@@ -4014,25 +4014,24 @@ text-transform: uppercase;
     top: 0;
     min-width: 300px;
     max-width: 340px;
-    padding: 9px 10px;
+    padding: 7px 8px;
     background: #fff8dd;
     border: 2px solid #2d1507;
     color: #211105;
     font-size: 12px;
-    line-height: 1.35;
+    line-height: 1.3;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
     z-index: 99999;
-    pointer-events: none;
 }
 
 .global-status-tooltip .status-tooltip-item + .status-tooltip-item {
-    margin-top: 9px;
-    padding-top: 8px;
+    margin-top: 6px;
+    padding-top: 5px;
     border-top: 1px solid rgba(45, 21, 7, 0.28);
 }
 
 .global-status-tooltip .status-tooltip-title {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     color: #9d170d;
     font-size: 13px;
     font-weight: 900;
@@ -4041,13 +4040,13 @@ text-transform: uppercase;
 }
 
 .global-status-tooltip .status-tooltip-desc-line {
-    margin: 2px 0;
+    margin: 1px 0;
     color: #211105;
 }
 
 .global-status-tooltip .status-tooltip-turns {
     display: inline-block;
-    margin-top: 5px;
+    margin-top: 3px;
     padding: 2px 6px;
     color: #fff8dd;
     background: #9d170d;

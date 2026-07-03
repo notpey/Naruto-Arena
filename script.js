@@ -603,6 +603,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         let draggingQueueActorSlot = null;
         let latestBoardState = null;
         let globalStatusTooltipEl = null;
+        let globalStatusTooltipHideTimer = null;
+        const cancelGlobalStatusTooltipHide = () => {
+            if (globalStatusTooltipHideTimer) {
+                clearTimeout(globalStatusTooltipHideTimer);
+                globalStatusTooltipHideTimer = null;
+            }
+        };
+        // Small delay before hiding: the tooltip is a floating element, not a
+        // DOM child of the icon that triggers it, so a plain mouseleave on the
+        // icon fires before the cursor can ever reach the tooltip box itself.
+        // The delay gives the cursor time to land on the tooltip, which cancels
+        // the pending hide via its own mouseenter below.
+        const scheduleGlobalStatusTooltipHide = () => {
+            cancelGlobalStatusTooltipHide();
+            globalStatusTooltipHideTimer = setTimeout(() => {
+                if (!globalStatusTooltipEl) return;
+                globalStatusTooltipEl.style.display = 'none';
+                globalStatusTooltipEl.innerHTML = '';
+            }, 150);
+        };
         let battleEndShown = false;
         let selectedExchangeType = 'taijutsu';
         let storyIntroDialogueShown = false;
@@ -2136,6 +2156,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tooltip = document.createElement('div');
             tooltip.className = 'global-status-tooltip';
             tooltip.style.display = 'none';
+            tooltip.addEventListener('mouseenter', cancelGlobalStatusTooltipHide);
+            tooltip.addEventListener('mouseleave', scheduleGlobalStatusTooltipHide);
             document.body.appendChild(tooltip);
             globalStatusTooltipEl = tooltip;
             return tooltip;
@@ -2510,6 +2532,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 const tooltipHtml = buildStatusTooltipHtml(group, statusSkill);
                 iconEl.onmouseenter = (event) => {
+                    cancelGlobalStatusTooltipHide();
                     const tooltip = ensureGlobalStatusTooltip();
                     tooltip.innerHTML = tooltipHtml;
                     tooltip.style.display = 'block';
@@ -2521,11 +2544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const anchor = iconEl;
                     positionGlobalStatusTooltip(event, anchor, false, isEnemySide);
                 };
-                iconEl.onmouseleave = () => {
-                    if (!globalStatusTooltipEl) return;
-                    globalStatusTooltipEl.style.display = 'none';
-                    globalStatusTooltipEl.innerHTML = '';
-                };
+                iconEl.onmouseleave = scheduleGlobalStatusTooltipHide;
                 if (index > 0) {
                     tooltipWrap.appendChild(iconEl);
                 }
