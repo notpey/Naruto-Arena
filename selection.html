@@ -40,6 +40,51 @@
                 document.body.classList.add("game-remaster");
             }
         } catch (error) {}
+
+        // Mobile landscape: even scaled to fit the device's width, the fixed
+        // 800px-tall stage is still much taller than a phone's landscape
+        // height, so it needed pinch-zoom/scrolling to see the whole screen.
+        // Fit it to the available height instead, docked to the top-left
+        // with the leftover width left black, rather than stretching it.
+        var viewportMeta = document.getElementById("viewport-meta");
+        function applyMobileLandscapeFit() {
+            var isRemasterNow = true;
+            try {
+                isRemasterNow = localStorage.getItem(key) !== "disabled";
+            } catch (error) {}
+            var stageWidth = isRemasterNow ? 1100 : 770;
+            var stageHeight = isRemasterNow ? 800 : 560;
+            var isLandscape = window.innerWidth > window.innerHeight;
+            var isPhoneSized = Math.min(window.innerWidth, window.innerHeight) <= 500;
+            if (isLandscape && isPhoneSized) {
+                var scale = Math.min(1, window.innerHeight / stageHeight);
+                document.documentElement.style.background = "#000";
+                document.documentElement.style.overflow = "hidden";
+                document.body.style.position = "fixed";
+                document.body.style.top = "0";
+                document.body.style.left = "0";
+                document.body.style.transformOrigin = "top left";
+                document.body.style.transform = "scale(" + scale + ")";
+                if (viewportMeta) {
+                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1");
+                }
+            } else {
+                document.documentElement.style.background = "";
+                document.documentElement.style.overflow = "";
+                document.body.style.position = "";
+                document.body.style.top = "";
+                document.body.style.left = "";
+                document.body.style.transformOrigin = "";
+                document.body.style.transform = "";
+                if (viewportMeta) {
+                    viewportMeta.setAttribute("content", "width=" + stageWidth + ", initial-scale=1");
+                }
+            }
+        }
+        applyMobileLandscapeFit();
+        window.addEventListener("resize", applyMobileLandscapeFit);
+        window.addEventListener("orientationchange", applyMobileLandscapeFit);
+        window.__applyMobileLandscapeFit = applyMobileLandscapeFit;
     })();
 </script>
 <div class="background">
@@ -314,6 +359,9 @@
             var viewportMeta = document.getElementById("viewport-meta");
             if (viewportMeta) {
                 viewportMeta.setAttribute("content", "width=" + (enabled ? 1100 : 770) + ", initial-scale=1");
+            }
+            if (typeof window.__applyMobileLandscapeFit === "function") {
+                window.__applyMobileLandscapeFit();
             }
             if (shouldResize) resizeForMode(enabled);
         }
