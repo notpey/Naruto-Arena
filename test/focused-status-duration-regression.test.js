@@ -129,3 +129,24 @@ test('Temari Summoning Quick Beheading Dance damages all enemies on apply', () =
     assert.equal(match.board.p2[1].hp, 65);
     assert.equal(match.board.p2[2].hp, 65);
 });
+
+test('Kakashi Raikiri still gets its Ninja Dogs bonus on his next turn', () => {
+    const match = makeMatch([indexById['hatake-kakashi']], [indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(getStatus(match, 'p2', 0, 'kakashi_ninja_dogs_mark')?.remainingTurns, 1);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.equal(
+        getStatus(match, 'p2', 0, 'kakashi_ninja_dogs_mark')?.remainingTurns,
+        1,
+        'mark should survive the opponent turn so it is still up for Raikiri next Kakashi turn'
+    );
+
+    const hpBefore = match.board.p2[0].hp;
+    queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(hpBefore - match.board.p2[0].hp, 100);
+});

@@ -6062,9 +6062,16 @@ const runBattleBotTurn = async (matchId) => {
             }
             const character = charactersData?.[actorUnit.rosterIndex];
             const isStoryBot = hydrated.mode === 'story';
-            const baseSkillIndices = (Array.isArray(character?.skills) ? character.skills : []).map(
-                (_, index) => index
-            );
+            // Hidden alt-skill entries (e.g. Dosu's "-improved" variants, Jiraiya's
+            // locked follow-ups) only exist to be swapped in at their base skill's
+            // slot via skillReplacements once unlocked -- they are not independent
+            // action slots. Iterating the raw array let bots queue them directly,
+            // bypassing whatever unlock condition normally gates them.
+            const baseSkillIndices = (Array.isArray(character?.skills) ? character.skills : [])
+                .map((skill, index) =>
+                    skill && !skill.hiddenFromSelectionViewer && !skill.omitFromSelectionViewer ? index : null
+                )
+                .filter((index) => index !== null);
             const skillIndices = isStoryBot
                 ? orderStoryBotSkillIndices({
                       hydrated,

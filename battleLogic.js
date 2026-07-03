@@ -680,9 +680,13 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
             break;
         }
         case 'single-character': {
+            // "One ally or one enemy" -- excludes the caster themself, same as
+            // single-ally does, so this differs from self-or-single-ally.
             result.mode = 'single';
             result.targets = [
-                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }),
+                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }).filter(
+                    (t) => t.slot !== actorSlot
+                ),
                 ...mapTargets(opponentUsername, opponentBoard, {
                     enemyTargeting: true,
                     skillClasses: effectiveSkill?.classes || [],

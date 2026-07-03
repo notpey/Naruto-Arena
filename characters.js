@@ -3273,7 +3273,7 @@ const characters = [
             {
                 "id": "dosu-kinuta-melody-arm-tuning",
                 "name": "Melody Arm Tuning",
-                "skillimage": "https://i.imgur.com/Irubt1X.png",
+                "skillimage": "https://i.imgur.com/yqkQKWQ.png",
                 "skilldescription": "For the following 4 turns, 'Resonating Echo Drill' will deal 20 additional damage and 'Sound Manipulation' will deal 10 additional damage.",
                 "energy": [
                     "Random"
@@ -3402,7 +3402,7 @@ const characters = [
             {
                 "id": "dosu-kinuta-agile-leap",
                 "name": "Agile Leap",
-                "skillimage": "https://i.imgur.com/yqkQKWQ.png",
+                "skillimage": "https://i.imgur.com/Irubt1X.png",
                 "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -6704,6 +6704,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "cannotUseSkillClasses": [
                                 "physical",
                                 "energy",

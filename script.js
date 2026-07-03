@@ -1231,7 +1231,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const actorUnit = Array.isArray(playerUnits) ? playerUnits[meta.actorSlot] : null;
                 const usable = isSkillUsable(meta, actorUnit);
                 imgEl.style.opacity = usable ? '1' : '0.4';
-                imgEl.style.pointerEvents = usable ? '' : 'none';
+                // Deliberately no pointer-events blocking here: the skill stays
+                // clickable to view its info at any time, even when it can't be
+                // cast right now. onSkillClick is what gates the actual cast
+                // attempt via the same isSkillUsable predicate.
             });
         };
 
@@ -4100,7 +4103,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentCharacterIndex === null) return;
         const character = roster[currentCharacterIndex];
         if (!character || !Array.isArray(character.skills)) return;
-        const viewerSkills = character.skills.filter((skill) => skill && !skill.omitFromSelectionViewer);
+        const viewerSkills = character.skills.filter(
+            (skill) => skill && !skill.omitFromSelectionViewer && !skill.hiddenFromSelectionViewer
+        );
         const skill = viewerSkills[skillIndex];
         if (!skill) return;
         renderSkill(skill, skillIndex);
@@ -4124,7 +4129,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         renderCharacterOverview(character);
         if (Array.isArray(character.skills)) {
-            const viewerSkills = character.skills.filter((skill) => skill && !skill.omitFromSelectionViewer);
+            const viewerSkills = character.skills.filter(
+                (skill) => skill && !skill.omitFromSelectionViewer && !skill.hiddenFromSelectionViewer
+            );
             ensureSkillImageSlots(viewerSkills.length);
             if (skillImagesContainer) {
                 skillImagesContainer.scrollLeft = 0;
@@ -4135,10 +4142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (skill) {
                     targetImg.src = skill.skillimage || '';
                     targetImg.alt = skill.name || `Skill ${skillIdx + 1}`;
-                    targetImg.title = skill.hiddenFromSelectionViewer
-                        ? `${skill.name || `Skill ${skillIdx + 1}`} (alternate)`
-                        : skill.name || `Skill ${skillIdx + 1}`;
-                    targetImg.classList.toggle('alternate-skill', Boolean(skill.hiddenFromSelectionViewer));
+                    targetImg.title = skill.name || `Skill ${skillIdx + 1}`;
                     targetImg.style.visibility = 'visible';
                     targetImg.onclick = () => handleSkillSelect(skillIdx);
                 } else {
