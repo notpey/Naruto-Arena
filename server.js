@@ -912,6 +912,7 @@ const matchSocketRooms = new Map();
 const wsConnections = new Set();
 const wsServer = new WebSocketServer({ noServer: true });
 let turnSweepTimer = null;
+let sessionCacheSweepTimer = null;
 const activeBattleBotTurns = new Set();
 const scheduledBattleBotTurns = new Set();
 const GAME_BOT_USERNAME_PREFIX = '__game_bot__:';
@@ -4276,6 +4277,26 @@ const validateBackgroundUrl = async (url) => {
     return true;
 };
 
+// Every authenticated request (including the 2-3s client polling loops used
+// by matchmaking and in-match state) previously did a MongoDB round-trip
+// just to re-fetch the user doc for the session. That round-trip dominates
+// perceived lag on a hosted free-tier DB. Cache the resolved user briefly per
+// token so bursts of polling requests reuse one lookup instead of one each.
+const SESSION_CACHE_TTL_MS = 3000;
+const sessionUserCache = new Map();
+
+const getSessionUserCached = async (token) => {
+    const cached = sessionUserCache.get(token);
+    if (cached && cached.expiresAt > Date.now()) {
+        return cached.user;
+    }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await usersCollection.findOne({ username: decoded.username });
+    const resolved = user ? { ...serializeUserForClient(user) } : null;
+    sessionUserCache.set(token, { user: resolved, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
+    return resolved;
+};
+
 const requireSession = async (req, res, next) => {
     try {
         const token = req.cookies?.[SESSION_COOKIE_NAME];
@@ -4283,15 +4304,12 @@ const requireSession = async (req, res, next) => {
             return res.status(401).json({ error: 'Unauthorized.' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = await usersCollection.findOne({ username: decoded.username });
-        if (!user) {
+        const authUser = await getSessionUserCached(token);
+        if (!authUser) {
             return res.status(401).json({ error: 'Unauthorized.' });
         }
 
-        req.authUser = {
-            ...serializeUserForClient(user),
-        };
+        req.authUser = authUser;
         next();
     } catch (error) {
         console.error('Session verification failed:', error);
@@ -4313,12 +4331,7 @@ const parseCookieHeader = (cookieHeader = '') => {
 
 const getSessionUserFromToken = async (token) => {
     if (!token) return null;
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await usersCollection.findOne({ username: decoded.username });
-    if (!user) return null;
-    return {
-        ...serializeUserForClient(user),
-    };
+    return getSessionUserCached(token);
 };
 
 const getMatchRoom = (matchId) => {
@@ -6746,6 +6759,10 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
+    const token = req.cookies?.[SESSION_COOKIE_NAME];
+    if (token) {
+        sessionUserCache.delete(token);
+    }
     clearSessionCookie(res);
     res.json({ ok: true });
 });
@@ -10171,6 +10188,17 @@ const startServer = async () => {
                 console.error('Failed to sweep expired matches:', error);
             });
         }, 2000);
+    }
+
+    if (!sessionCacheSweepTimer) {
+        sessionCacheSweepTimer = setInterval(() => {
+            const now = Date.now();
+            for (const [token, entry] of sessionUserCache) {
+                if (entry.expiresAt <= now) {
+                    sessionUserCache.delete(token);
+                }
+            }
+        }, 60000);
     }
 
     process.on('SIGINT', async () => {
