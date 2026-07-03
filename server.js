@@ -61,42 +61,6 @@ const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
 const DEFAULT_MISSION_CATALOG = [
     {
-        missionId: 'adored-elder-sister',
-        title: 'The Adored Elder Sister',
-        level_requirement: 1,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward: 'Mission "The Adored Elder Sister" completion.',
-        image: 'ingamebgexample.png',
-        imageAlt: 'The Adored Elder Sister mission artwork',
-        characterName: 'Hyuuga Hanabi',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Hyuuga Hanabi portrait',
-        requirements: [],
-        goals: [
-            'Use Hyuuga Neji\'s "Gentle Fist" 8 times. (0/8)',
-            'Use Hyuuga Hinata\'s "Gentle Fist" 8 times. (0/8)',
-        ],
-        sortOrder: 1,
-    },
-    {
-        missionId: 'yellow-flash',
-        title: 'The Yellow Flash',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward: 'Mission "The Yellow Flash" completion.',
-        image: 'ingamebgexample2.png',
-        imageAlt: 'The Yellow Flash mission artwork',
-        characterName: 'Minato Namikaze',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Minato Namikaze portrait',
-        requirements: [],
-        goals: [
-            'Win the battle against Minato.',
-            'Finish the mission to unlock its reward.',
-        ],
-        sortOrder: 2,
-    },
-    {
         missionId: 'a-rare-opportunity',
         title: 'A Rare Opportunity',
         level_requirement: 6,
@@ -2350,12 +2314,45 @@ const getStoredMissionCatalog = async () => {
     }
 
     const storedState = await appStateCollection.findOne({ key: MISSION_CATALOG_STATE_KEY });
+    const hasStoredDoc = Boolean(storedState);
     const storedCatalog = normalizeMissionCatalog(
         storedState && Array.isArray(storedState.missions) ? storedState.missions : []
     );
-    const nextCatalog = storedCatalog.length ? storedCatalog : defaultCatalog;
-    missionCatalogCache = nextCatalog;
-    return nextCatalog;
+    if (!hasStoredDoc) {
+        missionCatalogCache = defaultCatalog;
+        return defaultCatalog;
+    }
+
+    // The stored catalog is the source of truth for admin edits (including deletions).
+    // Merge in any missions newly added to DEFAULT_MISSION_CATALOG in code (e.g. unlock
+    // missions shipped with new characters) that the admin has never seen/saved before,
+    // without resurrecting anything the admin has deliberately deleted by missionId.
+    const storedIds = new Set(storedCatalog.map((mission) => mission.missionId));
+    const newDefaultMissions = defaultCatalog.filter((mission) => !storedIds.has(mission.missionId));
+    if (!newDefaultMissions.length) {
+        missionCatalogCache = storedCatalog;
+        return storedCatalog;
+    }
+
+    const mergedCatalog = normalizeMissionCatalog([...storedCatalog, ...newDefaultMissions]);
+    try {
+        await appStateCollection.updateOne(
+            { key: MISSION_CATALOG_STATE_KEY },
+            {
+                $set: {
+                    key: MISSION_CATALOG_STATE_KEY,
+                    missions: mergedCatalog,
+                    updatedAt: new Date(),
+                    updatedBy: 'system:merge-new-default-missions',
+                },
+            },
+            { upsert: true }
+        );
+    } catch (error) {
+        console.error('Mission catalog merge persist error:', error);
+    }
+    missionCatalogCache = mergedCatalog;
+    return mergedCatalog;
 };
 
 const saveMissionCatalog = async (missions, updatedBy) => {

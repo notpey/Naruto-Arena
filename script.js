@@ -874,11 +874,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
         };
 
+        const getSkillCostOverrideEnergyList = (actorSlot, skill) => {
+            if (!Number.isInteger(actorSlot) || actorSlot < 0 || !skill?.id) return null;
+            const actorUnit = latestBoardState?.[currentPlayerUsername]?.[actorSlot];
+            const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
+            let resolvedOverride = null;
+            statuses.forEach((status) => {
+                const remaining = Number(status?.remainingTurns) || 0;
+                if (remaining <= 0) return;
+                const overrides = status?.metadata?.skillCostOverridesBySkillId;
+                if (!overrides || typeof overrides !== 'object') return;
+                const override = overrides[skill.id];
+                if (!override || typeof override !== 'object') return;
+                resolvedOverride = override;
+            });
+            return Array.isArray(resolvedOverride?.energy) ? resolvedOverride.energy : null;
+        };
+
         const getEffectiveEnergyList = (energy = [], actorSlot = null, skill = null) => {
             const normalizedEnergy = (Array.isArray(energy) ? energy : []).filter((entry) => {
                 const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
                 return normalized && normalized !== 'none' && normalized !== 'non';
             });
+            const costOverrideEnergy = getSkillCostOverrideEnergyList(actorSlot, skill);
+            if (costOverrideEnergy) {
+                return costOverrideEnergy.filter((entry) => {
+                    const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
+                    return normalized && normalized !== 'none' && normalized !== 'non';
+                });
+            }
             if (!Number.isInteger(actorSlot) || actorSlot < 0) {
                 return normalizedEnergy;
             }

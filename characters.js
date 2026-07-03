@@ -3936,6 +3936,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "cannotUseSkillClasses": [
                                 "physical",
                                 "mental",
@@ -4088,6 +4089,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "cannotUseSkillClasses": [
                                 "physical",
                                 "mental",
@@ -6973,6 +6975,9 @@ const characters = [
                             "harmful": true,
                             "turnEndDamage": 15,
                             "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
                             "onExpireEffects": [
                                 {
                                     "type": "apply_status",
@@ -8457,21 +8462,6 @@ const characters = [
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "edo_tensei_hashirama_world_of_trees",
-                        "duration": 2,
-                        "scope": "self",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "edo_tensei_hashirama_world_of_trees"
-                        },
-                        "metadata": {
-                            "helpful": true,
-                            "usedSkillCooldownPenalty": 1,
-                            "tooltipText": "All enemies who use a new skill will have that skill's cooldown increased by 1. Edo Tensei Hashirama can use 'A World of Trees' again for a bonus."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
                         "statusId": "edo_tensei_hashirama_world_of_trees_enemy_cost",
                         "duration": 2,
                         "scope": "all-enemy",
@@ -8487,6 +8477,21 @@ const characters = [
                                 "strategic": 1
                             },
                             "tooltipText": "This character's physical, energy and strategic skills cost 1 additional random chakra."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_world_of_trees",
+                        "duration": 2,
+                        "scope": "self",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "usedSkillCooldownPenalty": 1,
+                            "tooltipText": "All enemies who use a new skill will have that skill's cooldown increased by 1. Edo Tensei Hashirama can use 'A World of Trees' again for a bonus."
                         }
                     }
                 ]
@@ -9025,6 +9030,11 @@ const characters = [
                     "Instant"
                 ],
                 "effects": [
+                    {
+                        "type": "heal",
+                        "amount": 15,
+                        "scope": "self"
+                    },
                     {
                         "type": "apply_status",
                         "statusId": "kyuubi_naruto_chakra_buff",

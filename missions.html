@@ -456,22 +456,12 @@
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
   <script src="./shop.js" defer></script>
+  <script src="./characters.js"></script>
 
   <!-- Missions: card grid + own-page mission detail (no modal). Reuses /api/missions. -->
   <script>
     (function () {
-      var defaultMissionCatalog = [
-        { missionId: "adored-elder-sister", title: "The Adored Elder Sister", level_requirement: 1,
-          reward: 'Mission "The Adored Elder Sister" completion.', image: "ingamebgexample.png",
-          characterName: "Hyuuga Hanabi", portrait: "deadcharacter.png", requirements: [],
-          goals: ['Use Hyuuga Neji\'s "Gentle Fist" 8 times. (0/8)', 'Use Hyuuga Hinata\'s "Gentle Fist" 8 times. (0/8)'],
-          available: true, sortOrder: 1 },
-        { missionId: "yellow-flash", title: "The Yellow Flash", level_requirement: 16,
-          reward: 'Mission "The Yellow Flash" completion.', image: "ingamebgexample2.png",
-          characterName: "Minato Namikaze", portrait: "deadcharacter.png", requirements: [],
-          goals: ["Win the battle against Minato.", "Finish the mission to unlock its reward."],
-          available: true, sortOrder: 2 }
-      ];
+      var defaultMissionCatalog = [];
 
       var landingView = document.getElementById("ms-landing");
       var categoryView = document.getElementById("ms-category");
@@ -488,6 +478,21 @@
       var missionCatalog = [];
       var missionMap = new Map();
       var missionProgressByMissionId = {};
+      var currentPlayerLevel = 1;
+
+      // Default mission sort mirrors the character roster order (characters.js
+      // array order), keyed by each mission's reward_character.
+      var characterRoster = Array.isArray(window.characters) ? window.characters : [];
+      var rosterIndexByCharacterId = new Map();
+      characterRoster.forEach(function (c, index) {
+        var id = String((c && (c.characterId || c.id)) || "").trim().toLowerCase();
+        if (id && !rosterIndexByCharacterId.has(id)) rosterIndexByCharacterId.set(id, index);
+      });
+      function getRosterSortIndex(m) {
+        var id = String((m && m.reward_character) || "").trim().toLowerCase();
+        var idx = id ? rosterIndexByCharacterId.get(id) : undefined;
+        return typeof idx === "number" ? idx : Number.MAX_SAFE_INTEGER;
+      }
 
       // Rank bands by level requirement (no canonical rank field exists in the
       // mission data model, so this is the documented fallback mapping; D & C
@@ -583,6 +588,8 @@
           };
         }).filter(function (m) { return m.missionId && m.title; })
           .sort(function (a, b) {
+            var rosterDiff = getRosterSortIndex(a) - getRosterSortIndex(b);
+            if (rosterDiff !== 0) return rosterDiff;
             var levelDiff = (getLevelRequirementValue(a) || 0) - (getLevelRequirementValue(b) || 0);
             if (levelDiff !== 0) return levelDiff;
             var sortDiff = (a.sortOrder || 0) - (b.sortOrder || 0);
@@ -662,6 +669,7 @@
       function statusOf(m) {
         if (isMissionCompleted(m.missionId)) return "completed";
         if (m.available === false) return "locked";
+        if (getLevelRequirementValue(m) > currentPlayerLevel) return "locked";
         return "available";
       }
 
@@ -886,9 +894,20 @@
       window.addEventListener("popstate", route);
 
       // ── load ────────────────────────────────────────────────
+      async function loadPlayerLevel() {
+        try {
+          var res = await fetch("/api/me", { credentials: "same-origin" });
+          if (!res.ok) return;
+          var data = await res.json().catch(function () { return {}; });
+          var level = Number(data && data.user && data.user.profile && data.user.profile.ladder && data.user.profile.ladder.level);
+          if (Number.isFinite(level) && level > 0) currentPlayerLevel = level;
+        } catch (e) {}
+      }
+
       async function loadMissions() {
         try {
           setStatus("Loading missions…");
+          await loadPlayerLevel();
           var res = await fetch("/api/missions", { credentials: "same-origin" });
           var data = await res.json().catch(function () { return {}; });
           if (!res.ok) throw new Error(data && data.error ? data.error : "Unable to load missions.");

@@ -6282,11 +6282,15 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     status?.metadata?.ignoreSourceNonAfflictionDamageBonus
                 );
                 if (baseTurnEndDamage > 0) {
+                    const sourceSkillSpecificBonus = sourceState
+                        ? getSkillSpecificDamageBonus(sourceState, status?.sourceSkillId || null)
+                        : 0;
                     turnEndDamage = Math.max(
                         0,
                         baseTurnEndDamage +
                             sourceDamageBonusFlat -
                             sourceDamageDebuffFlat +
+                            sourceSkillSpecificBonus +
                             (turnEndIsAffliction || ignoreSourceNonAfflictionDamageBonus
                                 ? 0
                                 : sourceNonAfflictionDamageBonusFlat - sourceNonAfflictionDamageDebuffFlat)

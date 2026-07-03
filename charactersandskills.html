@@ -385,6 +385,7 @@
     (function () {
       var roster = Array.isArray(window.characters) ? window.characters
         : (typeof characters !== "undefined" && Array.isArray(characters) ? characters : []);
+      var missionByMissionId = new Map();
 
       var subtabs = Array.prototype.slice.call(document.querySelectorAll(".gi-subtab"));
       var searchInput = document.getElementById("gi-search-input");
@@ -528,7 +529,20 @@
         desc.textContent = charDesc(c);
         var unlock = document.createElement("div");
         unlock.className = "gi-char-unlock";
-        unlock.appendChild(document.createTextNode("no requirements needed"));
+        var requiredMissionId = String(c.requiredMissionId || "").trim();
+        if (requiredMissionId) {
+          var requiredMission = missionByMissionId.get(requiredMissionId);
+          unlock.appendChild(document.createTextNode("Requires: "));
+          var missionLink = document.createElement("a");
+          missionLink.className = "gi-char-unlock-link";
+          missionLink.href = "missions.html?mission=" + encodeURIComponent(requiredMissionId);
+          missionLink.textContent = requiredMission && requiredMission.title
+            ? requiredMission.title
+            : requiredMissionId;
+          unlock.appendChild(missionLink);
+        } else {
+          unlock.appendChild(document.createTextNode("no requirements needed"));
+        }
         info.appendChild(titlerow);
         info.appendChild(desc);
         info.appendChild(unlock);
@@ -665,6 +679,18 @@
       if (searchInput) searchInput.addEventListener("input", function () { renderGrid(searchInput.value); });
 
       route();
+
+      fetch("/api/missions", { credentials: "same-origin" })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          (data && Array.isArray(data.missions) ? data.missions : []).forEach(function (m) {
+            if (m && m.missionId) missionByMissionId.set(m.missionId, m);
+          });
+          // Re-render if a character detail happens to already be open, so the
+          // "requirements to unlock" link picks up the mission's real title.
+          if (detailView && !detailView.hidden) route();
+        })
+        .catch(function () {});
     }());
   </script>
 
