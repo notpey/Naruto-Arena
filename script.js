@@ -177,6 +177,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let profileCache = null;
     const publicProfileCacheByUsername = new Map();
     let selectionClickTimer = null;
+    // Manual double-tap detection (used instead of the native `dblclick` event)
+    // so selecting/removing a character works identically on touch devices,
+    // where two taps don't reliably synthesize a browser `dblclick`.
+    const DOUBLE_TAP_THRESHOLD_MS = 400;
+    let lastRosterTapIndex = null;
+    let lastRosterTapTime = 0;
+    let lastSelectedSlotTapIndex = null;
+    let lastSelectedSlotTapTime = 0;
 
     const normalizeLadderPresentation = (ladder = null) => {
         const source = ladder && typeof ladder === 'object' ? ladder : {};
@@ -4089,20 +4097,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const handleClick = () => {
                 if (listItem.classList.contains('slot-empty')) return;
+                const now = Date.now();
+                const isDoubleTap =
+                    lastRosterTapIndex === i && now - lastRosterTapTime < DOUBLE_TAP_THRESHOLD_MS;
+                lastRosterTapIndex = isDoubleTap ? null : i;
+                lastRosterTapTime = now;
+                if (isDoubleTap) {
+                    cancelSelectionPreview();
+                    addRosterCharacterToSelection(i);
+                    return;
+                }
                 queueSelectionPreview(() => {
                     if (listItem.classList.contains('slot-empty')) return;
                     handleCharacterSelect(i);
                 });
             };
 
-            const handleDoubleClick = () => {
-                cancelSelectionPreview();
-                if (listItem.classList.contains('slot-empty')) return;
-                addRosterCharacterToSelection(i);
-            };
-
             listItem.addEventListener('click', handleClick);
-            listItem.addEventListener('dblclick', handleDoubleClick);
             listItem.addEventListener('dragstart', (event) => handleSlotDragStart(event, i));
             listItem.addEventListener('dragend', handleSlotDragEnd);
 
@@ -4116,16 +4127,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     selectedSlots.forEach((slot, slotIndex) => {
         slot.addEventListener('click', () => {
+            const now = Date.now();
+            const isDoubleTap =
+                lastSelectedSlotTapIndex === slotIndex &&
+                now - lastSelectedSlotTapTime < DOUBLE_TAP_THRESHOLD_MS;
+            lastSelectedSlotTapIndex = isDoubleTap ? null : slotIndex;
+            lastSelectedSlotTapTime = now;
+            if (isDoubleTap) {
+                cancelSelectionPreview();
+                handleSelectedSlotDoubleClick(slotIndex);
+                return;
+            }
             queueSelectionPreview(() => handleSelectedSlotClick(slotIndex));
         });
         slot.addEventListener('dragover', (event) => handleSelectedSlotDragOver(event, slot));
         slot.addEventListener('dragenter', (event) => handleSelectedSlotDragOver(event, slot));
         slot.addEventListener('dragleave', (event) => handleSelectedSlotDragLeave(event, slot));
         slot.addEventListener('drop', (event) => handleSelectedSlotDrop(event, slotIndex));
-        slot.addEventListener('dblclick', () => {
-            cancelSelectionPreview();
-            handleSelectedSlotDoubleClick(slotIndex);
-        });
     });
 
     const applySavedTeam = () => {

@@ -1816,7 +1816,11 @@ h1, h2, h3 {
     box-sizing: border-box;
     cursor: grab;
     user-select: none;
-    touch-action: none;
+    /* manipulation (not none): keeps taps/double-taps firing reliably on
+       touch devices and disables double-tap-to-zoom, since native HTML5
+       drag-and-drop doesn't work over touch anyway -- touch users rely
+       entirely on tap / double-tap here. */
+    touch-action: manipulation;
     box-shadow: 0 2px 4px rgba(45, 21, 7, 0.35);
     transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
@@ -1828,7 +1832,7 @@ h1, h2, h3 {
     display: block;
     cursor: grab;
     user-select: none;
-    touch-action: none;
+    touch-action: manipulation;
 }
 
 .slot-item:hover {
@@ -1913,6 +1917,7 @@ text-transform: uppercase;
     bottom: 140px;
     left: 480px;
     cursor: pointer;
+    touch-action: manipulation;
     box-shadow: 0 2px 4px rgba(45, 21, 7, 0.35);
     transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
