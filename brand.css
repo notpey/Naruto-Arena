@@ -1,0 +1,1884 @@
+/* ============================================================
+   SHINOBI-ARENA DESIGN TOKENS
+   Shared token layer for all public pages (index, profile,
+   missions, characters, etc.). Do NOT import into style.css —
+   the game client keeps its own token scope.
+
+   THEME: Naruto-Arena-inspired shinobi arena. Deep ink-navy
+   tactical surfaces, shinobi-ember primary accent, warm amber
+   chakra glow, crimson danger, chakra blue for info/ally,
+   parchment/bone for light info zones. (Re-themed from the
+   prior high-fantasy palette — see DESIGN_NOTES.md.
+   Legacy token names like --ca-purple are kept to avoid churn
+   but now hold shinobi-ember values; prefer the --ca-ember /
+   --ca-amber / --ca-crimson / --ca-chakra aliases below.)
+   ============================================================ */
+
+:root {
+  /* --- Ink-navy / Ground palette (tactical dark surfaces) --- */
+  --ca-void:        #05070e;   /* deep ink-navy body bg */
+  --ca-smoke:       #0a0c14;   /* near-black navy panel fill */
+  --ca-ash:         #10131c;   /* card surface */
+  --ca-slate:       #171b26;   /* border / divider dark */
+  --ca-iron:        #232938;   /* subtle raised surface */
+  --ca-mist:        #343c4d;   /* soft divider */
+
+  /* --- Bone / Parchment scale (light info zones) --- */
+  --ca-bone:        #f0ede8;   /* primary text / parchment surface */
+  --ca-parchment:   #c8c4bc;   /* muted / meta text */
+  --ca-dust:        #8a8680;   /* placeholder / disabled */
+
+  /* --- Light content surfaces (warm-white / parchment "sheets")
+         The dark navy shell is the FRAME; primary page content sits
+         on these light surfaces with ink-navy text for readability. */
+  --ca-surface-light: #faf8f3;  /* main body sheet — warm white */
+  --ca-surface:       #f4f0e8;  /* parchment panel / card */
+  --ca-surface-sunk:  #ebe5d7;  /* sunken / zebra / hover on light */
+  --ca-ink:           #1b2330;  /* primary text on light surfaces */
+  --ca-ink-soft:      #4c5562;  /* secondary text on light */
+  --ca-ink-faint:     #69707c;  /* meta / muted text on light */
+  --ca-line-ink:      rgba(27, 35, 48, 0.12);  /* hairline on light */
+  --ca-shadow-sheet:  0 18px 50px rgba(0, 0, 0, 0.5);  /* sheet float */
+
+  /* --- Global cohesion tokens (preferred for website UI) --- */
+  --ca-bg-page:       #05070e;
+  --ca-surface-warm:  #faf8f3;
+  --ca-surface-card:  #fffdf8;
+  --ca-muted:         #5e6672;
+  --ca-border:        rgba(27, 35, 48, 0.12);
+  --ca-orange:        #e8801a;
+  --ca-amber:         #ffae42;
+  --ca-purple-ui:     #7c4dff;
+  --ca-violet:        #a36bff;
+  --ca-danger:        #d52235;
+
+  /* --- Chakra trinity (shinobi ember / crimson / chakra blue) --- */
+  --ca-purple:      #e8801a;   /* Shinobi Ember — primary CTA, active state */
+  --ca-purple-lit:  #ffae42;   /* warm amber chakra glow / hover */
+  --ca-purple-dim:  #3a2008;   /* ember tint surface */
+  --ca-red:         var(--ca-danger);   /* Shinobi Crimson — danger / enemy / damage */
+  --ca-red-dim:     #3a0610;   /* crimson tint surface */
+  --ca-blue:        #2c9cdb;   /* Chakra Blue — info / ally */
+  --ca-blue-dim:    #071e30;   /* chakra blue tint surface */
+
+  /* Legacy names retained for older page CSS. Prefer the tokens above. */
+  --ca-purple:      var(--ca-orange);
+  --ca-purple-lit:  var(--ca-amber);
+  --ca-red:         var(--ca-danger);
+
+  /* --- Forward-facing shinobi aliases (prefer these) --- */
+  --ca-ember:       var(--ca-orange);      /* primary action / active state */
+  --ca-amber:       #ffae42;               /* amber chakra glow / hover */
+  --ca-crimson:     var(--ca-danger);      /* danger / enemy state */
+  --ca-chakra:      var(--ca-blue);        /* chakra energy / info / ally */
+  --ca-navy:        var(--ca-void);        /* tactical ground */
+  --ca-purple-accent: var(--ca-purple-ui); /* secondary highlight */
+
+  /* --- Gold / amber chakra (medals, #1, rewards) --- */
+  --ca-gold:        #ffb84d;
+  --ca-gold-warm:   #ff8c1a;
+
+  /* --- Semantic aliases (used in CSS below) --- */
+  --accent:         var(--ca-purple);
+  --accent-lit:     var(--ca-purple-lit);
+  --accent-dim:     var(--ca-purple-dim);
+  --accent-glow:    rgba(232, 128, 26, 0.22);
+  --danger:         var(--ca-danger);
+  --info:           var(--ca-blue);
+
+  /* --- Glow helpers --- */
+  --glow-purple:    0 0 0 3px rgba(232, 128, 26, 0.28);
+  --glow-red:       0 0 0 3px rgba(225, 24, 54, 0.28);
+  --glow-blue:      0 0 0 3px rgba(44, 156, 219, 0.28);
+
+  /* --- Surface borders --- */
+  --border-void:    1px solid rgba(255, 255, 255, 0.05);
+  --border-smoke:   1px solid rgba(255, 255, 255, 0.08);
+  --border-slash:   1px solid rgba(232, 128, 26, 0.35);
+
+  /* --- Typography scale (Outfit, already imported per page) --- */
+  --font-ui:        "Outfit", system-ui, sans-serif;
+  --fs-xs:          11px;
+  --fs-sm:          13px;
+  --fs-base:        15px;
+  --fs-md:          17px;
+  --fs-lg:          20px;
+  --fs-xl:          24px;
+  --fs-2xl:         30px;
+  --fw-normal:      400;
+  --fw-semi:        600;
+  --fw-bold:        700;
+  --fw-black:       800;
+
+  /* --- Spacing rhythm --- */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+
+  /* --- Radius --- */
+  --r-sm:  4px;
+  --r-md:  8px;
+  --r-lg:  14px;
+  --r-pill: 999px;
+
+  /* --- Clip paths (editorial slash corners) --- */
+  --clip-slash-sm: polygon(8px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 8px);
+  --clip-slash-md: polygon(14px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 14px);
+
+  /* --- Transitions --- */
+  --t-fast:  120ms ease;
+  --t-base:  200ms ease;
+  --t-slow:  350ms ease;
+
+  /* --- Z-index layers --- */
+  --z-base:    1;
+  --z-overlay: 100;
+  --z-modal:   200;
+  --z-toast:   300;
+
+  /* --- Ladder fills (replacing orange) --- */
+  --ladder-fill-a: var(--ca-purple);
+  --ladder-fill-b: var(--ca-purple-lit);
+}
+
+/* ============================================================
+   HIDDEN-STATE GUARD
+   Component classes below set `display: flex/grid/...`, which
+   overrides the UA `[hidden] { display: none }` rule (class
+   specificity beats the attribute-less UA rule). JS toggles
+   auth/account state via the `hidden` attribute, so without
+   this guard logged-in and logged-out UI render at the same
+   time. This forces hidden elements to stay hidden everywhere.
+   ============================================================ */
+[hidden] {
+  display: none !important;
+}
+
+/* ============================================================
+   LEGACY LIGHT-SHEET UTILITIES
+   Opt-in helpers for older website pages that still use their
+   historical inline layouts. These keep the dark shell/nav while
+   moving primary content onto parchment sheets.
+   ============================================================ */
+.ca-content-sheet,
+.ca-light-card,
+.ca-admin-panel {
+  color: var(--ca-ink);
+  border: 1px solid rgba(88, 64, 38, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(246, 240, 228, 0.92)),
+    var(--ca-surface);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+}
+
+.ca-content-sheet {
+  border-radius: var(--r-lg);
+  padding: clamp(18px, 2.5vw, 30px);
+}
+
+.ca-light-card,
+.ca-admin-panel {
+  border-radius: var(--r-md);
+}
+
+.ca-form-field,
+.ca-form-textarea,
+.ca-form-select {
+  width: 100%;
+  border: 1px solid rgba(27, 35, 48, 0.16);
+  background: #fffdf8;
+  color: var(--ca-ink);
+  font: inherit;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+
+.ca-form-field,
+.ca-form-select {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.ca-form-textarea {
+  min-height: 130px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.ca-form-field:focus,
+.ca-form-textarea:focus,
+.ca-form-select:focus {
+  border-color: rgba(196, 65, 36, 0.55);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(196, 65, 36, 0.15);
+}
+
+.ca-thumb-frame {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(27, 35, 48, 0.16);
+  background: var(--ca-surface-sunk);
+  border-radius: var(--r-md);
+}
+
+.ca-thumb-frame > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.na-legacy-light {
+  background:
+    radial-gradient(ellipse at 16% 8%, rgba(232, 128, 26, 0.18), transparent 30%),
+    radial-gradient(ellipse at 86% 10%, rgba(44, 156, 219, 0.11), transparent 28%),
+    linear-gradient(155deg, #05070e 0%, #0a0c14 42%, #03040a 70%, #120a06 100%);
+}
+
+.na-legacy-light .app {
+  gap: 0;
+}
+
+.na-legacy-light .main {
+  color: var(--ca-ink);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(244, 240, 232, 0.98)),
+    var(--ca-surface-light);
+  border-left: 1px solid rgba(232, 128, 26, 0.15);
+  border-right: 1px solid rgba(27, 35, 48, 0.08);
+  box-shadow: var(--ca-shadow-sheet);
+}
+
+.na-legacy-light .profile-search,
+.na-legacy-light .profile-section,
+.na-legacy-light .clan-profile-panel,
+.na-legacy-light .clan-shell,
+.na-legacy-light .avatar-panel,
+.na-legacy-light .background-panel,
+.na-legacy-light .reset-panel,
+.na-legacy-light .release-panel,
+.na-legacy-light .editor-stage,
+.na-legacy-light .mission-panel,
+.na-legacy-light .mainsection,
+.na-legacy-light .news-editor-card,
+.na-legacy-light .news-list-card,
+.na-legacy-light .character-editor-modal,
+.na-legacy-light .player-account-modal,
+.na-legacy-light .clan-register-modal,
+.na-legacy-light .goal-popup-card {
+  color: var(--ca-ink);
+  border: 1px solid rgba(88, 64, 38, 0.16);
+  border-radius: var(--r-md);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(246, 240, 228, 0.96)),
+    var(--ca-surface);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.na-legacy-light .clan-card,
+.na-legacy-light .editor-note,
+.na-legacy-light .editor-count,
+.na-legacy-light .character-editor-card,
+.na-legacy-light .character-editor-summary,
+.na-legacy-light .mission-list-item,
+.na-legacy-light .mission-toggle,
+.na-legacy-light .goal-card,
+.na-legacy-light .news-post-entry,
+.na-legacy-light .player-account-entry,
+.na-legacy-light .player-account-summary-card,
+.na-legacy-light .clan-register-section,
+.na-legacy-light .info-row,
+.na-legacy-light .quick-game-row,
+.na-legacy-light .clan-profile-info-row,
+.na-legacy-light .clan-profile-bio,
+.na-legacy-light .clan-profile-member-row,
+.na-legacy-light .reset-confirm {
+  color: var(--ca-ink);
+  border-color: var(--ca-line-ink);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.na-legacy-light .character-editor-card:hover,
+.na-legacy-light .mission-list-item:hover,
+.na-legacy-light .mission-list-item.active,
+.na-legacy-light .news-post-entry:hover,
+.na-legacy-light .player-account-entry:hover,
+.na-legacy-light .clan-card:hover {
+  color: var(--ca-ink);
+  border-color: rgba(232, 128, 26, 0.38);
+  background: rgba(255, 246, 230, 0.96);
+}
+
+.na-legacy-light .release-title,
+.na-legacy-light .mainsection-kicker,
+.na-legacy-light .profile-block-head,
+.na-legacy-light .clan-profile-block-head,
+.na-legacy-light .clan-profile-member-heading,
+.na-legacy-light .mission-panel-title,
+.na-legacy-light .mission-section-heading,
+.na-legacy-light .news-editor-title,
+.na-legacy-light .news-list-title,
+.na-legacy-light .editor-note-title,
+.na-legacy-light .background-panel-title,
+.na-legacy-light .avatar-panel-title,
+.na-legacy-light .reset-panel-title,
+.na-legacy-light .clan-register-head,
+.na-legacy-light .section-title {
+  color: var(--ca-ink);
+  border-bottom-color: rgba(196, 65, 36, 0.18);
+}
+
+.na-legacy-light .release-title::before,
+.na-legacy-light .mainsection-kicker::before,
+.na-legacy-light .mission-panel-title::before,
+.na-legacy-light .background-panel-title::before,
+.na-legacy-light .avatar-panel-title::before,
+.na-legacy-light .profile-star,
+.na-legacy-light .clan-profile-star,
+.na-legacy-light .clan-register-star,
+.na-legacy-light .mainsection-label,
+.na-legacy-light .clan-profile-member-rank {
+  color: var(--ca-violet);
+}
+
+.na-legacy-light .release-copy,
+.na-legacy-light .mainsection-meta,
+.na-legacy-light .mainsection-body,
+.na-legacy-light .mainsection-balances,
+.na-legacy-light .profile-search-status,
+.na-legacy-light .avatar-preview-copy,
+.na-legacy-light .avatar-hint,
+.na-legacy-light .avatar-status,
+.na-legacy-light .background-label,
+.na-legacy-light .background-hint,
+.na-legacy-light .background-status,
+.na-legacy-light .reset-copy,
+.na-legacy-light .reset-status,
+.na-legacy-light .editor-note-copy,
+.na-legacy-light .editor-count-label,
+.na-legacy-light .character-editor-status,
+.na-legacy-light .character-editor-id,
+.na-legacy-light .mission-panel-copy,
+.na-legacy-light .mission-field,
+.na-legacy-light .mission-field-help,
+.na-legacy-light .mission-section-copy,
+.na-legacy-light .mission-list-meta,
+.na-legacy-light .goal-card-meta,
+.na-legacy-light .goal-popup-copy,
+.na-legacy-light .mission-editor-status,
+.na-legacy-light .news-admin-label,
+.na-legacy-light .news-admin-help,
+.na-legacy-light .news-admin-status,
+.na-legacy-light .news-post-entry-meta,
+.na-legacy-light .player-accounts-status,
+.na-legacy-light .player-account-status,
+.na-legacy-light .player-account-entry-meta,
+.na-legacy-light .player-account-summary-label,
+.na-legacy-light .clan-profile-label,
+.na-legacy-light .clan-profile-empty,
+.na-legacy-light .clan-profile-status,
+.na-legacy-light .clan-register-copy,
+.na-legacy-light .clan-register-label,
+.na-legacy-light .clan-register-status {
+  color: var(--ca-ink-soft);
+}
+
+.na-legacy-light .info-value,
+.na-legacy-light .clan-profile-value,
+.na-legacy-light .clan-profile-member-cell,
+.na-legacy-light .clan-profile-member-date,
+.na-legacy-light .player-account-summary-value,
+.na-legacy-light .character-editor-card-name,
+.na-legacy-light .mission-list-title,
+.na-legacy-light .goal-card-summary,
+.na-legacy-light .news-post-entry-title,
+.na-legacy-light .clan-summary-copy,
+.na-legacy-light .clan-register-value {
+  color: var(--ca-ink);
+}
+
+.na-legacy-light .info-value.accent,
+.na-legacy-light .clan-profile-value.accent,
+.na-legacy-light .character-editor-name,
+.na-legacy-light .editor-count-value,
+.na-legacy-light .clan-summary-copy .rank,
+.na-legacy-light .clan-summary-copy strong {
+  color: #8a4f00;
+}
+
+.na-legacy-light .profile-search-input,
+.na-legacy-light .avatar-input,
+.na-legacy-light .background-input,
+.na-legacy-light .character-editor-search,
+.na-legacy-light .mission-search,
+.na-legacy-light .mission-field input,
+.na-legacy-light .mission-field select,
+.na-legacy-light .news-admin-input,
+.na-legacy-light .news-admin-textarea,
+.na-legacy-light .player-accounts-search,
+.na-legacy-light .clan-register-input,
+.na-legacy-light .clan-register-textarea {
+  border: 1px solid rgba(27, 35, 48, 0.16);
+  background: #fffdf8;
+  color: var(--ca-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.na-legacy-light .profile-search-input::placeholder,
+.na-legacy-light .avatar-input::placeholder,
+.na-legacy-light .background-input::placeholder,
+.na-legacy-light .character-editor-search::placeholder,
+.na-legacy-light .mission-search::placeholder,
+.na-legacy-light .news-admin-input::placeholder,
+.na-legacy-light .news-admin-textarea::placeholder,
+.na-legacy-light .player-accounts-search::placeholder,
+.na-legacy-light .clan-register-input::placeholder,
+.na-legacy-light .clan-register-textarea::placeholder {
+  color: var(--ca-ink-faint);
+}
+
+.na-legacy-light .profile-search-input:focus,
+.na-legacy-light .avatar-input:focus,
+.na-legacy-light .background-input:focus,
+.na-legacy-light .character-editor-search:focus,
+.na-legacy-light .character-editor-json:focus,
+.na-legacy-light .mission-search:focus,
+.na-legacy-light .mission-field input:focus,
+.na-legacy-light .mission-field select:focus,
+.na-legacy-light .news-admin-input:focus,
+.na-legacy-light .news-admin-textarea:focus,
+.na-legacy-light .player-accounts-search:focus,
+.na-legacy-light .player-account-editor:focus,
+.na-legacy-light .clan-register-input:focus,
+.na-legacy-light .clan-register-textarea:focus {
+  border-color: rgba(232, 128, 26, 0.58);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(232, 128, 26, 0.18), 0 0 0 5px rgba(124, 77, 255, 0.08);
+}
+
+.na-legacy-light .character-editor-json,
+.na-legacy-light .player-account-editor {
+  border: 1px solid rgba(27, 35, 48, 0.14);
+  background: #12161f;
+  color: #f8efe0;
+}
+
+.na-legacy-light .mission-button.secondary,
+.na-legacy-light .character-editor-button.secondary,
+.na-legacy-light .player-account-button.secondary,
+.na-legacy-light .news-admin-button.secondary,
+.na-legacy-light .clan-register-button,
+.na-legacy-light .reset-button.secondary,
+.na-legacy-light .goal-card-button {
+  border: 1px solid rgba(27, 35, 48, 0.16);
+  background: rgba(255, 253, 248, 0.82);
+  color: var(--ca-ink);
+}
+
+.na-legacy-light .profile-search-button,
+.na-legacy-light .avatar-save,
+.na-legacy-light .background-save,
+.na-legacy-light .mission-button.primary,
+.na-legacy-light .character-editor-button.primary,
+.na-legacy-light .player-account-button.primary,
+.na-legacy-light .news-admin-button.primary,
+.na-legacy-light .clan-card button,
+.na-legacy-light .clan-register-button.primary,
+.na-legacy-light .reset-button.primary {
+  border: 1px solid rgba(232, 128, 26, 0.45);
+  background: linear-gradient(135deg, var(--ca-orange) 0%, var(--ca-amber) 74%, var(--ca-violet) 100%);
+  color: #fffaf2;
+  box-shadow: 0 10px 20px rgba(232, 128, 26, 0.2);
+}
+
+.na-legacy-light .avatar-preview,
+.na-legacy-light .profile-avatar,
+.na-legacy-light .profile-clan-badge,
+.na-legacy-light .clan-avatar,
+.na-legacy-light .clan-profile-avatar,
+.na-legacy-light .clan-profile-member-avatar,
+.na-legacy-light .character-editor-card-face,
+.na-legacy-light .character-editor-face {
+  border: 1px solid rgba(27, 35, 48, 0.16);
+  background: var(--ca-surface-sunk);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+.na-legacy-light .profile-avatar,
+.na-legacy-light .avatar-preview,
+.na-legacy-light .clan-avatar,
+.na-legacy-light .clan-profile-avatar,
+.na-legacy-light .clan-profile-member-avatar,
+.na-legacy-light .character-editor-card-face,
+.na-legacy-light .character-editor-face {
+  object-fit: cover;
+}
+
+.na-legacy-light .profile-clan-badge,
+.na-legacy-light .clan-profile-level-meter,
+.na-legacy-light .clan-profile-member-level,
+.na-legacy-light .ladder-bar {
+  background: var(--ca-surface-sunk);
+}
+
+.na-legacy-light .clan-profile-member-row-header {
+  background: rgba(235, 229, 215, 0.86);
+  color: var(--ca-ink);
+  font-weight: var(--fw-black);
+}
+
+.na-legacy-light .stats-panel,
+.na-legacy-light .ladder {
+  border-color: rgba(232, 128, 26, 0.14);
+}
+
+@media (max-width: 860px) {
+  .na-legacy-light .main {
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+  }
+}
+
+/* ============================================================
+   HOMEPAGE COMPONENT STYLES
+   All homepage-specific styling lives here, not in style.css.
+   style.css is for the game client only.
+   ============================================================ */
+
+/* ── RESET / BASE ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ca-void);
+  color: var(--ca-bone);
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── NAV ──────────────────────────────────────────────────── */
+.ca-nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-overlay);
+  background: #080a12;
+  border-bottom: 1px solid rgba(232, 128, 26, 0.22);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+
+.ca-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 52px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Seal glyph */
+.ca-nav-seal {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.ca-seal-svg {
+  width: 32px;
+  height: 37px;
+}
+
+/* Center links */
+.ca-nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ca-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ca-parchment);
+  padding: 4px 0;
+  transition: color var(--t-fast);
+}
+
+.ca-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background var(--t-fast);
+}
+
+.ca-nav-link:hover {
+  color: var(--ca-bone);
+}
+
+.ca-nav-link.active {
+  color: var(--ca-amber);
+}
+
+.ca-nav-link.active::after {
+  background: linear-gradient(90deg, var(--ca-orange), var(--ca-violet));
+}
+
+.ca-nav-num {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ca-purple-lit);
+  vertical-align: super;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ── NAV DROPDOWN MENUS (Game Manual / Ladders / Ninja Missions) ── */
+.ca-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* toggle button styled identically to a nav link */
+.ca-nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ca-parchment);
+  padding: 4px 0;
+  cursor: pointer;
+  transition: color var(--t-fast);
+}
+.ca-nav-toggle:hover { color: var(--ca-bone); }
+.ca-nav-toggle.active { color: var(--ca-amber); }
+
+.ca-caret {
+  font-size: 8px;
+  line-height: 1;
+  transition: transform var(--t-fast);
+}
+.ca-nav-item.open .ca-caret { transform: rotate(180deg); }
+
+/* dropdown panel — dark ink surface w/ ember hover (matches account menu) */
+.ca-nav-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 196px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #0b0d15;
+  border: 1px solid rgba(232, 128, 26, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--t-fast), transform var(--t-fast), visibility var(--t-fast);
+  z-index: var(--z-overlay);
+}
+/* a small hover bridge so the menu doesn't close in the gap */
+.ca-nav-menu::before {
+  content: "";
+  position: absolute;
+  top: -10px; left: 0; right: 0;
+  height: 10px;
+}
+.ca-nav-item:hover .ca-nav-menu,
+.ca-nav-item:focus-within .ca-nav-menu,
+.ca-nav-item.open .ca-nav-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ca-nav-menu-link {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ca-parchment);
+  white-space: nowrap;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.ca-nav-menu-link:hover,
+.ca-nav-menu-link:focus-visible {
+  background: rgba(232, 128, 26, 0.14);
+  color: var(--ca-bone);
+  outline: none;
+}
+
+/* hamburger (hidden on desktop; shown via responsive block) */
+.ca-nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 34px;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.ca-nav-burger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--ca-bone);
+  transition: transform var(--t-fast), opacity var(--t-fast);
+}
+
+/* Ryo shop trigger (injected by nav.js, sits just left of the account block) */
+.ca-nav-shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 5px 12px 5px 6px;
+  border: 1px solid rgba(232, 128, 26, 0.35);
+  border-radius: 999px;
+  background: rgba(232, 128, 26, 0.1);
+  color: var(--ca-bone);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+.ca-nav-shop:hover {
+  background: rgba(232, 128, 26, 0.22);
+  box-shadow: 0 0 0 2px rgba(232, 128, 26, 0.25);
+  transform: translateY(-1px);
+}
+.ca-nav-shop:active {
+  transform: scale(0.97);
+}
+.ca-nav-shop-coin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ffe6a8, #ffb84d 55%, #e8801a 100%);
+  color: #4a2a05;
+  font-size: 11px;
+  font-weight: 900;
+}
+.ca-nav-shop-balance {
+  color: #ffb84d;
+}
+
+/* Right: account */
+.ca-nav-account {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-width: 200px;
+}
+
+.ca-nav-guest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ca-nav-auth-link {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ca-parchment);
+  transition: color var(--t-fast);
+}
+
+.ca-nav-auth-link:hover {
+  color: var(--ca-purple-lit);
+}
+
+.ca-nav-auth-sep {
+  color: var(--ca-mist);
+  font-size: 12px;
+}
+
+.ca-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ca-nav-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-purple-dim), var(--ca-purple));
+  border: 1px solid rgba(232, 128, 26, 0.5);
+  flex: 0 0 auto;
+}
+
+.ca-nav-welcome {
+  font-size: 12px;
+  color: var(--ca-parchment);
+  white-space: nowrap;
+}
+
+.ca-nav-welcome strong {
+  color: var(--ca-purple-lit);
+}
+
+.ca-nav-logout-btn {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ca-red);
+  background: transparent;
+  border: 1px solid rgba(225, 24, 54, 0.35);
+  padding: 3px 10px;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.ca-nav-logout-btn:hover {
+  background: rgba(225, 24, 54, 0.1);
+  border-color: rgba(225, 24, 54, 0.65);
+}
+
+/* ── HERO ──────────────────────────────────────────────────── */
+.ca-hero {
+  width: 100%;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% -10%, rgba(232, 128, 26, 0.26), transparent),
+    radial-gradient(ellipse 50% 70% at 78% 20%, rgba(124, 77, 255, 0.22), transparent 60%),
+    linear-gradient(90deg, #2b1406 0%, #17101b 32%, #0b0d15 55%, #17101b 75%, #2b1406 100%);
+  border-bottom: 1px solid rgba(232, 128, 26, 0.28);
+  overflow: hidden;
+}
+
+.ca-hero-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 240px;
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+}
+
+.ca-hero-arrow {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.15);
+  user-select: none;
+  text-align: center;
+  letter-spacing: -2px;
+}
+
+.ca-hero-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Play Now CTA */
+.ca-hero-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 28px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--ca-orange) 0%, var(--ca-amber) 68%, var(--ca-violet) 100%);
+  border: none;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  box-shadow: 0 4px 24px rgba(232, 128, 26, 0.42), 0 2px 10px rgba(124, 77, 255, 0.24);
+  transition: box-shadow var(--t-base), transform var(--t-fast);
+}
+
+.ca-hero-play:hover {
+  box-shadow: 0 6px 32px rgba(232, 128, 26, 0.62), 0 4px 16px rgba(124, 77, 255, 0.32);
+  transform: translateY(-1px);
+}
+
+/* Wordmark */
+.ca-hero-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ca-hero-word {
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ca-bone);
+  text-shadow: 0 0 40px rgba(232, 128, 26, 0.4), 0 2px 0 rgba(0, 0, 0, 0.6);
+  line-height: 1;
+}
+
+.ca-hero-seal {
+  width: 44px;
+  height: 50px;
+  flex: 0 0 auto;
+}
+
+/* Tagline */
+.ca-hero-tagline {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(236, 231, 220, 0.45);
+}
+
+.ca-hero--compact .ca-hero-inner {
+  height: 132px;
+  grid-template-columns: 42px 1fr 42px;
+}
+
+.ca-hero--compact .ca-hero-center {
+  gap: 8px;
+}
+
+.ca-hero--compact .ca-hero-play {
+  padding: 6px 20px;
+  font-size: 11px;
+}
+
+.ca-hero--compact .ca-hero-word {
+  font-size: clamp(26px, 3.8vw, 42px);
+}
+
+.ca-hero--compact .ca-hero-seal {
+  width: 34px;
+  height: 40px;
+}
+
+.ca-hero--compact .ca-hero-tagline {
+  letter-spacing: 0.16em;
+}
+
+/* ── PAGE LAYOUT ───────────────────────────────────────────── */
+.ca-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 0 28px;
+  align-items: start;
+}
+
+/* ── MAIN CONTENT ──────────────────────────────────────────── */
+.ca-main {
+  position: relative;
+  padding-top: 28px;
+}
+
+/* Kanji watermark */
+.ca-watermark {
+  position: absolute;
+  top: -20px;
+  right: -12px;
+  font-size: 160px;
+  font-weight: 900;
+  color: rgba(232, 128, 26, 0.04);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* ANNOUNCEMENT oversized heading */
+.ca-announce-heading {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  font-size: clamp(44px, 5.2vw, 64px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ca-orange);
+  line-height: 1;
+  opacity: 0.92;
+}
+
+/* ── RELEASES ──────────────────────────────────────────────── */
+.ca-releases {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 28px;
+  padding: 20px;
+  background: var(--ca-bone);
+  border-top: 3px solid var(--ca-orange);
+}
+
+.ca-section-label {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a4f00;
+}
+
+.ca-release-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ca-release-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: border-color var(--t-base);
+}
+
+.ca-release-card:hover {
+  border-color: rgba(232, 128, 26, 0.3);
+}
+
+.ca-release-face {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ddd;
+}
+
+.ca-release-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+/* ── NEWS SECTION ──────────────────────────────────────────── */
+.ca-news-section {
+  position: relative;
+  z-index: 1;
+}
+
+.ca-news-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.news-status {
+  min-height: 18px;
+  font-size: 12px;
+  color: var(--ca-parchment);
+}
+
+.news-status[data-state="error"] {
+  color: #ff8f8f;
+}
+
+.ca-news-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ca-news-btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: rgba(232, 128, 26, 0.08);
+  border: 1px solid rgba(232, 128, 26, 0.3);
+  color: var(--ca-purple-lit);
+  font-size: 18px;
+  line-height: 1;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.ca-news-btn:hover:not(:disabled) {
+  background: rgba(232, 128, 26, 0.18);
+  border-color: rgba(232, 128, 26, 0.6);
+}
+
+.ca-news-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.ca-news-counter {
+  font-size: 11px;
+  color: var(--ca-dust);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* News content container — JS injects .news-post cards here */
+.ca-news-content {
+  display: grid;
+  gap: 16px;
+}
+
+/* ── NEWS POST (rendered by index.js) ──────────────────────── */
+/* These selectors must match exactly what renderNewsPost() creates */
+.news-post {
+  background: var(--ca-bone);
+  border-top: 3px solid var(--ca-orange);
+  padding: 24px 24px 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.mainsection-kicker {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1a1218;
+  letter-spacing: -0.01em;
+}
+
+.mainsection-kicker::before {
+  content: '</ ';
+  color: var(--ca-violet);
+  font-weight: 400;
+}
+
+.mainsection-kicker::after {
+  content: ' >';
+  color: var(--ca-violet);
+  font-weight: 400;
+}
+
+.mainsection-meta {
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  color: #888;
+}
+
+.mainsection-meta .byline {
+  color: #8a4f00;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.mainsection-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #2a2a2a;
+  font-style: italic;
+}
+
+.mainsection-body p {
+  margin: 0 0 12px;
+}
+
+.mainsection-body p:last-child {
+  margin-bottom: 0;
+}
+
+.news-divider {
+  height: 1px;
+  margin: 16px 0;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(232, 128, 26, 0.5), transparent);
+}
+
+/* Character change entries */
+.news-change-title {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a4f00;
+}
+
+.news-change-title::before {
+  content: '/ ';
+  opacity: 0.5;
+}
+
+.news-change-list {
+  display: grid;
+  gap: 10px;
+}
+
+.news-change-group {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.news-change-group-list {
+  display: grid;
+  gap: 8px;
+}
+
+.news-change-character {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  background: #ccc;
+}
+
+.news-change-copy {
+  min-width: 0;
+}
+
+.news-change-character-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1218;
+  margin-bottom: 4px;
+}
+
+.news-change-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.news-change-item {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.news-change-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 7px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.news-change-type.buff {
+  background: rgba(99, 214, 104, 0.15);
+  border: 1px solid rgba(99, 214, 104, 0.3);
+  color: #2a7a2e;
+}
+
+.news-change-type.nerf {
+  background: rgba(225, 24, 54, 0.12);
+  border: 1px solid rgba(225, 24, 54, 0.28);
+  color: var(--ca-red);
+}
+
+.news-change-skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 3px;
+  background: rgba(232, 128, 26, 0.1);
+  border: 1px solid rgba(232, 128, 26, 0.22);
+  color: #8a4f00;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.news-change-skill-image {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #eee;
+}
+
+.news-change-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #333;
+  white-space: pre-line;
+  font-style: normal;
+}
+
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+.ca-sidebar {
+  position: relative;
+  padding-top: 28px;
+}
+
+.ca-sidebar-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 9, 12, 0.82) 0%, rgba(10, 9, 12, 0.97) 100%),
+    var(--sidebar-backdrop, none) center/cover no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ca-sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ca-sidebar-section {
+  margin-bottom: 22px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(232, 128, 26, 0.18);
+  border-top: 2px solid var(--ca-purple);
+}
+
+.ca-sidebar-title {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ca-purple-lit);
+}
+
+.ca-sidebar-subtitle {
+  margin: 14px 0 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 174, 66, 0.7);
+}
+
+/* Auth form */
+.ca-auth-desc {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--ca-dust);
+  line-height: 1.4;
+}
+
+.ca-auth-form {
+  display: grid;
+  gap: 8px;
+}
+
+.ca-auth-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(232, 128, 26, 0.25);
+  color: var(--ca-bone);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.ca-auth-input::placeholder {
+  color: var(--ca-dust);
+}
+
+.ca-auth-input:focus {
+  border-color: var(--ca-purple);
+  box-shadow: var(--glow-purple);
+}
+
+.ca-auth-btn {
+  width: 100%;
+  height: 38px;
+  background: linear-gradient(135deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+  border: none;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: var(--clip-slash-sm);
+  box-shadow: 0 4px 14px rgba(232, 128, 26, 0.3);
+  transition: box-shadow var(--t-base);
+}
+
+.ca-auth-btn:hover {
+  box-shadow: 0 4px 22px rgba(232, 128, 26, 0.5);
+}
+
+.ca-auth-toggle {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--ca-purple-lit);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+}
+
+.ca-auth-status {
+  min-height: 16px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--ca-parchment);
+}
+
+.ca-auth-status[data-state="error"] { color: #ff8f8f; }
+.ca-auth-status[data-state="success"] { color: #9ce2a1; }
+
+/* Account panel */
+.ca-account-panel {
+  /* shown/hidden via JS: `hidden` attribute */
+}
+
+.ca-account-greeting {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--ca-bone);
+}
+
+.ca-account-name {
+  color: var(--ca-purple-lit);
+  font-weight: 700;
+}
+
+.ca-account-actions {
+  display: grid;
+  gap: 1px;
+}
+
+/* Shared .account-action class used by JS */
+.account-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  color: var(--ca-parchment);
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+}
+
+.account-action svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  flex: 0 0 auto;
+  opacity: 0.65;
+}
+
+.account-action:hover {
+  color: var(--ca-bone);
+  background: rgba(232, 128, 26, 0.08);
+  border-left-color: rgba(232, 128, 26, 0.4);
+}
+
+.ca-logout-action {
+  margin-top: 6px;
+  color: #f09090;
+  border-left-color: transparent;
+}
+
+.ca-logout-action:hover {
+  color: #ffaaaa;
+  background: rgba(225, 24, 54, 0.1);
+  border-left-color: rgba(225, 24, 54, 0.5);
+}
+
+/* ── LEADERBOARD PANELS ────────────────────────────────────── */
+.ca-ladder-panel,
+.ca-stats-panel {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(232, 128, 26, 0.15);
+  border-top: 2px solid var(--ca-purple);
+}
+
+.ca-ladder-title {
+  margin: 0 0 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(232, 128, 26, 0.2);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ca-purple-lit);
+}
+
+.ca-ladder-list,
+.ca-stats-list,
+.ca-stats-list {
+  display: grid;
+  gap: 6px;
+}
+
+/* Shared .ladder-row / .ladder-rank / .ladder-name etc. (also used by JS) */
+.ladder-row {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 4px 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ladder-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ladder-rank {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(232, 128, 26, 0.12);
+  border: 1px solid rgba(232, 128, 26, 0.28);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ca-purple-lit);
+  line-height: 1;
+}
+
+.ladder-name {
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ca-bone);
+  line-height: 1.2;
+}
+
+.ladder-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ladder-name a:hover {
+  color: var(--ca-purple-lit);
+}
+
+.ladder-bar {
+  height: 12px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.ladder-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+}
+
+.ladder-score {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Stats list */
+.ca-stats-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  color: var(--ca-parchment);
+  line-height: 1.45;
+  gap: 4px;
+}
+
+.ca-stats-list li {
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .ca-page {
+    grid-template-columns: 1fr;
+  }
+  .ca-sidebar {
+    order: -1;
+    padding-top: 0;
+    margin-top: 20px;
+  }
+  .ca-sidebar-backdrop {
+    display: none;
+  }
+  .ca-sidebar-section,
+  .ca-ladder-panel,
+  .ca-stats-panel {
+    background: rgba(10, 9, 12, 0.9);
+  }
+}
+
+/* ── MOBILE / TABLET NAV (hamburger + accordion dropdowns) ── */
+@media (max-width: 960px) {
+  .ca-nav-burger { display: flex; }
+  .ca-nav-inner {
+    grid-template-columns: auto auto 1fr;
+    gap: 12px;
+  }
+  .ca-nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: #0b0d15;
+    border-top: 1px solid rgba(232, 128, 26, 0.28);
+    border-bottom: 1px solid rgba(232, 128, 26, 0.28);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+    padding: 8px 16px 16px;
+    max-height: calc(100vh - 52px);
+    overflow-y: auto;
+    display: none;
+  }
+  .ca-nav.ca-nav-mobile-open .ca-nav-links { display: flex; }
+  .ca-nav-item { flex-direction: column; align-items: stretch; }
+  .ca-nav-link,
+  .ca-nav-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: 13px 2px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  /* submenus expand inline (accordion), driven by .open only */
+  .ca-nav-menu {
+    position: static;
+    transform: none;
+    min-width: 0;
+    margin: 0;
+    padding: 0 0 6px 14px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    opacity: 1;
+    visibility: hidden;
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--t-base);
+  }
+  .ca-nav-item:hover .ca-nav-menu,
+  .ca-nav-item:focus-within .ca-nav-menu {
+    visibility: hidden;
+    pointer-events: none;
+    max-height: 0;
+  }
+  .ca-nav-item.open .ca-nav-menu {
+    visibility: visible;
+    pointer-events: auto;
+    max-height: 600px;
+  }
+  .ca-nav-menu::before { display: none; }
+  .ca-nav-menu-link { white-space: normal; padding: 11px 12px; }
+}
+
+@media (max-width: 680px) {
+  .ca-nav-inner {
+    padding: 0 14px;
+  }
+  .ca-nav-account {
+    min-width: 0;
+  }
+  .ca-hero-inner {
+    grid-template-columns: 32px 1fr 32px;
+    height: 180px;
+  }
+  .ca-hero-word {
+    font-size: 28px;
+  }
+  .ca-page {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .ca-release-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   SHARED SUBPAGE NAV: PLAY NOW CTA + ACCOUNT DROPDOWN
+   Subpages no longer have a left sidebar; account/admin tools
+   and Play Now live in the top nav. The #auth-panel section is
+   physically moved here, so all index.js IDs are preserved.
+   ============================================================ */
+.ca-nav-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Play Now CTA in the nav (single #play-now-button instance) */
+.ca-nav-play {
+  height: 30px;
+  padding: 0 16px;
+  border: 1px solid rgba(232, 128, 26, 0.6);
+  background: linear-gradient(135deg, var(--ca-orange) 0%, var(--ca-amber) 68%, var(--ca-violet) 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  clip-path: var(--clip-slash-sm);
+  box-shadow: 0 0 14px rgba(232, 128, 26, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: box-shadow var(--t-base), transform var(--t-fast);
+}
+.ca-nav-play:hover {
+  box-shadow: 0 0 22px rgba(232, 128, 26, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Account trigger (opens dropdown) */
+.ca-account-menu-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+.ca-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 5px 12px;
+  color: var(--ca-parchment);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.ca-account-trigger:hover {
+  color: var(--ca-bone);
+  border-color: rgba(232, 128, 26, 0.4);
+}
+.ca-account-trigger .ca-nav-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-purple-dim), var(--ca-purple));
+  border: 1px solid rgba(232, 128, 26, 0.5);
+  flex: 0 0 auto;
+}
+.ca-account-trigger .ca-nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ca-account-caret {
+  font-size: 9px;
+  color: var(--ca-purple-lit);
+  transition: transform var(--t-fast);
+}
+.ca-account-trigger[aria-expanded="true"] .ca-account-caret {
+  transform: rotate(180deg);
+}
+
+/* Dropdown panel — hosts the moved #auth-panel section */
+.ca-account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  max-height: 78vh;
+  overflow-y: auto;
+  background: #0b0d15;
+  border: 1px solid rgba(232, 128, 26, 0.3);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  padding: 18px;
+  z-index: var(--z-modal);
+}
+/* Neutralise the moved section's sidebar spacing inside the menu */
+.ca-account-menu #auth-panel.group,
+.ca-account-menu > #auth-panel {
+  margin: 0;
+}
+.ca-account-menu #admin-panel-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}

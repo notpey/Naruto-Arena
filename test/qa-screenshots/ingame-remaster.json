@@ -1,0 +1,43 @@
+{
+  "title": "Naruto-Arena Game",
+  "bodyClass": "ingame-client-page custom-game-cursor game-remaster",
+  "viewport": {
+    "vw": 1280,
+    "vh": 800
+  },
+  "scroll": {
+    "bodyW": 1280,
+    "bodyH": 804,
+    "docW": 1280,
+    "docH": 804
+  },
+  "outside": [
+    {
+      "tag": "DIV",
+      "cls": "skillinformation",
+      "id": "",
+      "txt": "SKILL NAME\n\nENERGY:\nNONE\n\nCLASSES:\n\nCOOLDOWN:\n\nNARUTO HITS ONE ENEMY WITH A BALL",
+      "x": 442,
+      "y": 612,
+      "w": 748,
+      "h": 192,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "IMG",
+      "cls": "render",
+      "id": "",
+      "txt": "render",
+      "x": 268,
+      "y": 587,
+      "w": 219,
+      "h": 546,
+      "display": "block",
+      "visibility": "visible"
+    }
+  ],
+  "missingImages": [
+    "avatar-right.jpg"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Naruto-Arena Selection",
+  "bodyClass": "selection-client-page custom-game-cursor game-remaster",
+  "viewport": {
+    "vw": 1100,
+    "vh": 800
+  },
+  "scroll": {
+    "bodyW": 1129,
+    "bodyH": 800,
+    "docW": 1129,
+    "docH": 800
+  },
+  "outside": [
+    {
+      "tag": "DIV",
+      "cls": "skillviewer collapsed",
+      "id": "",
+      "txt": "SELECT A CHARACTER\nSKILL NAME\nENERGY:\nCHOOSE A CHARACTER TO VIEW SKILLS.\nCLASSES",
+      "x": -903,
+      "y": 22,
+      "w": 59,
+      "h": 345,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "IMG",
+      "cls": "skillscroll",
+      "id": "",
+      "txt": " election croll",
+      "x": -420,
+      "y": 10,
+      "w": 120,
+      "h": 342,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "UL",
+      "cls": "slot-list",
+      "id": "",
+      "txt": " lot-li t",
+      "x": 132,
+      "y": 488,
+      "w": 997,
+      "h": 244,
+      "display": "grid",
+      "visibility": "visible"
+    }
+  ],
+  "missingImages": [
+    "",
+    "",
+    "",
+    "",
+    ""
+  ]
+}

@@ -9,11 +9,1558 @@
     src: url('pedra.ttf') format('truetype');
 }
 
+/* ============================================================
+   GAME-CLIENT LOCAL TOKENS
+   The battle UI keeps its own scroll/parchment scope (separate
+   from brand.css). These tokens just name the existing hardcoded
+   colors — values are unchanged, so the battle UI is visually
+   identical; this only makes the palette maintainable.
+   Shinobi reading: warm parchment combat scrolls, crimson
+   "your turn"/accent, red enemy/damage, chakra-blue info.
+   ============================================================ */
+:root {
+    --na-crimson:     #c41e3a; /* battle accent / active / your-turn */
+    --na-danger:      #e74c3c; /* enemy / damage red */
+    --na-parchment:   #fbe9b8; /* scroll card / panel interior */
+    --na-scroll:      #d4c9a8; /* scroll surface */
+    --na-scroll-2:    #c4b896; /* deeper scroll surface */
+    --na-scroll-edge: #8b7d5c; /* scroll border / stroke */
+    --na-chakra-blue: #56b0ff; /* chakra / info */
+    --na-ink:         #141414; /* dark text on parchment */
+
+    /* Game Client Dimensions
+       Current live client: 770x560
+       Future remaster target: 1280x800
+       Future proportional stage option: 1100x800
+
+       The live aliases below intentionally point at the current
+       770x560 client. Do not switch them to remaster values until
+       the remaster layout is built and QA-ready.
+    */
+    --game-current-w: 770px;
+    --game-current-h: 560px;
+    --game-remaster-window-w: 1280px;
+    --game-remaster-window-h: 800px;
+    --game-remaster-stage-w: 1100px;
+    --game-remaster-stage-h: 800px;
+    --game-remaster-side-gutter: 90px;
+    --game-stage-w: var(--game-current-w);
+    --game-stage-h: var(--game-current-h);
+    --selection-bg-image: url("selectionbg.png");
+    --ingame-bg-image: url("ingamebg.png");
+
+    /* Future Remaster Asset Slots
+       These filenames are placeholders for later Photoshop/export
+       handoff. They are intentionally not used by default live
+       selectors, so missing remaster files do not affect the 770x560
+       client.
+    */
+    --selection-bg-remaster-image: url("selectionbg-remaster.png");
+    --ingame-bg-remaster-image: url("ingamebg-remaster.png");
+    --login-panel-remaster-image: url("loginscroll-remaster.png");
+    --selection-panel-remaster-image: url("selectionpage-remaster.png");
+    --selection-skill-panel-remaster-image: url("skillpage-remaster.png");
+    --selection-scroll-remaster-image: url("selectionscroll-remaster.png");
+    --skill-scroll-remaster-image: url("skillscroll-remaster.png");
+    --modal-panel-remaster-image: url("searchingscroll-remaster.png");
+    --battle-skill-row-remaster-image: url("ingameskillscroll-remaster.png");
+    --battle-skill-info-remaster-image: url("ingamebottomscroll-remaster.png");
+    --battle-end-panel-remaster-image: url("endscroll-remaster.png");
+    --battle-scroll-behind-remaster-image: url("ingamescrollbehind-remaster.png");
+    --options-button-remaster-image: url("optionscroll-remaster.png");
+    --ladder-button-remaster-image: url("ladderbutton-remaster.png");
+    --quick-button-remaster-image: url("quickbutton-remaster.png");
+    --private-button-remaster-image: url("privatebutton-remaster.png");
+    --logout-button-remaster-image: url("logout-remaster.png");
+    --next-page-remaster-image: url("nextpage-remaster.png");
+    --search-art-remaster-image: url("sasukesearch-remaster.png");
+    --surrender-art-remaster-image: url("surrenderimage-remaster.png");
+    --render-remaster-image: url("render-remaster.png");
+    --win-remaster-image: url("win-remaster.png");
+    --lose-remaster-image: url("lose-remaster.png");
+    --dead-character-remaster-image: url("deadcharacter-remaster.png");
+    --found-remaster-image: url("found-remaster.png");
+    --loading-remaster-image: url("loading-remaster.png");
+    --sharingan-remaster-image: url("sharingan-remaster.png");
+    --skill-queue-remaster-image: url("skillqqueue-remaster.png");
+
+    /* Future Remaster Asset Sizes
+       Reference slots only. Existing elements keep their current
+       dimensions until later .game-remaster layout phases wire these
+       values into scoped rules.
+    */
+    --selection-panel-remaster-w: 997px;
+    --selection-panel-remaster-h: 317px;
+    --selection-skill-panel-remaster-w: 997px;
+    --selection-skill-panel-remaster-h: 317px;
+    --modal-panel-remaster-w: 559px;
+    --modal-panel-remaster-h: 415px;
+    --battle-skill-row-remaster-w: 545px;
+    --battle-skill-row-remaster-h: 113px;
+    --battle-skill-info-remaster-w: 748px;
+    --battle-skill-info-remaster-h: 192px;
+    --battle-end-panel-remaster-w: 918px;
+    --battle-end-panel-remaster-h: 460px;
+    --remaster-wide-button-w: 275px;
+    --remaster-wide-button-h: 82px;
+    --remaster-small-button-w: 260px;
+    --remaster-small-button-h: 66px;
+    --remaster-character-face: 107px;
+    --remaster-skill-icon: 80px;
+}
+
+/* ============================================================
+   GAME CLIENT REMASTER MODE
+   Disabled by default.
+
+   This class only changes the stage dimension aliases when a
+   developer temporarily applies `.game-remaster` to a wrapper or
+   body for manual testing. It is not present in selection.html or
+   ingame.html by default, so the live client remains 770x560.
+
+   Future phases will add remaster-specific selection and in-game
+   layout rules behind this class. Popup sizing should be updated
+   only after the remaster layout is ready.
+   ============================================================ */
+.game-remaster {
+    --game-stage-w: var(--game-remaster-stage-w);
+    --game-stage-h: var(--game-remaster-stage-h);
+}
+
+.game-remaster .background {
+    background-image: var(--selection-bg-remaster-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+.game-remaster .backgroundingame {
+    background-image: var(--ingame-bg-remaster-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+}
+
+/* Game Client Remaster Asset Hooks
+   These selectors are documentation scaffolds for future phases.
+   The full-stage backgrounds above are wired because their exports
+   match the disabled 1100x800 remaster stage. Other panels/buttons
+   require the layout phase before their larger assets can be safely
+   applied without cropping or distortion.
+
+   Planned mappings:
+   .game-remaster .selectionpage     -> --selection-panel-remaster-image
+   .game-remaster .skillpage         -> --selection-skill-panel-remaster-image
+   .game-remaster modal panels       -> --modal-panel-remaster-image
+   .game-remaster .skillscrollingame -> --battle-skill-row-remaster-image
+   .game-remaster .skillinformation  -> --battle-skill-info-remaster-image
+   .game-remaster .battle-end-panel  -> --battle-end-panel-remaster-image
+*/
+
+/* ============================================================
+   SELECTION SCREEN REMASTER LAYOUT
+   Disabled by default. Active only under .game-remaster.
+
+   Manual testing note: temporarily add `game-remaster` to the
+   selection page body or stage wrapper in browser devtools. Do not
+   commit that class to selection.html until the remaster is ready.
+   ============================================================ */
+.game-remaster .background {
+    width: var(--game-remaster-stage-w);
+    height: var(--game-remaster-stage-h);
+}
+
+.game-remaster .shop-icon-glyph {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+}
+
+.game-remaster .shop-icon-balance {
+    font-size: 13px;
+}
+
+.game-remaster .selectionpage {
+    background-image: var(--selection-panel-remaster-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    width: var(--selection-panel-remaster-w);
+    height: var(--selection-panel-remaster-h);
+    left: 77px;
+    top: 452px;
+    z-index: 1;
+}
+
+.game-remaster .selectionscroll {
+    content: var(--selection-scroll-remaster-image);
+    width: 66px;
+    height: 342px;
+    left: 33px;
+    top: 440px;
+    z-index: 2;
+}
+
+.game-remaster .slot-list {
+    grid-template-columns: repeat(7, 72px);
+    gap: 14px;
+    left: 55px;
+    top: 36px;
+    z-index: 3;
+}
+
+.game-remaster .slot-item {
+    width: 72px;
+    height: 72px;
+    box-shadow: 0 3px 7px rgba(45, 21, 7, 0.38);
+}
+
+.game-remaster .selected-character-slot-list {
+    position: absolute;
+    gap: 22px;
+    left: 690px;
+    right: auto;
+    top: 206px;
+    z-index: 5;
+}
+
+.game-remaster .selected-character-slot-list::before {
+    content: "SELECT 3 CHARACTERS";
+    position: absolute;
+    left: -25px;
+    top: -34px;
+    width: 310px;
+    color: #000000;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.game-remaster .selected-character-slot {
+    width: 72px;
+    height: 72px;
+    bottom: auto;
+    left: auto;
+    font-size: 30px;
+    box-shadow: 0 3px 7px rgba(45, 21, 7, 0.38);
+}
+
+.game-remaster .player-card {
+    position: absolute;
+    width: 300px;
+    left: 690px;
+    bottom: auto;
+    top: 34px;
+    gap: 16px;
+    padding: 0;
+    font-size: 13px;
+    align-items: flex-start;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    z-index: 5;
+}
+
+.game-remaster .player-avatar {
+    width: 107px;
+    height: 107px;
+    flex: 0 0 auto;
+    margin-right: 0;
+    border: 2px solid #000000;
+    box-shadow: 0 4px 9px rgba(45, 21, 7, 0.42);
+}
+
+.game-remaster .player-infoselection {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.16;
+}
+
+.game-remaster .player-nameselection {
+    color: var(--na-crimson);
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 700;
+    margin-bottom: 2px;
+    overflow-wrap: anywhere;
+}
+
+.game-remaster .player-card .player-stat {
+    margin-bottom: 0;
+    padding: 0;
+    border-top: 0;
+    overflow-wrap: anywhere;
+}
+
+.game-remaster .skillviewer {
+    left: 0;
+    bottom: auto;
+    top: -430px;
+}
+
+.game-remaster .skillscroll {
+    content: var(--skill-scroll-remaster-image);
+    width: 66px;
+    height: 342px;
+    left: 930px;
+    top: -12px;
+}
+
+.game-remaster .skillpage {
+    background-image: var(--selection-skill-panel-remaster-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    width: var(--selection-skill-panel-remaster-w);
+    height: var(--selection-skill-panel-remaster-h);
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 25px 80px 25px 30px;
+    box-sizing: border-box;
+}
+
+.game-remaster .skillviewer.collapsed {
+    transform: translateX(-980px) scaleX(0.9);
+}
+
+.game-remaster .skillviewer.collapsed .skillscroll {
+    transform: translateX(-360px) rotate(-15deg) scaleX(0.7);
+}
+
+.game-remaster .skillviewer.collapsed .skillpage {
+    transform: translateX(-310px) scaleX(0);
+}
+
+.game-remaster .skill-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* skill-header: character info takes all remaining space; skill thumbnails anchor right */
+.game-remaster .skill-header {
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 0;
+}
+
+/* character-info becomes a horizontal row: portrait | name+bio */
+.game-remaster .character-info {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+/* portrait: fixed size, does not shrink */
+.game-remaster .character-portrait {
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+}
+
+/* skill thumbnails in header: small, fixed, anchored right */
+.game-remaster .skill-image {
+    width: 62px;
+    height: 62px;
+}
+
+.game-remaster .skill-images {
+    flex: 0 0 auto;
+    gap: 10px;
+    margin-left: 0;
+    margin-top: 0;
+    max-width: none;
+    align-self: center;
+    padding: 6px;
+}
+
+.game-remaster .character-name {
+    width: auto;
+    min-height: 0;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    margin-bottom: 5px;
+}
+
+.game-remaster .skill-detail-card {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 26px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+}
+
+.game-remaster .skill-detail-head {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.game-remaster .skill-detail-image {
+    width: 78px;
+    height: 78px;
+}
+
+.game-remaster .skill-name {
+    font-size: 17px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+    color: #ca1414;
+}
+
+.game-remaster .skill-description {
+    font-size: 13px;
+    line-height: 1.4;
+    max-height: 60px;
+    text-transform: uppercase;
+}
+
+.game-remaster .skill-detail-meta {
+    font-size: 10px;
+    margin-top: 5px;
+    padding: 6px 10px;
+    justify-content: space-evenly;
+    border-radius: 4px;
+    background: #1b2330;
+    color: #fff;
+}
+
+.game-remaster .sdm-seg {
+    padding: 0 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-remaster .sdm-lbl {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.game-remaster .skill-classes,
+.game-remaster .class-type,
+.game-remaster .cooldown-value {
+    color: #fff;
+}
+
+.game-remaster .energy-none {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.game-remaster .energy-pip {
+    width: 11px;
+    height: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.game-remaster .energy-pip.filled.energy-random {
+    background-color: #000;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.game-remaster .character-bio,
+.game-remaster .skill-description {
+    text-shadow: 0 0 8px rgba(255, 248, 200, 0.95), 0 0 16px rgba(255, 248, 200, 0.8);
+    color: #1a0d04;
+}
+
+.game-remaster .button-container {
+    position: absolute;
+    left: 0;
+    right: auto;
+    top: -96px;
+    width: var(--selection-panel-remaster-w);
+    gap: 0;
+    justify-content: space-between;
+    z-index: 5;
+}
+
+.game-remaster .game-button {
+    position: static;
+    bottom: auto;
+    right: auto;
+}
+
+.game-remaster .ladder-button img {
+    content: var(--ladder-button-remaster-image);
+}
+
+.game-remaster .quick-button img {
+    content: var(--quick-button-remaster-image);
+}
+
+.game-remaster .private-button img {
+    content: var(--private-button-remaster-image);
+}
+
+.game-remaster .game-button img {
+    width: var(--remaster-wide-button-w);
+    height: var(--remaster-wide-button-h);
+}
+
+.game-remaster .logout-button img {
+    content: var(--logout-button-remaster-image);
+    width: 169px;
+    height: var(--remaster-wide-button-h);
+}
+
+.game-remaster .nextpage,
+.game-remaster .lastpage {
+    content: var(--next-page-remaster-image);
+    width: 59px;
+    height: 63px;
+    z-index: 6;
+}
+
+.game-remaster .nextpage {
+    left: 619px;
+    top: 200px;
+}
+
+.game-remaster .lastpage {
+    left: 0;
+    top: 24px;
+}
+
+.game-remaster .searchingscroll,
+.game-remaster .private-match-modal {
+    background: var(--modal-panel-remaster-image) no-repeat center / contain;
+    width: var(--modal-panel-remaster-w);
+    height: var(--modal-panel-remaster-h);
+    top: 0;
+    left: 0;
+}
+
+.game-remaster .sasukesearch {
+    content: var(--search-art-remaster-image);
+    width: 275px;
+    height: 179px;
+}
+
+.game-remaster .sharingan {
+    content: var(--sharingan-remaster-image);
+    width: 92px;
+    height: 92px;
+    /* clear inherited margin offsets; use explicit top/left instead */
+    margin-top: 0;
+    margin-left: 0;
+    top: 146px;
+    left: 272px;
+}
+
+/* Remaster searching modal inner content */
+.game-remaster .searching {
+    margin-top: 89px;
+    margin-left: 210px;
+}
+
+.game-remaster .sasukesearch {
+    display: block;
+    margin-left: 173px;
+}
+
+.game-remaster .cancel-button {
+    left: 266px;
+    top: 302px;
+}
+
+/* Backdrop z-index must beat .button-container (z-index:5) in the selectionpage stacking context */
+.game-remaster .searching-backdrop,
+.game-remaster .private-match-backdrop {
+    z-index: 20;
+}
+
+/* Hub tab bar (Play/Shop/Missions/Inventory/Story) is a built-in, always-on
+   part of the game screen now -- not gated behind the Remaster Mode preview
+   toggle. Base rule below fits the classic 770x560 stage; .game-remaster
+   overrides it with larger dimensions for the 1100x800 stage. */
+.selection-hub-nav {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: #080a12;
+    border-bottom: 1px solid rgba(232, 128, 26, 0.22);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 10px;
+    color: #f0ede8;
+}
+
+.game-remaster .selection-hub-nav {
+    height: 52px;
+    padding: 0 22px;
+    font-size: 11px;
+}
+
+.selection-hub-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    min-width: 54px;
+}
+
+.selection-hub-mark {
+    width: 32px;
+    height: 37px;
+    display: block;
+    overflow: visible;
+}
+
+.selection-hub-mark polygon {
+    fill: rgba(232, 128, 26, 0.06);
+    stroke: #e8801a;
+    stroke-width: 1.5;
+}
+
+.selection-hub-mark text {
+    fill: #7c4dff;
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.selection-hub-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 28px;
+}
+
+.selection-hub-tab {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #d7cabc;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.selection-hub-tab::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background: transparent;
+}
+
+.selection-hub-tab:hover,
+.selection-hub-tab.active {
+    color: #ffb84d;
+    background: transparent;
+    border-color: transparent;
+}
+
+.selection-hub-tab.active::after {
+    background: linear-gradient(90deg, #e8801a, #7c4dff);
+}
+
+.selection-hub-ryo {
+    height: 31px;
+    margin-left: 0;
+    min-width: 88px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px 0 6px;
+    border: 1px solid rgba(232, 128, 26, 0.35);
+    border-radius: 999px;
+    color: #f0ede8;
+    background: rgba(232, 128, 26, 0.1);
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: none;
+}
+
+.selection-hub-coin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    color: #4a2a05;
+    background: radial-gradient(circle at 32% 28%, #ffe6a8, #ffb84d 55%, #e8801a 100%);
+    font-size: 10px;
+}
+
+.selection-hub-settings {
+    position: relative;
+    margin-left: 7px;
+    flex: 0 0 auto;
+}
+
+.selection-hub-settings-button {
+    width: 31px;
+    height: 31px;
+    border: 1px solid rgba(232, 128, 26, 0.35);
+    border-radius: 50%;
+    color: #ffb84d;
+    background: rgba(232, 128, 26, 0.1);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.selection-hub-settings-button:hover,
+.selection-hub-settings.open .selection-hub-settings-button {
+    color: #f0ede8;
+    background: rgba(232, 128, 26, 0.22);
+    border-color: rgba(232, 128, 26, 0.6);
+}
+
+.selection-hub-settings-menu {
+    position: absolute;
+    right: 0;
+    top: 39px;
+    width: 210px;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #0b0d15;
+    border: 1px solid rgba(232, 128, 26, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    z-index: 80;
+}
+
+.selection-hub-settings-menu[hidden] {
+    display: none;
+}
+
+.selection-hub-settings-menu .remaster-preview-toggle {
+    position: static;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 0 8px;
+    border: 0;
+    border-bottom: 1px solid rgba(232, 128, 26, 0.26);
+    border-radius: 0;
+    color: #f0ede8;
+    background: transparent;
+    font-size: 11px;
+}
+
+.selection-hub-settings-menu .sound-controller {
+    position: static;
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.selection-hub-setting-label {
+    color: #f0ede8;
+}
+
+.selection-hub-environment[hidden],
+.selection-hub-env-panel[hidden] {
+    display: none !important;
+}
+
+/* Any non-"play" tab covers the whole stage, so the roster/team-pick UI
+   underneath doesn't need to be hidden separately -- it's fully obscured. */
+body.hub-view-shop .selectionscroll,
+body.hub-view-shop .selectionpage,
+body.hub-view-missions .selectionscroll,
+body.hub-view-missions .selectionpage,
+body.hub-view-inventory .selectionscroll,
+body.hub-view-inventory .selectionpage,
+body.hub-view-story .selectionscroll,
+body.hub-view-story .selectionpage {
+    display: none;
+}
+
+.selection-hub-environment {
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 36px;
+    z-index: 12;
+    width: 100%;
+    height: calc(100% - 36px);
+    box-sizing: border-box;
+    overflow: hidden;
+    color: #f0ede8;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+}
+
+.game-remaster .selection-hub-environment {
+    left: 42px;
+    top: 76px;
+    width: 1016px;
+    height: 688px;
+}
+
+.selection-hub-env-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px 14px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 14% 8%, rgba(232, 128, 26, 0.16), transparent 34%),
+        radial-gradient(ellipse at 86% 4%, rgba(44, 156, 219, 0.08), transparent 32%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 42%, #000000 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.68);
+}
+
+.game-remaster .selection-hub-env-panel {
+    padding: 22px 24px 24px;
+}
+
+.selection-hub-env-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+}
+
+.selection-hub-env-header h1 {
+    margin: 0 0 -4px;
+    color: #e8801a;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.game-remaster .selection-hub-env-header h1 {
+    margin: 0 0 -8px;
+    font-size: 54px;
+}
+
+.selection-hub-env-header p {
+    margin: 6px 0 0;
+    color: #a36bff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.game-remaster .selection-hub-env-header p {
+    margin: 9px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+}
+
+.selection-hub-env-close {
+    flex: 0 0 auto;
+    min-width: 90px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid rgba(232, 128, 26, 0.42);
+    border-radius: 4px;
+    color: #f0ede8;
+    background: rgba(232, 128, 26, 0.12);
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.game-remaster .selection-hub-env-close {
+    min-width: 116px;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 11px;
+    letter-spacing: 0.07em;
+}
+
+.selection-hub-env-close:hover {
+    color: #05070e;
+    background: #e8801a;
+}
+
+.selection-hub-env-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    min-height: 36px;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.game-remaster .selection-hub-env-toolbar {
+    gap: 11px;
+    min-height: 52px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+}
+
+.selection-hub-env-status {
+    color: #c8c4bc;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.selection-hub-rank {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    color: #c8c4bc;
+    background: transparent;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.selection-hub-rank:hover,
+.selection-hub-rank.active {
+    color: #ffffff;
+    border-color: rgba(124, 77, 255, 0.72);
+    background: rgba(124, 77, 255, 0.14);
+}
+
+.selection-hub-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    color: #c8c4bc;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.selection-hub-search input {
+    width: 188px;
+    height: 30px;
+    padding: 0 6px;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+    outline: 0;
+    color: #f0ede8;
+    background: transparent;
+    font: inherit;
+    font-size: 11px;
+    text-transform: none;
+}
+
+.selection-hub-search input:focus {
+    border-bottom-color: #a36bff;
+}
+
+.selection-hub-shop-grid,
+.selection-hub-mission-grid,
+.selection-hub-inventory-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    align-content: start;
+    gap: 14px 12px;
+    padding: 14px;
+    box-sizing: border-box;
+    color: #1b2330;
+    background: #faf8f3;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.game-remaster .selection-hub-shop-grid,
+.game-remaster .selection-hub-mission-grid,
+.game-remaster .selection-hub-inventory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+    gap: 22px 18px;
+    padding: 22px;
+}
+
+.selection-hub-env-empty {
+    grid-column: 1 / -1;
+    padding: 54px 18px;
+    color: #69707c;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.selection-hub-shop-card,
+.selection-hub-mission-card,
+.selection-hub-inventory-card {
+    display: block;
+    color: #1b2330;
+    text-decoration: none;
+}
+
+.selection-hub-shop-face,
+.selection-hub-mission-art {
+    position: relative;
+    overflow: hidden;
+    background: #111111;
+    border: 1px solid rgba(27, 35, 48, 0.16);
+}
+
+.selection-hub-shop-face {
+    width: 84px;
+    height: 84px;
+    margin-bottom: 10px;
+}
+
+.selection-hub-shop-face img,
+.selection-hub-mission-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.selection-hub-shop-name,
+.selection-hub-mission-name {
+    color: #1b2330;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.selection-hub-shop-price {
+    margin: 8px 0 10px;
+    color: #4c5562;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.selection-hub-shop-buy {
+    width: 100%;
+    height: 31px;
+    border: 0;
+    color: #05070e;
+    background: #e8801a;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.selection-hub-shop-buy:disabled {
+    color: #8a8680;
+    background: #ebe5d7;
+    cursor: default;
+}
+
+.selection-hub-mission-level {
+    color: #1f7a3f;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.selection-hub-mission-section {
+    margin: 5px 0 8px;
+    color: #69707c;
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.2;
+    text-transform: none;
+}
+
+.selection-hub-mission-art {
+    aspect-ratio: 5 / 4;
+}
+
+.selection-hub-mission-card:hover .selection-hub-mission-art {
+    border-color: #e8801a;
+}
+
+.selection-hub-mission-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 28px 10px 10px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.92));
+}
+
+.selection-hub-mission-feature {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.18;
+}
+
+.selection-hub-mission-rankline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.selection-hub-mission-rank {
+    color: #cdc9c2;
+    font-size: 10px;
+}
+
+.selection-hub-status-pill {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #cdfbd9;
+    background: #1f7a3f;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.selection-hub-status-pill.locked {
+    color: #ffffff;
+    background: #d52235;
+}
+
+.selection-hub-status-pill.completed {
+    color: #ffffff;
+    background: #69707c;
+}
+
+.selection-hub-mission-view {
+    margin-top: 8px;
+    color: #4c5562;
+    text-align: right;
+    font-size: 11px;
+    font-style: italic;
+    text-transform: none;
+}
+
+.selection-hub-inventory-card {
+    min-height: 148px;
+    padding: 18px;
+    box-sizing: border-box;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    background: #fffdf8;
+}
+
+.selection-hub-inventory-card span {
+    display: block;
+    color: #69707c;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.selection-hub-inventory-card strong {
+    display: block;
+    margin-top: 10px;
+    color: #1b2330;
+    font-size: 18px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+/* Story tab: episode-guide list (built in, no navigation away from the game
+   screen) -- a light "sheet" scrolling inside the dark hub panel, mirroring
+   how the shop/missions grids already sit on the panel's dark background. */
+.selection-hub-story-list[hidden],
+.selection-hub-story-briefing[hidden] {
+    display: none !important;
+}
+
+.selection-hub-story-list {
+    flex: 0 1 auto;
+    max-height: 100%;
+    min-height: 0;
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 16px;
+    color: #1b2330;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    background: #faf8f3;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.game-remaster .selection-hub-story-list {
+    padding: 22px;
+}
+
+.selection-hub-story-chapter {
+    margin-bottom: 6px;
+}
+
+.selection-hub-story-chapter-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 6px 10px;
+    border-bottom: 2px solid rgba(232, 128, 26, 0.35);
+}
+
+.selection-hub-story-chapter-title {
+    margin: 0;
+    color: #1b2330;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.selection-hub-story-chapter-progress {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #8a8680;
+    white-space: nowrap;
+}
+
+.selection-hub-story-row {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 6px;
+    border-bottom: 1px solid rgba(27, 35, 48, 0.08);
+    color: #1b2330;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.12s ease;
+}
+
+.selection-hub-story-row:last-child {
+    border-bottom: 0;
+}
+
+.selection-hub-story-row:hover {
+    background: rgba(124, 77, 255, 0.08);
+}
+
+.selection-hub-story-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #111;
+    border: 1px solid rgba(27, 35, 48, 0.16);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.selection-hub-story-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+
+.selection-hub-story-title {
+    margin: 0 0 3px;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #1b2330;
+}
+
+.selection-hub-story-meta {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: #69707c;
+}
+
+.game-remaster .selection-hub-story-title {
+    font-size: 14px;
+}
+
+/* Inline briefing sub-view: replaces the list within the same panel when a
+   battle is selected -- no page navigation happens here at all. */
+.selection-hub-story-briefing {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 0 1 auto;
+    max-height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 20px;
+    overflow: auto;
+    color: #1b2330;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    background: #faf8f3;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.selection-hub-story-back {
+    align-self: flex-start;
+    border: 0;
+    background: none;
+    color: #4c5562;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0;
+}
+
+.selection-hub-story-back:hover {
+    color: #7c4dff;
+}
+
+.selection-hub-story-briefing-title {
+    margin: 2px 0 0;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #1b2330;
+}
+
+.selection-hub-story-briefing-line {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    text-transform: none;
+    color: #4c5562;
+}
+
+.selection-hub-story-briefing-line strong {
+    color: #1b2330;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 10px;
+}
+
+.selection-hub-story-team-label {
+    margin: 8px 0 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #69707c;
+}
+
+.selection-hub-story-team-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.selection-hub-story-team-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 64px;
+}
+
+.selection-hub-story-team-portrait {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(27, 35, 48, 0.18);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+    background: #111;
+}
+
+.selection-hub-story-team-name {
+    font-size: 9px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #4c5562;
+    line-height: 1.25;
+}
+
+.selection-hub-story-actions {
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(27, 35, 48, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.selection-hub-story-begin {
+    height: 36px;
+    padding: 0 24px;
+    border: 0;
+    color: #05070e;
+    background: linear-gradient(180deg, #ffae42, #e8801a);
+    box-shadow: 0 3px 8px rgba(232, 128, 26, 0.35);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.selection-hub-story-begin:hover:not(:disabled) {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+}
+
+.selection-hub-story-begin:disabled {
+    color: #8a8680;
+    background: #ebe5d7;
+    box-shadow: none;
+    cursor: default;
+}
+
+.selection-hub-story-status {
+    font-size: 11px;
+    color: #69707c;
+}
+
+.selection-hub-story-status.error {
+    color: #d52235;
+}
+
+.game-remaster .skillviewer {
+    top: -396px;
+}
+
+.game-remaster .button-container {
+    top: -76px;
+}
+
 body {
     font-family: 'Franklin', sans-serif;
     margin: 0;
     padding: 0;
     text-transform: uppercase;
+}
+
+body.selection-client-page {
+    min-width: var(--game-stage-w);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000000;
+}
+
+.selection-client-page .background {
+    flex: 0 0 auto;
+}
+
+.remaster-preview-toggle {
+    position: fixed;
+    top: 34px;
+    right: 12px;
+    z-index: 10000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    color: #f9e6b0;
+    background: rgba(0, 0, 0, 0.68);
+    border: 1px solid rgba(249, 190, 86, 0.55);
+    border-radius: 4px;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remaster-preview-toggle input {
+    margin: 0;
+    accent-color: var(--na-crimson);
 }
 
 body.custom-game-cursor,
@@ -31,9 +1578,9 @@ h1, h2, h3 {
 }
 
 .background {
-    background-image: url('selectionbg.png');
-    width: 770px;
-    height: 560px;
+    background-image: var(--selection-bg-image);
+    width: var(--game-stage-w);
+    height: var(--game-stage-h);
     position: relative;
 }
 
@@ -48,7 +1595,41 @@ h1, h2, h3 {
 
 .sound-volume {
     width: 88px;
-    accent-color: #c41e3a;
+    accent-color: var(--na-crimson);
+}
+
+/* Superseded everywhere by the hub nav's Shop tab. */
+.shop-icon {
+    display: none;
+}
+
+.shop-icon:hover {
+    background: rgba(0, 0, 0, 0.82);
+    box-shadow: 0 0 0 2px rgba(249, 190, 86, 0.35), 0 4px 12px rgba(0, 0, 0, 0.4);
+    transform: translateY(-1px) scale(1.04);
+}
+
+.shop-icon:active {
+    transform: scale(0.96);
+}
+
+.shop-icon-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #ffe6a8, #ffb84d 55%, var(--na-crimson) 100%);
+    color: #4a2a05;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.shop-icon-balance {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .ingame-sound-controller {
@@ -63,7 +1644,7 @@ h1, h2, h3 {
 
 .ingame-sound-volume {
     width: 88px;
-    accent-color: #c41e3a;
+    accent-color: var(--na-crimson);
 }
 
 .login {
@@ -115,9 +1696,9 @@ h1, h2, h3 {
     position: absolute;
     top: 120px;
     left: 100px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -134,9 +1715,9 @@ h1, h2, h3 {
     position: absolute;
     top: 230px;
     left: 120px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -152,9 +1733,9 @@ h1, h2, h3 {
     position: absolute;
     top: 230px;
     left: 230px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -180,7 +1761,7 @@ h1, h2, h3 {
 .login-status {
     flex-basis: 100%;
     font-size: 16px;
-    color: #c41e3a;
+    color: var(--na-crimson);
     min-height: 18px;
     margin-top: 6px;
     text-align: center
@@ -230,12 +1811,14 @@ h1, h2, h3 {
 .slot-item {
     width: 50px;
     height: 50px;
-    background-color: #d4c9a8;
-    border: 1px solid #8b7d5c;
+    background-color: var(--na-scroll);
+    border: 1px solid #2d1507;
     box-sizing: border-box;
     cursor: grab;
     user-select: none;
     touch-action: none;
+    box-shadow: 0 2px 4px rgba(45, 21, 7, 0.35);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 
 .slot-image {
@@ -246,6 +1829,12 @@ h1, h2, h3 {
     cursor: grab;
     user-select: none;
     touch-action: none;
+}
+
+.slot-item:hover {
+    border-color: #000000;
+    box-shadow: 0 4px 8px rgba(45, 21, 7, 0.45);
+    transform: translateY(-1px);
 }
 
 .slot-image.drag-hidden {
@@ -268,8 +1857,9 @@ text-transform: uppercase;
 .player-avatar {
     width: 75px;
     height: 75px;
-    border: 1px solid #000000;
+    border: 2px solid #000000;
     margin-right: 10px;
+    box-shadow: 0 3px 6px rgba(45, 21, 7, 0.4);
 }
 
 .player-info {
@@ -309,8 +1899,8 @@ text-transform: uppercase;
 .selected-character-slot {
     width: 50px;
     height: 50px;
-    background-color: #c4b896;
-    border: 1px solid #8b7d5c;
+    background-color: var(--na-scroll-2);
+    border: 1px solid #2d1507;
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -323,11 +1913,18 @@ text-transform: uppercase;
     bottom: 140px;
     left: 480px;
     cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    box-shadow: 0 2px 4px rgba(45, 21, 7, 0.35);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.selected-character-slot:hover {
+    border-color: #000000;
+    box-shadow: 0 4px 8px rgba(45, 21, 7, 0.45);
+    transform: translateY(-1px);
 }
 
 .selected-character-slot.drag-over {
-    box-shadow: 0 0 0 2px #c41e3a inset, 0 0 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 2px var(--na-crimson) inset, 0 0 6px rgba(0, 0, 0, 0.3);
     transform: translateY(-2px);
 }
 
@@ -432,12 +2029,36 @@ text-transform: uppercase;
 .skill-header {
     display: flex;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .character-info {
     display: flex;
     flex-direction: column;
+}
+
+.character-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.character-bio {
+    display: none;
+}
+
+.game-remaster .character-bio {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    text-transform: uppercase;
+    color: #3a2a10;
+    margin: 0;
+    max-height: 65px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 21, 7, 0.35) transparent;
 }
 
 .character-name {
@@ -464,7 +2085,7 @@ text-transform: uppercase;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    padding-bottom: 2px;
+    padding: 6px 6px 6px;
     scrollbar-width: thin;
     scrollbar-color: rgba(45, 21, 7, 0.65) transparent;
     transform: scaleY(-1);
@@ -497,39 +2118,120 @@ text-transform: uppercase;
     width: 75px;
     height: 75px;
     border: 1px solid #000;
+    cursor: pointer;
+    transition: outline 0.1s, box-shadow 0.1s;
 }
 
-.skill-title-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+.skill-image.active {
+    outline: 2px solid var(--na-crimson);
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.25);
+}
+
+/* ── Skill Detail Card (selection screen modern panel) ─────── */
+
+.skill-detail-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.skill-detail-head {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 9px;
+    align-items: start;
+    margin-bottom: 6px;
+}
+
+.skill-detail-image {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid rgba(27, 35, 48, 0.22);
+    border-radius: 5px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.22);
+    background: rgba(27, 35, 48, 0.06);
+}
+
+.skill-detail-kicker {
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 1px;
 }
 
 .skill-name {
-    font-size: 16px;
-    color: #c41e3a;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--na-crimson);
     text-transform: uppercase;
+    line-height: 1.1;
+    margin: 1px 0 3px;
+}
+
+.skill-description {
+    font-size: 10px;
+    line-height: 1.4;
+    color: #2a2a2a;
+    text-transform: none;
+    max-height: 40px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 21, 7, 0.4) transparent;
+    margin: 0;
+}
+
+/* ── Skill Detail Meta rail ─────────────────────────────────── */
+
+.skill-detail-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    background: #1b2330;
+    border-radius: 999px;
+    padding: 5px 6px;
+    gap: 0;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.sdm-seg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sdm-seg--last {
+    border-right: none;
+}
+
+.sdm-lbl {
+    color: #99a0ad;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .energy-bar {
     display: flex;
     align-items: center;
-    gap: 5px;
-}
-
-.energy-label {
-    font-size: 10px;
-        color: #666;
-    text-transform: uppercase;
+    gap: 3px;
 }
 
 .energy-pip {
-    width: 8px;
-    height: 8px;
-    border: 1px solid #000;
-    background-color: #fff;
-    margin-left: -1px;
+    width: 9px;
+    height: 9px;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.15);
+    display: inline-block;
 }
 
 .energy-pip.filled {
@@ -537,63 +2239,49 @@ text-transform: uppercase;
 }
 
 .energy-pip.filled.energy-ninjutsu {
-    background-color: #56b0ff;
+    background-color: var(--na-chakra-blue);
 }
 
 .energy-pip.filled.energy-bloodline {
-    background-color: #e74c3c;
+    background-color: var(--na-danger);
 }
 
 .energy-pip.filled.energy-random {
-    background-color: #000000;
+    background-color: #888;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .energy-pip.filled.energy-genjutsu {
-    background-color: #ffffff;
+    background-color: #e8e8e8;
+    border-color: rgba(0, 0, 0, 0.25);
 }
 
 .energy-pip.filled.energy-taijutsu {
     background-color: #0fec7a;
 }
 
-.skill-description {
-    font-size: 12px;
-    height: 60px;
-    margin-toP: -7px;
-    text-transform: uppercase;
-    overflow: auto;
-}
-
-.skill-footer {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    text-transform: uppercase;
+.energy-none {
+    color: #99a0ad;
+    font-style: italic;
 }
 
 .skill-classes {
     display: flex;
-    gap: 5px;
-}
-
-.classes-label,
-.cooldown-label {
-        color: #666;
+    flex-wrap: wrap;
+    gap: 3px;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
 }
 
 .class-type {
-    color: #666;
-    margin-left: -2px;
-}
-
-.skill-cooldown {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    color: #fff;
 }
 
 .cooldown-value {
-    color: #666;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
 }
 
 .cooldown-icon {
@@ -613,8 +2301,8 @@ text-transform: uppercase;
     display: none;
     align-items: center;
     justify-content: center;
-        width: 770px;
-    height: 560px;
+    width: var(--game-stage-w);
+    height: var(--game-stage-h);
 }
 
 .searching-backdrop.visible {
@@ -629,8 +2317,8 @@ text-transform: uppercase;
     display: none;
     align-items: center;
     justify-content: center;
-    width: 770px;
-    height: 560px;
+    width: var(--game-stage-w);
+    height: var(--game-stage-h);
 }
 
 .private-match-backdrop.visible {
@@ -675,7 +2363,7 @@ text-transform: uppercase;
     width: 295px;
     min-height: 18px;
     margin: 0;
-    color: #c41e3a;
+    color: var(--na-crimson);
     font-size: 12px;
     text-align: center;
     text-transform: none;
@@ -685,9 +2373,9 @@ text-transform: uppercase;
 .private-match-cancel {
     position: absolute;
     top: 215px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -719,13 +2407,14 @@ text-transform: uppercase;
 
 .searching {
     margin-top: 50px;
+    margin-bottom: 0;
     margin-left: 125px;
     width: 200px;
     text-align: center;
 }
 
 .sasukesearch {
-    margin-left: 125px
+    margin-left: 125px;
 }
 
 .sharingan {
@@ -748,9 +2437,9 @@ text-transform: uppercase;
     text-transform: uppercase;
     top: 220px;
     left: 175px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -769,10 +2458,123 @@ text-transform: uppercase;
 }
 
 .backgroundingame {
-    background-image: url('ingamebg.png');
-    width: 770px;
-    height: 560px;
+    background-image: var(--ingame-bg-image);
+    width: var(--game-stage-w);
+    height: var(--game-stage-h);
     position: relative;
+}
+
+/* Story Mode cinematic dialogue: a scrim + bottom-anchored dialogue box that
+   plays over the already-rendered battlefield (intro before the fight is
+   playable, outro after it ends) instead of navigating to a separate page. */
+.story-dialogue-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 6500;
+    background: rgba(5, 4, 10, 0.55);
+    align-items: flex-end;
+    justify-content: center;
+    padding: 20px;
+    pointer-events: none;
+}
+
+.story-dialogue-overlay.visible {
+    display: flex;
+    pointer-events: auto;
+}
+
+.story-dialogue-box {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(10, 8, 16, 0.95);
+    border: 2px solid #a36bff;
+    border-radius: 10px;
+    padding: 16px 18px;
+    color: #f0ede8;
+    font-family: 'Libre Franklin', Arial, sans-serif;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.story-dialogue-box-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.story-dialogue-portrait {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex: 0 0 auto;
+    background: #111;
+}
+
+.story-dialogue-speaker {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #a36bff;
+    margin: 0 0 4px;
+}
+
+.story-dialogue-text {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.story-dialogue-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.story-dialogue-progress {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-right: auto;
+}
+
+.story-dialogue-btn {
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid #a36bff;
+    background: #a36bff;
+    color: #150c26;
+    cursor: pointer;
+}
+
+.story-dialogue-btn:hover {
+    filter: brightness(1.08);
+}
+
+.game-remaster .story-dialogue-box {
+    max-width: 620px;
+    padding: 22px 26px;
+}
+
+.game-remaster .story-dialogue-portrait {
+    width: 68px;
+    height: 68px;
+}
+
+.game-remaster .story-dialogue-speaker {
+    font-size: 13px;
+}
+
+.game-remaster .story-dialogue-text {
+    font-size: 15px;
 }
 
 .game-hud {
@@ -821,7 +2623,7 @@ text-transform: uppercase;
 
 
 .player-name.red {
-    color: #c41e3a;
+    color: var(--na-crimson);
 }
 
 .player-status {
@@ -879,7 +2681,7 @@ text-transform: uppercase;
 }
 
 .chakra-box.red {
-    background-color: #e74c3c;
+    background-color: var(--na-danger);
 }
 
 .chakra-box.blue {
@@ -930,7 +2732,7 @@ text-transform: uppercase;
 .timer-bar {
     width: 191px;
     height: 100%;
-    background-color: #c41e3a;
+    background-color: var(--na-crimson);
     position: absolute;
     top: 0;
     left: 0;
@@ -940,7 +2742,7 @@ text-transform: uppercase;
     width: 75px;
     position: relative;
     z-index: 1;
-    
+
 }
 
 .character-face {
@@ -948,6 +2750,43 @@ text-transform: uppercase;
     height: 75px;
     border: 1px solid #000;
     display: block;
+}
+
+.dynamic-queued-target-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border: 2px solid rgba(255, 200, 0, 0.98) !important;
+    border-radius: 3px;
+    box-shadow: 0 0 6px rgba(255, 200, 0, 0.85);
+}
+
+@keyframes hit-flash-anim {
+    0% {
+        filter: brightness(1) saturate(1);
+        transform: translateX(0);
+    }
+    12% {
+        filter: brightness(2.4) saturate(0.3) drop-shadow(0 0 10px rgba(255, 50, 50, 0.9));
+        transform: translateX(-4px);
+    }
+    30% {
+        transform: translateX(4px);
+    }
+    48% {
+        transform: translateX(-3px);
+    }
+    66% {
+        transform: translateX(2px);
+        filter: brightness(1.4) saturate(0.7);
+    }
+    100% {
+        filter: brightness(1) saturate(1);
+        transform: translateX(0);
+    }
+}
+
+.character-face.hit-flash {
+    animation: hit-flash-anim 1.1s ease-out;
 }
 
 .character-card {
@@ -961,22 +2800,26 @@ text-transform: uppercase;
     left: 1px;
     width: 75px;
     height: 75px;
-    background: rgba(255, 215, 0, 0.35);
+    background: rgba(255, 215, 0, 0.42);
+    border: 3px solid rgba(255, 230, 120, 0.95);
     pointer-events: none;
-    animation: target-blink 1.2s ease-in-out infinite;
+    animation: target-blink 1s ease-in-out infinite;
     box-sizing: border-box;
     z-index: 2;
 }
 
 @keyframes target-blink {
     0% {
-        opacity: 0.2;
+        opacity: 0.5;
+        box-shadow: 0 0 6px 2px rgba(255, 215, 0, 0.55);
     }
     50% {
-        opacity: 0.9;
+        opacity: 1;
+        box-shadow: 0 0 18px 6px rgba(255, 215, 0, 0.95);
     }
     100% {
-        opacity: 0.2;
+        opacity: 0.5;
+        box-shadow: 0 0 6px 2px rgba(255, 215, 0, 0.55);
     }
 }
 
@@ -988,6 +2831,26 @@ text-transform: uppercase;
     background-color: #ffffff;
     border: 1px solid #000;
     box-sizing: content-box;
+}
+
+@keyframes health-drop-flash-anim {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 30, 30, 0);
+        outline: 2px solid rgba(255, 30, 30, 0);
+    }
+    20% {
+        box-shadow: 0 0 12px 4px rgba(255, 30, 30, 0.95);
+        outline: 2px solid rgba(255, 30, 30, 0.9);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 30, 30, 0);
+        outline: 2px solid rgba(255, 30, 30, 0);
+    }
+}
+
+.health-bar-container.health-drop-flash {
+    animation: health-drop-flash-anim 1.1s ease-out;
+    z-index: 3;
 }
 
 .health-bar {
@@ -1110,6 +2973,8 @@ text-transform: uppercase;
     transform: scaleX(-1);
 }
 
+/* ── Battle screen skill info panel ─────────────────────────── */
+
 .skillinformation {
     background-image: url('ingamebottomscroll.png');
     width: 523px;
@@ -1117,84 +2982,181 @@ text-transform: uppercase;
     position: absolute;
     left: 247px;
     top: 426px;
+    box-sizing: border-box;
+    /* top/bottom padding calibrated to ingamebottomscroll.png's tan interior */
+    padding: 44px 18px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: 'Franklin', Arial, sans-serif;
+}
+
+.skill-info-head {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    min-height: 0;
 }
 
 .skillviewimage {
-    width: 75px;
-    height: 75px;
-    border: 1px solid black;
-    top: 28px;
-    left: 32px;
-    position: relative;
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
+    object-fit: cover;
+    border: 1px solid rgba(27, 35, 48, 0.22);
+    border-radius: 5px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(27, 35, 48, 0.06);
+    position: static;
+    top: auto;
+    left: auto;
+}
+
+.skill-info-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-info-kicker {
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #888;
+    line-height: 1;
+    margin-bottom: 0;
 }
 
 .ingameskillname {
-    color: #cb0400;
-    position: absolute;
-    left: 118px;
-    top: 9px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--na-crimson);
+    text-transform: uppercase;
+    line-height: 1.15;
+    margin: 1px 0 2px;
+    position: static;
+    left: auto;
+    top: auto;
 }
 
 .ingameskilldescription {
-        position: absolute;
-    left: 118px;
-    top: 30px;
-    font-size: 12px;
-    max-height: 50px;
+    font-size: 9px;
+    line-height: 1.38;
+    color: #2a2a2a;
+    flex: 1;
     overflow-y: auto;
+    max-height: 34px;
+    margin: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 21, 7, 0.4) transparent;
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
 }
 
+/* ── Battle skill info meta rail ────────────────────────────── */
+
+.skillinformation .skill-info-kicker { display: none; }
+
+.skill-info-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    background: #1b2330;
+    border-radius: 999px;
+    padding: 2px 6px;
+    gap: 0;
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.sim-seg {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 7px;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sim-seg:last-child,
+.ingameclasspicker {
+    border-right: none;
+}
+
+.sim-lbl {
+    color: #99a0ad;
+    font-weight: 700;
+    white-space: nowrap;
+    font-size: 8px;
+}
 
 .energytext {
-    position: absolute;
     display: flex;
     align-items: center;
     gap: 3px;
-    right: 20px;
-    top: 27px;
-    font-size: 10px;
+    position: static;
+    right: auto;
+    top: auto;
+    font-size: 8px;
 }
 
 .energytext .chakra-box {
-    margin-top: -2px;
+    margin-top: 0;
 }
 
-
 .ingameclasses {
-        position: absolute;
-    left: 118px;
-    top:88px;
-        font-size: 10px;
+    font-size: 8px;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0;
+    position: static;
+    left: auto;
+    top: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
 }
 
 .ingamecooldown {
-        position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    right: 20px;
-    top: 87px;
-    font-size: 10px;
+    font-size: 8px;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0;
+    position: static;
+    display: block;
+    right: auto;
+    top: auto;
 }
 
 .ingameclasspicker {
-    position: absolute;
-    right: 20px;
-    top: 56px;
-    display: flex;
+    display: none;
     align-items: center;
     gap: 5px;
-    font-size: 10px;
+    padding: 0 7px;
+    position: static;
+    right: auto;
+    top: auto;
+    font-size: 8px;
 }
 
 .ingame-class-picker-field {
-    background: #faedcd;
-    border: 1px solid #000000;
-    border-radius: 0;
-    height: 18px;
-    font-size: 10px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 3px;
+    height: 16px;
+    font-size: 8px;
     font-family: 'Franklin', Arial, sans-serif;
-    color: #000000;
+    color: #fff;
 }
 
 .class-choice-popup {
@@ -1219,7 +3181,7 @@ text-transform: uppercase;
     position:absolute;
     left: 300px;
     top: 200px;
-    
+
 }
 
 
@@ -1360,7 +3322,7 @@ text-transform: uppercase;
 }
 
 .chakra-box.red {
-    background-color: #e74c3c;
+    background-color: var(--na-danger);
 }
 
 .chakra-box.blue {
@@ -1406,7 +3368,7 @@ text-transform: uppercase;
 .minus-button,
 .plus-button {
     background-color: transparent;
-    border: none;      
+    border: none;
     color: #000;
     font-size: 18px;
     cursor: pointer;
@@ -1493,7 +3455,7 @@ text-transform: uppercase;
 }
 
 .exchange_chakra_choice.selected {
-    border-color: #c41e3a;
+    border-color: var(--na-crimson);
 }
 
 .exchange_chakra_subtitle {
@@ -1552,9 +3514,9 @@ text-transform: uppercase;
     position: absolute;
     top: 230px;
     left: 120px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -1570,9 +3532,9 @@ text-transform: uppercase;
     position: absolute;
     top: 230px;
     left: 230px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -1637,9 +3599,9 @@ text-transform: uppercase;
     position: absolute;
     top: 230px;
     left: 120px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -1655,9 +3617,9 @@ text-transform: uppercase;
     position: absolute;
     top: 230px;
     left: 230px;
-    background-color: #fbe9b8;
+    background-color: var(--na-parchment);
     border: 1px solid #000000;
-    color: #141414;
+    color: var(--na-ink);
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -1899,4 +3861,909 @@ text-transform: uppercase;
     top: 17px;
     z-index: 3;
     transform: scaleX(-1);
+}
+
+/* ============================================================
+   INGAME CLIENT PAGE — BODY CENTERING
+   Applies in both live and remaster modes to center the
+   fixed-size battle stage in the browser/popup window.
+   min-width resolves via --game-stage-w: 770px live, 1100px
+   when .game-remaster is also on the body element.
+   ============================================================ */
+body.ingame-client-page {
+    min-width: var(--game-stage-w);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000000;
+}
+
+body.ingame-client-page .backgroundingame {
+    flex: 0 0 auto;
+}
+
+/* ============================================================
+   IN-GAME BATTLE REMASTER LAYOUT
+   Disabled by default. Active only under .game-remaster.
+
+   Phase 6A: First-pass visual scaffolding for the 1100×800
+   battle stage. All rules are scoped under .game-remaster and
+   do not affect the live/default 770×560 battle client.
+
+   JS-sensitive areas deferred to Phase 6B/6C:
+   - Timer bar max-width constant (script.js)
+   - Health bar max-width constant (script.js)
+   - Queue animation getBoundingClientRect() pixel offsets
+   - Win vs. lose portrait src swap (dynamic JS assignment)
+   - Target overlay create/position (JS-driven)
+   - Tooltip screen-edge clamping (JS clientX/clientY logic)
+
+   Manual testing:
+     Use the Remaster Mode toggle in ingame.html, or in DevTools:
+       document.body.classList.add("game-remaster")
+   ============================================================ */
+
+/* --- HUD (top bar) ---
+   Scale: 1100/770 ≈ 1.43. Flex layout auto-spreads the three
+   HUD sections; only explicitly-positioned children need updates.
+*/
+.game-remaster .game-hud {
+    position: relative;
+    height: 112px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px minmax(0, 1fr);
+    align-items: start;
+    padding: 8px 44px 0;
+    box-sizing: border-box;
+    z-index: 8;
+}
+
+.game-remaster .player-left {
+    position: static;
+    justify-self: start;
+    width: 260px;
+    margin-left: 60px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 68px;
+    align-items: start;
+    gap: 12px;
+}
+
+.game-remaster .player-right {
+    position: static;
+    justify-self: end;
+    width: 260px;
+    margin-right: 60px;
+    max-width: none;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+}
+
+.game-remaster .player-avatar-left {
+    left: auto;
+    position: static;
+}
+
+.game-remaster .player-avatar-left,
+.game-remaster .player-avatar-right {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+}
+
+.game-remaster .player-info,
+.game-remaster .player-inforight {
+    position: static;
+    left: auto;
+    top: auto;
+    min-width: 0;
+    width: 136px;
+    max-width: 136px;
+    padding-top: 17px;
+    align-items: stretch;
+}
+
+.game-remaster .player-info {
+    text-align: right;
+    justify-self: end;
+}
+
+.game-remaster .player-inforight {
+    text-align: left;
+    justify-self: start;
+}
+
+.game-remaster .player-name {
+    position: static;
+    left: auto;
+    top: auto;
+    display: block;
+    width: 100%;
+    font-size: 18px;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.game-remaster .player-status {
+    position: static;
+    left: auto;
+    top: auto;
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+    font-size: 14px;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+}
+
+.game-remaster .player-info .player-name,
+.game-remaster .player-info .player-status {
+    text-align: right;
+}
+
+.game-remaster .player-inforight .player-name,
+.game-remaster .player-inforight .player-status {
+    text-align: left;
+}
+
+.game-remaster .ready-section {
+    position: static;
+    justify-self: center;
+    width: 330px;
+    padding-top: 15px;
+    text-align: center;
+}
+
+/* Timer track: CSS width scaled to 1.43×; the JS timer-bar
+   width constant (191px) is out of scope until Phase 6B. */
+.game-remaster .timer-track {
+    width: 273px;
+    height: 14px;
+    margin: 0 auto;
+}
+
+.game-remaster .timer-bar {
+    width: 273px;
+}
+
+.game-remaster .ready-text {
+    font-size: 14px;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.game-remaster .chakra-display {
+    gap: 13px;
+    margin: 5px 0 0;
+}
+
+.game-remaster .chakra-item {
+    gap: 4px;
+}
+
+.game-remaster .chakra-count {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.game-remaster .exchange-label {
+    position: static;
+    margin-top: 3px;
+    font-size: 10px;
+    line-height: 1;
+}
+
+/* Sound slider: overlay the .sound scroll div exactly, fill tan area */
+.game-remaster .ingame-sound-controller {
+    top: 686px;
+    left: 43px;
+    width: 170px;
+    height: 66px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 38px;
+    padding-right: 14px;
+}
+
+.game-remaster .ingame-sound-volume {
+    width: 100%;
+}
+
+/* --- Character faces, health bars, cards ---
+   Target overlay matches face size for CSS-only coverage.
+   Health bar CSS max-width scaled; JS HP calculation constant
+   (75px full-width) is deferred to Phase 6B for sync.
+*/
+.game-remaster .character-face {
+    width: var(--remaster-character-face);
+    height: var(--remaster-character-face);
+}
+
+.game-remaster .character-card {
+    width: var(--remaster-character-face);
+    margin-left: 46px;
+    margin-top: -40px;
+    z-index: 10;
+}
+
+.game-remaster .target-overlay {
+    width: var(--remaster-character-face);
+    height: var(--remaster-character-face);
+}
+
+.game-remaster .health-bar-container {
+    width: var(--remaster-character-face);
+    height: 18px;
+}
+
+.game-remaster .health-bar {
+    width: var(--remaster-character-face);
+    height: 18px;
+}
+
+.game-remaster .health-text {
+    width: var(--remaster-character-face);
+    line-height: 18px;
+}
+
+/* Rank hat stays at legacy size; visual tuning deferred to Phase 6B */
+
+/* Status tooltip icons clear the larger 107px character face */
+.game-remaster .skilltooltips {
+    left: 120px;
+}
+
+.game-remaster .status-tooltip-content {
+    left: 120px;
+}
+
+/* --- Player and enemy character columns --- */
+.game-remaster .player-characters {
+    gap: 80px;
+    margin-top: 15px;
+}
+
+.game-remaster .enemy-characters {
+    top: 146px;
+    left: 944px;
+    gap: 76px;
+}
+
+/* --- Skill holder, scroll frame, and icons ---
+   Queue animation uses getBoundingClientRect() in script.js.
+   Pixel offsets will need a Phase 6B audit after layout is stable.
+   not-turn clip values are proportionally scaled; exact queue
+   hide position is a Phase 6B item.
+*/
+.game-remaster .skillholder {
+    top: 27px;
+    left: 71px;
+}
+
+.game-remaster .ingamescrollbehind {
+    content: var(--battle-scroll-behind-remaster-image);
+    width: 36px;
+    height: 126px;
+}
+
+.game-remaster .skillscrollingame {
+    background-image: var(--battle-skill-row-remaster-image);
+    width: var(--battle-skill-row-remaster-w);
+    height: var(--battle-skill-row-remaster-h);
+    left: 34px;
+    top: 6px;
+}
+
+.game-remaster .skillscrollingame.not-turn {
+    clip-path: inset(0 0 0 114px);
+    left: -80px;
+}
+
+.game-remaster .skillqueue {
+    width: 80px;
+    height: 80px;
+    top: 16px;
+    left: 28px;
+}
+
+.game-remaster .skillimage {
+    width: var(--remaster-skill-icon);
+    height: var(--remaster-skill-icon);
+    top: 16px;
+    left: 57px;
+}
+
+/* --- Skill information panel (bottom, right of surrender buttons)
+   left: 352px puts the right edge at 352+748=1100px (stage edge).
+   Horizontally clear of the 260px surrender buttons at left: 43px.
+*/
+.game-remaster .skillinformation {
+    background-image: var(--battle-skill-info-remaster-image);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: var(--battle-skill-info-remaster-w);
+    height: var(--battle-skill-info-remaster-h);
+    left: 355px;
+    top: 606px;
+    padding: 36px 26px 36px 54px;
+    gap: 20px;
+    justify-content: center;
+    z-index: auto;
+}
+
+.game-remaster .skillviewimage {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    position: relative;
+    left: auto;
+    top: auto;
+    z-index: 8;
+}
+
+.game-remaster .skillinformation.profile-summary .skillviewimage {
+    border-color: #000000;
+    border-radius: 0;
+    box-shadow: 0 3px 7px rgba(45, 21, 7, 0.35);
+}
+
+.game-remaster .ingameskillname {
+    font-size: 15px;
+    position: static;
+    left: auto;
+    top: auto;
+}
+
+.game-remaster .ingameskilldescription {
+    font-size: 12px;
+    max-height: 50px;
+    width: auto;
+    position: static;
+    left: auto;
+    top: auto;
+}
+
+.game-remaster .skillinformation.profile-summary .ingameskilldescription {
+    max-height: 56px;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.game-remaster .energytext {
+    font-size: 10px;
+    position: static;
+    right: auto;
+    top: auto;
+}
+
+.game-remaster .ingameclasses {
+    font-size: 10px;
+    max-width: 220px;
+    position: static;
+    left: auto;
+    top: auto;
+}
+
+.game-remaster .ingamecooldown {
+    font-size: 10px;
+    position: static;
+    right: auto;
+    top: auto;
+}
+
+.game-remaster .ingameclasspicker {
+    font-size: 10px;
+    position: static;
+    right: auto;
+    top: auto;
+}
+
+.game-remaster .skill-info-meta {
+    font-size: 10px;
+    padding: 5px 8px;
+    justify-content: space-evenly;
+}
+
+.game-remaster .sim-seg {
+    padding: 0 10px;
+}
+
+.game-remaster .sim-lbl {
+    font-size: 10px;
+}
+
+/* --- Surrender and sound/option buttons ---
+   Positioned in the left strip (43–303px) so they stay clear of
+   the skill info panel that begins at left: 352px.
+*/
+.game-remaster .surrenderbutton {
+    background-image: var(--options-button-remaster-image);
+    width: var(--remaster-small-button-w);
+    height: var(--remaster-small-button-h);
+    left: 43px;
+    top: 613px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 38px;
+    padding-right: 12px;
+    cursor: pointer;
+}
+
+.game-remaster .surrenderbutton span {
+    position: static;
+    left: auto;
+    top: auto;
+    width: 118px;
+    flex: 0 0 118px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.game-remaster .sound {
+    background-image: var(--options-button-remaster-image);
+    width: var(--remaster-small-button-w);
+    height: var(--remaster-small-button-h);
+    left: 43px;
+    top: 686px;
+}
+
+/* --- Decorative render (bottom character art) --- */
+.game-remaster .bottomrender {
+    position: absolute;
+    width: 219px;
+    height: 213px;
+    left: 178px;
+    top: auto;
+    bottom: 0;
+    z-index: 6;
+    pointer-events: none;
+}
+
+.game-remaster .render {
+    content: var(--render-remaster-image);
+    width: 219px;
+}
+
+/* --- Battle-end overlay and panel ---
+   Portrait slot scaled; win.png vs lose.png content swap is done
+   by script.js (src attribute). CSS can't distinguish dynamically
+   set src, so the portrait object-fit scales whichever image JS
+   places. Full remaster portrait swap deferred to Phase 6B.
+*/
+.game-remaster .battle-end-overlay.visible {
+    background: rgba(0, 0, 0, 0.52);
+}
+
+.game-remaster .battle-end-panel {
+    background-image: var(--battle-end-panel-remaster-image);
+    background-size: 100% 100%;
+    width: var(--battle-end-panel-remaster-w);
+    height: var(--battle-end-panel-remaster-h);
+    top: 123px;
+    overflow: hidden;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.22),
+        0 16px 36px rgba(0, 0, 0, 0.28),
+        0 40px 90px rgba(0, 0, 0, 0.32);
+}
+
+.game-remaster .battle-end-portrait {
+    width: 338px;
+    height: 324px;
+    left: 116px;
+    top: 68px;
+    object-fit: cover;
+}
+
+.game-remaster .battle-end-copy {
+    left: 476px;
+    top: 44px;
+    width: 390px;
+}
+
+.game-remaster .battle-end-title {
+    font-size: 63px;
+    margin-left: 0;
+    margin-top: 0;
+}
+
+.game-remaster .battle-end-message {
+    font-size: 16px;
+    margin-left: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.game-remaster .battle-end-continue {
+    font-size: 38px;
+    top: 320px;
+    margin-top: 0;
+}
+
+/* --- Modal panels (chakra end-turn, exchange chakra, surrender confirm) --- */
+.game-remaster .ChakraChooseEndTurn {
+    background: var(--modal-panel-remaster-image) no-repeat center / 100% 100% !important;
+    width: var(--modal-panel-remaster-w);
+    height: var(--modal-panel-remaster-h);
+    --remaster-modal-tan-left: 96px;
+    --remaster-modal-tan-right: 28px;
+    --remaster-modal-content-left: 108px;
+    --remaster-modal-content-right: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    z-index: 500;
+    font-family: 'Franklin', Arial, sans-serif;
+    color: #111111;
+    overflow: visible;
+}
+
+.game-remaster .exchange_chakra {
+    background: var(--modal-panel-remaster-image) no-repeat center / 100% 100% !important;
+    width: var(--modal-panel-remaster-w);
+    height: var(--modal-panel-remaster-h);
+    --remaster-modal-tan-left: 96px;
+    --remaster-modal-tan-right: 28px;
+    --remaster-modal-content-left: 108px;
+    --remaster-modal-content-right: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    z-index: 500;
+    font-family: 'Franklin', Arial, sans-serif;
+    color: #111111;
+    overflow: visible;
+}
+
+.game-remaster .surrender-confirm {
+    background-image: var(--modal-panel-remaster-image);
+    background-size: 100% 100%;
+    width: var(--modal-panel-remaster-w);
+    height: var(--modal-panel-remaster-h);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 0;
+    z-index: 500;
+}
+
+/* Full-viewport dim behind the end-turn/exchange-chakra/surrender modals.
+   A real sibling element (created lazily in script.js), not a box-shadow or
+   pseudo-element of the panel itself -- both of those paint inside the
+   panel's own stacking context and either clip unpredictably at the stage
+   edge or (for a negative z-index ::before) paint on TOP of the panel's own
+   background instead of behind it. This sits at a lower z-index than the
+   panels (500) so it's guaranteed to render underneath them. */
+.game-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 499;
+    pointer-events: none;
+}
+
+.game-remaster .game-modal-backdrop.visible {
+    display: block;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.game-remaster .ChakraChooseEndTurn .chakrachoose {
+    position: absolute;
+    top: 62px;
+    left: var(--remaster-modal-tan-left);
+    right: var(--remaster-modal-tan-right);
+    width: auto;
+    margin: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.18);
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-container {
+    position: absolute;
+    top: 104px;
+    left: var(--remaster-modal-content-left);
+    right: var(--remaster-modal-content-right);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    padding: 0;
+    font-size: 13px;
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-column,
+.game-remaster .ChakraChooseEndTurn .chakra-columnright,
+.game-remaster .exchange_chakra_column {
+    gap: 6px;
+}
+
+.game-remaster .chakra-title {
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.16);
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-row {
+    height: 20px;
+    display: grid;
+    grid-template-columns: 14px minmax(76px, 1fr) 18px auto;
+    gap: 7px;
+    align-items: center;
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-name,
+.game-remaster .ChakraChooseEndTurn .chakra-amount,
+.game-remaster .exchange_chakra_row .chakra-name,
+.game-remaster .exchange_chakra_row .chakra-amount {
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.9), 0 1px 3px rgba(45, 21, 7, 0.14);
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-name {
+    min-width: 0;
+}
+
+.game-remaster .ChakraChooseEndTurn .chakra-buttons {
+    margin-left: 6px;
+    gap: 7px;
+}
+
+.game-remaster .ChakraChooseEndTurn .skillorder {
+    position: absolute;
+    top: 260px;
+    left: 174px;
+    width: 282px;
+    min-height: 58px;
+    justify-content: center;
+    gap: 24px;
+    z-index: 2;
+}
+
+.game-remaster .ChakraChooseEndTurn .skillorder::before {
+    content: "ADJUST SKILL ORDER";
+    position: absolute;
+    top: -32px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.18);
+    pointer-events: none;
+}
+
+.game-remaster .ChakraChooseEndTurn .skillpreview {
+    width: 50px;
+    height: 50px;
+    background: #a7a7a7;
+    border: 1px solid #222222;
+    object-fit: cover;
+}
+
+.game-remaster .ok-buttonendturn,
+.game-remaster .ok-buttonexchange {
+    top: auto;
+    left: 347px;
+    right: auto;
+    bottom: 50px;
+    width: auto;
+    min-width: 152px;
+    height: 34px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 999px;
+    background: #f1bf14;
+    color: #000000;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 10;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+.game-remaster .cancel-buttonendturn,
+.game-remaster .cancel-buttonexchange {
+    top: auto;
+    left: 176px;
+    bottom: 54px;
+    width: auto;
+    min-width: 60px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid #222222;
+    background: transparent;
+    color: #111111;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    z-index: 10;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.16);
+    pointer-events: auto;
+}
+
+.game-remaster .exchange_chakra_title,
+.game-remaster .exchange_chakra_subtitle,
+.game-remaster .exchange_chakra_choices {
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
+}
+
+.game-remaster .exchange_chakra_title {
+    position: absolute;
+    top: 50px;
+    left: var(--remaster-modal-tan-left);
+    right: var(--remaster-modal-tan-right);
+    width: auto;
+    margin: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.18);
+}
+
+.game-remaster .exchange_chakra_choices {
+    position: absolute;
+    top: 90px;
+    left: var(--remaster-modal-tan-left);
+    right: var(--remaster-modal-tan-right);
+    width: auto;
+    display: flex;
+    justify-content: center;
+    gap: 34px;
+    margin: 0;
+}
+
+.game-remaster .exchange_chakra_subtitle {
+    position: absolute;
+    top: 136px;
+    left: var(--remaster-modal-tan-left);
+    right: var(--remaster-modal-tan-right);
+    width: auto;
+    margin: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.18);
+}
+
+.game-remaster .exchange_chakra_container {
+    position: absolute;
+    top: 181px;
+    left: var(--remaster-modal-content-left);
+    right: var(--remaster-modal-content-right);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    font-size: 13px;
+}
+
+.game-remaster .exchange_chakra_row {
+    height: 20px;
+    display: grid;
+    grid-template-columns: 14px minmax(76px, 1fr) 18px auto auto;
+    gap: 7px;
+    align-items: center;
+}
+
+.game-remaster .exchange_chakra_row .chakra-name,
+.game-remaster .exchange_chakra_row .chakra-amount {
+    min-width: 0;
+}
+
+.game-remaster .minus-button,
+.game-remaster .plus-button,
+.game-remaster .exchange_symbol {
+    width: 17px;
+    height: 17px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid #a7aaa6;
+    background: transparent;
+    color: #777777;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 15px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(45, 21, 7, 0.24);
+    position: static;
+}
+
+.game-remaster .plus-button,
+.game-remaster .exchange_symbol:last-child {
+    border-color: #000000;
+    background: #000000;
+    color: #ffffff;
+}
+
+.game-remaster .exchange_chakra_choice {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+}
+
+.game-remaster .exchange_chakra_choice .chakra-box,
+.game-remaster .chakra-box {
+    width: 13px !important;
+    height: 13px !important;
+    border: 0 !important;
+    border-radius: 50%;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(45, 21, 7, 0.35), 0 0 0 1px rgba(255, 248, 210, 0.7);
+}
+
+.game-remaster .chakra-box.white {
+    border: 1px solid #9b9b9b !important;
+}
+
+.game-remaster .exchange_chakra_choice.selected {
+    outline: 0;
+    box-shadow: 0 0 0 2px #111111, 0 1px 3px rgba(45, 21, 7, 0.25);
+}
+
+.game-remaster .surrender-confirm-title {
+    position: absolute;
+    left: 90px;
+    right: 20px;
+    top: 40px;
+    text-align: center;
+}
+
+.game-remaster .surrender-confirm-preview-image {
+    content: var(--surrender-art-remaster-image);
+    width: 275px;
+    height: 179px;
+    top: 90px;
+    left: 178px;
+}
+
+.game-remaster .surrender-confirm-ok {
+    top: 365px;
+    left: 224px;
+}
+
+.game-remaster .surrender-confirm-cancel {
+    top: 365px;
+    left: 326px;
 }

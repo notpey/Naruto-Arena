@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naruto-Arena — Leaderboards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 85% 8%, rgba(44, 156, 219, 0.08), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 38%, #000000 70%, #120a06 100%);
+      color: var(--ca-bone);
+      font-family: var(--font-ui);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── PAGE WRAPPER ──────────────────────────────────────────── */
+    .lb-page {
+      width: min(1340px, 100%);
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .lb-crumb {
+      margin: 24px 0 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ca-dust);
+    }
+    .lb-crumb a { color: var(--ca-parchment); }
+    .lb-crumb a:hover { color: var(--ca-orange); }
+    .lb-crumb .cur { color: var(--ca-orange); }
+    .lb-local-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 24px; }
+    .lb-local-nav a {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ca-parchment); padding: 8px 13px; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px; transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+    }
+    .lb-local-nav a:hover { color: #fff; border-color: var(--ca-orange); }
+    .lb-local-nav a.active { color: #fff; border-color: rgba(124, 77, 255, 0.7); background: rgba(124, 77, 255, 0.14); }
+
+    /* ── SUB-TABS (PLAYERS / CLANS) ────────────────────────────── */
+    .lb-subtabs {
+      display: flex;
+      justify-content: center;
+      gap: 34px;
+      padding: 26px 0 22px;
+    }
+    .lb-subtab {
+      background: none;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ca-dust);
+      padding: 4px 2px;
+      position: relative;
+      transition: color var(--t-fast);
+    }
+    .lb-subtab sup { font-size: 9px; margin-left: 3px; color: var(--ca-orange); }
+    .lb-subtab:hover { color: var(--ca-bone); }
+    .lb-subtab.active { color: var(--ca-orange); }
+    .lb-subtab.active::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -3px;
+      height: 2px;
+      background: var(--ca-orange);
+    }
+
+    /* ── CATEGORY BAR (black) + SEARCH ─────────────────────────── */
+    .lb-catbar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0 20px;
+      min-height: 56px;
+      flex-wrap: wrap;
+    }
+    .lb-cats { display: flex; gap: 30px; flex: 1 1 auto; }
+    .lb-cat {
+      background: none;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ca-parchment);
+      padding: 18px 0;
+      position: relative;
+      white-space: nowrap;
+      transition: color var(--t-fast);
+    }
+    .lb-cat sup { font-size: 8px; margin-left: 4px; color: var(--ca-dust); }
+    .lb-cat:hover { color: #fff; }
+    .lb-cat.active { color: var(--ca-orange); }
+    .lb-cat.active::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 3px;
+      background: var(--ca-orange);
+    }
+    .lb-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+    .lb-search input {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+      color: var(--ca-bone);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-style: italic;
+      padding: 6px 4px;
+      width: 190px;
+      outline: none;
+    }
+    .lb-search input::placeholder { color: var(--ca-dust); letter-spacing: 0.05em; }
+    .lb-search input:focus { border-bottom-color: var(--ca-purple); }
+    .lb-search-icon {
+      width: 24px; height: 24px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--ca-bone);
+      font-size: 12px;
+    }
+
+    /* ── BIG EDITORIAL HEADER (overflow / oversized) ───────────── */
+    .lb-bigtitle-wrap {
+      position: relative;
+      min-height: 84px;
+      overflow: visible;
+      margin: 30px 0 10px;
+    }
+    .lb-bigtitle {
+      position: relative;
+      left: 0;
+      margin: 0;
+      font-size: clamp(46px, 6.8vw, 88px);
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: var(--ca-orange);
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0.94;
+    }
+
+    /* ── BOARD (light sheet on the dark shell) ─────────────────── */
+    .lb-board {
+      display: grid; gap: 0;
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--ca-shadow-sheet);
+    }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      min-height: 88px;
+      border-bottom: 1px solid var(--ca-line-ink);
+      background: var(--ca-surface-light);
+    }
+    .lb-row:first-child { border-top: 0; }
+    .lb-row:last-child { border-bottom: 0; }
+
+    /* Medal cell */
+    .lb-medal {
+      display: grid;
+      place-items: center;
+      background: var(--ca-surface-sunk);
+      border-right: 1px solid var(--ca-line-ink);
+    }
+    .lb-medal-badge {
+      width: 46px; height: 46px;
+      display: grid; place-items: center;
+      position: relative;
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--ca-bone);
+    }
+    /* numbered (rank >= 4) medallion */
+    .lb-medal-badge.num {
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 35%, #4a4a4a 0%, #2a2a2a 70%);
+      border: 2px solid #555;
+      box-shadow: inset 0 0 0 3px #1f1f1f;
+    }
+    .lb-medal-badge.num::before,
+    .lb-medal-badge.num::after {
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      width: 6px; height: 12px;
+      background: #444;
+    }
+    .lb-medal-badge.num::before { left: 14px; transform: rotate(12deg); }
+    .lb-medal-badge.num::after  { right: 14px; transform: rotate(-12deg); }
+
+    .lb-row.r1 .lb-medal { background: var(--ca-gold); }
+    .lb-row.r2 .lb-medal { background: #c9c9c9; }
+    .lb-row.r3 .lb-medal { background: #d8472b; }
+    .lb-row.r1 .lb-medal-badge { color: #5a3a00; font-size: 22px; }
+    .lb-row.r2 .lb-medal-badge,
+    .lb-row.r3 .lb-medal-badge { color: #fff; font-size: 18px; }
+
+    /* Row body: player | divider | clan */
+    .lb-row-body {
+      display: grid;
+      grid-template-columns: 1fr 0 1fr;
+      align-items: stretch;
+    }
+    .lb-side {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      min-width: 0;
+    }
+    .lb-side--clan {
+      position: relative;
+      background: var(--ca-surface);
+      clip-path: polygon(38px 0, 100% 0, 100% 100%, 0 100%);
+      padding-left: 46px;
+    }
+    .lb-row.r1 .lb-side--player { background: rgba(255, 184, 77, 0.10); }
+    .lb-row.r1 .lb-side--clan   { background: rgba(255, 184, 77, 0.06); }
+    .lb-row.r2 .lb-side--player { background: rgba(201, 201, 201, 0.07); }
+    .lb-row.r3 .lb-side--player { background: rgba(216, 71, 43, 0.10); }
+    .lb-row.r3 .lb-side--clan   { background: rgba(216, 71, 43, 0.05); }
+
+    .lb-board[data-focus="players"] .lb-side--clan,
+    .lb-board[data-focus="clans"] .lb-side--player { opacity: 0.62; }
+
+    .lb-avatar {
+      width: 56px; height: 56px;
+      flex: 0 0 auto;
+      object-fit: cover;
+      background: var(--ca-surface-sunk);
+      border: 1px solid var(--ca-line-ink);
+    }
+    .lb-info { min-width: 0; flex: 1 1 auto; }
+
+    .lb-name-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 100%;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--ca-surface-sunk);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ca-ink);
+      line-height: 1.1;
+    }
+    .lb-name-pill a { color: inherit; }
+    .lb-name-pill a:hover { text-decoration: underline; }
+    .lb-row.r1 .lb-name-pill { background: var(--ca-gold); color: #4a2f00; }
+    .lb-row.r2 .lb-name-pill { background: #d0d0d0; color: #222; }
+    .lb-row.r3 .lb-name-pill { background: var(--ca-violet); color: #fff; }
+    .lb-verified { width: 14px; height: 14px; flex: 0 0 auto; }
+
+    .lb-rowtitle {
+      margin: 5px 0 7px;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--ca-ink-soft);
+    }
+    .lb-row.r1 .lb-rowtitle { color: #8a6a1f; }
+
+    /* progress bar */
+    .lb-prog {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 8px;
+      max-width: 340px;
+    }
+    .lb-prog-end { font-size: 9px; font-weight: 700; color: var(--ca-ink-faint); }
+    .lb-prog-bar {
+      height: 11px;
+      border: 1px solid var(--ca-line-ink);
+      background: var(--ca-surface-sunk);
+      overflow: hidden;
+    }
+    .lb-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2faa55 0%, #46c46a 100%);
+    }
+
+    .lb-empty-side {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ca-ink-faint);
+    }
+    .lb-board-empty {
+      padding: 40px 20px;
+      text-align: center;
+      background: var(--ca-surface-light);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ca-ink-faint);
+    }
+
+    /* ── PAGINATION ────────────────────────────────────────────── */
+    .lb-pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 26px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ca-parchment);
+    }
+    .lb-pager-nums { display: flex; gap: 10px; }
+    .lb-pager-nums span { color: var(--ca-dust); }
+    .lb-pager-nums .active { color: var(--ca-orange); }
+    .lb-pager-btn { color: var(--ca-parchment); }
+    .lb-pager-btn[aria-disabled="true"] { color: var(--ca-mist); cursor: default; }
+
+    /* ── FOOTER ────────────────────────────────────────────────── */
+    .lb-footer {
+      background: #0a0a0a;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 40px 24px 30px;
+      text-align: center;
+    }
+    .lb-footer-social { display: flex; justify-content: center; gap: 16px; margin-bottom: 26px; }
+    .lb-footer-icon {
+      width: 46px; height: 46px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--ca-orange);
+      color: #000;
+      font-weight: 900;
+      font-size: 18px;
+    }
+    .lb-footer-discord {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 46px; padding: 0 18px;
+      border-radius: 999px;
+      background: var(--ca-orange);
+      color: #000;
+      font-size: 13px; font-weight: 900; letter-spacing: 0.08em;
+    }
+    .lb-footer-links {
+      display: flex; justify-content: center; gap: 30px;
+      margin-bottom: 24px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ca-parchment);
+    }
+    .lb-footer-links sup { font-size: 8px; color: var(--ca-dust); }
+    .lb-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
+
+    /* ── LADDER HUB SECTIONS (Road to Hokage / Hall of Fame) ──── */
+    .lb-anchor { display: block; position: relative; top: -64px; height: 0; }
+    .lb-live { scroll-margin-top: 64px; }
+    .lb-hub {
+      scroll-margin-top: 64px;
+      margin-top: 30px;
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
+      border-radius: 10px;
+      box-shadow: var(--ca-shadow-sheet);
+      padding: 28px 32px 32px;
+      color: var(--ca-ink);
+    }
+    .lb-hub-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ca-orange); }
+    .lb-hub h2 { margin: 4px 0 14px; font-size: 24px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); }
+    .lb-hub p { margin: 0 0 14px; font-size: 14px; line-height: 1.65; color: var(--ca-ink-soft); }
+    .lb-hub p strong { color: var(--ca-ink); }
+    .lb-hub-note { font-size: 13px; }
+    .lb-hub-note a { color: var(--ca-orange); font-weight: 700; }
+    .lb-faq { display: grid; gap: 14px; margin: 4px 0 14px; }
+    .lb-faq dt { font-size: 14px; font-weight: 800; color: var(--ca-ink); margin-bottom: 3px; }
+    .lb-faq dd { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ca-ink-soft); }
+    .lb-hof { display: grid; gap: 14px; }
+    .lb-hof-season { border: 1px solid var(--ca-line-ink); border-radius: 8px; overflow: hidden; }
+    .lb-hof-season-head { background: var(--ca-ink); color: var(--ca-surface-light); font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; }
+    .lb-hof-coming { padding: 22px 16px; font-size: 13px; font-style: italic; color: var(--ca-ink-faint); background: var(--ca-surface); }
+
+    /* section heading on the dark shell (above a light sheet) */
+    .lb-section-h { margin: 18px 0 14px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-purple-lit); }
+
+    /* Clan Ladder board (light) */
+    .lb-clanboard { display: grid; gap: 0; border: 1px solid var(--ca-line-ink); border-radius: 8px; overflow: hidden; }
+    .lb-clan-row { display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; background: var(--ca-surface-light); border-bottom: 1px solid var(--ca-line-ink); }
+    .lb-clan-row:last-child { border-bottom: 0; }
+    .lb-clan-row:nth-child(even) { background: var(--ca-surface); }
+    .lb-clan-rank { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 6px; background: var(--ca-surface-sunk); font-size: 13px; font-weight: 900; color: var(--ca-ink); }
+    .lb-clan-row.r1 .lb-clan-rank { background: var(--ca-gold); color: #4a2f00; }
+    .lb-clan-row.r2 .lb-clan-rank { background: #d0d0d0; }
+    .lb-clan-row.r3 .lb-clan-rank { background: #d8472b; color: #fff; }
+    .lb-clan-name { font-size: 14px; font-weight: 800; color: var(--ca-ink); }
+    .lb-clan-name a { color: inherit; }
+    .lb-clan-name a:hover { color: var(--ca-orange); }
+    .lb-clan-meta { font-size: 12px; font-weight: 700; color: var(--ca-ink-soft); }
+    .lb-clan-empty { padding: 34px 18px; text-align: center; font-size: 13px; font-style: italic; color: var(--ca-ink-faint); background: var(--ca-surface-light); }
+
+    @media (max-width: 900px) {
+      .lb-row-body { grid-template-columns: 1fr; }
+      .lb-side--clan { clip-path: none; padding-left: 18px; border-top: 1px solid rgba(0,0,0,0.5); }
+      .lb-bigtitle-wrap { min-height: 62px; }
+    }
+    @media (max-width: 680px) {
+      .lb-search input { width: 130px; }
+      .lb-cats { gap: 16px; }
+    }
+  </style>
+  <link rel="stylesheet" href="shop.css">
+</head>
+<body>
+
+  <!-- ═══ SHINOBI-ARENA SHARED NAV ══════════════════════════════ -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N·A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Start Page</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
+      </ul>
+
+      <div class="ca-nav-account" id="ca-nav-account">
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+            <section class="group" id="auth-panel">
+              <h2 class="group-title" id="auth-title">Login</h2>
+              <div id="guest-auth-view">
+                <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
+                <form class="auth-form" id="auth-form">
+                  <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
+                  <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                  <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
+                  <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
+                  <button class="auth-button" type="submit" id="auth-submit">Login</button>
+                  <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
+                  <p class="auth-status" id="auth-status" aria-live="polite"></p>
+                </form>
+              </div>
+              <div class="account-panel" id="account-panel" hidden>
+                <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
+                <div class="account-actions">
+                  <button class="account-action" type="button" id="view-profile-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg>
+                    <span>View Profile</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-avatar-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg>
+                    <span>Change Avatar</span>
+                  </button>
+                  <button class="account-action" type="button" id="clan-panel-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg>
+                    <span>Clan Panel</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-backgrounds-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg>
+                    <span>Custom Background</span>
+                  </button>
+                  <button class="account-action" type="button" id="reset-account-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg>
+                    <span>Reset Account</span>
+                  </button>
+                  <section class="group" id="admin-panel-section" hidden>
+                    <h2 class="group-title">Admin Panel</h2>
+                    <nav class="nav">
+                      <a class="nav-link" href="winrates.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" /><path d="M7 14V9" /><path d="M12 14V6" /><path d="M17 14v-3" /></svg>
+                        <span>Winrates</span>
+                      </a>
+                      <a class="nav-link" href="charactereditor.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 16 18 4" /><path d="m14 4 4 4" /><path d="M6 16l-1 4 4-1" /></svg>
+                        <span>Character Editor</span>
+                      </a>
+                      <a class="nav-link" href="editmission.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" /><path d="M7 16l10-10" /><path d="M14 6l4 4" /><path d="M6 18l1-4 4-1" /></svg>
+                        <span>Mission Editor</span>
+                      </a>
+                      <a class="nav-link" href="playeraccounts.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
+                        <span>Player Accounts</span>
+                      </a>
+                      <a class="nav-link" href="newspost.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
+                        <span>News Post</span>
+                      </a>
+                    </nav>
+                  </section>
+                  <button class="account-action" type="button" id="logout-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
+                    <span>Log Out</span>
+                  </button>
+                </div>
+                <p class="auth-status" id="account-status" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═════════════════════════════════════════════════ -->
+  <header class="ca-hero">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">◁</div>
+      <div class="ca-hero-center">
+        <button class="ca-hero-play" type="button" id="play-now-button">
+          › START PLAYING
+        </button>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">⚡</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
+        </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">▷</div>
+    </div>
+  </header>
+
+  <!-- ═══ LEADERBOARDS ═════════════════════════════════════════ -->
+  <main class="lb-page">
+    <nav class="lb-crumb" aria-label="Breadcrumb">
+      <a href="index.html">Naruto-Arena</a> &gt; <a href="leaderboards.html#ninja-ladder">Ladders</a> &gt; <span class="cur" id="lb-crumb-current">Ninja Ladder</span>
+    </nav>
+    <nav class="lb-local-nav" aria-label="Ladder sections">
+      <a class="active" href="#ninja-ladder" data-ladder-section="ninja-ladder">Ninja Ladder</a>
+      <a href="#clan-ladder" data-ladder-section="clan-ladder">Clan Ladder</a>
+      <a href="#road-to-hokage" data-ladder-section="road-to-hokage">Road to Hokage</a>
+      <a href="#hall-of-fame" data-ladder-section="hall-of-fame">Hall of Fame</a>
+    </nav>
+
+    <!-- ── NINJA LADDER (individual) ──────────────────────────── -->
+    <section id="ninja-ladder" class="lb-live">
+
+      <h2 class="lb-section-h">/ Ninja Ladder — International individual ranking</h2>
+
+      <!-- Players / Clans column emphasis -->
+      <div class="lb-subtabs" role="tablist" aria-label="Leaderboard focus">
+        <button class="lb-subtab active" type="button" data-focus="players" role="tab" aria-selected="true">Players<sup>01</sup></button>
+        <button class="lb-subtab" type="button" data-focus="clans" role="tab" aria-selected="false">Clans<sup>02</sup></button>
+      </div>
+
+      <!-- Category bar + search -->
+      <div class="lb-catbar">
+        <div class="lb-cats" role="tablist" aria-label="Leaderboard category">
+          <button class="lb-cat active" type="button" data-cat="ladder" role="tab" aria-selected="true">Top Ladder Rank<sup>10</sup></button>
+          <button class="lb-cat" type="button" data-cat="streak" role="tab" aria-selected="false">Top Streak<sup>10</sup></button>
+          <button class="lb-cat" type="button" data-cat="wins" role="tab" aria-selected="false">Highest Wins<sup>10</sup></button>
+        </div>
+        <div class="lb-search">
+          <input type="search" id="lb-search-input" placeholder="Search for a player......" aria-label="Search for a player" />
+          <span class="lb-search-icon" aria-hidden="true">⌕</span>
+        </div>
+      </div>
+
+      <!-- Oversized editorial header -->
+      <div class="lb-bigtitle-wrap">
+        <h1 class="lb-bigtitle" id="lb-bigtitle">TOP LADDER RANK</h1>
+      </div>
+
+      <!-- Board (rendered by script) -->
+      <div class="lb-board" id="lb-board" data-focus="players">
+        <div class="lb-board-empty">Loading rankings…</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="lb-pager">
+        <a class="lb-pager-btn" id="lb-prev" aria-disabled="true" href="#">&laquo; Previous Page</a>
+        <div class="lb-pager-nums" id="lb-pager-nums"><span class="active">1</span></div>
+        <a class="lb-pager-btn" id="lb-next" aria-disabled="true" href="#">Next Page &raquo;</a>
+      </div>
+    </section>
+
+    <!-- ── CLAN LADDER (international clans) ───────────────────── -->
+    <section id="clan-ladder" class="lb-hub">
+      <div class="lb-hub-kicker">/ International Clans</div>
+      <h2>Clan Ladder</h2>
+      <p>The Clan Ladder is Naruto-Arena's international clan ranking. Clans join automatically as their members play <strong>clan ladder games</strong> — every member's result contributes to the clan's standing, so the strongest, most active alliances rise to the top.</p>
+      <div class="lb-clanboard" id="lb-clanboard">
+        <div class="lb-clan-empty">Loading clan rankings…</div>
+      </div>
+    </section>
+
+    <!-- ── ROAD TO HOKAGE ─────────────────────────────────────── -->
+    <section id="road-to-hokage" class="lb-hub">
+      <div class="lb-hub-kicker">/ Seasonal Competition</div>
+      <h2>Road to Hokage</h2>
+      <p>Road to Hokage is Naruto-Arena's <strong>seasonal</strong> competitive mode. Each season resets the standings and gives every shinobi a fresh climb toward the top — rewarding consistency across a full season rather than a single hot streak, with refined matchmaking and seasonal progression on top of standard ladder play.</p>
+      <dl class="lb-faq">
+        <div><dt>What is a season?</dt><dd>A fixed competitive period. When it ends, final standings are recorded and the ladder resets so everyone starts the next season even.</dd></div>
+        <div><dt>How is it different from the Ninja Ladder?</dt><dd>The Ninja Ladder is a continuous, all-time individual ranking. Road to Hokage is season-scoped, with its own progression and end-of-season recognition.</dd></div>
+        <div><dt>What do I earn?</dt><dd>Seasonal progression and a place in history — the top 10 of every season are immortalized in the Hall of Fame.</dd></div>
+      </dl>
+      <p class="lb-hub-note">Current season standings appear on the <a href="#ninja-ladder">Ninja Ladder</a> above.</p>
+    </section>
+
+    <!-- ── HALL OF FAME ───────────────────────────────────────── -->
+    <section id="hall-of-fame" class="lb-hub">
+      <div class="lb-hub-kicker">/ Legends of the Arena</div>
+      <h2>Hall of Fame</h2>
+      <p>The Hall of Fame immortalizes the <strong>top 10 players from each Road to Hokage season</strong>. As seasons conclude, their champions are enshrined here permanently — a growing record of the arena's greatest shinobi.</p>
+      <div class="lb-hof">
+        <div class="lb-hof-season">
+          <div class="lb-hof-season-head">Season 1</div>
+          <div class="lb-hof-coming">Awaiting its first champions — Season 1 results will be enshrined here once the season concludes.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+  <footer class="lb-footer">
+    <div class="lb-footer-social">
+      <span class="lb-footer-icon" aria-hidden="true">CA</span>
+      <a class="lb-footer-discord" href="#" aria-label="Join our Discord">DISCORD</a>
+    </div>
+    <nav class="lb-footer-links" aria-label="Legal">
+      <a href="#">Privacy Notice<sup>05</sup></a>
+      <a href="#">Terms of Service<sup>06</sup></a>
+      <a href="#">Copyright<sup>06</sup></a>
+    </nav>
+    <p class="lb-footer-copy">Naruto-Arena 2026. &nbsp; All Rights Reserved.</p>
+  </footer>
+
+  <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./shop.js" defer></script>
+
+  <!-- Shinobi-Arena nav account sync + dropdown toggle -->
+  <script>
+    (function () {
+      var trigger = document.getElementById('ca-account-trigger');
+      var menu = document.getElementById('ca-account-menu');
+      var navGuest = document.getElementById('ca-nav-guest');
+      var navUser = document.getElementById('ca-nav-user');
+      var navUsername = document.getElementById('ca-nav-username');
+      var accountPanel = document.getElementById('account-panel');
+      var accountUsername = document.getElementById('account-username');
+      function syncNav() {
+        var loggedIn = accountPanel && !accountPanel.hidden;
+        if (navGuest) navGuest.hidden = loggedIn;
+        if (navUser) navUser.hidden = !loggedIn;
+        if (loggedIn && navUsername && accountUsername) {
+          navUsername.textContent = accountUsername.textContent || '';
+        }
+      }
+      if (accountPanel) {
+        new MutationObserver(syncNav).observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
+      }
+      syncNav();
+      function closeMenu() { if (menu) { menu.hidden = true; } if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      function openMenu() { if (menu) { menu.hidden = false; } if (trigger) trigger.setAttribute('aria-expanded', 'true'); }
+      if (trigger && menu) {
+        trigger.addEventListener('click', function (e) { e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); });
+        menu.addEventListener('click', function (e) { if (e.target.closest('.account-action')) closeMenu(); });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+      }
+    })();
+  </script>
+
+  <!-- Leaderboards data + rendering (reuses /api/leaderboards/sidebar) -->
+  <script>
+    (function () {
+      var DEFAULT_AVATAR = "https://i.postimg.cc/3JqVcPXm/default.png";
+      var PROFILE_LOOKUP_KEY = "narutoProfileLookupUser";
+
+      var CATEGORIES = {
+        ladder: { title: "TOP LADDER RANK", playerKey: "topPlayerLevels", metric: "level" },
+        streak: { title: "TOP STREAK",      playerKey: "topCurrentStreaks", metric: "streak" },
+        wins:   { title: "HIGHEST WINS",    playerKey: "topWins",          metric: "wins" }
+      };
+
+      var board = document.getElementById("lb-board");
+      var bigTitle = document.getElementById("lb-bigtitle");
+      var searchInput = document.getElementById("lb-search-input");
+      var subtabs = Array.prototype.slice.call(document.querySelectorAll(".lb-subtab"));
+      var cats = Array.prototype.slice.call(document.querySelectorAll(".lb-cat"));
+
+      var state = { focus: "players", category: "ladder", query: "", boards: null, loaded: false, failed: false };
+
+      function esc(value) { return String(value == null ? "" : value); }
+      function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+      function profileLink(username) {
+        var a = document.createElement("a");
+        a.href = "profile.html";
+        a.textContent = username || "Unknown";
+        a.addEventListener("click", function () {
+          try { sessionStorage.setItem(PROFILE_LOOKUP_KEY, String(username || "").trim().slice(0, 64)); } catch (e) {}
+        });
+        return a;
+      }
+      function clanLink(clanName) {
+        var a = document.createElement("a");
+        var safe = String(clanName || "").trim();
+        a.href = safe ? "clanprofile.html?clan=" + encodeURIComponent(safe) : "clanprofile.html";
+        a.textContent = clanName || "Unknown";
+        return a;
+      }
+
+      var VERIFIED_SVG =
+        '<svg class="lb-verified" viewBox="0 0 24 24" fill="#2c9cdb" aria-hidden="true">' +
+        '<path d="M12 2l2.2 1.6 2.7-.2 1 2.5 2.3 1.4-.6 2.6.6 2.6-2.3 1.4-1 2.5-2.7-.2L12 22l-2.2-1.6-2.7.2-1-2.5L3.8 16.7l.6-2.6-.6-2.6 2.3-1.4 1-2.5 2.7.2z"/>' +
+        '<path d="M10.6 14.6l-2-2 1.1-1.1 0.9.9 2.9-2.9 1.1 1.1z" fill="#fff"/></svg>';
+
+      function makeAvatar() {
+        var img = document.createElement("img");
+        img.className = "lb-avatar";
+        img.alt = "";
+        img.src = DEFAULT_AVATAR;
+        img.addEventListener("error", function () { img.style.visibility = "hidden"; });
+        return img;
+      }
+
+      function playerSubtitle(metric, value) {
+        var v = Number(value) || 0;
+        if (metric === "level") return "Level " + v;
+        if (metric === "streak") return (v >= 0 ? "+" : "") + v + " win streak";
+        return v.toLocaleString() + " wins";
+      }
+
+      function progressEl(metric, entry, maxValue) {
+        var v = Number(entry && entry.value) || 0;
+        var wrap = document.createElement("div");
+        wrap.className = "lb-prog";
+
+        var left = document.createElement("span");
+        left.className = "lb-prog-end";
+        var bar = document.createElement("div");
+        bar.className = "lb-prog-bar";
+        var fill = document.createElement("div");
+        fill.className = "lb-prog-fill";
+        var right = document.createElement("span");
+        right.className = "lb-prog-end";
+
+        var pct;
+        if (metric === "level") {
+          var explicit = Number(entry && entry.progressPercent);
+          pct = Number.isFinite(explicit) ? explicit : 0;
+          left.textContent = String(v);
+          right.textContent = String(v + 1);
+        } else {
+          pct = maxValue > 0 ? (v / maxValue) * 100 : 0;
+          left.textContent = "0";
+          right.textContent = String(v);
+        }
+        fill.style.width = clamp(Math.round(pct), 5, 100) + "%";
+
+        bar.appendChild(fill);
+        wrap.appendChild(left);
+        wrap.appendChild(bar);
+        wrap.appendChild(right);
+        return wrap;
+      }
+
+      function playerSide(entry, metric, maxValue) {
+        var side = document.createElement("div");
+        side.className = "lb-side lb-side--player";
+        if (!entry) {
+          side.className = "lb-empty-side";
+          side.textContent = "—";
+          return side;
+        }
+        side.appendChild(makeAvatar());
+
+        var info = document.createElement("div");
+        info.className = "lb-info";
+
+        var pill = document.createElement("span");
+        pill.className = "lb-name-pill";
+        pill.appendChild(profileLink(entry.username));
+        pill.insertAdjacentHTML("beforeend", VERIFIED_SVG);
+
+        var title = document.createElement("div");
+        title.className = "lb-rowtitle";
+        title.textContent = playerSubtitle(metric, entry.value);
+
+        info.appendChild(pill);
+        info.appendChild(title);
+        info.appendChild(progressEl(metric, entry, maxValue));
+        side.appendChild(info);
+        return side;
+      }
+
+      function clanSide(entry, maxValue) {
+        var side = document.createElement("div");
+        side.className = "lb-side lb-side--clan";
+        if (!entry) {
+          side.className = "lb-empty-side lb-side--clan";
+          side.textContent = "—";
+          return side;
+        }
+        side.appendChild(makeAvatar());
+
+        var info = document.createElement("div");
+        info.className = "lb-info";
+
+        var pill = document.createElement("span");
+        pill.className = "lb-name-pill";
+        pill.appendChild(clanLink(entry.clanName));
+
+        var title = document.createElement("div");
+        title.className = "lb-rowtitle";
+        title.textContent = "Alliance · Level " + (Number(entry.value) || 1);
+
+        info.appendChild(pill);
+        info.appendChild(title);
+        info.appendChild(progressEl("level", entry, maxValue));
+        side.appendChild(info);
+        return side;
+      }
+
+      function medalCell(rank) {
+        var cell = document.createElement("div");
+        cell.className = "lb-medal";
+        var badge = document.createElement("div");
+        badge.className = "lb-medal-badge";
+        if (rank === 1) {
+          badge.innerHTML = "♛";
+        } else if (rank <= 3) {
+          badge.textContent = String(rank);
+        } else {
+          badge.classList.add("num");
+          badge.textContent = String(rank);
+        }
+        cell.appendChild(badge);
+        return cell;
+      }
+
+      function render() {
+        if (!board) return;
+        board.dataset.focus = state.focus;
+        var cat = CATEGORIES[state.category];
+        if (bigTitle) bigTitle.textContent = cat.title;
+
+        var boards = state.boards || {};
+        var players = Array.isArray(boards[cat.playerKey]) ? boards[cat.playerKey] : [];
+        var clans = Array.isArray(boards.topClanLevels) ? boards.topClanLevels : [];
+
+        var q = state.query.trim().toLowerCase();
+        if (q) {
+          players = players.filter(function (p) { return String(p.username || "").toLowerCase().indexOf(q) !== -1; });
+          clans = clans.filter(function (c) { return String(c.clanName || "").toLowerCase().indexOf(q) !== -1; });
+        }
+
+        board.innerHTML = "";
+
+        if (!state.loaded) {
+          board.innerHTML = '<div class="lb-board-empty">Loading rankings…</div>';
+          return;
+        }
+        if (state.failed) {
+          board.innerHTML = '<div class="lb-board-empty">Unable to load rankings right now.</div>';
+          return;
+        }
+        if (!players.length && !clans.length) {
+          board.innerHTML = '<div class="lb-board-empty">No ranked entries yet</div>';
+          return;
+        }
+
+        var playerMax = players.length ? Math.max(Number(players[0].value) || 0, 1) : 1;
+        var clanMax = clans.length ? Math.max(Number(clans[0].value) || 0, 1) : 1;
+        var rowCount = Math.max(players.length, clans.length);
+
+        for (var i = 0; i < rowCount; i++) {
+          var rank = i + 1;
+          var row = document.createElement("div");
+          row.className = "lb-row" + (rank <= 3 ? " r" + rank : "");
+
+          row.appendChild(medalCell(rank));
+
+          var body = document.createElement("div");
+          body.className = "lb-row-body";
+          body.appendChild(playerSide(players[i], cat.metric, playerMax));
+          var div = document.createElement("div");
+          div.className = "lb-divider";
+          body.appendChild(div);
+          body.appendChild(clanSide(clans[i], clanMax));
+          row.appendChild(body);
+
+          board.appendChild(row);
+        }
+      }
+
+      // ── tab wiring ──────────────────────────────────────────
+      subtabs.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          subtabs.forEach(function (b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+          btn.classList.add("active");
+          btn.setAttribute("aria-selected", "true");
+          state.focus = btn.getAttribute("data-focus");
+          render();
+        });
+      });
+      cats.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          cats.forEach(function (b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+          btn.classList.add("active");
+          btn.setAttribute("aria-selected", "true");
+          state.category = btn.getAttribute("data-cat");
+          render();
+        });
+      });
+      if (searchInput) {
+        searchInput.addEventListener("input", function () { state.query = searchInput.value || ""; render(); });
+      }
+
+      // ── Clan Ladder (dedicated section) ──────────────────────
+      var ladderLabels = {
+        "ninja-ladder": "Ninja Ladder",
+        "clan-ladder": "Clan Ladder",
+        "road-to-hokage": "Road to Hokage",
+        "hall-of-fame": "Hall of Fame"
+      };
+      var ladderLinks = Array.prototype.slice.call(document.querySelectorAll("[data-ladder-section]"));
+      var ladderCrumb = document.getElementById("lb-crumb-current");
+      function syncLadderSection() {
+        var key = (window.location.hash || "#ninja-ladder").replace("#", "") || "ninja-ladder";
+        if (!ladderLabels[key]) key = "ninja-ladder";
+        if (ladderCrumb) ladderCrumb.textContent = ladderLabels[key];
+        ladderLinks.forEach(function (link) {
+          var active = link.getAttribute("data-ladder-section") === key;
+          link.classList.toggle("active", active);
+          if (active) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      }
+      window.addEventListener("hashchange", syncLadderSection);
+      syncLadderSection();
+
+      var clanBoard = document.getElementById("lb-clanboard");
+      function renderClanLadder() {
+        if (!clanBoard) return;
+        if (!state.loaded) { clanBoard.innerHTML = '<div class="lb-clan-empty">Loading clan rankings…</div>'; return; }
+        if (state.failed) { clanBoard.innerHTML = '<div class="lb-clan-empty">Clan rankings are unavailable right now.</div>'; return; }
+        var clans = (state.boards && Array.isArray(state.boards.topClanLevels)) ? state.boards.topClanLevels : [];
+        clanBoard.innerHTML = "";
+        if (!clans.length) {
+          clanBoard.innerHTML = '<div class="lb-clan-empty">No clan rankings yet — clans appear here once they start playing clan ladder games.</div>';
+          return;
+        }
+        clans.forEach(function (c, i) {
+          var rank = i + 1;
+          var row = document.createElement("div");
+          row.className = "lb-clan-row" + (rank <= 3 ? " r" + rank : "");
+          var rk = document.createElement("div");
+          rk.className = "lb-clan-rank";
+          rk.textContent = rank;
+          var name = document.createElement("div");
+          name.className = "lb-clan-name";
+          name.appendChild(clanLink(c.clanName));
+          var meta = document.createElement("div");
+          meta.className = "lb-clan-meta";
+          meta.textContent = "Level " + (Number(c.value) || 1) + (c.members ? " · " + c.members + " member" + (c.members === 1 ? "" : "s") : "");
+          row.appendChild(rk); row.appendChild(name); row.appendChild(meta);
+          clanBoard.appendChild(row);
+        });
+      }
+
+      // ── data load ───────────────────────────────────────────
+      fetch("/api/leaderboards/sidebar", { credentials: "same-origin" })
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(new Error("bad status")); })
+        .then(function (data) {
+          state.boards = (data && data.leaderboards) ? data.leaderboards : {};
+          state.loaded = true;
+          render();
+          renderClanLadder();
+        })
+        .catch(function () {
+          state.loaded = true;
+          state.failed = true;
+          render();
+          renderClanLadder();
+        });
+
+      render();
+      renderClanLadder();
+    })();
+  </script>
+
+</body>
+</html>

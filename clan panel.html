@@ -3,16 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naruto-Arena Clan Panel</title>
+  <title>Naruto-Arena � Clan Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
   <style>
-    :root {
-      --line: #181818;
-      --text: #f4f4f4;
-      --accent: #ffb84d;
-    }
 
     * {
       box-sizing: border-box;
@@ -22,29 +18,13 @@
       margin: 0;
       min-height: 100vh;
       background:
-        url("https://i.postimg.cc/x11QM8NQ/476467.png"),
-        radial-gradient(circle at 12% 18%, rgba(255, 149, 0, 0.3), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(255, 106, 0, 0.18), transparent 22%),
-        radial-gradient(circle at 50% 78%, rgba(255, 184, 77, 0.08), transparent 28%),
-        linear-gradient(145deg, #1a0700 0%, #090909 38%, #000000 68%, #2f0d00 100%);
-      background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-      background-size: 120px 120px, auto, auto, auto, auto;
-      background-position: 0 0, center, center, center, center;
-      color: var(--text);
-      font-family: "Outfit", system-ui, sans-serif;
-      animation: bodyPatternDrift 18s linear infinite;
+        radial-gradient(circle at 15% 20%, rgba(232, 128, 26, 0.18), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(232, 128, 26, 0.10), transparent 25%),
+        radial-gradient(circle at 50% 80%, rgba(58, 32, 8, 0.20), transparent 35%),
+        linear-gradient(160deg, #060008 0%, #000000 50%, #03000a 100%);
+      color: var(--ca-bone);
+      font-family: var(--font-ui);
     }
-
-    @keyframes bodyPatternDrift {
-      from {
-        background-position: 0 0, center, center, center, center;
-      }
-
-      to {
-        background-position: 120px 0, center, center, center, center;
-      }
-    }
-
 
     a {
       color: inherit;
@@ -56,7 +36,7 @@
       min-height: 100vh;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 235px minmax(0, 1fr) 270px;
+      grid-template-columns: minmax(0, 1fr) 270px;
     }
 
     .sidebar,
@@ -68,7 +48,7 @@
     .sidebar {
       position: relative;
       overflow: hidden;
-      border-right: 1px solid var(--line);
+      border-right: 1px solid var(--ca-slate);
       background:
         linear-gradient(180deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.9) 100%),
         var(--sidebar-backdrop, none) center/cover no-repeat,
@@ -81,7 +61,7 @@
       inset: 0;
       background:
         linear-gradient(180deg, rgba(3, 3, 3, 0.2) 0%, rgba(0, 0, 0, 0.68) 45%, rgba(0, 0, 0, 0.9) 100%),
-        radial-gradient(circle at top left, rgba(241, 117, 34, 0.12), transparent 30%);
+        radial-gradient(circle at top left, rgba(232, 128, 26, 0.12), transparent 30%);
       pointer-events: none;
     }
 
@@ -91,7 +71,7 @@
     }
 
     .aside {
-      border-left: 1px solid var(--line);
+      border-left: 1px solid var(--ca-slate);
     }
 
     .brand {
@@ -165,7 +145,7 @@
 
     .nav-link:hover,
     .account-action:hover {
-      color: var(--accent);
+      color: var(--ca-purple-lit);
     }
 
     .nav-link svg,
@@ -180,7 +160,7 @@
 
     .nav-link.active,
     .account-action.active {
-      color: var(--accent);
+      color: var(--ca-purple-lit);
       font-weight: 500;
     }
 
@@ -191,9 +171,8 @@
       left: -22px;
       top: 9px;
       bottom: 9px;
-      width: 4px;
-      border-radius: 999px;
-      background: var(--accent);
+      width: 3px;
+      background: var(--ca-purple);
     }
 
     .play-now {
@@ -201,12 +180,13 @@
       height: 42px;
       margin-bottom: 8px;
       border: 0;
-      border-radius: 100px;
-      background: linear-gradient(160deg, #ffb84d 0%, #ff8c1a 100%);
-      color: #101010;
+      clip-path: var(--clip-slash-sm);
+      background: linear-gradient(160deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+      color: var(--ca-bone);
       font: inherit;
       font-weight: 700;
       cursor: pointer;
+      box-shadow: 0 6px 18px rgba(232, 128, 26, 0.28);
     }
 
     .auth-form {
@@ -218,48 +198,54 @@
     .auth-description,
     .auth-status {
       margin: 0;
-      color: #a0a0a0;
+      color: var(--ca-parchment);
       font-size: 12px;
       line-height: 1.4;
     }
 
     .auth-status[data-state="error"] {
-      color: #ff8f8f;
+      color: var(--ca-red);
     }
 
     .auth-status[data-state="success"] {
-      color: #9ce2a1;
+      color: #4ade80;
     }
 
     .auth-input {
       width: 100%;
       height: 38px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 100px;
+      border: var(--border-smoke);
+      border-radius: var(--r-sm);
       background: rgba(8, 8, 8, 0.7);
-      color: #f3f3f3;
+      color: var(--ca-bone);
       padding: 0 12px;
       font: inherit;
       outline: none;
+    }
+
+    .auth-input:focus {
+      border-color: var(--ca-purple);
+      box-shadow: var(--glow-purple);
     }
 
     .auth-button {
       width: 100%;
       height: 40px;
       border: 0;
-      border-radius: 100px;
-      background: linear-gradient(90deg, #ffb84d 0%, #ff8c1a 100%);
-      color: #000;
+      clip-path: var(--clip-slash-sm);
+      background: linear-gradient(90deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+      color: var(--ca-bone);
       font: inherit;
       font-weight: 600;
       cursor: pointer;
+      box-shadow: 0 6px 18px rgba(232, 128, 26, 0.22);
     }
 
     .auth-switch {
       border: 0;
       padding: 0;
       background: transparent;
-      color: #ffd392;
+      color: var(--ca-purple-lit);
       font: inherit;
       font-size: 12px;
       text-align: left;
@@ -272,14 +258,14 @@
 
     .account-greeting {
       margin: 0;
-      color: #f6f6f6;
+      color: var(--ca-bone);
       font-size: 15px;
       line-height: 1.45;
       font-weight: 500;
     }
 
     .account-name {
-      color: #ffd392;
+      color: var(--ca-purple-lit);
       font-weight: 700;
     }
 
@@ -293,17 +279,25 @@
       padding: 18px 26px 26px;
     }
 
+    .clan-panel-crumb {
+      margin: 0 0 14px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ca-dust);
+    }
+    .clan-panel-crumb a { color: var(--ca-parchment); }
+    .clan-panel-crumb a:hover { color: var(--ca-orange); }
+    .clan-panel-crumb .cur { color: var(--ca-purple-lit); }
+
     .clan-shell {
       display: grid;
       gap: 22px;
-      border: 1px solid #171717;
-      border-radius: 14px;
+      border: var(--border-slash);
       padding: 24px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
-        #0a0a0a;
-      color: #e7e7e7;
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
+      background: var(--ca-ash);
+      color: var(--ca-bone);
     }
 
     .clan-summary {
@@ -338,7 +332,7 @@
     }
 
     .clan-summary-copy .rank {
-      color: #ffb84d;
+      color: var(--ca-purple-lit);
       font-weight: 700;
       margin-top: 3px;
     }
@@ -356,15 +350,14 @@
       gap: 16px;
       min-height: 170px;
       padding: 20px 18px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--ca-slate);
+      border: var(--border-smoke);
     }
 
     .clan-card p {
       margin: 0;
       max-width: 260px;
-      color: #9d9d9d;
+      color: var(--ca-dust);
       font-size: 13px;
       line-height: 1.55;
     }
@@ -372,19 +365,20 @@
     .clan-card button {
       min-width: 132px;
       height: 34px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 999px;
-      background: #161616;
-      color: #f0f0f0;
+      border: var(--border-slash);
+      background: var(--ca-iron);
+      color: var(--ca-bone);
       font: inherit;
       font-size: 12px;
       cursor: pointer;
       padding: 0 14px;
+      transition: background var(--t-base), border-color var(--t-base);
     }
 
     .clan-card button:hover {
-      border-color: rgba(255, 184, 77, 0.45);
-      color: #ffcf8c;
+      background: var(--ca-purple-dim);
+      border-color: var(--ca-purple);
+      color: var(--ca-purple-lit);
     }
 
     .clan-bottom-divider {
@@ -445,14 +439,11 @@
 
     .clan-register-modal {
       width: min(720px, 100%);
-      border: 1px solid #171717;
-      border-radius: 14px;
+      border: var(--border-slash);
       padding: 20px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
-        #0a0a0a;
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
-      color: #e9e9e9;
+      background: var(--ca-ash);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+      color: var(--ca-bone);
     }
 
     .clan-register-section + .clan-register-section {
@@ -465,14 +456,14 @@
       gap: 8px;
       padding-bottom: 8px;
       margin-bottom: 8px;
-      border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
-      color: #ffffff;
+      border-bottom: 1px solid rgba(232, 128, 26, 0.25);
+      color: var(--ca-bone);
       font-size: 18px;
       font-weight: 600;
     }
 
     .clan-register-star {
-      color: #fd9926;
+      color: var(--ca-purple-lit);
       font-size: 14px;
       line-height: 1;
     }
@@ -508,11 +499,18 @@
     .clan-register-input,
     .clan-register-textarea {
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: rgba(15, 15, 15, 0.9);
-      color: #f2f2f2;
+      border: var(--border-smoke);
+      border-radius: var(--r-sm);
+      background: rgba(8, 8, 8, 0.8);
+      color: var(--ca-bone);
       font: inherit;
       outline: none;
+    }
+
+    .clan-register-input:focus,
+    .clan-register-textarea:focus {
+      border-color: var(--ca-purple);
+      box-shadow: var(--glow-purple);
     }
 
     .clan-register-input {
@@ -536,10 +534,9 @@
     .clan-register-button {
       min-width: 118px;
       height: 38px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: #161616;
-      color: #f0f0f0;
+      border: var(--border-smoke);
+      background: var(--ca-iron);
+      color: var(--ca-bone);
       font: inherit;
       cursor: pointer;
       padding: 0 16px;
@@ -547,9 +544,11 @@
 
     .clan-register-button.primary {
       border: 0;
-      background: linear-gradient(90deg, #ffb84d 0%, #ff8c1a 100%);
-      color: #000;
+      clip-path: var(--clip-slash-sm);
+      background: linear-gradient(90deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+      color: var(--ca-bone);
       font-weight: 700;
+      box-shadow: 0 4px 14px rgba(232, 128, 26, 0.28);
     }
 
     .clan-register-status {
@@ -578,12 +577,18 @@
     .stats-title {
       margin: 0 0 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(232, 128, 26, 0.2);
       font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #ffcf8c;
+      color: var(--ca-parchment);
+    }
+
+    .ladder-title::before,
+    .stats-title::before {
+      content: "/ ";
+      color: var(--ca-purple-lit);
     }
 
     .ladder-list,
@@ -636,23 +641,21 @@
 
     .ladder-name a:hover,
     .stats-list a:hover {
-      color: #ffcf8c;
+      color: var(--ca-purple-lit);
     }
 
     .ladder-bar {
       height: 18px;
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      background: #ffffff;
+      border: 1px solid rgba(232, 128, 26, 0.2);
+      background: var(--ca-slate);
       position: relative;
       overflow: hidden;
-      border-radius: 999px;
     }
 
     .ladder-fill {
       height: 100%;
-      background: linear-gradient(90deg, #ffb84d 0%, #ff8c1a 100%);
-      box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.08);
+      background: linear-gradient(90deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
     }
 
     .ladder-score {
@@ -662,9 +665,9 @@
       place-items: center;
       font-size: 10px;
       font-weight: 800;
-      color: #000000;
+      color: var(--ca-bone);
       letter-spacing: 0.03em;
-      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     }
 
     .stats-group + .stats-group {
@@ -706,7 +709,7 @@
 
       .sidebar {
         border-right: 0;
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px solid var(--ca-slate);
       }
 
       .nav-link.active::before,
@@ -724,50 +727,65 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="shop.css">
 </head>
-<body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <img class="brand-mark" src="https://i.postimg.cc/nLym09x8/logo.png" alt="Naruto-Arena logo" />
-        <div class="brand-copy">
-          <div class="brand-name">NARUTO-ARENA</div>
-          <div class="brand-tagline">Your #1 Naruto Online Multiplayer Game</div>
-        </div>
-      </div>
+<body class="na-legacy-light">
 
-      <section class="group">
-        <h2 class="group-title">Home Menu</h2>
-        <nav class="nav">
-          <button class="play-now" type="button" id="play-now-button">Play Now</button>
-          <a class="nav-link" href="index.html">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" /></svg>
-            <span>Home</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
-            <span>Community</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" /><rect x="14" y="4" width="6" height="6" /><rect x="4" y="14" width="6" height="6" /><rect x="14" y="14" width="6" height="6" /></svg>
-            <span>Events</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.1 2.8 7.9 7 9 4.2-1.1 7-4.9 7-9V6z" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-            <span>Ninja Missions</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5A2.5 2.5 0 0 1 8.5 2H20v16H8.5A2.5 2.5 0 0 0 6 20.5z" /><path d="M6 4.5V22" /><path d="M9.5 7H16" /><path d="M9.5 11H17" /></svg>
-            <span>Game Manual</span>
-          </a>
-          <a class="nav-link" href="charactersandskills.html">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h16" /><path d="M7.5 4v16" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
-            <span>Characters and Skills</span>
-          </a>
-        </nav>
-      </section>
+  <!-- --- SHINOBI-ARENA SHARED NAV (injected) ------------------- -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N�A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Start Page</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
+      </ul>
 
-      <section class="group" id="auth-panel">
+      <div class="ca-nav-account" id="ca-nav-account">
+        <button class="ca-nav-play" type="button" id="play-now-button">� START PLAYING</button>
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">v</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+<section class="group" id="auth-panel">
         <h2 class="group-title" id="auth-title">Login</h2>
         <div id="guest-auth-view">
           <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
@@ -823,8 +841,7 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
                   <span>News Post</span>
                 </a>
-              </nav>
-            </section>
+              </nav></section>
             <button class="account-action" type="button" id="logout-button">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
               <span>Log Out</span>
@@ -833,9 +850,36 @@
           <p class="auth-status" id="account-status" aria-live="polite"></p>
         </div>
       </section>
-    </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <header class="ca-hero ca-hero--compact" aria-label="Naruto-Arena banner">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">&lt;</div>
+      <div class="ca-hero-center">
+        <a class="ca-hero-play" href="selection.html">&gt; START PLAYING</a>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">N</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
+        </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">&gt;</div>
+    </div>
+  </header>
+<div class="app">
+
 
     <main class="main">
+      <nav class="clan-panel-crumb" aria-label="Breadcrumb">
+        <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Clan Panel</span>
+      </nav>
       <section class="clan-shell">
         <div class="clan-summary">
           <img class="clan-avatar" id="clan-panel-avatar" src="https://i.postimg.cc/3JqVcPXm/default.png" alt="Clan avatar" />
@@ -893,7 +937,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-register-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-register-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Creation Details</span>
           </div>
           <p class="clan-register-copy">The creator of the clan will be saved, which is the account you are currently logged in with.</p>
@@ -910,7 +954,7 @@
 
         <section class="clan-register-section">
           <div class="clan-register-head">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan name and abbreviation</span>
           </div>
           <p class="clan-register-copy">The clan name is the full name of the clan. The name can have maximum of 35 characters. The name is unique and cannot be changed after the clan has been created.</p>
@@ -927,7 +971,7 @@
 
         <section class="clan-register-section">
           <div class="clan-register-head">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Optional Clan Details</span>
           </div>
           <div class="clan-register-row">
@@ -948,7 +992,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="leave-clan-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="leave-clan-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Leave Clan</span>
           </div>
           <p class="clan-register-copy">Are you sure you want to leave your clan?</p>
@@ -967,7 +1011,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-recruitment-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-recruitment-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan Recruitment</span>
           </div>
           <p class="clan-register-copy">Invite a player by username. You can also retract an active invitation sent by your clan.</p>
@@ -985,7 +1029,7 @@
 
         <section class="clan-register-section">
           <div class="clan-register-head">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Outstanding Invitations</span>
           </div>
           <div class="quick-games-list" id="clan-recruitment-list"></div>
@@ -1001,7 +1045,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-info-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-info-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan Info</span>
           </div>
           <p class="clan-register-copy">Update your clan name, abbreviation, and bio. Clan name and abbreviation must remain unique.</p>
@@ -1031,7 +1075,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-avatar-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-avatar-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan Avatar</span>
           </div>
           <div class="clan-register-row">
@@ -1057,7 +1101,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-invitations-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-invitations-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan Invitations</span>
           </div>
           <p class="clan-register-copy">Select an invitation and accept it to join that clan.</p>
@@ -1075,7 +1119,7 @@
       <div class="clan-register-modal" role="dialog" aria-modal="true" aria-labelledby="clan-management-title">
         <section class="clan-register-section">
           <div class="clan-register-head" id="clan-management-title">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Clan Management</span>
           </div>
           <p class="clan-register-copy">Assign custom display names for your clan ranks. These labels are based on the built-in clan permission tiers.</p>
@@ -1119,7 +1163,7 @@
 
         <section class="clan-register-section">
           <div class="clan-register-head">
-            <span class="clan-register-star">✦</span>
+            <span class="clan-register-star">*</span>
             <span>Assign Member Rank</span>
           </div>
           <p class="clan-register-copy">Choose a clan member, including yourself, and assign them to one of the rank tiers above.</p>
@@ -1181,5 +1225,44 @@
     </aside>
   </div>
   <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./shop.js" defer></script>
+
+
+  <!-- Shinobi-Arena nav account sync (injected): mirrors #account-panel into the nav + dropdown toggle -->
+  <script>
+    (function () {
+      var trigger = document.getElementById('ca-account-trigger');
+      var menu = document.getElementById('ca-account-menu');
+      var navGuest = document.getElementById('ca-nav-guest');
+      var navUser = document.getElementById('ca-nav-user');
+      var navUsername = document.getElementById('ca-nav-username');
+      var accountPanel = document.getElementById('account-panel');
+      var accountUsername = document.getElementById('account-username');
+      function syncNav() {
+        var loggedIn = accountPanel && !accountPanel.hidden;
+        if (navGuest) navGuest.hidden = loggedIn;
+        if (navUser) navUser.hidden = !loggedIn;
+        if (loggedIn && navUsername && accountUsername) {
+          navUsername.textContent = accountUsername.textContent || '';
+        }
+      }
+      if (accountPanel) {
+        new MutationObserver(syncNav).observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
+      }
+      syncNav();
+      function closeMenu() { if (menu) { menu.hidden = true; } if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      function openMenu() { if (menu) { menu.hidden = false; } if (trigger) trigger.setAttribute('aria-expanded', 'true'); }
+      if (trigger && menu) {
+        trigger.addEventListener('click', function (e) { e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); });
+        menu.addEventListener('click', function (e) { if (e.target.closest('.account-action')) closeMenu(); });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+      }
+    })();
+  </script>
+
 </body>
 </html>

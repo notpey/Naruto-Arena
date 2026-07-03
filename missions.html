@@ -1,2760 +1,942 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cosmic-Arena Missions</title>
+  <title>Naruto-Arena — Missions</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
   <style>
-    :root {
-      --bg: #f4e7c9;
-      --panel: #fff7de;
-      --panel-strong: #fffdf6;
-      --line: #16120d;
-      --ink: #15110b;
-      --text: #21180f;
-      --muted: #65584b;
-      --accent: #ff5b2e;
-      --accent-2: #ffd43a;
-      --accent-3: #1f75ff;
-      --shadow: 0 10px 0 rgba(0, 0, 0, 0.9);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-
-
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      min-height: 100vh;
+      margin: 0; min-height: 100vh;
       background:
-        radial-gradient(circle at 20% 20%, rgba(255, 212, 58, 0.85), transparent 0 18%),
-        radial-gradient(circle at 80% 14%, rgba(31, 117, 255, 0.3), transparent 0 16%),
-        radial-gradient(circle, rgba(21, 17, 11, 0.18) 1px, transparent 1.2px) 0 0 / 11px 11px,
-        linear-gradient(180deg, #fff4cd 0%, #f5dd9e 34%, #f7b44a 100%);
-      color: var(--text);
-      font-family: "Barlow Condensed", system-ui, sans-serif;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .app {
-      width: min(1560px, 100%);
-      min-height: 100vh;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 235px minmax(0, 1fr) 270px;
-      gap: 18px;
-      padding: 18px;
-    }
-
-    .sidebar,
-    .aside {
-      padding: 18px 20px;
-      background: var(--panel);
-      border: 4px solid var(--line);
-      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .sidebar {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .sidebar::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(180deg, rgba(255, 91, 46, 0.08), transparent 30%, rgba(21, 17, 11, 0.08) 100%),
-        radial-gradient(circle at top left, rgba(255, 212, 58, 0.36), transparent 28%);
-      pointer-events: none;
-    }
-
-    .sidebar > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .aside {
-      background:
-        radial-gradient(circle at top right, rgba(255, 212, 58, 0.28), transparent 22%),
-        var(--panel);
-    }
-
-    .brand {
-      display: grid;
-      justify-items: center;
-      gap: 10px;
-      margin-bottom: 34px;
-      padding-bottom: 18px;
-      border-bottom: 4px solid var(--line);
-    }
-
-    .brand-mark {
-      width: 54px;
-      height: auto;
-      max-height: 42px;
-      display: block;
-      object-fit: contain;
-    }
-
-    .brand-name {
-      font-family: "Bangers", cursive;
-      font-size: 34px;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      line-height: 1;
-      text-shadow: 3px 3px 0 var(--accent-2);
-    }
-
-    .brand-copy {
-      display: grid;
-      gap: 4px;
-      justify-items: center;
-      text-align: center;
-    }
-
-    .brand-tagline {
-      font-size: 14px;
-      line-height: 1.2;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .group {
-      margin-bottom: 28px;
-    }
-
-    .group-title {
-      margin: 0 0 14px;
-      color: var(--ink);
-      font-family: "Bangers", cursive;
-      font-size: 27px;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-    }
-
-    .nav {
-      display: grid;
-      gap: 6px;
-    }
-
-    .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 10px 12px;
-      color: var(--ink);
-      font-size: 19px;
-      font-weight: 700;
-      position: relative;
-      border: 3px solid transparent;
-      text-transform: uppercase;
-    }
-
-    .nav-link:hover {
-      color: var(--ink);
-      border-color: var(--line);
-      background: var(--accent-2);
-    }
-
-    .nav-link svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.8;
-      flex: 0 0 auto;
-    }
-
-    .nav-link.active {
-      color: #fff;
-      background: var(--accent);
-      border-color: var(--line);
-      transform: translate(-4px, -4px);
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
-    }
-
-    .nav-link.active::before {
-      content: "!";
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%) rotate(-8deg);
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--accent-2);
-      color: var(--line);
-      font-family: "Bangers", cursive;
-      font-size: 18px;
-    }
-
-    .play-now {
-      width: 100%;
-      height: 52px;
-      margin-bottom: 10px;
-      border: 4px solid var(--line);
-      background: linear-gradient(180deg, #ffeb67 0%, #ff9e1b 100%);
-      color: #101010;
-      font: inherit;
-      font-size: 24px;
-      font-weight: 800;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.95);
-      transform: rotate(-1.5deg);
-    }
-
-    .play-now:hover {
-      transform: translateY(2px) rotate(-1.5deg);
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .auth-form {
-      display: grid;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .auth-description {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.4;
-      font-weight: 600;
-    }
-
-    .auth-input {
-      width: 100%;
-      height: 42px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-      color: var(--ink);
-      padding: 0 12px;
-      font: inherit;
-      font-size: 18px;
-      font-weight: 600;
-      outline: none;
-    }
-
-    .auth-input::placeholder {
-      color: #806d5b;
-    }
-
-    .auth-input:focus {
-      border-color: var(--accent-3);
-      box-shadow: 0 0 0 4px rgba(31, 117, 255, 0.15);
-    }
-
-    .auth-button {
-      width: 100%;
-      height: 44px;
-      border: 3px solid var(--line);
-      background: linear-gradient(180deg, #ff673d 0%, #ef2e00 100%);
-      color: #ffffff;
-      font: inherit;
-      font-size: 20px;
-      font-weight: 800;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .auth-switch {
-      border: 0;
-      padding: 0;
-      background: transparent;
-      color: var(--accent-3);
-      font: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      text-align: left;
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-
-    .auth-status {
-      min-height: 18px;
-      margin: 0;
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.4;
-      font-weight: 600;
-    }
-
-    .auth-status[data-state="error"] {
-      color: #ff8f8f;
-    }
-
-    .auth-status[data-state="success"] {
-      color: #9ce2a1;
-    }
-
-    .account-panel[hidden] {
-      display: none;
-    }
-
-    .account-greeting {
-      margin: 0;
-      color: var(--ink);
-      font-size: 19px;
-      line-height: 1.45;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .account-name {
-      color: var(--accent);
-      font-weight: 800;
-    }
-
-    .account-actions {
-      display: grid;
-      gap: 6px;
-      margin-top: 14px;
-    }
-
-    .account-action {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      width: 100%;
-      min-height: 42px;
-      border: 3px solid transparent;
-      background: transparent;
-      color: var(--ink);
-      padding: 8px 10px;
-      font: inherit;
-      font-size: 18px;
-      font-weight: 700;
-      text-align: left;
-      cursor: pointer;
-      position: relative;
-      text-transform: uppercase;
-    }
-
-    .account-action svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.8;
-      flex: 0 0 auto;
-    }
-
-    .account-action:hover {
-      color: var(--ink);
-      background: var(--accent-2);
-      border-color: var(--line);
-    }
-
-    .account-action.active {
-      color: #fff;
-      background: var(--accent-3);
-      border-color: var(--line);
-    }
-
-    .account-action.active::before {
-      display: none;
-    }
-
-    .main {
-      padding: 0;
-      display: grid;
-      gap: 18px;
-      align-content: start;
-    }
-
-    .missions-panel {
-      width: 100%;
-      margin: 0 auto;
-      padding: 22px;
-      border: 4px solid var(--line);
-      background:
-        radial-gradient(circle at top right, rgba(255, 212, 58, 0.38), transparent 20%),
-        radial-gradient(circle at bottom left, rgba(31, 117, 255, 0.12), transparent 28%),
-        linear-gradient(180deg, #fff9ea 0%, #f7e0a7 100%);
-      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-      position: relative;
-      overflow: hidden;
-    }
-
-
-    .missions-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px 18px;
-      margin-bottom: 20px;
-      padding: 14px 16px;
-      border: 3px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 243, 214, 0.96)),
-        var(--panel-strong);
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
-      color: #000000;
-      font-family: "Barlow Condensed", system-ui, sans-serif;
-      font-size: 16px;
-      line-height: 1.2;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
-    }
-
-    .missions-search {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .missions-search-label {
-      white-space: nowrap;
-    }
-
-    .missions-search-input {
-      width: min(260px, 54vw);
-      min-width: 160px;
-      height: 30px;
-      padding: 0 10px;
-      border: 2px solid var(--line);
-      background: #ffffff;
-      color: #222222;
-      font: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.08);
-    }
-
-    .missions-search-input::placeholder {
-      color: #777777;
-    }
-
-    .missions-search-input:focus {
-      border-color: var(--accent-3);
-      box-shadow: 0 0 0 3px rgba(31, 117, 255, 0.14);
-    }
-
-    .missions-availability {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      font-size: 15px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .missions-status {
-      min-height: 18px;
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.3;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .missions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
-      justify-content: center;
-      gap: 18px 18px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .mission-card {
-      display: grid;
-      align-content: start;
-      gap: 10px;
-      width: 100%;
-      max-width: 320px;
-      justify-self: center;
-      padding: 14px 12px 12px;
-      border: 3px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 249, 227, 0.96)),
-        var(--panel-strong);
-      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.95);
-      transform: rotate(calc(var(--mission-tilt, 0) * 1deg));
-      cursor: pointer;
-    }
-
-    .mission-card:nth-child(1) {
-      --mission-tilt: -1.2;
-    }
-
-    .mission-card:nth-child(2) {
-      --mission-tilt: 0.8;
-    }
-
-    .mission-card:nth-child(3) {
-      --mission-tilt: -0.6;
-    }
-
-    .mission-card:hover,
-    .mission-card:focus-within {
-      transform: translateY(-2px) rotate(calc(var(--mission-tilt, 0) * 1deg));
-      box-shadow: 7px 7px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-title {
-      display: block;
-      color: var(--accent-3);
-      font-family: "Bangers", cursive;
-      font-size: 28px;
-      line-height: 1;
-      text-align: center;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      font-weight: 400;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .mission-image {
-      width: 265px;
-      height: 177px;
-      display: block;
-      border: 1px solid #000000;
-      object-fit: cover;
-      background: #f0f0f0;
-      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.85);
-      justify-self: center;
-    }
-
-    .mission-details {
-      width: 100%;
-      display: grid;
-      gap: 6px;
-    }
-
-    .mission-requirements-title {
-      display: inline-flex;
-      width: fit-content;
-      padding: 3px 8px;
-      border: 2px solid var(--line);
-      background: var(--accent-2);
-      color: var(--line);
-      font-size: 14px;
-      line-height: 1.2;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .mission-requirements-box {
-      min-height: 64px;
-      padding: 8px 10px;
-      border: 2px dashed rgba(22, 18, 13, 0.4);
-      background: rgba(255, 255, 255, 0.72);
-      color: #000000;
-      font-size: 15px;
-      line-height: 1.35;
-      font-weight: 600;
-    }
-
-    .mission-requirements-box p {
-      margin: 0;
-    }
-
-    .mission-requirements-box p + p {
-      margin-top: 2px;
-    }
-
-    .mission-rank {
-      margin: 0;
-      font-weight: 600;
-    }
-
-    .mission-rank-label {
-      font-weight: 800;
-    }
-
-    .mission-rank-available {
-      color: #008000;
-    }
-
-    .mission-rank-unavailable {
-      color: #d00000;
-    }
-
-    .mission-link {
-      color: var(--accent);
-      font-weight: 800;
-      text-decoration: none;
-    }
-
-    .mission-card.completed {
-      filter: grayscale(1);
-      opacity: 0.72;
-    }
-
-    .mission-card.completed .mission-link {
-      color: #4f4f4f;
-      cursor: default;
-      pointer-events: none;
-    }
-
-    .mission-card.completed .mission-rank-available,
-    .mission-card.completed .mission-rank-unavailable {
-      color: #4f4f4f;
-    }
-
-    .mission-note {
-      color: #6f6f6f;
-      font-style: italic;
-      margin: 0;
-    }
-
-    .mission-overlay {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255, 212, 58, 0.22), transparent 18%),
-        radial-gradient(circle at 80% 10%, rgba(31, 117, 255, 0.15), transparent 20%),
-        rgba(0, 0, 0, 0.56);
-      backdrop-filter: blur(2px);
-      z-index: 1000;
-    }
-
-    .mission-overlay[hidden] {
-      display: none;
-    }
-
-    .mission-sheet {
-      width: min(100%, 900px);
-      border: 4px solid var(--line);
-      background:
-        radial-gradient(circle at top right, rgba(255, 212, 58, 0.34), transparent 18%),
-        radial-gradient(circle at bottom left, rgba(31, 117, 255, 0.12), transparent 22%),
-        linear-gradient(180deg, #fff8de 0%, #f5d98b 100%);
-      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-      position: relative;
-      overflow: hidden;
-      padding: 20px 20px 18px;
-    }
-
-    .mission-sheet::before {
-      content: "Mission Brief";
-      position: absolute;
-      top: 14px;
-      right: 16px;
-      padding: 6px 12px;
-      border: 3px solid var(--line);
-      background: var(--accent-2);
-      font-family: "Bangers", cursive;
-      font-size: 24px;
-      letter-spacing: 0.04em;
-      transform: rotate(3deg);
-      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-close {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--line);
-      background: linear-gradient(180deg, #fffaf0 0%, #ffe98d 100%);
-      color: var(--line);
-      font: inherit;
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1;
-      cursor: pointer;
-      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-close:hover {
-      background: var(--accent-2);
-    }
-
-    .mission-sheet-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
-      gap: 18px 22px;
-      padding-top: 30px;
-      align-items: start;
-    }
-
-    .mission-sheet-copy,
-    .mission-sheet-goals {
-      min-width: 0;
-      padding: 14px 14px 12px;
-      border: 3px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 248, 228, 0.95)),
-        var(--panel-strong);
-      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-heading {
-      margin: 0 0 8px;
-      color: var(--accent);
-      font-family: "Bangers", cursive;
-      font-size: 24px;
-      font-weight: 400;
-      line-height: 0.95;
-      border-bottom: 3px solid var(--line);
-      padding-bottom: 6px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .mission-sheet-line {
-      margin: 0 0 6px;
-      color: #111111;
-      font-size: 16px;
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
-    .mission-sheet-link {
-      color: var(--accent-3);
-      font-weight: 700;
-      text-decoration: underline;
-    }
-
-    .mission-sheet-divider {
-      margin: 12px 0 12px;
-      border-top: 2px dashed rgba(22, 18, 13, 0.45);
-    }
-
-    .mission-sheet-reward {
-      margin: 0;
-      color: #111111;
-      font-size: 16px;
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
-    .mission-sheet-requirements {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .mission-sheet-visual {
-      display: grid;
-      justify-items: start;
-      gap: 12px;
-      align-content: start;
-      padding: 14px 14px 12px;
-      border: 3px solid var(--line);
-      background:
-        radial-gradient(circle at center, rgba(255, 212, 58, 0.24), transparent 46%),
-        rgba(255, 255, 255, 0.68);
-      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-image {
-      width: 265px;
-      height: 177px;
-      border: 1px solid #000000;
-      object-fit: cover;
-      background: #f0f0f0;
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.85);
-    }
-
-    .mission-sheet-footer {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      gap: 18px;
-      align-items: start;
-      padding-top: 2px;
-    }
-
-    .mission-sheet-portrait {
-      width: 92px;
-      height: 92px;
-      border: 3px solid var(--line);
-      object-fit: cover;
-      background: #f0f0f0;
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-portrait-wrap {
-      display: grid;
-      gap: 6px;
-      justify-items: start;
-      padding: 12px;
-      border: 3px solid var(--line);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 248, 228, 0.96));
-      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .mission-sheet-character-name {
-      color: var(--ink);
-      font-size: 16px;
-      line-height: 1.2;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .mission-sheet-goals-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .mission-sheet-goal {
-      margin: 0;
-      color: #111111;
-      font-size: 16px;
-      line-height: 1.45;
-      font-weight: 500;
-      padding-left: 10px;
-      position: relative;
-    }
-
-    .mission-sheet-goal::before {
-      content: "✘";
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-weight: 800;
-    }
-
-    .release-panel {
-      margin-bottom: 0;
-      padding: 24px;
-      border: 4px solid var(--line);
-      background:
-        linear-gradient(135deg, rgba(31, 117, 255, 0.18), transparent 42%),
-        radial-gradient(circle at right top, rgba(255, 212, 58, 0.55), transparent 18%),
-        linear-gradient(180deg, #fffdfa 0%, #ffe6b4 100%);
-      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .release-panel::before {
-      content: "Hero Dispatch";
-      position: absolute;
-      top: 18px;
-      right: 20px;
-      padding: 6px 12px;
-      border: 3px solid var(--line);
-      background: var(--accent);
-      color: #fff;
-      font-family: "Bangers", cursive;
-      font-size: 24px;
-      letter-spacing: 0.05em;
-      transform: rotate(3deg);
-    }
-
-    .release-title {
-      margin: 0 0 10px;
-      max-width: 560px;
-      font-family: "Bangers", cursive;
-      font-size: 45px;
-      font-weight: 400;
-      line-height: 0.95;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      text-shadow: 4px 4px 0 var(--accent-2);
-    }
-
-    .release-copy {
-      margin: 0 0 20px;
-      max-width: 720px;
-      color: var(--muted);
-      font-size: 22px;
-      line-height: 1.1;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .release-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-      justify-items: stretch;
-    }
-
-    .release-card {
-      display: grid;
-      gap: 12px;
-      justify-items: center;
-      padding: 18px 14px;
-      border: 4px solid var(--line);
-      background:
-        radial-gradient(circle at center, rgba(255, 212, 58, 0.3), transparent 45%),
-        var(--panel-strong);
-      transform: rotate(calc((var(--card-tilt, 0)) * 1deg));
-      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.95);
-      min-height: 100%;
-    }
-
-    .release-card:nth-child(1) { --card-tilt: -2; }
-    .release-card:nth-child(2) { --card-tilt: 1; }
-    .release-card:nth-child(3) { --card-tilt: -1; }
-
-    .release-face {
-      width: 75px;
-      height: 75px;
-      border: 3px solid var(--line);
-      background: #111;
-      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
-    }
-
-    .release-label {
-      color: var(--ink);
-      font-size: 18px;
-      text-align: center;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 18px;
-      margin-bottom: 18px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .tabs {
-      display: flex;
-      gap: 34px;
-    }
-
-    .tab {
-      font-size: 17px;
-      color: #a7a7a7;
-      position: relative;
-      padding: 4px 0;
-    }
-
-    .tab.active {
-      color: #fff;
-    }
-
-    .tab.active::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: -18px;
-      width: 30px;
-      height: 4px;
-      transform: translateX(-50%);
-      border-radius: 999px;
-      background: #fff;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-
-    .icon-btn,
-    .avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      border: 1px solid #3c3c3c;
-      background: #0e0e0e;
-    }
-
-    .icon-btn svg {
-      width: 17px;
-      height: 17px;
-      stroke: #f5f5f5;
-      fill: none;
-      stroke-width: 1.8;
-    }
-
-    .avatar {
-      background: linear-gradient(90deg, #ffb84d 0%, #ff8c1a 100%);
-      border-color: rgba(255, 82, 82, 0.6);
-      font-size: 14px;
-    }
-
-    .mainsection {
-      padding: 26px 24px;
-      border: 1px solid #171717;
-      border-radius: 14px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
-        #0a0a0a;
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
-    }
-
-    .mainsection-kicker {
-      margin: 0 0 6px;
-      color: #1b1b1b;
-      font-size: 30px;
-      font-weight: 700;
-      line-height: 1.05;
-    }
-
-    .mainsection-meta {
-      margin: 0 0 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
-      color: #a5a5a5;
-      font-size: 18px;
-      line-height: 1.4;
-    }
-
-    .mainsection-meta .byline {
-      color: #ff9136;
-      font-weight: 600;
-    }
-
-    .mainsection-body {
-      color: #000000;
-      font-size: 19px;
-      line-height: 1.65;
-    }
-
-    .mainsection-body p {
-      margin: 0 0 14px;
-    }
-
-    .mainsection-points {
-      margin: 0 0 14px;
-      padding-left: 20px;
-      display: grid;
-      gap: 6px;
-    }
-
-    .mainsection-points li::marker {
-      color: #d0d0d0;
-    }
-
-    .mainsection-label {
-      margin: 12px 0 8px;
-      color: #ffcf74;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .mainsection-balances {
-      margin: 0;
-      padding-left: 20px;
-      display: grid;
-      gap: 6px;
-      color: #d6d6d6;
-    }
-
-    .mainsection-balances strong {
-      color: #fff;
-    }
-
-    .news-feed {
-      display: grid;
-      gap: 18px;
-    }
-
-    .news-feed-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .news-feed-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .news-feed-button {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--line);
-      background: var(--accent-2);
-      color: var(--line);
-      font: inherit;
-      font-size: 22px;
-      line-height: 1;
-      cursor: pointer;
-      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .news-feed-button:hover:not(:disabled) {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .news-feed-button:disabled {
-      opacity: 0.45;
-      cursor: default;
-    }
-
-    .news-feed-counter {
-      color: var(--muted);
-      font-size: 15px;
-      font-weight: 700;
-      white-space: nowrap;
-      text-transform: uppercase;
-    }
-
-    .news-status {
-      min-height: 20px;
-      color: var(--text);
-      font-size: 16px;
-      line-height: 1.4;
-      font-weight: 700;
-    }
-
-    .news-status[data-state="error"] {
-      color: #ff8f8f;
-    }
-
-    .news-post {
-      padding: 26px 24px;
-      border: 4px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 243, 218, 0.92)),
-        var(--panel);
-      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .news-divider {
-      height: 1px;
-      margin: 18px 0;
-      border: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 91, 46, 0.9), transparent);
-    }
-
-    .news-change-title {
-      margin: 0 0 12px;
-      color: var(--accent);
-      font-family: "Bangers", cursive;
-      font-size: 28px;
-      font-weight: 400;
-      letter-spacing: 0.05em;
-    }
-
-    .news-change-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      display: grid;
-      gap: 10px;
-      color: var(--text);
-    }
-
-    .news-change-item {
-      display: grid;
-      gap: 12px;
-      align-items: start;
-      padding: 12px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-    }
-
-    .news-change-character {
-      width: 77px;
-      height: 77px;
-      background: #111;
-      border:  1px solid black;
-    }
-
-    .news-change-copy {
-      min-width: 0;
-    }
-
-    .news-change-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 8px;
-      flex-wrap: wrap;
-    }
-
-    .news-change-character-name {
-      color: var(--ink);
-      font-size: 18px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .news-change-skill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 8px 3px 3px;
-      background: var(--accent-2);
-      color: var(--line);
-      font-size: 13px;
-      font-weight: 800;
-      border: 2px solid var(--line);
-      text-transform: uppercase;
-    }
-
-    .news-change-skill-image {
-      width: 24px;
-      height: 24px;
-      object-fit: cover;
-      border: 2px solid var(--line);
-      background: #111;
-    }
-
-    .news-change-text {
-      margin: 0;
-      color: var(--text);
-      line-height: 1.55;
-      white-space: pre-line;
-      font-size: 17px;
-      font-weight: 600;
-    }
-
-    .news-change-type {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 0 8px;
-      border: 2px solid var(--line);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .news-change-type.buff {
-      background: #8cff7d;
-      color: var(--line);
-    }
-
-    .news-change-type.nerf {
-      background: #ff8f8f;
-      color: var(--line);
-    }
-
-    .news-change-group {
-      display: grid;
-      grid-template-columns: 75px minmax(0, 1fr);
-      gap: 12px;
-      align-items: start;
-      padding: 12px;
-      border: 3px solid var(--line);
-      background: var(--panel-strong);
-    }
-
-    .news-change-group-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .slider-dots {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 18px 0 26px;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.55);
-      background: transparent;
-    }
-
-    .dot.active {
-      background: #fff;
-      border-color: #fff;
-    }
-
-    .section-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .section-title {
-      margin: 0;
-      font-size: 21px;
-      font-weight: 600;
-    }
-
-    .carousel-arrow {
-      width: 36px;
-      height: 36px;
-      display: grid;
-      place-items: center;
-      color: #9c9c9c;
-      font-size: 36px;
-      line-height: 1;
-    }
-
-    .poster-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 24px;
-      margin-bottom: 38px;
-    }
-
-    .poster-card {
-      min-width: 0;
-    }
-
-    .poster-image {
-      height: 228px;
+        radial-gradient(ellipse at 15% 10%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 85% 8%, rgba(44, 156, 219, 0.08), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 38%, #000000 70%, #120a06 100%);
+      color: var(--ca-bone); font-family: var(--font-ui);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .ms-page { width: min(1340px, 100%); margin: 0 auto; padding: 0 24px 64px; }
+
+    /* Big editorial header */
+    .ms-bigtitle-wrap { position: relative; height: 78px; overflow: hidden; margin: 30px 0 4px; }
+    .ms-bigtitle {
+      position: absolute; bottom: -22px; left: -4px; margin: 0;
+      font-size: clamp(58px, 8vw, 104px); font-weight: 900; letter-spacing: 0.01em;
+      text-transform: uppercase; color: var(--ca-orange); line-height: 1; white-space: nowrap; opacity: 0.94;
+    }
+    .ms-subtitle { margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple); }
+
+    /* Toolbar (black bar) */
+    .ms-toolbar {
+      display: flex; align-items: center; gap: 26px; background: #000;
+      border: 1px solid rgba(255,255,255,0.06); padding: 14px 20px; flex-wrap: wrap;
+    }
+    .ms-check { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ca-parchment); cursor: pointer; }
+    .ms-check input { accent-color: var(--ca-orange); width: 14px; height: 14px; }
+    .ms-search { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .ms-search input {
+      background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,0.25);
+      color: var(--ca-bone); font-family: var(--font-ui); font-size: 12px; font-style: italic; padding: 6px 4px; width: 210px; outline: none;
+    }
+    .ms-search input::placeholder { color: var(--ca-dust); letter-spacing: 0.05em; }
+    .ms-search input:focus { border-bottom-color: var(--ca-purple); }
+    .ms-search-icon { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); font-size: 12px; }
+
+    .ms-status { margin: 14px 2px 0; font-size: 12px; color: var(--ca-dust); min-height: 16px; }
+
+    /* ── MISSION CARD GRID (light sheet on the dark shell) ─────── */
+    .ms-grid {
+      display: grid; gap: 26px 22px; margin-top: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
       border-radius: 10px;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--ca-shadow-sheet);
+      padding: 28px 26px;
+      color: var(--ca-ink);
     }
-
-    .poster-caption {
-      margin-top: 12px;
-      font-size: 14px;
-      text-align: center;
-      color: #dedede;
+    .ms-card { display: block; }
+    .ms-card-level { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1f7a3f; }
+    .ms-card-name { font-size: 19px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 8px; line-height: 1.05; }
+    .ms-card-art { position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: #111; border: 1px solid var(--ca-line-ink); }
+    .ms-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-base); }
+    .ms-card:hover .ms-card-art { border-color: var(--ca-orange); }
+    .ms-card:hover .ms-card-art img { transform: scale(1.04); }
+    .ms-card-overlay {
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 12px 12px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.92));
     }
+    .ms-card-mname { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.15; }
+    .ms-card-rankline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+    .ms-card-rank { font-size: 11px; color: #cdc9c2; }
+    .ms-card-rank .lbl { text-decoration: underline; text-transform: uppercase; letter-spacing: 0.04em; }
+    .ms-card-rank .val { color: #ff5a5a; }
+    .ms-status-pill { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+    .ms-status-pill.available { background: #1f7a3f; color: #cdfbd9; }
+    .ms-status-pill.locked { background: var(--ca-red); color: #fff; }
+    .ms-status-pill.completed { background: rgba(255,255,255,0.16); color: var(--ca-bone); }
+    .ms-card-view { margin-top: 9px; text-align: right; font-size: 12px; font-style: italic; color: var(--ca-ink-soft); }
+    .ms-card:hover .ms-card-view { color: var(--ca-orange); text-decoration: underline; }
+    .ms-empty { padding: 50px 20px; text-align: center; color: var(--ca-ink-faint); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 
-    .aside-top {
-      padding-bottom: 16px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    }
+    .ms-card-section { font-size: 11px; font-style: italic; color: var(--ca-ink-faint); margin: -4px 0 8px; }
 
-    .ladder,
-    .stats-panel {
-      margin-bottom: 16px;
-      padding: 14px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 241, 202, 0.95) 100%),
-        var(--panel);
-      color: var(--text);
-      border: 4px solid var(--line);
-      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.95);
-    }
-
-    .ladder-title,
-    .stats-title {
-      margin: 0 0 12px;
-      padding-bottom: 8px;
-      border-bottom: 3px solid var(--line);
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    .ladder-list,
-    .stats-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .ladder-row {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 8px 8px 8px 0;
-      border-bottom: 2px dashed rgba(21, 17, 11, 0.35);
-    }
-
-    .ladder-row:last-child {
-      border-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .ladder-rank {
-      width: 24px;
-      height: 24px;
-      display: grid;
-      place-items: center;
-      border-radius: 999px;
-      background: var(--accent-2);
-      border: 2px solid var(--line);
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--line);
-      line-height: 1;
-    }
-
-    .ladder-name {
-      margin-bottom: 5px;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.2;
-      color: var(--ink);
-      text-transform: uppercase;
-    }
-
-    .ladder-name a,
-    .stats-list a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .ladder-name a:hover,
-    .stats-list a:hover {
-      color: var(--accent);
-    }
-
-    .ladder-bar {
-      height: 18px;
-      width: 100%;
-      border: 3px solid var(--line);
-      background: #ffffff;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ladder-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent) 0%, #ffb11b 100%);
-    }
-
-    .ladder-score {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-size: 10px;
-      font-weight: 800;
-      color: #000000;
-      letter-spacing: 0.03em;
-      text-shadow: none;
-    }
-
-    .search {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      height: 34px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: #1e1e1e;
-      color: #7f7f7f;
-      font-size: 14px;
-    }
-
-    .stats-group + .stats-group {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 2px dashed rgba(21, 17, 11, 0.35);
-    }
-
-    .stats-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .stats-list li {
-      padding: 7px 8px;
-      background: var(--panel-strong);
-      border: 2px solid rgba(21, 17, 11, 0.4);
-      font-weight: 700;
-    }
-
-    .search svg {
-      width: 14px;
-      height: 14px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      flex: 0 0 auto;
-    }
-
-    .aside-title {
-      margin: 0 0 18px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .stack {
-      display: grid;
-      gap: 18px;
-    }
-
-    .stack-item {
-      display: grid;
-      grid-template-columns: 102px 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    .stack-thumb {
-      width: 102px;
-      height: 148px;
+    /* ── LANDING: rank category blocks ────────────────────────── */
+    .ms-cats {
+      margin: 18px auto 0;
+      max-width: 1040px;
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
       border-radius: 10px;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--ca-shadow-sheet);
+      padding: 8px 34px;
     }
-
-    .stack-name {
-      margin: 2px 0 6px;
-      font-size: 18px;
-      font-weight: 500;
-      line-height: 1.15;
+    /* thumbnail-LEFT (fixed, asset-ready) + text-RIGHT */
+    .ms-cat {
+      display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center;
+      padding: 26px 0; border-bottom: 1px solid var(--ca-line-ink); color: var(--ca-ink);
     }
-
-    .stack-meta {
-      color: #bcbcbc;
-      font-size: 14px;
-      line-height: 1.35;
+    .ms-cat:last-child { border-bottom: 0; }
+    .ms-cat-title { margin: 0 0 8px; font-size: 18px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); }
+    .ms-cat-count { font-size: 12px; font-weight: 700; color: var(--ca-ink-faint); }
+    .ms-cat p { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: var(--ca-ink-soft); max-width: 600px; }
+    .ms-cat-cta { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; color: var(--ca-purple); }
+    .ms-cat:hover .ms-cat-cta { color: var(--ca-orange); text-decoration: underline; }
+    .ms-cat:hover .ms-cat-title { color: var(--ca-orange); }
+    /* fixed 200×120 placeholder container — swap the gradient for a custom
+       <img style="width:100%;height:100%;object-fit:cover"> when assets arrive */
+    .ms-cat-thumb {
+      width: 200px; height: 120px;
+      display: grid; place-items: center;
+      border-radius: 8px; border: 1px solid var(--ca-line-ink); overflow: hidden;
     }
+    .ms-cat-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ms-cat-thumb span { font-size: 38px; font-weight: 900; letter-spacing: 0.04em; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .ms-cat-thumb.t-dc { background: linear-gradient(135deg, #1f7a3f, #46c46a); }
+    .ms-cat-thumb.t-b  { background: linear-gradient(135deg, #b07d12, var(--ca-gold)); }
+    .ms-cat-thumb.t-a  { background: linear-gradient(135deg, #7a3d08, var(--ca-purple)); }
+    .ms-cat-thumb.t-s  { background: linear-gradient(135deg, var(--ca-purple-ui), var(--ca-violet)); }
 
-    .see-more {
-      width: 100%;
-      height: 34px;
-      margin: 18px 0 26px;
-      border: 0;
-      border-radius: 999px;
-      background: #292929;
-      color: #ededed;
-      font: inherit;
-      cursor: pointer;
+    .ms-local-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 20px; }
+    .ms-local-nav a {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ca-parchment); padding: 8px 13px; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px; transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
     }
+    .ms-local-nav a:hover { color: #fff; border-color: var(--ca-orange); }
+    .ms-local-nav a.active { color: #fff; border-color: rgba(124, 77, 255, 0.7); background: rgba(124, 77, 255, 0.14); }
 
-    @media (max-width: 1180px) {
-      .app {
-        grid-template-columns: 220px minmax(0, 1fr);
-        padding: 14px;
-      }
-
-      .aside {
-        display: none;
-      }
-
-      .poster-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 860px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-bottom-width: 4px;
-      }
-
-      .mainsection {
-        padding: 22px 18px;
-      }
-
-      .poster-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-      }
-
-      .release-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* ── CATEGORY: breadcrumb + intro + inline toolbar ────────── */
+    .ms-crumb-nav { margin: 22px 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ca-parchment); }
+    .ms-crumb-nav a { color: var(--ca-parchment); }
+    .ms-crumb-nav a:hover { color: var(--ca-orange); }
+    .ms-crumb-nav .cur { color: var(--ca-orange); }
+    .ms-cat-intro { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--ca-parchment); max-width: 760px; }
+    .ms-search-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ca-parchment); }
+    .ms-search-inline { margin-left: 0; }
+    .ms-toolbar .ms-check { margin-left: auto; }
+    .ms-crumb a { color: var(--ca-ink-soft); }
+    .ms-crumb a:hover { color: var(--ca-orange); }
 
     @media (max-width: 560px) {
-      .main,
-      .sidebar {
-        padding-left: 14px;
-        padding-right: 14px;
-      }
-
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-      }
-
-      .tabs {
-        gap: 22px;
-      }
-
-      .mainsection-kicker {
-        font-size: 24px;
-      }
+      .ms-cat { grid-template-columns: 1fr; gap: 14px; }
+      .ms-cat-thumb { width: 100%; height: 120px; order: -1; }
     }
 
+    /* ── DETAIL VIEW (light sheet) ────────────────────────────── */
+    #ms-detail-view {
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
+      border-radius: 10px;
+      box-shadow: var(--ca-shadow-sheet);
+      padding: 26px 30px 34px;
+      margin-top: 22px;
+      color: var(--ca-ink);
+    }
+    .ms-crumb { margin: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ca-ink-faint); }
+    .ms-crumb .cur { color: var(--ca-orange); }
+    .ms-detail-nav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 26px; padding-bottom: 14px; border-bottom: 1px solid var(--ca-line-ink); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .ms-detail-nav a:hover { color: var(--ca-orange); }
+    .ms-detail-nav .accent { color: var(--ca-violet); }
+    .ms-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #1f7a3f; }
+    .ms-detail-title { font-size: 30px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 22px; }
+    .ms-detail-grid { display: grid; grid-template-columns: 360px 1fr 1fr 1fr; gap: 30px; align-items: start; }
+    .ms-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #111; border: 1px solid var(--ca-line-ink); }
+    .ms-col-head { display: inline-block; background: var(--ca-ink); border: 1px solid var(--ca-ink); padding: 4px 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ca-surface-light); margin-bottom: 14px; }
+    .ms-col-head.reward { background: #1f7a3f; border-color: #1f7a3f; color: #fff; }
+    .ms-col-line { font-size: 13px; color: var(--ca-ink-soft); margin: 0 0 9px; line-height: 1.5; }
+    .ms-col-line::before { content: "– "; color: var(--ca-ink-faint); }
+    .ms-col-line strong { color: var(--ca-ink); font-weight: 700; }
+    .ms-col-sub { margin-top: 22px; }
+    .ms-reward-char { margin-top: 6px; }
+    .ms-reward-char img { width: 84px; height: 84px; object-fit: cover; border: 1px solid var(--ca-line-ink); display: block; margin-bottom: 8px; }
+    .ms-reward-name { font-size: 13px; font-weight: 700; color: var(--ca-ink); }
+
+    /* Footer */
+    .ms-footer { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 24px 30px; text-align: center; }
+    .ms-footer-social { display: flex; justify-content: center; gap: 16px; margin-bottom: 26px; }
+    .ms-footer-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--ca-orange), var(--ca-violet)); color: #000; font-weight: 900; font-size: 16px; }
+    .ms-footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 24px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-parchment); }
+    .ms-footer-links sup { font-size: 8px; color: var(--ca-dust); }
+    .ms-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
+
+    @media (max-width: 980px) {
+      .ms-detail-grid { grid-template-columns: 1fr 1fr; }
+    }
     @media (max-width: 640px) {
-      .missions-panel {
-        max-width: 100%;
-        padding: 16px;
-      }
-
-      .missions-toolbar {
-        justify-content: center;
-      }
-
-      .missions-grid {
-        grid-template-columns: 1fr;
-        justify-content: center;
-      }
-
-      .mission-card {
-        transform: none;
-      }
-
-      .mission-image {
-        width: min(265px, 100%);
-        height: auto;
-        aspect-ratio: 265 / 177;
-      }
-
-      .mission-sheet {
-        padding-top: 54px;
-      }
-
-      .mission-sheet-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .mission-sheet-copy,
-      .mission-sheet-goals,
-      .mission-sheet-visual,
-      .mission-sheet-portrait-wrap {
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
-      }
-
-      .mission-sheet-image {
-        width: min(265px, 100%);
-        height: auto;
-        aspect-ratio: 265 / 177;
-      }
-
-      .mission-sheet-footer {
-        grid-template-columns: 1fr;
-      }
-
-      .mission-sheet-portrait {
-        width: 77px;
-        height: 77px;
-      }
+      .ms-detail-grid { grid-template-columns: 1fr; }
+      .ms-search { margin-left: 0; }
     }
   </style>
+  <link rel="stylesheet" href="shop.css">
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <img class="brand-mark" src="sitelogo.png" alt="Comic-Arena logo" />
-        <div class="brand-copy">
-          <div class="brand-name">Comic-ARENA</div>
-          <div class="brand-tagline">Your #1 Comic Online Multiplayer Game</div>
+
+  <!-- ═══ SHINOBI-ARENA SHARED NAV ══════════════════════════════ -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N·A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Start Page</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
+      </ul>
+
+      <div class="ca-nav-account" id="ca-nav-account">
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+            <section class="group" id="auth-panel">
+              <h2 class="group-title" id="auth-title">Login</h2>
+              <div id="guest-auth-view">
+                <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
+                <form class="auth-form" id="auth-form">
+                  <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
+                  <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                  <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
+                  <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
+                  <button class="auth-button" type="submit" id="auth-submit">Login</button>
+                  <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
+                  <p class="auth-status" id="auth-status" aria-live="polite"></p>
+                </form>
+              </div>
+              <div class="account-panel" id="account-panel" hidden>
+                <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
+                <div class="account-actions">
+                  <button class="account-action" type="button" id="view-profile-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg>
+                    <span>View Profile</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-avatar-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg>
+                    <span>Change Avatar</span>
+                  </button>
+                  <button class="account-action" type="button" id="clan-panel-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg>
+                    <span>Clan Panel</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-backgrounds-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg>
+                    <span>Custom Background</span>
+                  </button>
+                  <button class="account-action" type="button" id="reset-account-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg>
+                    <span>Reset Account</span>
+                  </button>
+                  <section class="group" id="admin-panel-section" hidden>
+                    <h2 class="group-title">Admin Panel</h2>
+                    <nav class="nav">
+                      <a class="nav-link" href="winrates.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" /><path d="M7 14V9" /><path d="M12 14V6" /><path d="M17 14v-3" /></svg>
+                        <span>Winrates</span>
+                      </a>
+                      <a class="nav-link" href="charactereditor.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 16 18 4" /><path d="m14 4 4 4" /><path d="M6 16l-1 4 4-1" /></svg>
+                        <span>Character Editor</span>
+                      </a>
+                      <a class="nav-link active" href="editmission.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" /><path d="M7 16l10-10" /><path d="M14 6l4 4" /><path d="M6 18l1-4 4-1" /></svg>
+                        <span>Mission Editor</span>
+                      </a>
+                      <a class="nav-link" href="playeraccounts.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
+                        <span>Player Accounts</span>
+                      </a>
+                      <a class="nav-link" href="newspost.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
+                        <span>News Post</span>
+                      </a>
+                    </nav>
+                  </section>
+                  <button class="account-action" type="button" id="logout-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
+                    <span>Log Out</span>
+                  </button>
+                </div>
+                <p class="auth-status" id="account-status" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
-
-      <section class="group">
-        <h2 class="group-title">Home Menu</h2>
-        <nav class="nav">
-          <button class="play-now" type="button" id="play-now-button">Play Now</button>
-          <a class="nav-link" href="index.html">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" /></svg>
-            <span>Home</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
-            <span>Community</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" /><rect x="14" y="4" width="6" height="6" /><rect x="4" y="14" width="6" height="6" /><rect x="14" y="14" width="6" height="6" /></svg>
-            <span>Events</span>
-          </a>
-          <a class="nav-link active" href="missions.html">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.1 2.8 7.9 7 9 4.2-1.1 7-4.9 7-9V6z" /><path d="M9 12h6" /><path d="M12 9v6" /></svg>
-            <span>Comic Missions</span>
-          </a>
-          <a class="nav-link" href="#">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5A2.5 2.5 0 0 1 8.5 2H20v16H8.5A2.5 2.5 0 0 0 6 20.5z" /><path d="M6 4.5V22" /><path d="M9.5 7H16" /><path d="M9.5 11H17" /></svg>
-            <span>Game Manual</span>
-          </a>
-          <a class="nav-link" href="charactersandskills.html">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h16" /><path d="M7.5 4v16" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
-            <span>Characters and Skills</span>
-          </a>
-        </nav>
-      </section>
-
-      <section class="group" id="auth-panel">
-        <h2 class="group-title" id="auth-title">Login</h2>
-        <div id="guest-auth-view">
-          <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
-          <form class="auth-form" id="auth-form">
-            <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
-            <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
-            <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
-            <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
-            <button class="auth-button" type="submit" id="auth-submit">Login</button>
-            <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
-            <p class="auth-status" id="auth-status" aria-live="polite"></p>
-          </form>
-        </div>
-        <div class="account-panel" id="account-panel" hidden>
-          <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
-          <div class="account-actions">
-            <button class="account-action" type="button" id="view-profile-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg>
-              <span>View Profile</span>
-            </button>
-            <button class="account-action" type="button" id="change-avatar-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg>
-              <span>Change Avatar</span>
-            </button>
-            <button class="account-action" type="button" id="clan-panel-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg>
-              <span>Clan Panel</span>
-            </button>
-            <button class="account-action" type="button" id="change-backgrounds-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg>
-              <span>Custom Background</span>
-            </button>
-            <button class="account-action" type="button" id="reset-account-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg>
-              <span>Reset Account</span>
-            </button>
-            <section class="group" id="admin-panel-section" hidden>
-              <h2 class="group-title">Admin Panel</h2>
-              <nav class="nav">
-                <a class="nav-link" href="winrates.html">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" /><path d="M7 14V9" /><path d="M12 14V6" /><path d="M17 14v-3" /></svg>
-                  <span>Winrates</span>
-                </a>
-                <a class="nav-link" href="charactereditor.html">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 16 18 4" /><path d="m14 4 4 4" /><path d="M6 16l-1 4 4-1" /></svg>
-                  <span>Character Editor</span>
-                </a>
-                <a class="nav-link active" href="editmission.html">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" /><path d="M7 16l10-10" /><path d="M14 6l4 4" /><path d="M6 18l1-4 4-1" /></svg>
-                  <span>Mission Editor</span>
-                </a>
-                <a class="nav-link" href="playeraccounts.html">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
-                  <span>Player Accounts</span>
-                </a>
-                <a class="nav-link" href="newspost.html">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
-                  <span>News Post</span>
-                </a>
-              </nav>
-            </section>
-            <button class="account-action" type="button" id="logout-button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
-              <span>Log Out</span>
-            </button>
-          </div>
-          <p class="auth-status" id="account-status" aria-live="polite"></p>
-        </div>
-      </section>
-
-    </aside>
-
-    <main class="main">
-      <section class="missions-panel" aria-label="Missions">
-        <div class="missions-toolbar">
-          <div class="missions-search">
-            <label class="missions-search-label" for="mission-search">Search Mission:</label>
-            <input
-              class="missions-search-input"
-              id="mission-search"
-              type="search"
-              placeholder="Search for a name mission..."
-              aria-label="Search for a mission by name"
-            />
-          </div>
-          <label class="missions-availability" for="missions-available">
-            <input id="missions-available" type="checkbox" />
-            <span>Only Show Available</span>
-          </label>
-        </div>
-        <p class="missions-status" id="missions-status" aria-live="polite"></p>
-        <div class="missions-grid" id="missions-grid"></div>
-      </section>
-    </main>
-
-    <div class="mission-overlay" id="mission-overlay" hidden>
-      <section class="mission-sheet" id="mission-sheet" role="dialog" aria-modal="true" aria-labelledby="mission-sheet-heading">
-        <button class="mission-sheet-close" type="button" id="mission-sheet-close" aria-label="Close mission info">✘</button>
-        <div class="mission-sheet-grid">
-          <div class="mission-sheet-copy">
-            <h3 class="mission-sheet-heading" id="mission-sheet-heading">Mission Info</h3>
-            <p class="mission-sheet-line" id="mission-sheet-name-line"></p>
-            <div class="mission-sheet-divider"></div>
-            <h3 class="mission-sheet-heading">Mission Requirements</h3>
-            <p class="mission-sheet-line" id="mission-sheet-rank-line"></p>
-            <div class="mission-sheet-requirements" id="mission-sheet-requirements"></div>
-            <div class="mission-sheet-divider"></div>
-            <h3 class="mission-sheet-heading">Mission Reward</h3>
-            <p class="mission-sheet-reward" id="mission-sheet-reward"></p>
-          </div>
-
-          <div class="mission-sheet-visual">
-            <img class="mission-sheet-image" id="mission-sheet-image" alt="" />
-          </div>
-
-          <div class="mission-sheet-footer">
-            <div class="mission-sheet-portrait-wrap">
-              <div class="mission-sheet-character-name" id="mission-sheet-character-name"></div>
-              <img class="mission-sheet-portrait" id="mission-sheet-portrait" alt="" />
-            </div>
-            <div class="mission-sheet-goals">
-              <h3 class="mission-sheet-heading">Mission Goals</h3>
-              <div class="mission-sheet-goals-list" id="mission-sheet-goals"></div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
+  </nav>
 
-    <aside class="aside">
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Player Levels</h3>
-        <div class="ladder-list" id="sidebar-top-player-levels">
-          <div class="ladder-row">
-            <div class="ladder-rank">01</div>
-            <div>
-              <div class="ladder-name">Rafa</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 57%;"></div><div class="ladder-score">57</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">02</div>
-            <div>
-              <div class="ladder-name">nejihyuuga</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 56%;"></div><div class="ladder-score">56</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">03</div>
-            <div>
-              <div class="ladder-name">ichi404</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 55%;"></div><div class="ladder-score">55</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">04</div>
-            <div>
-              <div class="ladder-name">Shar</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 53%;"></div><div class="ladder-score">53</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">05</div>
-            <div>
-              <div class="ladder-name">HalfDead-</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 52%;"></div><div class="ladder-score">52</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">06</div>
-            <div>
-              <div class="ladder-name">ShikamaruN</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">07</div>
-            <div>
-              <div class="ladder-name">Josh</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">08</div>
-            <div>
-              <div class="ladder-name">robz</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">09</div>
-            <div>
-              <div class="ladder-name">Shari</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 50%;"></div><div class="ladder-score">50</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">10</div>
-            <div>
-              <div class="ladder-name">xinef</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 50%;"></div><div class="ladder-score">50</div></div>
-            </div>
-          </div>
+  <!-- ═══ HERO ═════════════════════════════════════════════════ -->
+  <header class="ca-hero">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">◁</div>
+      <div class="ca-hero-center">
+        <button class="ca-hero-play" type="button" id="play-now-button">› START PLAYING</button>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">⚡</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
         </div>
-      </section>
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Alliance Levels</h3>
-        <div class="ladder-list" id="sidebar-top-clan-levels">
-          <div class="ladder-row">
-            <div class="ladder-rank">01</div>
-            <div>
-              <div class="ladder-name">Akatsuki</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 92%;"></div><div class="ladder-score">92</div></div>
-            </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">▷</div>
+    </div>
+  </header>
+
+  <!-- ═══ MISSIONS ═════════════════════════════════════════════ -->
+  <main class="ms-page">
+
+    <!-- ── LANDING: rank category overview ────────────────────── -->
+    <section id="ms-landing">
+      <nav class="ms-crumb-nav" aria-label="Breadcrumb">
+        <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Ninja Missions</span>
+      </nav>
+      <div class="ms-bigtitle-wrap"><h1 class="ms-bigtitle">NINJA MISSIONS</h1></div>
+      <p class="ms-subtitle">/ Choose a rank and complete goals to unlock characters and rewards</p>
+      <nav class="ms-local-nav" aria-label="Mission sections">
+        <a class="active" href="missions.html" data-mission-section="overview">Overview</a>
+        <a href="missions.html?rank=dc" data-mission-section="dc">D/C Rank</a>
+        <a href="missions.html?rank=b" data-mission-section="b">B Rank</a>
+        <a href="missions.html?rank=a" data-mission-section="a">A Rank</a>
+        <a href="missions.html?rank=s" data-mission-section="s">S Rank</a>
+      </nav>
+
+      <div class="ms-cats">
+        <a class="ms-cat" href="missions.html?rank=dc">
+          <div class="ms-cat-thumb t-dc" aria-hidden="true"><span>D·C</span></div>
+          <div class="ms-cat-body">
+            <h2 class="ms-cat-title">D &amp; C Rank Missions <span class="ms-cat-count" data-count="dc"></span></h2>
+            <p>The D and C Rank Missions are the proving grounds for new and unexperienced shinobi. Clearing them unlocks notably the Sound ninja and early upgrades to get your roster started.</p>
+            <span class="ms-cat-cta">Check out the D &amp; C Rank Missions! ›</span>
           </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">02</div>
-            <div>
-              <div class="ladder-name">Konoha</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 89%;"></div><div class="ladder-score">89</div></div>
-            </div>
+        </a>
+        <a class="ms-cat" href="missions.html?rank=b">
+          <div class="ms-cat-thumb t-b" aria-hidden="true"><span>B</span></div>
+          <div class="ms-cat-body">
+            <h2 class="ms-cat-title">B Rank Missions <span class="ms-cat-count" data-count="b"></span></h2>
+            <p>The B Rank Missions are reserved for experienced ninja. With these missions you can unlock villains and the subordinates of the most dangerous shinobi.</p>
+            <span class="ms-cat-cta">Check out the B Rank Missions! ›</span>
           </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">03</div>
-            <div>
-              <div class="ladder-name">Sand</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 85%;"></div><div class="ladder-score">85</div></div>
-            </div>
+        </a>
+        <a class="ms-cat" href="missions.html?rank=a">
+          <div class="ms-cat-thumb t-a" aria-hidden="true"><span>A</span></div>
+          <div class="ms-cat-body">
+            <h2 class="ms-cat-title">A Rank Missions <span class="ms-cat-count" data-count="a"></span></h2>
+            <p>The A Rank Missions are only assigned to highly experienced ninja. With these missions you are able to unlock team leaders and elite fighters.</p>
+            <span class="ms-cat-cta">Check out the A Rank Missions! ›</span>
           </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">04</div>
-            <div>
-              <div class="ladder-name">Mist</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 81%;"></div><div class="ladder-score">81</div></div>
-            </div>
+        </a>
+        <a class="ms-cat" href="missions.html?rank=s">
+          <div class="ms-cat-thumb t-s" aria-hidden="true"><span>S</span></div>
+          <div class="ms-cat-body">
+            <h2 class="ms-cat-title">S Rank Missions <span class="ms-cat-count" data-count="s"></span></h2>
+            <p>The S Rank Missions are only for the best of the best. With these missions you are able to unlock legendary ninja and hokage-tier shinobi.</p>
+            <span class="ms-cat-cta">Check out the S Rank Missions! ›</span>
           </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">05</div>
-            <div>
-              <div class="ladder-name">Cloud</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 78%;"></div><div class="ladder-score">78</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">06</div>
-            <div>
-              <div class="ladder-name">LeafForce</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 74%;"></div><div class="ladder-score">74</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">07</div>
-            <div>
-              <div class="ladder-name">Anbu</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 71%;"></div><div class="ladder-score">71</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">08</div>
-            <div>
-              <div class="ladder-name">Uchiha</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 67%;"></div><div class="ladder-score">67</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">09</div>
-            <div>
-              <div class="ladder-name">Sannin</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 63%;"></div><div class="ladder-score">63</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">10</div>
-            <div>
-              <div class="ladder-name">Hyuga</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 60%;"></div><div class="ladder-score">60</div></div>
-            </div>
-          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ── CATEGORY: rank page ────────────────────────────────── -->
+    <section id="ms-category" hidden>
+      <nav class="ms-crumb-nav" aria-label="Breadcrumb">
+        <a href="index.html">Naruto-Arena</a> &gt; <a href="missions.html">Ninja Missions</a> &gt; <span class="cur" id="ms-cat-crumb">Rank</span>
+      </nav>
+      <div class="ms-bigtitle-wrap"><h1 class="ms-bigtitle" id="ms-cat-title">RANK MISSIONS</h1></div>
+      <p class="ms-cat-intro" id="ms-cat-intro"></p>
+      <nav class="ms-local-nav" aria-label="Mission sections">
+        <a href="missions.html" data-mission-section="overview">Back to Ninja Missions</a>
+        <a href="missions.html?rank=dc" data-mission-section="dc">D/C Rank</a>
+        <a href="missions.html?rank=b" data-mission-section="b">B Rank</a>
+        <a href="missions.html?rank=a" data-mission-section="a">A Rank</a>
+        <a href="missions.html?rank=s" data-mission-section="s">S Rank</a>
+      </nav>
+
+      <div class="ms-toolbar">
+        <label class="ms-search-label" for="ms-search-input">Search Mission:</label>
+        <div class="ms-search ms-search-inline">
+          <input type="search" id="ms-search-input" placeholder="Search for a name mission..." aria-label="Search missions" />
+          <span class="ms-search-icon" aria-hidden="true">⌕</span>
         </div>
-      </section>
-      <section class="stats-panel">
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Winstreak</h3>
-          <ol class="stats-list" id="sidebar-top-current-streaks">
-            <li>Douglasschanu +25 streak</li>
-            <li>madara +22 streak</li>
-            <li>topreactor +21 streak</li>
-            <li>ComodoroTeach +20</li>
-            <li>Clanles +20 streak</li>
-            <li>Vy +20 streak</li>
-            <li>vanns +20 streak</li>
-            <li>Cleezus888 +19 streak</li>
-            <li>yase-forfun +16 streak</li>
-            <li>TheusTop +15 streak</li>
-          </ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Wins</h3>
-          <ol class="stats-list" id="sidebar-top-wins">
-            <li>juicewrld999 +8255 wins</li>
-            <li>GoodySan +7216 wins</li>
-            <li>rogerindopend +6558 wins</li>
-            <li>One_ib +6463 wins</li>
-            <li>Sirup +4921 wins</li>
-            <li>gravidadeTAUBATE +4586 wins</li>
-            <li>leohyua25 +4342 wins</li>
-            <li>newmimproved +4282 wins</li>
-            <li>beluxe +4281 wins</li>
-            <li>julu0612 +4188 wins</li>
-          </ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 20 Highest Win Streak</h3>
-          <ol class="stats-list" id="sidebar-top-highest-streaks">
-            <li>Buffy +80 streak</li>
-            <li>_hoshigama- +76 streak</li>
-            <li>Cloudprince +76 streak</li>
-            <li>GodEneru +74 streak</li>
-            <li>AkatsKonan +73 streak</li>
-            <li>HalfDead- +72 streak</li>
-            <li>_Shark +67 streak</li>
-            <li>gabooo +66 streak</li>
-            <li>Cersak +65 streak</li>
-            <li>Demon +65 streak</li>
-            <li>Dan +63 streak</li>
-            <li>mrChans +61 streak</li>
-            <li>itachi_killer25 +61 streak</li>
-            <li>Sakura +60 streak</li>
-            <li>Rafa +60 streak</li>
-            <li>videogame33 +60 streak</li>
-            <li>Myotismon +60 streak</li>
-            <li>Sasuke +60 streak</li>
-            <li>Bolts +59 streak</li>
-            <li>Douglasschanu +57 streak</li>
-          </ol>
-        </div>
-      </section>
-    </aside>
-  </div>
+        <label class="ms-check"><input type="checkbox" id="ms-available-only" /> Only Show Available</label>
+      </div>
+
+      <p class="ms-status" id="ms-status" aria-live="polite"></p>
+      <div id="ms-grid" class="ms-grid"><div class="ms-empty">Loading missions…</div></div>
+    </section>
+
+    <!-- ── DETAIL ─────────────────────────────────────────────── -->
+    <section id="ms-detail-view" hidden></section>
+
+  </main>
+
+  <!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+  <footer class="ms-footer">
+    <div class="ms-footer-social">
+      <span class="ms-footer-icon" aria-hidden="true">CA</span>
+      <a class="ms-footer-icon" href="#" aria-label="Join our Discord">D</a>
+    </div>
+    <nav class="ms-footer-links" aria-label="Legal">
+      <a href="#">Privacy Notice<sup>05</sup></a>
+      <a href="#">Terms of Service<sup>06</sup></a>
+      <a href="#">Copyright<sup>06</sup></a>
+    </nav>
+    <p class="ms-footer-copy">Naruto-Arena 2026. &nbsp; All Rights Reserved.</p>
+  </footer>
+
+  <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./shop.js" defer></script>
+
+  <!-- Missions: card grid + own-page mission detail (no modal). Reuses /api/missions. -->
   <script>
     (function () {
-      const defaultMissionCatalog = [
-        {
-          missionId: "adored-elder-sister",
-          title: "The Adored Elder Sister",
-          level_requirement: 1,
-          mode_restriction: { allowed_modes: ["quick", "ladder"] },
-          reward: 'Mission "The Adored Elder Sister" completion.',
-          image: "ingamebgexample.png",
-          imageAlt: "The Adored Elder Sister mission artwork",
-          characterName: "Hyuuga Hanabi",
-          portrait: "deadcharacter.png",
-          portraitAlt: "Hyuuga Hanabi portrait",
-          requirements: [],
-          goals: [
-            'Use Hyuuga Neji\'s "Gentle Fist" 8 times. (0/8)',
-            'Use Hyuuga Hinata\'s "Gentle Fist" 8 times. (0/8)'
-          ],
-          available: true,
-          sortOrder: 1
-        },
-        {
-          missionId: "yellow-flash",
-          title: "The Yellow Flash",
-          level_requirement: 16,
-          mode_restriction: { allowed_modes: ["quick", "ladder"] },
-          reward: 'Mission "The Yellow Flash" completion.',
-          image: "ingamebgexample2.png",
-          imageAlt: "The Yellow Flash mission artwork",
-          characterName: "Minato Namikaze",
-          portrait: "deadcharacter.png",
-          portraitAlt: "Minato Namikaze portrait",
-          requirements: [],
-          goals: [
-            "Win the battle against Minato.",
-            "Finish the mission to unlock its reward."
-          ],
-          available: true,
-          sortOrder: 2
-        },
-        {
-          missionId: "negan",
-          title: "Negan",
-          level_requirement: 16,
-          mode_restriction: { allowed_modes: ["quick", "ladder"] },
-          reward_character: "negan",
-          reward_character_name: "Negan",
-          reward: "Unlock Negan.",
-          image: "https://i.imgur.com/csZvbwl.png",
-          imageAlt: "Negan mission artwork",
-          characterName: "Rick Grimes",
-          portrait: "https://i.imgur.com/4p90X9r.png",
-          portraitAlt: "Rick Grimes portrait",
-          requirements: [],
-          goals: [
-            {
-              type: "win_streak",
-              character_id: "rick-grimes",
-              character_name: "Rick Grimes",
-              wins: 4
-            }
-          ],
-          available: true,
-          sortOrder: 3
-        }
+      var defaultMissionCatalog = [
+        { missionId: "adored-elder-sister", title: "The Adored Elder Sister", level_requirement: 1,
+          reward: 'Mission "The Adored Elder Sister" completion.', image: "ingamebgexample.png",
+          characterName: "Hyuuga Hanabi", portrait: "deadcharacter.png", requirements: [],
+          goals: ['Use Hyuuga Neji\'s "Gentle Fist" 8 times. (0/8)', 'Use Hyuuga Hinata\'s "Gentle Fist" 8 times. (0/8)'],
+          available: true, sortOrder: 1 },
+        { missionId: "yellow-flash", title: "The Yellow Flash", level_requirement: 16,
+          reward: 'Mission "The Yellow Flash" completion.', image: "ingamebgexample2.png",
+          characterName: "Minato Namikaze", portrait: "deadcharacter.png", requirements: [],
+          goals: ["Win the battle against Minato.", "Finish the mission to unlock its reward."],
+          available: true, sortOrder: 2 },
+        { missionId: "negan", title: "Negan", level_requirement: 16, reward_character: "negan",
+          reward_character_name: "Negan", reward: "Unlock Negan.", image: "https://i.imgur.com/csZvbwl.png",
+          characterName: "Rick Grimes", portrait: "https://i.imgur.com/4p90X9r.png", requirements: [],
+          goals: [{ type: "win_streak", character_id: "rick-grimes", character_name: "Rick Grimes", wins: 4 }],
+          available: true, sortOrder: 3 }
       ];
 
-      const missionsGrid = document.getElementById("missions-grid");
-      const missionsStatus = document.getElementById("missions-status");
-      const missionSearch = document.getElementById("mission-search");
-      const missionsAvailable = document.getElementById("missions-available");
-      const overlay = document.getElementById("mission-overlay");
-      const sheet = document.getElementById("mission-sheet");
-      const closeButton = document.getElementById("mission-sheet-close");
-      const nameLine = document.getElementById("mission-sheet-name-line");
-      const rankLine = document.getElementById("mission-sheet-rank-line");
-      const requirementsEl = document.getElementById("mission-sheet-requirements");
-      const rewardLine = document.getElementById("mission-sheet-reward");
-      const imageEl = document.getElementById("mission-sheet-image");
-      const characterNameEl = document.getElementById("mission-sheet-character-name");
-      const portraitEl = document.getElementById("mission-sheet-portrait");
-      const goalsEl = document.getElementById("mission-sheet-goals");
+      var landingView = document.getElementById("ms-landing");
+      var categoryView = document.getElementById("ms-category");
+      var grid = document.getElementById("ms-grid");
+      var detailView = document.getElementById("ms-detail-view");
+      var statusEl = document.getElementById("ms-status");
+      var searchInput = document.getElementById("ms-search-input");
+      var availableOnly = document.getElementById("ms-available-only");
+      var catTitle = document.getElementById("ms-cat-title");
+      var catCrumb = document.getElementById("ms-cat-crumb");
+      var catIntro = document.getElementById("ms-cat-intro");
+      var missionSectionLinks = Array.prototype.slice.call(document.querySelectorAll("[data-mission-section]"));
 
-      let missionCatalog = [];
-      let missionMap = new Map();
-      let missionProgressByMissionId = {};
+      var missionCatalog = [];
+      var missionMap = new Map();
+      var missionProgressByMissionId = {};
+
+      // Rank bands by level requirement (no canonical rank field exists in the
+      // mission data model, so this is the documented fallback mapping; D & C
+      // are grouped together per the classic Naruto-Arena flow).
+      var RANK_META = {
+        dc: { label: "D & C Rank Missions", title: "D & C RANK MISSIONS",
+              intro: "With D and C Rank Missions you unlock many new characters and upgrades to existing characters — the proving grounds for new and unexperienced shinobi." },
+        b:  { label: "B Rank Missions", title: "B RANK MISSIONS",
+              intro: "B Rank Missions are reserved for experienced shinobi, unlocking villains and the subordinates of the most dangerous ninja." },
+        a:  { label: "A Rank Missions", title: "A RANK MISSIONS",
+              intro: "A Rank Missions are assigned to highly experienced shinobi, unlocking team leaders and elite fighters." },
+        s:  { label: "S Rank Missions", title: "S RANK MISSIONS",
+              intro: "S Rank Missions are only for the best of the best — unlocking legendary ninja and hokage-tier shinobi." }
+      };
+      function rankOf(m) {
+        var lv = getLevelRequirementValue(m) || 1;
+        if (lv >= 40) return "s";
+        if (lv >= 30) return "a";
+        if (lv >= 20) return "b";
+        return "dc"; // level < 20 → combined D & C
+      }
+
+      function setStatus(msg, isError) {
+        if (!statusEl) return;
+        statusEl.textContent = msg || "";
+        statusEl.style.color = isError ? "#e06666" : "";
+      }
+      function slug(v) { return String(v || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+      function getParam(name) { try { return new URLSearchParams(window.location.search).get(name) || ""; } catch (e) { return ""; } }
+
+      // ── normalization (ported) ─────────────────────────────
+      function normalizeMissionGoal(goal) {
+        if (typeof goal === "string") {
+          var text = goal.trim();
+          if (!text) return null;
+          var m;
+          if ((m = text.match(/^Reach\s+rank\s+(\d+)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "reach_rank", rank: Number(m[1]) || 0 };
+          if ((m = text.match(/^Win\s+(\d+)\s+matches?\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "win_matches", character_name: m[2].trim(), wins: Number(m[1]) || 0 };
+          if ((m = text.match(/^Win\s+(\d+)\s+battles?\s+in\s+a\s+row\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "win_streak", character_name: m[2].trim(), wins: Number(m[1]) || 0 };
+          return { type: "text", text: text };
+        }
+        var s = goal && typeof goal === "object" ? goal : {};
+        var type = String(s.type || s.goalType || "text").trim().toLowerCase();
+        var wins = Number(s.wins != null ? s.wins : (s.count != null ? s.count : 0)) || 0;
+        var cname = String(s.character_name || s.characterName || s.character_id || s.characterId || "").trim();
+        var rank = Number(s.rank != null ? s.rank : (s.level != null ? s.level : 0)) || 0;
+        if (type === "reach_rank") return rank ? { type: "reach_rank", rank: rank } : null;
+        if (type === "win_matches" || type === "win_streak") return wins ? { type: type, character_name: cname, wins: wins } : null;
+        if (type === "win_streak_any" || type === "win_matches_any") {
+          var anyNames = Array.isArray(s.character_names) ? s.character_names.filter(Boolean) : [];
+          var anyIds = Array.isArray(s.character_ids) ? s.character_ids.filter(Boolean) : [];
+          var groupLabel = String(s.character_name || s.group_label || "").trim();
+          if (!wins || (anyNames.length < 2 && anyIds.length < 2 && !groupLabel)) return null;
+          return { type: type, character_names: anyNames, group_label: groupLabel, wins: wins };
+        }
+        var text = String(s.text || s.value || s.label || s.description || "").trim();
+        return text ? { type: "text", text: text } : null;
+      }
 
       function normalizeMissionCatalog(missions) {
-        const list = Array.isArray(missions) ? missions : [];
-        return list
-          .map(function (mission, index) {
-            const source = mission && typeof mission === "object" ? mission : {};
-            const missionId = String(source.missionId || source.id || source.title || source.name || "")
-              .trim()
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "") || "mission-" + (index + 1);
-            const levelRequirement = Number(
-              source.level_requirement ??
-              source.levelRequirement ??
-              source.rank_requirement?.level ??
-              source.rankRequirement?.level ??
-              source.rank ??
-              0
-            ) || 0;
-            const allowedModes = Array.isArray(source.mode_restriction?.allowed_modes)
-              ? source.mode_restriction.allowed_modes
-              : Array.isArray(source.modeRestriction?.allowedModes)
-                ? source.modeRestriction.allowedModes
-                : ["quick", "ladder"];
-            const rewardCharacter = String(source.reward_character || source.rewardCharacter || "").trim();
-            const rewardCharacterName = String(source.reward_character_name || source.rewardCharacterName || "").trim();
-            const streakCharacter = String(source.win_streak?.character_id || source.winStreak?.characterId || "").trim();
-            const streakCharacterName = String(source.win_streak?.character_name || source.winStreak?.characterName || source.characterName || "").trim();
-            const streakWins = Number(source.win_streak?.wins || source.winStreak?.wins || 0) || 0;
-            return {
-              missionId: missionId,
-              title: String(source.title || source.name || "Mission " + (index + 1)).trim(),
-              level_requirement: levelRequirement,
-              rank: levelRequirement ? String(levelRequirement) : "",
-              mode_restriction: { allowed_modes: allowedModes.filter(function (mode) {
-                return mode === "quick" || mode === "ladder";
-              }) },
-              reward_character: rewardCharacter,
-              reward_character_name: rewardCharacterName,
-              reward: String(source.reward || "").trim(),
-              win_streak: {
-                character_id: streakCharacter,
-                character_name: streakCharacterName,
-                wins: streakWins
-              },
-              image: String(source.image || "").trim(),
-              imageAlt: String(source.imageAlt || source.imageAltText || (source.title || source.name || "Mission") + " mission artwork").trim(),
-              characterName: String(source.characterName || "").trim(),
-              portrait: String(source.portrait || "").trim(),
-              portraitAlt: String(source.portraitAlt || source.portraitAltText || (source.characterName || source.title || "Mission") + " portrait").trim(),
-              requirements: Array.isArray(source.requirements)
-                ? source.requirements.map(function (entry) { return String(entry || "").trim(); }).filter(Boolean)
-                : [],
-              goals: Array.isArray(source.goals)
-                ? source.goals
-                    .map(function (entry) { return normalizeMissionGoal(entry); })
-                    .filter(Boolean)
-                : [],
-              available: source.available !== false,
-              sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1
-            };
-          })
-          .filter(function (mission) {
-            return mission.missionId && mission.title;
-          })
-          .sort(function (a, b) {
-            var sortDelta = (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0);
-            if (sortDelta !== 0) {
-              return sortDelta;
-            }
-            return a.title.localeCompare(b.title);
-          });
+        var list = Array.isArray(missions) ? missions : [];
+        return list.map(function (mission, index) {
+          var src = mission && typeof mission === "object" ? mission : {};
+          var missionId = slug(src.missionId || src.id || src.title || src.name || "") || "mission-" + (index + 1);
+          var level = Number(src.level_requirement != null ? src.level_requirement : (src.levelRequirement != null ? src.levelRequirement : (src.rank != null ? src.rank : 0))) || 0;
+          var allowed = Array.isArray(src.mode_restriction && src.mode_restriction.allowed_modes) ? src.mode_restriction.allowed_modes : ["quick", "ladder"];
+          return {
+            missionId: missionId,
+            title: String(src.title || src.name || "Mission " + (index + 1)).trim(),
+            level_requirement: level,
+            mode_restriction: { allowed_modes: allowed.filter(function (m) { return m === "quick" || m === "ladder"; }) },
+            reward_character: String(src.reward_character || src.rewardCharacter || "").trim(),
+            reward_character_name: String(src.reward_character_name || src.rewardCharacterName || "").trim(),
+            reward: String(src.reward || "").trim(),
+            win_streak: {
+              character_name: String((src.win_streak && src.win_streak.character_name) || (src.winStreak && src.winStreak.characterName) || "").trim(),
+              wins: Number((src.win_streak && src.win_streak.wins) || (src.winStreak && src.winStreak.wins) || 0) || 0
+            },
+            image: String(src.image || "").trim(),
+            imageAlt: String(src.imageAlt || (src.title || "Mission") + " artwork").trim(),
+            characterName: String(src.characterName || "").trim(),
+            portrait: String(src.portrait || "").trim(),
+            requirements: Array.isArray(src.requirements) ? src.requirements.map(function (e) { return String(e || "").trim(); }).filter(Boolean) : [],
+            goals: Array.isArray(src.goals) ? src.goals.map(normalizeMissionGoal).filter(Boolean) : [],
+            available: src.available !== false,
+            sortOrder: Number.isFinite(Number(src.sortOrder)) ? Number(src.sortOrder) : index + 1
+          };
+        }).filter(function (m) { return m.missionId && m.title; })
+          .sort(function (a, b) { var d = (a.sortOrder || 0) - (b.sortOrder || 0); return d !== 0 ? d : a.title.localeCompare(b.title); });
       }
 
       function setMissionCatalog(missions) {
         missionCatalog = normalizeMissionCatalog(missions);
         missionMap = new Map();
-        missionCatalog.forEach(function (mission) {
-          missionMap.set(mission.missionId, mission);
-        });
-      }
-
-      function normalizeMissionGoalProgressEntry(entry) {
-        const source = entry && typeof entry === "object" ? entry : {};
-        const count = Math.max(0, Number(source.count ?? source.progress ?? 0) || 0);
-        return {
-          count: count,
-          progress: count,
-          completedAt:
-            source.completedAt instanceof Date || typeof source.completedAt === "string"
-              ? source.completedAt
-              : null,
-          updatedAt:
-            source.updatedAt instanceof Date || typeof source.updatedAt === "string"
-              ? source.updatedAt
-              : null,
-        };
-      }
-
-      function normalizeMissionProgressEntry(entry) {
-        const source = entry && typeof entry === "object" ? entry : {};
-        const rawGoalProgress =
-          source.goalProgressByIndex && typeof source.goalProgressByIndex === "object"
-            ? source.goalProgressByIndex
-            : source.goalProgress && typeof source.goalProgress === "object"
-              ? source.goalProgress
-              : {};
-        const goalProgressByIndex = {};
-        Object.keys(rawGoalProgress).forEach(function (goalIndex) {
-          const normalizedGoalIndex = String(parseInt(goalIndex, 10));
-          if (!normalizedGoalIndex || normalizedGoalIndex === "NaN") {
-            return;
-          }
-          goalProgressByIndex[normalizedGoalIndex] = normalizeMissionGoalProgressEntry(rawGoalProgress[goalIndex]);
-        });
-        return {
-          completedAt:
-            source.completedAt instanceof Date || typeof source.completedAt === "string"
-              ? source.completedAt
-              : null,
-          goalProgressByIndex: goalProgressByIndex,
-          goalProgress: goalProgressByIndex,
-        };
+        missionCatalog.forEach(function (m) { missionMap.set(m.missionId, m); });
       }
 
       function setMissionProgress(progressByMissionId) {
-        const source = progressByMissionId && typeof progressByMissionId === "object" ? progressByMissionId : {};
-        const normalized = {};
-        Object.keys(source).forEach(function (missionId) {
-          normalized[missionId] = normalizeMissionProgressEntry(source[missionId]);
-        });
-        missionProgressByMissionId = normalized;
-      }
-
-      function getMissionGoalProgress(missionId, goalIndex) {
-        const missionProgress =
-          missionProgressByMissionId && typeof missionProgressByMissionId === "object"
-            ? missionProgressByMissionId[missionId]
-            : null;
-        const goalProgress =
-          missionProgress && missionProgress.goalProgressByIndex && typeof missionProgress.goalProgressByIndex === "object"
-            ? missionProgress.goalProgressByIndex[String(goalIndex)]
-            : null;
-        return normalizeMissionGoalProgressEntry(goalProgress || {});
-      }
-
-      function isMissionCompleted(missionId) {
-        const missionProgress =
-          missionProgressByMissionId && typeof missionProgressByMissionId === "object"
-            ? missionProgressByMissionId[missionId]
-            : null;
-        return Boolean(missionProgress && missionProgress.completedAt);
-      }
-
-      function escapeHtml(value) {
-        return String(value || "").replace(/[&<>"']/g, function (character) {
-          return ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-          })[character];
-        });
-      }
-
-      function setStatus(message, isError) {
-        if (!missionsStatus) {
-          return;
-        }
-        missionsStatus.textContent = message || "";
-        missionsStatus.style.color = isError ? "#c91717" : "";
-      }
-
-      function getLevelRequirementValue(mission) {
-        const value = Number(mission && mission.level_requirement ? mission.level_requirement : mission && mission.rank ? mission.rank : 0);
-        return Number.isFinite(value) && value > 0 ? value : 0;
-      }
-
-      function getModeRestrictionText(mission) {
-        const allowedModes = Array.isArray(mission && mission.mode_restriction && mission.mode_restriction.allowed_modes)
-          ? mission.mode_restriction.allowed_modes
-              .map(function (entry) { return String(entry || "").trim().toLowerCase(); })
-              .filter(Boolean)
-          : [];
-        if (!allowedModes.length) {
-          return "";
-        }
-        if (allowedModes.length === 2 && allowedModes.indexOf("quick") !== -1 && allowedModes.indexOf("ladder") !== -1) {
-          return "Mode: Quick games and ladder games only.";
-        }
-        return "Mode: " + allowedModes.map(function (entry) {
-          return entry.charAt(0).toUpperCase() + entry.slice(1);
-        }).join(", ") + ".";
-      }
-
-      function normalizeMissionGoal(goal) {
-        if (typeof goal === "string") {
-          const text = goal.trim();
-          if (!text) {
-            return null;
-          }
-
-          const reachRankMatch = text.match(/^Reach\s+rank\s+(\d+)(?:\.\s*\(0\/\d+\))?$/i);
-          if (reachRankMatch) {
-            return {
-              type: "reach_rank",
-              rank: Number(reachRankMatch[1]) || 0,
-            };
-          }
-
-          const winMatchesMatch = text.match(/^Win\s+(\d+)\s+matches?\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i);
-          if (winMatchesMatch) {
-            const characterName = String(winMatchesMatch[2] || "").trim();
-            return {
-              type: "win_matches",
-              character_id: characterName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-              character_name: characterName,
-              wins: Number(winMatchesMatch[1]) || 0,
-            };
-          }
-
-          const winSameTeamMatch = text.match(/^Win\s+(\d+)\s+games?\s+with\s+(.+?)\s+and\s+(.+?)\s+on\s+the\s+same\s+team(?:\.\s*\(0\/\d+\))?$/i);
-          if (winSameTeamMatch) {
-            const firstCharacterName = String(winSameTeamMatch[2] || "").trim();
-            const secondCharacterName = String(winSameTeamMatch[3] || "").trim();
-            return {
-              type: "win_matches_same_team",
-              character_ids: [
-                firstCharacterName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-                secondCharacterName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-              ].filter(Boolean),
-              character_names: [firstCharacterName, secondCharacterName],
-              wins: Number(winSameTeamMatch[1]) || 0,
-            };
-          }
-
-          const winStreakMatch = text.match(/^Win\s+(\d+)\s+battles?\s+in\s+a\s+row\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i);
-          if (winStreakMatch) {
-            const characterName = String(winStreakMatch[2] || "").trim();
-            return {
-              type: "win_streak",
-              character_id: characterName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-              character_name: characterName,
-              wins: Number(winStreakMatch[1]) || 0,
-            };
-          }
-
-          return {
-            type: "text",
-            text,
-          };
-        }
-
-        const source = goal && typeof goal === "object" ? goal : {};
-        const type = String(source.type || source.goalType || source.kind || "text").trim().toLowerCase();
-        const wins = Number(source.wins ?? source.count ?? source.target ?? 0) || 0;
-        const characterId = String(source.character_id || source.characterId || source.character || "").trim();
-        const characterName = String(source.character_name || source.characterName || characterId).trim();
-        const rank = Number(source.rank ?? source.level ?? source.target ?? source.goal ?? source.value ?? 0) || 0;
-        if (type === "reach_rank") {
-          if (!rank) {
-            return null;
-          }
-          return {
-            type: "reach_rank",
-            rank,
-          };
-        }
-        if (type === "win_matches_same_team") {
-          const characterIds = (
-            Array.isArray(source.character_ids)
-              ? source.character_ids
-              : [
-                  source.character_id || source.characterId || source.character || "",
-                  source.teammate_character_id || source.teammateCharacterId || source.character_two_id || source.characterTwoId || "",
-                ]
-          ).map(function (value) {
-            return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-          }).filter(Boolean);
-          const uniqueCharacterIds = Array.from(new Set(characterIds)).slice(0, 2);
-          const characterNames = (
-            Array.isArray(source.character_names)
-              ? source.character_names
-              : [
-                  source.character_name || source.characterName || uniqueCharacterIds[0] || "",
-                  source.teammate_character_name || source.teammateCharacterName || source.character_two_name || source.characterTwoName || uniqueCharacterIds[1] || "",
-                ]
-          ).map(function (value) {
-            return String(value || "").trim();
+        var src = progressByMissionId && typeof progressByMissionId === "object" ? progressByMissionId : {};
+        var out = {};
+        Object.keys(src).forEach(function (id) {
+          var e = src[id] && typeof src[id] === "object" ? src[id] : {};
+          var rawGP = (e.goalProgressByIndex && typeof e.goalProgressByIndex === "object") ? e.goalProgressByIndex
+            : ((e.goalProgress && typeof e.goalProgress === "object") ? e.goalProgress : {});
+          var gp = {};
+          Object.keys(rawGP).forEach(function (gi) {
+            var ni = String(parseInt(gi, 10));
+            if (ni && ni !== "NaN") { var ge = rawGP[gi] || {}; gp[ni] = { count: Math.max(0, Number(ge.count != null ? ge.count : (ge.progress || 0)) || 0) }; }
           });
-          if (!wins || uniqueCharacterIds.length < 2) {
-            return null;
-          }
-          return {
-            type: "win_matches_same_team",
-            character_ids: uniqueCharacterIds,
-            character_names: [
-              characterNames[0] || uniqueCharacterIds[0],
-              characterNames[1] || uniqueCharacterIds[1],
-            ],
-            wins,
-          };
-        }
-        if (type === "win_matches" || type === "win_streak") {
-          if (!wins || !characterId) {
-            return null;
-          }
-          return {
-            type,
-            character_id: characterId,
-            character_name: characterName || characterId,
-            wins,
-          };
-        }
-
-        const text = String(source.text || source.value || source.label || source.description || "").trim();
-        if (!text) {
-          return null;
-        }
-        return {
-          type: "text",
-          text,
-        };
-      }
-
-      function formatMissionGoal(goal, progress) {
-        const normalized = normalizeMissionGoal(goal);
-        if (!normalized) {
-          return "";
-        }
-        const progressCount = Math.max(0, Number(progress && progress.count ? progress.count : 0) || 0);
-        if (normalized.type === "reach_rank") {
-          return "Reach rank " + normalized.rank + ". (" + Math.min(progressCount, normalized.rank) + "/" + normalized.rank + ")";
-        }
-        if (normalized.type === "win_matches") {
-          const characterName = normalized.character_name || normalized.character_id;
-          return "Win " + normalized.wins + " matches with " + characterName + ". (" + Math.min(progressCount, normalized.wins) + "/" + normalized.wins + ")";
-        }
-        if (normalized.type === "win_streak") {
-          const characterName = normalized.character_name || normalized.character_id;
-          return "Win " + normalized.wins + " battles in a row with " + characterName + ". (" + Math.min(progressCount, normalized.wins) + "/" + normalized.wins + ")";
-        }
-        if (normalized.type === "win_matches_same_team") {
-          const names = Array.isArray(normalized.character_names) ? normalized.character_names : normalized.character_ids;
-          return "Win " + normalized.wins + " games with " + (names[0] || normalized.character_ids[0]) + " and " + (names[1] || normalized.character_ids[1]) + " on the same team. (" + Math.min(progressCount, normalized.wins) + "/" + normalized.wins + ")";
-        }
-        return normalized.text || "";
-      }
-
-      function getRequirementLines(mission) {
-        const lines = [];
-        const modeText = getModeRestrictionText(mission);
-        if (modeText) {
-          lines.push(modeText);
-        }
-
-        const streak = mission && mission.win_streak ? mission.win_streak : null;
-        const streakWins = Number(streak && streak.wins ? streak.wins : 0) || 0;
-        const streakCharacterName = String(
-          streak && streak.character_name
-            ? streak.character_name
-            : streak && streak.character_id
-              ? streak.character_id
-              : usedCharacterName || usedCharacterId
-        ).trim();
-        if (streakWins > 0 && streakCharacterName) {
-          lines.push("Win streak: Win " + streakWins + " battles in a row with " + streakCharacterName + ".");
-        }
-        (Array.isArray(mission && mission.requirements) ? mission.requirements : []).forEach(function (requirement) {
-          if (requirement && lines.indexOf(requirement) === -1) {
-            lines.push(requirement);
-          }
+          out[id] = { completedAt: (typeof e.completedAt === "string" || e.completedAt instanceof Date) ? e.completedAt : null, goalProgressByIndex: gp };
         });
+        missionProgressByMissionId = out;
+      }
+
+      function getGoalProgress(missionId, goalIndex) {
+        var mp = missionProgressByMissionId[missionId];
+        var gp = mp && mp.goalProgressByIndex ? mp.goalProgressByIndex[String(goalIndex)] : null;
+        return { count: Math.max(0, Number(gp && gp.count ? gp.count : 0) || 0) };
+      }
+      function isMissionCompleted(missionId) {
+        var mp = missionProgressByMissionId[missionId];
+        return Boolean(mp && mp.completedAt);
+      }
+
+      function getLevelRequirementValue(m) {
+        var v = Number(m && m.level_requirement ? m.level_requirement : 0);
+        return Number.isFinite(v) && v > 0 ? v : 0;
+      }
+      function formatMissionGoal(goal, progress) {
+        var n = normalizeMissionGoal(goal);
+        if (!n) return "";
+        var c = Math.max(0, Number(progress && progress.count ? progress.count : 0) || 0);
+        if (n.type === "reach_rank") return "Reach rank " + n.rank + ". (" + Math.min(c, n.rank) + "/" + n.rank + ")";
+        if (n.type === "win_matches") return "Win " + n.wins + " battles" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+        if (n.type === "win_streak") return "Win " + n.wins + " battles in a row" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+        if (n.type === "win_streak_any") return "Win " + n.wins + " battles in a row with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+        if (n.type === "win_matches_any") return "Win " + n.wins + " battles with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+        return n.text || "";
+      }
+      function getModeText(m) {
+        var modes = (m && m.mode_restriction && Array.isArray(m.mode_restriction.allowed_modes)) ? m.mode_restriction.allowed_modes : [];
+        if (!modes.length) return "";
+        if (modes.length === 2 && modes.indexOf("quick") !== -1 && modes.indexOf("ladder") !== -1) return "Quick games and ladder games only.";
+        return modes.map(function (x) { return x.charAt(0).toUpperCase() + x.slice(1); }).join(", ") + ".";
+      }
+      function getRequirementLines(m) {
+        var lines = [];
+        var modeText = getModeText(m);
+        if (modeText) lines.push("Mode: " + modeText);
+        var sw = m && m.win_streak ? m.win_streak : null;
+        if (sw && sw.wins > 0 && sw.character_name) lines.push("Win " + sw.wins + " battles in a row with " + sw.character_name + ".");
+        (Array.isArray(m && m.requirements) ? m.requirements : []).forEach(function (r) { if (r && lines.indexOf(r) === -1) lines.push(r); });
         return lines;
       }
-
-      function getCardRequirementLines(mission) {
-        return [];
+      function getRewardText(m) {
+        var rcn = String((m && m.reward_character_name) || (m && m.reward_character) || "").trim();
+        if (rcn) return "Unlock " + rcn + ".";
+        return String(m && m.reward ? m.reward : "").trim();
+      }
+      function statusOf(m) {
+        if (isMissionCompleted(m.missionId)) return "completed";
+        if (m.available === false) return "locked";
+        return "available";
       }
 
-      function getRewardText(mission) {
-        const rewardCharacterName = String(
-          mission && mission.reward_character_name
-            ? mission.reward_character_name
-            : mission && mission.reward_character
-              ? mission.reward_character
-              : ""
-        ).trim();
-        if (rewardCharacterName) {
-          return "Unlock " + rewardCharacterName + ".";
-        }
-        return String(mission && mission.reward ? mission.reward : "").trim();
+      // ── CARD / CATEGORY / LANDING ───────────────────────────
+      function buildCard(m) {
+        var st = statusOf(m);
+        var meta = RANK_META[rankOf(m)];
+        var card = document.createElement("a");
+        card.className = "ms-card";
+        card.href = "missions.html?mission=" + encodeURIComponent(m.missionId);
+
+        var lvl = document.createElement("div");
+        lvl.className = "ms-card-level";
+        lvl.textContent = "Level " + (getLevelRequirementValue(m) || 1);
+        var name = document.createElement("div");
+        name.className = "ms-card-name";
+        name.textContent = m.title;
+        var section = document.createElement("div");
+        section.className = "ms-card-section";
+        section.textContent = "Section: " + (meta ? meta.label : "Missions");
+
+        var art = document.createElement("div");
+        art.className = "ms-card-art";
+        var img = document.createElement("img");
+        img.loading = "lazy";
+        img.src = m.image || m.portrait || "deadcharacter.png";
+        img.alt = m.imageAlt || m.title;
+        var overlay = document.createElement("div");
+        overlay.className = "ms-card-overlay";
+        var mname = document.createElement("div");
+        mname.className = "ms-card-mname";
+        mname.textContent = m.characterName ? "Featuring " + m.characterName : m.title;
+        var rankline = document.createElement("div");
+        rankline.className = "ms-card-rankline";
+        var rank = document.createElement("div");
+        rank.className = "ms-card-rank";
+        rank.innerHTML = '<span class="lbl">Rank:</span> <span class="val">At least ' + (getLevelRequirementValue(m) || "Any") + '</span>';
+        var pill = document.createElement("span");
+        pill.className = "ms-status-pill " + st;
+        pill.textContent = st === "locked" ? "✕ Locked" : (st === "completed" ? "Completed" : "Available");
+        rankline.appendChild(rank);
+        rankline.appendChild(pill);
+        overlay.appendChild(mname);
+        overlay.appendChild(rankline);
+        art.appendChild(img);
+        art.appendChild(overlay);
+
+        var view = document.createElement("div");
+        view.className = "ms-card-view";
+        view.textContent = "» View this mission";
+
+        card.appendChild(lvl);
+        card.appendChild(name);
+        card.appendChild(section);
+        card.appendChild(art);
+        card.appendChild(view);
+        return card;
       }
 
-      function renderMissionCard(mission) {
-        const completed = isMissionCompleted(mission.missionId);
-        const article = document.createElement("article");
-        article.className = "mission-card" + (completed ? " completed" : "");
-        article.tabIndex = 0;
-        article.setAttribute("role", "button");
-        article.setAttribute("aria-label", "Open mission info for " + mission.title);
-        article.setAttribute("data-mission", mission.missionId);
-        if (mission.available === false) {
-          article.setAttribute("aria-disabled", "true");
-          article.style.opacity = "0.78";
-        }
+      function renderCategory(rank) {
+        if (!grid) return;
+        var meta = RANK_META[rank];
+        if (catTitle) catTitle.textContent = meta.title;
+        if (catCrumb) catCrumb.textContent = meta.label;
+        if (catIntro) catIntro.textContent = meta.intro;
 
-        const title = document.createElement("a");
-        title.className = "mission-title";
-        title.href = "#";
-        title.setAttribute("data-mission-open", "");
+        var q = String(searchInput && searchInput.value ? searchInput.value : "").trim().toLowerCase();
+        var availOnly = Boolean(availableOnly && availableOnly.checked);
+        var list = missionCatalog.filter(function (m) {
+          if (rankOf(m) !== rank) return false;
+          if (availOnly && statusOf(m) !== "available") return false;
+          if (q) {
+            var hay = (m.title + " " + (m.characterName || "")).toLowerCase();
+            if (hay.indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+
+        grid.innerHTML = "";
+        if (!list.length) {
+          grid.innerHTML = '<div class="ms-empty">No ' + meta.label + ' match these filters. Try a different search or show all missions.</div>';
+          return;
+        }
+        list.forEach(function (m) { grid.appendChild(buildCard(m)); });
+      }
+
+      function renderLanding() {
+        var counts = { dc: 0, b: 0, a: 0, s: 0 };
+        missionCatalog.forEach(function (m) { counts[rankOf(m)]++; });
+        Object.keys(counts).forEach(function (r) {
+          var el = document.querySelector('.ms-cat-count[data-count="' + r + '"]');
+          if (el) el.textContent = counts[r] ? "(" + counts[r] + ")" : "(0)";
+        });
+      }
+
+      // ── DETAIL ──────────────────────────────────────────────
+      function renderDetail(mission) {
+        if (!detailView || !mission) return;
+        detailView.innerHTML = "";
+        var idx = missionCatalog.indexOf(mission);
+        var next = missionCatalog[(idx + 1 + missionCatalog.length) % missionCatalog.length];
+
+        var crumb = document.createElement("div");
+        var mrank = rankOf(mission);
+        var mmeta = RANK_META[mrank];
+        crumb.className = "ms-crumb";
+        crumb.innerHTML = '<a href="index.html">Naruto-Arena</a> &gt; ' +
+          '<a href="missions.html">Ninja Missions</a> &gt; ' +
+          '<a href="missions.html?rank=' + mrank + '">' + mmeta.label + '</a> &gt; ' +
+          '<span class="cur">' + mission.title + '</span>';
+
+        var nav = document.createElement("div");
+        nav.className = "ms-detail-nav";
+        var back = document.createElement("a");
+        back.href = "missions.html?rank=" + mrank;
+        back.textContent = "‹ Back to " + mmeta.label;
+        var nextLink = document.createElement("a");
+        nextLink.href = "missions.html?mission=" + encodeURIComponent(next.missionId);
+        nextLink.innerHTML = 'View <span class="accent">' + (next.characterName || next.title) + '</span> ›';
+        nav.appendChild(back); nav.appendChild(nextLink);
+
+        var lvl = document.createElement("div");
+        lvl.className = "ms-detail-level";
+        lvl.textContent = "Level " + (getLevelRequirementValue(mission) || 1);
+        var title = document.createElement("div");
+        title.className = "ms-detail-title";
         title.textContent = mission.title;
 
-        const image = document.createElement("img");
-        image.className = "mission-image";
-        image.src = mission.image || "deadcharacter.png";
-        image.alt = mission.imageAlt || mission.title + " mission artwork";
+        var gridEl = document.createElement("div");
+        gridEl.className = "ms-detail-grid";
 
-        const details = document.createElement("div");
-        details.className = "mission-details";
+        // art column
+        var art = document.createElement("img");
+        art.className = "ms-detail-art";
+        art.src = mission.image || mission.portrait || "deadcharacter.png";
+        art.alt = mission.imageAlt || mission.title;
 
-        const requirementsTitle = document.createElement("div");
-        requirementsTitle.className = "mission-requirements-title";
-        requirementsTitle.textContent = "Requirements:";
+        // information + requirements column
+        var infoCol = document.createElement("div");
+        var infoHead = document.createElement("div"); infoHead.className = "ms-col-head"; infoHead.textContent = "› Information";
+        infoCol.appendChild(infoHead);
+        var l1 = document.createElement("p"); l1.className = "ms-col-line"; l1.innerHTML = "<strong>Mission Name:</strong> " + mission.title; infoCol.appendChild(l1);
+        var lt = document.createElement("p"); lt.className = "ms-col-line"; lt.innerHTML = '<strong>Mission Type:</strong> <a href="missions.html?rank=' + mrank + '">' + mmeta.label + "</a>"; infoCol.appendChild(lt);
+        var l2 = document.createElement("p"); l2.className = "ms-col-line"; l2.innerHTML = "<strong>Mission Level:</strong> " + (getLevelRequirementValue(mission) || 1); infoCol.appendChild(l2);
+        if (mission.characterName) { var l3 = document.createElement("p"); l3.className = "ms-col-line"; l3.innerHTML = "<strong>Featured:</strong> " + mission.characterName; infoCol.appendChild(l3); }
+        var reqLines = getRequirementLines(mission);
+        var reqSub = document.createElement("div"); reqSub.className = "ms-col-sub";
+        var reqHead = document.createElement("div"); reqHead.className = "ms-col-head"; reqHead.textContent = "› Requirements"; reqSub.appendChild(reqHead);
+        var rLvl = document.createElement("p"); rLvl.className = "ms-col-line"; rLvl.innerHTML = "<strong>Rank:</strong> At least " + (getLevelRequirementValue(mission) || "Any"); reqSub.appendChild(rLvl);
+        reqLines.forEach(function (r) { var p = document.createElement("p"); p.className = "ms-col-line"; p.textContent = r; reqSub.appendChild(p); });
+        infoCol.appendChild(reqSub);
 
-        const requirementsBox = document.createElement("div");
-        requirementsBox.className = "mission-requirements-box";
+        // goals column
+        var goalsCol = document.createElement("div");
+        var goalsHead = document.createElement("div"); goalsHead.className = "ms-col-head"; goalsHead.textContent = "› Goals"; goalsCol.appendChild(goalsHead);
+        var goals = Array.isArray(mission.goals) ? mission.goals : [];
+        if (!goals.length) { var ge = document.createElement("p"); ge.className = "ms-col-line"; ge.textContent = "Finish the mission to unlock its reward."; goalsCol.appendChild(ge); }
+        else goals.forEach(function (g, gi) { var p = document.createElement("p"); p.className = "ms-col-line"; p.textContent = formatMissionGoal(g, getGoalProgress(mission.missionId, gi)); goalsCol.appendChild(p); });
 
-        const rankLine = document.createElement("p");
-        rankLine.className = "mission-rank";
-        const rankLabel = document.createElement("span");
-        rankLabel.className = "mission-rank-label";
-        rankLabel.textContent = "Level requirement:";
-        rankLine.appendChild(rankLabel);
-        rankLine.appendChild(document.createTextNode(" At least "));
-        const rankValue = document.createElement("span");
-        rankValue.className = mission.available === false ? "mission-rank-unavailable" : "mission-rank-available";
-        rankValue.textContent = getLevelRequirementValue(mission) || "Any";
-        rankLine.appendChild(rankValue);
-        requirementsBox.appendChild(rankLine);
+        // reward column
+        var rewardCol = document.createElement("div");
+        var rewardHead = document.createElement("div"); rewardHead.className = "ms-col-head reward"; rewardHead.textContent = "› Reward"; rewardCol.appendChild(rewardHead);
+        var rcn = String((mission.reward_character_name) || (mission.reward_character) || "").trim();
+        if (rcn) {
+          var rc = document.createElement("div"); rc.className = "ms-reward-char";
+          var rcLabel = document.createElement("p"); rcLabel.className = "ms-col-line"; rcLabel.textContent = "Character unlocked:"; rewardCol.appendChild(rcLabel);
+          if (mission.portrait) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
+          var rname = document.createElement("div"); rname.className = "ms-reward-name"; rname.textContent = rcn; rc.appendChild(rname);
+          rewardCol.appendChild(rc);
+        } else {
+          var rtext = document.createElement("p"); rtext.className = "ms-col-line"; rtext.textContent = getRewardText(mission) || "Mission completion reward."; rewardCol.appendChild(rtext);
+        }
 
-        const requirementLines = getCardRequirementLines(mission);
-        requirementLines.forEach(function (requirement) {
-          const line = document.createElement("p");
-          line.className = "mission-note";
-          line.style.fontStyle = "normal";
-          line.style.color = "#111111";
-          line.textContent = requirement;
-          requirementsBox.appendChild(line);
-        });
+        gridEl.appendChild(art);
+        gridEl.appendChild(infoCol);
+        gridEl.appendChild(goalsCol);
+        gridEl.appendChild(rewardCol);
 
-        const viewLine = document.createElement("p");
-        const viewLink = document.createElement("a");
-        viewLink.className = "mission-link";
-        viewLink.href = "#";
-        viewLink.setAttribute("data-mission-open", "");
-        viewLink.textContent = completed ? "Mission Completed" : "View this mission";
-        viewLine.appendChild(viewLink);
-        requirementsBox.appendChild(viewLine);
-
-        details.appendChild(requirementsTitle);
-        details.appendChild(requirementsBox);
-
-        article.appendChild(title);
-        article.appendChild(image);
-        article.appendChild(details);
-        return article;
+        detailView.appendChild(crumb);
+        detailView.appendChild(nav);
+        detailView.appendChild(lvl);
+        detailView.appendChild(title);
+        detailView.appendChild(gridEl);
       }
 
-      function renderMissionCards() {
-        if (!missionsGrid) {
-          return;
-        }
-
-        const searchValue = String(missionSearch && missionSearch.value ? missionSearch.value : "").trim().toLowerCase();
-        const showAvailableOnly = Boolean(missionsAvailable && missionsAvailable.checked);
-        const filtered = missionCatalog.filter(function (mission) {
-          const levelRequirementText = String(getLevelRequirementValue(mission) || "");
-          const matchesSearch =
-            !searchValue ||
-            mission.title.toLowerCase().indexOf(searchValue) !== -1 ||
-            levelRequirementText.toLowerCase().indexOf(searchValue) !== -1 ||
-            mission.missionId.toLowerCase().indexOf(searchValue) !== -1;
-          const matchesAvailability = !showAvailableOnly || mission.available !== false;
-          return matchesSearch && matchesAvailability;
-        });
-
-        missionsGrid.innerHTML = "";
-        if (!filtered.length) {
-          setStatus("No missions match that search.", true);
-          return;
-        }
-
-        setStatus("");
-        filtered.forEach(function (mission) {
-          missionsGrid.appendChild(renderMissionCard(mission));
-        });
-
-        missionsGrid.querySelectorAll("[data-mission]").forEach(function (card) {
-          const key = card.getAttribute("data-mission");
-          const openTargets = card.querySelectorAll("[data-mission-open]");
-
-          card.addEventListener("click", function (event) {
-            const target = event.target;
-            if (target && target.closest && target.closest(".mission-link")) {
-              return;
-            }
-            event.preventDefault();
-            openMission(key);
-          });
-
-          card.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              openMission(key);
-            }
-          });
-
-          openTargets.forEach(function (target) {
-            target.addEventListener("click", function (event) {
-              event.preventDefault();
-              event.stopPropagation();
-              openMission(key);
-            });
-          });
+      function showOnly(view) {
+        if (landingView) landingView.hidden = view !== "landing";
+        if (categoryView) categoryView.hidden = view !== "category";
+        if (detailView) { detailView.hidden = view !== "detail"; if (view !== "detail") detailView.innerHTML = ""; }
+      }
+      function syncMissionNav(key) {
+        key = key || "overview";
+        missionSectionLinks.forEach(function (link) {
+          var active = link.getAttribute("data-mission-section") === key;
+          link.classList.toggle("active", active);
+          if (active) link.setAttribute("aria-current", "page");
+          else link.removeAttribute("aria-current");
         });
       }
 
-      function openMission(key) {
-        const mission = missionMap.get(key);
-        if (!mission || !overlay) {
-          return;
+      function route() {
+        var id = getParam("mission");
+        var rank = (getParam("rank") || "").toLowerCase();
+        if (id && missionMap.has(id)) {
+          showOnly("detail");
+          renderDetail(missionMap.get(id));
+          syncMissionNav(rankOf(missionMap.get(id)));
+          window.scrollTo(0, 0);
+        } else if (RANK_META[rank]) {
+          showOnly("category");
+          renderCategory(rank);
+          syncMissionNav(rank);
+          window.scrollTo(0, 0);
+        } else {
+          showOnly("landing");
+          renderLanding();
+          syncMissionNav("overview");
+          window.scrollTo(0, 0);
         }
-
-        nameLine.innerHTML = "&raquo; Mission Name: <span class=\"mission-sheet-link\">" + escapeHtml(mission.title) + "</span>";
-        rankLine.textContent = "✘ Level requirement: At least " + (getLevelRequirementValue(mission) || "Any");
-        rewardLine.textContent = getRewardText(mission);
-        imageEl.src = mission.image || "deadcharacter.png";
-        imageEl.alt = mission.imageAlt || mission.title + " mission artwork";
-        characterNameEl.textContent = mission.characterName || "";
-        portraitEl.src = mission.portrait || "deadcharacter.png";
-        portraitEl.alt = mission.portraitAlt || mission.characterName + " portrait";
-
-        requirementsEl.innerHTML = "";
-        getRequirementLines(mission).forEach(function (requirement) {
-          const line = document.createElement("p");
-          line.className = "mission-sheet-line";
-          line.textContent = requirement;
-          requirementsEl.appendChild(line);
-        });
-
-        goalsEl.innerHTML = "";
-        (Array.isArray(mission.goals) ? mission.goals : []).forEach(function (goal, goalIndex) {
-          const p = document.createElement("p");
-          p.className = "mission-sheet-goal";
-          p.textContent = formatMissionGoal(goal, getMissionGoalProgress(mission.missionId, goalIndex));
-          goalsEl.appendChild(p);
-        });
-
-        overlay.hidden = false;
-        document.body.style.overflow = "hidden";
-        closeButton.focus();
       }
+      // re-route on in-page query changes (e.g. browser back/forward)
+      window.addEventListener("popstate", route);
 
-      function closeMission() {
-        if (overlay) {
-          overlay.hidden = true;
-        }
-        document.body.style.overflow = "";
-      }
-
-      async function loadMissionCatalog() {
+      // ── load ────────────────────────────────────────────────
+      async function loadMissions() {
         try {
-          setStatus("Loading missions...");
-          const response = await fetch("/api/missions", {
-            credentials: "same-origin"
-          });
-          const data = await response.json().catch(function () {
-            return {};
-          });
-
-          if (!response.ok) {
-            throw new Error(data && data.error ? data.error : "Unable to load missions.");
-          }
-
+          setStatus("Loading missions…");
+          var res = await fetch("/api/missions", { credentials: "same-origin" });
+          var data = await res.json().catch(function () { return {}; });
+          if (!res.ok) throw new Error(data && data.error ? data.error : "Unable to load missions.");
           setMissionCatalog(data && Array.isArray(data.missions) ? data.missions : []);
           setMissionProgress(data && data.missionProgressByMissionId ? data.missionProgressByMissionId : {});
-          if (!missionCatalog.length) {
-            setMissionCatalog(defaultMissionCatalog);
-            setMissionProgress({});
-          }
-          renderMissionCards();
-        } catch (error) {
+          if (!missionCatalog.length) { setMissionCatalog(defaultMissionCatalog); setMissionProgress({}); }
+          setStatus("");
+          route();
+        } catch (e) {
           setMissionCatalog(defaultMissionCatalog);
           setMissionProgress({});
-          renderMissionCards();
           setStatus("Using local mission data while the server is unavailable.", true);
+          route();
         }
       }
 
-      if (missionSearch) {
-        missionSearch.addEventListener("input", renderMissionCards);
+      function refreshCategory() {
+        var rank = (getParam("rank") || "").toLowerCase();
+        if (RANK_META[rank] && !getParam("mission")) renderCategory(rank);
       }
+      if (searchInput) searchInput.addEventListener("input", refreshCategory);
+      if (availableOnly) availableOnly.addEventListener("change", refreshCategory);
 
-      if (missionsAvailable) {
-        missionsAvailable.addEventListener("change", renderMissionCards);
-      }
-
-      closeButton.addEventListener("click", closeMission);
-
-      overlay.addEventListener("click", function (event) {
-        if (event.target === overlay) {
-          closeMission();
-        }
-      });
-
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && !overlay.hidden) {
-          closeMission();
-        }
-      });
-
-      sheet.addEventListener("click", function (event) {
-        event.stopPropagation();
-      });
-
-      loadMissionCatalog();
+      loadMissions();
     }());
   </script>
-  <script src="./index.js" defer></script>
+
+  <!-- Shinobi-Arena nav account sync + dropdown toggle -->
+  <script>
+    (function () {
+      var trigger = document.getElementById('ca-account-trigger');
+      var menu = document.getElementById('ca-account-menu');
+      var navGuest = document.getElementById('ca-nav-guest');
+      var navUser = document.getElementById('ca-nav-user');
+      var navUsername = document.getElementById('ca-nav-username');
+      var accountPanel = document.getElementById('account-panel');
+      var accountUsername = document.getElementById('account-username');
+      function syncNav() {
+        var loggedIn = accountPanel && !accountPanel.hidden;
+        if (navGuest) navGuest.hidden = loggedIn;
+        if (navUser) navUser.hidden = !loggedIn;
+        if (loggedIn && navUsername && accountUsername) {
+          navUsername.textContent = accountUsername.textContent || '';
+        }
+      }
+      if (accountPanel) {
+        new MutationObserver(syncNav).observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
+      }
+      syncNav();
+      function closeMenu() { if (menu) { menu.hidden = true; } if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      function openMenu() { if (menu) { menu.hidden = false; } if (trigger) trigger.setAttribute('aria-expanded', 'true'); }
+      if (trigger && menu) {
+        trigger.addEventListener('click', function (e) { e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); });
+        menu.addEventListener('click', function (e) { if (e.target.closest('.account-action')) closeMenu(); });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+      }
+    })();
+  </script>
+
 </body>
 </html>

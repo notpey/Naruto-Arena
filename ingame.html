@@ -7,12 +7,42 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
-<body>
+<body class="ingame-client-page">
+<script>
+    (function () {
+        var key = "na-selection-remaster-preview";
+        try {
+            if (localStorage.getItem(key) === "enabled") {
+                document.body.classList.add("game-remaster");
+            }
+        } catch (e) {}
+    })();
+</script>
+<label class="remaster-preview-toggle">
+    <input id="remaster-ingame-preview-toggle" type="checkbox">
+    <span>Remaster Mode</span>
+</label>
 <div class="backgroundingame">
     <div class="ingame-sound-controller" aria-label="Sound controller">
         <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
+    </div>
+
+    <div class="story-dialogue-overlay" id="story-dialogue-overlay">
+        <div class="story-dialogue-box">
+            <div class="story-dialogue-box-row">
+                <img class="story-dialogue-portrait" id="story-dialogue-portrait" src="" alt="" hidden>
+                <div>
+                    <p class="story-dialogue-speaker" id="story-dialogue-speaker"></p>
+                    <p class="story-dialogue-text" id="story-dialogue-text"></p>
+                </div>
+            </div>
+            <div class="story-dialogue-actions">
+                <span class="story-dialogue-progress" id="story-dialogue-progress"></span>
+                <button type="button" class="story-dialogue-btn" id="story-dialogue-next">Next ▶</button>
+            </div>
+        </div>
     </div>
 
     <div class="ChakraChooseEndTurn" style="background-image: url('searchingscroll.png');">
@@ -84,7 +114,7 @@
         <div class="skillorder">
             
         </div>
-        <button type="button" class="ok-buttonendturn">OK</button>
+        <button type="button" class="ok-buttonendturn">End your turn</button>
         <button type="button" class="cancel-buttonendturn">CANCEL</button>
     </div>
 
@@ -164,7 +194,7 @@
             </div>
         </div>
 
-        <button type="button" class="ok-buttonexchange">OK</button>
+        <button type="button" class="ok-buttonexchange">Exchange chakra</button>
         <button type="button" class="cancel-buttonexchange">CANCEL</button>
     </div>
 
@@ -240,7 +270,7 @@
         </div>
 
         <div class="player-right">
-            <img src="avatar-right.jpg" alt="Opponent Avatar" class="player-avatar-right">
+            <img src="found.png" alt="Opponent Avatar" class="player-avatar-right">
             <div class="player-inforight">
                 <div class="player-name red">ALLDEAD</div>
                 <div class="player-status">ACADEMY STUDENT</div>
@@ -374,12 +404,23 @@
     </div>
 
     <div class="skillinformation">
-        <img src="https://i.imgur.com/thNhBRH.png" alt="skillviewimage" class="skillviewimage">
-        <p class="ingameskillname">Skill Name</p>
-        <div class="energytext"><span>Energy:</span><span class="energy-none"> none</span></div>
-        <p class="ingameclasses">Classes:</p>
-         <p class="ingamecooldown"><span>Cooldown:</span></p>
-        <p class="ingameskilldescription">Naruto hits one enemy with a ball of chakra, dealing 45 damage to them and stunning their skills for 1 turn. Requires 'Shadow Clones'.</p>
+        <div class="skill-info-head">
+            <img src="https://i.imgur.com/thNhBRH.png" alt="skill" class="skillviewimage">
+            <div class="skill-info-body">
+                <div class="skill-info-kicker">SKILL</div>
+                <p class="ingameskillname">Skill Name</p>
+                <p class="ingameskilldescription">Naruto hits one enemy with a ball of chakra, dealing 45 damage to them and stunning their skills for 1 turn. Requires 'Shadow Clones'.</p>
+            </div>
+        </div>
+        <div class="skill-info-meta">
+            <span class="sim-seg"><span class="sim-lbl">/ ENERGY</span><div class="energytext"></div></span>
+            <span class="sim-seg"><span class="sim-lbl">/ CLASSES</span><p class="ingameclasses"></p></span>
+            <span class="sim-seg"><span class="sim-lbl">/ COOLDOWN</span><p class="ingamecooldown"></p></span>
+            <div class="ingameclasspicker" style="display:none">
+                <span class="sim-lbl">/ TYPE</span>
+                <select class="ingame-class-picker-field"></select>
+            </div>
+        </div>
     </div>
 
     <div class="class-choice-popup" aria-hidden="true">
@@ -404,7 +445,54 @@
 </div>
 
 </div>
-<script src="characters.js"></script>
-<script src="script.js"></script>
+<script src="characters.js?v=3"></script>
+<script src="script.js?v=3"></script>
+<script>
+    (function () {
+        var key = "na-selection-remaster-preview";
+        var toggle = document.getElementById("remaster-ingame-preview-toggle");
+        if (!toggle) return;
+
+        function isEnabled() {
+            try { return localStorage.getItem(key) === "enabled"; } catch (e) { return false; }
+        }
+
+        function resizeForMode(enabled) {
+            var targetWidth = enabled ? 1100 : 770;
+            var targetHeight = enabled ? 800 : 560;
+            var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
+            var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
+            var popupWidth = targetWidth + chromeWidth;
+            var popupHeight = targetHeight + chromeHeight;
+            try {
+                window.resizeTo(popupWidth, popupHeight);
+                window.moveTo(
+                    Math.max(0, Math.round((window.screen.width - popupWidth) / 2)),
+                    Math.max(0, Math.round((window.screen.height - popupHeight) / 2))
+                );
+            } catch (e) {}
+        }
+
+        function apply(enabled, shouldResize) {
+            document.body.classList.toggle("game-remaster", enabled);
+            toggle.checked = enabled;
+            try {
+                if (enabled) localStorage.setItem(key, "enabled");
+                else localStorage.removeItem(key);
+            } catch (e) {}
+            requestAnimationFrame(function () {
+                if (typeof window.refreshIngameHealthBars === "function") {
+                    window.refreshIngameHealthBars();
+                }
+            });
+            if (shouldResize) resizeForMode(enabled);
+        }
+
+        apply(isEnabled(), false);
+        toggle.addEventListener("change", function () {
+            apply(toggle.checked, true);
+        });
+    })();
+</script>
 </body>
 </html>

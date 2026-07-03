@@ -212,8 +212,34 @@
   var characterEditorExport = document.getElementById("character-editor-export");
   var characterEditorClose = document.getElementById("character-editor-close");
   var characterEditorModalStatus = document.getElementById("character-editor-modal-status");
+  var imgEditFace = document.getElementById("img-edit-face");
+  var imgInputFace = document.getElementById("img-input-face");
+  var imgSkillsContainer = document.getElementById("img-skills-container");
+  var imgSyncTimer = null;
+  var characterEditorNew = document.getElementById("character-editor-new");
+  var characterEditorDelete = document.getElementById("character-editor-delete");
+  var characterEditorDeleteConfirmRow = document.getElementById("character-editor-delete-confirm");
+  var characterEditorDeleteCancel = document.getElementById("character-editor-delete-cancel");
+  var characterEditorDeleteConfirmBtn = document.getElementById("character-editor-delete-confirm-btn");
+  var characterRequiredMission = document.getElementById("character-required-mission");
+  var isNewCharacter = false;
   var selectedAdminCharacterId = "";
   var adminCharacterEntries = [];
+  var adminMissionsForCharEditor = [];
+
+  var newCharacterSkeleton = {
+    id: 0,
+    characterId: "new-character",
+    name: "New Character",
+    facePicture: "",
+    characterdeescription: "",
+    skills: [
+      { id: "new-character-skill-1", name: "Skill 1", skillimage: "", skilldescription: "", energy: ["Random"], target: "single-enemy", damage: 0, cooldown: 0, classes: [], effects: [] },
+      { id: "new-character-skill-2", name: "Skill 2", skillimage: "", skilldescription: "", energy: ["Random"], target: "single-enemy", damage: 0, cooldown: 0, classes: [], effects: [] },
+      { id: "new-character-skill-3", name: "Skill 3", skillimage: "", skilldescription: "", energy: ["Random"], target: "single-enemy", damage: 0, cooldown: 0, classes: [], effects: [] },
+      { id: "new-character-skill-4", name: "Skill 4", skillimage: "", skilldescription: "", energy: ["Random"], target: "self", damage: 0, cooldown: 4, classes: ["Instant"], effects: [] }
+    ]
+  };
   var newsFeed = document.getElementById("news-feed");
   var newsStatus = document.getElementById("news-status");
   var newsFeedContent = document.getElementById("news-feed-content");
@@ -1538,6 +1564,71 @@
     delete characterEditorModalStatus.dataset.state;
   }
 
+  function cloneCharacterEditorPreset(character) {
+    try {
+      return JSON.parse(JSON.stringify(character));
+    } catch (error) {
+      return character;
+    }
+  }
+
+  function getCharacterEditorStarterPresets() {
+    if (typeof window === "undefined") {
+      return {};
+    }
+    var sharedPresets = window.STARTER_CHARACTER_PRESETS || {};
+    return {
+      "uzumaki-naruto": window.NARUTO_STARTER_CHARACTER || null,
+      "haruno-sakura": window.SAKURA_STARTER_CHARACTER || null,
+      "uchiha-sasuke": window.SASUKE_STARTER_CHARACTER || null,
+      "inuzuka-kiba": sharedPresets["inuzuka-kiba"] || null,
+      "aburame-shino": sharedPresets["aburame-shino"] || null,
+      "hyuuga-hinata": sharedPresets["hyuuga-hinata"] || null,
+      "nara-shikamaru": sharedPresets["nara-shikamaru"] || null,
+      "akimichi-chouji": sharedPresets["akimichi-chouji"] || null,
+      "yamanaka-ino": sharedPresets["yamanaka-ino"] || null,
+      "rock-lee": sharedPresets["rock-lee"] || null,
+      "tenten": sharedPresets["tenten"] || null,
+      "neji-hyuuga": sharedPresets["neji-hyuuga"] || null,
+      "gaara-of-the-desert": sharedPresets["gaara-of-the-desert"] || null,
+      "kankuro": sharedPresets["kankuro"] || null,
+      "temari": sharedPresets["temari"] || null
+    };
+  }
+
+  function getCharacterEditorPreset(character) {
+    var characterId = character && character.characterId ? String(character.characterId) : "";
+    var presets = getCharacterEditorStarterPresets();
+    return characterId && presets[characterId] ? presets[characterId] : null;
+  }
+
+  function shouldUseCharacterEditorPreset(character) {
+    var preset = getCharacterEditorPreset(character);
+    if (!preset || !character) {
+      return false;
+    }
+    var expectedSkillIds = Array.isArray(preset.skills)
+      ? preset.skills.map(function (skill) { return skill && skill.id ? String(skill.id) : ""; }).join("|")
+      : "";
+    var actualSkillIds = Array.isArray(character.skills)
+      ? character.skills.map(function (skill) { return skill && skill.id ? String(skill.id) : ""; }).join("|")
+      : "";
+    return Boolean(expectedSkillIds) && actualSkillIds !== expectedSkillIds;
+  }
+
+  function getCharacterEditorDisplayCharacter(character) {
+    if (!shouldUseCharacterEditorPreset(character)) {
+      return {
+        character: character,
+        usedPreset: false
+      };
+    }
+    return {
+      character: cloneCharacterEditorPreset(getCharacterEditorPreset(character)),
+      usedPreset: true
+    };
+  }
+
   function openCharacterEditorModal() {
     if (!characterEditorOverlay) {
       return;
@@ -1553,7 +1644,169 @@
     characterEditorOverlay.classList.remove("visible");
     characterEditorOverlay.setAttribute("aria-hidden", "true");
     selectedAdminCharacterId = "";
+    isNewCharacter = false;
+    hideDeleteConfirm();
+    if (characterEditorDelete) characterEditorDelete.hidden = true;
     setCharacterEditorModalStatus("");
+    populateCharacterImagePanel({});
+  }
+
+  function populateCharacterImagePanel(character) {
+    var face = character && character.facePicture ? String(character.facePicture) : "";
+    if (imgEditFace) imgEditFace.src = face || defaultProfileAvatar;
+    if (imgInputFace) imgInputFace.value = face;
+
+    if (!imgSkillsContainer) return;
+    clearChildren(imgSkillsContainer);
+    var skills = character && Array.isArray(character.skills) ? character.skills : [];
+    for (var si = 0; si < 4; si++) {
+      var skill = skills[si] || null;
+      var skillName = skill && skill.name ? String(skill.name) : ("Skill " + (si + 1));
+      var skillImg = skill && skill.skillimage ? String(skill.skillimage) : "";
+
+      var row = document.createElement("div");
+      row.className = "img-editor-row";
+
+      var thumb = document.createElement("img");
+      thumb.className = "img-editor-thumb";
+      thumb.id = "img-edit-skill-" + si;
+      thumb.alt = skillName;
+      thumb.src = skillImg || defaultProfileAvatar;
+      row.appendChild(thumb);
+
+      var fields = document.createElement("div");
+      fields.className = "img-editor-fields";
+
+      var lbl = document.createElement("span");
+      lbl.className = "img-editor-label";
+      lbl.textContent = skillName;
+      fields.appendChild(lbl);
+
+      var inp = document.createElement("input");
+      inp.className = "img-editor-input";
+      inp.type = "url";
+      inp.id = "img-input-skill-" + si;
+      inp.placeholder = "https://i.imgur.com/…";
+      inp.autocomplete = "off";
+      inp.value = skillImg;
+      inp.dataset.skillIndex = String(si);
+      inp.addEventListener("input", handleSkillImageInput);
+      fields.appendChild(inp);
+
+      row.appendChild(fields);
+      imgSkillsContainer.appendChild(row);
+    }
+  }
+
+  function handleFaceImageInput() {
+    var url = imgInputFace ? imgInputFace.value.trim() : "";
+    if (imgEditFace) imgEditFace.src = url || defaultProfileAvatar;
+    if (characterEditorFace) characterEditorFace.src = url || defaultProfileAvatar;
+    patchImageInJson("facePicture", url);
+  }
+
+  function handleSkillImageInput(e) {
+    var idx = parseInt(e.target.dataset.skillIndex, 10);
+    var url = e.target.value.trim();
+    var thumb = document.getElementById("img-edit-skill-" + idx);
+    if (thumb) thumb.src = url || defaultProfileAvatar;
+    patchSkillImageInJson(idx, url);
+  }
+
+  function patchImageInJson(key, value) {
+    if (!characterEditorJson) return;
+    try {
+      var obj = JSON.parse(characterEditorJson.value || "{}");
+      obj[key] = value;
+      characterEditorJson.value = JSON.stringify(obj, null, 2);
+    } catch (e) {}
+  }
+
+  function patchSkillImageInJson(skillIndex, value) {
+    if (!characterEditorJson) return;
+    try {
+      var obj = JSON.parse(characterEditorJson.value || "{}");
+      if (Array.isArray(obj.skills) && obj.skills[skillIndex]) {
+        obj.skills[skillIndex].skillimage = value;
+        characterEditorJson.value = JSON.stringify(obj, null, 2);
+      }
+    } catch (e) {}
+  }
+
+  function syncImagePanelFromJson() {
+    if (!characterEditorJson) return;
+    try {
+      var obj = JSON.parse(characterEditorJson.value || "{}");
+      var face = obj.facePicture ? String(obj.facePicture) : "";
+      if (imgEditFace) imgEditFace.src = face || defaultProfileAvatar;
+      if (imgInputFace) imgInputFace.value = face;
+      if (characterEditorFace) characterEditorFace.src = face || defaultProfileAvatar;
+      var skills = Array.isArray(obj.skills) ? obj.skills : [];
+      for (var i = 0; i < 4; i++) {
+        var skillImg = skills[i] && skills[i].skillimage ? String(skills[i].skillimage) : "";
+        var thumb = document.getElementById("img-edit-skill-" + i);
+        var inp = document.getElementById("img-input-skill-" + i);
+        if (thumb) thumb.src = skillImg || defaultProfileAvatar;
+        if (inp) inp.value = skillImg;
+        var lbl = inp && inp.previousElementSibling;
+        if (lbl && skills[i] && skills[i].name) lbl.textContent = String(skills[i].name);
+      }
+      if (characterRequiredMission) {
+        characterRequiredMission.value = obj.requiredMissionId ? String(obj.requiredMissionId) : "";
+      }
+    } catch (e) {}
+  }
+
+  function openNewCharacterModal() {
+    var skeleton = JSON.parse(JSON.stringify(newCharacterSkeleton));
+    isNewCharacter = true;
+    selectedAdminCharacterId = "";
+    setText(characterEditorName, "New Character");
+    setText(characterEditorId, "(unsaved)");
+    if (characterEditorFace) characterEditorFace.src = defaultProfileAvatar;
+    if (characterEditorJson) characterEditorJson.value = JSON.stringify(skeleton, null, 2);
+    if (characterEditorDelete) characterEditorDelete.hidden = true;
+    hideDeleteConfirm();
+    populateCharacterImagePanel(skeleton);
+    populateMissionSelectForCharEditor("");
+    setCharacterEditorModalStatus("Fill in the character data then click Save Character to create it.");
+    openCharacterEditorModal();
+  }
+
+  function showDeleteConfirm() {
+    if (characterEditorDeleteConfirmRow) characterEditorDeleteConfirmRow.classList.add("visible");
+  }
+
+  function hideDeleteConfirm() {
+    if (characterEditorDeleteConfirmRow) characterEditorDeleteConfirmRow.classList.remove("visible");
+  }
+
+  async function deleteAdminCharacter() {
+    if (!selectedAdminCharacterId) return;
+    var idToDelete = selectedAdminCharacterId;
+    hideDeleteConfirm();
+    setCharacterEditorModalStatus("Deleting character...");
+    try {
+      var response = await fetch("/api/admin/characters/" + encodeURIComponent(idToDelete), {
+        method: "DELETE",
+        credentials: "same-origin"
+      });
+      var rawText = await response.text();
+      var data = null;
+      try { data = JSON.parse(rawText); } catch (e) {}
+      if (!response.ok) {
+        var deleteErrMsg = data && data.error
+          ? data.error
+          : ("Server returned " + response.status + ": " + rawText.slice(0, 120));
+        setCharacterEditorModalStatus(deleteErrMsg, "error");
+        return;
+      }
+      closeCharacterEditorModal();
+      loadAdminCharacters();
+      loadCharacterCatalog();
+    } catch (error) {
+      setCharacterEditorModalStatus("Unable to reach the server.", "error");
+    }
   }
 
   function renderAdminCharacters(entries) {
@@ -1616,6 +1869,29 @@
     setCharacterEditorStatus("");
   }
 
+  async function loadAdminMissionsForCharEditor() {
+    try {
+      var response = await fetch("/api/admin/missions", { credentials: "same-origin" });
+      if (!response.ok) return;
+      var data = await response.json().catch(function () { return {}; });
+      adminMissionsForCharEditor = Array.isArray(data && data.missions) ? data.missions : [];
+    } catch (e) {}
+  }
+
+  function populateMissionSelectForCharEditor(currentMissionId) {
+    if (!characterRequiredMission) return;
+    var val = typeof currentMissionId === "string" ? currentMissionId.trim() : "";
+    characterRequiredMission.innerHTML = '<option value="">None (always available)</option>';
+    adminMissionsForCharEditor.forEach(function (m) {
+      if (!m || !m.missionId) return;
+      var opt = document.createElement("option");
+      opt.value = m.missionId;
+      opt.textContent = (m.title || m.missionId) + " (" + m.missionId + ")";
+      characterRequiredMission.appendChild(opt);
+    });
+    characterRequiredMission.value = val;
+  }
+
   async function loadAdminCharacters() {
     if (!characterEditorGrid) {
       return;
@@ -1647,7 +1923,10 @@
       return;
     }
 
+    isNewCharacter = false;
     selectedAdminCharacterId = characterId;
+    if (characterEditorDelete) characterEditorDelete.hidden = false;
+    hideDeleteConfirm();
     setText(characterEditorName, "Loading...");
     setText(characterEditorId, characterId);
     if (characterEditorFace) {
@@ -1672,7 +1951,9 @@
         return;
       }
 
-      var character = data && data.character ? data.character : {};
+      var loadedCharacter = data && data.character ? data.character : {};
+      var displayResult = getCharacterEditorDisplayCharacter(loadedCharacter);
+      var character = displayResult.character || loadedCharacter || {};
       setText(characterEditorName, character && character.name ? character.name : characterId);
       setText(characterEditorId, character && character.characterId ? character.characterId : characterId);
       if (characterEditorFace) {
@@ -1681,7 +1962,13 @@
       if (characterEditorJson) {
         characterEditorJson.value = JSON.stringify(character, null, 2);
       }
-      setCharacterEditorModalStatus("");
+      populateCharacterImagePanel(character);
+      populateMissionSelectForCharEditor(character && character.requiredMissionId ? character.requiredMissionId : "");
+      if (displayResult.usedPreset) {
+        setCharacterEditorModalStatus("Loaded the updated starter kit because the server returned stale editor data. Save Character to sync it.", "success");
+      } else {
+        setCharacterEditorModalStatus("");
+      }
     } catch (error) {
       setCharacterEditorModalStatus("Unable to reach the server.", "error");
     }
@@ -1703,13 +1990,15 @@
     if (characterEditorSave) {
       characterEditorSave.disabled = true;
     }
-    setCharacterEditorModalStatus("Saving character...");
+    setCharacterEditorModalStatus(isNewCharacter ? "Creating character..." : "Saving character...");
     try {
-      var response = await fetch("/api/admin/characters/" + encodeURIComponent(selectedAdminCharacterId), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
+      var url = isNewCharacter
+        ? "/api/admin/characters"
+        : "/api/admin/characters/" + encodeURIComponent(selectedAdminCharacterId);
+      var method = isNewCharacter ? "POST" : "PUT";
+      var response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify(nextCharacter)
       });
@@ -1718,22 +2007,25 @@
       });
 
       if (!response.ok) {
-        setCharacterEditorModalStatus(data && data.error ? data.error : "Unable to update character.", "error");
+        setCharacterEditorModalStatus(data && data.error ? data.error : (isNewCharacter ? "Unable to create character." : "Unable to update character."), "error");
         return;
       }
 
       var savedCharacter = data && data.character ? data.character : nextCharacter;
+      isNewCharacter = false;
       selectedAdminCharacterId =
         savedCharacter && savedCharacter.characterId ? String(savedCharacter.characterId) : selectedAdminCharacterId;
+      if (characterEditorDelete) characterEditorDelete.hidden = false;
       if (characterEditorJson) {
         characterEditorJson.value = JSON.stringify(savedCharacter, null, 2);
       }
+      populateCharacterImagePanel(savedCharacter);
       setText(characterEditorName, savedCharacter && savedCharacter.name ? savedCharacter.name : selectedAdminCharacterId);
       setText(characterEditorId, selectedAdminCharacterId);
       if (characterEditorFace) {
         characterEditorFace.src = savedCharacter && savedCharacter.facePicture ? savedCharacter.facePicture : defaultProfileAvatar;
       }
-      setCharacterEditorModalStatus("Character updated.");
+      setCharacterEditorModalStatus("Character " + (method === "POST" ? "created." : "updated."), "success");
       loadAdminCharacters();
       loadCharacterCatalog();
     } catch (error) {
@@ -3671,6 +3963,47 @@
     });
   }
 
+  if (characterEditorNew) {
+    characterEditorNew.addEventListener("click", function () {
+      openNewCharacterModal();
+    });
+  }
+
+  if (characterEditorDelete) {
+    characterEditorDelete.addEventListener("click", function () {
+      showDeleteConfirm();
+    });
+  }
+
+  if (characterEditorDeleteCancel) {
+    characterEditorDeleteCancel.addEventListener("click", function () {
+      hideDeleteConfirm();
+    });
+  }
+
+  if (characterEditorDeleteConfirmBtn) {
+    characterEditorDeleteConfirmBtn.addEventListener("click", function () {
+      deleteAdminCharacter();
+    });
+  }
+
+  if (imgInputFace) {
+    imgInputFace.addEventListener("input", handleFaceImageInput);
+  }
+
+  if (characterRequiredMission) {
+    characterRequiredMission.addEventListener("change", function () {
+      patchImageInJson("requiredMissionId", characterRequiredMission.value || "");
+    });
+  }
+
+  if (characterEditorJson) {
+    characterEditorJson.addEventListener("input", function () {
+      clearTimeout(imgSyncTimer);
+      imgSyncTimer = setTimeout(syncImagePanelFromJson, 400);
+    });
+  }
+
   if (characterEditorExport) {
     characterEditorExport.addEventListener("click", function () {
       exportAdminCharacters();
@@ -4578,8 +4911,16 @@
   if (playNowButton) {
     playNowButton.addEventListener("click", function () {
       var destination = accountPanel.hidden ? "selection-login.html" : "selection.html";
-      var targetInnerWidth = 760;
-      var targetInnerHeight = 580;
+      var useRemasterPreview = false;
+      try {
+        useRemasterPreview =
+          destination === "selection.html" &&
+          localStorage.getItem("na-selection-remaster-preview") === "enabled";
+      } catch (error) {}
+      var targetInnerWidth =
+        destination === "selection.html" ? (useRemasterPreview ? 1100 : 770) : 760;
+      var targetInnerHeight =
+        destination === "selection.html" ? (useRemasterPreview ? 800 : 560) : 580;
       var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
       var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
       var popupWidth = targetInnerWidth + chromeWidth;
@@ -4613,6 +4954,7 @@
   loadAdminWinrates();
   loadAdminUsers();
   loadAdminCharacters();
+  loadAdminMissionsForCharEditor();
   loadPublicNews();
   loadAdminNewsPosts();
   loadCharacterCatalog();
@@ -4620,7 +4962,7 @@
   loadMaintenanceMode();
 
   fetchSessionUser().then(function (user) {
-    var isAdminOnlyPage = /(winrates|playeraccounts|newspost|charactereditor|editmission)\.html$/i.test(window.location.pathname || "");
+    var isAdminOnlyPage = /(?:admin|winrates|playeraccounts|newspost|charactereditor|editmission)(?:\.html)?$/i.test(window.location.pathname || "");
     if (isAdminOnlyPage && !(user && String(user.role || "").trim().toLowerCase() === "admin")) {
       window.location.replace("index.html");
       return;

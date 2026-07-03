@@ -190,9 +190,22 @@ const resolveEffectiveSkill = ({ characters, rosterIndex, skillIndex, actorState
     while (resolvedSkill?.id && replacementMap[resolvedSkill.id] && !visited.has(resolvedSkill.id)) {
         visited.add(resolvedSkill.id);
         const replacementId = replacementMap[resolvedSkill.id];
-        const replacementSkill =
+        let replacementSkill =
             (Array.isArray(character?.skills) ? character.skills : []).find((skill) => skill?.id === replacementId) ||
             null;
+        if (!replacementSkill && Array.isArray(characters)) {
+            // Not one of this character's own skills — fall back to a global lookup so a
+            // dynamically "copied" enemy skill (e.g. Sharingan Counter) can be resolved too.
+            for (const otherCharacter of characters) {
+                const found = (Array.isArray(otherCharacter?.skills) ? otherCharacter.skills : []).find(
+                    (skill) => skill?.id === replacementId
+                );
+                if (found) {
+                    replacementSkill = found;
+                    break;
+                }
+            }
+        }
         if (!replacementSkill) {
             break;
         }
@@ -250,6 +263,7 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         bloodlineCostIncrease: 0,
         genjutsuCostIncrease: 0,
         cannotUseSkills: false,
+        stunImmune: false,
         damageBonusFlat: 0,
         nonAfflictionDamageBonusFlat: 0,
         damageDebuffFlat: 0,
@@ -318,6 +332,9 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         );
         if (metadata.cannotUseSkills) {
             totals.cannotUseSkills = true;
+        }
+        if (metadata.stunImmune) {
+            totals.stunImmune = true;
         }
         if (metadata.invulnerable) {
             totals.invulnerable = true;
@@ -659,7 +676,18 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
         case 'single-character': {
             result.mode = 'single';
             result.targets = [
-                ...mapTargets(actingUsername, actorBoard),
+                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }),
+                ...mapTargets(opponentUsername, opponentBoard, {
+                    enemyTargeting: true,
+                    skillClasses: effectiveSkill?.classes || [],
+                }),
+            ];
+            break;
+        }
+        case 'all-characters': {
+            result.mode = 'all';
+            result.targets = [
+                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }),
                 ...mapTargets(opponentUsername, opponentBoard, {
                     enemyTargeting: true,
                     skillClasses: effectiveSkill?.classes || [],
@@ -818,6 +846,27 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
         }, 0);
         randomIncrease += nonMentalIncrease;
     }
+    const skillClassesForCostIncrease = Array.isArray(skill?.classes) ? skill.classes : [];
+    const classScopedIncrease = (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce(
+        (sum, status) => {
+            const remaining = Number(status?.remainingTurns) || 0;
+            if (remaining <= 0) return sum;
+            const map =
+                status?.metadata?.randomCostIncreaseForSkillClasses &&
+                typeof status.metadata.randomCostIncreaseForSkillClasses === 'object'
+                    ? status.metadata.randomCostIncreaseForSkillClasses
+                    : null;
+            if (!map) return sum;
+            let statusIncrease = 0;
+            Object.entries(map).forEach(([className, amount]) => {
+                if (!hasSkillClass(skillClassesForCostIncrease, className)) return;
+                statusIncrease = Math.max(statusIncrease, Math.max(0, Number(amount) || 0));
+            });
+            return sum + statusIncrease;
+        },
+        0
+    );
+    randomIncrease += classScopedIncrease;
     return {
         reservedSpecific,
         requiredRandom: Math.max(0, base.requiredRandom + randomIncrease - randomReduction),
@@ -1107,6 +1156,9 @@ const applyStatus = ({
     fresh = false,
 }) => {
     if (!targetState || !statusId) return;
+    if (metadata?.cannotUseSkills && getStatusMetadataTotals(targetState).stunImmune) {
+        return;
+    }
     const applyStackDerivedNumericKeys = (nextMetadata) => {
         if (!nextMetadata || typeof nextMetadata !== 'object') return nextMetadata;
         const stackKey =
@@ -1400,7 +1452,7 @@ const getOutgoingDamageCap = (actorState, actorUnit = null) => {
     return cap;
 };
 
-const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState, skillClasses = [] }) => {
+const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState, targetUnit = null, skillClasses = [] }) => {
     let amount = Number(effect?.amount) || 0;
     const effectiveSkillClasses = Array.isArray(skillClasses) ? [...skillClasses] : [];
     if (Boolean(effect?.metadata?.afflictionDamage) && !hasSkillClass(effectiveSkillClasses, 'affliction')) {
@@ -1457,6 +1509,21 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
         if (Boolean(effect?.metadata?.amountFromSourceCurrentHp)) {
             resolvedAmount += Math.max(0, Number(actorUnit?.hp) || 0);
         }
+        const unconditionalMissingHpStep = Math.max(0, Number(effect?.metadata?.amountFromSourceMissingHpStep) || 0);
+        const unconditionalMissingHpDivisor = Math.max(1, Number(effect?.metadata?.amountFromSourceMissingHpDivisor) || 0);
+        if (unconditionalMissingHpStep > 0 && unconditionalMissingHpDivisor > 0) {
+            const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
+            const missingHp = Math.max(0, DEFAULT_HP - currentHp);
+            resolvedAmount += Math.floor(missingHp / unconditionalMissingHpDivisor) * unconditionalMissingHpStep;
+        }
+        const unconditionalTargetMissingHpStep = Math.max(0, Number(effect?.metadata?.amountFromTargetMissingHpStep) || 0);
+        const unconditionalTargetMissingHpDivisor = Math.max(1, Number(effect?.metadata?.amountFromTargetMissingHpDivisor) || 0);
+        if (unconditionalTargetMissingHpStep > 0 && unconditionalTargetMissingHpDivisor > 0) {
+            const targetCurrentHp = Math.max(0, Number(targetUnit?.hp) || 0);
+            const targetMissingHp = Math.max(0, DEFAULT_HP - targetCurrentHp);
+            resolvedAmount +=
+                Math.floor(targetMissingHp / unconditionalTargetMissingHpDivisor) * unconditionalTargetMissingHpStep;
+        }
         const outgoingCap = getOutgoingDamageCap(actorState, actorUnit);
         return outgoingCap === null ? resolvedAmount : Math.min(resolvedAmount, outgoingCap);
     }
@@ -1498,7 +1565,7 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
     return outgoingCap === null ? resolvedAmount : Math.min(resolvedAmount, outgoingCap);
 };
 
-const getTargetBonusDamageFromSource = ({ targetState, sourceCharacterId, sourceSkillId = null }) => {
+const getTargetBonusDamageFromSource = ({ targetState, sourceCharacterId, sourceSkillId = null, skillClasses = [], afflictionDamage = false }) => {
     if (!targetState || !sourceCharacterId) return 0;
     const statuses = Array.isArray(targetState?.statuses) ? targetState.statuses : [];
     return statuses.reduce((sum, status) => {
@@ -1506,7 +1573,17 @@ const getTargetBonusDamageFromSource = ({ targetState, sourceCharacterId, source
         if (remaining <= 0) return sum;
         const metadata = status?.metadata || {};
         const flatBonus = Number(metadata?.bonusDamageFromSourceSkillsFlat) || 0;
-        let bonus = flatBonus;
+        const nonAfflictionBonus = !afflictionDamage ? (Number(metadata?.bonusDamageFromSourceNonAfflictionFlat) || 0) : 0;
+        let classBonus = 0;
+        const skillClassBonusMap = metadata?.bonusDamageFromSourceSkillClassesAny;
+        if (skillClassBonusMap && typeof skillClassBonusMap === 'object' && skillClasses.length > 0) {
+            Object.entries(skillClassBonusMap).forEach(([className, amount]) => {
+                if (hasSkillClass(skillClasses, className)) {
+                    classBonus += Number(amount) || 0;
+                }
+            });
+        }
+        let bonus = flatBonus + nonAfflictionBonus + classBonus;
         const perStack = Number(metadata?.bonusDamageFromSourceSkillsPerStack) || 0;
         const stackKey =
             typeof metadata?.bonusDamageFromSourceSkillsPerStackMetadataKey === 'string'
@@ -1552,6 +1629,25 @@ const formatSkillClassLabel = (value = '') => {
     const normalized = normalizeSkillClassName(value);
     if (!normalized) return '';
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
+const getTargetClassScopedDamageModifiers = (targetState, skillClasses = []) => {
+    const totals = { damageTakenBonusFlat: 0 };
+    const statuses = Array.isArray(targetState?.statuses) ? targetState.statuses : [];
+    statuses.forEach((status) => {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) return;
+        const metadata = status?.metadata || {};
+        const classBonusMap =
+            metadata?.damageTakenBonusBySkillClass && typeof metadata.damageTakenBonusBySkillClass === 'object'
+                ? metadata.damageTakenBonusBySkillClass
+                : {};
+        Object.entries(classBonusMap).forEach(([className, amount]) => {
+            if (!hasSkillClass(skillClasses, className)) return;
+            totals.damageTakenBonusFlat += Number(amount) || 0;
+        });
+    });
+    return totals;
 };
 
 const getSourceClassScopedDamageModifiers = (actorState, skillClasses = []) => {
@@ -1787,6 +1883,18 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
         const bonuses = status?.metadata?.skillDamageBonuses;
         if (!bonuses || typeof bonuses !== 'object') return sum;
         return sum + (Number(bonuses[skillId]) || 0);
+    }, 0);
+};
+
+const getSkillSpecificDurationBonus = (actorState, skillId) => {
+    if (!skillId) return 0;
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    return statuses.reduce((sum, status) => {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) return sum;
+        const bonuses = status?.metadata?.skillDurationBonuses;
+        if (!bonuses || typeof bonuses !== 'object') return sum;
+        return sum + Math.max(0, Number(bonuses[skillId]) || 0);
     }, 0);
 };
 
@@ -2048,7 +2156,10 @@ const maybeTriggerReactiveDefenses = ({
         return (
             remaining > 0 &&
             (Boolean(status?.metadata?.triggerOnEnemyHarmfulNonMental) ||
-                Boolean(status?.metadata?.triggerOnEnemyHarmfulSkill))
+                Boolean(status?.metadata?.triggerOnEnemyHarmfulSkill) ||
+                Boolean(status?.metadata?.triggerOnEnemyHarmfulNonStrategic) ||
+                (Array.isArray(status?.metadata?.triggerOnEnemyHarmfulSkillClassesAny) &&
+                    status.metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0))
         );
     });
     if (trapIndex < 0) return false;
@@ -2056,6 +2167,16 @@ const maybeTriggerReactiveDefenses = ({
     const trapStatus = statuses[trapIndex];
     const trapMetadata = trapStatus?.metadata || {};
     if (trapMetadata?.triggerOnEnemyHarmfulNonMental && hasSkillClass(skillClasses, 'mental')) {
+        return false;
+    }
+    if (trapMetadata?.triggerOnEnemyHarmfulNonStrategic && hasSkillClass(skillClasses, 'strategic')) {
+        return false;
+    }
+    if (
+        Array.isArray(trapMetadata?.triggerOnEnemyHarmfulSkillClassesAny) &&
+        trapMetadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0 &&
+        !trapMetadata.triggerOnEnemyHarmfulSkillClassesAny.some((entry) => hasSkillClass(skillClasses, entry))
+    ) {
         return false;
     }
     const counterDamage = Math.max(0, Number(trapMetadata?.counterDamage) || 0);
@@ -2094,6 +2215,20 @@ const maybeTriggerReactiveDefenses = ({
             metadata: counterStatusMetadata,
             // Counter-applied statuses land during the triggering unit's turn, so they
             // need to start fresh or a 1-turn effect expires at that same turn end.
+            fresh: true,
+        });
+    }
+    const counterApplyStatusToRecipient = trapMetadata?.counterApplyStatusToRecipient;
+    if (counterApplyStatusToRecipient?.statusId && recipient?.unit && recipient.unit.alive !== false) {
+        const recipientState = ensureUnitStateShape(recipient.unit);
+        applyStatus({
+            targetState: recipientState,
+            statusId: counterApplyStatusToRecipient.statusId,
+            duration: counterApplyStatusToRecipient.duration,
+            sourceSkillId: trapStatus?.sourceSkillId || null,
+            sourceUsername: trapStatus?.sourceUsername || null,
+            sourceSlot: Number.isInteger(trapStatus?.sourceSlot) ? trapStatus.sourceSlot : null,
+            metadata: counterApplyStatusToRecipient.metadata || {},
             fresh: true,
         });
     }
@@ -2145,6 +2280,35 @@ const maybeTriggerReactiveDefenses = ({
                 sourceSlot: Number.isInteger(trapStatus?.sourceSlot) ? trapStatus.sourceSlot : null,
                 metadata: counterApplyStatusToSourceOwner.metadata || {},
                 fresh: false,
+            });
+        }
+    }
+    const counterCopySkillReplacementFor = trapMetadata?.counterCopySkillReplacementFor;
+    if (
+        typeof counterCopySkillReplacementFor === 'string' &&
+        counterCopySkillReplacementFor &&
+        typeof sourceSkillId === 'string' &&
+        sourceSkillId &&
+        trapStatus?.sourceUsername &&
+        Number.isInteger(trapStatus?.sourceSlot)
+    ) {
+        const trapSetterUnit = match.board?.[trapStatus.sourceUsername]?.[Number(trapStatus.sourceSlot)] || null;
+        if (trapSetterUnit && trapSetterUnit.alive !== false) {
+            const trapSetterState = ensureUnitStateShape(trapSetterUnit);
+            const copyDuration = Math.max(1, Number(trapMetadata?.counterCopySkillReplacementDuration) || 1);
+            applyStatus({
+                targetState: trapSetterState,
+                statusId: `${counterCopySkillReplacementFor}_copied_skill`,
+                duration: copyDuration,
+                sourceSkillId: trapStatus?.sourceSkillId || null,
+                sourceUsername: trapStatus?.sourceUsername || null,
+                sourceSlot: Number.isInteger(trapStatus?.sourceSlot) ? trapStatus.sourceSlot : null,
+                metadata: {
+                    helpful: true,
+                    skillReplacements: { [counterCopySkillReplacementFor]: sourceSkillId },
+                    tooltipText: 'This character has copied an enemy skill.',
+                },
+                fresh: true,
             });
         }
     }
@@ -2357,6 +2521,29 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                         amount: 1,
                     });
                 }
+                const removeStatusIdsFromEnemyOnBreak = Array.isArray(
+                    status?.metadata?.removeStatusIdsFromEnemyOnBreak
+                )
+                    ? status.metadata.removeStatusIdsFromEnemyOnBreak.filter(
+                          (id) => typeof id === 'string' && id
+                      )
+                    : [];
+                if (removeStatusIdsFromEnemyOnBreak.length > 0 && context?.match && context?.targetUsername) {
+                    const opponentEntry = (context.match.players || []).find(
+                        (player) => player?.username && player.username !== context.targetUsername
+                    );
+                    const opponentUsername = opponentEntry?.username;
+                    const opponentUnits = opponentUsername
+                        ? context.match.board?.[opponentUsername] || []
+                        : [];
+                    opponentUnits.forEach((opponentUnit) => {
+                        if (!opponentUnit || opponentUnit.alive === false) return;
+                        const opponentState = ensureUnitStateShape(opponentUnit);
+                        opponentState.statuses = (
+                            Array.isArray(opponentState.statuses) ? opponentState.statuses : []
+                        ).filter((entry) => !removeStatusIdsFromEnemyOnBreak.includes(entry?.id));
+                    });
+                }
                 targetState.statuses.splice(i, 1);
                 i -= 1;
             }
@@ -2372,6 +2559,10 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     const damageTakenBonusFlat = Math.max(0, Number(totals.damageTakenBonusFlat) || 0);
     if (damageTakenBonusFlat > 0) {
         incoming += damageTakenBonusFlat;
+    }
+    if (incoming > 0) {
+        const classScopedTargetTotals = getTargetClassScopedDamageModifiers(targetState, skillClasses);
+        incoming += Math.max(0, Number(classScopedTargetTotals.damageTakenBonusFlat) || 0);
     }
     const standardPercentReduction = ignoreDamageReduction
         ? 0
@@ -2500,6 +2691,14 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                 ? status.metadata.removeStatusIdsOnNewDamage.filter((id) => typeof id === 'string' && id)
                 : [];
             ids.forEach((id) => removeIds.add(id));
+            if (!afflictionDamage) {
+                const nonAfflictionIds = Array.isArray(status?.metadata?.removeStatusIdsOnNewNonAfflictionDamage)
+                    ? status.metadata.removeStatusIdsOnNewNonAfflictionDamage.filter(
+                          (id) => typeof id === 'string' && id
+                      )
+                    : [];
+                nonAfflictionIds.forEach((id) => removeIds.add(id));
+            }
         });
         if (removeIds.size > 0) {
             targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter(
@@ -3448,13 +3647,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         ) {
             continue;
         }
-        if (skill?.id) {
-            const skillUses =
-                actorState.skillUses && typeof actorState.skillUses === 'object' ? actorState.skillUses : {};
-            skillUses[skill.id] = (Number(skillUses[skill.id]) || 0) + 1;
-            actorState.skillUses = skillUses;
-        }
-
+        if (!doesActorSatisfySkillCondition(actorUnit, actorState, skill)) continue;
         const ownerUseSkillTriggeredStatusIds = new Set();
         const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
         (Array.isArray(actorState?.statuses) ? actorState.statuses : []).forEach((status) => {
@@ -3540,6 +3733,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             ) {
                 return;
             }
+            if (Boolean(status?.metadata?.onOwnerUseSkillHarmfulOnly) && !skillHasHarmfulEffects(skill)) {
+                return;
+            }
             const removeStatusIdsOnOwnerUseSkill = Array.isArray(status?.metadata?.removeStatusIdsOnOwnerUseSkill)
                 ? status.metadata.removeStatusIdsOnOwnerUseSkill.filter((id) => typeof id === 'string' && id)
                 : [];
@@ -3583,6 +3779,20 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     fresh: false,
                 });
             }
+            const ownerUseSkillEffects = Array.isArray(status?.metadata?.onOwnerUseSkillEffects)
+                ? status.metadata.onOwnerUseSkillEffects.filter((effect) => effect && typeof effect === 'object')
+                : [];
+            if (ownerUseSkillEffects.length > 0) {
+                applyTriggeredEffectsFromStatus({
+                    effects: ownerUseSkillEffects,
+                    match,
+                    status,
+                    targetUnit: actorUnit,
+                    targetState: actorState,
+                    targetUsername: actingUsername,
+                    targetSlot: actorSlot,
+                });
+            }
         });
         if (ownerUseSkillTriggeredStatusIds.size > 0) {
             actorState.statuses = (Array.isArray(actorState.statuses) ? actorState.statuses : []).filter(
@@ -3611,6 +3821,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const effects = Array.isArray(skill.effects) ? skill.effects : [];
         if (!effects.length) continue;
         if (!doesActorSatisfySkillCondition(actorUnit, actorState, skill)) continue;
+        if (skill?.id) {
+            const skillUses =
+                actorState.skillUses && typeof actorState.skillUses === 'object' ? actorState.skillUses : {};
+            skillUses[skill.id] = (Number(skillUses[skill.id]) || 0) + 1;
+            actorState.skillUses = skillUses;
+            actorState.totalSkillUseCount = (Number(actorState.totalSkillUseCount) || 0) + 1;
+        }
         const skillCannotBeCountered = Boolean(skill?.cannotBeCountered);
         const actingCharacterId =
             (typeof characters?.[actorUnit?.rosterIndex]?.id === 'string' &&
@@ -3801,6 +4018,23 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         }
         const randomScopeGroupPicks = new Map();
         const reflectedRecipientByOriginalKey = new Map();
+        const resolveFixedReflectTarget = (metadata, sourceStatus = null) => {
+            let fixedUsername = null;
+            let fixedSlot = null;
+            if (Boolean(metadata?.reflectToFixedTarget)) {
+                fixedUsername = metadata?.reflectTargetUsername;
+                fixedSlot = Number(metadata?.reflectTargetSlot);
+            } else if (Boolean(metadata?.reflectToSourceCaster)) {
+                fixedUsername = sourceStatus?.sourceUsername;
+                fixedSlot = Number(sourceStatus?.sourceSlot);
+            } else {
+                return null;
+            }
+            if (typeof fixedUsername !== 'string' || !fixedUsername || !Number.isInteger(fixedSlot)) return null;
+            const fixedUnit = match?.board?.[fixedUsername]?.[fixedSlot] || null;
+            if (!fixedUnit || fixedUnit.alive === false) return null;
+            return { username: fixedUsername, slot: fixedSlot, unit: fixedUnit };
+        };
         const reflectRecipients = (recipients = []) =>
             (Array.isArray(recipients) ? recipients : []).map((recipient) => {
                 if (!recipient?.unit || recipient.unit.alive === false) return recipient;
@@ -3810,6 +4044,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     const targetState = ensureUnitStateShape(recipient.unit);
                     consumeStatus(targetState, targetReflectStatus.id);
                     const metadata = targetReflectStatus?.metadata || {};
+                    const fixedTarget = resolveFixedReflectTarget(metadata, targetReflectStatus);
+                    if (fixedTarget) {
+                        return fixedTarget;
+                    }
                     if (Boolean(metadata?.reflectBackToCaster)) {
                         return { username: actingUsername, slot: actorSlot, unit: actorUnit };
                     }
@@ -3835,6 +4073,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 }
                 if (!shouldReflectTargetsByPersonalStatus) return recipient;
                 const personalReflectMetadata = personalReflectStatus?.metadata || {};
+                const fixedPersonalTarget = resolveFixedReflectTarget(personalReflectMetadata, personalReflectStatus);
+                if (fixedPersonalTarget) {
+                    return fixedPersonalTarget;
+                }
                 if (Boolean(personalReflectMetadata?.reflectBackToCaster)) {
                     return { username: actingUsername, slot: actorSlot, unit: actorUnit };
                 }
@@ -3894,6 +4136,20 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 return filterHelpfulImmuneRecipients({
                     effect,
                     recipients: reflectRecipients(opponentUnits),
+                    actingUsername,
+                });
+            }
+            if (scope === 'all-other-enemy') {
+                const selectedKeys = new Set(
+                    selectedTargets
+                        .filter((entry) => entry?.username && Number.isInteger(entry?.slot))
+                        .map((entry) => `${entry.username}:${entry.slot}`)
+                );
+                return filterHelpfulImmuneRecipients({
+                    effect,
+                    recipients: reflectRecipients(
+                        opponentUnits.filter((entry) => !selectedKeys.has(`${entry.username}:${entry.slot}`))
+                    ),
                     actingUsername,
                 });
             }
@@ -4299,6 +4555,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         actorState,
                         actorUnit,
                         targetState,
+                        targetUnit: recipient.unit,
                         skillClasses: skill.classes || [],
                     });
                     const skillSpecificBonus = getSkillSpecificDamageBonus(actorState, skill.id || null);
@@ -4306,6 +4563,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         targetState,
                         sourceCharacterId: actingCharacterId,
                         sourceSkillId: skill.id || null,
+                        skillClasses: skill.classes || [],
+                        afflictionDamage: Boolean(effect?.metadata?.afflictionDamage) || hasSkillClass(skill.classes || [], 'affliction'),
                     });
                     const totalAmount = Math.max(0, amount + skillSpecificBonus + targetSourceBonus);
                     queueDamage(recipient, totalAmount, effect);
@@ -4505,6 +4764,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     if (extraDuration > 0) {
                         runtimeDuration = Math.max(0, Number(runtimeDuration) || 0) + extraDuration;
                     }
+                    const outgoingExtraDuration = getSkillSpecificDurationBonus(actorState, skill.id || null);
+                    if (outgoingExtraDuration > 0) {
+                        runtimeDuration = Math.max(0, Number(runtimeDuration) || 0) + outgoingExtraDuration;
+                    }
                     if (
                         runtimeMetadata?.cannotBecomeInvulnerable &&
                         runtimeMetadata?.turnDurationAnchor !== 'source_turn'
@@ -4600,6 +4863,24 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         };
                         copyTargetUsernameToKeys.forEach((key) => {
                             nextMetadata[key] = recipient.username;
+                        });
+                        runtimeMetadata = nextMetadata;
+                    }
+                    const copyTargetTotalSkillUseCountToKeys = Array.isArray(
+                        runtimeMetadata?.copyTargetTotalSkillUseCountToKeys
+                    )
+                        ? runtimeMetadata.copyTargetTotalSkillUseCountToKeys.filter(
+                              (key) => typeof key === 'string' && key
+                          )
+                        : [];
+                    if (copyTargetTotalSkillUseCountToKeys.length > 0) {
+                        const recipientState = ensureUnitStateShape(recipient.unit);
+                        const currentCount = Number(recipientState?.totalSkillUseCount) || 0;
+                        const nextMetadata = {
+                            ...(runtimeMetadata || {}),
+                        };
+                        copyTargetTotalSkillUseCountToKeys.forEach((key) => {
+                            nextMetadata[key] = currentCount;
                         });
                         runtimeMetadata = nextMetadata;
                     }
@@ -4888,6 +5169,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
 
             if (effectType === 'cleanse_harmful') {
                 const recipients = resolveRecipients(effect);
+                const condition = effect?.condition;
                 recipients.forEach((recipient) => {
                     if (!recipient?.unit || recipient.unit.alive === false) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
@@ -4896,6 +5178,20 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             targetState,
                             skillClasses: skill.classes || [],
                             isEnemySkill: recipient.username !== actingUsername,
+                        })
+                    ) {
+                        return;
+                    }
+                    if (
+                        condition &&
+                        !doesEffectConditionMatch({
+                            condition,
+                            actorState,
+                            targetState,
+                            actorUnit,
+                            actorUsername: actingUsername,
+                            targetUnit: recipient.unit,
+                            targetUsername: recipient.username,
                         })
                     ) {
                         return;
@@ -5335,6 +5631,57 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         const available = ['taijutsu', 'ninjutsu', 'genjutsu'].filter(
                             (type) => (Number(targetPool[type]) || 0) > 0
                         );
+                        if (!available.length) break;
+                        const picked = available[Math.floor(Math.random() * available.length)];
+                        targetPool[picked] = Math.max(0, (Number(targetPool[picked]) || 0) - 1);
+                        sourcePool[picked] = (Number(sourcePool[picked]) || 0) + 1;
+                    }
+                    match.chakraPools[recipient.username] = targetPool;
+                    match.chakraPools[actingUsername] = sourcePool;
+                });
+            }
+
+            if (effectType === 'drain_chakra_random_from_target_to_self') {
+                const recipients = resolveRecipients(effect);
+                const maxAmount = Math.max(0, Number(effect?.amount) || 0);
+                if (maxAmount <= 0) return;
+                recipients.forEach((recipient) => {
+                    if (!recipient?.username || recipient.username === actingUsername) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    if (
+                        doesTargetIgnoreSkillByClass({
+                            targetState,
+                            skillClasses: skill.classes || [],
+                            isEnemySkill: recipient.username !== actingUsername,
+                        })
+                    ) {
+                        return;
+                    }
+                    const condition = effect?.condition;
+                    if (condition) {
+                        if (
+                            !doesEffectConditionMatch({
+                                condition,
+                                actorState,
+                                targetState,
+                                actorUnit,
+                                actorUsername: actingUsername,
+                                targetUnit: recipient.unit,
+                                targetUsername: recipient.username,
+                            })
+                        )
+                            return;
+                        if (condition.consumeOnMatch && condition.statusId) {
+                            const scope = condition.scope === 'target' ? 'target' : 'self';
+                            const scopedState = scope === 'target' ? targetState : actorState;
+                            consumeStatus(scopedState, condition.statusId);
+                        }
+                    }
+                    match.chakraPools = match.chakraPools || {};
+                    const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
+                    const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
+                    for (let i = 0; i < maxAmount; i += 1) {
+                        const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
                         if (!available.length) break;
                         const picked = available[Math.floor(Math.random() * available.length)];
                         targetPool[picked] = Math.max(0, (Number(targetPool[picked]) || 0) - 1);
@@ -6069,6 +6416,18 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     match.chakraPools[status.sourceUsername] = sourcePool;
                 }
 
+                const turnEndRemoveRandomChakra = Math.max(
+                    0,
+                    Number(status?.metadata?.turnEndRemoveRandomChakra) || 0
+                );
+                if (turnEndRemoveRandomChakra > 0) {
+                    removeRandomChakraFromMatch({
+                        match,
+                        username,
+                        amount: turnEndRemoveRandomChakra,
+                    });
+                }
+
                 const turnEndHealPercentCurrent = Number(status?.metadata?.turnEndHealPercentCurrent) || 0;
                 if (turnEndHealPercentCurrent > 0) {
                     const currentHp = Math.max(0, Number(unit?.hp) || 0);
@@ -6254,9 +6613,13 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     const durationAnchor =
                         status?.metadata?.turnDurationAnchor === 'source_turn'
                             ? 'source_turn'
+                            : status?.metadata?.turnDurationAnchor === 'any_turn'
+                            ? 'any_turn'
                             : 'owner_turn';
                     const shouldTickDuration =
-                        durationAnchor === 'source_turn'
+                        durationAnchor === 'any_turn'
+                            ? true
+                            : durationAnchor === 'source_turn'
                             ? status?.sourceUsername === endingUsername
                             : username === endingUsername;
                     if (!shouldTickDuration) {
@@ -6789,6 +7152,25 @@ const applyTriggeredEffectsFromStatus = ({
             return;
         }
         if (effect.type === 'apply_status' && effect.statusId) {
+            if (effect.scope === 'all-allies' && match && status?.sourceUsername) {
+                const teamUnits = Array.isArray(match.board?.[status.sourceUsername])
+                    ? match.board[status.sourceUsername]
+                    : [];
+                teamUnits.forEach((teamUnit) => {
+                    if (!teamUnit || teamUnit.alive === false) return;
+                    applyStatus({
+                        targetState: ensureUnitStateShape(teamUnit),
+                        statusId: effect.statusId,
+                        duration: effect.duration,
+                        sourceSkillId: status?.sourceSkillId || null,
+                        sourceUsername: status?.sourceUsername || null,
+                        sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
+                        metadata: effect.metadata || {},
+                        fresh: false,
+                    });
+                });
+                return;
+            }
             applyStatus({
                 targetState: Array.isArray(pendingStatuses) ? { statuses: pendingStatuses } : targetState,
                 statusId: effect.statusId,
@@ -6798,6 +7180,30 @@ const applyTriggeredEffectsFromStatus = ({
                 sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
                 metadata: effect.metadata || {},
                 fresh: false,
+            });
+            return;
+        }
+        if (effect.type === 'gain_chakra') {
+            const amount = Math.max(0, Number(effect?.amount) || 0);
+            if (amount <= 0 || !targetUsername) return;
+            const rawType = typeof effect?.chakraType === 'string' ? effect.chakraType.trim().toLowerCase() : '';
+            if (rawType === 'random') {
+                for (let i = 0; i < amount; i += 1) {
+                    const pick = chakraTypes[Math.floor(Math.random() * chakraTypes.length)];
+                    applyChakraGainToMatch({
+                        match,
+                        username: targetUsername,
+                        chakraType: pick,
+                        amount: 1,
+                    });
+                }
+                return;
+            }
+            applyChakraGainToMatch({
+                match,
+                username: targetUsername,
+                chakraType: rawType,
+                amount,
             });
             return;
         }
@@ -6954,6 +7360,25 @@ const triggerStoredStatusEffects = ({
             }),
             pendingStatuses,
         });
+    }
+    const inactionEffects = Array.isArray(status?.metadata?.onExpireEffectsIfNoNewSkillUsed)
+        ? status.metadata.onExpireEffectsIfNoNewSkillUsed
+        : [];
+    if (inactionEffects.length > 0) {
+        const snapshot = Number(status?.metadata?.skillUseCountSnapshot) || 0;
+        const currentCount = Number(targetState?.totalSkillUseCount) || 0;
+        if (currentCount <= snapshot) {
+            applyTriggeredEffectsFromStatus({
+                effects: inactionEffects,
+                match,
+                status,
+                targetUnit,
+                targetState,
+                targetUsername,
+                targetSlot,
+                pendingStatuses,
+            });
+        }
     }
 };
 

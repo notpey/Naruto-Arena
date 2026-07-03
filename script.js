@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const slotList = document.querySelector('.slot-list');
     const nameEl = document.getElementById('character-name');
+    const charBioEl = document.getElementById('character-bio');
     const portraitEl = document.getElementById('character-portrait');
     const skillNameEl = document.getElementById('skill-name');
     const skillDescEl = document.getElementById('skill-description');
@@ -159,6 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const classesEl = document.getElementById('skill-classes');
     const cooldownEl = document.getElementById('skill-cooldown');
     const cooldownWrapper = cooldownEl ? cooldownEl.parentElement : null;
+    const skillDetailImageEl = document.getElementById('skill-detail-image');
+    const skillDetailMetaEl = document.querySelector('.skill-detail-meta');
     const skillViewer = document.querySelector('.skillviewer');
     const skillScroll = document.querySelector('.skillscroll');
     const skillImagesContainer = document.querySelector('.skill-images');
@@ -172,6 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const defaultProfileAvatar = 'https://i.postimg.cc/3JqVcPXm/default.png';
     const defaultLadderRankHat = 'hats/academy.png';
     let profileCache = null;
+    const publicProfileCacheByUsername = new Map();
     let selectionClickTimer = null;
 
     const normalizeLadderPresentation = (ladder = null) => {
@@ -191,6 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             wins: Number.isFinite(Number(source.wins)) ? Math.max(0, Number(source.wins)) : 0,
             losses: Number.isFinite(Number(source.losses)) ? Math.max(0, Number(source.losses)) : 0,
             streak: Number.isFinite(Number(source.streak)) ? Number(source.streak) : 0,
+            highestStreak: Number.isFinite(Number(source.highestStreak)) ? Number(source.highestStreak) : 0,
             rankHatUrl:
                 typeof source.rankHatUrl === 'string' && source.rankHatUrl.trim()
                     ? source.rankHatUrl.trim()
@@ -411,13 +416,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return null;
             }
             const data = await response.json();
-            return data?.user?.username ? data.user : null;
+            if (data?.user?.username) {
+                publicProfileCacheByUsername.set(data.user.username.trim().toLowerCase(), data.user);
+                return data.user;
+            }
         } catch (error) {
             return null;
         }
+        return null;
     };
 
-    const hydrateOpponentIdentity = async (username) => {
+    const isGameBotUsername = (username = '') =>
+        typeof username === 'string' && username.trim().toLowerCase().startsWith('__game_bot__:');
+
+    const getPublicOpponentDisplayName = (opponent = null) => {
+        const explicitName =
+            typeof opponent?.displayName === 'string' && opponent.displayName.trim()
+                ? opponent.displayName.trim()
+                : '';
+        if (explicitName) return explicitName.toLowerCase() === 'game bot' ? 'Rogue Ninja' : explicitName;
+        const username = typeof opponent?.username === 'string' ? opponent.username.trim() : '';
+        if (isGameBotUsername(username)) return 'Rogue Ninja';
+        return username;
+    };
+
+    const hydrateOpponentIdentity = async (username, displayName = '') => {
         if (!username) {
             applyOpponentIdentity({
                 avatarUrl: defaultProfileAvatar,
@@ -426,11 +449,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         const user = await fetchPublicProfile(username);
+        const fallbackName = displayName || getPublicOpponentDisplayName({ username });
         applyOpponentIdentity({
-            name: user?.username || username,
+            name: user?.username || fallbackName,
             avatarUrl: user?.profile?.avatarUrl || defaultProfileAvatar,
             ladder: user?.profile?.ladder || null,
         });
+        return user;
     };
 
     const matchIdFromUrl = new URLSearchParams(window.location.search).get('matchId');
@@ -442,7 +467,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         let currentPlayerUsername = null;
         let currentTurnUsername = null;
         let currentOpponentUsername = null;
+        let currentOpponentDisplayName = null;
         let currentMatchMode = 'quick';
+        let currentPlayerTeamIndices = [];
+        let currentOpponentTeamIndices = [];
         const startFirstSound = new Audio('sounds/start-first.mp3');
         const secondPlayerStartSound = new Audio('sounds/yahoe.mp3');
         const nextRoundSound = new Audio('sounds/next-round.mp3');
@@ -473,6 +501,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const exchangeChooseCountEl = exchangeModalEl?.querySelector('.chakrachoosered');
         const readyTextEl = document.querySelector('.ready-text');
         const readySectionEl = document.querySelector('.ready-section');
+        let gameModalBackdropEl = null;
+        const setModalBackdropVisible = (visible) => {
+            if (!gameModalBackdropEl) {
+                gameModalBackdropEl = document.createElement('div');
+                gameModalBackdropEl.className = 'game-modal-backdrop';
+                document.body.appendChild(gameModalBackdropEl);
+            }
+            gameModalBackdropEl.classList.toggle('visible', Boolean(visible));
+        };
         const endTurnModalEl = document.querySelector('.ChakraChooseEndTurn');
         const skillOrderEl = endTurnModalEl?.querySelector('.skillorder');
         const endTurnOkButton = document.querySelector('.ok-buttonendturn');
@@ -485,6 +522,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const battleEndTitleEl = battleEndOverlayEl?.querySelector('.battle-end-title');
         const battleEndMessageEl = battleEndOverlayEl?.querySelector('.battle-end-message');
         const battleEndContinueButton = battleEndOverlayEl?.querySelector('.battle-end-continue');
+        const storyDialogueOverlayEl = document.getElementById('story-dialogue-overlay');
+        const storyDialoguePortraitEl = document.getElementById('story-dialogue-portrait');
+        const storyDialogueSpeakerEl = document.getElementById('story-dialogue-speaker');
+        const storyDialogueTextEl = document.getElementById('story-dialogue-text');
+        const storyDialogueProgressEl = document.getElementById('story-dialogue-progress');
+        const storyDialogueNextButton = document.getElementById('story-dialogue-next');
         const classChoicePopupEl = document.querySelector('.class-choice-popup');
         const classChoicePopupOptionsEl = classChoicePopupEl?.querySelector('.class-choice-popup-options');
         const classChoicePopupCancelButton = classChoicePopupEl?.querySelector('.class-choice-popup-cancel');
@@ -517,6 +560,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let globalStatusTooltipEl = null;
         let battleEndShown = false;
         let selectedExchangeType = 'taijutsu';
+        let storyIntroDialogueShown = false;
+        let storyOutroDialogueShown = false;
+        let storyDialogueActive = false;
         const playIngameSound = (audio) => {
             soundManager.play(audio);
         };
@@ -565,6 +611,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             classPickerWrapEl: document.querySelector('.ingameclasspicker'),
             classPickerEl: document.querySelector('.ingame-class-picker-field'),
             descEl: document.querySelector('.ingameskilldescription'),
+            metaEl: document.querySelector('.skill-info-meta'),
         };
         const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];
         const emptyPool = () => ({
@@ -713,6 +760,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return statuses.reduce(
                 (totals, status) => {
                     const metadata = status?.metadata || {};
+                    const classScopedMap =
+                        metadata.randomCostIncreaseForSkillClasses &&
+                        typeof metadata.randomCostIncreaseForSkillClasses === 'object'
+                            ? metadata.randomCostIncreaseForSkillClasses
+                            : null;
                     return {
                         taijutsu: totals.taijutsu + (Number(metadata.taijutsuCostReduction) || 0),
                         ninjutsu: totals.ninjutsu + (Number(metadata.ninjutsuCostReduction) || 0),
@@ -731,6 +783,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         nonMentalRandomIncrease:
                             totals.nonMentalRandomIncrease +
                             (Number(metadata.nonMentalRandomCostIncrease) || 0),
+                        classScopedRandomIncreaseMaps: classScopedMap
+                            ? [...totals.classScopedRandomIncreaseMaps, classScopedMap]
+                            : totals.classScopedRandomIncreaseMaps,
                     };
                 },
                 {
@@ -745,6 +800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     random: 0,
                     randomIncrease: 0,
                     nonMentalRandomIncrease: 0,
+                    classScopedRandomIncreaseMaps: [],
                 }
             );
         };
@@ -777,9 +833,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .filter(Boolean)
                 : [];
             const skillIsMental = skillClasses.includes('mental');
+            const classScopedIncrease = (reductions.classScopedRandomIncreaseMaps || []).reduce(
+                (sum, map) => {
+                    let statusIncrease = 0;
+                    Object.entries(map).forEach(([className, amount]) => {
+                        if (!skillClasses.includes(String(className).toLowerCase())) return;
+                        statusIncrease = Math.max(statusIncrease, Math.max(0, Number(amount) || 0));
+                    });
+                    return sum + statusIncrease;
+                },
+                0
+            );
             const randomIncrease =
                 Math.max(0, reductions.randomIncrease) +
-                (skillIsMental ? 0 : Math.max(0, reductions.nonMentalRandomIncrease));
+                (skillIsMental ? 0 : Math.max(0, reductions.nonMentalRandomIncrease)) +
+                classScopedIncrease;
             const reduced = [];
             normalizedEnergy.forEach((entry) => {
                 const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
@@ -1408,6 +1476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const openEndTurnModal = async () => {
             if (!endTurnModalEl || !matchIdFromUrl) return;
+            setModalBackdropVisible(true);
             try {
                 const res = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}`, {
                     credentials: 'include',
@@ -1435,6 +1504,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const closeEndTurnModal = () => {
             if (!endTurnModalEl) return;
             endTurnModalEl.style.visibility = 'hidden';
+            setModalBackdropVisible(false);
         };
 
         const getExchangeTypeFromButton = (button) => {
@@ -1515,6 +1585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             exchangeSpendAssignments = emptyPool();
             renderExchangeModal(playerPoolState);
             exchangeModalEl.style.visibility = 'visible';
+            setModalBackdropVisible(true);
         };
 
         const closeExchangeModal = () => {
@@ -1522,16 +1593,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             exchangeSpendAssignments = emptyPool();
             renderExchangeModal(playerPoolState);
             exchangeModalEl.style.visibility = 'hidden';
+            setModalBackdropVisible(false);
         };
 
         const openSurrenderConfirm = () => {
             if (!surrenderConfirmEl) return;
             surrenderConfirmEl.style.visibility = 'visible';
+            setModalBackdropVisible(true);
         };
 
         const closeSurrenderConfirm = () => {
             if (!surrenderConfirmEl) return;
             surrenderConfirmEl.style.visibility = 'hidden';
+            setModalBackdropVisible(false);
         };
 
         const stopMatchRealtime = () => {
@@ -1597,17 +1671,104 @@ document.addEventListener('DOMContentLoaded', async () => {
             activeCastingSkill = null;
         };
 
+        // Story Mode cinematic dialogue: plays step-by-step over the already
+        // rendered battlefield. The scrim (`.story-dialogue-overlay.visible`)
+        // covers the whole stage with pointer-events enabled, so it naturally
+        // blocks skill/target clicks underneath without touching battle logic.
+        const showStoryDialogue = (entries, finalLabel, onComplete) => {
+            if (!storyDialogueOverlayEl || !Array.isArray(entries) || !entries.length) {
+                onComplete();
+                return;
+            }
+            storyDialogueActive = true;
+            let stepIndex = 0;
+            const renderStep = () => {
+                const entry = entries[stepIndex] || {};
+                if (storyDialoguePortraitEl) {
+                    if (entry.portrait) {
+                        storyDialoguePortraitEl.src = entry.portrait;
+                        storyDialoguePortraitEl.alt = entry.speaker || 'Speaker portrait';
+                        storyDialoguePortraitEl.hidden = false;
+                    } else {
+                        storyDialoguePortraitEl.hidden = true;
+                    }
+                }
+                if (storyDialogueSpeakerEl) storyDialogueSpeakerEl.textContent = entry.speaker || '';
+                if (storyDialogueTextEl) storyDialogueTextEl.textContent = entry.text || '';
+                if (storyDialogueProgressEl) {
+                    storyDialogueProgressEl.textContent = `${stepIndex + 1} / ${entries.length}`;
+                }
+                const isLast = stepIndex >= entries.length - 1;
+                if (storyDialogueNextButton) {
+                    storyDialogueNextButton.textContent = isLast ? finalLabel : 'Next ▶';
+                }
+            };
+            const advance = () => {
+                if (stepIndex >= entries.length - 1) {
+                    storyDialogueOverlayEl.classList.remove('visible');
+                    storyDialogueActive = false;
+                    if (storyDialogueNextButton) {
+                        storyDialogueNextButton.removeEventListener('click', advance);
+                    }
+                    onComplete();
+                    return;
+                }
+                stepIndex += 1;
+                renderStep();
+            };
+            if (storyDialogueNextButton) {
+                storyDialogueNextButton.addEventListener('click', advance);
+            }
+            renderStep();
+            storyDialogueOverlayEl.classList.add('visible');
+        };
+
         const MAX_HP = 100;
         const HEALTH_BAR_MAX_WIDTH = 75;
+        const getHealthBarMaxWidth = (healthBar) => {
+            const container = healthBar?.parentElement;
+            const measuredWidth = container?.clientWidth;
+            return measuredWidth > 0 ? measuredWidth : HEALTH_BAR_MAX_WIDTH;
+        };
+        const triggerHitFeedback = (card) => {
+            const face = card.querySelector('.character-face');
+            const healthBarContainer = card.querySelector('.health-bar-container');
+            if (face) {
+                face.classList.remove('hit-flash');
+                void face.offsetWidth;
+                face.classList.add('hit-flash');
+                window.setTimeout(() => face.classList.remove('hit-flash'), 1100);
+            }
+            if (healthBarContainer) {
+                healthBarContainer.classList.remove('health-drop-flash');
+                void healthBarContainer.offsetWidth;
+                healthBarContainer.classList.add('health-drop-flash');
+                window.setTimeout(() => healthBarContainer.classList.remove('health-drop-flash'), 1100);
+            }
+        };
+
         const renderUnitHealth = (card, unit) => {
             if (!card) return;
+            if (!unit) {
+                // No combatant occupies this slot (e.g. a story-mode enemy team
+                // smaller than the fixed 3-slot layout). Keep the box in place
+                // (visibility, not display) so the real cards don't reflow.
+                card.style.visibility = 'hidden';
+                return;
+            }
+            card.style.visibility = '';
             const healthBar = card.querySelector('.health-bar');
             const healthText = card.querySelector('.health-text');
             if (!healthBar || !healthText) return;
             const rawHp = Number(unit?.hp);
             const hp = Math.max(0, Math.min(MAX_HP, Number.isFinite(rawHp) ? rawHp : MAX_HP));
+            const previousHp = card.dataset.lastKnownHp !== undefined ? Number(card.dataset.lastKnownHp) : hp;
+            if (Number.isFinite(previousHp) && hp < previousHp) {
+                triggerHitFeedback(card);
+            }
+            card.dataset.lastKnownHp = String(hp);
             const ratio = hp / MAX_HP;
-            const width = Math.max(0, Math.round(HEALTH_BAR_MAX_WIDTH * ratio));
+            const width = Math.max(0, Math.round(getHealthBarMaxWidth(healthBar) * ratio));
             healthBar.style.width = `${width}px`;
             healthBar.classList.remove('hp-mid', 'hp-low');
             if (hp <= 30) {
@@ -1675,6 +1836,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const opponentUsername = data.opponent?.username || currentOpponentUsername;
             const opponentUnits = opponentUsername ? board[opponentUsername] : null;
 
+            if (Array.isArray(playerCards) && Array.isArray(playerUnits)) {
+                playerCards.forEach((card, slot) => renderUnitHealth(card, playerUnits[slot]));
+            }
+            if (Array.isArray(enemyCards) && Array.isArray(opponentUnits)) {
+                enemyCards.forEach((card, slot) => renderUnitHealth(card, opponentUnits[slot]));
+            }
+        };
+
+        window.refreshIngameHealthBars = () => {
+            if (!latestBoardState || typeof latestBoardState !== 'object') return;
+            const playerUnits = currentPlayerUsername ? latestBoardState[currentPlayerUsername] : null;
+            const opponentUnits = currentOpponentUsername ? latestBoardState[currentOpponentUsername] : null;
             if (Array.isArray(playerCards) && Array.isArray(playerUnits)) {
                 playerCards.forEach((card, slot) => renderUnitHealth(card, playerUnits[slot]));
             }
@@ -1996,8 +2169,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 const textLinesHtml = textRows
                     .map((row, idx) => {
-                        const line =
-                            `<div class="status-tooltip-desc-line">- ${escapeHtml(row.text)}</div>`;
+                        const line = String(row.text)
+                            .split('\n')
+                            .filter(Boolean)
+                            .map((sub) => `<div class="status-tooltip-desc-line">- ${escapeHtml(sub)}</div>`)
+                            .join('');
                         const turns =
                             `<div class="status-tooltip-turns">${escapeHtml(formatTurnsLabel(row.remaining))}</div>`;
                         const divider =
@@ -2085,11 +2261,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (data.opponent?.username) {
                 const nextOpponentUsername = data.opponent.username;
+                currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
                 const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                 currentOpponentUsername = nextOpponentUsername;
                 if (opponentChanged) {
-                    hydrateOpponentIdentity(nextOpponentUsername).catch(() => {});
+                    hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
                 }
+            }
+            if (
+                data.mode === 'story' &&
+                !storyIntroDialogueShown &&
+                Array.isArray(data.storyMatch?.introDialogue) &&
+                data.storyMatch.introDialogue.length
+            ) {
+                storyIntroDialogueShown = true;
+                showStoryDialogue(data.storyMatch.introDialogue, 'Begin ▶', () => {});
             }
             const pool = data.chakraPools?.[currentPlayerUsername] || playerPoolState || emptyPool();
             renderChakra(pool);
@@ -2103,10 +2289,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (data.status === 'ended') {
                 const didWin = Boolean(data.winner && data.winner === currentPlayerUsername);
+                if (data.mode === 'story' && data.storyMatch?.chapterId && data.storyMatch?.nodeId) {
+                    if (storyOutroDialogueShown) return;
+                    storyOutroDialogueShown = true;
+                    battleEndShown = true;
+                    stopMatchRealtime();
+                    clearTargetHighlights();
+                    activeTargetOptions = null;
+                    activeCastingSkill = null;
+                    const outroEntries = didWin ? data.storyMatch.outroDialogueWin : data.storyMatch.outroDialogueLoss;
+                    showStoryDialogue(outroEntries, 'Continue ▶', () => {
+                        window.location.href = 'story.html';
+                    });
+                    return;
+                }
                 const opponentFromResult = didWin ? data.surrenderedBy : data.winner;
                 showBattleEndOverlay({
                     didWin,
-                    opponentUsername: opponentFromResult || data.opponent?.username || currentOpponentUsername,
+                    opponentUsername:
+                        opponentFromResult === data.opponent?.username
+                            ? currentOpponentDisplayName
+                            : opponentFromResult || currentOpponentDisplayName || currentOpponentUsername,
                     expDelta: data.ladderResult?.expDelta,
                     clanExpDelta: data.ladderResult?.clanExpDelta,
                 });
@@ -2119,12 +2322,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentOpponentUsername &&
                 (playerAlive <= 0 || opponentAlive <= 0)
             ) {
-                if (currentMatchMode === 'ladder') {
+                if (currentMatchMode === 'ladder' || currentMatchMode === 'story') {
                     return;
                 }
                 showBattleEndOverlay({
                     didWin: playerAlive > opponentAlive,
-                    opponentUsername: currentOpponentUsername,
+                    opponentUsername: currentOpponentDisplayName || currentOpponentUsername,
                 });
                 return;
             }
@@ -2140,6 +2343,87 @@ document.addEventListener('DOMContentLoaded', async () => {
             taijutsu: 'green',
             genjutsu: 'white',
             random: 'black',
+        };
+
+        const setSkillInfoMetaLabels = (labels = ['/ ENERGY', '/ CLASSES', '/ COOLDOWN']) => {
+            if (!skillInfo.metaEl) return;
+            Array.from(skillInfo.metaEl.querySelectorAll('.sim-lbl')).forEach((labelEl, index) => {
+                if (labels[index]) {
+                    labelEl.textContent = labels[index];
+                }
+            });
+        };
+
+        const getTeamNames = (teamIndices = []) =>
+            (Array.isArray(teamIndices) ? teamIndices : [])
+                .map((rosterIndex) => rosterData?.[rosterIndex]?.name || '')
+                .filter(Boolean);
+
+        const renderPlayerProfileInfo = async (side = 'player') => {
+            const isOpponent = side === 'opponent';
+            const username = isOpponent ? currentOpponentUsername : currentPlayerUsername;
+            if (!username) return;
+            const displayUsername = isOpponent ? currentOpponentDisplayName || username : username;
+            let cachedProfile = isOpponent
+                ? publicProfileCacheByUsername.get(username.trim().toLowerCase())
+                : profileCache;
+            if (!cachedProfile) {
+                cachedProfile = isOpponent ? await fetchPublicProfile(username) : await fetchProfile();
+            }
+            if (!cachedProfile && !isOpponent) {
+                const cachedUser = readCachedUser();
+                if (cachedUser?.username) {
+                    cachedProfile = {
+                        username: cachedUser.username,
+                        profile: {
+                            avatarUrl: cachedUser.avatarUrl || defaultProfileAvatar,
+                            clan: { abbreviation: cachedUser.clanAbbreviation || 'None' },
+                            ladder: cachedUser.ladder || null,
+                        },
+                    };
+                }
+            }
+            const profile = cachedProfile?.profile || {};
+            const ladder = normalizeLadderPresentation(profile.ladder);
+            const clan = profile.clan || null;
+            const avatarEl = document.querySelector(
+                isOpponent ? '.player-avatar-right' : '.player-avatar-left'
+            );
+            const teamNames = getTeamNames(isOpponent ? currentOpponentTeamIndices : currentPlayerTeamIndices);
+            const clanLabel = clan?.abbreviation || clan?.name || 'None';
+            const record = `${ladder.wins} - ${ladder.losses}`;
+            const teamText = teamNames.length ? teamNames.join(', ') : 'Unknown team';
+            if (skillInfo.imgEl) {
+                skillInfo.imgEl.src = avatarEl?.src || profile.avatarUrl || defaultProfileAvatar;
+                skillInfo.imgEl.alt = `${displayUsername} avatar`;
+            }
+            if (skillInfo.nameEl) {
+                skillInfo.nameEl.textContent = displayUsername;
+            }
+            if (skillInfo.descEl) {
+                skillInfo.descEl.textContent = [
+                    `Rank: ${ladder.rank}`,
+                    `Streak: ${formatSignedNumber(ladder.streak)} | Highest streak: ${formatSignedNumber(ladder.highestStreak || 0)}`,
+                    `Team: ${teamText}`,
+                ].join('  ');
+            }
+            setSkillInfoMetaLabels(['/ RECORD', '/ CLAN', '/ LEVEL']);
+            if (skillInfo.energyEl) {
+                skillInfo.energyEl.textContent = record;
+            }
+            if (skillInfo.classesEl) {
+                skillInfo.classesEl.textContent = clanLabel;
+            }
+            if (skillInfo.cooldownEl) {
+                skillInfo.cooldownEl.textContent = String(ladder.level);
+            }
+            if (skillInfo.classPickerWrapEl && skillInfo.classPickerEl) {
+                skillInfo.classPickerWrapEl.style.display = 'none';
+                skillInfo.classPickerEl.innerHTML = '';
+            }
+            document.querySelector('.skillinformation')?.classList.add('profile-summary');
+            activeCastingSkill = null;
+            clearTargetHighlights();
         };
 
         const renderQueuedTargetTooltips = () => {
@@ -2170,21 +2454,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const hp = Number(unit?.hp);
                     const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
                     if (dead) return;
-                    const key = `${username}:${slot}`;
+                    const key = `${slot} ${username}`;
                     if (!queuedByTargetKey.has(key)) {
-                        queuedByTargetKey.set(key, []);
+                        queuedByTargetKey.set(key, { username, slot, entries: [] });
                     }
-                    queuedByTargetKey.get(key).push({
+                    queuedByTargetKey.get(key).entries.push({
                         iconSrc,
                         skillName: effectiveSkill?.name || 'Queued Skill',
                     });
                 });
             });
 
-            queuedByTargetKey.forEach((entries, key) => {
-                const [username, slotText] = key.split(':');
-                const slot = Number.parseInt(slotText, 10);
-                if (!username || !Number.isInteger(slot) || slot < 0) return;
+            queuedByTargetKey.forEach(({ username, slot, entries }) => {
                 const cards = username === currentPlayerUsername ? playerCards : enemyCards;
                 const card = Array.isArray(cards) ? cards[slot] : null;
                 const tooltipWrap = card?.querySelector('.skilltooltips');
@@ -2212,6 +2493,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const renderSkillInfo = (character, skill, actorSlot = null, skillIdx = null) => {
             if (!skill || !character) return;
+            document.querySelector('.skillinformation')?.classList.remove('profile-summary');
+            setSkillInfoMetaLabels();
             if (skillInfo.imgEl) {
                 skillInfo.imgEl.src = skill.skillimage || '';
                 skillInfo.imgEl.alt = skill.name || 'Skill';
@@ -2223,11 +2506,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillInfo.descEl.textContent = skill.skilldescription || '';
             }
             if (skillInfo.cooldownEl) {
-                skillInfo.cooldownEl.textContent = `Cooldown: ${skill.cooldown ?? '-'}`;
+                skillInfo.cooldownEl.textContent = skill.cooldown ?? '-';
             }
             if (skillInfo.classesEl) {
                 const classes = getVisibleSkillClasses(skill.classes).join(', ');
-                skillInfo.classesEl.textContent = `Classes: ${classes}`;
+                skillInfo.classesEl.textContent = classes;
             }
             if (skillInfo.classPickerWrapEl && skillInfo.classPickerEl) {
                 const options = getClassChoiceOptions(skill);
@@ -2272,9 +2555,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (skillInfo.energyEl) {
                 skillInfo.energyEl.innerHTML = '';
-                const label = document.createElement('span');
-                label.textContent = 'Energy:';
-                skillInfo.energyEl.appendChild(label);
                 const effectiveEnergy = getEffectiveEnergyList(skill.energy || [], actorSlot, skill);
                 if (!effectiveEnergy.length) {
                     const noneText = document.createElement('span');
@@ -2295,6 +2575,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         };
+
+        const bindProfileInfoTrigger = (selector, side) => {
+            Array.from(document.querySelectorAll(selector)).forEach((element) => {
+                if (!element) return;
+                element.setAttribute('role', 'button');
+                element.setAttribute('tabindex', '0');
+                element.addEventListener('click', () => renderPlayerProfileInfo(side));
+                element.addEventListener('keydown', (event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    renderPlayerProfileInfo(side);
+                });
+            });
+        };
+
+        bindProfileInfoTrigger('.player-left .player-name, .player-avatar-left', 'player');
+        bindProfileInfoTrigger('.player-right .player-name, .player-avatar-right', 'opponent');
 
         const renderDynamicSkillIcons = () => {
             playerSkillMetaByKey.forEach((meta) => {
@@ -2503,8 +2800,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!playerCardsLocal.length || !enemyCardsLocal.length) return;
                 const team = data.player?.team || [];
                 const enemyTeam = data.opponent?.team || [];
-                if (!Array.isArray(team) || team.length !== playerCardsLocal.length) return;
-                if (!Array.isArray(enemyTeam) || enemyTeam.length !== enemyCardsLocal.length) return;
+                if (!Array.isArray(team) || team.length > playerCardsLocal.length) return;
+                if (!Array.isArray(enemyTeam) || enemyTeam.length > enemyCardsLocal.length) return;
+                currentPlayerTeamIndices = team.slice();
+                currentOpponentTeamIndices = enemyTeam.slice();
                 playerSkillMetaByKey.clear();
 
                 const playerNameEl = document.querySelector('.player-name.red');
@@ -2514,17 +2813,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const enemyNameEl = document.querySelector('.player-right .player-name.red');
                 if (enemyNameEl && data.opponent?.username) {
                     const nextOpponentUsername = data.opponent.username;
-                    enemyNameEl.textContent = nextOpponentUsername;
+                    currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
+                    enemyNameEl.textContent = currentOpponentDisplayName || nextOpponentUsername;
                     const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                     currentOpponentUsername = nextOpponentUsername;
                     if (opponentChanged) {
-                        hydrateOpponentIdentity(nextOpponentUsername).catch(() => {});
+                        hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
                     }
                 }
 
                 const populateCard = (card, rosterIndex, isPlayer, slotIndex) => {
                     const character = rosterData[rosterIndex];
-                    if (!character) return;
+                    if (!character) {
+                        card.style.visibility = 'hidden';
+                        return;
+                    }
+                    card.style.visibility = '';
                     const face = card.querySelector('.character-face');
                     if (face) {
                         face.src = character.facePicture || '';
@@ -2912,9 +3216,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const opponentUsername = didWin
                     ? data.surrenderedBy
                     : data.winner || currentOpponentUsername;
+                const opponentDisplay =
+                    opponentUsername === currentOpponentUsername
+                        ? currentOpponentDisplayName || currentOpponentUsername
+                        : opponentUsername;
                 showBattleEndOverlay({
                     didWin,
-                    opponentUsername,
+                    opponentUsername: opponentDisplay,
                     expDelta: data.ladderResult?.expDelta,
                     clanExpDelta: data.ladderResult?.clanExpDelta,
                 });
@@ -3331,16 +3639,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderEnergy = (energyList = []) => {
         if (!energyBarEl) return;
-        const label = energyBarEl.querySelector('.energy-label');
         energyBarEl.innerHTML = '';
-        if (label) {
-            energyBarEl.appendChild(label);
-        } else {
-            const newLabel = document.createElement('span');
-            newLabel.className = 'energy-label';
-            newLabel.textContent = 'ENERGY:';
-            energyBarEl.appendChild(newLabel);
-        }
         const energyClassMap = {
             ninjutsu: 'energy-ninjutsu',
             bloodline: 'energy-bloodline',
@@ -3373,10 +3672,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderClasses = (classes = []) => {
         if (!classesEl) return;
         classesEl.innerHTML = '';
-        const label = document.createElement('span');
-        label.className = 'classes-label';
-        label.textContent = 'CLASSES:';
-        classesEl.appendChild(label);
         getVisibleSkillClasses(classes).forEach((cls) => {
             const span = document.createElement('span');
             span.className = 'class-type';
@@ -3419,19 +3714,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (skillDescEl) {
             skillDescEl.textContent = skill.skilldescription || '';
         }
-        if (energyBarEl) {
-            energyBarEl.style.display = 'flex';
+        if (skillDetailImageEl) {
+            skillDetailImageEl.src = skill.skillimage || '';
+            skillDetailImageEl.alt = skill.name || 'Selected skill';
         }
-        if (classesEl) {
-            classesEl.style.display = 'flex';
+        if (skillDetailMetaEl) {
+            skillDetailMetaEl.style.display = 'flex';
         }
         renderEnergy(skill.energy);
         renderClasses(skill.classes);
         if (cooldownEl) {
             cooldownEl.textContent = skill.cooldown ?? '-';
-        }
-        if (cooldownWrapper) {
-            cooldownWrapper.style.display = 'flex';
         }
         setActiveSkillImage(activeIndex);
     };
@@ -3442,24 +3735,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             skillNameEl.style.visibility = 'hidden';
         }
         if (skillDescEl) {
-            skillDescEl.textContent =
-                character.characterdescription ||
-                character.characterdeescription ||
-                '';
+            skillDescEl.textContent = '';
         }
-        if (energyBarEl) {
-            energyBarEl.style.display = 'none';
+        if (skillDetailImageEl) {
+            skillDetailImageEl.src = '';
+            skillDetailImageEl.alt = '';
         }
-        if (classesEl) {
-            classesEl.style.display = 'none';
+        if (skillDetailMetaEl) {
+            skillDetailMetaEl.style.display = 'none';
         }
         renderEnergy([]);
         renderClasses([]);
         if (cooldownEl) {
             cooldownEl.textContent = '-';
-        }
-        if (cooldownWrapper) {
-            cooldownWrapper.style.display = 'none';
         }
         setActiveSkillImage(-1);
     };
@@ -3481,6 +3769,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentCharacterIndex = index;
         if (nameEl) {
             nameEl.textContent = character.name || 'Unknown shinobi';
+        }
+        if (charBioEl) {
+            charBioEl.textContent =
+                character.characterdescription ||
+                character.characterdeescription ||
+                '';
         }
         if (portraitEl) {
             portraitEl.src = character.facePicture || '';

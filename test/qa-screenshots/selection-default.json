@@ -1,0 +1,95 @@
+{
+  "title": "Naruto-Arena Selection",
+  "bodyClass": "selection-client-page custom-game-cursor",
+  "viewport": {
+    "vw": 770,
+    "vh": 560
+  },
+  "scroll": {
+    "bodyW": 811,
+    "bodyH": 703,
+    "docW": 811,
+    "docH": 703
+  },
+  "outside": [
+    {
+      "tag": "DIV",
+      "cls": "skillviewer collapsed",
+      "id": "",
+      "txt": "SELECT A CHARACTER\nSKILL NAME\nENERGY:\nCHOOSE A CHARACTER TO VIEW SKILLS.\nCLASSES",
+      "x": -566,
+      "y": 16,
+      "w": 41,
+      "h": 242,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "IMG",
+      "cls": "skillscroll",
+      "id": "",
+      "txt": " election croll",
+      "x": -353,
+      "y": 16,
+      "w": 84,
+      "h": 239,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "UL",
+      "cls": "slot-list",
+      "id": "",
+      "txt": " lot-li t",
+      "x": 92,
+      "y": 342,
+      "w": 697,
+      "h": 170,
+      "display": "grid",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "player-card",
+      "id": "",
+      "txt": "TESTER\nACADEMY STUDENT\nCLAN: NONE\nLEVEL: 1 (0 XP)\nLADDERRANK: UNRANKED\nRATIO: 0 ",
+      "x": 521,
+      "y": 336,
+      "w": 290,
+      "h": 110,
+      "display": "flex",
+      "visibility": "visible"
+    },
+    {
+      "tag": "UL",
+      "cls": "selected-character-slot-list",
+      "id": "",
+      "txt": "1\n2\n3",
+      "x": 54,
+      "y": 596,
+      "w": 697,
+      "h": 50,
+      "display": "flex",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "button-container",
+      "id": "",
+      "txt": "button-container",
+      "x": 54,
+      "y": 646,
+      "w": 697,
+      "h": 57,
+      "display": "flex",
+      "visibility": "visible"
+    }
+  ],
+  "missingImages": [
+    "",
+    "",
+    "",
+    "",
+    ""
+  ]
+}

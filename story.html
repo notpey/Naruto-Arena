@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naruto-Arena — Story Mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 85% 8%, rgba(44, 156, 219, 0.08), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 38%, #000000 70%, #120a06 100%);
+      color: var(--ca-bone); font-family: var(--font-ui);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .st-page { width: min(1340px, 100%); margin: 0 auto; padding: 0 24px 64px; }
+
+    .st-bigtitle-wrap { position: relative; height: 78px; overflow: hidden; margin: 30px 0 4px; }
+    .st-bigtitle {
+      position: absolute; bottom: -22px; left: -4px; margin: 0;
+      font-size: clamp(58px, 8vw, 104px); font-weight: 900; letter-spacing: 0.01em;
+      text-transform: uppercase; color: var(--ca-violet); line-height: 1; white-space: nowrap; opacity: 0.94;
+    }
+    .st-subtitle { margin: 0 0 26px; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple-ui); }
+    .st-crumb-nav { margin: 22px 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ca-parchment); }
+    .st-crumb-nav a { color: var(--ca-parchment); }
+    .st-crumb-nav a:hover { color: var(--ca-violet); }
+    .st-crumb-nav .cur { color: var(--ca-violet); }
+    .st-status { margin: 14px 2px 0; font-size: 12px; color: var(--ca-dust); min-height: 16px; }
+    .st-empty { padding: 50px 20px; text-align: center; color: var(--ca-ink-faint); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* ── Episode guide: chapters as sections, battles as horizontal rows
+       (streaming-service episode-list feel) instead of a missions-style
+       rank-category card grid. ── */
+    .st-chapter-block {
+      margin: 34px auto 0; max-width: 980px;
+      background: var(--ca-surface-light); border: 1px solid var(--ca-line-ink);
+      border-radius: 12px; box-shadow: var(--ca-shadow-sheet); overflow: hidden;
+    }
+    .st-chapter-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+      padding: 22px 28px 16px; border-bottom: 1px solid var(--ca-line-ink);
+      background: linear-gradient(180deg, rgba(163, 107, 255, 0.08), transparent);
+    }
+    .st-chapter-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple-ui); margin: 0 0 4px; }
+    .st-chapter-title { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ca-ink); }
+    .st-chapter-progress { font-size: 12px; font-weight: 700; color: var(--ca-ink-faint); white-space: nowrap; }
+
+    .st-episode-list { display: flex; flex-direction: column; }
+    .st-episode-row {
+      display: grid; grid-template-columns: 172px 1fr auto; gap: 22px; align-items: center;
+      padding: 18px 28px; border-bottom: 1px solid var(--ca-line-ink); color: var(--ca-ink);
+      position: relative;
+    }
+    .st-episode-row:last-child { border-bottom: 0; }
+    .st-episode-row:hover { background: rgba(163, 107, 255, 0.06); }
+    .st-episode-row::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--ca-purple-ui); opacity: 0; transition: opacity var(--t-fast);
+    }
+    .st-episode-row:hover::before { opacity: 1; }
+
+    .st-episode-thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; background: #111; border: 1px solid var(--ca-line-ink); }
+    .st-episode-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-base); }
+    .st-episode-row:hover .st-episode-thumb img { transform: scale(1.05); }
+    .st-episode-play {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      background: rgba(0, 0, 0, 0.28); opacity: 0; transition: opacity var(--t-fast);
+    }
+    .st-episode-row:hover .st-episode-play { opacity: 1; }
+    .st-episode-play span {
+      width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, 0.92);
+      display: grid; place-items: center; color: var(--ca-purple-ui); font-size: 13px;
+    }
+
+    .st-episode-num { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-purple-ui); margin: 0 0 4px; }
+    .st-episode-title { font-size: 17px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ca-ink); margin: 0 0 6px; line-height: 1.15; }
+    .st-episode-synopsis { font-size: 13px; line-height: 1.5; color: var(--ca-ink-soft); margin: 0; max-width: 560px; }
+    .st-episode-meta { font-size: 11px; color: var(--ca-ink-faint); margin-top: 8px; }
+
+    .st-episode-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .st-status-pill { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+    .st-status-pill.available { background: #1f7a3f; color: #cdfbd9; }
+    .st-status-pill.completed { background: rgba(163, 107, 255, 0.18); color: var(--ca-purple-ui); }
+    .st-episode-cta { font-size: 12px; font-style: italic; color: var(--ca-ink-soft); }
+    .st-episode-row:hover .st-episode-cta { color: var(--ca-purple-ui); text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .st-episode-row { grid-template-columns: 1fr; }
+      .st-episode-side { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+
+    #st-detail-view {
+      background: var(--ca-surface-light); border: 1px solid var(--ca-line-ink);
+      border-radius: 10px; box-shadow: var(--ca-shadow-sheet);
+      padding: 26px 30px 34px; margin-top: 22px; color: var(--ca-ink);
+    }
+    .st-detail-nav { display: flex; align-items: center; justify-content: space-between; margin: 0 0 26px; padding-bottom: 14px; border-bottom: 1px solid var(--ca-line-ink); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .st-detail-nav a:hover { color: var(--ca-violet); }
+    .st-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #1f7a3f; }
+    .st-detail-title { font-size: 30px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 22px; }
+    .st-detail-grid { display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start; }
+    .st-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #111; border: 1px solid var(--ca-line-ink); }
+
+    /* briefing: preset team preview + begin-battle action */
+    .st-briefing-label { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ca-ink-faint); margin: 22px 0 10px; }
+    .st-team-row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .st-team-member { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 78px; }
+    .st-team-portrait { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ca-line-ink); background: #111; }
+    .st-team-name { font-size: 10px; font-weight: 700; text-align: center; color: var(--ca-ink-soft); line-height: 1.2; }
+    .st-vs-badge { display: flex; align-items: center; justify-content: center; width: 32px; font-size: 12px; font-weight: 900; color: var(--ca-red); }
+    .st-briefing-actions { margin-top: 26px; display: flex; align-items: center; gap: 14px; }
+    .st-briefing-status { font-size: 12px; color: var(--ca-ink-faint); }
+    .st-briefing-status.error { color: var(--ca-red); }
+    .st-btn {
+      font-family: var(--font-ui); font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 6px; border: 1px solid var(--ca-violet); background: transparent; color: var(--ca-violet);
+      cursor: pointer; transition: background var(--t-fast), color var(--t-fast);
+    }
+    .st-btn:hover { background: var(--ca-violet); color: #150c26; }
+    .st-btn.primary { background: var(--ca-violet); color: #150c26; }
+    .st-btn.primary:hover { filter: brightness(1.08); }
+
+    .st-col-head { display: inline-block; background: var(--ca-ink); border: 1px solid var(--ca-ink); padding: 4px 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ca-surface-light); margin-bottom: 14px; }
+    .st-col-line { font-size: 13px; color: var(--ca-ink-soft); margin: 0 0 9px; line-height: 1.5; }
+    .st-col-line strong { color: var(--ca-ink); font-weight: 700; }
+
+    .st-footer { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 24px 30px; text-align: center; }
+    .st-footer-social { display: flex; justify-content: center; gap: 16px; margin-bottom: 26px; }
+    .st-footer-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--ca-orange), var(--ca-violet)); color: #000; font-weight: 900; font-size: 16px; }
+    .st-footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 24px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-parchment); }
+    .st-footer-links sup { font-size: 8px; color: var(--ca-dust); }
+    .st-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
+
+    @media (max-width: 980px) {
+      .st-detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="shop.css">
+</head>
+<body>
+
+  <!-- ═══ SHINOBI-ARENA SHARED NAV ══════════════════════════════ -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N·A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Start Page</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
+      </ul>
+
+      <div class="ca-nav-account" id="ca-nav-account">
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+            <section class="group" id="auth-panel">
+              <h2 class="group-title" id="auth-title">Login</h2>
+              <div id="guest-auth-view">
+                <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
+                <form class="auth-form" id="auth-form">
+                  <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
+                  <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                  <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
+                  <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
+                  <button class="auth-button" type="submit" id="auth-submit">Login</button>
+                  <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
+                  <p class="auth-status" id="auth-status" aria-live="polite"></p>
+                </form>
+              </div>
+              <div class="account-panel" id="account-panel" hidden>
+                <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
+                <div class="account-actions">
+                  <button class="account-action" type="button" id="view-profile-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg>
+                    <span>View Profile</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-avatar-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg>
+                    <span>Change Avatar</span>
+                  </button>
+                  <button class="account-action" type="button" id="clan-panel-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg>
+                    <span>Clan Panel</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-backgrounds-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg>
+                    <span>Custom Background</span>
+                  </button>
+                  <button class="account-action" type="button" id="reset-account-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg>
+                    <span>Reset Account</span>
+                  </button>
+                  <button class="account-action" type="button" id="logout-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
+                    <span>Log Out</span>
+                  </button>
+                </div>
+                <p class="auth-status" id="account-status" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═════════════════════════════════════════════════ -->
+  <header class="ca-hero">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">◁</div>
+      <div class="ca-hero-center">
+        <button class="ca-hero-play" type="button" id="play-now-button">› START PLAYING</button>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">⚡</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
+        </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">▷</div>
+    </div>
+  </header>
+
+  <!-- ═══ STORY MODE ═══════════════════════════════════════════ -->
+  <main class="st-page">
+
+    <!-- ── LANDING: episode guide (chapters as sections, battles as rows,
+         not a missions-style rank grid) ──────────────────────── -->
+    <section id="st-landing">
+      <nav class="st-crumb-nav" aria-label="Breadcrumb">
+        <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Story Mode</span>
+      </nav>
+      <div class="st-bigtitle-wrap"><h1 class="st-bigtitle">STORY MODE</h1></div>
+      <p class="st-subtitle">/ Follow the story arc by arc and unlock characters as you go</p>
+      <p class="st-status" id="st-status" aria-live="polite"></p>
+      <div id="st-chapters"></div>
+    </section>
+
+    <!-- ── DETAIL: dialogue + begin battle / outro ────────────── -->
+    <section id="st-detail-view" hidden></section>
+
+  </main>
+
+  <!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+  <footer class="st-footer">
+    <div class="st-footer-social">
+      <span class="st-footer-icon" aria-hidden="true">CA</span>
+      <a class="st-footer-icon" href="#" aria-label="Join our Discord">D</a>
+    </div>
+    <nav class="st-footer-links" aria-label="Legal">
+      <a href="#">Privacy Notice<sup>05</sup></a>
+      <a href="#">Terms of Service<sup>06</sup></a>
+      <a href="#">Copyright<sup>06</sup></a>
+    </nav>
+    <p class="st-footer-copy">Naruto-Arena 2026. &nbsp; All Rights Reserved.</p>
+  </footer>
+
+  <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./shop.js" defer></script>
+  <script src="./characters.js"></script>
+
+  <!-- Story Mode: episode guide + briefing. The actual dialogue now plays
+       inside ingame.html, over the battlefield, once the fight begins. -->
+  <script>
+    (function () {
+      var landingView = document.getElementById("st-landing");
+      var detailView = document.getElementById("st-detail-view");
+      var chaptersEl = document.getElementById("st-chapters");
+      var statusEl = document.getElementById("st-status");
+      var roster = typeof characters !== "undefined" ? characters : (window.characters || []);
+
+      var chapters = [];
+      var nodeMap = new Map(); // nodeId -> { chapter, node }
+      var storyProgressByNodeId = {};
+      var startingBattle = false;
+
+      function findCharacterById(characterId) {
+        return roster.find(function (c) { return c && c.characterId === characterId; }) || null;
+      }
+
+      function setStatus(msg, isError) {
+        if (!statusEl) return;
+        statusEl.textContent = msg || "";
+        statusEl.style.color = isError ? "#e06666" : "";
+      }
+      function getParam(name) {
+        try { return new URLSearchParams(window.location.search).get(name) || ""; }
+        catch (e) { return ""; }
+      }
+      function isNodeCompleted(nodeId) {
+        var entry = storyProgressByNodeId[nodeId];
+        return Boolean(entry && entry.completedAt);
+      }
+
+      function buildEpisodeRow(chapter, node, episodeNumber) {
+        var completed = isNodeCompleted(node.nodeId);
+        var row = document.createElement("a");
+        row.className = "st-episode-row";
+        row.href = "story.html?chapter=" + encodeURIComponent(chapter.chapterId) + "&node=" + encodeURIComponent(node.nodeId);
+
+        var thumb = document.createElement("div");
+        thumb.className = "st-episode-thumb";
+        var img = document.createElement("img");
+        img.loading = "lazy";
+        img.src = node.image || "deadcharacter.png";
+        img.alt = node.imageAlt || node.title;
+        var play = document.createElement("div");
+        play.className = "st-episode-play";
+        play.setAttribute("aria-hidden", "true");
+        var playGlyph = document.createElement("span");
+        playGlyph.textContent = "▶";
+        play.appendChild(playGlyph);
+        thumb.appendChild(img);
+        thumb.appendChild(play);
+
+        var body = document.createElement("div");
+        var num = document.createElement("div");
+        num.className = "st-episode-num";
+        num.textContent = "Battle " + episodeNumber;
+        var title = document.createElement("div");
+        title.className = "st-episode-title";
+        title.textContent = node.title;
+        var synopsis = document.createElement("p");
+        synopsis.className = "st-episode-synopsis";
+        synopsis.textContent = "Vs. " + (node.enemyDisplayName || "Rogue Ninja") + ".";
+        var meta = document.createElement("div");
+        meta.className = "st-episode-meta";
+        meta.textContent = "Level " + (node.level_requirement || 1) + " and up";
+        body.appendChild(num);
+        body.appendChild(title);
+        body.appendChild(synopsis);
+        body.appendChild(meta);
+
+        var side = document.createElement("div");
+        side.className = "st-episode-side";
+        var pill = document.createElement("span");
+        pill.className = "st-status-pill " + (completed ? "completed" : "available");
+        pill.textContent = completed ? "Completed" : "Available";
+        var cta = document.createElement("span");
+        cta.className = "st-episode-cta";
+        cta.textContent = completed ? "Watch again ›" : "Start battle ›";
+        side.appendChild(pill);
+        side.appendChild(cta);
+
+        row.appendChild(thumb);
+        row.appendChild(body);
+        row.appendChild(side);
+        return row;
+      }
+
+      function renderEpisodeGuide() {
+        if (!chaptersEl) return;
+        chaptersEl.innerHTML = "";
+        if (!chapters.length) {
+          chaptersEl.innerHTML = '<div class="st-empty">No story chapters are available yet.</div>';
+          return;
+        }
+        chapters.forEach(function (chapter) {
+          var block = document.createElement("section");
+          block.className = "st-chapter-block";
+
+          var head = document.createElement("div");
+          head.className = "st-chapter-head";
+          var headText = document.createElement("div");
+          var eyebrow = document.createElement("p");
+          eyebrow.className = "st-chapter-eyebrow";
+          eyebrow.textContent = "Chapter " + (chapter.sortOrder || 1);
+          var title = document.createElement("h2");
+          title.className = "st-chapter-title";
+          title.textContent = chapter.title;
+          headText.appendChild(eyebrow);
+          headText.appendChild(title);
+          var totalNodes = chapter.nodes.length;
+          var completedNodes = chapter.nodes.filter(function (n) { return isNodeCompleted(n.nodeId); }).length;
+          var progress = document.createElement("div");
+          progress.className = "st-chapter-progress";
+          progress.textContent = completedNodes + " / " + totalNodes + " battles complete";
+          head.appendChild(headText);
+          head.appendChild(progress);
+          block.appendChild(head);
+
+          var list = document.createElement("div");
+          list.className = "st-episode-list";
+          if (!chapter.nodes.length) {
+            list.innerHTML = '<div class="st-empty">No battles in this chapter yet.</div>';
+          } else {
+            chapter.nodes.forEach(function (node, index) {
+              list.appendChild(buildEpisodeRow(chapter, node, index + 1));
+            });
+          }
+          block.appendChild(list);
+
+          chaptersEl.appendChild(block);
+        });
+      }
+
+      function buildTeamRow(characterIds) {
+        var row = document.createElement("div");
+        row.className = "st-team-row";
+        characterIds.forEach(function (characterId) {
+          var character = findCharacterById(characterId);
+          var member = document.createElement("div");
+          member.className = "st-team-member";
+          var img = document.createElement("img");
+          img.className = "st-team-portrait";
+          img.src = (character && character.facePicture) || "deadcharacter.png";
+          img.alt = (character && character.name) || characterId;
+          var name = document.createElement("div");
+          name.className = "st-team-name";
+          name.textContent = (character && character.name) || characterId;
+          member.appendChild(img);
+          member.appendChild(name);
+          row.appendChild(member);
+        });
+        return row;
+      }
+
+      function startStoryBattle(node, statusHost, button) {
+        if (startingBattle) return;
+        startingBattle = true;
+        if (button) { button.disabled = true; button.textContent = "Starting Battle…"; }
+        if (statusHost) { statusHost.textContent = "Assembling your team…"; statusHost.classList.remove("error"); }
+        fetch("/api/story/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ nodeId: node.nodeId }),
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (!res.ok || !data || !data.ok) {
+                throw new Error((data && data.error) || "Could not start this battle.");
+              }
+              return data;
+            });
+          })
+          .then(function (data) {
+            window.location.href = "ingame.html?matchId=" + encodeURIComponent(data.matchId);
+          })
+          .catch(function (e) {
+            startingBattle = false;
+            if (button) { button.disabled = false; button.textContent = "Begin Battle ▶"; }
+            if (statusHost) {
+              statusHost.textContent = e && e.message ? e.message : "Could not start this battle.";
+              statusHost.classList.add("error");
+            }
+          });
+      }
+
+      function renderNodeDetail(chapter, node) {
+        if (!detailView) return;
+        detailView.innerHTML = "";
+
+        var nav = document.createElement("div");
+        nav.className = "st-detail-nav";
+        var back = document.createElement("a");
+        back.href = "story.html";
+        back.textContent = "‹ Back to Story Mode";
+        nav.appendChild(back);
+
+        var lvl = document.createElement("div");
+        lvl.className = "st-detail-level";
+        lvl.textContent = "Level " + (node.level_requirement || 1);
+        var title = document.createElement("div");
+        title.className = "st-detail-title";
+        title.textContent = node.title;
+
+        var gridEl = document.createElement("div");
+        gridEl.className = "st-detail-grid";
+
+        var art = document.createElement("img");
+        art.className = "st-detail-art";
+        art.src = node.image || "deadcharacter.png";
+        art.alt = node.imageAlt || node.title;
+
+        var right = document.createElement("div");
+        var head = document.createElement("div");
+        head.className = "st-col-head";
+        head.textContent = "› Briefing";
+        right.appendChild(head);
+        var enemyLine = document.createElement("p");
+        enemyLine.className = "st-col-line";
+        enemyLine.innerHTML = "<strong>Opponent:</strong> " + (node.enemyDisplayName || "Rogue Ninja");
+        right.appendChild(enemyLine);
+        var noteLine = document.createElement("p");
+        noteLine.className = "st-col-line";
+        noteLine.textContent = "This battle uses a preset team so the story plays out consistently.";
+        right.appendChild(noteLine);
+
+        var teamLabel = document.createElement("div");
+        teamLabel.className = "st-briefing-label";
+        teamLabel.textContent = "Your Team";
+        right.appendChild(teamLabel);
+        right.appendChild(buildTeamRow(node.playerTeam && node.playerTeam.length ? node.playerTeam : []));
+
+        var actions = document.createElement("div");
+        actions.className = "st-briefing-actions";
+        var beginBtn = document.createElement("button");
+        beginBtn.type = "button";
+        beginBtn.className = "st-btn primary";
+        beginBtn.textContent = "Begin Battle ▶";
+        var status = document.createElement("span");
+        status.className = "st-briefing-status";
+        beginBtn.addEventListener("click", function () {
+          startStoryBattle(node, status, beginBtn);
+        });
+        actions.appendChild(beginBtn);
+        actions.appendChild(status);
+        right.appendChild(actions);
+
+        gridEl.appendChild(art);
+        gridEl.appendChild(right);
+
+        detailView.appendChild(nav);
+        detailView.appendChild(lvl);
+        detailView.appendChild(title);
+        detailView.appendChild(gridEl);
+      }
+
+      function showOnly(view) {
+        if (landingView) landingView.hidden = view !== "landing";
+        if (detailView) { detailView.hidden = view !== "detail"; if (view !== "detail") detailView.innerHTML = ""; }
+      }
+
+      function route() {
+        var nodeId = getParam("node");
+        if (nodeId && nodeMap.has(nodeId)) {
+          showOnly("detail");
+          var found = nodeMap.get(nodeId);
+          renderNodeDetail(found.chapter, found.node);
+          window.scrollTo(0, 0);
+        } else {
+          showOnly("landing");
+          renderEpisodeGuide();
+          window.scrollTo(0, 0);
+        }
+      }
+      window.addEventListener("popstate", route);
+
+      function setStoryCatalog(nextChapters) {
+        chapters = (Array.isArray(nextChapters) ? nextChapters : []).slice().sort(function (a, b) {
+          return (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0);
+        });
+        nodeMap = new Map();
+        chapters.forEach(function (chapter) {
+          chapter.nodes = Array.isArray(chapter.nodes) ? chapter.nodes : [];
+          chapter.nodes.forEach(function (node) { nodeMap.set(node.nodeId, { chapter: chapter, node: node }); });
+        });
+      }
+
+      async function loadStory() {
+        try {
+          setStatus("Loading story mode…");
+          var res = await fetch("/api/story", { credentials: "same-origin" });
+          var data = await res.json().catch(function () { return {}; });
+          if (!res.ok) throw new Error(data && data.error ? data.error : "Unable to load story mode.");
+          setStoryCatalog(data && Array.isArray(data.chapters) ? data.chapters : []);
+          storyProgressByNodeId = (data && data.storyProgressByNodeId) || {};
+          setStatus("");
+          route();
+        } catch (e) {
+          setStoryCatalog([]);
+          storyProgressByNodeId = {};
+          setStatus("Story mode is unavailable right now.", true);
+          route();
+        }
+      }
+
+      loadStory();
+    }());
+  </script>
+
+  <!-- Shinobi-Arena nav account sync + dropdown toggle -->
+  <script>
+    (function () {
+      var trigger = document.getElementById('ca-account-trigger');
+      var menu = document.getElementById('ca-account-menu');
+      var navGuest = document.getElementById('ca-nav-guest');
+      var navUser = document.getElementById('ca-nav-user');
+      var navUsername = document.getElementById('ca-nav-username');
+      var accountPanel = document.getElementById('account-panel');
+      var accountUsername = document.getElementById('account-username');
+      function syncNav() {
+        var loggedIn = accountPanel && !accountPanel.hidden;
+        if (navGuest) navGuest.hidden = loggedIn;
+        if (navUser) navUser.hidden = !loggedIn;
+        if (loggedIn && navUsername && accountUsername) {
+          navUsername.textContent = accountUsername.textContent || '';
+        }
+      }
+      if (accountPanel) {
+        new MutationObserver(syncNav).observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
+      }
+      syncNav();
+      function closeMenu() { if (menu) { menu.hidden = true; } if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      function openMenu() { if (menu) { menu.hidden = false; } if (trigger) trigger.setAttribute('aria-expanded', 'true'); }
+      if (trigger && menu) {
+        trigger.addEventListener('click', function (e) { e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); });
+        menu.addEventListener('click', function (e) { if (e.target.closest('.account-action')) closeMenu(); });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+      }
+    })();
+  </script>
+
+</body>
+</html>

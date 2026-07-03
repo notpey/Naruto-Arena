@@ -1,3 +1,19 @@
 node_modules
 .env
 npm-debug.log*
+
+# Local server logs / restart artifacts (not part of the app)
+server.*.log
+server.err.log
+server.out.log
+
+# One-off dev/debug scripts and their scratch output (marked
+# "DEV-ONLY, SAFE TO DELETE" in their own headers)
+dev-*.js
+dev-*-results.json
+
+# Large local QA screenshot/browser-profile scratch dir
+tmp-ui-qa-screenshots/
+
+# Ad hoc scratch images used during asset work
+scratch_*.png

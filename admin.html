@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naruto-Arena Admin Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 14% 8%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 88% 4%, rgba(124, 77, 255, 0.1), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 42%, #000 100%);
+      color: var(--ca-bone);
+      font-family: var(--font-ui);
+    }
+    a { color: inherit; text-decoration: none; }
+    .acp-shell { width: min(1440px, 100%); margin: 0 auto; padding: 24px; }
+    .acp-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 58px;
+      margin-bottom: 26px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .acp-brand { display: flex; align-items: center; gap: 14px; }
+    .acp-seal { width: 38px; height: 44px; flex: 0 0 auto; }
+    .acp-seal polygon { fill: rgba(232, 128, 26, 0.08); stroke: var(--ca-orange); stroke-width: 1.5; }
+    .acp-seal text { fill: var(--ca-purple-ui); font: 900 12px system-ui, sans-serif; }
+    .acp-title { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+    .acp-subtitle { margin: 3px 0 0; color: var(--ca-dust); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .acp-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+    .acp-nav a {
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--ca-parchment);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .acp-nav a:hover { color: #fff; border-color: rgba(232, 128, 26, 0.6); background: rgba(232, 128, 26, 0.1); }
+    .acp-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+    .acp-panel {
+      background: rgba(8, 10, 18, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    .acp-panel-head { padding: 18px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+    .acp-panel-head-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .acp-panel-title { margin: 0; color: var(--ca-orange); font-size: 22px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; }
+    .acp-panel-copy { margin: 5px 0 0; color: var(--ca-parchment); font-size: 13px; line-height: 1.45; }
+    .acp-panel-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .acp-button {
+      min-height: 34px;
+      padding: 0 13px;
+      border: 1px solid rgba(232, 128, 26, 0.55);
+      background: var(--ca-orange);
+      color: #05070e;
+      cursor: pointer;
+      font: 900 11px var(--font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .acp-button.secondary {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: #10131c;
+      color: var(--ca-parchment);
+    }
+    .acp-button:disabled { cursor: not-allowed; opacity: 0.55; }
+    .acp-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; padding: 18px; }
+    .acp-tool {
+      min-height: 142px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #10131c;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .acp-tool:hover { border-color: rgba(232, 128, 26, 0.65); background: rgba(232, 128, 26, 0.08); }
+    .acp-tool-kicker { color: var(--ca-purple-ui); font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+    .acp-tool-title { margin: 0; color: #fff; font-size: 18px; font-weight: 900; text-transform: uppercase; }
+    .acp-tool p { margin: 0; color: var(--ca-parchment); font-size: 13px; line-height: 1.45; text-transform: none; }
+    .acp-tool-cta { margin-top: auto; color: var(--ca-orange); font-size: 12px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+    .acp-grid { display: grid; gap: 22px; }
+    .acp-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+    .acp-stat { padding: 14px; background: #10131c; border: 1px solid rgba(255, 255, 255, 0.07); }
+    .acp-stat span { display: block; color: var(--ca-dust); font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+    .acp-stat strong { display: block; margin-top: 6px; color: #fff; font-size: 25px; font-weight: 900; }
+    .acp-status { padding: 0 16px 16px; color: var(--ca-parchment); font-size: 12px; line-height: 1.55; }
+    .acp-status strong { color: #fff; }
+    .acp-ranks { padding: 18px; overflow: auto; }
+    .acp-table { width: 100%; border-collapse: collapse; min-width: 680px; color: var(--ca-ink); background: var(--ca-surface-light); }
+    .acp-table th, .acp-table td { padding: 11px 12px; border-bottom: 1px solid var(--ca-line-ink); text-align: left; }
+    .acp-table th {
+      background: #000;
+      color: var(--ca-bone);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .acp-table td { font-size: 13px; font-weight: 700; }
+    .acp-table tr:last-child td { border-bottom: 0; }
+    .acp-rank-name { color: var(--ca-orange); font-weight: 900; }
+    .acp-rank-input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--ca-ink);
+      padding: 7px 9px;
+      font: 800 13px var(--font-ui);
+    }
+    .acp-rank-levels {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .acp-rank-range { color: rgba(30, 24, 16, 0.7); font-size: 12px; font-weight: 900; }
+    .acp-rank-message { margin-top: 10px; color: var(--ca-parchment); font-size: 12px; font-weight: 800; }
+    .acp-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      color: var(--ca-parchment);
+      background: rgba(232, 128, 26, 0.08);
+      border: 1px solid rgba(232, 128, 26, 0.18);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .acp-error {
+      margin: 24px 0 0;
+      padding: 16px;
+      color: #ffb0b0;
+      background: rgba(213, 34, 53, 0.12);
+      border: 1px solid rgba(213, 34, 53, 0.35);
+      font-weight: 800;
+    }
+    @media (max-width: 980px) {
+      .acp-main { grid-template-columns: 1fr; }
+      .acp-top { align-items: flex-start; flex-direction: column; }
+      .acp-nav { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="acp-shell">
+    <header class="acp-top">
+      <div class="acp-brand">
+        <svg class="acp-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" />
+          <text x="20" y="29" text-anchor="middle">N-A</text>
+        </svg>
+        <div>
+          <h1 class="acp-title">Admin Control Panel</h1>
+          <p class="acp-subtitle">Game operations, live editors, and progression rules</p>
+        </div>
+      </div>
+      <nav class="acp-nav" aria-label="Admin navigation">
+        <a href="index.html">Start Page</a>
+        <a href="selection.html">Client</a>
+        <a href="leaderboards.html">Ladders</a>
+        <a href="missions.html">Missions</a>
+      </nav>
+    </header>
+
+    <main class="acp-main">
+      <div class="acp-grid">
+        <section class="acp-panel">
+          <div class="acp-panel-head">
+            <h2 class="acp-panel-title">Operational Tools</h2>
+            <p class="acp-panel-copy">The existing editors now sit behind one control-panel entry point.</p>
+          </div>
+          <div class="acp-tools" id="acp-tools"></div>
+        </section>
+
+        <section class="acp-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">Player Ranks</h2>
+                <p class="acp-panel-copy">Edit the level thresholds, rank names, and player-card icons used by the game server.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button secondary" type="button" id="acp-rank-reset">Restore Defaults</button>
+                <button class="acp-button" type="button" id="acp-rank-save">Save Ranks</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-ranks">
+            <table class="acp-table">
+              <thead>
+                <tr>
+                  <th>Levels</th>
+                  <th>Ninja Rank</th>
+                  <th>Icon</th>
+                  <th>Minimum EXP</th>
+                </tr>
+              </thead>
+              <tbody id="acp-rank-table"></tbody>
+            </table>
+            <div class="acp-rank-message" id="acp-rank-message"></div>
+            <div class="acp-note" id="acp-hokage-note"></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="acp-grid">
+        <section class="acp-panel">
+          <div class="acp-panel-head">
+            <h2 class="acp-panel-title">Snapshot</h2>
+            <p class="acp-panel-copy">Live counts from the server.</p>
+          </div>
+          <div class="acp-stat-grid">
+            <div class="acp-stat"><span>Characters</span><strong id="count-characters">-</strong></div>
+            <div class="acp-stat"><span>Missions</span><strong id="count-missions">-</strong></div>
+            <div class="acp-stat"><span>Players</span><strong id="count-players">-</strong></div>
+            <div class="acp-stat"><span>Admins</span><strong id="count-admins">-</strong></div>
+          </div>
+          <div class="acp-status" id="acp-status">Loading control panel...</div>
+        </section>
+
+        <section class="acp-panel">
+          <div class="acp-panel-head">
+            <h2 class="acp-panel-title">Economy</h2>
+            <p class="acp-panel-copy">Reward values currently enforced by match outcomes.</p>
+          </div>
+          <div class="acp-status" id="acp-economy">Loading economy...</div>
+        </section>
+      </aside>
+    </main>
+    <div class="acp-error" id="acp-error" hidden></div>
+  </div>
+
+  <script>
+    (function () {
+      var toolsEl = document.getElementById("acp-tools");
+      var rankTable = document.getElementById("acp-rank-table");
+      var statusEl = document.getElementById("acp-status");
+      var economyEl = document.getElementById("acp-economy");
+      var errorEl = document.getElementById("acp-error");
+      var rankSaveButton = document.getElementById("acp-rank-save");
+      var rankResetButton = document.getElementById("acp-rank-reset");
+      var rankMessage = document.getElementById("acp-rank-message");
+      function setText(id, value) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = value;
+      }
+      function formatNumber(value) {
+        return Math.max(0, Math.round(Number(value) || 0)).toLocaleString("en-US");
+      }
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+      function showError(message) {
+        if (!errorEl) return;
+        errorEl.hidden = false;
+        errorEl.textContent = message || "Unable to load admin control panel.";
+      }
+      function setRankMessage(message, isError) {
+        if (!rankMessage) return;
+        rankMessage.textContent = message || "";
+        rankMessage.style.color = isError ? "#ffb0b0" : "var(--ca-parchment)";
+      }
+      function setRankButtonsDisabled(disabled) {
+        if (rankSaveButton) rankSaveButton.disabled = disabled;
+        if (rankResetButton) rankResetButton.disabled = disabled;
+      }
+      function renderTools(tools) {
+        if (!toolsEl) return;
+        toolsEl.innerHTML = "";
+        (Array.isArray(tools) ? tools : []).forEach(function (tool) {
+          var link = document.createElement("a");
+          link.className = "acp-tool";
+          link.href = tool.href || "#";
+          link.innerHTML =
+            '<span class="acp-tool-kicker">' + (tool.status || "Tool") + '</span>' +
+            '<h3 class="acp-tool-title">' + (tool.title || "Admin Tool") + '</h3>' +
+            '<p>' + (tool.description || "") + '</p>' +
+            '<span class="acp-tool-cta">Open Tool</span>';
+          toolsEl.appendChild(link);
+        });
+      }
+      function renderRanks(rules) {
+        if (!rankTable) return;
+        rankTable.innerHTML = "";
+        var levels = Array.isArray(rules && rules.levels) ? rules.levels : [];
+        (Array.isArray(rules && rules.rankTiers) ? rules.rankTiers : []).forEach(function (tier) {
+          var row = document.createElement("tr");
+          var minLevel = Number(tier.minLevel) || 1;
+          var minLevelInfo = levels.find(function (entry) { return Number(entry.level) === minLevel; }) || {};
+          row.setAttribute("data-rank-row", "true");
+          row.innerHTML =
+            '<td><div class="acp-rank-levels">' +
+            '<input class="acp-rank-input" data-field="minLevel" type="number" min="1" max="' + (rules.maxLevel || 50) + '" value="' + minLevel + '">' +
+            '<span class="acp-rank-range">through level ' + (tier.maxLevel || minLevel) + '</span>' +
+            '</div></td>' +
+            '<td><input class="acp-rank-input acp-rank-name" data-field="rank" type="text" maxlength="40" value="' + escapeHtml(tier.rank || "") + '"></td>' +
+            '<td><input class="acp-rank-input" data-field="rankHatUrl" type="text" maxlength="220" value="' + escapeHtml(tier.rankHatUrl || "") + '"></td>' +
+            '<td>' + formatNumber(minLevelInfo.cumulativeExperience) + '</td>';
+          rankTable.appendChild(row);
+        });
+        var note = document.getElementById("acp-hokage-note");
+        if (note && rules && rules.hokageRequirement) {
+          note.innerHTML =
+            '<strong>Hokage rule:</strong> ' +
+            'the #1 ladder player becomes Hokage only when they are level ' +
+            rules.hokageRequirement.minLevel +
+            '+. Level ' +
+            (rules.maxLevel || 50) +
+            ' is capped at ' +
+            formatNumber(rules.maxExperiencePoints) +
+            ' EXP.';
+        }
+        setRankMessage("");
+      }
+      function collectRankTiers() {
+        return Array.prototype.slice.call(document.querySelectorAll("[data-rank-row]")).map(function (row) {
+          var minLevelInput = row.querySelector('[data-field="minLevel"]');
+          var rankInput = row.querySelector('[data-field="rank"]');
+          var iconInput = row.querySelector('[data-field="rankHatUrl"]');
+          return {
+            minLevel: Number(minLevelInput && minLevelInput.value),
+            rank: rankInput ? rankInput.value.trim() : "",
+            rankHatUrl: iconInput ? iconInput.value.trim() : ""
+          };
+        });
+      }
+      function saveRankRules() {
+        setRankButtonsDisabled(true);
+        setRankMessage("Saving rank rules...");
+        fetch("/api/admin/ladder-rules", {
+          method: "PUT",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rankTiers: collectRankTiers() })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (!res.ok) throw new Error((data && data.error) || "Unable to save rank rules.");
+              return data;
+            });
+          })
+          .then(function (data) {
+            renderRanks(data.ladderRules);
+            setRankMessage("Rank rules saved.");
+          })
+          .catch(function (error) {
+            setRankMessage(error && error.message ? error.message : "Unable to save rank rules.", true);
+          })
+          .finally(function () {
+            setRankButtonsDisabled(false);
+          });
+      }
+      function resetRankRules() {
+        setRankButtonsDisabled(true);
+        setRankMessage("Restoring default Naruto-Arena ranks...");
+        fetch("/api/admin/ladder-rules", {
+          method: "DELETE",
+          credentials: "same-origin"
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (!res.ok) throw new Error((data && data.error) || "Unable to reset rank rules.");
+              return data;
+            });
+          })
+          .then(function (data) {
+            renderRanks(data.ladderRules);
+            setRankMessage("Default rank rules restored.");
+          })
+          .catch(function (error) {
+            setRankMessage(error && error.message ? error.message : "Unable to reset rank rules.", true);
+          })
+          .finally(function () {
+            setRankButtonsDisabled(false);
+          });
+      }
+      if (rankSaveButton) rankSaveButton.addEventListener("click", saveRankRules);
+      if (rankResetButton) rankResetButton.addEventListener("click", resetRankRules);
+      fetch("/api/admin/control-panel", { credentials: "same-origin" })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            if (!res.ok) throw new Error((data && data.error) || "Admin access required.");
+            return data;
+          });
+        })
+        .then(function (data) {
+          var counts = data.counts || {};
+          setText("count-characters", formatNumber(counts.characters));
+          setText("count-missions", formatNumber(counts.missions));
+          setText("count-players", formatNumber(counts.players));
+          setText("count-admins", formatNumber(counts.admins));
+          if (statusEl) {
+            statusEl.innerHTML =
+              '<strong>Maintenance:</strong> ' +
+              (data.maintenance && data.maintenance.enabled ? "Enabled" : "Disabled") +
+              '<br><strong>Rank system:</strong> Naruto-Arena canon active.';
+          }
+          if (economyEl) {
+            var economy = data.economy || {};
+            economyEl.innerHTML =
+              '<strong>Ladder win:</strong> ' + formatNumber(economy.ladderWinRyo) + ' Ryo<br>' +
+              '<strong>Ladder loss:</strong> ' + formatNumber(economy.ladderLossRyo) + ' Ryo<br>' +
+              '<strong>Quick win:</strong> ' + formatNumber(economy.quickWinRyo) + ' Ryo<br>' +
+              '<strong>Quick loss:</strong> ' + formatNumber(economy.quickLossRyo) + ' Ryo';
+          }
+          renderTools(data.tools);
+          renderRanks(data.ladderRules);
+        })
+        .catch(function (error) {
+          showError(error && error.message ? error.message : "Unable to load admin control panel.");
+        });
+    })();
+  </script>
+</body>
+</html>

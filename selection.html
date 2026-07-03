@@ -7,13 +7,131 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="shop.css">
 </head>
-<body>
+<body class="selection-client-page">
+<script>
+    (function () {
+        var key = "na-selection-remaster-preview";
+        try {
+            if (localStorage.getItem(key) === "enabled") {
+                document.body.classList.add("game-remaster");
+            }
+        } catch (error) {}
+    })();
+</script>
 <div class="background">
-    <div class="sound-controller" aria-label="Sound controller">
-        <input id="sound-volume" class="sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
-    </div>
+    <button type="button" class="shop-icon" data-shop-trigger aria-label="Open the Ryo shop" title="Ryo Shop">
+        <span class="shop-icon-glyph">両</span>
+        <span class="shop-icon-balance" data-shop-balance>0</span>
+    </button>
+    <nav class="selection-hub-nav" aria-label="Selection hub navigation">
+        <div class="selection-hub-brand">
+            <svg class="selection-hub-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true" focusable="false">
+                <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" />
+                <text x="20" y="29" text-anchor="middle">N&#183;A</text>
+            </svg>
+        </div>
+        <div class="selection-hub-tabs">
+            <button type="button" class="selection-hub-tab active" data-hub-view="play">Start Playing</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="shop">Shop</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="missions">Missions</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="inventory">Inventory</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="story">Story</button>
+        </div>
+        <button type="button" class="selection-hub-ryo" data-hub-view="shop" aria-label="Open the Ryo shop">
+            <span class="selection-hub-coin" aria-hidden="true">R</span>
+            <span data-shop-balance>0</span>
+        </button>
+        <div class="selection-hub-settings">
+            <button type="button" class="selection-hub-settings-button" aria-label="Open settings" aria-expanded="false"><span aria-hidden="true">&#9881;</span></button>
+            <div class="selection-hub-settings-menu" hidden>
+                <label class="remaster-preview-toggle">
+                    <input id="remaster-preview-toggle" type="checkbox">
+                    <span>Remaster Mode</span>
+                </label>
+                <div class="sound-controller" aria-label="Sound controller">
+                    <span class="selection-hub-setting-label">Sound</span>
+                    <input id="sound-volume" class="sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section class="selection-hub-environment" data-hub-environment hidden>
+        <div class="selection-hub-env-panel" data-hub-panel="shop" hidden>
+            <div class="selection-hub-env-header">
+                <div>
+                    <h1>Shop</h1>
+                    <p>Unlock mission-bound characters and spend earned Ryo.</p>
+                </div>
+                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
+            </div>
+            <div class="selection-hub-env-toolbar">
+                <span class="selection-hub-env-status" data-shop-env-status>Loading shop...</span>
+            </div>
+            <div class="selection-hub-shop-grid" data-shop-env-grid></div>
+        </div>
+        <div class="selection-hub-env-panel" data-hub-panel="missions" hidden>
+            <div class="selection-hub-env-header">
+                <div>
+                    <h1>Ninja Missions</h1>
+                    <p>Track unlock paths, rank categories, and completion progress.</p>
+                </div>
+                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
+            </div>
+            <div class="selection-hub-env-toolbar">
+                <button type="button" class="selection-hub-rank active" data-mission-rank="all">Overview</button>
+                <button type="button" class="selection-hub-rank" data-mission-rank="dc">D/C Rank</button>
+                <button type="button" class="selection-hub-rank" data-mission-rank="b">B Rank</button>
+                <button type="button" class="selection-hub-rank" data-mission-rank="a">A Rank</button>
+                <button type="button" class="selection-hub-rank" data-mission-rank="s">S Rank</button>
+                <label class="selection-hub-search">
+                    <span>Search</span>
+                    <input type="search" data-mission-search placeholder="Search missions..." autocomplete="off">
+                </label>
+            </div>
+            <div class="selection-hub-mission-grid" data-mission-grid>
+                <div class="selection-hub-env-empty">Loading missions...</div>
+            </div>
+        </div>
+        <div class="selection-hub-env-panel" data-hub-panel="inventory" hidden>
+            <div class="selection-hub-env-header">
+                <div>
+                    <h1>Inventory</h1>
+                    <p>Manage account rewards, cosmetics, and future client items.</p>
+                </div>
+                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
+            </div>
+            <div class="selection-hub-inventory-grid">
+                <article class="selection-hub-inventory-card">
+                    <span>Avatars</span>
+                    <strong>Coming Soon</strong>
+                </article>
+                <article class="selection-hub-inventory-card">
+                    <span>Backgrounds</span>
+                    <strong>Coming Soon</strong>
+                </article>
+                <article class="selection-hub-inventory-card">
+                    <span>Titles</span>
+                    <strong>Coming Soon</strong>
+                </article>
+            </div>
+        </div>
+        <div class="selection-hub-env-panel" data-hub-panel="story" hidden>
+            <div class="selection-hub-env-header">
+                <div>
+                    <h1>Story</h1>
+                    <p>Fight scripted battles and unlock rewards, right here.</p>
+                </div>
+                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
+            </div>
+            <div class="selection-hub-story-list" data-story-list>
+                <div class="selection-hub-env-empty">Loading story battles...</div>
+            </div>
+            <div class="selection-hub-story-briefing" data-story-briefing hidden></div>
+        </div>
+    </section>
     <img class="selectionscroll" src="selectionscroll.png" alt="selectionscroll">
     <div class="selectionpage">
 
@@ -44,8 +162,11 @@
 <div class="skill-card">
     <div class="skill-header">
         <div class="character-info">
-            <div id="character-name" class="character-name">Select a character</div>
             <img id="character-portrait" src="" alt="Character portrait" class="character-portrait">
+            <div class="character-text">
+                <div id="character-name" class="character-name">Select a character</div>
+                <p id="character-bio" class="character-bio"></p>
+            </div>
         </div>
         <div class="skill-images">
             <img data-skill-index="0" src="" alt="Skill 1" class="skill-image">
@@ -54,25 +175,19 @@
             <img data-skill-index="3" src="" alt="Skill 4" class="skill-image">
         </div>
     </div>
-    
-    <div class="skill-title-bar">
-        <div id="skill-name" class="skill-name">Skill name</div>
-        <div class="energy-bar" id="energy-bar">
-            <span class="energy-label">ENERGY:</span>
+    <div class="skill-detail-card">
+        <div class="skill-detail-head">
+            <img id="skill-detail-image" class="skill-detail-image" src="" alt="Selected skill">
+            <div class="skill-detail-content">
+                <div class="skill-detail-kicker">SKILL</div>
+                <div id="skill-name" class="skill-name">Skill name</div>
+                <div id="skill-description" class="skill-description">Choose a character to view skills.</div>
+            </div>
         </div>
-    </div>
-    
-    <div id="skill-description" class="skill-description">
-        Choose a character to view skills.
-    </div>
-    
-    <div class="skill-footer">
-        <div class="skill-classes" id="skill-classes">
-            <span class="classes-label">CLASSES:</span>
-        </div>
-        <div class="skill-cooldown">
-            <span class="cooldown-label">COOLDOWN:</span>
-            <span id="skill-cooldown" class="cooldown-value">-</span>
+        <div class="skill-detail-meta">
+            <span class="sdm-seg"><span class="sdm-lbl">/ ENERGY</span><div class="energy-bar" id="energy-bar"></div></span>
+            <span class="sdm-seg"><span class="sdm-lbl">/ CLASSES</span><div class="skill-classes" id="skill-classes"></div></span>
+            <span class="sdm-seg sdm-seg--last"><span class="sdm-lbl">/ COOLDOWN</span><span id="skill-cooldown" class="cooldown-value">-</span></span>
         </div>
     </div>
 </div>
@@ -121,7 +236,670 @@
 
     </div>
 </div>
-<script src="characters.js"></script>
-<script src="script.js"></script>
+<script src="characters.js?v=3"></script>
+<script src="script.js?v=3"></script>
+<script src="shop.js"></script>
+<script>
+    (function () {
+        var key = "na-selection-remaster-preview";
+        var toggle = document.getElementById("remaster-preview-toggle");
+        if (!toggle) return;
+
+        function isEnabled() {
+            try {
+                return localStorage.getItem(key) === "enabled";
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function resizeForMode(enabled) {
+            var targetWidth = enabled ? 1100 : 770;
+            var targetHeight = enabled ? 800 : 560;
+            var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
+            var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
+            var popupWidth = targetWidth + chromeWidth;
+            var popupHeight = targetHeight + chromeHeight;
+            try {
+                window.resizeTo(popupWidth, popupHeight);
+                window.moveTo(
+                    Math.max(0, Math.round((window.screen.width - popupWidth) / 2)),
+                    Math.max(0, Math.round((window.screen.height - popupHeight) / 2))
+                );
+            } catch (error) {}
+        }
+
+        function apply(enabled, shouldResize) {
+            document.body.classList.toggle("game-remaster", enabled);
+            toggle.checked = enabled;
+            try {
+                if (enabled) localStorage.setItem(key, "enabled");
+                else localStorage.removeItem(key);
+            } catch (error) {}
+            if (shouldResize) resizeForMode(enabled);
+        }
+
+        apply(isEnabled(), false);
+        toggle.addEventListener("change", function () {
+            apply(toggle.checked, true);
+        });
+    })();
+
+    (function () {
+        var settings = document.querySelector(".selection-hub-settings");
+        var settingsButton = document.querySelector(".selection-hub-settings-button");
+        var settingsMenu = document.querySelector(".selection-hub-settings-menu");
+        var environment = document.querySelector("[data-hub-environment]");
+        var panels = Array.prototype.slice.call(document.querySelectorAll("[data-hub-panel]"));
+        var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".selection-hub-tabs [data-hub-view]"));
+        var viewButtons = Array.prototype.slice.call(document.querySelectorAll("[data-hub-view]"));
+        var shopGrid = document.querySelector("[data-shop-env-grid]");
+        var shopStatus = document.querySelector("[data-shop-env-status]");
+        var missionGrid = document.querySelector("[data-mission-grid]");
+        var missionSearch = document.querySelector("[data-mission-search]");
+        var missionRankButtons = Array.prototype.slice.call(document.querySelectorAll("[data-mission-rank]"));
+        var storyListEl = document.querySelector("[data-story-list]");
+        var storyBriefingEl = document.querySelector("[data-story-briefing]");
+        var storyBattleStarting = false;
+        var loadedShop = false;
+        var loadedMissions = false;
+        var loadedStory = false;
+        var missions = [];
+        var missionProgressByMissionId = {};
+        var missionRank = "all";
+        var storyNodes = [];
+        var storyProgressByNodeId = {};
+
+        var rankMeta = {
+            dc: "D & C Rank Missions",
+            b: "B Rank Missions",
+            a: "A Rank Missions",
+            s: "S Rank Missions"
+        };
+
+        function setSettingsOpen(open) {
+            if (!settings || !settingsButton || !settingsMenu) return;
+            settings.classList.toggle("open", open);
+            settingsButton.setAttribute("aria-expanded", open ? "true" : "false");
+            settingsMenu.hidden = !open;
+        }
+
+        function fetchJson(url, options) {
+            return fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
+                return res.json().catch(function () {
+                    return {};
+                }).then(function (data) {
+                    if (!res.ok) {
+                        throw new Error((data && data.error) || "Request failed.");
+                    }
+                    return data;
+                });
+            });
+        }
+
+        function formatRyo(value) {
+            var amount = Math.max(0, Math.round(Number(value) || 0));
+            return amount.toLocaleString("en-US");
+        }
+
+        function updateBalanceDisplays(ryo) {
+            document.querySelectorAll("[data-shop-balance]").forEach(function (el) {
+                el.textContent = formatRyo(ryo);
+            });
+        }
+
+        function renderShopMessage(message) {
+            if (!shopGrid) return;
+            shopGrid.innerHTML = "";
+            var empty = document.createElement("div");
+            empty.className = "selection-hub-env-empty";
+            empty.textContent = message;
+            shopGrid.appendChild(empty);
+        }
+
+        function renderShopCharacters(ryo, characters) {
+            if (!shopGrid) return;
+            shopGrid.innerHTML = "";
+            if (!characters.length) {
+                renderShopMessage("Every shop character is already unlocked, or none are for sale yet.");
+                return;
+            }
+            characters.forEach(function (character) {
+                var card = document.createElement("article");
+                card.className = "selection-hub-shop-card";
+
+                var face = document.createElement("div");
+                face.className = "selection-hub-shop-face";
+                if (character.facePicture) {
+                    var img = document.createElement("img");
+                    img.src = character.facePicture;
+                    img.alt = character.name || character.characterId || "Character";
+                    face.appendChild(img);
+                }
+
+                var name = document.createElement("div");
+                name.className = "selection-hub-shop-name";
+                name.textContent = character.name || character.characterId || "Character";
+
+                var price = document.createElement("div");
+                price.className = "selection-hub-shop-price";
+                price.textContent = formatRyo(character.shopPrice) + " Ryo";
+
+                var buy = document.createElement("button");
+                buy.type = "button";
+                buy.className = "selection-hub-shop-buy";
+                buy.setAttribute("data-shop-env-buy", character.characterId || "");
+                buy.disabled = Number(ryo) < Number(character.shopPrice || 0);
+                buy.textContent = buy.disabled ? "Not Enough Ryo" : "Unlock";
+
+                card.appendChild(face);
+                card.appendChild(name);
+                card.appendChild(price);
+                card.appendChild(buy);
+                shopGrid.appendChild(card);
+            });
+        }
+
+        function loadShopEnvironment(force) {
+            if (!shopGrid || (loadedShop && !force)) return;
+            loadedShop = true;
+            if (shopStatus) shopStatus.textContent = "Loading shop...";
+            renderShopMessage("Loading shop...");
+            fetchJson("/api/shop").then(function (data) {
+                updateBalanceDisplays(data.ryo);
+                if (shopStatus) shopStatus.textContent = "Balance: " + formatRyo(data.ryo) + " Ryo";
+                renderShopCharacters(Number(data.ryo) || 0, Array.isArray(data.characters) ? data.characters : []);
+            }).catch(function (error) {
+                loadedShop = false;
+                if (shopStatus) shopStatus.textContent = "Shop unavailable";
+                renderShopMessage(error.message || "You must be logged in to visit the shop.");
+            });
+        }
+
+        function handleShopPurchase(characterId, button) {
+            if (!characterId || !button) return;
+            button.disabled = true;
+            button.textContent = "Unlocking";
+            fetchJson("/api/shop/purchase", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ characterId: characterId })
+            }).then(function (data) {
+                updateBalanceDisplays(data.ryo);
+                loadedShop = false;
+                loadShopEnvironment(true);
+            }).catch(function (error) {
+                button.disabled = false;
+                button.textContent = error.message || "Try Again";
+            });
+        }
+
+        function slug(value) {
+            return String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        }
+
+        function getLevelRequirementValue(mission) {
+            var value = Number(mission && mission.level_requirement ? mission.level_requirement : 0);
+            return Number.isFinite(value) && value > 0 ? value : 0;
+        }
+
+        function rankOf(mission) {
+            var level = getLevelRequirementValue(mission) || 1;
+            if (level >= 40) return "s";
+            if (level >= 30) return "a";
+            if (level >= 20) return "b";
+            return "dc";
+        }
+
+        function normalizeMission(mission, index) {
+            var src = mission && typeof mission === "object" ? mission : {};
+            var id = slug(src.missionId || src.id || src.title || src.name || "") || "mission-" + (index + 1);
+            return {
+                missionId: id,
+                title: String(src.title || src.name || "Mission " + (index + 1)).trim(),
+                level_requirement: Number(src.level_requirement != null ? src.level_requirement : (src.levelRequirement || src.rank || 0)) || 0,
+                reward_character: String(src.reward_character || src.rewardCharacter || "").trim(),
+                reward_character_name: String(src.reward_character_name || src.rewardCharacterName || "").trim(),
+                reward: String(src.reward || "").trim(),
+                image: String(src.image || "").trim(),
+                imageAlt: String(src.imageAlt || src.title || "Mission artwork").trim(),
+                characterName: String(src.characterName || "").trim(),
+                portrait: String(src.portrait || "").trim(),
+                available: src.available !== false,
+                sortOrder: Number.isFinite(Number(src.sortOrder)) ? Number(src.sortOrder) : index + 1
+            };
+        }
+
+        function normalizeMissionProgress(progressByMissionId) {
+            var source = progressByMissionId && typeof progressByMissionId === "object" ? progressByMissionId : {};
+            var out = {};
+            Object.keys(source).forEach(function (id) {
+                var entry = source[id] && typeof source[id] === "object" ? source[id] : {};
+                out[id] = { completedAt: entry.completedAt || null };
+            });
+            return out;
+        }
+
+        function statusOf(mission) {
+            var progress = missionProgressByMissionId[mission.missionId];
+            if (progress && progress.completedAt) return "completed";
+            if (mission.available === false) return "locked";
+            return "available";
+        }
+
+        function renderMissions() {
+            if (!missionGrid) return;
+            var query = String(missionSearch && missionSearch.value ? missionSearch.value : "").trim().toLowerCase();
+            var list = missions.filter(function (mission) {
+                if (missionRank !== "all" && rankOf(mission) !== missionRank) return false;
+                if (!query) return true;
+                var haystack = [
+                    mission.title,
+                    mission.missionId,
+                    mission.characterName,
+                    mission.reward_character_name,
+                    mission.reward_character,
+                    mission.reward
+                ].join(" ").toLowerCase();
+                return haystack.indexOf(query) !== -1;
+            });
+
+            missionGrid.innerHTML = "";
+            if (!list.length) {
+                var empty = document.createElement("div");
+                empty.className = "selection-hub-env-empty";
+                empty.textContent = "No missions match these filters.";
+                missionGrid.appendChild(empty);
+                return;
+            }
+
+            list.forEach(function (mission) {
+                var state = statusOf(mission);
+                var meta = rankMeta[rankOf(mission)] || "Ninja Missions";
+                var card = document.createElement("article");
+                card.className = "selection-hub-mission-card";
+
+                var level = document.createElement("div");
+                level.className = "selection-hub-mission-level";
+                level.textContent = "Level " + (getLevelRequirementValue(mission) || 1);
+
+                var name = document.createElement("div");
+                name.className = "selection-hub-mission-name";
+                name.textContent = mission.title;
+
+                var section = document.createElement("div");
+                section.className = "selection-hub-mission-section";
+                section.textContent = "Section: " + meta;
+
+                var art = document.createElement("div");
+                art.className = "selection-hub-mission-art";
+                var img = document.createElement("img");
+                img.loading = "lazy";
+                img.src = mission.image || mission.portrait || "deadcharacter.png";
+                img.alt = mission.imageAlt || mission.title;
+
+                var overlay = document.createElement("div");
+                overlay.className = "selection-hub-mission-overlay";
+                var feature = document.createElement("div");
+                feature.className = "selection-hub-mission-feature";
+                feature.textContent = mission.characterName ? "Featuring " + mission.characterName : mission.title;
+
+                var rankline = document.createElement("div");
+                rankline.className = "selection-hub-mission-rankline";
+                var rank = document.createElement("div");
+                rank.className = "selection-hub-mission-rank";
+                rank.textContent = "Rank: At least " + (getLevelRequirementValue(mission) || "Any");
+                var pill = document.createElement("span");
+                pill.className = "selection-hub-status-pill " + state;
+                pill.textContent = state === "locked" ? "Locked" : (state === "completed" ? "Completed" : "Available");
+
+                rankline.appendChild(rank);
+                rankline.appendChild(pill);
+                overlay.appendChild(feature);
+                overlay.appendChild(rankline);
+                art.appendChild(img);
+                art.appendChild(overlay);
+
+                var view = document.createElement("div");
+                view.className = "selection-hub-mission-view";
+                view.textContent = "View this mission >";
+
+                card.appendChild(level);
+                card.appendChild(name);
+                card.appendChild(section);
+                card.appendChild(art);
+                card.appendChild(view);
+                missionGrid.appendChild(card);
+            });
+        }
+
+        function loadMissionEnvironment(force) {
+            if (!missionGrid || (loadedMissions && !force)) {
+                renderMissions();
+                return;
+            }
+            loadedMissions = true;
+            missionGrid.innerHTML = '<div class="selection-hub-env-empty">Loading missions...</div>';
+            fetchJson("/api/missions").then(function (data) {
+                missions = (Array.isArray(data.missions) ? data.missions : []).map(normalizeMission).sort(function (a, b) {
+                    var order = (a.sortOrder || 0) - (b.sortOrder || 0);
+                    return order !== 0 ? order : a.title.localeCompare(b.title);
+                });
+                missionProgressByMissionId = normalizeMissionProgress(data.missionProgressByMissionId);
+                renderMissions();
+            }).catch(function () {
+                loadedMissions = false;
+                missions = [];
+                missionProgressByMissionId = {};
+                missionGrid.innerHTML = '<div class="selection-hub-env-empty">Unable to load missions.</div>';
+            });
+        }
+
+        function normalizeStoryNode(node, chapterTitle, chapterSortOrder) {
+            var src = node && typeof node === "object" ? node : {};
+            return {
+                nodeId: String(src.nodeId || "").trim(),
+                chapterTitle: String(chapterTitle || "").trim(),
+                chapterSortOrder: Number(chapterSortOrder) || 1,
+                title: String(src.title || "Battle").trim(),
+                level_requirement: Number(src.level_requirement) || 0,
+                image: String(src.image || "").trim(),
+                imageAlt: String(src.imageAlt || src.title || "Battle artwork").trim(),
+                enemyDisplayName: String(src.enemyDisplayName || "Rogue Ninja").trim(),
+                playerTeam: Array.isArray(src.playerTeam) ? src.playerTeam : []
+            };
+        }
+
+        function isStoryNodeCompleted(nodeId) {
+            var progress = storyProgressByNodeId[nodeId];
+            return Boolean(progress && progress.completedAt);
+        }
+
+        function findCharacterById(characterId) {
+            var roster = typeof characters !== "undefined" ? characters : (window.characters || []);
+            return roster.find(function (c) { return c && c.characterId === characterId; }) || null;
+        }
+
+        function showStoryList() {
+            if (storyListEl) storyListEl.hidden = false;
+            if (storyBriefingEl) { storyBriefingEl.hidden = true; storyBriefingEl.innerHTML = ""; }
+        }
+
+        function startStoryBattleFromHub(node, statusEl, beginBtn) {
+            if (storyBattleStarting) return;
+            storyBattleStarting = true;
+            beginBtn.disabled = true;
+            beginBtn.textContent = "Starting Battle…";
+            statusEl.textContent = "Assembling your team…";
+            statusEl.classList.remove("error");
+            fetchJson("/api/story/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nodeId: node.nodeId })
+            }).then(function (data) {
+                window.location.href = "ingame.html?matchId=" + encodeURIComponent(data.matchId);
+            }).catch(function (error) {
+                storyBattleStarting = false;
+                beginBtn.disabled = false;
+                beginBtn.textContent = "Begin Battle";
+                statusEl.textContent = (error && error.message) || "Could not start this battle.";
+                statusEl.classList.add("error");
+            });
+        }
+
+        function showStoryBriefing(node) {
+            if (!storyBriefingEl) return;
+            if (storyListEl) storyListEl.hidden = true;
+            storyBriefingEl.hidden = false;
+            storyBriefingEl.innerHTML = "";
+
+            var back = document.createElement("button");
+            back.type = "button";
+            back.className = "selection-hub-story-back";
+            back.textContent = "‹ Back to Story";
+            back.addEventListener("click", showStoryList);
+
+            var title = document.createElement("div");
+            title.className = "selection-hub-story-briefing-title";
+            title.textContent = node.title;
+
+            var opponentLine = document.createElement("p");
+            opponentLine.className = "selection-hub-story-briefing-line";
+            opponentLine.innerHTML = "<strong>Opponent:</strong> " + node.enemyDisplayName;
+
+            var noteLine = document.createElement("p");
+            noteLine.className = "selection-hub-story-briefing-line";
+            noteLine.textContent = "This battle uses a preset team so the story plays out consistently.";
+
+            var teamLabel = document.createElement("div");
+            teamLabel.className = "selection-hub-story-team-label";
+            teamLabel.textContent = "Your Team";
+
+            var teamRow = document.createElement("div");
+            teamRow.className = "selection-hub-story-team-row";
+            (node.playerTeam.length ? node.playerTeam : []).forEach(function (characterId) {
+                var character = findCharacterById(characterId);
+                var member = document.createElement("div");
+                member.className = "selection-hub-story-team-member";
+                var img = document.createElement("img");
+                img.className = "selection-hub-story-team-portrait";
+                img.src = (character && character.facePicture) || "deadcharacter.png";
+                img.alt = (character && character.name) || characterId;
+                var name = document.createElement("div");
+                name.className = "selection-hub-story-team-name";
+                name.textContent = (character && character.name) || characterId;
+                member.appendChild(img);
+                member.appendChild(name);
+                teamRow.appendChild(member);
+            });
+
+            var actions = document.createElement("div");
+            actions.className = "selection-hub-story-actions";
+            var beginBtn = document.createElement("button");
+            beginBtn.type = "button";
+            beginBtn.className = "selection-hub-story-begin";
+            beginBtn.textContent = "Begin Battle";
+            var status = document.createElement("span");
+            status.className = "selection-hub-story-status";
+            beginBtn.addEventListener("click", function () {
+                startStoryBattleFromHub(node, status, beginBtn);
+            });
+            actions.appendChild(beginBtn);
+            actions.appendChild(status);
+
+            storyBriefingEl.appendChild(back);
+            storyBriefingEl.appendChild(title);
+            storyBriefingEl.appendChild(opponentLine);
+            storyBriefingEl.appendChild(noteLine);
+            storyBriefingEl.appendChild(teamLabel);
+            storyBriefingEl.appendChild(teamRow);
+            storyBriefingEl.appendChild(actions);
+        }
+
+        function buildStoryRow(node) {
+            var completed = isStoryNodeCompleted(node.nodeId);
+            var row = document.createElement("div");
+            row.className = "selection-hub-story-row";
+            row.setAttribute("data-story-node", node.nodeId);
+
+            var thumb = document.createElement("div");
+            thumb.className = "selection-hub-story-thumb";
+            var img = document.createElement("img");
+            img.loading = "lazy";
+            img.src = node.image || "deadcharacter.png";
+            img.alt = node.imageAlt;
+            thumb.appendChild(img);
+
+            var body = document.createElement("div");
+            var title = document.createElement("div");
+            title.className = "selection-hub-story-title";
+            title.textContent = node.title;
+            var meta = document.createElement("p");
+            meta.className = "selection-hub-story-meta";
+            meta.textContent = "Vs. " + node.enemyDisplayName + " · Level " + (node.level_requirement || 1) + "+";
+            body.appendChild(title);
+            body.appendChild(meta);
+
+            var pill = document.createElement("span");
+            pill.className = "selection-hub-status-pill " + (completed ? "completed" : "available");
+            pill.textContent = completed ? "Completed" : "Available";
+
+            row.appendChild(thumb);
+            row.appendChild(body);
+            row.appendChild(pill);
+            return row;
+        }
+
+        function renderStoryPanel() {
+            if (!storyListEl) return;
+            storyListEl.innerHTML = "";
+            if (!storyNodes.length) {
+                var empty = document.createElement("div");
+                empty.className = "selection-hub-env-empty";
+                empty.textContent = "No story battles are available yet.";
+                storyListEl.appendChild(empty);
+                return;
+            }
+            var chaptersByTitle = new Map();
+            storyNodes.forEach(function (node) {
+                if (!chaptersByTitle.has(node.chapterTitle)) chaptersByTitle.set(node.chapterTitle, []);
+                chaptersByTitle.get(node.chapterTitle).push(node);
+            });
+            Array.from(chaptersByTitle.keys())
+                .sort(function (a, b) {
+                    var nodesA = chaptersByTitle.get(a);
+                    var nodesB = chaptersByTitle.get(b);
+                    return (nodesA[0].chapterSortOrder || 1) - (nodesB[0].chapterSortOrder || 1);
+                })
+                .forEach(function (chapterTitle) {
+                    var nodes = chaptersByTitle.get(chapterTitle);
+                    var completedCount = nodes.filter(function (n) { return isStoryNodeCompleted(n.nodeId); }).length;
+
+                    var block = document.createElement("div");
+                    block.className = "selection-hub-story-chapter";
+                    var head = document.createElement("div");
+                    head.className = "selection-hub-story-chapter-head";
+                    var title = document.createElement("div");
+                    title.className = "selection-hub-story-chapter-title";
+                    title.textContent = chapterTitle;
+                    var progress = document.createElement("span");
+                    progress.className = "selection-hub-story-chapter-progress";
+                    progress.textContent = completedCount + " / " + nodes.length;
+                    head.appendChild(title);
+                    head.appendChild(progress);
+                    block.appendChild(head);
+
+                    nodes.forEach(function (node) { block.appendChild(buildStoryRow(node)); });
+                    storyListEl.appendChild(block);
+                });
+        }
+
+        function loadStoryEnvironment(force) {
+            if (!storyListEl || (loadedStory && !force)) return;
+            loadedStory = true;
+            showStoryList();
+            storyListEl.innerHTML = '<div class="selection-hub-env-empty">Loading story battles...</div>';
+            fetchJson("/api/story").then(function (data) {
+                var chapters = Array.isArray(data.chapters) ? data.chapters : [];
+                storyNodes = [];
+                chapters.forEach(function (chapter) {
+                    (Array.isArray(chapter.nodes) ? chapter.nodes : []).forEach(function (node) {
+                        storyNodes.push(normalizeStoryNode(node, chapter.title, chapter.sortOrder));
+                    });
+                });
+                storyProgressByNodeId = (data.storyProgressByNodeId && typeof data.storyProgressByNodeId === "object")
+                    ? data.storyProgressByNodeId : {};
+                renderStoryPanel();
+            }).catch(function () {
+                loadedStory = false;
+                storyNodes = [];
+                storyListEl.innerHTML = '<div class="selection-hub-env-empty">Unable to load story mode.</div>';
+            });
+        }
+
+        function setHubView(view) {
+            var nextView = view || "play";
+            var isEnvironment = nextView !== "play";
+            document.body.classList.remove("hub-view-shop", "hub-view-missions", "hub-view-inventory", "hub-view-story");
+            if (isEnvironment) {
+                document.body.classList.add("hub-view-" + nextView);
+            }
+            if (environment) {
+                environment.hidden = !isEnvironment;
+            }
+            panels.forEach(function (panel) {
+                panel.hidden = panel.getAttribute("data-hub-panel") !== nextView;
+            });
+            tabButtons.forEach(function (button) {
+                var active = button.getAttribute("data-hub-view") === nextView;
+                button.classList.toggle("active", active);
+                if (active) button.setAttribute("aria-current", "page");
+                else button.removeAttribute("aria-current");
+            });
+            setSettingsOpen(false);
+            if (nextView === "shop") loadShopEnvironment(false);
+            if (nextView === "missions") loadMissionEnvironment(false);
+            if (nextView === "story") { showStoryList(); loadStoryEnvironment(false); }
+        }
+
+        if (settingsButton) {
+            settingsButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                setSettingsOpen(!settings || !settings.classList.contains("open"));
+            });
+        }
+
+        viewButtons.forEach(function (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                setHubView(button.getAttribute("data-hub-view"));
+            });
+        });
+
+        if (shopGrid) {
+            shopGrid.addEventListener("click", function (event) {
+                var button = event.target.closest("[data-shop-env-buy]");
+                if (!button || button.disabled) return;
+                handleShopPurchase(button.getAttribute("data-shop-env-buy"), button);
+            });
+        }
+
+        missionRankButtons.forEach(function (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                missionRank = button.getAttribute("data-mission-rank") || "all";
+                missionRankButtons.forEach(function (candidate) {
+                    candidate.classList.toggle("active", candidate === button);
+                });
+                renderMissions();
+            });
+        });
+
+        if (missionSearch) {
+            missionSearch.addEventListener("input", renderMissions);
+        }
+
+        if (storyListEl) {
+            storyListEl.addEventListener("click", function (event) {
+                var row = event.target.closest("[data-story-node]");
+                if (!row) return;
+                var nodeId = row.getAttribute("data-story-node");
+                var node = storyNodes.find(function (n) { return n.nodeId === nodeId; });
+                if (!node) return;
+                showStoryBriefing(node);
+            });
+        }
+
+        document.addEventListener("click", function (event) {
+            if (settings && settings.contains(event.target)) return;
+            setSettingsOpen(false);
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") return;
+            setSettingsOpen(false);
+        });
+    })();
+</script>
 </body>
 </html>

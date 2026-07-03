@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naruto-Arena — Game Manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 85% 8%, rgba(44, 156, 219, 0.08), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 38%, #000000 70%, #120a06 100%);
+      color: var(--ca-bone); font-family: var(--font-ui);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .mn-page { width: min(1040px, 100%); margin: 0 auto; padding: 0 24px 64px; }
+
+    .mn-bigtitle-wrap { position: relative; height: 76px; overflow: hidden; margin: 30px 0 4px; }
+    .mn-bigtitle {
+      position: absolute; bottom: -20px; left: -4px; margin: 0;
+      font-size: clamp(50px, 7vw, 92px); font-weight: 900; letter-spacing: 0.01em;
+      text-transform: uppercase; color: var(--ca-orange); line-height: 1; white-space: nowrap; opacity: 0.94;
+    }
+    .mn-subtitle { margin: 0 0 22px; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple); }
+
+    .mn-crumb {
+      margin: 24px 0 0;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ca-dust);
+    }
+    .mn-crumb a { color: var(--ca-parchment); }
+    .mn-crumb a:hover { color: var(--ca-orange); }
+    .mn-crumb .cur { color: var(--ca-orange); }
+
+    /* in-page section nav */
+    .mn-toc { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+    .mn-toc a {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ca-parchment); padding: 8px 14px; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px; transition: border-color var(--t-fast), color var(--t-fast);
+    }
+    .mn-toc a:hover { border-color: var(--ca-orange); color: var(--ca-bone); }
+    .mn-toc a.active { border-color: rgba(124, 77, 255, 0.7); color: #fff; background: rgba(124, 77, 255, 0.14); }
+
+    /* light "scroll" sheets */
+    .mn-sheet {
+      scroll-margin-top: 70px;
+      background: var(--ca-surface-light);
+      border: 1px solid var(--ca-line-ink);
+      border-radius: 10px;
+      box-shadow: var(--ca-shadow-sheet);
+      padding: 30px 34px 34px;
+      margin-bottom: 26px;
+      color: var(--ca-ink);
+    }
+    .mn-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ca-orange); }
+    .mn-sheet h2 { margin: 4px 0 14px; font-size: 26px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); }
+    .mn-sheet p { margin: 0 0 14px; font-size: 14px; line-height: 1.65; color: var(--ca-ink-soft); }
+    .mn-sheet p strong { color: var(--ca-ink); }
+    .mn-list { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 10px; }
+    .mn-list li { position: relative; padding-left: 22px; font-size: 14px; line-height: 1.55; color: var(--ca-ink-soft); }
+    .mn-list li::before { content: "›"; position: absolute; left: 4px; top: 0; color: var(--ca-violet); font-weight: 900; }
+    .mn-list li strong { color: var(--ca-ink); }
+    .mn-cta {
+      display: inline-block; margin-top: 8px; padding: 11px 20px; border-radius: 6px;
+      background: linear-gradient(160deg, var(--ca-purple) 0%, var(--ca-purple-lit) 100%);
+      color: #2a1402; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .mn-faq { display: grid; gap: 14px; margin-top: 8px; }
+    .mn-faq dt { font-size: 14px; font-weight: 800; color: var(--ca-ink); margin-bottom: 4px; }
+    .mn-faq dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ca-ink-soft); }
+
+    /* footer */
+    .mn-footer { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 24px 30px; text-align: center; }
+    .mn-footer-social { display: flex; justify-content: center; gap: 16px; margin-bottom: 26px; }
+    .mn-footer-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--ca-orange), var(--ca-violet)); color: #000; font-weight: 900; font-size: 16px; }
+    .mn-footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 24px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-parchment); }
+    .mn-footer-links sup { font-size: 8px; color: var(--ca-dust); }
+    .mn-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
+  </style>
+  <link rel="stylesheet" href="shop.css">
+</head>
+<body>
+
+  <!-- ═══ NARUTO-ARENA SHARED NAV ══════════════════════════════ -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N·A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Start Page</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
+      </ul>
+
+      <div class="ca-nav-account" id="ca-nav-account">
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+            <section class="group" id="auth-panel">
+              <h2 class="group-title" id="auth-title">Login</h2>
+              <div id="guest-auth-view">
+                <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
+                <form class="auth-form" id="auth-form">
+                  <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
+                  <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                  <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
+                  <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
+                  <button class="auth-button" type="submit" id="auth-submit">Login</button>
+                  <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
+                  <p class="auth-status" id="auth-status" aria-live="polite"></p>
+                </form>
+              </div>
+              <div class="account-panel" id="account-panel" hidden>
+                <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
+                <div class="account-actions">
+                  <button class="account-action" type="button" id="view-profile-button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg><span>View Profile</span></button>
+                  <button class="account-action" type="button" id="change-avatar-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg><span>Change Avatar</span></button>
+                  <button class="account-action" type="button" id="clan-panel-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg><span>Clan Panel</span></button>
+                  <button class="account-action" type="button" id="change-backgrounds-button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg><span>Custom Background</span></button>
+                  <button class="account-action" type="button" id="reset-account-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg><span>Reset Account</span></button>
+                  <section class="group" id="admin-panel-section" hidden>
+                    <h2 class="group-title">Admin Panel</h2>
+                    <nav class="nav">
+                      <a class="nav-link" href="winrates.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" /><path d="M7 14V9" /><path d="M12 14V6" /><path d="M17 14v-3" /></svg><span>Winrates</span></a>
+                      <a class="nav-link" href="charactereditor.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 16 18 4" /><path d="m14 4 4 4" /><path d="M6 16l-1 4 4-1" /></svg><span>Character Editor</span></a>
+                      <a class="nav-link" href="playeraccounts.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg><span>Player Accounts</span></a>
+                      <a class="nav-link" href="newspost.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg><span>News Post</span></a>
+                    </nav>
+                  </section>
+                  <button class="account-action" type="button" id="logout-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg><span>Log Out</span></button>
+                </div>
+                <p class="auth-status" id="account-status" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═════════════════════════════════════════════════ -->
+  <header class="ca-hero">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">◁</div>
+      <div class="ca-hero-center">
+        <button class="ca-hero-play" type="button" id="play-now-button">› START PLAYING</button>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">⚡</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
+        </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">▷</div>
+    </div>
+  </header>
+
+  <!-- ═══ GAME MANUAL ══════════════════════════════════════════ -->
+  <main class="mn-page">
+    <nav class="mn-crumb" aria-label="Breadcrumb">
+      <a href="index.html">Naruto-Arena</a> &gt; <a href="manual.html#basics">Game Manual</a> &gt; <span class="cur" id="mn-crumb-current">The Basics</span>
+    </nav>
+    <div class="mn-bigtitle-wrap"><h1 class="mn-bigtitle">GAME MANUAL</h1></div>
+    <p class="mn-subtitle">/ Everything you need before you step into the arena</p>
+
+    <nav class="mn-toc" aria-label="Manual sections">
+      <a class="active" href="#basics" data-manual-section="basics">The Basics</a>
+      <a href="#characters-and-skills" data-manual-section="characters-and-skills">Characters &amp; Skills</a>
+      <a href="#ninja-ladder" data-manual-section="ninja-ladder">The Ninja Ladder</a>
+    </nav>
+
+    <section class="mn-sheet" id="basics" aria-labelledby="basics-h">
+      <div class="mn-kicker">/ Chapter 01</div>
+      <h2 id="basics-h">The Basics</h2>
+      <p>Before you start playing, it is important to understand the basics of the game. Naruto-Arena is a turn-based strategy battle: you bring a team of <strong>three characters</strong> into the arena and outwit your opponent by spending energy on the right skills at the right time.</p>
+      <ul class="mn-list">
+        <li><strong>Turns.</strong> Players alternate turns. On your turn you choose which skills to use, assign their energy cost, then end your turn to resolve them.</li>
+        <li><strong>Chakra / energy.</strong> Each turn you gain energy of different natures (Taijutsu, Ninjutsu, Genjutsu, Bloodline). Skills require specific energy to activate, so managing your reserves is half the battle.</li>
+        <li><strong>Characters.</strong> Your three shinobi each bring a unique kit. Team composition and synergy decide how a match flows.</li>
+        <li><strong>Skills.</strong> Every skill lists its energy cost, classes (Physical, Instant, Melee, and so on) and effect. Reading a skill's details — shown on every character page — is the core of building a winning plan.</li>
+        <li><strong>Cooldowns.</strong> Powerful skills go on cooldown after use and cannot be reused until it expires, so timing matters.</li>
+        <li><strong>Targeting.</strong> Skills target a single enemy, all enemies, an ally, or yourself. Choosing the right target wins fights.</li>
+        <li><strong>Winning a match.</strong> Reduce all three of your opponent's characters to zero health to claim victory.</li>
+      </ul>
+      <a class="mn-cta" href="selection.html">Start Playing ›</a>
+    </section>
+
+    <section class="mn-sheet" id="characters-and-skills" aria-labelledby="cs-h">
+      <div class="mn-kicker">/ Chapter 02</div>
+      <h2 id="cs-h">Characters &amp; Skills</h2>
+      <p>Naruto-Arena focuses on characters and skills. This section gives an overview of all characters available in the game and how their skills are presented — each character's energy costs, cooldowns, classes and required chakra nature.</p>
+      <p>The full, browsable roster lives on its own page, where you can open any shinobi to study their complete skill set before you queue up.</p>
+      <a class="mn-cta" href="charactersandskills.html">Browse all characters &amp; skills ›</a>
+    </section>
+
+    <section class="mn-sheet" id="ninja-ladder" aria-labelledby="nl-h">
+      <div class="mn-kicker">/ Chapter 03</div>
+      <h2 id="nl-h">The Ninja Ladder</h2>
+      <p>This section explains the ladder system for players who want to compete globally. When you play <strong>ladder games</strong>, your results are tracked on the international Ninja Ladder — an ongoing ranking that represents your individual skill against every other player.</p>
+      <ul class="mn-list">
+        <li><strong>Ladder games.</strong> Ranked matches that count toward your ladder standing. Wins raise your rank; losses lower it.</li>
+        <li><strong>Rankings.</strong> Players are ordered by performance, so climbing the ladder is a direct measure of skill.</li>
+        <li><strong>Progression.</strong> Levels, win streaks and fame accumulate as you play, unlocking new milestones along the way.</li>
+        <li><strong>Competitive play.</strong> Clans compete on their own ladder, and each season culminates in the Road to Hokage and the Hall of Fame.</li>
+      </ul>
+      <a class="mn-cta" href="leaderboards.html#ninja-ladder">View the live ladders ›</a>
+    </section>
+  </main>
+
+  <!-- ═══ FOOTER ═══════════════════════════════════════════════ -->
+  <footer class="mn-footer">
+    <div class="mn-footer-social">
+      <span class="mn-footer-icon" aria-hidden="true">NA</span>
+      <a class="mn-footer-icon" href="#" aria-label="Join our Discord">D</a>
+    </div>
+    <nav class="mn-footer-links" aria-label="Legal">
+      <a href="#">Privacy Notice<sup>05</sup></a>
+      <a href="#">Terms of Service<sup>06</sup></a>
+      <a href="#">Copyright<sup>06</sup></a>
+    </nav>
+    <p class="mn-footer-copy">Naruto-Arena 2026. &nbsp; All Rights Reserved.</p>
+  </footer>
+
+  <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./shop.js" defer></script>
+
+  <script>
+    (function () {
+      var labels = {
+        "basics": "The Basics",
+        "characters-and-skills": "Characters & Skills",
+        "ninja-ladder": "The Ninja Ladder"
+      };
+      var crumbCurrent = document.getElementById("mn-crumb-current");
+      var links = Array.prototype.slice.call(document.querySelectorAll("[data-manual-section]"));
+      function syncManualSection() {
+        var key = (window.location.hash || "#basics").replace("#", "") || "basics";
+        if (!labels[key]) key = "basics";
+        if (crumbCurrent) crumbCurrent.textContent = labels[key];
+        links.forEach(function (link) {
+          var active = link.getAttribute("data-manual-section") === key;
+          link.classList.toggle("active", active);
+          if (active) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      }
+      window.addEventListener("hashchange", syncManualSection);
+      syncManualSection();
+    }());
+  </script>
+
+  <!-- Naruto-Arena nav account sync + dropdown toggle -->
+  <script>
+    (function () {
+      var trigger = document.getElementById('ca-account-trigger');
+      var menu = document.getElementById('ca-account-menu');
+      var navGuest = document.getElementById('ca-nav-guest');
+      var navUser = document.getElementById('ca-nav-user');
+      var navUsername = document.getElementById('ca-nav-username');
+      var accountPanel = document.getElementById('account-panel');
+      var accountUsername = document.getElementById('account-username');
+      function syncNav() {
+        var loggedIn = accountPanel && !accountPanel.hidden;
+        if (navGuest) navGuest.hidden = loggedIn;
+        if (navUser) navUser.hidden = !loggedIn;
+        if (loggedIn && navUsername && accountUsername) {
+          navUsername.textContent = accountUsername.textContent || '';
+        }
+      }
+      if (accountPanel) {
+        new MutationObserver(syncNav).observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
+      }
+      syncNav();
+      function closeMenu() { if (menu) { menu.hidden = true; } if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      function openMenu() { if (menu) { menu.hidden = false; } if (trigger) trigger.setAttribute('aria-expanded', 'true'); }
+      if (trigger && menu) {
+        trigger.addEventListener('click', function (e) { e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); });
+        menu.addEventListener('click', function (e) { if (e.target.closest('.account-action')) closeMenu(); });
+        document.addEventListener('click', function (e) {
+          if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+      }
+    })();
+  </script>
+
+</body>
+</html>

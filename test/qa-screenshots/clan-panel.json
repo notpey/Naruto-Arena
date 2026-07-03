@@ -1,0 +1,247 @@
+{
+  "title": "Naruto-Arena � Clan Panel",
+  "bodyClass": "na-legacy-light",
+  "viewport": {
+    "vw": 1280,
+    "vh": 900
+  },
+  "scroll": {
+    "bodyW": 1280,
+    "bodyH": 1212,
+    "docW": 1280,
+    "docH": 1212
+  },
+  "outside": [
+    {
+      "tag": "DIV",
+      "cls": "app",
+      "id": "",
+      "txt": "NARUTO-ARENA > CLAN PANEL\nYour Clan:\nClanle \nYour Rank:\nNone\n\nThe clan invitatio",
+      "x": 0,
+      "y": 186,
+      "w": 1280,
+      "h": 1026,
+      "display": "grid",
+      "visibility": "visible"
+    },
+    {
+      "tag": "MAIN",
+      "cls": "main",
+      "id": "",
+      "txt": "NARUTO-ARENA > CLAN PANEL\nYour Clan:\nClanle \nYour Rank:\nNone\n\nThe clan invitatio",
+      "x": 0,
+      "y": 186,
+      "w": 1010,
+      "h": 1026,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "ASIDE",
+      "cls": "aside",
+      "id": "",
+      "txt": "TOP 10 PLAYER LEVELS\n01\n__te t_gauntlet_fixed_a\n1\n02\n__te t_gauntlet_fixed_b\n1\n0",
+      "x": 1010,
+      "y": 186,
+      "w": 270,
+      "h": 1026,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "SECTION",
+      "cls": "stats-panel",
+      "id": "",
+      "txt": "TOP 10 WINSTREAK\n__te t_gauntlet_fixed_a 0  treak\n__te t_gauntlet_fixed_b 0  tre",
+      "x": 1033,
+      "y": 593,
+      "w": 225,
+      "h": 586,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "stats-group",
+      "id": "",
+      "txt": "TOP 10 WINS\n__te t_gauntlet_fixed_a 0 win \n__te t_gauntlet_fixed_b 0 win \nAdmin ",
+      "x": 1048,
+      "y": 780,
+      "w": 195,
+      "h": 174,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "OL",
+      "cls": "stats-list",
+      "id": "sidebar-top-wins",
+      "txt": "__te t_gauntlet_fixed_a 0 win \n__te t_gauntlet_fixed_b 0 win \nAdmin 0 win ",
+      "x": 1048,
+      "y": 838,
+      "w": 195,
+      "h": 116,
+      "display": "grid",
+      "visibility": "visible"
+    },
+    {
+      "tag": "LI",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_b 0 win ",
+      "x": 1048,
+      "y": 879,
+      "w": 195,
+      "h": 33,
+      "display": "list-item",
+      "visibility": "visible"
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_b",
+      "x": 1057,
+      "y": 888,
+      "w": 128,
+      "h": 15,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "LI",
+      "cls": "",
+      "id": "",
+      "txt": "Admin 0 win ",
+      "x": 1048,
+      "y": 921,
+      "w": 195,
+      "h": 33,
+      "display": "list-item",
+      "visibility": "visible"
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "txt": "Admin",
+      "x": 1057,
+      "y": 930,
+      "w": 35,
+      "h": 15,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "stats-group",
+      "id": "",
+      "txt": "TOP 20 HIGHEST WIN STREAK\n__te t_gauntlet_fixed_a 0  treak\n__te t_gauntlet_fixed",
+      "x": 1048,
+      "y": 970,
+      "w": 195,
+      "h": 193,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "H3",
+      "cls": "stats-title",
+      "id": "",
+      "txt": "TOP 20 HIGHEST WIN STREAK",
+      "x": 1048,
+      "y": 987,
+      "w": 195,
+      "h": 48,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "OL",
+      "cls": "stats-list",
+      "id": "sidebar-top-highest-streaks",
+      "txt": "__te t_gauntlet_fixed_a 0  treak\n__te t_gauntlet_fixed_b 0  treak\nAdmin 0  treak",
+      "x": 1048,
+      "y": 1047,
+      "w": 195,
+      "h": 116,
+      "display": "grid",
+      "visibility": "visible"
+    },
+    {
+      "tag": "LI",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_a 0  treak",
+      "x": 1048,
+      "y": 1047,
+      "w": 195,
+      "h": 33,
+      "display": "list-item",
+      "visibility": "visible"
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_a",
+      "x": 1057,
+      "y": 1056,
+      "w": 128,
+      "h": 15,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "LI",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_b 0  treak",
+      "x": 1048,
+      "y": 1088,
+      "w": 195,
+      "h": 33,
+      "display": "list-item",
+      "visibility": "visible"
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "txt": "__te t_gauntlet_fixed_b",
+      "x": 1057,
+      "y": 1097,
+      "w": 128,
+      "h": 15,
+      "display": "inline",
+      "visibility": "visible"
+    },
+    {
+      "tag": "LI",
+      "cls": "",
+      "id": "",
+      "txt": "Admin 0  treak",
+      "x": 1048,
+      "y": 1130,
+      "w": 195,
+      "h": 33,
+      "display": "list-item",
+      "visibility": "visible"
+    },
+    {
+      "tag": "A",
+      "cls": "",
+      "id": "",
+      "txt": "Admin",
+      "x": 1057,
+      "y": 1139,
+      "w": 35,
+      "h": 15,
+      "display": "inline",
+      "visibility": "visible"
+    }
+  ],
+  "missingImages": [
+    null
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "title": "Naruto-Arena Game",
+  "bodyClass": "ingame-client-page custom-game-cursor",
+  "viewport": {
+    "vw": 760,
+    "vh": 580
+  },
+  "scroll": {
+    "bodyW": 770,
+    "bodyH": 580,
+    "docW": 770,
+    "docH": 580
+  },
+  "outside": [
+    {
+      "tag": "DIV",
+      "cls": "backgroundingame",
+      "id": "",
+      "txt": "JAWSOFKIRJ\nACADEMY STUDENT\nPRESS WHEN READY\nX 0\nX 0\nX 0\nX 0\nT\nX 0\nEXCHANGE CHAKR",
+      "x": 0,
+      "y": 10,
+      "w": 770,
+      "h": 560,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "game-hud",
+      "id": "",
+      "txt": "JAWSOFKIRJ\nACADEMY STUDENT\nPRESS WHEN READY\nX 0\nX 0\nX 0\nX 0\nT\nX 0\nEXCHANGE CHAKR",
+      "x": 0,
+      "y": 10,
+      "w": 770,
+      "h": 92,
+      "display": "flex",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "player-characters",
+      "id": "",
+      "txt": "100/100\n100/100\n100/100",
+      "x": -2,
+      "y": 102,
+      "w": 770,
+      "h": 304,
+      "display": "flex",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "enemy-characters",
+      "id": "",
+      "txt": "100/100\n100/100\n100/100",
+      "x": 661,
+      "y": 102,
+      "w": 107,
+      "h": 298,
+      "display": "flex",
+      "visibility": "visible"
+    },
+    {
+      "tag": "DIV",
+      "cls": "skillinformation",
+      "id": "",
+      "txt": "SKILL NAME\n\nENERGY:\nNONE\n\nCLASSES:\n\nCOOLDOWN:\n\nNARUTO HITS ONE ENEMY WITH A BALL",
+      "x": 247,
+      "y": 436,
+      "w": 523,
+      "h": 134,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "P",
+      "cls": "ingameskilldescription",
+      "id": "",
+      "txt": "NARUTO HITS ONE ENEMY WITH A BALL OF CHAKRA, DEALING 45 DAMAGE TO THEM AND STUNN",
+      "x": 365,
+      "y": 478,
+      "w": 405,
+      "h": 28,
+      "display": "block",
+      "visibility": "visible"
+    },
+    {
+      "tag": "IMG",
+      "cls": "render",
+      "id": "",
+      "txt": "render",
+      "x": 125,
+      "y": 421,
+      "w": 153,
+      "h": 382,
+      "display": "block",
+      "visibility": "visible"
+    }
+  ],
+  "missingImages": [
+    "avatar-right.jpg"
+  ]
+}

@@ -21,7 +21,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
 const MATCH_FOUND_HOLD_MS = 3 * 1000;
-const BATTLE_BOT_QUEUE_TIMEOUT_MS = 60 * 1000;
+const BATTLE_BOT_QUEUE_TIMEOUT_MS = 2 * 1000;
 const BATTLE_BOT_ACTION_DELAY_MS = 15 * 1000;
 const BATTLE_BOTS_ENABLED = process.env.ENABLE_BATTLE_BOTS !== 'false';
 const DEFAULT_URI = process.env.MONGODB_URI;
@@ -46,10 +46,13 @@ const LATEST_CHARACTER_RELEASES = [
 ];
 const LATEST_CHARACTER_RELEASES_STATE_KEY = 'latest_character_releases';
 const MAINTENANCE_MODE_STATE_KEY = 'maintenance_mode';
+const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
 const DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/3JqVcPXm/default.png';
 const LEGACY_DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/zG3W1w6K/itachi.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
 let missionCatalogCache = null;
+const STORY_CATALOG_STATE_KEY = 'story';
+let storyCatalogCache = null;
 const DEFAULT_MISSION_CATALOG = [
     {
         missionId: 'adored-elder-sister',
@@ -111,6 +114,793 @@ const DEFAULT_MISSION_CATALOG = [
         ],
         sortOrder: 3,
     },
+    {
+        missionId: 'a-rare-opportunity',
+        title: 'A Rare Opportunity',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'shigure',
+        reward_character_name: 'Shigure',
+        reward: 'Unlock Shigure.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'A Rare Opportunity mission artwork',
+        characterName: 'Oboro',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Oboro portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches',
+                character_id: 'oboro',
+                character_name: 'Oboro',
+                wins: 10,
+            },
+        ],
+        sortOrder: 4,
+    },
+    {
+        missionId: 'a-new-find-skin',
+        title: 'A New-Find Skin',
+        level_requirement: 16,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'shiore-orochimaru',
+        reward_character_name: 'Shiore Orochimaru',
+        reward: 'Unlock Shiore Orochimaru.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'A New-Find Skin mission artwork',
+        characterName: 'Uchiha Sasuke',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Uchiha Sasuke portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'uchiha-sasuke',
+                character_name: 'Sasuke (classic)',
+                wins: 5,
+            },
+            {
+                type: 'win_streak',
+                character_id: 'mitarashi-anko',
+                character_name: 'Anko',
+                wins: 5,
+            },
+        ],
+        sortOrder: 5,
+    },
+    {
+        missionId: 'the-sounds-amongst-the-leaves',
+        title: 'The Sounds Amongst the Leaves',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'akadou-yoroi',
+        reward_character_name: 'Akadou Yoroi',
+        reward: 'Unlock Akadou Yoroi.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Sounds Amongst the Leaves mission artwork',
+        characterName: 'Dosu Kinuta',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Dosu Kinuta portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'],
+                character_name: 'any Sound Genin (Dosu, Kin, Zaku)',
+                wins: 3,
+            },
+        ],
+        sortOrder: 6,
+    },
+    {
+        missionId: 'twisting-sound',
+        title: 'Twisting Sound',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'tsurugi-misumi',
+        reward_character_name: 'Tsurugi Misumi',
+        reward: 'Unlock Tsurugi Misumi.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Twisting Sound mission artwork',
+        characterName: 'Kankuro',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Kankuro portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'kankuro',
+                character_name: 'Kankuro',
+                wins: 3,
+            },
+        ],
+        sortOrder: 7,
+    },
+    {
+        missionId: 'the-survivor-of-the-seal',
+        title: 'The Survivor of the Seal',
+        level_requirement: 16,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'mitarashi-anko',
+        reward_character_name: 'Mitarashi Anko',
+        reward: 'Unlock Mitarashi Anko.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Survivor of the Seal mission artwork',
+        characterName: 'Uchiha Sasuke',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Uchiha Sasuke portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches_any',
+                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
+                character_name: 'any Team 7 (old era) member',
+                wins: 6,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
+                character_name: 'any Team 8 member',
+                wins: 6,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
+                character_name: 'any Team 9 member',
+                wins: 6,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
+                character_name: 'any Team 10 (old era) member',
+                wins: 6,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
+                character_name: 'any member of Team Baki',
+                wins: 6,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'],
+                character_name: 'any Sound Genin (Dosu, Kin, Zaku)',
+                wins: 6,
+            },
+        ],
+        sortOrder: 8,
+    },
+    {
+        missionId: 'the-search-for-jiroubou',
+        title: 'The Search for Jiroubou',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'jiroubou',
+        reward_character_name: 'Jiroubou',
+        reward: 'Unlock Jiroubou.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Search for Jiroubou mission artwork',
+        characterName: 'Akimichi Chouji',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Akimichi Chouji portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'akimichi-chouji',
+                character_name: 'Chouji',
+                wins: 3,
+            },
+        ],
+        sortOrder: 9,
+    },
+    {
+        missionId: 'the-search-for-kidoumaru',
+        title: 'The Search for Kidoumaru',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'kidoumaru',
+        reward_character_name: 'Kidoumaru',
+        reward: 'Unlock Kidoumaru.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'The Search for Kidoumaru mission artwork',
+        characterName: 'Neji Hyuuga',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Neji Hyuuga portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'neji-hyuuga',
+                character_name: 'Neji',
+                wins: 3,
+            },
+        ],
+        sortOrder: 10,
+    },
+    {
+        missionId: 'the-search-for-tayuya',
+        title: 'The Search for Tayuya',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'tayuya',
+        reward_character_name: 'Tayuya',
+        reward: 'Unlock Tayuya.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Search for Tayuya mission artwork',
+        characterName: 'Nara Shikamaru',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Nara Shikamaru portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['nara-shikamaru', 'temari'],
+                character_name: 'Shikamaru or Temari (classic versions)',
+                wins: 3,
+            },
+        ],
+        sortOrder: 11,
+    },
+    {
+        missionId: 'the-search-for-sakon',
+        title: 'The Search for Sakon',
+        level_requirement: 6,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'sakon-and-ukon',
+        reward_character_name: 'Sakon and Ukon',
+        reward: 'Unlock Sakon and Ukon.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'The Search for Sakon mission artwork',
+        characterName: 'Inuzuka Kiba',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Inuzuka Kiba portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['inuzuka-kiba', 'kankuro'],
+                character_name: 'Kiba or Kankuro (classic versions)',
+                wins: 3,
+            },
+        ],
+        sortOrder: 12,
+    },
+    {
+        missionId: 'the-search-for-kimimaro',
+        title: 'The Search for Kimimaro',
+        level_requirement: 16,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'kimimaro',
+        reward_character_name: 'Kimimaro',
+        reward: 'Unlock Kimimaro.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Search for Kimimaro mission artwork',
+        characterName: 'Rock Lee',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Rock Lee portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'rock-lee',
+                character_name: 'Rock Lee',
+                wins: 4,
+            },
+            {
+                type: 'win_streak',
+                character_id: 'gaara-of-the-desert',
+                character_name: 'Gaara',
+                wins: 4,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'rock-lee',
+                character_name: 'Rock Lee',
+                wins: 10,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'gaara-of-the-desert',
+                character_name: 'Gaara',
+                wins: 10,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'uzumaki-naruto',
+                character_name: 'Naruto',
+                wins: 10,
+            },
+        ],
+        sortOrder: 13,
+    },
+    {
+        missionId: 'the-moonlight-of-the-leaf',
+        title: 'The Moonlight of the Leaf',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'gekko-hayate',
+        reward_character_name: 'Gekko Hayate',
+        reward: 'Unlock Gekko Hayate.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'The Moonlight of the Leaf mission artwork',
+        characterName: 'Gekko Hayate',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Gekko Hayate portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                wins: 4,
+            },
+        ],
+        sortOrder: 14,
+    },
+    {
+        missionId: 'medical-training',
+        title: 'Medical Training',
+        level_requirement: 16,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'shizune',
+        reward_character_name: 'Shizune',
+        reward: 'Unlock Shizune.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Medical Training mission artwork',
+        characterName: 'Haruno Sakura',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Haruno Sakura portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches',
+                character_id: 'haruno-sakura',
+                character_name: 'Sakura',
+                wins: 15,
+            },
+        ],
+        sortOrder: 15,
+    },
+    {
+        missionId: 'team-7-fights-as-a-team',
+        title: 'Team 7 Fights as a Team',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'hatake-kakashi',
+        reward_character_name: 'Hatake Kakashi',
+        reward: 'Unlock Hatake Kakashi.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'Team 7 Fights as a Team mission artwork',
+        characterName: 'Uzumaki Naruto',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Uzumaki Naruto portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
+                character_name: 'any Team 7 (old era) member',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
+                character_name: 'any Team 7 (old era) member',
+                wins: 15,
+            },
+        ],
+        sortOrder: 16,
+    },
+    {
+        missionId: 'team-8-scouting-at-its-best',
+        title: 'Team 8 Scouting at its Best',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'yuhi-kurenai',
+        reward_character_name: 'Yuhi Kurenai',
+        reward: 'Unlock Yuhi Kurenai.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Team 8 Scouting at its Best mission artwork',
+        characterName: 'Inuzuka Kiba',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Inuzuka Kiba portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
+                character_name: 'any Team 8 member',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
+                character_name: 'any Team 8 member',
+                wins: 15,
+            },
+        ],
+        sortOrder: 17,
+    },
+    {
+        missionId: 'team-10-proves-its-worth',
+        title: 'Team 10 Proves Its Worth',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'sarutobi-asuma',
+        reward_character_name: 'Sarutobi Asuma',
+        reward: 'Unlock Sarutobi Asuma.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'Team 10 Proves Its Worth mission artwork',
+        characterName: 'Nara Shikamaru',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Nara Shikamaru portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
+                character_name: 'any Team 10 (old era) member',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
+                character_name: 'any Team 10 (old era) member',
+                wins: 15,
+            },
+        ],
+        sortOrder: 18,
+    },
+    {
+        missionId: 'team-9-the-best-taijutsu-team',
+        title: 'Team 9 the Best Taijutsu Team',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'maito-gai',
+        reward_character_name: 'Maito Gai',
+        reward: 'Unlock Maito Gai.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Team 9 the Best Taijutsu Team mission artwork',
+        characterName: 'Rock Lee',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Rock Lee portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
+                character_name: 'any Team 9 member',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
+                character_name: 'any Team 9 member',
+                wins: 15,
+            },
+        ],
+        sortOrder: 19,
+    },
+    {
+        missionId: 'sand-siblings-at-war',
+        title: 'Sand Siblings at War',
+        level_requirement: 21,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'baki',
+        reward_character_name: 'Baki',
+        reward: 'Unlock Baki.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'Sand Siblings at War mission artwork',
+        characterName: 'Gaara',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Gaara portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak_any',
+                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
+                character_name: 'any member of Team Baki',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
+                character_name: 'any member of Team Baki',
+                wins: 15,
+            },
+        ],
+        sortOrder: 20,
+    },
+    {
+        missionId: 'survival',
+        title: 'Survival',
+        level_requirement: 16,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'yakushi-kabuto',
+        reward_character_name: 'Yakushi Kabuto',
+        reward: 'Unlock Yakushi Kabuto.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Survival mission artwork',
+        characterName: 'Yakushi Kabuto',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Yakushi Kabuto portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_streak',
+                character_id: 'yakushi-kabuto',
+                character_name: 'Young Kabuto',
+                wins: 4,
+            },
+            {
+                type: 'win_streak_any',
+                character_ids: ['akadou-yoroi', 'tsurugi-misumi'],
+                character_name: 'Yoroi or Misumi',
+                wins: 4,
+            },
+            {
+                type: 'win_matches_any',
+                character_ids: [
+                    'dosu-kinuta',
+                    'tsuchi-kin',
+                    'zaku-abumi',
+                    'jiroubou',
+                    'kidoumaru',
+                    'tayuya',
+                    'sakon-and-ukon',
+                    'kimimaro',
+                ],
+                character_name: 'any Sound Ninja',
+                wins: 15,
+            },
+        ],
+        sortOrder: 21,
+    },
+    {
+        missionId: 'disciples-of-the-slug',
+        title: 'Disciples of the Slug',
+        level_requirement: 26,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'tsunade',
+        reward_character_name: 'Tsunade',
+        reward: 'Unlock Tsunade.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'Disciples of the Slug mission artwork',
+        characterName: 'Haruno Sakura',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Haruno Sakura portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches',
+                character_id: 'haruno-sakura',
+                character_name: 'Sakura',
+                wins: 15,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'shizune',
+                character_name: 'Shizune',
+                wins: 20,
+            },
+        ],
+        sortOrder: 22,
+    },
+    {
+        missionId: 'disciples-of-the-toad',
+        title: 'Disciples of the Toad',
+        level_requirement: 26,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'jiraiya',
+        reward_character_name: 'Jiraiya',
+        reward: 'Unlock Jiraiya.',
+        image: 'ingamebgexample2.png',
+        imageAlt: 'Disciples of the Toad mission artwork',
+        characterName: 'Uzumaki Naruto',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Uzumaki Naruto portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches',
+                character_id: 'uzumaki-naruto',
+                character_name: 'Naruto',
+                wins: 15,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'hatake-kakashi',
+                character_name: 'Kakashi',
+                wins: 20,
+            },
+        ],
+        sortOrder: 23,
+    },
+    {
+        missionId: 'disciples-of-the-snake',
+        title: 'Disciples of the Snake',
+        level_requirement: 26,
+        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
+        reward_character: 'orochimaru',
+        reward_character_name: 'Orochimaru',
+        reward: 'Unlock Orochimaru.',
+        image: 'ingamebgexample.png',
+        imageAlt: 'Disciples of the Snake mission artwork',
+        characterName: 'Uchiha Sasuke',
+        portrait: 'deadcharacter.png',
+        portraitAlt: 'Uchiha Sasuke portrait',
+        requirements: [],
+        goals: [
+            {
+                type: 'win_matches',
+                character_id: 'uchiha-sasuke',
+                character_name: 'Sasuke',
+                wins: 15,
+            },
+            {
+                type: 'win_matches',
+                character_id: 'yakushi-kabuto',
+                character_name: 'Kabuto',
+                wins: 20,
+            },
+        ],
+        sortOrder: 24,
+    },
+];
+
+const STORY_PORTRAIT_NARUTO = 'https://i.imgur.com/jp3OIOA.png';
+const STORY_PORTRAIT_IRUKA = 'https://i.imgur.com/snz8zD4.png';
+const STORY_PORTRAIT_MIZUKI = 'https://i.imgur.com/NZS59L7.png';
+
+const DEFAULT_STORY_CATALOG = [
+    {
+        chapterId: 'chapter-1',
+        title: 'Chapter 1: Enter, Naruto Uzumaki!',
+        sortOrder: 1,
+        nodes: [
+            {
+                nodeId: 'chapter-1-node-1',
+                title: 'The Forbidden Scroll',
+                level_requirement: 1,
+                image: 'https://i.imgur.com/fo7Yfff.png',
+                imageAlt: 'Mizuki lurking in the forest, artwork',
+                enemyTeam: ['mizuki'],
+                playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
+                enemyDisplayName: 'Mizuki',
+                bossScript: [
+                    {
+                        skillId: 'mizuki-genjutsu-ambush-tactics',
+                        when: { turnGte: 1 },
+                    },
+                ],
+                introDialogue: [
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: 'Psst... Naruto. There IS a secret way to graduate that old man Hokage never told you about.',
+                    },
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: "A secret scroll?! Believe it, I'll ace this makeup exam and become a real ninja!",
+                    },
+                    {
+                        speaker: 'Iruka',
+                        portrait: STORY_PORTRAIT_IRUKA,
+                        text: 'Naruto! Put that down — that is the Forbidden Scroll of Sealing. Mizuki lied to you!',
+                    },
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: "Too late for warnings, Iruka. The scroll — and the boy — are already mine to use."
+                    },
+                ],
+                outroDialogueWin: [
+                    {
+                        speaker: 'Iruka',
+                        portrait: STORY_PORTRAIT_IRUKA,
+                        text: "Get behind me, Naruto. I won't let him lay a hand on you.",
+                    },
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: "How touching. Next time, sensei, I won't miss.",
+                    },
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: 'Iruka-sensei... thank you.',
+                    },
+                ],
+                outroDialogueLoss: [
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: "You're not ready for this, Naruto. Run home to that empty apartment of yours.",
+                    },
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: "This isn't over, Mizuki. I'll show you — believe it!",
+                    },
+                ],
+                reward_character: 'umino-iruka',
+                sortOrder: 1,
+            },
+            {
+                nodeId: 'chapter-1-node-2',
+                title: 'Nine Shadows, One Truth',
+                level_requirement: 1,
+                image: 'https://i.imgur.com/fo7Yfff.png',
+                imageAlt: 'Mizuki wielding a giant shuriken, artwork',
+                enemyTeam: ['mizuki'],
+                playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
+                enemyDisplayName: 'Mizuki',
+                bossScript: [
+                    {
+                        skillId: 'mizuki-execution-shuriken',
+                        when: { turnGte: 1 },
+                    },
+                    {
+                        skillId: 'mizuki-execution-shuriken-empowered',
+                        when: { turnGte: 1 },
+                    },
+                ],
+                introDialogue: [
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: 'You want to know why this whole village looks at you like a monster, Naruto? It is because you ARE one — the Nine-Tailed Fox itself.',
+                    },
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: '...',
+                    },
+                    {
+                        speaker: 'Iruka',
+                        portrait: STORY_PORTRAIT_IRUKA,
+                        text: "Don't listen to him! You are Uzumaki Naruto. Nothing more, and nothing less.",
+                    },
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: "Then let's see what 'nothing more' can do against THIS!",
+                    },
+                ],
+                outroDialogueWin: [
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: 'Multi Shadow Clone Jutsu! One Naruto wasn\'t enough — so here come a thousand!',
+                    },
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: 'Impossible... a single Genin, the dead-last of the class, did all of this?!',
+                    },
+                    {
+                        speaker: 'Iruka',
+                        portrait: STORY_PORTRAIT_IRUKA,
+                        text: 'Naruto... close your eyes for a second. Congratulations — you graduate. Believe it.',
+                    },
+                ],
+                outroDialogueLoss: [
+                    {
+                        speaker: 'Mizuki',
+                        portrait: STORY_PORTRAIT_MIZUKI,
+                        text: 'The Fox\'s power means nothing if the boy carrying it is still this weak.',
+                    },
+                    {
+                        speaker: 'Naruto',
+                        portrait: STORY_PORTRAIT_NARUTO,
+                        text: "I'm not done yet. I'll prove you wrong if it's the last thing I do!",
+                    },
+                ],
+                reward_character: 'mizuki',
+                sortOrder: 2,
+            },
+        ],
+    },
 ];
 
 let mongoClient;
@@ -125,7 +915,7 @@ let turnSweepTimer = null;
 const activeBattleBotTurns = new Set();
 const scheduledBattleBotTurns = new Set();
 const GAME_BOT_USERNAME_PREFIX = '__game_bot__:';
-const GAME_BOT_DISPLAY_NAME = 'Game Bot';
+const GAME_BOT_DISPLAY_NAME = 'Rogue Ninja';
 
 const DEFAULT_CLAN_RANK_NAMES = {
     clanLeader: 'Clan Leader',
@@ -137,42 +927,122 @@ const DEFAULT_CLAN_RANK_NAMES = {
 };
 
 const LADDER_MAX_LEVEL = 50;
-const LADDER_MAX_EXPERIENCE_POINTS = 156500;
-const LADDER_RANK_TIERS = [
-    { minLevel: 46, rank: 'Infinity Knight', hatUrl: 'hats/kage.png' },
-    { minLevel: 41, rank: 'Dimension Crusader', hatUrl: 'hats/akatsuki.png' },
-    { minLevel: 36, rank: 'Purity Aegis', hatUrl: 'hats/jinch.png' },
-    { minLevel: 31, rank: 'Galaxy Reaper', hatUrl: 'hats/sannin.png' },
-    { minLevel: 26, rank: 'Abyssal Grasp', hatUrl: 'hats/jounin.png' },
-    { minLevel: 21, rank: 'Void Sentinel', hatUrl: 'hats/anbu.png' },
-    { minLevel: 16, rank: 'Stormbreaker', hatUrl: 'hats/missingnin.png' },
-    { minLevel: 12, rank: 'Blood Ripper', hatUrl: 'hats/chunin.png' },
-    { minLevel: 6, rank: 'Temporal Warden', hatUrl: 'hats/genin.png' },
-    { minLevel: 1, rank: 'Sparkstrike', hatUrl: 'hats/academy.png' },
+const LADDER_MAX_EXPERIENCE_POINTS = 50000;
+const LADDER_WIN_RYO = 50;
+const LADDER_LOSS_RYO = 10;
+const QUICK_WIN_RYO = 20;
+const QUICK_LOSS_RYO = 5;
+const DEFAULT_LADDER_RANK_TIERS = [
+    { minLevel: 46, rank: 'Kage', hatUrl: 'hats/kage.png' },
+    { minLevel: 41, rank: 'Akatsuki', hatUrl: 'hats/akatsuki.png' },
+    { minLevel: 36, rank: 'Jinchuuriki', hatUrl: 'hats/jinch.png' },
+    { minLevel: 31, rank: 'Sannin', hatUrl: 'hats/sannin.png' },
+    { minLevel: 26, rank: 'Jounin', hatUrl: 'hats/jounin.png' },
+    { minLevel: 21, rank: 'Anbu', hatUrl: 'hats/anbu.png' },
+    { minLevel: 16, rank: 'Missing-Nin', hatUrl: 'hats/missingnin.png' },
+    { minLevel: 11, rank: 'Chuunin', hatUrl: 'hats/chunin.png' },
+    { minLevel: 6, rank: 'Genin', hatUrl: 'hats/genin.png' },
+    { minLevel: 1, rank: 'Academy Student', hatUrl: 'hats/academy.png' },
 ];
+let activeLadderRankTiers = DEFAULT_LADDER_RANK_TIERS.map((tier) => ({ ...tier }));
 const HOKAGE_RANK_INFO = {
-    rank: 'Infinity Knight',
+    rank: 'Hokage',
     hatUrl: 'hats/kage.png',
 };
-const LADDER_EXP_BRACKETS = [
-    { minLevel: 1, maxLevel: 3, expRequired: 500 },
-    { minLevel: 4, maxLevel: 5, expRequired: 750 },
-    { minLevel: 6, maxLevel: 11, expRequired: 1000 },
-    { minLevel: 12, maxLevel: 15, expRequired: 2000 },
-    { minLevel: 16, maxLevel: 20, expRequired: 2500 },
-    { minLevel: 21, maxLevel: 25, expRequired: 3000 },
-    { minLevel: 26, maxLevel: 30, expRequired: 3500 },
-    { minLevel: 31, maxLevel: 35, expRequired: 4000 },
-    { minLevel: 36, maxLevel: 40, expRequired: 4500 },
-    { minLevel: 41, maxLevel: 45, expRequired: 5000 },
-    { minLevel: 46, maxLevel: 49, expRequired: 5500 },
-];
+const LADDER_EXP_CURVE_POWER = 1.42;
+
+const cloneLadderRankTiers = (tiers = activeLadderRankTiers) =>
+    (Array.isArray(tiers) ? tiers : []).map((tier) => ({ ...tier }));
+
+const normalizeLadderRankTiersForSave = (tiers) => {
+    if (!Array.isArray(tiers) || !tiers.length) {
+        throw new Error('At least one rank tier is required.');
+    }
+
+    const seenLevels = new Set();
+    const normalizedTiers = tiers.map((tier) => {
+        const minLevel = Math.max(1, Math.min(LADDER_MAX_LEVEL, Math.round(Number(tier?.minLevel) || 0)));
+        const rank = typeof tier?.rank === 'string' ? tier.rank.trim() : '';
+        const hatUrl =
+            typeof tier?.rankHatUrl === 'string'
+                ? tier.rankHatUrl.trim()
+                : typeof tier?.hatUrl === 'string'
+                ? tier.hatUrl.trim()
+                : '';
+
+        if (!minLevel || !rank) {
+            throw new Error('Each rank tier needs a starting level and rank name.');
+        }
+        if (seenLevels.has(minLevel)) {
+            throw new Error(`Duplicate rank starting level: ${minLevel}.`);
+        }
+        seenLevels.add(minLevel);
+        return {
+            minLevel,
+            rank: rank.slice(0, 40),
+            hatUrl: hatUrl.slice(0, 220),
+        };
+    });
+
+    if (!seenLevels.has(1)) {
+        throw new Error('Rank tiers must include a level 1 starting rank.');
+    }
+
+    return normalizedTiers.sort((left, right) => right.minLevel - left.minLevel);
+};
+
+const setActiveLadderRankTiers = (tiers) => {
+    activeLadderRankTiers = normalizeLadderRankTiersForSave(tiers);
+    return cloneLadderRankTiers();
+};
+
+const getDefaultLadderRankTiers = () => cloneLadderRankTiers(DEFAULT_LADDER_RANK_TIERS);
+
+const getStoredLadderRankTiers = async () => {
+    if (!appStateCollection) {
+        return setActiveLadderRankTiers(getDefaultLadderRankTiers());
+    }
+
+    const state = await appStateCollection.findOne({ key: LADDER_RANK_RULES_STATE_KEY });
+    try {
+        const storedTiers = Array.isArray(state?.rankTiers) ? state.rankTiers : [];
+        return setActiveLadderRankTiers(storedTiers.length ? storedTiers : getDefaultLadderRankTiers());
+    } catch (error) {
+        console.warn('Stored ladder rank rules are invalid; falling back to defaults:', error.message);
+        return setActiveLadderRankTiers(getDefaultLadderRankTiers());
+    }
+};
+
+const saveLadderRankTiers = async (tiers, updatedBy) => {
+    const normalizedTiers = setActiveLadderRankTiers(tiers);
+    await appStateCollection.updateOne(
+        { key: LADDER_RANK_RULES_STATE_KEY },
+        {
+            $set: {
+                key: LADDER_RANK_RULES_STATE_KEY,
+                rankTiers: normalizedTiers,
+                updatedAt: new Date(),
+                updatedBy: updatedBy || '',
+            },
+        },
+        { upsert: true }
+    );
+    return normalizedTiers;
+};
+
+const resetLadderRankTiers = async () => {
+    const defaultTiers = setActiveLadderRankTiers(getDefaultLadderRankTiers());
+    if (appStateCollection) {
+        await appStateCollection.deleteOne({ key: LADDER_RANK_RULES_STATE_KEY });
+    }
+    return defaultTiers;
+};
 
 const getBaseRankInfoForLevel = (level) => {
     const normalizedLevel = Math.max(1, Number(level) || 1);
     return (
-        LADDER_RANK_TIERS.find((entry) => normalizedLevel >= entry.minLevel) ||
-        LADDER_RANK_TIERS[LADDER_RANK_TIERS.length - 1]
+        activeLadderRankTiers.find((entry) => normalizedLevel >= entry.minLevel) ||
+        activeLadderRankTiers[activeLadderRankTiers.length - 1]
     );
 };
 
@@ -184,24 +1054,35 @@ const getRankInfoForLevel = (level, isHokage = false) => {
     return getBaseRankInfoForLevel(normalizedLevel);
 };
 
+const getCumulativeExperienceThreshold = (level) => {
+    const normalizedLevel = Math.min(LADDER_MAX_LEVEL, Math.max(1, Number(level) || 1));
+    if (normalizedLevel <= 1) {
+        return 0;
+    }
+    if (normalizedLevel === 2) {
+        return 200;
+    }
+    if (normalizedLevel >= LADDER_MAX_LEVEL) {
+        return LADDER_MAX_EXPERIENCE_POINTS;
+    }
+    const progress = (normalizedLevel - 1) / (LADDER_MAX_LEVEL - 1);
+    return Math.max(0, Math.round(LADDER_MAX_EXPERIENCE_POINTS * Math.pow(progress, LADDER_EXP_CURVE_POWER)));
+};
+
 const getExperienceRequiredForNextLevel = (level) => {
     const normalizedLevel = Math.max(1, Number(level) || 1);
     if (normalizedLevel >= LADDER_MAX_LEVEL) {
         return 0;
     }
-    const bracket = LADDER_EXP_BRACKETS.find(
-        (entry) => normalizedLevel >= entry.minLevel && normalizedLevel <= entry.maxLevel
+    return Math.max(
+        0,
+        getCumulativeExperienceThreshold(normalizedLevel + 1) -
+            getCumulativeExperienceThreshold(normalizedLevel)
     );
-    return bracket ? bracket.expRequired : 0;
 };
 
 const getCumulativeExperienceForLevel = (level) => {
-    const normalizedLevel = Math.min(LADDER_MAX_LEVEL, Math.max(1, Number(level) || 1));
-    let total = 0;
-    for (let currentLevel = 1; currentLevel < normalizedLevel; currentLevel += 1) {
-        total += getExperienceRequiredForNextLevel(currentLevel);
-    }
-    return total;
+    return getCumulativeExperienceThreshold(level);
 };
 
 const deriveLadderStateFromExperience = (experiencePoints) => {
@@ -238,32 +1119,38 @@ const resolveLadderExperienceDelta = ({ playerLevel, opponentLevel, didWin }) =>
     const normalizedPlayerLevel = Math.max(1, Number(playerLevel) || 1);
     const normalizedOpponentLevel = Math.max(1, Number(opponentLevel) || 1);
     const levelDifference = normalizedOpponentLevel - normalizedPlayerLevel;
+    let rawDelta = 0;
 
     if (levelDifference >= 11) {
-        return didWin ? 750 : 0;
+        rawDelta = didWin ? 600 : 0;
+    } else if (levelDifference >= 6) {
+        rawDelta = didWin ? 600 : 0;
+    } else if (levelDifference >= 3) {
+        rawDelta = didWin ? 450 : -25;
+    } else if (levelDifference >= 1) {
+        rawDelta = didWin ? 350 : -50;
+    } else if (levelDifference <= -11) {
+        rawDelta = didWin ? 15 : -600;
+    } else if (levelDifference <= -6) {
+        rawDelta = didWin ? 50 : -450;
+    } else if (levelDifference <= -3) {
+        rawDelta = didWin ? 150 : -300;
+    } else if (levelDifference <= -1) {
+        rawDelta = didWin ? 200 : -150;
+    } else {
+        rawDelta = didWin ? 250 : -75;
     }
-    if (levelDifference >= 6) {
-        return didWin ? 600 : 0;
+
+    if (rawDelta > 0) {
+        return Math.max(15, Math.min(600, rawDelta));
     }
-    if (levelDifference >= 3) {
-        return didWin ? 450 : -25;
+    if (rawDelta < 0 && normalizedPlayerLevel <= 25) {
+        return -Math.min(600, Math.round(Math.abs(rawDelta) * 0.5));
     }
-    if (levelDifference >= 1) {
-        return didWin ? 350 : -50;
+    if (rawDelta === 0) {
+        return 0;
     }
-    if (levelDifference <= -11) {
-        return didWin ? 100 : -200;
-    }
-    if (levelDifference <= -6) {
-        return didWin ? 100 : -200;
-    }
-    if (levelDifference <= -3) {
-        return didWin ? 150 : -200;
-    }
-    if (levelDifference <= -1) {
-        return didWin ? 200 : -150;
-    }
-    return didWin ? 250 : -75;
+    return -Math.min(600, Math.abs(rawDelta));
 };
 
 const getLevelProgressPercent = (experienceIntoLevel, experienceForNextLevel, level) => {
@@ -277,6 +1164,49 @@ const getLevelProgressPercent = (experienceIntoLevel, experienceForNextLevel, le
         return 100;
     }
     return Math.max(6, Math.min(100, Math.round((normalizedLevel / LADDER_MAX_LEVEL) * 100)));
+};
+
+const buildLadderRulesForAdmin = () => {
+    const levels = [];
+    for (let level = 1; level <= LADDER_MAX_LEVEL; level += 1) {
+        const rankInfo = getRankInfoForLevel(level);
+        levels.push({
+            level,
+            cumulativeExperience: getCumulativeExperienceForLevel(level),
+            experienceForNextLevel: getExperienceRequiredForNextLevel(level),
+            rank: rankInfo.rank,
+            rankHatUrl: rankInfo.hatUrl,
+        });
+    }
+
+    const sortedTiers = cloneLadderRankTiers().sort((left, right) => left.minLevel - right.minLevel);
+    return {
+        maxLevel: LADDER_MAX_LEVEL,
+        maxExperiencePoints: LADDER_MAX_EXPERIENCE_POINTS,
+        hokageRequirement: {
+            minLevel: 46,
+            ladderRank: 1,
+            rank: HOKAGE_RANK_INFO.rank,
+            rankHatUrl: HOKAGE_RANK_INFO.hatUrl,
+        },
+        defaults: {
+            rankTiers: getDefaultLadderRankTiers()
+                .sort((left, right) => left.minLevel - right.minLevel)
+                .map((entry, index, tiers) => ({
+                    minLevel: entry.minLevel,
+                    maxLevel: index < tiers.length - 1 ? tiers[index + 1].minLevel - 1 : LADDER_MAX_LEVEL,
+                    rank: entry.rank,
+                    rankHatUrl: entry.hatUrl,
+                })),
+        },
+        rankTiers: sortedTiers.map((entry, index) => ({
+            minLevel: entry.minLevel,
+            maxLevel: index < sortedTiers.length - 1 ? sortedTiers[index + 1].minLevel - 1 : LADDER_MAX_LEVEL,
+            rank: entry.rank,
+            rankHatUrl: entry.hatUrl,
+        })),
+        levels,
+    };
 };
 
 const getRosterCharacterId = (rosterIndex) => {
@@ -375,26 +1305,29 @@ const getLegacyLevelRequirement = (value) => {
 
     const legacyLevelMap = new Map([
         ['academy student', 1],
-        ['sparkstrike', 1],
         ['genin', 6],
-        ['temporal warden', 6],
-        ['chunin', 12],
-        ['blood ripper', 12],
-        ['jounin', 16],
-        ['jonin', 16],
-        ['joinin', 16],
-        ['stormbreaker', 16],
+        ['chunin', 11],
+        ['chuunin', 11],
+        ['jounin', 26],
+        ['jonin', 26],
+        ['joinin', 26],
+        ['missing-nin', 16],
+        ['missing nin', 16],
         ['anbu', 21],
-        ['void sentinel', 21],
         ['sannin', 31],
-        ['galaxy reaper', 31],
         ['jinchuriki', 36],
-        ['purity aegis', 36],
+        ['jinchuuriki', 36],
         ['akatsuki', 41],
-        ['dimension crusader', 41],
         ['kage', 46],
-        ['infinity knight', 46],
+        ['hokage', 46],
     ]);
+    cloneLadderRankTiers().forEach((tier) => {
+        const rankLabel = String(tier.rank || '').trim().toLowerCase();
+        if (rankLabel) {
+            legacyLevelMap.set(rankLabel, tier.minLevel);
+            legacyLevelMap.set(rankLabel.replace(/-/g, ' '), tier.minLevel);
+        }
+    });
     return legacyLevelMap.get(label) || 0;
 };
 
@@ -524,6 +1457,28 @@ const normalizeMissionState = (missions = {}) => {
     };
 };
 
+const normalizeStoryProgressEntry = (entry = {}) => {
+    const source = entry && typeof entry === 'object' ? entry : {};
+    const completedAt =
+        source.completedAt instanceof Date || typeof source.completedAt === 'string'
+            ? source.completedAt
+            : null;
+    return { completedAt };
+};
+
+const normalizeStoryState = (story = {}) => {
+    const source = story && typeof story === 'object' ? story : {};
+    const sourceProgress =
+        source.progressByNodeId && typeof source.progressByNodeId === 'object' ? source.progressByNodeId : {};
+    const progressByNodeId = {};
+    Object.keys(sourceProgress).forEach((nodeId) => {
+        const normalizedNodeId = typeof nodeId === 'string' ? nodeId.trim() : '';
+        if (!normalizedNodeId) return;
+        progressByNodeId[normalizedNodeId] = normalizeStoryProgressEntry(sourceProgress[nodeId]);
+    });
+    return { progressByNodeId };
+};
+
 const normalizeMissionTextList = (entries = []) =>
     (Array.isArray(entries) ? entries : [])
         .map((entry) => {
@@ -561,6 +1516,26 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
                 : null;
         }
 
+        const winMatchesAnyMatch = text.match(
+            /^Win\s+(\d+)\s+matches?\s+with\s+(.+?)\s+or\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i
+        );
+        if (winMatchesAnyMatch) {
+            const wins = Math.max(0, Number(winMatchesAnyMatch[1]) || 0);
+            const firstCharacterName = winMatchesAnyMatch[2].trim();
+            const secondCharacterName = winMatchesAnyMatch[3].trim();
+            const firstCharacterId = normalizeCharacterId(firstCharacterName);
+            const secondCharacterId = normalizeCharacterId(secondCharacterName);
+            if (!wins || !firstCharacterId || !secondCharacterId) {
+                return null;
+            }
+            return {
+                type: 'win_matches_any',
+                character_ids: [firstCharacterId, secondCharacterId],
+                character_names: [firstCharacterName, secondCharacterName],
+                wins,
+            };
+        }
+
         const winMatchesMatch = text.match(/^Win\s+(\d+)\s+matches?\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i);
         if (winMatchesMatch) {
             const wins = Math.max(0, Number(winMatchesMatch[1]) || 0);
@@ -570,6 +1545,26 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
                 type: 'win_matches',
                 character_id: characterId,
                 character_name: characterName,
+                wins,
+            };
+        }
+
+        const winStreakAnyMatch = text.match(
+            /^Win\s+(\d+)\s+battles?\s+in\s+a\s+row\s+with\s+(.+?)\s+or\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i
+        );
+        if (winStreakAnyMatch) {
+            const wins = Math.max(0, Number(winStreakAnyMatch[1]) || 0);
+            const firstCharacterName = winStreakAnyMatch[2].trim();
+            const secondCharacterName = winStreakAnyMatch[3].trim();
+            const firstCharacterId = normalizeCharacterId(firstCharacterName);
+            const secondCharacterId = normalizeCharacterId(secondCharacterName);
+            if (!wins || !firstCharacterId || !secondCharacterId) {
+                return null;
+            }
+            return {
+                type: 'win_streak_any',
+                character_ids: [firstCharacterId, secondCharacterId],
+                character_names: [firstCharacterName, secondCharacterName],
                 wins,
             };
         }
@@ -630,6 +1625,10 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
                         type === 'same_team_wins' ||
                         type === 'same_team'
                         ? 'win_matches_same_team'
+                    : type === 'win_streak_any' || type === 'streak_any' || type === 'win_streak_either'
+                        ? 'win_streak_any'
+                    : type === 'win_matches_any' || type === 'match_wins_any' || type === 'win_matches_either'
+                        ? 'win_matches_any'
                 : 'text';
 
     if (normalizedType === 'win_matches' || normalizedType === 'win_streak') {
@@ -643,7 +1642,7 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
         const characterName = String(
             source.character_name ?? source.characterName ?? getCharacterDisplayNameById(characterId)
         ).trim();
-        if (!wins || !characterId) {
+        if (!wins) {
             return null;
         }
         return {
@@ -707,6 +1706,60 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
             type: 'win_matches_same_team',
             character_ids: uniqueCharacterIds,
             character_names: characterNames,
+            wins,
+        };
+    }
+
+    if (normalizedType === 'win_streak_any') {
+        const wins = Math.max(
+            0,
+            Number(source.wins ?? source.count ?? source.target ?? source.goal ?? 0) || 0
+        );
+        const characterIds = normalizeMissionTextList(
+            Array.isArray(source.character_ids) ? source.character_ids : []
+        ).map((value) => normalizeCharacterId(value));
+        const uniqueCharacterIds = Array.from(new Set(characterIds.filter(Boolean)));
+        if (!wins || uniqueCharacterIds.length < 2) {
+            return null;
+        }
+        const rawCharacterNames = Array.isArray(source.character_names) ? source.character_names : [];
+        const characterNames = uniqueCharacterIds.map((characterId, idx) => {
+            const providedName = String(rawCharacterNames[idx] ?? '').trim();
+            return providedName || getCharacterDisplayNameById(characterId);
+        });
+        const groupLabel = String(source.character_name ?? source.group_label ?? '').trim();
+        return {
+            type: 'win_streak_any',
+            character_ids: uniqueCharacterIds,
+            character_names: characterNames,
+            ...(groupLabel ? { character_name: groupLabel } : {}),
+            wins,
+        };
+    }
+
+    if (normalizedType === 'win_matches_any') {
+        const wins = Math.max(
+            0,
+            Number(source.wins ?? source.count ?? source.target ?? source.goal ?? 0) || 0
+        );
+        const characterIds = normalizeMissionTextList(
+            Array.isArray(source.character_ids) ? source.character_ids : []
+        ).map((value) => normalizeCharacterId(value));
+        const uniqueCharacterIds = Array.from(new Set(characterIds.filter(Boolean)));
+        if (!wins || uniqueCharacterIds.length < 2) {
+            return null;
+        }
+        const rawCharacterNames = Array.isArray(source.character_names) ? source.character_names : [];
+        const characterNames = uniqueCharacterIds.map((characterId, idx) => {
+            const providedName = String(rawCharacterNames[idx] ?? '').trim();
+            return providedName || getCharacterDisplayNameById(characterId);
+        });
+        const groupLabel = String(source.character_name ?? source.group_label ?? '').trim();
+        return {
+            type: 'win_matches_any',
+            character_ids: uniqueCharacterIds,
+            character_names: characterNames,
+            ...(groupLabel ? { character_name: groupLabel } : {}),
             wins,
         };
     }
@@ -933,15 +1986,156 @@ const saveMissionCatalog = async (missions, updatedBy) => {
     return normalizedCatalog;
 };
 
+const normalizeStoryNode = (node = {}, index = 0) => {
+    const source = node && typeof node === 'object' ? node : {};
+    const title = typeof source.title === 'string' && source.title.trim() ? source.title.trim() : `Battle ${index + 1}`;
+    const nodeId = slugifyMissionId(
+        typeof source.nodeId === 'string' && source.nodeId.trim() ? source.nodeId.trim() : title
+    ) || `node-${index + 1}`;
+    const enemyTeam = (Array.isArray(source.enemyTeam) ? source.enemyTeam : [])
+        .map((id) => normalizeCharacterId(id))
+        .filter(Boolean)
+        .slice(0, 3);
+    const playerTeam = (Array.isArray(source.playerTeam) ? source.playerTeam : [])
+        .map((id) => normalizeCharacterId(id))
+        .filter(Boolean)
+        .slice(0, 3);
+    const bossScript = (Array.isArray(source.bossScript) ? source.bossScript : [])
+        .map((rule) => (rule && typeof rule.skillId === 'string' && rule.skillId.trim()
+            ? { skillId: rule.skillId.trim(), when: rule.when && typeof rule.when === 'object' ? rule.when : {} }
+            : null))
+        .filter(Boolean);
+    const normalizeDialogue = (entries) =>
+        (Array.isArray(entries) ? entries : [])
+            .map((entry) => (entry && typeof entry.text === 'string' && entry.text.trim()
+                ? {
+                      speaker: typeof entry.speaker === 'string' ? entry.speaker.trim() : '',
+                      portrait: typeof entry.portrait === 'string' ? entry.portrait.trim() : '',
+                      text: entry.text.trim(),
+                  }
+                : null))
+            .filter(Boolean);
+    return {
+        nodeId,
+        title,
+        level_requirement: Math.max(0, Number(source.level_requirement) || 0),
+        image: typeof source.image === 'string' ? source.image.trim() : '',
+        imageAlt:
+            typeof source.imageAlt === 'string' && source.imageAlt.trim()
+                ? source.imageAlt.trim()
+                : `${title} artwork`,
+        enemyTeam,
+        playerTeam,
+        enemyDisplayName:
+            typeof source.enemyDisplayName === 'string' && source.enemyDisplayName.trim()
+                ? source.enemyDisplayName.trim()
+                : GAME_BOT_DISPLAY_NAME,
+        bossScript,
+        introDialogue: normalizeDialogue(source.introDialogue),
+        outroDialogueWin: normalizeDialogue(source.outroDialogueWin),
+        outroDialogueLoss: normalizeDialogue(source.outroDialogueLoss),
+        reward_character: normalizeCharacterId(source.reward_character) || null,
+        sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1,
+    };
+};
+
+const normalizeStoryCatalog = (chapters = []) =>
+    (Array.isArray(chapters) ? chapters : [])
+        .map((chapter, index) => {
+            const source = chapter && typeof chapter === 'object' ? chapter : {};
+            const title =
+                typeof source.title === 'string' && source.title.trim() ? source.title.trim() : `Chapter ${index + 1}`;
+            const chapterId = slugifyMissionId(
+                typeof source.chapterId === 'string' && source.chapterId.trim() ? source.chapterId.trim() : title
+            ) || `chapter-${index + 1}`;
+            return {
+                chapterId,
+                title,
+                sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1,
+                nodes: (Array.isArray(source.nodes) ? source.nodes : []).map((node, nodeIndex) =>
+                    normalizeStoryNode(node, nodeIndex)
+                ),
+            };
+        })
+        .filter((chapter) => chapter.chapterId && chapter.nodes.length)
+        .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
+
+const getDefaultStoryCatalog = () => normalizeStoryCatalog(DEFAULT_STORY_CATALOG);
+
+const getStoredStoryCatalog = async () => {
+    const defaultCatalog = getDefaultStoryCatalog();
+    if (!appStateCollection) {
+        storyCatalogCache = defaultCatalog;
+        return defaultCatalog;
+    }
+    const storedState = await appStateCollection.findOne({ key: STORY_CATALOG_STATE_KEY });
+    const storedCatalog = normalizeStoryCatalog(
+        storedState && Array.isArray(storedState.chapters) ? storedState.chapters : []
+    );
+    const nextCatalog = storedCatalog.length ? storedCatalog : defaultCatalog;
+    storyCatalogCache = nextCatalog;
+    return nextCatalog;
+};
+
+const saveStoryCatalog = async (chapters, updatedBy) => {
+    const normalizedCatalog = normalizeStoryCatalog(chapters);
+    if (!normalizedCatalog.length) {
+        throw new Error('At least one story chapter is required.');
+    }
+    await appStateCollection.updateOne(
+        { key: STORY_CATALOG_STATE_KEY },
+        {
+            $set: {
+                key: STORY_CATALOG_STATE_KEY,
+                chapters: normalizedCatalog,
+                updatedAt: new Date(),
+                updatedBy: updatedBy || '',
+            },
+        },
+        { upsert: true }
+    );
+    storyCatalogCache = normalizedCatalog;
+    return normalizedCatalog;
+};
+
+const findStoryNode = (catalog, nodeId) => {
+    const normalizedNodeId = typeof nodeId === 'string' ? nodeId.trim() : '';
+    if (!normalizedNodeId) return null;
+    for (const chapter of Array.isArray(catalog) ? catalog : []) {
+        const node = (Array.isArray(chapter?.nodes) ? chapter.nodes : []).find((n) => n.nodeId === normalizedNodeId);
+        if (node) {
+            return { chapter, node };
+        }
+    }
+    return null;
+};
+
 const getMissionLockedCharacterIds = async () => {
     const catalog = missionCatalogCache && Array.isArray(missionCatalogCache)
         ? missionCatalogCache
         : await getStoredMissionCatalog();
-    return new Set(
+    const storyCatalog = storyCatalogCache && Array.isArray(storyCatalogCache)
+        ? storyCatalogCache
+        : await getStoredStoryCatalog();
+    const locked = new Set(
         (Array.isArray(catalog) ? catalog : [])
             .map((mission) => normalizeCharacterId(mission.reward_character))
             .filter(Boolean)
     );
+    (Array.isArray(storyCatalog) ? storyCatalog : []).forEach((chapter) => {
+        (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
+            const id = normalizeCharacterId(node.reward_character);
+            if (id) locked.add(id);
+        });
+    });
+    // Also lock any character that has requiredMissionId set directly on the character
+    (Array.isArray(charactersData) ? charactersData : []).forEach((character) => {
+        if (character && typeof character.requiredMissionId === 'string' && character.requiredMissionId.trim()) {
+            const id = normalizeCharacterId(character.characterId);
+            if (id) locked.add(id);
+        }
+    });
+    return locked;
 };
 
 const profileHasUnlockedCharacter = (profile, characterId, lockedCharacterIds = new Set()) => {
@@ -950,16 +2144,35 @@ const profileHasUnlockedCharacter = (profile, characterId, lockedCharacterIds = 
     if (!normalizedCharacterId) {
         return true;
     }
+    if (!lockedCharacterIds.has(normalizedCharacterId)) {
+        return true;
+    }
     const missions = profile && typeof profile.missions === 'object' ? profile.missions : {};
     const unlocked = new Set(
         (Array.isArray(missions.unlockedCharacterIds) ? missions.unlockedCharacterIds : [])
             .map((entry) => normalizeCharacterId(entry))
             .filter(Boolean)
     );
-    if (!lockedCharacterIds.has(normalizedCharacterId)) {
+    if (unlocked.has(normalizedCharacterId)) {
         return true;
     }
-    return unlocked.has(normalizedCharacterId);
+    // Check requiredMissionId completion directly on character data
+    const characterEntry = (Array.isArray(charactersData) ? charactersData : [])
+        .find((c) => normalizeCharacterId(c && c.characterId) === normalizedCharacterId);
+    const requiredMissionId = characterEntry && typeof characterEntry.requiredMissionId === 'string'
+        ? characterEntry.requiredMissionId.trim()
+        : '';
+    if (requiredMissionId) {
+        const progressByMissionId =
+            missions.progressByMissionId && typeof missions.progressByMissionId === 'object'
+                ? missions.progressByMissionId
+                : {};
+        const missionProgress = progressByMissionId[requiredMissionId];
+        if (missionProgress && missionProgress.completedAt) {
+            return true;
+        }
+    }
+    return false;
 };
 
 const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
@@ -1006,6 +2219,7 @@ const buildDefaultUserProfile = (user = {}) => {
             ingameUrl: '',
         },
         posts: 0,
+        ryo: 0,
         clan: null,
         clanInvitations: [],
         recentQuickGames: [],
@@ -1293,6 +2507,9 @@ const normalizeUserProfile = (user = {}) => {
                     : defaults.backgrounds.ingameUrl,
         },
         posts: Number.isFinite(Number(source.posts)) ? Math.max(0, Number(source.posts)) : defaults.posts,
+        ryo: Number.isFinite(Number(source.ryo))
+            ? Math.max(0, Math.round(Number(source.ryo)))
+            : defaults.ryo,
         clan,
         clanInvitations: normalizeClanInvitations(source.clanInvitations),
         recentQuickGames: normalizeRecentQuickGames(source.recentQuickGames),
@@ -1302,6 +2519,7 @@ const normalizeUserProfile = (user = {}) => {
         recentPrivateGamesCount24Hours: normalizeRecentQuickGames(source.recentPrivateGames).length,
         recentLadderGamesCount24Hours: normalizeRecentLadderGames(source.recentLadderGames).length,
         missions: normalizeMissionState(source.missions),
+        story: normalizeStoryState(source.story),
         matchmaking: {
             battleBotEnabled:
                 typeof matchmaking.battleBotEnabled === 'boolean'
@@ -1395,6 +2613,10 @@ const recordRecentQuickGameForUsers = async ({ players, winnerUsername, endedAt 
                 (player) => player?.username && player.username === winnerUsername
             );
             const profile = normalizeUserProfile(user);
+            const didWin = Boolean(winnerUsername) && winnerUsername === user.username;
+            profile.ryo =
+                Math.max(0, Number(profile.ryo) || 0) +
+                (didWin ? QUICK_WIN_RYO : winnerUsername ? QUICK_LOSS_RYO : 0);
             profile.recentQuickGames = normalizeRecentQuickGames([
                 {
                     playedAt: endedDate,
@@ -1583,7 +2805,9 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         goalType !== 'win_matches' &&
                         goalType !== 'win_streak' &&
                         goalType !== 'reach_rank' &&
-                        goalType !== 'win_matches_same_team'
+                        goalType !== 'win_matches_same_team' &&
+                        goalType !== 'win_streak_any' &&
+                        goalType !== 'win_matches_any'
                     ) {
                         return;
                     }
@@ -1608,6 +2832,12 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         sameTeamCharacterIds.every((characterId) =>
                             teamHasCharacterId(match, username, characterId)
                         );
+                    const anyStreakCharacterIds = Array.isArray(goal.character_ids)
+                        ? goal.character_ids.map((value) => normalizeCharacterId(value)).filter(Boolean)
+                        : [];
+                    const hasAnyStreakCharacter =
+                        anyStreakCharacterIds.length > 0 &&
+                        anyStreakCharacterIds.some((characterId) => teamHasCharacterId(match, username, characterId));
                     const existingGoalProgress = normalizeMissionGoalProgressEntry(
                         nextGoalProgressByIndex[goalIndex] || {}
                     );
@@ -1635,6 +2865,22 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         nextGoalProgress.count = Math.min(targetCount, Math.max(0, userLevel));
                     } else if (goalType === 'win_matches_same_team') {
                         if (didWin && hasSameTeamCharacters) {
+                            nextGoalProgress.count = Math.min(
+                                targetCount,
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                            );
+                        }
+                    } else if (goalType === 'win_streak_any') {
+                        if (didWin && hasAnyStreakCharacter) {
+                            nextGoalProgress.count = Math.min(
+                                targetCount,
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                            );
+                        } else if (winnerUsername) {
+                            nextGoalProgress.count = 0;
+                        }
+                    } else if (goalType === 'win_matches_any') {
+                        if (didWin && hasAnyStreakCharacter) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
                                 Math.max(0, Number(existingGoalProgress.count) || 0) + 1
@@ -1712,6 +2958,72 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
         })
     );
 
+    return true;
+};
+
+const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
+    if (!match || match.mode !== 'story' || !winnerUsername) {
+        return null;
+    }
+    const nodeId = typeof match.storyMatch?.nodeId === 'string' ? match.storyMatch.nodeId : '';
+    if (!nodeId) {
+        return null;
+    }
+    const humanPlayer = (Array.isArray(match.players) ? match.players : []).find(
+        (player) => player?.username && !isGameBotUsername(player.username)
+    );
+    if (!humanPlayer || humanPlayer.username !== winnerUsername) {
+        return null;
+    }
+
+    const user = await usersCollection.findOne(
+        { username: humanPlayer.username },
+        { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
+    );
+    if (!user) {
+        return null;
+    }
+
+    const storyCatalog = await getStoredStoryCatalog();
+    const found = findStoryNode(storyCatalog, nodeId);
+    const profile = normalizeUserProfile(user);
+    const storyState = normalizeStoryState(profile.story);
+    const progressByNodeId = { ...storyState.progressByNodeId };
+    const alreadyCompleted = Boolean(progressByNodeId[nodeId]?.completedAt);
+    progressByNodeId[nodeId] = normalizeStoryProgressEntry({
+        completedAt: progressByNodeId[nodeId]?.completedAt || endedAt || new Date(),
+    });
+
+    const rewardCharacterId = normalizeCharacterId(found?.node?.reward_character);
+    const missionState = normalizeMissionState(profile.missions);
+    const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
+    let unlockedIdsChanged = false;
+    if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
+        unlockedIds.add(rewardCharacterId);
+        unlockedIdsChanged = true;
+    }
+
+    if (alreadyCompleted && !unlockedIdsChanged) {
+        return null;
+    }
+
+    profile.story = { progressByNodeId };
+    if (unlockedIdsChanged) {
+        profile.missions = {
+            ...profile.missions,
+            unlockedCharacterIds: Array.from(unlockedIds),
+        };
+    }
+
+    const normalizedProfile = normalizeUserProfile({ ...user, profile });
+    await usersCollection.updateOne(
+        { _id: user._id },
+        {
+            $set: {
+                profile: normalizedProfile,
+            },
+        }
+    );
     return true;
 };
 
@@ -1854,6 +3166,11 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
 
     await applyMissionProgressForUsers(match, winnerUsername, endedAt);
 
+    if (match.mode === 'story') {
+        await applyStoryProgressForUsers(match, winnerUsername, endedAt);
+        return null;
+    }
+
     if (match.mode === 'private') {
         await recordRecentPrivateGameForUsers({
             players: match.players || [],
@@ -1938,6 +3255,9 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
             Math.max(0, previousExperiencePoints + expChange)
         );
         profile.ladder.experiencePoints = nextExperiencePoints;
+        profile.ryo =
+            Math.max(0, Number(profile.ryo) || 0) +
+            (didWin ? LADDER_WIN_RYO : winnerUsername ? LADDER_LOSS_RYO : 0);
         if (didWin) {
             profile.ladder.wins += 1;
             profile.ladder.streak = Math.max(0, Number(profile.ladder.streak) || 0) + 1;
@@ -2066,6 +3386,10 @@ const buildCharacterCatalog = () =>
         characterId: typeof character.characterId === 'string' ? character.characterId : '',
         name: typeof character.name === 'string' ? character.name : '',
         facePicture: typeof character.facePicture === 'string' ? character.facePicture : '',
+        requiredMissionId: typeof character.requiredMissionId === 'string' ? character.requiredMissionId.trim() : '',
+        shopPrice: Number.isFinite(Number(character.shopPrice))
+            ? Math.max(0, Math.round(Number(character.shopPrice)))
+            : 0,
         skills: (Array.isArray(character.skills) ? character.skills : []).map((skill = {}) => ({
             id: typeof skill.id === 'string' ? skill.id : '',
             name: typeof skill.name === 'string' ? skill.name : '',
@@ -2643,8 +3967,21 @@ app.use(
     })
 );
 app.use(async (req, res, next) => {
-    const protectedMissionPages = new Set(['/editmission', '/editmission.html']);
-    if (!protectedMissionPages.has(req.path)) {
+    const protectedAdminPages = new Set([
+        '/admin',
+        '/admin.html',
+        '/charactereditor',
+        '/charactereditor.html',
+        '/editmission',
+        '/editmission.html',
+        '/newspost',
+        '/newspost.html',
+        '/playeraccounts',
+        '/playeraccounts.html',
+        '/winrates',
+        '/winrates.html',
+    ]);
+    if (!protectedAdminPages.has(req.path)) {
         return next();
     }
 
@@ -2713,7 +4050,13 @@ app.use(async (req, res, next) => {
         return next();
     }
 });
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), {
+    setHeaders(res, filePath) {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.set('Cache-Control', 'no-cache');
+        }
+    },
+}));
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -3190,6 +4533,20 @@ const buildMatchPayloadForUser = (match, username) => {
         lastChakraGain: sanitizeLastChakraGainForViewer(match.economy?.lastChakraGain, username),
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
+        storyMatch: match.storyMatch
+            ? {
+                  chapterId: match.storyMatch.chapterId || null,
+                  nodeId: match.storyMatch.nodeId || null,
+                  enemyDisplayName: match.storyMatch.enemyDisplayName || null,
+                  introDialogue: Array.isArray(match.storyMatch.introDialogue) ? match.storyMatch.introDialogue : [],
+                  outroDialogueWin: Array.isArray(match.storyMatch.outroDialogueWin)
+                      ? match.storyMatch.outroDialogueWin
+                      : [],
+                  outroDialogueLoss: Array.isArray(match.storyMatch.outroDialogueLoss)
+                      ? match.storyMatch.outroDialogueLoss
+                      : [],
+              }
+            : null,
     };
 };
 
@@ -3336,6 +4693,7 @@ let ladderQueue = [];
 let privateQueue = [];
 const quickMatches = new Map(); // matchId -> { players, createdAt }
 const userToMatch = new Map(); // username -> { matchId, opponent }
+const battleBotQueueTimers = new Map();
 
 const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];
 
@@ -3423,6 +4781,7 @@ const removeQueuedEntry = (username, mode = null) => {
             )
         );
     });
+    clearScheduledBattleBotQueueCheck(username);
 };
 
 const getCharacterSpecificChakraProfile = (character = {}) => {
@@ -3770,6 +5129,7 @@ const buildMatch = (players, aliveLookup = {}, options = {}) => {
 };
 
 const enqueuePlayer = (entry) => {
+    clearScheduledBattleBotQueueCheck(entry.username);
     quickQueue = quickQueue.filter((u) => u.username !== entry.username);
     ladderQueue = ladderQueue.filter((u) => u.username !== entry.username);
     privateQueue = privateQueue.filter((u) => u.username !== entry.username);
@@ -3793,17 +5153,28 @@ const dequeueOpponent = (username, mode = 'quick') => {
     } else {
         quickQueue = quickQueue.filter((u) => u.username !== opponent.username);
     }
+    clearScheduledBattleBotQueueCheck(opponent.username);
     return opponent;
 };
 
-const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1 }) => ({
+const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1, displayName = GAME_BOT_DISPLAY_NAME }) => ({
     username: createGameBotUsername(matchId),
-    displayName: GAME_BOT_DISPLAY_NAME,
+    displayName: displayName || GAME_BOT_DISPLAY_NAME,
     isBot: true,
     team,
     aliveCount: Array.isArray(team) ? team.length : 3,
     ladderLevel: Math.max(1, Number(ladderLevel) || 1),
 });
+
+const resolveRosterIndicesForCharacterIds = (characterIds = []) =>
+    (Array.isArray(characterIds) ? characterIds : [])
+        .map((characterId) => {
+            const normalizedId = normalizeCharacterId(characterId);
+            return (Array.isArray(charactersData) ? charactersData : []).findIndex(
+                (character) => normalizeCharacterId(character?.characterId) === normalizedId
+            );
+        })
+        .filter((rosterIndex) => rosterIndex >= 0);
 
 const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
     const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -3850,6 +5221,132 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
     return matchDocument;
 };
 
+const buildStoryBattleBotMatch = async ({ username, team, chapter, node }) => {
+    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const enemyRosterIndices = resolveRosterIndicesForCharacterIds(node.enemyTeam);
+    const botPlayer = createBattleBotPlayer({
+        matchId,
+        team: enemyRosterIndices.length ? enemyRosterIndices : buildBattleBotTeam(),
+        ladderLevel: 1,
+        displayName: node.enemyDisplayName,
+    });
+    const aliveLookup = {
+        [username]: Array.isArray(team) ? team.length : 3,
+        [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
+    };
+    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
+    const playerDocs = [
+        {
+            username,
+            team,
+            aliveCount: aliveLookup[username],
+        },
+        botPlayer,
+    ];
+    const board = battleLogic.buildInitialBoard(playerDocs);
+    const matchDocument = {
+        matchId: built.matchId,
+        mode: 'story',
+        status: 'active',
+        createdAt: new Date(),
+        matchStartsAt: built.matchStartsAt,
+        chakraPools: built.chakraPools,
+        economy: built.economy,
+        pendingTurns: built.pendingTurns,
+        currentTurn: built.currentTurn,
+        turnStartedAt: built.turnStartedAt,
+        turnOrder: built.turnOrder,
+        turnExpiresAt: built.turnExpiresAt,
+        board,
+        players: playerDocs,
+        botMatch: {
+            enabled: true,
+            displayName: node.enemyDisplayName,
+        },
+        storyMatch: {
+            chapterId: chapter.chapterId,
+            nodeId: node.nodeId,
+            bossScript: node.bossScript || null,
+            enemyDisplayName: node.enemyDisplayName,
+            introDialogue: node.introDialogue || [],
+            outroDialogueWin: node.outroDialogueWin || [],
+            outroDialogueLoss: node.outroDialogueLoss || [],
+        },
+    };
+    await matchesCollection.insertOne(matchDocument);
+    return matchDocument;
+};
+
+const clearScheduledBattleBotQueueCheck = (username) => {
+    const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
+    if (!normalizedUsername) return;
+    const timer = battleBotQueueTimers.get(normalizedUsername);
+    if (timer) {
+        clearTimeout(timer);
+        battleBotQueueTimers.delete(normalizedUsername);
+    }
+};
+
+const scheduleBattleBotQueueCheck = ({ username, mode = 'quick', userProfile = null }) => {
+    if (!BATTLE_BOTS_ENABLED || (mode !== 'quick' && mode !== 'ladder')) {
+        return;
+    }
+    const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
+    if (!normalizedUsername) return;
+    clearScheduledBattleBotQueueCheck(username);
+    const queued = findQueuedEntry(username, mode);
+    if (!queued?.entry || queued.entry.allowBattleBot === false) {
+        return;
+    }
+    const queuedAtMs = new Date(queued.entry.queuedAt || Date.now()).getTime();
+    const elapsedMs = Number.isNaN(queuedAtMs) ? 0 : Date.now() - queuedAtMs;
+    const delayMs = Math.max(0, BATTLE_BOT_QUEUE_TIMEOUT_MS - elapsedMs);
+    const timer = setTimeout(async () => {
+        battleBotQueueTimers.delete(normalizedUsername);
+        try {
+            const latestQueued = findQueuedEntry(username, mode);
+            if (!latestQueued?.entry || latestQueued.entry.allowBattleBot === false) {
+                return;
+            }
+            if (userToMatch.has(username)) {
+                return;
+            }
+            const existingMatch = await matchesCollection.findOne({
+                'players.username': username,
+                status: { $ne: 'ended' },
+            });
+            if (existingMatch) {
+                const opponentEntry = (existingMatch.players || []).find((player) => player?.username !== username);
+                userToMatch.set(username, {
+                    matchId: existingMatch.matchId,
+                    opponent: opponentEntry ? getPlayerDisplayName(opponentEntry) : GAME_BOT_DISPLAY_NAME,
+                });
+                scheduleBattleBotTurn(existingMatch);
+                return;
+            }
+            let normalizedProfile = userProfile && typeof userProfile === 'object' ? userProfile : null;
+            if (!normalizedProfile) {
+                const user = await usersCollection.findOne(
+                    { username },
+                    { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
+                );
+                normalizedProfile = normalizeUserProfile(user || {});
+            }
+            const botMatch = await maybeCreateBattleBotMatch({
+                username,
+                mode,
+                userProfile: normalizedProfile,
+            });
+            if (botMatch) {
+                scheduleBattleBotTurn(botMatch);
+            }
+        } catch (error) {
+            console.error('Battle bot queue check failed:', error);
+        }
+    }, delayMs);
+    battleBotQueueTimers.set(normalizedUsername, timer);
+};
+
 const maybeCreateBattleBotMatch = async ({ username, mode, userProfile = null }) => {
     if (!BATTLE_BOTS_ENABLED || (mode !== 'quick' && mode !== 'ladder')) {
         return null;
@@ -3890,6 +5387,7 @@ const dequeuePrivateOpponent = (username, targetUsername) => {
     });
     if (!opponent) return null;
     privateQueue = privateQueue.filter((entry) => entry.username !== opponent.username);
+    clearScheduledBattleBotQueueCheck(opponent.username);
     return opponent;
 };
 
@@ -4145,6 +5643,125 @@ const assignBattleBotRandomChakra = ({ match, username }) => {
     }
 };
 
+const classifySkillEffects = (skill) => {
+    const effects = Array.isArray(skill?.effects) ? skill.effects : [];
+    const hasType = (type) => effects.some((effect) => effect && effect.type === type);
+    return {
+        isDamage: hasType('damage') || hasType('health_steal_damage') || hasType('execute_below_hp'),
+        isHeal: hasType('heal'),
+        isCleanse: hasType('cleanse_statuses'),
+    };
+};
+
+const isTargetAlly = (target, actingUsername) => Boolean(target) && target.username === actingUsername;
+
+const pickLowestHpFractionTarget = (hydrated, targets = []) => {
+    let best = null;
+    let bestFraction = Infinity;
+    (Array.isArray(targets) ? targets : []).forEach((target) => {
+        const unit = hydrated?.board?.[target?.username]?.[target?.slot];
+        if (!unit || unit.alive === false) {
+            return;
+        }
+        const fraction = (Number(unit.hp) || 0) / (Number(battleLogic.DEFAULT_HP) || 100);
+        if (fraction < bestFraction) {
+            bestFraction = fraction;
+            best = target;
+        }
+    });
+    return best || targets[0] || null;
+};
+
+// Picks a smarter target than random: damage/harmful skills go to the lowest-HP enemy,
+// heals go to the lowest-HP ally. Falls back to null so callers can use the random default.
+const pickBestTargetSelection = ({ hydrated, actingUsername, skill, options }) => {
+    const targets = Array.isArray(options?.targets) ? options.targets : [];
+    if (!targets.length) {
+        return null;
+    }
+    if (options.mode === 'all') {
+        return targets;
+    }
+    if (options.mode !== 'single') {
+        return null;
+    }
+    const classification = classifySkillEffects(skill);
+    let pool = targets;
+    if (options.targetType === 'single-character') {
+        const filtered = targets.filter((target) =>
+            classification.isHeal ? isTargetAlly(target, actingUsername) : !isTargetAlly(target, actingUsername)
+        );
+        if (filtered.length) {
+            pool = filtered;
+        }
+    }
+    const picked = pickLowestHpFractionTarget(hydrated, pool);
+    return picked ? [picked] : null;
+};
+
+// Heuristic priority score for a skill: favors damage, favors healing only when an ally is
+// actually hurt (so the bot doesn't waste heals at full HP), mildly favors cleansing.
+const scoreSkillChoice = ({ hydrated, actingUsername, skill }) => {
+    const classification = classifySkillEffects(skill);
+    let score = 1;
+    if (classification.isDamage) {
+        score += 5;
+    }
+    if (classification.isHeal) {
+        const team = Array.isArray(hydrated?.board?.[actingUsername]) ? hydrated.board[actingUsername] : [];
+        const hurtAlly = team.some(
+            (unit) =>
+                unit &&
+                unit.alive !== false &&
+                (Number(unit.hp) || 0) < (Number(battleLogic.DEFAULT_HP) || 100) * 0.4
+        );
+        score += hurtAlly ? 8 : -3;
+    }
+    if (classification.isCleanse) {
+        score += 2;
+    }
+    return score;
+};
+
+const bossScriptRuleMatches = ({ rule, turnNumber, actorHpFraction }) => {
+    const when = rule?.when || {};
+    if (Number.isFinite(Number(when.turnGte)) && turnNumber < Number(when.turnGte)) {
+        return false;
+    }
+    if (Number.isFinite(Number(when.selfHpBelowFraction)) && actorHpFraction >= Number(when.selfHpBelowFraction)) {
+        return false;
+    }
+    return true;
+};
+
+// Orders a boss's skill indices for a turn: scripted rules (matched against turn/HP
+// conditions) come first in priority order, remaining skills are ranked by heuristic score.
+// Legality/affordability is still validated by the caller for each candidate in turn.
+const orderStoryBotSkillIndices = ({ hydrated, username, actorUnit, character, candidateIndices, bossScript }) => {
+    const turnNumber = Number(hydrated?.economy?.turnCounts?.[username]) || 0;
+    const actorHpFraction = (Number(actorUnit?.hp) || 0) / (Number(battleLogic.DEFAULT_HP) || 100);
+    const skills = Array.isArray(character?.skills) ? character.skills : [];
+    const priorityIndices = [];
+    (Array.isArray(bossScript) ? bossScript : []).forEach((rule) => {
+        if (!bossScriptRuleMatches({ rule, turnNumber, actorHpFraction })) {
+            return;
+        }
+        const skillIndex = skills.findIndex((skill) => skill?.id === rule.skillId);
+        if (skillIndex >= 0 && candidateIndices.includes(skillIndex) && !priorityIndices.includes(skillIndex)) {
+            priorityIndices.push(skillIndex);
+        }
+    });
+    const remaining = candidateIndices
+        .filter((index) => !priorityIndices.includes(index))
+        .map((index) => ({
+            index,
+            score: scoreSkillChoice({ hydrated, actingUsername: username, skill: skills[index] }),
+        }))
+        .sort((a, b) => b.score - a.score)
+        .map((entry) => entry.index);
+    return [...priorityIndices, ...remaining];
+};
+
 const resolveTurnStartChoiceForUser = ({ match, username, choiceKey }) => {
     const pendingTurn = getPendingTurn(match, username);
     const prompt = pendingTurn.turnStartChoice;
@@ -4265,9 +5882,20 @@ const runBattleBotTurn = async (matchId) => {
                 return;
             }
             const character = charactersData?.[actorUnit.rosterIndex];
-            const skillIndices = shuffleList(
-                (Array.isArray(character?.skills) ? character.skills : []).map((_, index) => index)
+            const isStoryBot = hydrated.mode === 'story';
+            const baseSkillIndices = (Array.isArray(character?.skills) ? character.skills : []).map(
+                (_, index) => index
             );
+            const skillIndices = isStoryBot
+                ? orderStoryBotSkillIndices({
+                      hydrated,
+                      username,
+                      actorUnit,
+                      character,
+                      candidateIndices: baseSkillIndices,
+                      bossScript: hydrated.storyMatch?.bossScript,
+                  })
+                : shuffleList(baseSkillIndices);
             for (const skillIndex of skillIndices) {
                 const options = battleLogic.computeTargetOptions({
                     match: hydrated,
@@ -4291,7 +5919,10 @@ const runBattleBotTurn = async (matchId) => {
                 const classChoiceOptions = Array.isArray(skill?.classChoiceOptions)
                     ? skill.classChoiceOptions.map((entry) => normalizeClassChoice(entry)).filter(Boolean)
                     : [];
-                const targetSelection = chooseBattleBotTargetSelection(options);
+                const targetSelection = isStoryBot
+                    ? pickBestTargetSelection({ hydrated, actingUsername: username, skill, options }) ||
+                      chooseBattleBotTargetSelection(options)
+                    : chooseBattleBotTargetSelection(options);
                 if (!targetSelection) {
                     continue;
                 }
@@ -4848,6 +6479,7 @@ async function initDb() {
     await matchesCollection.createIndex({ matchId: 1 }, { unique: true });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
     await newsPostsCollection.createIndex({ createdAt: -1 });
+    await getStoredLadderRankTiers();
     await backfillUserProfiles();
     console.log('Connected to MongoDB.');
 }
@@ -4984,6 +6616,10 @@ const matchJoinSchema = Joi.object({
     team: teamSchema.required(),
     mode: Joi.string().valid('quick', 'ladder', 'private').default('quick'),
     targetUsername: Joi.string().trim().min(1).max(64).allow('').optional(),
+});
+
+const storyStartSchema = Joi.object({
+    nodeId: Joi.string().trim().min(1).max(128).required(),
 });
 
 const publicProfileLookupSchema = Joi.object({
@@ -5419,9 +7055,87 @@ app.post('/api/match/join', requireSession, async (req, res) => {
             allowBattleBot: Boolean(profile.matchmaking?.battleBotEnabled),
             ladderLevel: Number(profile.ladder?.level) || 1,
         });
+        scheduleBattleBotQueueCheck({
+            username,
+            mode,
+            userProfile: profile,
+        });
         return res.json({ ok: true, queued: true, mode });
     } catch (error) {
         console.error('Matchmaking error:', error);
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
+app.post('/api/story/start', requireSession, async (req, res) => {
+    try {
+        const username = req.authUser.username;
+        const { error: validationError, value } = storyStartSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A story battle is required.' });
+        }
+        const { nodeId } = value;
+
+        if (userToMatch.has(username)) {
+            return res.status(409).json({ error: 'You are already in a match.' });
+        }
+        const existingMatch = await matchesCollection.findOne({
+            'players.username': username,
+            status: { $ne: 'ended' },
+        });
+        if (existingMatch) {
+            return res.status(409).json({ error: 'You are already in a match.' });
+        }
+
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+
+        const storyCatalog = await getStoredStoryCatalog();
+        const found = findStoryNode(storyCatalog, nodeId);
+        if (!found) {
+            return res.status(404).json({ error: 'Story battle not found.' });
+        }
+        const userLevel = Number(profile?.ladder?.level) || 1;
+        if (found.node.level_requirement > 0 && userLevel < found.node.level_requirement) {
+            return res.status(403).json({ error: 'You are not a high enough level for this battle yet.' });
+        }
+
+        const team = resolveRosterIndicesForCharacterIds(found.node.playerTeam);
+        if (team.length !== found.node.playerTeam.length) {
+            console.error(`Story node ${nodeId} has an invalid playerTeam entry.`);
+            return res.status(500).json({ error: 'This story battle is misconfigured.' });
+        }
+
+        const matchDocument = await buildStoryBattleBotMatch({
+            username,
+            team,
+            chapter: found.chapter,
+            node: found.node,
+        });
+        userToMatch.set(username, { matchId: matchDocument.matchId, opponent: found.node.enemyDisplayName });
+        scheduleBattleBotTurn(matchDocument);
+        const safePayload = buildMatchPayloadForUser(matchDocument, username);
+        return res.json({
+            ok: true,
+            matchFound: true,
+            matchId: matchDocument.matchId,
+            mode: 'story',
+            opponent: found.node.enemyDisplayName,
+            matchStartsAt: matchDocument.matchStartsAt,
+            matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
+            currentTurn: matchDocument.currentTurn || null,
+            turnOrder: matchDocument.turnOrder || null,
+            turnExpiresAt: matchDocument.turnExpiresAt || null,
+            turnDurationMs: getTurnDurationMsForUser(matchDocument, matchDocument?.currentTurn),
+            chakraPools: safePayload?.chakraPools || null,
+            lastChakraGain: safePayload?.lastChakraGain || null,
+            pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
+        });
+    } catch (error) {
+        console.error('Story match start error:', error);
         return res.status(500).json({ error: 'Internal server error.' });
     }
 });
@@ -5499,6 +7213,13 @@ app.get('/api/match/status', requireSession, async (req, res) => {
                 chakraPools: safePayload?.chakraPools || null,
                 lastChakraGain: safePayload?.lastChakraGain || null,
                 pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
+            });
+        }
+        if (queuedEntry?.entry) {
+            scheduleBattleBotQueueCheck({
+                username,
+                mode: queuedEntry.mode || 'quick',
+                userProfile: normalizedProfile,
             });
         }
 
@@ -6283,6 +8004,131 @@ app.get('/api/missions', async (req, res) => {
     }
 });
 
+app.get('/api/story', async (req, res) => {
+    try {
+        const chapters = await getStoredStoryCatalog();
+        let storyState = { progressByNodeId: {} };
+        let unlockedCharacterIds = [];
+        try {
+            const token = req.cookies?.[SESSION_COOKIE_NAME];
+            const authUser = token ? await getSessionUserFromToken(token) : null;
+            if (authUser) {
+                const normalizedProfile = normalizeUserProfile(authUser);
+                storyState = normalizeStoryState(normalizedProfile.story);
+                unlockedCharacterIds = normalizedProfile.missions.unlockedCharacterIds || [];
+            }
+        } catch (sessionError) {
+            console.warn('Story session lookup failed:', sessionError);
+        }
+        return res.json({
+            ok: true,
+            chapters,
+            storyProgressByNodeId: storyState.progressByNodeId,
+            unlockedCharacterIds,
+        });
+    } catch (error) {
+        console.error('Story catalog load error:', error);
+        return res.status(500).json({ error: 'Unable to load story mode.' });
+    }
+});
+
+app.get('/api/shop', requireSession, async (req, res) => {
+    try {
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const lockedCharacterIds = await getMissionLockedCharacterIds();
+        const characters = buildCharacterCatalog().filter((character) => {
+            if (!character.requiredMissionId) {
+                return false;
+            }
+            return !profileHasUnlockedCharacter(profile, character.characterId, lockedCharacterIds);
+        });
+        return res.json({
+            ok: true,
+            ryo: profile.ryo,
+            characters,
+        });
+    } catch (error) {
+        console.error('Shop catalog load error:', error);
+        return res.status(500).json({ error: 'Unable to load shop.' });
+    }
+});
+
+app.post('/api/shop/purchase', requireSession, async (req, res) => {
+    try {
+        const characterId = normalizeCharacterId(req.body?.characterId);
+        if (!characterId) {
+            return res.status(400).json({ error: 'Character is required.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const characterEntry = (Array.isArray(charactersData) ? charactersData : []).find(
+            (entry) => normalizeCharacterId(entry && entry.characterId) === characterId
+        );
+        const requiredMissionId =
+            characterEntry && typeof characterEntry.requiredMissionId === 'string'
+                ? characterEntry.requiredMissionId.trim()
+                : '';
+        if (!characterEntry || !requiredMissionId) {
+            return res.status(400).json({ error: 'This character is not available in the shop.' });
+        }
+        const shopPrice = Number.isFinite(Number(characterEntry.shopPrice))
+            ? Math.max(0, Math.round(Number(characterEntry.shopPrice)))
+            : 0;
+
+        const profile = normalizeUserProfile(user);
+        const lockedCharacterIds = await getMissionLockedCharacterIds();
+        if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+            return res.status(400).json({ error: 'Character already unlocked.' });
+        }
+        if ((Number(profile.ryo) || 0) < shopPrice) {
+            return res.status(400).json({ error: 'Not enough Ryo.' });
+        }
+
+        const missionState = normalizeMissionState(profile.missions);
+        const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
+        unlockedIds.add(characterId);
+        const progressByMissionId = { ...(missionState.progressByMissionId || {}) };
+        const existingProgress = normalizeMissionProgressEntry(
+            progressByMissionId[requiredMissionId] || {}
+        );
+        progressByMissionId[requiredMissionId] = normalizeMissionProgressEntry({
+            ...existingProgress,
+            completedAt: existingProgress.completedAt || new Date(),
+        });
+
+        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - shopPrice);
+        profile.missions = {
+            ...profile.missions,
+            progressByMissionId,
+            progress: progressByMissionId,
+            unlockedCharacterIds: Array.from(unlockedIds),
+        };
+
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            { $set: { profile: normalizedProfile } }
+        );
+
+        return res.json({
+            ok: true,
+            ryo: normalizedProfile.ryo,
+            unlockedCharacterIds: normalizedProfile.missions.unlockedCharacterIds,
+            missionProgressByMissionId: normalizedProfile.missions.progressByMissionId,
+        });
+    } catch (error) {
+        console.error('Shop purchase error:', error);
+        return res.status(500).json({ error: 'Unable to complete purchase.' });
+    }
+});
+
 app.get('/api/admin/missions', requireSession, async (req, res) => {
     if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
         return res.status(403).json({ error: 'Admin access required.' });
@@ -6297,6 +8143,120 @@ app.get('/api/admin/missions', requireSession, async (req, res) => {
     } catch (error) {
         console.error('Admin mission catalog load error:', error);
         return res.status(500).json({ error: 'Unable to load missions.' });
+    }
+});
+
+app.get('/api/admin/control-panel', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    try {
+        const [missionCatalog, totalUsers, adminUsers] = await Promise.all([
+            getStoredMissionCatalog(),
+            usersCollection.countDocuments({}),
+            usersCollection.countDocuments({ role: 'admin' }),
+        ]);
+        const maintenanceState = await getMaintenanceModeState().catch(() => false);
+        return res.json({
+            ok: true,
+            counts: {
+                characters: Array.isArray(characterCatalog) ? characterCatalog.length : 0,
+                missions: Array.isArray(missionCatalog) ? missionCatalog.length : 0,
+                players: totalUsers,
+                admins: adminUsers,
+            },
+            economy: {
+                ladderWinRyo: LADDER_WIN_RYO,
+                ladderLossRyo: LADDER_LOSS_RYO,
+                quickWinRyo: QUICK_WIN_RYO,
+                quickLossRyo: QUICK_LOSS_RYO,
+            },
+            maintenance: {
+                enabled: Boolean(maintenanceState),
+            },
+            ladderRules: buildLadderRulesForAdmin(),
+            tools: [
+                {
+                    href: 'charactereditor.html',
+                    title: 'Character Editor',
+                    description: 'Create, update, delete, and export playable character records.',
+                    status: 'Live editor',
+                },
+                {
+                    href: 'editmission.html',
+                    title: 'Mission Editor',
+                    description: 'Manage unlock missions, rank requirements, goals, and rewards.',
+                    status: 'Live editor',
+                },
+                {
+                    href: 'playeraccounts.html',
+                    title: 'Player Accounts',
+                    description: 'Edit account documents, player EXP, roles, missions, and ladder stats.',
+                    status: 'Live editor',
+                },
+                {
+                    href: 'winrates.html',
+                    title: 'Winrates',
+                    description: 'Audit character performance and reset the winrate sample.',
+                    status: 'Live report',
+                },
+                {
+                    href: 'newspost.html',
+                    title: 'News Post',
+                    description: 'Publish and manage front-page updates.',
+                    status: 'Live editor',
+                },
+            ],
+        });
+    } catch (error) {
+        console.error('Admin control panel load error:', error);
+        return res.status(500).json({ error: 'Unable to load admin control panel.' });
+    }
+});
+
+app.get('/api/admin/ladder-rules', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    return res.json({
+        ok: true,
+        ladderRules: buildLadderRulesForAdmin(),
+    });
+});
+
+app.put('/api/admin/ladder-rules', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    try {
+        await saveLadderRankTiers(req.body?.rankTiers, req.authUser.username);
+        return res.json({
+            ok: true,
+            ladderRules: buildLadderRulesForAdmin(),
+        });
+    } catch (error) {
+        console.error('Admin ladder rule save error:', error);
+        return res.status(400).json({ error: error.message || 'Unable to save ladder rules.' });
+    }
+});
+
+app.delete('/api/admin/ladder-rules', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    try {
+        await resetLadderRankTiers();
+        return res.json({
+            ok: true,
+            ladderRules: buildLadderRulesForAdmin(),
+        });
+    } catch (error) {
+        console.error('Admin ladder rule reset error:', error);
+        return res.status(500).json({ error: 'Unable to reset ladder rules.' });
     }
 });
 
@@ -6410,6 +8370,56 @@ app.put('/api/admin/characters/:characterId', requireSession, async (req, res) =
     } catch (error) {
         console.error('Admin character update error:', error);
         return res.status(500).json({ error: 'Unable to update character.' });
+    }
+});
+
+app.post('/api/admin/characters', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+    const newCharacter = req.body && typeof req.body === 'object' ? req.body : null;
+    if (!newCharacter || typeof newCharacter.characterId !== 'string' || !newCharacter.characterId.trim()) {
+        return res.status(400).json({ error: 'A valid character payload with a characterId is required.' });
+    }
+    const currentCharacters = Array.isArray(charactersData) ? charactersData : [];
+    const duplicate = currentCharacters.find(
+        (entry) => typeof entry?.characterId === 'string' && entry.characterId === newCharacter.characterId.trim()
+    );
+    if (duplicate) {
+        return res.status(409).json({ error: 'Character id is already in use.' });
+    }
+    try {
+        const updatedCharacters = [...currentCharacters, newCharacter];
+        await saveCharactersDataFile(updatedCharacters);
+        return res.status(201).json({ ok: true, character: newCharacter });
+    } catch (error) {
+        console.error('Admin character create error:', error);
+        return res.status(500).json({ error: 'Unable to create character.' });
+    }
+});
+
+app.delete('/api/admin/characters/:characterId', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+    const characterId = typeof req.params?.characterId === 'string' ? req.params.characterId.trim() : '';
+    if (!characterId) {
+        return res.status(400).json({ error: 'A character id is required.' });
+    }
+    const currentCharacters = Array.isArray(charactersData) ? charactersData : [];
+    const characterIndex = currentCharacters.findIndex(
+        (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
+    );
+    if (characterIndex === -1) {
+        return res.status(404).json({ error: 'Character not found.' });
+    }
+    try {
+        const updatedCharacters = currentCharacters.filter((_, i) => i !== characterIndex);
+        await saveCharactersDataFile(updatedCharacters);
+        return res.json({ ok: true });
+    } catch (error) {
+        console.error('Admin character delete error:', error);
+        return res.status(500).json({ error: 'Unable to delete character.' });
     }
 });
 
@@ -8096,6 +10106,13 @@ app.get(['/selection', '/selection.html'], (req, res) => {
 
 app.get(['/ingame', '/ingame.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'ingame.html'));
+});
+
+app.get(['/admin', '/admin.html'], requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.redirect('/');
+    }
+    return res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 app.get(['/profile', '/profile.html'], (req, res) => {
