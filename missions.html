@@ -576,7 +576,12 @@
             sortOrder: Number.isFinite(Number(src.sortOrder)) ? Number(src.sortOrder) : index + 1
           };
         }).filter(function (m) { return m.missionId && m.title; })
-          .sort(function (a, b) { var d = (a.sortOrder || 0) - (b.sortOrder || 0); return d !== 0 ? d : a.title.localeCompare(b.title); });
+          .sort(function (a, b) {
+            var levelDiff = (getLevelRequirementValue(a) || 0) - (getLevelRequirementValue(b) || 0);
+            if (levelDiff !== 0) return levelDiff;
+            var sortDiff = (a.sortOrder || 0) - (b.sortOrder || 0);
+            return sortDiff !== 0 ? sortDiff : a.title.localeCompare(b.title);
+          });
       }
 
       function setMissionCatalog(missions) {

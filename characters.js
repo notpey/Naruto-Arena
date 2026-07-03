@@ -275,6 +275,7 @@ const characters = [
                         "metadata": {
                             "damageReductionFlat": 10,
                             "cannotBeStunned": true,
+                            "stunImmune": true,
                             "skillDamageBonuses": {
                                 "haruno-sakura-ko-punch": 10
                             },
@@ -2332,10 +2333,9 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "cannotBeStunned": true,
-                            "invulnerableToNonAffliction": true,
+                            "stunImmune": true,
                             "triggerOnEnemyHarmfulNonMental": true,
-                            "removeStatusIdsOnOwnerUseSkill": [],
-                            "tooltipText": "Gaara ignores stuns and non-affliction damage until triggered."
+                            "tooltipText": "Gaara ignores stuns until he next takes non-affliction damage."
                         }
                     }
                 ]
@@ -2366,7 +2366,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "destructibleDefensePoints": 40,
-                            "tooltipText": "Gaara has permanent destructible defense from Armor of Sand."
+                            "tooltipText": "Gaara has 40 points of permanent destructible defense from Armor of Sand."
                         }
                     }
                 ]

@@ -97,6 +97,7 @@
                         "metadata": {
                             "damageReductionFlat": 10,
                             "cannotBeStunned": true,
+                            "stunImmune": true,
                             "skillDamageBonuses": {
                                 "haruno-sakura-ko-punch": 10
                             },

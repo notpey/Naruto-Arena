@@ -3604,6 +3604,31 @@
     );
   }
 
+  // Paint the last-known logged-in state from localStorage immediately, on
+  // the same tick the page loads, instead of waiting on the /api/me round
+  // trip. Without this every navigation briefly shows the guest nav state
+  // (or, on profile.html, the static "placeholder_ninja" markup) before the
+  // real fetch resolves and corrects it. fetchSessionUser() below still runs
+  // and is the source of truth; this is only a same-tab paint so it can't
+  // go stale in a way the real fetch wouldn't immediately overwrite.
+  function hydrateFromCachedUser() {
+    var cached = null;
+    try {
+      cached = JSON.parse(localStorage.getItem("narutoUser") || "null");
+    } catch (error) {
+      cached = null;
+    }
+    if (!cached || !cached.username) return;
+    if (guestAuthView) guestAuthView.hidden = true;
+    if (accountPanel) accountPanel.hidden = false;
+    if (accountUsername) accountUsername.textContent = cached.username;
+    setText(clanRegisterCreator, cached.username);
+    if (profileUsername) profileUsername.textContent = cached.username;
+    var profileCrumbCurrent = document.getElementById("profile-crumb-current");
+    if (profileCrumbCurrent) profileCrumbCurrent.textContent = cached.username;
+    if (profileAvatarImage && cached.avatarUrl) profileAvatarImage.src = cached.avatarUrl;
+  }
+
   function setCurrentSessionUser(user) {
     currentSessionUser = user && user.username ? user : null;
     updateClanPanelNotification(currentSessionUser);
@@ -4953,6 +4978,7 @@
   }
 
   updateMode();
+  hydrateFromCachedUser();
   initializeReleaseInputs();
   loadSidebarLeaderboards();
   loadAdminWinrates();

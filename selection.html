@@ -866,6 +866,8 @@
             missionGrid.innerHTML = '<div class="selection-hub-env-empty">Loading missions...</div>';
             fetchJson("/api/missions").then(function (data) {
                 missions = (Array.isArray(data.missions) ? data.missions : []).map(normalizeMission).sort(function (a, b) {
+                    var levelDiff = (getLevelRequirementValue(a) || 0) - (getLevelRequirementValue(b) || 0);
+                    if (levelDiff !== 0) return levelDiff;
                     var order = (a.sortOrder || 0) - (b.sortOrder || 0);
                     return order !== 0 ? order : a.title.localeCompare(b.title);
                 });
