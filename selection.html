@@ -2,7 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
+    <script>
+        // The game stage is a fixed-pixel-width layout (1100px remaster /
+        // 770px classic), not a responsive one. On mobile, telling the
+        // browser the viewport is "device-width" makes it render that fixed
+        // layout at 1:1 scale and clip most of it. Instead, tell the browser
+        // the viewport's true width so it auto-scales the whole stage down
+        // to fit the screen (pinch-zoom still works; this only sets the
+        // starting scale).
+        (function () {
+            try {
+                var isRemaster = localStorage.getItem("na-selection-remaster-preview") !== "disabled";
+                var stageWidth = isRemaster ? 1100 : 770;
+                var meta = document.getElementById("viewport-meta");
+                if (meta) {
+                    meta.setAttribute("content", "width=" + stageWidth + ", initial-scale=1");
+                }
+            } catch (error) {}
+        })();
+    </script>
     <title>Naruto-Arena Selection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -278,6 +297,10 @@
                 if (enabled) localStorage.removeItem(key);
                 else localStorage.setItem(key, "disabled");
             } catch (error) {}
+            var viewportMeta = document.getElementById("viewport-meta");
+            if (viewportMeta) {
+                viewportMeta.setAttribute("content", "width=" + (enabled ? 1100 : 770) + ", initial-scale=1");
+            }
             if (shouldResize) resizeForMode(enabled);
         }
 
