@@ -8365,6 +8365,1711 @@ const characters = [
             }
         ]
     }
+,
+    {
+        "id": "edo-tensei-hashirama",
+        "characterId": "edo-tensei-hashirama",
+        "name": "Edo Tensei Hashirama",
+        "characterdeescription": "The first Hokage, and founder of the Hidden Leaf Village; Hashirama, a member of the legendary Senju clan. Hashirama has the unique ability to give life to trees, creating them, and manipulating them to assault the enemy team while protecting his own.",
+        "requiredMissionId": "the-resurrection-of-the-first",
+        "skills": [
+            {
+                "id": "edo-tensei-hashirama-tree-wave-destruction",
+                "name": "Tree Wave Destruction",
+                "skillimage": "",
+                "skilldescription": "Edo Tensei Hashirama deals 10 damage to all enemies and grants his team 5 points of permanent destructible defense.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_tree_wave_defense",
+                        "duration": 99,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 5,
+                            "mergeNumericAddKeys": [
+                                "destructibleDefensePoints"
+                            ],
+                            "tooltipText": "This character has permanent destructible defense from Tree Wave Destruction."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-hashirama-tree-strangulation",
+                "name": "Tree Strangulation",
+                "skillimage": "",
+                "skilldescription": "Edo Tensei Hashirama deals 20 damage to one enemy and stuns their physical and energy skills for 1 turn. During 'A World of Trees', this skill will stun all skills.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_tree_strangulation_stun_partial",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy"
+                            ],
+                            "tooltipText": "This character's physical and energy skills are stunned by Tree Strangulation."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_tree_strangulation_stun_full",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned by Tree Strangulation."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-hashirama-a-world-of-trees",
+                "name": "A World of Trees",
+                "skillimage": "",
+                "skilldescription": "For 2 turns, all enemies' physical, energy and strategic skills will cost 1 additional random energy and their cooldowns will be increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
+                "energy": [
+                    "Bloodline",
+                    "Bloodline"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_world_of_trees_defense",
+                        "duration": 99,
+                        "scope": "all-allies",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 30,
+                            "mergeNumericAddKeys": [
+                                "destructibleDefensePoints"
+                            ],
+                            "tooltipText": "This character has permanent destructible defense from A World of Trees."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_world_of_trees_stun",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned by A World of Trees."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_world_of_trees",
+                        "duration": 2,
+                        "scope": "self",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "usedSkillCooldownPenalty": 1,
+                            "tooltipText": "All enemies who use a new skill will have that skill's cooldown increased by 1. Edo Tensei Hashirama can use 'A World of Trees' again for a bonus."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_world_of_trees_enemy_cost",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "edo_tensei_hashirama_world_of_trees"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "randomCostIncreaseForSkillClasses": {
+                                "physical": 1,
+                                "energy": 1,
+                                "strategic": 1
+                            },
+                            "tooltipText": "This character's physical, energy and strategic skills cost 1 additional random chakra."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-hashirama-deflection",
+                "name": "Deflection",
+                "skillimage": "",
+                "skilldescription": "This skill makes Edo Tensei Hashirama invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_hashirama_deflection",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "edo-tensei-tobirama",
+        "characterId": "edo-tensei-tobirama",
+        "name": "Edo Tensei Tobirama",
+        "characterdeescription": "The second Hokage of the Hidden Leaf Village; Tobirama, a member of the Senju clan, puts the well being of the village and people above all else. Tobirama is a master of many jutsu, using both ninjutsu and genjutsu to stop his enemies in different ways.",
+        "requiredMissionId": "the-resurrection-of-the-second",
+        "skills": [
+            {
+                "id": "edo-tensei-tobirama-water-assault",
+                "name": "Water Assault",
+                "skillimage": "",
+                "skilldescription": "Edo Tensei Tobirama makes one enemy ignore all helpful effects except energy cost changes for 1 turn and deals 15 damage to them.",
+                "energy": [
+                    "Ninjutsu",
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_tobirama_water_assault_seal",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invulnerableToHelpfulSkills": true,
+                            "tooltipText": "This character ignores all helpful effects except energy cost changes."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-tobirama-water-colliding-wave",
+                "name": "Water Colliding Wave",
+                "skillimage": "",
+                "skilldescription": "Edo Tensei Tobirama deals 15 damage to all enemies for 3 turns and stuns their affliction skills each turn. During this time, 'Water Assault' will deal 15 additional damage.",
+                "energy": [
+                    "Ninjutsu",
+                    "Genjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Energy",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_tobirama_water_colliding_wave_dot",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "cannotUseSkillClasses": [
+                                "affliction"
+                            ],
+                            "tooltipText": "This character takes 15 damage each turn and their affliction skills are stunned."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_tobirama_water_colliding_wave_buff",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "edo-tensei-tobirama-water-assault": 15
+                            },
+                            "tooltipText": "Water Assault deals 15 additional damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-tobirama-bringer-of-darkness",
+                "name": "Bringer of Darkness",
+                "skillimage": "",
+                "skilldescription": "Edo Tensei Tobirama makes his team invulnerable to all physical and strategic skills for 1 turn.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_tobirama_bringer_of_darkness",
+                        "duration": 1,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToSkillClasses": ["physical", "strategic"],
+                            "tooltipText": "This character is invulnerable to physical and strategic skills."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "edo-tensei-tobirama-water-encampment-wall",
+                "name": "Water Encampment Wall",
+                "skillimage": "",
+                "skilldescription": "This skill makes Edo Tensei Tobirama invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "edo_tensei_tobirama_water_encampment_wall",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "sarutobi-hiruzen",
+        "characterId": "sarutobi-hiruzen",
+        "name": "Sarutobi Hiruzen",
+        "characterdeescription": "The third and most recent Hokage of the Hidden Leaf Village to die; Hiruzen, known as the God of Shinobi was considered to be one of the strongest ninja alive in his prime. While powerful using just his normal jutsu, Hiruzen is able to pull out a trump card when desperation strikes.",
+        "requiredMissionId": "the-god-of-the-shinobi",
+        "skills": [
+            {
+                "id": "sarutobi-hiruzen-fire-dragon-flame-bullet",
+                "name": "Fire Dragon Flame Bullet",
+                "skillimage": "",
+                "skilldescription": "Sarutobi Hiruzen deals 30 affliction damage to one enemy. The following turn, that enemy will take 10 affliction damage.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_fire_dragon_dot",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "tooltipText": "This character will take 10 affliction damage next turn from Fire Dragon Flame Bullet.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 10,
+                                    "metadata": {
+                                        "afflictionDamage": true
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sarutobi-hiruzen-dead-demon-consuming-seal",
+                "name": "Dead Demon Consuming Seal",
+                "skillimage": "",
+                "skilldescription": "Permanently, one enemy takes 40 affliction damage, is stunned and cannot reduce damage or become invulnerable each turn. Sarutobi Hiruzen himself takes 20 affliction damage and is stunned each turn. This skill cannot be removed or ignored and will end when Sarutobi Hiruzen dies.",
+                "energy": [
+                    "Random",
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_dead_demon_seal_enemy",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "afflictionDamage": true,
+                            "cannotUseSkills": true,
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "cannotBeCleansed": true,
+                            "turnEndDamage": 40,
+                            "turnEndTrigger": "source_turn",
+                            "tooltipText": "This character takes 40 affliction damage each turn, is stunned, and is unable to reduce damage or become invulnerable. This effect cannot be removed or ignored and ends if Sarutobi Hiruzen dies."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_dead_demon_seal_self",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "harmful": true,
+                            "afflictionDamage": true,
+                            "cannotUseSkills": true,
+                            "cannotBeCleansed": true,
+                            "turnEndDamage": 20,
+                            "turnEndTrigger": "source_turn",
+                            "tooltipText": "Sarutobi Hiruzen takes 20 affliction damage each turn and is stunned."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sarutobi-hiruzen-major-summoning-enma",
+                "name": "Major Summoning: Enma",
+                "skillimage": "",
+                "skilldescription": "Sarutobi Hiruzen and his team become invulnerable for 1 turn. For the rest of the game, Sarutobi Hiruzen will deal 5 damage to all enemies each turn, Sarutobi Hiruzen's team will gain 5 points of damage reduction, and this skill will be replaced by 'Adamantine Prison Wall'. This skill will end if Sarutobi Hiruzen dies.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu",
+                    "Genjutsu"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_enma_invuln",
+                        "duration": 1,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_enma_dot",
+                        "duration": 99,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "turnEndTrigger": "source_turn",
+                            "tooltipText": "This character takes 5 damage each turn from Major Summoning: Enma."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_enma_dr",
+                        "duration": 99,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 5,
+                            "tooltipText": "This character has 5 points of damage reduction from Major Summoning: Enma."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_enma_replace",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "sarutobi-hiruzen-major-summoning-enma": "sarutobi-hiruzen-adamantine-prison-wall"
+                            },
+                            "tooltipText": "Major Summoning: Enma is replaced by Adamantine Prison Wall."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sarutobi-hiruzen-earth-style-wall",
+                "name": "Earth-Style Wall",
+                "skillimage": "",
+                "skilldescription": "This skill makes Sarutobi Hiruzen invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_earth_style_wall",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sarutobi-hiruzen-adamantine-prison-wall",
+                "name": "Adamantine Prison Wall",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "For 1 turn, Sarutobi Hiruzen and his team will gain 20 points of unpierceable damage reduction and they cannot be killed.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sarutobi_hiruzen_adamantine_wall",
+                        "duration": 1,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 20,
+                            "minimumHp": 1,
+                            "tooltipText": "This character has 20 points of damage reduction and cannot be killed."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "kyuubi-naruto",
+        "characterId": "kyuubi-naruto",
+        "name": "Kyuubi Naruto",
+        "characterdeescription": "Naruto's anger and desperation has forced the Kyuubi's chakra to come up to the surface, changing Naruto into a single-minded beast with a nearly endless amount of chakra. With the Kyuubi chakra around Naruto, he is able to unleash powerful waves of raw chakra to endow his power further, or gather it back to guard and heal him.",
+        "requiredMissionId": "the-rise-of-a-jinchuuriki",
+        "skills": [
+            {
+                "id": "kyuubi-naruto-kyuubi-rasengan",
+                "name": "Kyuubi Rasengan",
+                "skillimage": "",
+                "skilldescription": "Kyuubi Naruto deals 35 damage to one enemy and stuns them for 1 turn. Kyuubi Naruto will take 5 affliction damage.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant",
+                    "Affliction"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kyuubi_naruto_rasengan_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kyuubi-naruto-kyuubi-rage",
+                "name": "Kyuubi Rage",
+                "skillimage": "",
+                "skilldescription": "Kyuubi Naruto deals 15 damage to all enemies for 3 turns. During this time, 'Kyuubi Rasengan' will deal 10 additional damage. 'Kyuubi Chakra' may not be used during this time.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "actorCondition": {
+                    "missingStatusId": "kyuubi_naruto_chakra_buff"
+                },
+                "classes": [
+                    "Energy",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kyuubi_naruto_rage_dot",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "tooltipText": "This character takes 15 damage each turn from Kyuubi Rage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kyuubi_naruto_rage_buff",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "kyuubi-naruto-kyuubi-rasengan": 10
+                            },
+                            "tooltipText": "Kyuubi Rasengan deals 10 additional damage. Kyuubi Chakra cannot be used."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kyuubi-naruto-kyuubi-chakra",
+                "name": "Kyuubi Chakra",
+                "skillimage": "",
+                "skilldescription": "Kyuubi Naruto heals himself for 15 health each turn for 5 turns. During this time, Kyuubi Naruto will gain 15 points of damage reduction and 'Kyuubi Rasengan' will deal 5 less damage. 'Kyuubi Rage' may not be used during this time.",
+                "energy": [
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 5,
+                "actorCondition": {
+                    "missingStatusId": "kyuubi_naruto_rage_buff"
+                },
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kyuubi_naruto_chakra_buff",
+                        "duration": 5,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "turnEndHealFlat": 15,
+                            "damageReductionFlat": 15,
+                            "skillDamageBonuses": {
+                                "kyuubi-naruto-kyuubi-rasengan": -5
+                            },
+                            "tooltipText": "Kyuubi Naruto heals 15 health each turn, has 15 points of damage reduction, and Kyuubi Rasengan deals 5 less damage. Kyuubi Rage cannot be used."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kyuubi-naruto-kyuubi-dodge",
+                "name": "Kyuubi Dodge",
+                "skillimage": "",
+                "skilldescription": "This skill makes Kyuubi Naruto invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kyuubi_naruto_dodge",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "cursed-seal-lv1-sasuke",
+        "characterId": "cursed-seal-lv1-sasuke",
+        "name": "Cursed Seal Lv1 Sasuke",
+        "characterdeescription": "Sasuke is pushed into his maximum during the Chuunin Exams and ends awakening his Cursed Seal to fight the Sound Genin and save Sakura. Sasuke is not in full control of the seal yet, but his anger and power were already raised a lot. ORIGINAL DESIGN: TheDarkLegend",
+        "requiredMissionId": "dark-enhancing",
+        "skills": [
+            {
+                "id": "cursed-seal-lv1-sasuke-silent-blow",
+                "name": "Silent Blow",
+                "skillimage": "",
+                "skilldescription": "Cursed Seal Lv1 Sasuke deals 25 damage to one enemy. The following turn, Cursed Seal Lv1 Sasuke's skills will deal 5 additional damage.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_lv1_sasuke_silent_blow_delay",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "This character's skills will deal additional damage next turn.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "cursed_seal_lv1_sasuke_silent_blow_buff",
+                                    "duration": 1,
+                                    "metadata": {
+                                        "helpful": true,
+                                        "damageBonusFlat": 5,
+                                        "tooltipText": "This character's skills deal 5 additional damage."
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-lv1-sasuke-cursed-chidori",
+                "name": "Cursed Chidori",
+                "skillimage": "",
+                "skilldescription": "Cursed Seal Lv1 Sasuke deals 25 piercing damage to one enemy. The following turn, Cursed Seal Lv1 Sasuke's skills will deal 5 additional damage.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_lv1_sasuke_cursed_chidori_delay",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "This character's skills will deal additional damage next turn.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "cursed_seal_lv1_sasuke_cursed_chidori_buff",
+                                    "duration": 1,
+                                    "metadata": {
+                                        "helpful": true,
+                                        "damageBonusFlat": 5,
+                                        "tooltipText": "This character's skills deal 5 additional damage."
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-lv1-sasuke-cursed-sharingan",
+                "name": "Cursed Sharingan",
+                "skillimage": "",
+                "skilldescription": "For 3 turns, Cursed Seal Lv1 Sasuke gains 10 points of damage reduction and targets all enemies. If they use a new harmful skill, they will receive 10 additional damage from 'Silent Blow' and 'Cursed Chidori' for 1 turn. This skill cannot be countered and ends if Cursed Seal Lv1 Sasuke dies.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "cannotBeCountered": true,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_lv1_sasuke_cursed_sharingan_dr",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "tooltipText": "This character has 10 points of damage reduction."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_lv1_sasuke_cursed_sharingan_trap",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "hideTooltipFromEnemy": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterStatusId": "cursed_seal_lv1_sasuke_cursed_sharingan_vulnerability",
+                            "counterStatusDuration": 1,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "damageTakenBonusBySkillClass": {
+                                    "physical": 10,
+                                    "energy": 10
+                                },
+                                "tooltipText": "This character takes 10 additional damage from Silent Blow and Cursed Chidori."
+                            },
+                            "tooltipText": "If this character uses a new harmful skill, they will take additional damage from Silent Blow and Cursed Chidori."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-lv1-sasuke-dark-aura",
+                "name": "Dark Aura",
+                "skillimage": "",
+                "skilldescription": "This skill makes Cursed Seal Lv1 Sasuke invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_lv1_sasuke_dark_aura",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "cursed-seal-sasuke",
+        "characterId": "cursed-seal-sasuke",
+        "name": "Cursed Seal Sasuke",
+        "characterdeescription": "Having gotten used to the Cursed Seal, Sasuke is able to draw Orochimaru's vile chakra through it, becoming a twisted hideous version of himself, but also getting stronger and faster. With the Cursed Seal, Sasuke's powers have exponentially increased, allowing him to pierce or trap enemies with his dark chakra.",
+        "requiredMissionId": "descent-into-darkness",
+        "skills": [
+            {
+                "id": "cursed-seal-sasuke-corrupt-chidori",
+                "name": "Corrupt Chidori",
+                "skillimage": "",
+                "skilldescription": "Cursed Seal Sasuke deals 45 damage to one enemy, reducing their non-affliction damage by 20 for 2 turns.",
+                "energy": [
+                    "Ninjutsu",
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_corrupt_chidori_debuff",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "nonAfflictionDamageDebuffFlat": 20,
+                            "tooltipText": "This character deals 20 less non-affliction damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-sasuke-dark-void",
+                "name": "Dark Void",
+                "skillimage": "",
+                "skilldescription": "Cursed Seal Sasuke stuns one enemy for 2 turns, makes them invulnerable to harmful skills for 1 turn and invulnerable to helpful skills for 2 turns. When this skill ends, this enemy will take 55 damage. This skill will end if Cursed Seal Sasuke dies.",
+                "energy": [
+                    "Ninjutsu",
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 5,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_dark_void_stun",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "invulnerableToHelpfulSkills": true,
+                            "tooltipText": "This character is stunned and invulnerable to helpful skills.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 55
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_dark_void_invuln_harmful",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invulnerableToHarmfulEffects": true,
+                            "tooltipText": "This character is invulnerable to harmful skills."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-sasuke-cursed-seal",
+                "name": "Cursed Seal",
+                "skillimage": "",
+                "skilldescription": "Cursed Seal Sasuke becomes invulnerable for 1 turn and takes 15 affliction damage that cannot kill him. For 1 turn, 'Corrupt Chidori' will cost 1 random energy instead and 'Dark Void' will cost 2 random energies instead. For 2 turns, Cursed Seal Sasuke will ignore healing effects.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_cursed_seal_floor",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "minimumHp": 1,
+                            "tooltipText": "This character cannot be killed."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_cursed_seal_invuln",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_cursed_seal_cost",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillCostOverridesBySkillId": {
+                                "cursed-seal-sasuke-corrupt-chidori": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                },
+                                "cursed-seal-sasuke-dark-void": {
+                                    "energy": [
+                                        "Random",
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Corrupt Chidori costs 1 random chakra and Dark Void costs 2 random chakra."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_cursed_seal_no_heal",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "harmful": true,
+                            "healReceivedMultiplier": 0,
+                            "tooltipText": "This character ignores healing effects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cursed-seal-sasuke-sharingan-evasion",
+                "name": "Sharingan Evasion",
+                "skillimage": "",
+                "skilldescription": "This skill makes Cursed Seal Sasuke invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "cursed_seal_sasuke_sharingan_evasion",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "butterfly-chouji",
+        "characterId": "butterfly-chouji",
+        "name": "Butterfly Chouji",
+        "characterdeescription": "Chouji has evolved into butterfly mode by consuming all three akimichi's coloured pills, gaining incredible speed and strenght at the cost of rapid weight loss. ORIGINAL DESIGN: AnteMito",
+        "requiredMissionId": "chouji-awakens",
+        "skills": [
+            {
+                "id": "butterfly-chouji-chakra-wings",
+                "name": "Chakra Wings",
+                "skillimage": "",
+                "skilldescription": "Butterfly Chouji gains 10 points of damage reduction and 10 points of destructible defense. He will take 5 affliction damage each turn. Butterfly Chouji can use his other skills while this is active. Butterfly Chouji's skills will deal 5 additional damage every turn with a max of 10 stacks. This skill may be used once and is permanent. This skill cannot be removed.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "actorCondition": {
+                    "missingStatusId": "butterfly_chouji_chakra_wings_active"
+                },
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "butterfly_chouji_chakra_wings_active",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeCleansed": true,
+                            "damageReductionFlat": 10,
+                            "destructibleDefensePoints": 10,
+                            "afflictionDamage": true,
+                            "turnEndDamage": 5,
+                            "turnEndTrigger": "source_turn",
+                            "damageBonusFlat": 5,
+                            "growPerTurn": [
+                                { "key": "damageBonusFlat", "amount": 5, "max": 50 }
+                            ],
+                            "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense, takes 5 affliction damage each turn, and his skills deal 5 additional damage. This bonus grows by 5 each turn, up to a maximum of 10 stacks."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "butterfly-chouji-butterfly-bullet-bombing",
+                "name": "Butterfly Bullet Bombing",
+                "skillimage": "",
+                "skilldescription": "Butterfly Chouji targets one enemy, destroying all destructible defense that target has and then dealing 20 damage to them. This skill cannot be countered and can only be used during 'Chakra Wings'.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "cannotBeCountered": true,
+                "actorCondition": {
+                    "statusId": "butterfly_chouji_chakra_wings_active"
+                },
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "destroy_destructible_defense",
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "butterfly-chouji-enemy-immobilization",
+                "name": "Enemy Immobilization",
+                "skillimage": "",
+                "skilldescription": "Butterfly Chouji deals 5 damage to one enemy. For 1 turn, that enemy's skills will be stunned and Butterfly Chouji will ignore enemy stun effects. This skill may only be used during 'Chakra Wings'.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "actorCondition": {
+                    "statusId": "butterfly_chouji_chakra_wings_active"
+                },
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Control"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "butterfly_chouji_enemy_immobilization_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "butterfly_chouji_enemy_immobilization_self",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stunImmune": true,
+                            "tooltipText": "This character ignores stun effects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "butterfly-chouji-effortless-block",
+                "name": "Effortless Block",
+                "skillimage": "",
+                "skilldescription": "This skill makes Butterfly Chouji invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "butterfly_chouji_effortless_block",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "drunken-lee",
+        "characterId": "drunken-lee",
+        "name": "Drunken Lee",
+        "characterdeescription": "Having accidentally drank sake, Lee's hidden Drunken Fist powers have awakened, completely changing his fighting style. While drunk, Lee attacks randomly, but is harder to stop the more he keeps fighting.",
+        "requiredMissionId": "the-drunken-master",
+        "skills": [
+            {
+                "id": "drunken-lee-unpredictable-assault",
+                "name": "Unpredictable Assault",
+                "skillimage": "",
+                "skilldescription": "Drunken Lee deals 20 damage to a random enemy. This skill cannot be countered. Each time this skill is used, it will deal 5 additional damage.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "cannotBeCountered": true,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "random-enemy"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "drunken_lee_unpredictable_assault_stacks",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageBonusFlat": 5,
+                            "mergeNumericAddKeys": [
+                                "damageBonusFlat"
+                            ],
+                            "tooltipText": "This character's skills deal 5 additional damage. This effect stacks each time Unpredictable Assault is used."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "drunken-lee-drunken-counter",
+                "name": "Drunken Counter",
+                "skillimage": "",
+                "skilldescription": "Drunken Lee targets himself or an ally. For 1 turn, the first harmful non-strategic skill used on the target will be countered and the countered enemy will have 'Unpredictable Assault' applied on them. This skill is invisible.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self-or-single-ally",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "drunken_lee_drunken_counter",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "hideTooltipFromEnemy": true,
+                            "triggerOnEnemyHarmfulNonStrategic": true,
+                            "counterCancelsSkill": true,
+                            "counterDamage": 20,
+                            "tooltipText": "The first non-strategic skill used on this character will be countered."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "drunken-lee-drunken-fist",
+                "name": "Drunken Fist",
+                "skillimage": "",
+                "skilldescription": "Drunken Lee deals 15 damage to one enemy for 3 turns. The following 3 turns, Drunken Lee will ignore all enemy stun effects, and 'Unpredictable Assault' will deal 5 additional damage.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "drunken_lee_drunken_fist_dot",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "tooltipText": "This character takes 15 damage each turn from Drunken Fist."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "drunken_lee_drunken_fist_self",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stunImmune": true,
+                            "skillDamageBonuses": {
+                                "drunken-lee-unpredictable-assault": 5
+                            },
+                            "tooltipText": "This character ignores enemy stun effects. Unpredictable Assault deals 5 additional damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "drunken-lee-drunken-leap",
+                "name": "Drunken Leap",
+                "skillimage": "",
+                "skilldescription": "This skill makes Drunken Lee invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "drunken_lee_drunken_leap",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "shukaku-gaara",
+        "characterId": "shukaku-gaara",
+        "name": "Shukaku Gaara",
+        "characterdeescription": "Having lived inside him the whole time, Shukaku is one of the nine tailed beasts and is very eager to escape and cause chaos to the world. While Shukaku slowly takes over Gaara, his own power increases, allowing him to demolish his foes with powerful sand attacks.",
+        "requiredMissionId": "the-beast-inside",
+        "skills": [
+            {
+                "id": "shukaku-gaara-sand-claw",
+                "name": "Sand Claw",
+                "skillimage": "",
+                "skilldescription": "Shukaku Gaara deals 30 damage to one enemy and gains 10 points of permanent destructible defense.",
+                "energy": [
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "shukaku_gaara_sand_claw_defense",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 10,
+                            "mergeNumericAddKeys": [
+                                "destructibleDefensePoints"
+                            ],
+                            "tooltipText": "This character has permanent destructible defense from Sand Claw."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "shukaku-gaara-constricting-sand-prison",
+                "name": "Constricting Sand Prison",
+                "skillimage": "",
+                "skilldescription": "Shukaku Gaara deals 10 damage to one enemy each turn. The first skill that this enemy uses will be countered, and this skill will end.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "shukaku_gaara_constricting_sand_prison",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterCancelsSkill": true,
+                            "tooltipText": "This character takes 10 damage each turn. The first skill they use will be countered, ending this effect."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "shukaku-gaara-sand-transformation",
+                "name": "Sand Transformation",
+                "skillimage": "",
+                "skilldescription": "Shukaku Gaara will gain 10 points of destructible defense each turn for 4 turns. When this skill ends, for 3 turns 'Sand Claw' will cost 1 less random energy and 'Constricting Sand Prison' and 'Sand Transformation' will be replaced.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 6,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "shukaku_gaara_sand_transformation",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 10,
+                            "mergeNumericAddKeys": [
+                                "destructibleDefensePoints"
+                            ],
+                            "growPerTurn": [
+                                { "key": "destructibleDefensePoints", "amount": 10, "max": 40 }
+                            ],
+                            "tooltipText": "This character has 10 points of destructible defense from Sand Transformation. This grows by 10 each turn, up to 40.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "shukaku_gaara_sand_transformation_followup",
+                                    "duration": 3,
+                                    "metadata": {
+                                        "helpful": true,
+                                        "skillCostOverridesBySkillId": {
+                                            "shukaku-gaara-sand-claw": {
+                                                "energy": [
+                                                    "Random"
+                                                ]
+                                            }
+                                        },
+                                        "skillReplacements": {
+                                            "shukaku-gaara-constricting-sand-prison": "shukaku-gaara-drilling-air-bullet",
+                                            "shukaku-gaara-sand-transformation": "shukaku-gaara-true-awakening"
+                                        },
+                                        "tooltipText": "Sand Claw costs 1 less random chakra. Constricting Sand Prison is replaced by Drilling Air Bullet and Sand Transformation is replaced by True Awakening."
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "shukaku-gaara-thick-sand-coat",
+                "name": "Thick Sand Coat",
+                "skillimage": "",
+                "skilldescription": "This skill makes Shukaku Gaara invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "shukaku_gaara_thick_sand_coat",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "shukaku-gaara-drilling-air-bullet",
+                "name": "Drilling Air Bullet",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Shukaku Gaara deals 60 damage to one enemy.",
+                "energy": [
+                    "Bloodline",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 60,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "shukaku-gaara-true-awakening",
+                "name": "True Awakening",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "The following turn, 'Sand Claw' and 'Drilling Air Bullet' will deal double damage.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "shukaku_gaara_true_awakening_delay",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Sand Claw and Drilling Air Bullet will deal double damage next turn.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "shukaku_gaara_true_awakening_double",
+                                    "duration": 1,
+                                    "metadata": {
+                                        "helpful": true,
+                                        "skillDamageBonuses": {
+                                            "shukaku-gaara-sand-claw": 30,
+                                            "shukaku-gaara-drilling-air-bullet": 60
+                                        },
+                                        "tooltipText": "Sand Claw and Drilling Air Bullet deal double damage."
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
 ];
 
 if (typeof module !== 'undefined') {

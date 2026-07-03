@@ -287,10 +287,10 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         totals.damageTakenBonusFlat += Number(metadata.damageTakenBonusFlat) || 0;
         totals.nonAfflictionDamageTakenBonusFlat += Number(metadata.nonAfflictionDamageTakenBonusFlat) || 0;
         if (Number.isFinite(metadata.damageTakenMultiplier)) {
-            totals.damageTakenMultiplier *= Math.max(0, Number(metadata.damageTakenMultiplier) || 1);
+            totals.damageTakenMultiplier *= Math.max(0, Number(metadata.damageTakenMultiplier));
         }
         if (Number.isFinite(metadata.healReceivedMultiplier)) {
-            statusHealReceivedMultiplier = Math.max(0, Number(metadata.healReceivedMultiplier) || 1);
+            statusHealReceivedMultiplier = Math.max(0, Number(metadata.healReceivedMultiplier));
         }
         const healMultiplierAtMostThreshold = Number(
             metadata.healReceivedMultiplierWhenOwnerCurrentHpAtMostThreshold
@@ -3526,6 +3526,7 @@ const cleanseHarmfulStatuses = (unit, count = 1) => {
         if (removed >= maxCount) return true;
         const harmful = Boolean(status?.metadata?.harmful);
         if (!harmful) return true;
+        if (Boolean(status?.metadata?.cannotBeCleansed)) return true;
         removed += 1;
         return false;
     });
@@ -3544,6 +3545,7 @@ const cleanseEnemyAfflictionStatuses = (unit, ownerUsername, count = 0) => {
         const sourceUsername = typeof status?.sourceUsername === 'string' ? status.sourceUsername : '';
         if (!sourceUsername || sourceUsername === ownerUsername) return true;
         if (!Boolean(status?.metadata?.afflictionDamage)) return true;
+        if (Boolean(status?.metadata?.cannotBeCleansed)) return true;
         removed += 1;
         return false;
     });
@@ -6027,6 +6029,22 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                         ? status?.sourceUsername === endingUsername
                         : username === endingUsername;
                 if (!shouldTrigger) return;
+                const growPerTurn = Array.isArray(status?.metadata?.growPerTurn)
+                    ? status.metadata.growPerTurn
+                    : [];
+                if (growPerTurn.length > 0 && status?.metadata && typeof status.metadata === 'object') {
+                    growPerTurn.forEach((entry) => {
+                        const key = typeof entry?.key === 'string' ? entry.key : '';
+                        const amount = Number(entry?.amount) || 0;
+                        if (!key || !amount) return;
+                        const current = Number(status.metadata[key]) || 0;
+                        let next = current + amount;
+                        if (Number.isFinite(Number(entry?.max))) {
+                            next = amount > 0 ? Math.min(next, Number(entry.max)) : Math.max(next, Number(entry.max));
+                        }
+                        status.metadata[key] = next;
+                    });
+                }
                 const turnEndApplyStatusToSelf = status?.metadata?.turnEndApplyStatusToSelf;
                 if (turnEndApplyStatusToSelf && typeof turnEndApplyStatusToSelf === 'object') {
                     applyStatus({
@@ -7258,6 +7276,7 @@ const applyTriggeredEffectsFromStatus = ({
                 if (!removeAll && maxCount > 0) {
                     // handled by removed counter below
                 }
+                if (Boolean(entry?.metadata?.cannotBeCleansed)) return true;
                 const sourceUsername = entry?.sourceUsername || '';
                 const fromEnemy =
                     Boolean(sourceUsername) && Boolean(targetUsername) && sourceUsername !== targetUsername;
