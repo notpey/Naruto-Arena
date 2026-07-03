@@ -616,6 +616,7 @@ const characters = [
                 "id": "inuzuka-kiba-garouga-reduced",
                 "name": "Garouga",
                 "hiddenFromSelectionViewer": true,
+                "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/dhx6Qvr.png",
                 "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy.",
                 "energy": [
@@ -821,6 +822,10 @@ const characters = [
                         "statusId": "hyuuga_hinata_gentle_fist",
                         "duration": 2,
                         "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        },
                         "metadata": {
                             "harmful": true,
                             "turnEndDamage": 15,
@@ -829,6 +834,26 @@ const characters = [
                             "ongoingClass": "action",
                             "triggerOnApply": true,
                             "tooltipText": "This character takes 15 damage from Gentle Fist."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_gentle_fist_byakugan",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndRemoveRandomChakra": 1,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Gentle Fist and loses 1 random chakra."
                         }
                     }
                 ]
@@ -853,6 +878,22 @@ const characters = [
                         "type": "damage",
                         "amount": 10,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
+                        },
                         "metadata": {
                             "ignoreDamageReduction": true
                         }
@@ -892,10 +933,6 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "skillReplacements": {
-                                "hyuuga-hinata-hinata-gentle-fist": "hyuuga-hinata-hinata-gentle-fist-byakugan",
-                                "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan"
-                            },
                             "tooltipText": "Hinata has 15 damage reduction and her skills are improved."
                         }
                     }
@@ -933,7 +970,9 @@ const characters = [
                 "id": "hyuuga-hinata-hinata-gentle-fist-byakugan",
                 "name": "Hinata Gentle Fist",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/k0nWgv6.png",
+                "omitFromSelectionViewer": true,
+                "useBaseSkillCooldown": true,
+                "skillimage": "https://i.imgur.com/guOfm9P.png",
                 "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
                 "energy": [
                     "Taijutsu"
@@ -968,7 +1007,9 @@ const characters = [
                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan",
                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/NHwkyNb.png",
+                "omitFromSelectionViewer": true,
+                "useBaseSkillCooldown": true,
+                "skillimage": "https://i.imgur.com/CFkIcA6.png",
                 "skilldescription": "Hyuuga Hinata deals 15 piercing damage to all enemies and grants her team 10 points of destructible defense for 1 turn.",
                 "energy": [
                     "Ninjutsu"
@@ -1049,7 +1090,7 @@ const characters = [
                 "skillimage": "https://i.imgur.com/qrtbpQH.png",
                 "skilldescription": "Nara Shikamaru makes all enemies unable to reduce damage or become invulnerable and deals 15 damage to them for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
                 "energy": [
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
@@ -1727,6 +1768,7 @@ const characters = [
                 "id": "rock-lee-final-lotus",
                 "name": "Final Lotus",
                 "hiddenFromSelectionViewer": true,
+                "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/h658CGb.png",
                 "skilldescription": "Rock Lee deals 100 damage to one enemy.",
                 "energy": [
@@ -1922,6 +1964,10 @@ const characters = [
                         "statusId": "tenten_twin_rising_dragons_mark",
                         "duration": 1,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "tenten_full_release_active"
+                        },
                         "metadata": {
                             "harmful": true,
                             "bonusDamageFromSourceSkillsFlat": 10,
@@ -1930,6 +1976,34 @@ const characters = [
                                 "tenten-twin-rising-dragons-trap"
                             ],
                             "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_twin_rising_dragons_mark",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "bonusDamageFromSourceSkillsFlat": 20,
+                            "bonusDamageFromSourceCharacterId": "tenten",
+                            "bonusDamageAppliesToSkillIds": [
+                                "tenten-twin-rising-dragons-trap"
+                            ],
+                            "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                        }
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "statusId": "tenten_full_release_active",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
                         }
                     }
                 ]
@@ -1960,6 +2034,10 @@ const characters = [
                         "statusId": "tenten_twin_rising_dragons_trap_debuff",
                         "duration": 1,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "tenten_full_release_active"
+                        },
                         "metadata": {
                             "harmful": true,
                             "damageDebuffBySkillClass": {
@@ -1967,6 +2045,33 @@ const characters = [
                                 "energy": 5
                             },
                             "tooltipText": "This character deals 5 less physical and chakra damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_twin_rising_dragons_trap_debuff",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "damageDebuffBySkillClass": {
+                                "physical": 5,
+                                "energy": 5
+                            },
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
+                        }
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "statusId": "tenten_full_release_active",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
                         }
                     },
                     {
@@ -1980,7 +2085,7 @@ const characters = [
                 "id": "tenten-twin-rising-dragons-full-release",
                 "name": "Twin Rising Dragons Full Release",
                 "skillimage": "https://i.imgur.com/5cUbYBW.png",
-                "skilldescription": "Tenten becomes invulnerable to non-strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons will apply its non-damage effect twice and the damage reduction effect of Twin Rising Dragons Trap will last 1 additional turn.",
+                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons will apply its non-damage effect twice and the damage reduction effect of Twin Rising Dragons Trap will last 1 additional turn.",
                 "energy": [
                     "Random"
                 ],
@@ -1998,13 +2103,8 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "invulnerableToSkillClasses": [
-                                "physical",
-                                "energy",
-                                "mental",
-                                "affliction"
-                            ],
-                            "tooltipText": "Tenten is invulnerable to non-strategic skills."
+                            "invulnerable": true,
+                            "tooltipText": "Tenten is invulnerable."
                         }
                     },
                     {
@@ -2013,10 +2113,6 @@ const characters = [
                         "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "skillReplacements": {
-                                "tenten-twin-rising-dragons": "tenten-twin-rising-dragons-full-release-version",
-                                "tenten-twin-rising-dragons-trap": "tenten-twin-rising-dragons-trap-full-release-version"
-                            },
                             "consumeOnNextSkillUse": true,
                             "tooltipText": "Tenten's next harmful skill is improved."
                         }
@@ -2055,7 +2151,8 @@ const characters = [
                 "id": "tenten-twin-rising-dragons-full-release-version",
                 "name": "Twin Rising Dragons",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/mlelii2.png",
+                "omitFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/735M5GV.png",
                 "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
@@ -2100,7 +2197,8 @@ const characters = [
                 "id": "tenten-twin-rising-dragons-trap-full-release-version",
                 "name": "Twin Rising Dragons Trap",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/3bgTaua.png",
+                "omitFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/pOsj115.png",
                 "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
                 "energy": [
                     "Random"
@@ -2512,6 +2610,7 @@ const characters = [
                 "id": "temari-summoning-quick-beheading-dance-reduced",
                 "name": "Summoning Quick Beheading Dance",
                 "hiddenFromSelectionViewer": true,
+                "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/AsbfOOH.png",
                 "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies.",
                 "energy": [
@@ -2722,7 +2821,7 @@ const characters = [
                 "id": "tsuchi-kin-illusion-bell-needles",
                 "name": "Illusion Bell Needles",
                 "skillimage": "https://i.imgur.com/wFHxiW6.png",
-                "skilldescription": "One enemy takes 25 damage. If used after 'Needle and Bell Trap', the target has all their skills silenced for 1 turn. If used after 'Unnerving Bells', the target has all their skills delayed for 1 turn. If used after 'Sound Hallucinations', the target has all their skills Blinded for 1 turn.",
+                "skilldescription": "One enemy takes 25 damage. If used after 'Needle and Bell Trap', the target has all their skills silenced for 1 turn. If used after 'Unnerving Bells', the target has all their skills delayed for 1 turn.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -2769,21 +2868,6 @@ const characters = [
                         }
                     },
                     {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_illusion_bell_blind",
-                        "duration": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_sound_hallucinations"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "fullBlind": true,
-                            "tooltipText": "This character's skills are blinded and may hit random targets."
-                        }
-                    },
-                    {
                         "type": "damage",
                         "amount": 5,
                         "condition": {
@@ -2801,15 +2885,6 @@ const characters = [
                             "consumeOnMatch": true
                         }
                     },
-                    {
-                        "type": "damage",
-                        "amount": 5,
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_sound_hallucinations",
-                            "consumeOnMatch": true
-                        }
-                    }
                 ]
             },
             {
@@ -2875,7 +2950,7 @@ const characters = [
                 "id": "tsuchi-kin-unnerving-bells",
                 "name": "Unnerving Bells",
                 "skillimage": "https://i.imgur.com/BU6EHyR.png",
-                "skilldescription": "One enemy loses 1 random chakra and has their cooldowns paralyzed for 2 turns. 'Illusion Bell Needles' deals 5 additional damage next turn.",
+                "skilldescription": "One enemy loses 1 random chakra. 'Illusion Bell Needles' deals 5 additional damage next turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2892,17 +2967,6 @@ const characters = [
                         "type": "remove_random_chakra",
                         "amount": 1,
                         "scope": "target"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_unnerving_bells_cooldown_paralyze",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "freezeCooldowns": true,
-                            "tooltipText": "This character's cooldowns are paralyzed."
-                        }
                     },
                     {
                         "type": "cleanse_statuses",
@@ -2924,58 +2988,29 @@ const characters = [
                 ]
             },
             {
-                "id": "tsuchi-kin-sound-hallucinations",
-                "name": "Sound Hallucinations",
+                "id": "tsuchi-kin-kin-substitution",
+                "name": "Kin Substitution",
                 "skillimage": "https://i.imgur.com/XVx6f4x.png",
-                "skilldescription": "Kin gains 50% Evasion for 1 turn and increases the cooldowns of one enemy by 2 for 2 turns. 'Illusion Bell Needles' deals 5 additional damage next turn.",
+                "skilldescription": "This skill makes Tsuchi Kin invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
-                "target": "single-enemy",
+                "target": "self",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 4,
                 "classes": [
-                    "Mental",
-                    "Ranged",
+                    "Strategic",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "tsuchi_kin_sound_hallucinations_evasion",
+                        "statusId": "invulnerable",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "evadeChancePercent": 50,
-                            "tooltipText": "This character has 50% evade chance."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_sound_hallucinations_cooldown_increase",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "usedSkillCooldownPenalty": 2,
-                            "tooltipText": "For 2 turns, the skills this character uses has its cooldown increased by 2 turns."
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "self",
-                        "metadataAny": [
-                            "tsuchiKinIllusionBellPrep"
-                        ]
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_sound_hallucinations",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "tsuchiKinIllusionBellPrep": true,
-                            "tooltipText": "Illusion Bell Needles is empowered by Sound Hallucinations."
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
                         }
                     }
                 ]
@@ -3049,6 +3084,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltipFromEnemy": true,
                             "triggerOnEnemyHarmfulNonStrategic": true,
                             "counterCancelsSkill": true,
                             "tooltipText": "The first non-strategic skill used on this character will be countered."
@@ -5429,7 +5465,7 @@ const characters = [
                 "id": "mitarashi-anko-quick-reflexes",
                 "name": "Quick Reflexes",
                 "skillimage": "https://i.imgur.com/jOjcH7H.png",
-                "skilldescription": "This skill makes Quick invulnerable for 1 turn.",
+                "skilldescription": "This skill makes Mitarashi Anko invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5775,6 +5811,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltipFromEnemy": true,
                             "triggerOnEnemyHarmfulNonStrategic": true,
                             "counterCancelsSkill": true,
                             "tooltipText": "The first non-strategic skill used on this character will be countered."
@@ -6627,6 +6664,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltipFromEnemy": true,
                             "triggerOnEnemyHarmfulSkillClassesAny": [
                                 "physical",
                                 "energy",
@@ -7295,6 +7333,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "hideTooltipFromUnitOwner": true,
                             "onOwnerUseSkillTrigger": true,
                             "onOwnerUseSkillHarmfulOnly": true,
                             "onOwnerUseSkillEffects": [
@@ -7638,6 +7677,7 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "hideTooltipFromUnitOwner": true,
                             "copyTargetTotalSkillUseCountToKeys": [
                                 "skillUseCountSnapshot"
                             ],

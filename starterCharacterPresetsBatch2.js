@@ -286,6 +286,10 @@
                         "statusId": "tenten_twin_rising_dragons_mark",
                         "duration": 1,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "tenten_full_release_active"
+                        },
                         "metadata": {
                             "harmful": true,
                             "bonusDamageFromSourceSkillsFlat": 10,
@@ -294,6 +298,34 @@
                                 "tenten-twin-rising-dragons-trap"
                             ],
                             "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_twin_rising_dragons_mark",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "bonusDamageFromSourceSkillsFlat": 20,
+                            "bonusDamageFromSourceCharacterId": "tenten",
+                            "bonusDamageAppliesToSkillIds": [
+                                "tenten-twin-rising-dragons-trap"
+                            ],
+                            "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                        }
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "statusId": "tenten_full_release_active",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
                         }
                     }
                 ]
@@ -324,6 +356,10 @@
                         "statusId": "tenten_twin_rising_dragons_trap_debuff",
                         "duration": 1,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "tenten_full_release_active"
+                        },
                         "metadata": {
                             "harmful": true,
                             "damageDebuffBySkillClass": {
@@ -331,6 +367,33 @@
                                 "energy": 5
                             },
                             "tooltipText": "This character deals 5 less physical and chakra damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_twin_rising_dragons_trap_debuff",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "damageDebuffBySkillClass": {
+                                "physical": 5,
+                                "energy": 5
+                            },
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
+                        }
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "statusId": "tenten_full_release_active",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "tenten_full_release_active"
                         }
                     },
                     {
@@ -344,7 +407,7 @@
                 "id": "tenten-twin-rising-dragons-full-release",
                 "name": "Twin Rising Dragons Full Release",
                 "skillimage": "https://i.imgur.com/5cUbYBW.png",
-                "skilldescription": "Tenten becomes invulnerable to non-strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons will apply its non-damage effect twice and the damage reduction effect of Twin Rising Dragons Trap will last 1 additional turn.",
+                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons will apply its non-damage effect twice and the damage reduction effect of Twin Rising Dragons Trap will last 1 additional turn.",
                 "energy": [
                     "Random"
                 ],
@@ -362,13 +425,8 @@
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "invulnerableToSkillClasses": [
-                                "physical",
-                                "energy",
-                                "mental",
-                                "affliction"
-                            ],
-                            "tooltipText": "Tenten is invulnerable to non-strategic skills."
+                            "invulnerable": true,
+                            "tooltipText": "Tenten is invulnerable."
                         }
                     },
                     {
@@ -377,10 +435,6 @@
                         "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "skillReplacements": {
-                                "tenten-twin-rising-dragons": "tenten-twin-rising-dragons-full-release-version",
-                                "tenten-twin-rising-dragons-trap": "tenten-twin-rising-dragons-trap-full-release-version"
-                            },
                             "consumeOnNextSkillUse": true,
                             "tooltipText": "Tenten's next harmful skill is improved."
                         }
@@ -397,8 +451,8 @@
                 "id": "tenten-twin-rising-dragons-full-release-version",
                 "name": "Twin Rising Dragons",
                 "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/mlelii2.png",
+                "omitFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/735M5GV.png",
                 "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
@@ -443,8 +497,8 @@
                 "id": "tenten-twin-rising-dragons-trap-full-release-version",
                 "name": "Twin Rising Dragons Trap",
                 "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/3bgTaua.png",
+                "omitFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/pOsj115.png",
                 "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
                 "energy": [
                     "Random"
@@ -1000,6 +1054,8 @@
                             "turnEndDamage": 35,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
                             "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
                         }
                     }
@@ -1095,6 +1151,8 @@
                             "turnEndDamage": 35,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
                             "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
                         }
                     }

@@ -88,19 +88,14 @@ test('Tenten Twin Rising Dragons Trap debuff expires instead of freezing', () =>
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff'), undefined);
 });
 
-test('Tsuchi Kin cooldown paralyze does not remain frozen at two turns', () => {
+test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {
     const match = makeMatch([indexById['tsuchi-kin']], [indexById['gaara-of-the-desert']]);
 
     queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
-    assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze')?.remainingTurns, 2);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze')?.remainingTurns, 2);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze')?.remainingTurns, 1);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze'), undefined);
+    assert.equal(getStatus(match, 'p1', 0, 'tsuchi_kin_illusion_bell_trigger_unnerving_bells')?.remainingTurns, 1);
 });
 
 test('Orochimaru Manda grants one random chakra on Orochimaru turn end', () => {

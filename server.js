@@ -23,7 +23,7 @@ app.use(compression());
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
 const MATCH_FOUND_HOLD_MS = 3 * 1000;
-const BATTLE_BOT_QUEUE_TIMEOUT_MS = 3 * 1000;
+const BATTLE_BOT_QUEUE_TIMEOUT_MS = 2 * 1000;
 const BATTLE_BOT_ACTION_DELAY_MS = 15 * 1000;
 const BATTLE_BOTS_ENABLED = process.env.ENABLE_BATTLE_BOTS !== 'false';
 const DEFAULT_URI = process.env.MONGODB_URI;
@@ -2696,6 +2696,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
 
     const userByUsername = new Map(users.map((user) => [user.username, user]));
     const missionCatalog = await getStoredMissionCatalog();
+    const missionResultsByUsername = new Map();
 
     await Promise.all(
         usernames.map(async (username) => {
@@ -2713,6 +2714,8 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
             const userLevel = Number(profile?.ladder?.level) || 1;
             const didWin = Boolean(winnerUsername) && winnerUsername === username;
             let mutated = false;
+            const completedMissionIds = [];
+            const unlockedCharacterIds = [];
 
             for (const mission of missionCatalog) {
                 if (!mission || !mission.missionId) {
@@ -2870,8 +2873,12 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                 if (hasTrackableGoals && allTrackableGoalsComplete) {
                     nextProgress.completedAt = existingProgress.completedAt || endedAt || new Date();
                     nextProgress.unlockedAt = nextProgress.completedAt;
-                    if (rewardCharacterId) {
+                    if (!alreadyCompleted) {
+                        completedMissionIds.push(mission.missionId);
+                    }
+                    if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
                         unlockedIds.add(rewardCharacterId);
+                        unlockedCharacterIds.push(rewardCharacterId);
                     }
                 }
 
@@ -2887,6 +2894,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     !unlockedIds.has(rewardCharacterId)
                 ) {
                     unlockedIds.add(rewardCharacterId);
+                    unlockedCharacterIds.push(rewardCharacterId);
                     mutated = true;
                 }
             }
@@ -2914,10 +2922,18 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     },
                 }
             );
+            missionResultsByUsername.set(username, {
+                completedMissionIds: Array.from(new Set(completedMissionIds)),
+                unlockedCharacterIds: Array.from(new Set(unlockedCharacterIds)),
+                unlockedCharacters: Array.from(new Set(unlockedCharacterIds)).map((characterId) => ({
+                    characterId,
+                    name: getCharacterDisplayNameById(characterId),
+                })),
+            });
         })
     );
 
-    return true;
+    return Object.fromEntries(missionResultsByUsername);
 };
 
 const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
@@ -3123,7 +3139,9 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         return null;
     }
 
-    await applyMissionProgressForUsers(match, winnerUsername, endedAt);
+    const missionResults = await applyMissionProgressForUsers(match, winnerUsername, endedAt);
+    match.missionResults =
+        missionResults && Object.keys(missionResults).length > 0 ? missionResults : null;
 
     if (match.mode === 'story') {
         await applyStoryProgressForUsers(match, winnerUsername, endedAt);
@@ -3213,10 +3231,9 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
             LADDER_MAX_EXPERIENCE_POINTS,
             Math.max(0, previousExperiencePoints + expChange)
         );
+        const ryoDelta = didWin ? LADDER_WIN_RYO : winnerUsername ? LADDER_LOSS_RYO : 0;
         profile.ladder.experiencePoints = nextExperiencePoints;
-        profile.ryo =
-            Math.max(0, Number(profile.ryo) || 0) +
-            (didWin ? LADDER_WIN_RYO : winnerUsername ? LADDER_LOSS_RYO : 0);
+        profile.ryo = Math.max(0, Number(profile.ryo) || 0) + ryoDelta;
         if (didWin) {
             profile.ladder.wins += 1;
             profile.ladder.streak = Math.max(0, Number(profile.ladder.streak) || 0) + 1;
@@ -3275,6 +3292,8 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
             didWin,
             expDelta,
             clanExpDelta,
+            ryoDelta,
+            missionResult: missionResults?.[username] || null,
             previousExperiencePoints,
             previousLevel: initialProfiles.get(username)?.ladder?.level || 1,
             previousRank: initialProfiles.get(username)?.ladder?.rank || 'Academy Student',
@@ -3293,6 +3312,8 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
             didWin: prelim.didWin,
             expDelta: prelim.expDelta,
             clanExpDelta: prelim.clanExpDelta || 0,
+            ryoDelta: prelim.ryoDelta || 0,
+            missionResult: prelim.missionResult || null,
             previousExperiencePoints: prelim.previousExperiencePoints,
             currentExperiencePoints: finalProfile.ladder.experiencePoints,
             previousLevel: prelim.previousLevel,
@@ -4530,6 +4551,7 @@ const buildMatchPayloadForUser = (match, username) => {
         lastChakraGain: sanitizeLastChakraGainForViewer(match.economy?.lastChakraGain, username),
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
+        missionResult: match.missionResults?.[username] || null,
         storyMatch: match.storyMatch
             ? {
                   chapterId: match.storyMatch.chapterId || null,
@@ -5004,10 +5026,17 @@ const pickInitialTurn = (players = []) => {
     return { turnOrder, currentTurn: turnOrder[0] || null };
 };
 
-const generateRandomChakra = (count = 0) => {
+const generateRandomChakra = (count = 0, currentPool = null) => {
     const gains = [];
+    const workingPool = {
+        ...createEmptyChakraPool(),
+        ...(currentPool && typeof currentPool === 'object' ? currentPool : {}),
+    };
     for (let i = 0; i < count; i += 1) {
-        const pick = chakraTypes[Math.floor(Math.random() * chakraTypes.length)];
+        const lowestCount = Math.min(...chakraTypes.map((type) => Math.max(0, Number(workingPool[type]) || 0)));
+        const candidates = chakraTypes.filter((type) => Math.max(0, Number(workingPool[type]) || 0) === lowestCount);
+        const pick = candidates[Math.floor(Math.random() * candidates.length)] || chakraTypes[0];
+        workingPool[pick] = (Number(workingPool[pick]) || 0) + 1;
         gains.push(pick);
     }
     return gains;
@@ -5065,7 +5094,8 @@ const initializeEconomyState = (players, currentTurn, aliveLookup = {}) => {
     });
 
     if (currentTurn && chakraPools[currentTurn]) {
-        const gains = generateRandomChakra(1);
+        const openingGainCount = Math.max(1, Number(aliveLookup?.[currentTurn]) || 1);
+        const gains = generateRandomChakra(openingGainCount, chakraPools[currentTurn]);
         chakraPools[currentTurn] = applyChakraGain(chakraPools[currentTurn], gains);
         economy.startGranted[currentTurn] = true;
         economy.lastChakraGain[currentTurn] = gains;
@@ -5154,6 +5184,30 @@ const dequeueOpponent = (username, mode = 'quick') => {
     return opponent;
 };
 
+const getRandomBattleBotLevel = () => Math.max(1, Math.min(LADDER_MAX_LEVEL, 1 + Math.floor(Math.random() * LADDER_MAX_LEVEL)));
+
+const buildBattleBotLadderPresentation = (level = 1) => {
+    const normalizedLevel = Math.max(1, Math.min(LADDER_MAX_LEVEL, Number(level) || 1));
+    const rankInfo = getRankInfoForLevel(normalizedLevel);
+    return {
+        level: normalizedLevel,
+        rank: rankInfo.rank,
+        rankHatUrl: rankInfo.hatUrl,
+        experiencePoints: getCumulativeExperienceForLevel(normalizedLevel),
+        experienceIntoLevel: 0,
+        experienceForNextLevel: getExperienceRequiredForNextLevel(normalizedLevel),
+        experienceToNextLevel: getExperienceRequiredForNextLevel(normalizedLevel),
+        ladderRank: null,
+        wins: 0,
+        losses: 0,
+        streak: 0,
+        highestStreak: 0,
+        highestLevel: normalizedLevel,
+        famePoints: 0,
+        isHokage: false,
+    };
+};
+
 const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1, displayName = GAME_BOT_DISPLAY_NAME }) => ({
     username: createGameBotUsername(matchId),
     displayName: displayName || GAME_BOT_DISPLAY_NAME,
@@ -5161,6 +5215,9 @@ const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1, displayName = G
     team,
     aliveCount: Array.isArray(team) ? team.length : 3,
     ladderLevel: Math.max(1, Number(ladderLevel) || 1),
+    profile: {
+        ladder: buildBattleBotLadderPresentation(ladderLevel),
+    },
 });
 
 const resolveRosterIndicesForCharacterIds = (characterIds = []) =>
@@ -5178,7 +5235,7 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
     const botPlayer = createBattleBotPlayer({
         matchId,
         team: buildBattleBotTeam(),
-        ladderLevel: Number(playerProfile?.ladder?.level) || 1,
+        ladderLevel: getRandomBattleBotLevel(),
     });
     const aliveLookup = {
         [username]: Array.isArray(team) ? team.length : 3,
@@ -5505,7 +5562,8 @@ const ensureMatchEconomy = async (match) => {
         !match.economy.startGranted[current] &&
         match.economy.turnCounts[current] === 0
     ) {
-        const gains = generateRandomChakra(1);
+        const openingGainCount = Math.max(1, getAliveCountForUser(match, current));
+        const gains = generateRandomChakra(openingGainCount, match.chakraPools[current]);
         match.chakraPools[current] = applyChakraGain(match.chakraPools[current], gains);
         match.economy.startGranted[current] = true;
         match.economy.lastChakraGain[current] = gains;
@@ -6348,6 +6406,7 @@ const finalizeTurn = async (match, username) => {
                     economy: match.economy,
                     pendingTurns: match.pendingTurns,
                     ladderResults: match.ladderResults || null,
+                    missionResults: match.missionResults || null,
                 },
             }
         );
@@ -6364,7 +6423,7 @@ const finalizeTurn = async (match, username) => {
         'additionalRandomChakraPerTurn'
     );
     const effectiveGainCount = Math.max(0, aliveCount - blockedActorGainCount);
-    const turnGains = generateRandomChakra(effectiveGainCount + additionalTurnGains);
+    const turnGains = generateRandomChakra(effectiveGainCount + additionalTurnGains, pools[username]);
     pools[username] = applyChakraGain(pools[username], turnGains);
     econ.lastChakraGain[username] = turnGains;
 
@@ -6389,7 +6448,7 @@ const finalizeTurn = async (match, username) => {
             'preventNextTurnChakraGain'
         );
         const effectiveStartGainCount = Math.max(0, aliveCount - blockedNextStartCount);
-        const startGains = generateRandomChakra(effectiveStartGainCount + additionalStartGains);
+        const startGains = generateRandomChakra(effectiveStartGainCount + additionalStartGains, pools[nextTurn]);
         pools[nextTurn] = applyChakraGain(pools[nextTurn], startGains);
         econ.startGranted[nextTurn] = true;
         econ.lastChakraGain[nextTurn] = startGains;
@@ -7321,6 +7380,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
             endReason: match.endReason || null,
             endedAt: match.endedAt || null,
             ladderResult: match.ladderResults?.[username] || null,
+            missionResult: match.missionResults?.[username] || null,
         });
     }
     const opponentEntry = match.players.find((p) => p.username !== username);
@@ -7343,6 +7403,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
                 currentTurn: null,
                 turnExpiresAt: null,
                 ladderResults: ladderResults || null,
+                missionResults: match.missionResults || null,
             },
         }
     );
@@ -7358,6 +7419,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
         endReason: 'surrender',
         endedAt,
         ladderResult: ladderResults?.[username] || null,
+        missionResult: match.missionResults?.[username] || null,
     });
 });
 

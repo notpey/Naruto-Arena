@@ -357,6 +357,10 @@
                         "statusId": "hyuuga_hinata_gentle_fist",
                         "duration": 2,
                         "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        },
                         "metadata": {
                             "harmful": true,
                             "turnEndDamage": 15,
@@ -365,6 +369,26 @@
                             "ongoingClass": "action",
                             "triggerOnApply": true,
                             "tooltipText": "This character takes 15 damage from Gentle Fist."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_gentle_fist_byakugan",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndRemoveRandomChakra": 1,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Gentle Fist and loses 1 random chakra."
                         }
                     }
                 ]
@@ -389,6 +413,22 @@
                         "type": "damage",
                         "amount": 10,
                         "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
+                        },
                         "metadata": {
                             "ignoreDamageReduction": true
                         }
@@ -428,10 +468,6 @@
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "skillReplacements": {
-                                "hyuuga-hinata-hinata-gentle-fist": "hyuuga-hinata-hinata-gentle-fist-byakugan",
-                                "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan"
-                            },
                             "tooltipText": "Hinata has 15 damage reduction and her skills are improved."
                         }
                     }
@@ -447,8 +483,9 @@
                 "id": "hyuuga-hinata-hinata-gentle-fist-byakugan",
                 "name": "Hinata Gentle Fist",
                 "hiddenFromSelectionViewer": true,
+                "omitFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/k0nWgv6.png",
+                "skillimage": "https://i.imgur.com/guOfm9P.png",
                 "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
                 "energy": [
                     "Taijutsu"
@@ -483,8 +520,9 @@
                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan",
                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                 "hiddenFromSelectionViewer": true,
+                "omitFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/NHwkyNb.png",
+                "skillimage": "https://i.imgur.com/CFkIcA6.png",
                 "skilldescription": "Hyuuga Hinata deals 15 piercing damage to all enemies and grants her team 10 points of destructible defense for 1 turn.",
                 "energy": [
                     "Ninjutsu"
@@ -566,7 +604,7 @@
                 "skillimage": "https://i.imgur.com/qrtbpQH.png",
                 "skilldescription": "Nara Shikamaru makes all enemies unable to reduce damage or become invulnerable and deals 15 damage to them for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
                 "energy": [
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "all-enemy",
                 "damage": 0,

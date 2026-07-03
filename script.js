@@ -437,6 +437,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isGameBotUsername = (username = '') =>
         typeof username === 'string' && username.trim().toLowerCase().startsWith('__game_bot__:');
 
+    let latestOpponentProfileLadder = null;
+
     const getPublicOpponentDisplayName = (opponent = null) => {
         const explicitName =
             typeof opponent?.displayName === 'string' && opponent.displayName.trim()
@@ -455,6 +457,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ladder: null,
             });
             return;
+        }
+        if (isGameBotUsername(username)) {
+            const fallbackName = displayName || getPublicOpponentDisplayName({ username });
+            applyOpponentIdentity({
+                name: fallbackName,
+                avatarUrl: defaultProfileAvatar,
+                ladder: latestOpponentProfileLadder || null,
+            });
+            return null;
         }
         const user = await fetchPublicProfile(username);
         const fallbackName = displayName || getPublicOpponentDisplayName({ username });
@@ -1766,17 +1777,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 0);
         };
 
-        const showBattleEndOverlay = ({ didWin, opponentUsername, expDelta = null, clanExpDelta = null }) => {
+        const showBattleEndOverlay = ({
+            didWin,
+            opponentUsername,
+            expDelta = null,
+            clanExpDelta = null,
+            ryoDelta = null,
+            missionResult = null,
+        }) => {
             if (!battleEndOverlayEl || battleEndShown) return;
             const opponent = (opponentUsername || currentOpponentUsername || 'UNKNOWN').trim();
             const isLadderMatch = currentMatchMode === 'ladder';
             const normalizedExpDelta = Number.isFinite(Number(expDelta)) ? Number(expDelta) : 0;
-            const expMagnitude = Math.abs(normalizedExpDelta).toLocaleString();
             const normalizedClanExpDelta = Math.max(0, Number(clanExpDelta) || 0);
-            const clanExpLine =
-                normalizedClanExpDelta > 0
-                    ? `<br>YOUR CLAN GAINED ${normalizedClanExpDelta.toLocaleString()} EXP`
-                    : '';
+            const normalizedRyoDelta = Math.max(0, Number(ryoDelta) || 0);
+            const unlockedCharacters = Array.isArray(missionResult?.unlockedCharacters)
+                ? missionResult.unlockedCharacters
+                : [];
+            const unlockNames = unlockedCharacters
+                .map((entry) => (typeof entry?.name === 'string' ? entry.name.trim() : ''))
+                .filter(Boolean);
+            const outcomeText = didWin
+                ? isLadderMatch
+                    ? `You won a ladder battle against ${opponent}.`
+                    : currentMatchMode === 'private'
+                        ? `You won a private game against ${opponent}.`
+                        : `You won a quick battle against ${opponent}.`
+                : isLadderMatch
+                    ? `You lost a ladder battle against ${opponent}.`
+                    : currentMatchMode === 'private'
+                        ? `You lost a private game against ${opponent}.`
+                        : `You lost a quick battle against ${opponent}.`;
+            const rewardRows = [];
+            if (isLadderMatch) {
+                rewardRows.push({
+                    label: 'EXP',
+                    value:
+                        normalizedExpDelta >= 0
+                            ? `+${normalizedExpDelta.toLocaleString()}`
+                            : normalizedExpDelta.toLocaleString(),
+                });
+            }
+            if (normalizedClanExpDelta > 0) {
+                rewardRows.push({
+                    label: 'Clan EXP',
+                    value: `+${normalizedClanExpDelta.toLocaleString()}`,
+                });
+            }
+            if (normalizedRyoDelta > 0) {
+                rewardRows.push({
+                    label: 'Ryo',
+                    value: `+${normalizedRyoDelta.toLocaleString()}`,
+                });
+            }
+            const rewardsHtml = rewardRows.length
+                ? `<div class="battle-end-rewards">${rewardRows
+                      .map(
+                          (row) =>
+                              `<div class="battle-end-reward-row"><span class="battle-end-reward-label">${escapeHtml(row.label)}</span><span class="battle-end-reward-value">${escapeHtml(row.value)}</span></div>`
+                      )
+                      .join('')}</div>`
+                : '';
+            const unlocksHtml = unlockNames.length
+                ? `<div class="battle-end-unlocks">Unlocked: ${escapeHtml(unlockNames.join(', '))}</div>`
+                : `<div class="battle-end-unlocks">No new character unlocks.</div>`;
             if (battleEndPortraitEl) {
                 battleEndPortraitEl.src = didWin ? 'win.png' : 'lose.png';
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
@@ -1785,17 +1849,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 battleEndTitleEl.textContent = didWin ? 'WINNER' : 'LOSER';
             }
             if (battleEndMessageEl) {
-                battleEndMessageEl.innerHTML = didWin
-                    ? isLadderMatch
-                        ? `YOU WON A LADDER BATTLE AGAINST ${opponent}.<br>YOU GAINED ${expMagnitude} EXP${clanExpLine}`
-                        : currentMatchMode === 'private'
-                            ? `YOU WIN!<br>YOU WON A PRIVATE GAME AGAINST ${opponent}`
-                        : `CONGRATULATIONS!<br>YOU HAVE WON A QUICK BATTLE AGAINST ${opponent}.`
-                    : isLadderMatch
-                        ? `YOU LOST A LADDER BATTLE AGAINST ${opponent}.<br>YOU LOST ${expMagnitude} EXP`
-                        : currentMatchMode === 'private'
-                            ? `TOO BAD!<br>YOU LOST A PRIVATE GAME AGAINST ${opponent}`
-                        : `TOO BAD!<br>YOU HAVE LOST A QUICK BATTLE AGAINST ${opponent}.`;
+                battleEndMessageEl.innerHTML =
+                    `<div class="battle-end-summary">` +
+                    `<div class="battle-end-outcome">${escapeHtml(outcomeText)}</div>` +
+                    rewardsHtml +
+                    unlocksHtml +
+                    `</div>`;
             }
             battleEndOverlayEl.classList.add('visible');
             battleEndShown = true;
@@ -1923,9 +1982,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     face.dataset.aliveSrc = aliveSrc;
                 }
                 if (dead) {
-                    face.src = 'deadcharacter.png';
+                    card.dataset.wasDead = 'true';
+                    if (face.dataset.deadApplied === 'true') {
+                        face.src = 'deadcharacter.png';
+                        return;
+                    }
+                    if (face.dataset.deadTransitioning === 'true') {
+                        return;
+                    }
+                    face.dataset.deadTransitioning = 'true';
+                    face.classList.add('death-fade');
+                    window.setTimeout(() => {
+                        if (card.dataset.wasDead === 'true') {
+                            face.src = 'deadcharacter.png';
+                            face.dataset.deadApplied = 'true';
+                        }
+                        delete face.dataset.deadTransitioning;
+                        face.classList.remove('death-fade');
+                    }, 650);
                     return;
                 }
+                card.dataset.wasDead = 'false';
+                delete face.dataset.deadApplied;
+                delete face.dataset.deadTransitioning;
+                face.classList.remove('death-fade');
                 const statuses = Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [];
                 const faceOverride = statuses
                     .find(
@@ -2205,6 +2285,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (remaining >= 99) return 'Infinite';
                     return `${remaining} TURN${remaining === 1 ? '' : 'S'} LEFT`;
                 };
+                const splitTooltipTextIntoLines = (text, statusMetadata = {}) => {
+                    const defensePoints = Math.max(0, Number(statusMetadata?.destructibleDefensePoints) || 0);
+                    let normalized = String(text || '').trim();
+                    if (
+                        defensePoints > 0 &&
+                        /destructible defense/i.test(normalized) &&
+                        !new RegExp(`\\b${defensePoints}\\b`).test(normalized)
+                    ) {
+                        normalized = normalized.replace(
+                            /has permanent destructible defense/i,
+                            `has ${defensePoints} permanent destructible defense`
+                        );
+                        normalized = normalized.replace(
+                            /has destructible defense/i,
+                            `has ${defensePoints} destructible defense`
+                        );
+                    }
+                    return normalized
+                        .split(/\n+/)
+                        .flatMap((part) => part.split(/(?<=\.)\s+(?=This character|They|Their|All enemies|If |For \d+ turns)/i))
+                        .flatMap((part) =>
+                            part.split(
+                                /\s+and\s+(?=(?:takes|take|deals|deal|loses|lose|has|have|gains|gain|receives|receive|removes|remove|stuns|stun|their skills|skills cost)\b)/i
+                            )
+                        )
+                        .map((part) => part.trim())
+                        .filter(Boolean)
+                        .map((part, index) => {
+                            if (
+                                index > 0 &&
+                                /^(takes|take|deals|deal|loses|lose|has|have|gains|gain|receives|receive|removes|remove|stuns|stun|skills cost)\b/i.test(part)
+                            ) {
+                                return `This character ${part}`;
+                            }
+                            return part;
+                        });
+                };
                 const textRows = [];
                 groupStatuses.forEach((status) => {
                     const statusMetadata = status?.metadata || {};
@@ -2332,13 +2449,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         key,
                         text,
                         remaining,
+                        lines: splitTooltipTextIntoLines(text, statusMetadata),
                     });
                 });
                 const textLinesHtml = textRows
                     .map((row, idx) => {
-                        const line = String(row.text)
-                            .split('\n')
-                            .filter(Boolean)
+                        const line = (Array.isArray(row.lines) && row.lines.length ? row.lines : [row.text])
                             .map((sub) => `<div class="status-tooltip-desc-line">- ${escapeHtml(sub)}</div>`)
                             .join('');
                         const turns =
@@ -2429,9 +2545,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.opponent?.username) {
                 const nextOpponentUsername = data.opponent.username;
                 currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
+                latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
                 const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                 currentOpponentUsername = nextOpponentUsername;
-                if (opponentChanged) {
+                if (opponentChanged || isGameBotUsername(nextOpponentUsername)) {
                     hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
                 }
             }
@@ -2479,6 +2596,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             : opponentFromResult || currentOpponentDisplayName || currentOpponentUsername,
                     expDelta: data.ladderResult?.expDelta,
                     clanExpDelta: data.ladderResult?.clanExpDelta,
+                    ryoDelta: data.ladderResult?.ryoDelta,
+                    missionResult: data.ladderResult?.missionResult || data.missionResult,
                 });
                 return;
             }
@@ -2982,10 +3101,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (enemyNameEl && data.opponent?.username) {
                     const nextOpponentUsername = data.opponent.username;
                     currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
+                    latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
                     enemyNameEl.textContent = currentOpponentDisplayName || nextOpponentUsername;
                     const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                     currentOpponentUsername = nextOpponentUsername;
-                    if (opponentChanged) {
+                    if (opponentChanged || isGameBotUsername(nextOpponentUsername)) {
                         hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
                     }
                 }
@@ -3393,6 +3513,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     opponentUsername: opponentDisplay,
                     expDelta: data.ladderResult?.expDelta,
                     clanExpDelta: data.ladderResult?.clanExpDelta,
+                    ryoDelta: data.ladderResult?.ryoDelta,
+                    missionResult: data.ladderResult?.missionResult || data.missionResult,
                 });
             } catch (error) {
                 console.warn('Failed to surrender.', error);
@@ -3924,7 +4046,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentCharacterIndex === null) return;
         const character = roster[currentCharacterIndex];
         if (!character || !Array.isArray(character.skills)) return;
-        const viewerSkills = character.skills.filter(Boolean);
+        const viewerSkills = character.skills.filter((skill) => skill && !skill.omitFromSelectionViewer);
         const skill = viewerSkills[skillIndex];
         if (!skill) return;
         renderSkill(skill, skillIndex);
@@ -3948,7 +4070,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         renderCharacterOverview(character);
         if (Array.isArray(character.skills)) {
-            const viewerSkills = character.skills.filter(Boolean);
+            const viewerSkills = character.skills.filter((skill) => skill && !skill.omitFromSelectionViewer);
             ensureSkillImageSlots(viewerSkills.length);
             if (skillImagesContainer) {
                 skillImagesContainer.scrollLeft = 0;

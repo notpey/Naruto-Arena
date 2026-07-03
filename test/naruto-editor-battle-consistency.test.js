@@ -362,7 +362,7 @@ test('battleLogic resolves Hinata starter kit behavior used by the editor data',
             skillIndex: 0,
             actorState: hinataState,
         }).id,
-        'hyuuga-hinata-hinata-gentle-fist-byakugan'
+        'hyuuga-hinata-hinata-gentle-fist'
     );
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
@@ -537,7 +537,23 @@ test('battleLogic resolves Tenten starter kit behavior used by the editor data',
             skillIndex: 0,
             actorState: match.board.p1[0].state,
         }).id,
-        'tenten-twin-rising-dragons-full-release-version'
+        'tenten-twin-rising-dragons'
+    );
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'tenten_twin_rising_dragons_mark' &&
+                status.metadata.bonusDamageFromSourceSkillsFlat === 20
+        ),
+        true,
+        'Full Release should improve Twin Rising Dragons without replacing the skill id'
+    );
+    assert.equal(
+        match.board.p1[0].state.statuses.some((status) => status.id === 'tenten_full_release_active'),
+        false,
+        'Full Release improvement should be consumed by the next harmful Tenten skill'
     );
 });
 
