@@ -113,6 +113,7 @@
             <div class="selection-hub-mission-grid" data-mission-grid>
                 <div class="selection-hub-env-empty">Loading missions...</div>
             </div>
+            <div class="selection-hub-mission-detail" data-mission-detail hidden></div>
         </div>
         <div class="selection-hub-env-panel" data-hub-panel="inventory" hidden>
             <div class="selection-hub-env-header">
@@ -334,6 +335,7 @@
         var shopGrid = document.querySelector("[data-shop-env-grid]");
         var shopStatus = document.querySelector("[data-shop-env-status]");
         var missionGrid = document.querySelector("[data-mission-grid]");
+        var missionDetailEl = document.querySelector("[data-mission-detail]");
         var missionSearch = document.querySelector("[data-mission-search]");
         var missionRankButtons = Array.prototype.slice.call(document.querySelectorAll("[data-mission-rank]"));
         var inventoryGrid = document.querySelector(".selection-hub-inventory-grid");
@@ -514,20 +516,99 @@
             return "dc";
         }
 
+        function normalizeMissionGoal(goal) {
+            if (typeof goal === "string") {
+                var text = goal.trim();
+                if (!text) return null;
+                var m;
+                if ((m = text.match(/^Reach\s+rank\s+(\d+)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "reach_rank", rank: Number(m[1]) || 0 };
+                if ((m = text.match(/^Win\s+(\d+)\s+matches?\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "win_matches", character_name: m[2].trim(), wins: Number(m[1]) || 0 };
+                if ((m = text.match(/^Win\s+(\d+)\s+battles?\s+in\s+a\s+row\s+with\s+(.+?)(?:\.\s*\(0\/\d+\))?$/i))) return { type: "win_streak", character_name: m[2].trim(), wins: Number(m[1]) || 0 };
+                return { type: "text", text: text };
+            }
+            var s = goal && typeof goal === "object" ? goal : {};
+            var type = String(s.type || s.goalType || "text").trim().toLowerCase();
+            var wins = Number(s.wins != null ? s.wins : (s.count != null ? s.count : 0)) || 0;
+            var cname = String(s.character_name || s.characterName || s.character_id || s.characterId || "").trim();
+            var rank = Number(s.rank != null ? s.rank : (s.level != null ? s.level : 0)) || 0;
+            if (type === "reach_rank") return rank ? { type: "reach_rank", rank: rank } : null;
+            if (type === "win_matches" || type === "win_streak") return wins ? { type: type, character_name: cname, wins: wins } : null;
+            if (type === "win_streak_any" || type === "win_matches_any") {
+                var anyNames = Array.isArray(s.character_names) ? s.character_names.filter(Boolean) : [];
+                var anyIds = Array.isArray(s.character_ids) ? s.character_ids.filter(Boolean) : [];
+                var groupLabel = String(s.character_name || s.group_label || "").trim();
+                if (!wins || (anyNames.length < 2 && anyIds.length < 2 && !groupLabel)) return null;
+                return { type: type, character_names: anyNames, group_label: groupLabel, wins: wins };
+            }
+            var freeText = String(s.text || s.value || s.label || s.description || "").trim();
+            return freeText ? { type: "text", text: freeText } : null;
+        }
+
+        function formatMissionGoal(goal, progress) {
+            var n = normalizeMissionGoal(goal);
+            if (!n) return "";
+            var c = Math.max(0, Number(progress && progress.count ? progress.count : 0) || 0);
+            if (n.type === "reach_rank") return "Reach rank " + n.rank + ". (" + Math.min(c, n.rank) + "/" + n.rank + ")";
+            if (n.type === "win_matches") return "Win " + n.wins + " battles" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_streak") return "Win " + n.wins + " battles in a row" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_streak_any") return "Win " + n.wins + " battles in a row with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_matches_any") return "Win " + n.wins + " battles with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            return n.text || "";
+        }
+
+        function getGoalProgress(missionId, goalIndex) {
+            var mp = missionProgressByMissionId[missionId];
+            var gp = mp && mp.goalProgressByIndex ? mp.goalProgressByIndex[String(goalIndex)] : null;
+            return { count: Math.max(0, Number(gp && gp.count ? gp.count : 0) || 0) };
+        }
+
+        function getModeText(mission) {
+            var modes = (mission && mission.mode_restriction && Array.isArray(mission.mode_restriction.allowed_modes)) ? mission.mode_restriction.allowed_modes : [];
+            if (!modes.length) return "";
+            if (modes.length === 2 && modes.indexOf("quick") !== -1 && modes.indexOf("ladder") !== -1) return "Quick games and ladder games only.";
+            return modes.map(function (x) { return x.charAt(0).toUpperCase() + x.slice(1); }).join(", ") + ".";
+        }
+
+        function getRequirementLines(mission) {
+            var lines = [];
+            var modeText = getModeText(mission);
+            if (modeText) lines.push("Mode: " + modeText);
+            var sw = mission && mission.win_streak ? mission.win_streak : null;
+            if (sw && sw.wins > 0 && sw.character_name) lines.push("Win " + sw.wins + " battles in a row with " + sw.character_name + ".");
+            (Array.isArray(mission && mission.requirements) ? mission.requirements : []).forEach(function (r) {
+                if (r && lines.indexOf(r) === -1) lines.push(r);
+            });
+            return lines;
+        }
+
+        function getRewardText(mission) {
+            var rcn = String((mission && mission.reward_character_name) || (mission && mission.reward_character) || "").trim();
+            if (rcn) return "Unlock " + rcn + ".";
+            return String(mission && mission.reward ? mission.reward : "").trim();
+        }
+
         function normalizeMission(mission, index) {
             var src = mission && typeof mission === "object" ? mission : {};
             var id = slug(src.missionId || src.id || src.title || src.name || "") || "mission-" + (index + 1);
+            var allowedModes = Array.isArray(src.mode_restriction && src.mode_restriction.allowed_modes) ? src.mode_restriction.allowed_modes : ["quick", "ladder"];
             return {
                 missionId: id,
                 title: String(src.title || src.name || "Mission " + (index + 1)).trim(),
                 level_requirement: Number(src.level_requirement != null ? src.level_requirement : (src.levelRequirement || src.rank || 0)) || 0,
+                mode_restriction: { allowed_modes: allowedModes.filter(function (m) { return m === "quick" || m === "ladder"; }) },
                 reward_character: String(src.reward_character || src.rewardCharacter || "").trim(),
                 reward_character_name: String(src.reward_character_name || src.rewardCharacterName || "").trim(),
                 reward: String(src.reward || "").trim(),
+                win_streak: {
+                    character_name: String((src.win_streak && src.win_streak.character_name) || (src.winStreak && src.winStreak.characterName) || "").trim(),
+                    wins: Number((src.win_streak && src.win_streak.wins) || (src.winStreak && src.winStreak.wins) || 0) || 0
+                },
                 image: String(src.image || "").trim(),
                 imageAlt: String(src.imageAlt || src.title || "Mission artwork").trim(),
                 characterName: String(src.characterName || "").trim(),
                 portrait: String(src.portrait || "").trim(),
+                requirements: Array.isArray(src.requirements) ? src.requirements.map(function (e) { return String(e || "").trim(); }).filter(Boolean) : [],
+                goals: Array.isArray(src.goals) ? src.goals.map(normalizeMissionGoal).filter(Boolean) : [],
                 available: src.available !== false,
                 sortOrder: Number.isFinite(Number(src.sortOrder)) ? Number(src.sortOrder) : index + 1
             };
@@ -538,7 +619,20 @@
             var out = {};
             Object.keys(source).forEach(function (id) {
                 var entry = source[id] && typeof source[id] === "object" ? source[id] : {};
-                out[id] = { completedAt: entry.completedAt || null };
+                var rawGoalProgress = (entry.goalProgressByIndex && typeof entry.goalProgressByIndex === "object")
+                    ? entry.goalProgressByIndex
+                    : ((entry.goalProgress && typeof entry.goalProgress === "object") ? entry.goalProgress : {});
+                var goalProgressByIndex = {};
+                Object.keys(rawGoalProgress).forEach(function (goalIndex) {
+                    var normalizedIndex = String(parseInt(goalIndex, 10));
+                    if (normalizedIndex && normalizedIndex !== "NaN") {
+                        var goalEntry = rawGoalProgress[goalIndex] || {};
+                        goalProgressByIndex[normalizedIndex] = {
+                            count: Math.max(0, Number(goalEntry.count != null ? goalEntry.count : (goalEntry.progress || 0)) || 0)
+                        };
+                    }
+                });
+                out[id] = { completedAt: entry.completedAt || null, goalProgressByIndex: goalProgressByIndex };
             });
             return out;
         }
@@ -636,7 +730,7 @@
                 card.setAttribute("role", "button");
                 card.style.cursor = "pointer";
                 var openMissionDetail = function () {
-                    window.location.href = "missions.html?mission=" + encodeURIComponent(mission.missionId);
+                    showMissionDetail(mission);
                 };
                 card.addEventListener("click", openMissionDetail);
                 card.addEventListener("keydown", function (event) {
@@ -647,6 +741,120 @@
                 });
                 missionGrid.appendChild(card);
             });
+        }
+
+        function showMissionsGrid() {
+            if (missionGrid) missionGrid.hidden = false;
+            if (missionDetailEl) { missionDetailEl.hidden = true; missionDetailEl.innerHTML = ""; }
+        }
+
+        function showMissionDetail(mission) {
+            if (!missionDetailEl || !mission) return;
+            if (missionGrid) missionGrid.hidden = true;
+            missionDetailEl.hidden = false;
+            missionDetailEl.innerHTML = "";
+
+            var meta = rankMeta[rankOf(mission)] || "Ninja Missions";
+
+            var back = document.createElement("button");
+            back.type = "button";
+            back.className = "selection-hub-mission-back";
+            back.textContent = "‹ Back to Missions";
+            back.addEventListener("click", showMissionsGrid);
+
+            var lvl = document.createElement("div");
+            lvl.className = "selection-hub-mission-detail-level";
+            lvl.textContent = "Level " + (getLevelRequirementValue(mission) || 1) + " · " + meta;
+
+            var title = document.createElement("div");
+            title.className = "selection-hub-mission-detail-title";
+            title.textContent = mission.title;
+
+            var body = document.createElement("div");
+            body.className = "selection-hub-mission-detail-body";
+
+            var art = document.createElement("img");
+            art.className = "selection-hub-mission-detail-art";
+            art.src = mission.image || mission.portrait || "deadcharacter.png";
+            art.alt = mission.imageAlt || mission.title;
+
+            var infoCol = document.createElement("div");
+            infoCol.className = "selection-hub-mission-detail-col";
+
+            var reqHead = document.createElement("div");
+            reqHead.className = "selection-hub-mission-detail-head";
+            reqHead.textContent = "› Requirements";
+            infoCol.appendChild(reqHead);
+
+            if (mission.characterName) {
+                var featured = document.createElement("p");
+                featured.className = "selection-hub-mission-detail-line";
+                featured.innerHTML = "<strong>Featured:</strong> " + mission.characterName;
+                infoCol.appendChild(featured);
+            }
+            var rankLine = document.createElement("p");
+            rankLine.className = "selection-hub-mission-detail-line";
+            rankLine.innerHTML = "<strong>Rank:</strong> At least " + (getLevelRequirementValue(mission) || "Any");
+            infoCol.appendChild(rankLine);
+            getRequirementLines(mission).forEach(function (line) {
+                var p = document.createElement("p");
+                p.className = "selection-hub-mission-detail-line";
+                p.textContent = line;
+                infoCol.appendChild(p);
+            });
+
+            var goalsHead = document.createElement("div");
+            goalsHead.className = "selection-hub-mission-detail-head";
+            goalsHead.textContent = "› Goals";
+            infoCol.appendChild(goalsHead);
+            var goals = Array.isArray(mission.goals) ? mission.goals : [];
+            if (!goals.length) {
+                var noGoals = document.createElement("p");
+                noGoals.className = "selection-hub-mission-detail-line";
+                noGoals.textContent = "Finish the mission to unlock its reward.";
+                infoCol.appendChild(noGoals);
+            } else {
+                goals.forEach(function (goal, goalIndex) {
+                    var p = document.createElement("p");
+                    p.className = "selection-hub-mission-detail-line";
+                    p.textContent = formatMissionGoal(goal, getGoalProgress(mission.missionId, goalIndex));
+                    infoCol.appendChild(p);
+                });
+            }
+
+            var rewardHead = document.createElement("div");
+            rewardHead.className = "selection-hub-mission-detail-head reward";
+            rewardHead.textContent = "› Reward";
+            infoCol.appendChild(rewardHead);
+            var rcn = String(mission.reward_character_name || mission.reward_character || "").trim();
+            if (rcn) {
+                var rewardRow = document.createElement("div");
+                rewardRow.className = "selection-hub-mission-reward-char";
+                if (mission.portrait) {
+                    var rimg = document.createElement("img");
+                    rimg.src = mission.portrait;
+                    rimg.alt = rcn;
+                    rewardRow.appendChild(rimg);
+                }
+                var rname = document.createElement("div");
+                rname.className = "selection-hub-mission-reward-name";
+                rname.textContent = "Character unlocked: " + rcn;
+                rewardRow.appendChild(rname);
+                infoCol.appendChild(rewardRow);
+            } else {
+                var rewardText = document.createElement("p");
+                rewardText.className = "selection-hub-mission-detail-line";
+                rewardText.textContent = getRewardText(mission) || "Mission completion reward.";
+                infoCol.appendChild(rewardText);
+            }
+
+            body.appendChild(art);
+            body.appendChild(infoCol);
+
+            missionDetailEl.appendChild(back);
+            missionDetailEl.appendChild(lvl);
+            missionDetailEl.appendChild(title);
+            missionDetailEl.appendChild(body);
         }
 
         function loadMissionEnvironment(force) {
@@ -914,7 +1122,7 @@
             });
             setSettingsOpen(false);
             if (nextView === "shop") loadShopEnvironment(false);
-            if (nextView === "missions") loadMissionEnvironment(false);
+            if (nextView === "missions") { showMissionsGrid(); loadMissionEnvironment(false); }
             if (nextView === "inventory") {
                 var activeInventoryButton = inventoryTabButtons.find(function (button) {
                     return button.classList.contains("active");
