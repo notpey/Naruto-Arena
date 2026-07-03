@@ -102,3 +102,35 @@ test('Tsuchi Kin cooldown paralyze does not remain frozen at two turns', () => {
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze'), undefined);
 });
+
+test('Orochimaru Manda grants one random chakra on Orochimaru turn end', () => {
+    const match = makeMatch([indexById.orochimaru], [indexById.tenten]);
+
+    queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(getStatus(match, 'p1', 0, 'orochimaru_manda_chakra_gain')?.remainingTurns, 99);
+
+    match.chakraPools.p1 = { taijutsu: 0, ninjutsu: 0, bloodline: 0, genjutsu: 0 };
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    const before = Object.values(match.chakraPools.p1).reduce((sum, value) => sum + value, 0);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    const after = Object.values(match.chakraPools.p1).reduce((sum, value) => sum + value, 0);
+
+    assert.equal(after, before + 1);
+});
+
+test('Temari Summoning Quick Beheading Dance damages all enemies on apply', () => {
+    const match = makeMatch(
+        [indexById.temari],
+        [indexById.tenten, indexById['gaara-of-the-desert'], indexById['tsuchi-kin']]
+    );
+
+    queueSkill(match, 'p1', 0, 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+
+    assert.equal(match.board.p2[0].hp, 65);
+    assert.equal(match.board.p2[1].hp, 65);
+    assert.equal(match.board.p2[2].hp, 65);
+});

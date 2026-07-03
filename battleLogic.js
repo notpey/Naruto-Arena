@@ -249,6 +249,7 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         unpierceableDamageReductionPercent: 0,
         physicalDamageReductionFlat: 0,
         damageTakenBonusFlat: 0,
+        nonAfflictionDamageTakenBonusFlat: 0,
         damageTakenMultiplier: 1,
         healReceivedMultiplier: 1,
         minimumHp: 0,
@@ -284,6 +285,7 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         );
         totals.physicalDamageReductionFlat += Number(metadata.physicalDamageReductionFlat) || 0;
         totals.damageTakenBonusFlat += Number(metadata.damageTakenBonusFlat) || 0;
+        totals.nonAfflictionDamageTakenBonusFlat += Number(metadata.nonAfflictionDamageTakenBonusFlat) || 0;
         if (Number.isFinite(metadata.damageTakenMultiplier)) {
             totals.damageTakenMultiplier *= Math.max(0, Number(metadata.damageTakenMultiplier) || 1);
         }
@@ -325,10 +327,14 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         totals.genjutsuCostIncrease += Number(metadata.genjutsuCostIncrease) || 0;
         totals.damageBonusFlat += Number(metadata.damageBonusFlat) || 0;
         totals.nonAfflictionDamageBonusFlat += Number(metadata.nonAfflictionDamageBonusFlat) || 0;
-        totals.damageDebuffFlat += Math.max(0, Number(metadata.DamageDebuff) || 0);
+        totals.damageDebuffFlat += Math.max(
+            0,
+            (Number(metadata.damageDebuffFlat) || 0) + (Number(metadata.DamageDebuff) || 0)
+        );
         totals.nonAfflictionDamageDebuffFlat += Math.max(
             0,
-            Number(metadata.NonAfflictionDamageDebuff) || 0
+            (Number(metadata.nonAfflictionDamageDebuffFlat) || 0) +
+                (Number(metadata.NonAfflictionDamageDebuff) || 0)
         );
         if (metadata.cannotUseSkills) {
             totals.cannotUseSkills = true;
@@ -2559,6 +2565,15 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     const damageTakenBonusFlat = Math.max(0, Number(totals.damageTakenBonusFlat) || 0);
     if (damageTakenBonusFlat > 0) {
         incoming += damageTakenBonusFlat;
+    }
+    if (!afflictionDamage) {
+        const nonAfflictionDamageTakenBonusFlat = Math.max(
+            0,
+            Number(totals.nonAfflictionDamageTakenBonusFlat) || 0
+        );
+        if (nonAfflictionDamageTakenBonusFlat > 0) {
+            incoming += nonAfflictionDamageTakenBonusFlat;
+        }
     }
     if (incoming > 0) {
         const classScopedTargetTotals = getTargetClassScopedDamageModifiers(targetState, skillClasses);
@@ -6493,12 +6508,24 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 }
                 const turnEndGainChakra = status?.metadata?.turnEndGainChakra;
                 if (turnEndGainChakra?.chakraType) {
-                    applyChakraGainToMatch({
-                        match,
-                        username,
-                        chakraType: turnEndGainChakra.chakraType,
-                        amount: Math.max(0, Number(turnEndGainChakra.amount) || 1),
-                    });
+                    const turnEndGainAmount = Math.max(0, Number(turnEndGainChakra.amount) || 1);
+                    const turnEndGainType =
+                        typeof turnEndGainChakra.chakraType === 'string'
+                            ? turnEndGainChakra.chakraType.trim().toLowerCase()
+                            : '';
+                    if (turnEndGainType === 'random') {
+                        for (let i = 0; i < turnEndGainAmount; i += 1) {
+                            const pick = chakraTypes[Math.floor(Math.random() * chakraTypes.length)];
+                            applyChakraGainToMatch({ match, username, chakraType: pick, amount: 1 });
+                        }
+                    } else {
+                        applyChakraGainToMatch({
+                            match,
+                            username,
+                            chakraType: turnEndGainType,
+                            amount: turnEndGainAmount,
+                        });
+                    }
                 }
                 const turnEndSetHpToRaw = Number(status?.metadata?.turnEndSetHpTo);
                 if (Number.isFinite(turnEndSetHpToRaw)) {

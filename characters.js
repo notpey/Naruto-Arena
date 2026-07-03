@@ -2418,6 +2418,8 @@ const characters = [
                             "turnEndDamage": 35,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
                             "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
                         }
                     }
@@ -2534,6 +2536,8 @@ const characters = [
                             "turnEndDamage": 35,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
                             "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
                         }
                     }
@@ -2983,13 +2987,13 @@ const characters = [
         "characterId": "zaku-abumi",
         "name": "Zaku Abumi",
         "facePicture": "https://i.imgur.com/GMkH15X.png",
-        "characterdeescription": "Zaku Abumi is a Sound Village shinobi whose surgically modified arms unleash devastating supersonic air blasts. He specializes in disrupting opponents by targeting and suppressing specific skill classes, forcing enemies into predictable and weakened states. Rather than relying on brute force alone, Zaku manipulates battlefield tempo through calculated interference..",
+        "characterdeescription": "One of the three sound genin; Zaku is a willful individual who has a very strong desire to win and succeed. Using the implanted tubes in his arm, Zaku can create powerful waves of chakra, or alter the wind ever so gently to protect an ally.",
         "skills": [
             {
-                "id": "zaku-abumi-air-cutter",
-                "name": "Air Cutter",
+                "id": "zaku-abumi-decapitating-airwaves",
+                "name": "Decapitating Airwaves",
                 "skillimage": "https://i.imgur.com/wYuJK6u.png",
-                "skilldescription": "Using his surgically altered arms Zaku fires a blast of supersonic air at one enemy dealing 20 piercing damage. Choose Physical, Chakra, or Mental. The target will have that class stunned for 1 turn. A random Secondary enemy takes 10  damage and is affected by the same class stun choice for 1 turn.",
+                "skilldescription": "Abumi Zaku deals 25 damage to one enemy. The following turn, 'Extreme Decapitating Airwaves' may be used.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -2998,52 +3002,26 @@ const characters = [
                 "cooldown": 0,
                 "classes": [
                     "Physical",
-                    "Ranged",
                     "Instant"
-                ],
-                "classChoiceOptions": [
-                    "physical",
-                    "chakra",
-                    "mental"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
+                        "amount": 25,
+                        "scope": "target"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "zaku_abumi_air_cutter_class_lock",
+                        "statusId": "zaku_abumi_decapitating_airwaves_unlock",
                         "duration": 1,
-                        "scope": "target",
+                        "scope": "self",
                         "metadata": {
-                            "harmful": true,
-                            "useChosenSkillClassForCannotUseSkillClasses": true,
-                            "tooltipText": "This characters {selectedSkillClassLabel} skills are stunned"
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "random-other-enemy",
-                        "metadata": {
-                            "randomScopeGroupKey": "zaku_abumi_air_cutter_secondary_target"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "zaku_abumi_air_cutter_class_lock",
-                        "duration": 1,
-                        "scope": "random-other-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "randomScopeGroupKey": "zaku_abumi_air_cutter_secondary_target",
-                            "useChosenSkillClassForCannotUseSkillClasses": true,
-                            "tooltipText": "This characters {selectedSkillClassLabel} skills are stunned."
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "skillReplacements": {
+                                "zaku-abumi-extreme-decapitating-airwaves": "zaku-abumi-extreme-decapitating-airwaves-active"
+                            },
+                            "tooltipText": "Extreme Decapitating Airwaves may be used."
                         }
                     }
                 ]
@@ -3052,23 +3030,16 @@ const characters = [
                 "id": "zaku-abumi-wall-of-air",
                 "name": "Wall of Air",
                 "skillimage": "https://i.imgur.com/1bKTzwA.png",
-                "skilldescription": "Choose Physical, Chakra, or Mental. One enemy deals 15 less damage with that class and takes 15 damage if they use a skill of the same class for 1 turn.",
+                "skilldescription": "Abumi Zaku targets one ally. The following turn, the first non-strategic skill used on this ally will be countered. This skill is invisible.",
                 "energy": [
                     "Random"
                 ],
-                "target": "single-enemy",
+                "target": "self-or-single-ally",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
-                    "Physical",
-                    "Ranged",
-                    "Instant",
-                    "Unique"
-                ],
-                "classChoiceOptions": [
-                    "physical",
-                    "chakra",
-                    "mental"
+                    "Strategic",
+                    "Instant"
                 ],
                 "effects": [
                     {
@@ -3077,94 +3048,87 @@ const characters = [
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
-                            "harmful": true,
-                            "useChosenSkillClassForDamageDebuffBySkillClass": true,
-                            "chosenSkillClassDamageDebuffAmount": 15,
-                            "onOwnerUseSkillSelfDamage": 15,
-                            "useChosenSkillClassForOnOwnerUseSkillClassesAny": true,
-                            "tooltipText": "This character deals 15 less damage with {selectedSkillClassLabel} skills and takes 15 damage when using a skill with {selectedSkillClassLabel} class."
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulNonStrategic": true,
+                            "counterCancelsSkill": true,
+                            "tooltipText": "The first non-strategic skill used on this character will be countered."
                         }
                     }
                 ]
             },
             {
-                "id": "zaku-abumi-extreme-air-cutter",
-                "name": "Extreme Air Cutter",
+                "id": "zaku-abumi-extreme-decapitating-airwaves",
+                "name": "Extreme Decapitating Airwaves",
                 "skillimage": "https://i.imgur.com/BGu8oPg.png",
-                "skilldescription": "Zaku boosts his air waves to a frightening level and deals 40 piercing damage to one enemy and 15 damage to the other enemies. Choose Physical, Chakra, or Mental. All enemies will have the selected class stunned for 1 turn.",
+                "skilldescription": "Abumi Zaku deals 45 damage to all enemies. This skill requires 'Decapitating Airwaves' to be used in the previous turn.",
                 "energy": [
                     "Bloodline",
-                    "Bloodline"
+                    "Random",
+                    "Random"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 0,
+                "actorCondition": {
+                    "statusId": "zaku_abumi_decapitating_airwaves_unlock"
+                },
                 "classes": [
                     "Physical",
-                    "Ranged",
-                    "Instant",
-                    "Unique"
+                    "Instant"
                 ],
-                "classChoiceOptions": [
-                    "physical",
-                    "chakra",
-                    "mental"
+                "effects": []
+            },
+            {
+                "id": "zaku-abumi-extreme-decapitating-airwaves-active",
+                "name": "Extreme Decapitating Airwaves",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/BGu8oPg.png",
+                "skilldescription": "Abumi Zaku deals 45 damage to all enemies.",
+                "energy": [
+                    "Bloodline",
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 40,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "other-enemies"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "zaku_abumi_extreme_air_cutter_class_lock",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "useChosenSkillClassForCannotUseSkillClasses": true,
-                            "tooltipText": "This characters {selectedSkillClassLabel} skills are stunned"
-                        }
+                        "amount": 45,
+                        "scope": "all-enemy"
                     }
                 ]
             },
             {
-                "id": "zaku-abumi-air-deflection",
-                "name": "Air Deflection",
+                "id": "zaku-abumi-airwave-deflection",
+                "name": "Airwave Deflection",
                 "skillimage": "https://i.imgur.com/yszdsLO.png",
-                "skilldescription": "Choose Physical, Chakra, or Mental. Zaku removes 1 harmful skill from that class from him and his allies.",
+                "skilldescription": "This skill makes Abumi Zaku invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
-                "target": "self-or-single-ally",
+                "target": "self",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 4,
                 "classes": [
-                    "Chakra",
+                    "Strategic",
                     "Instant"
-                ],
-                "classChoiceOptions": [
-                    "physical",
-                    "chakra",
-                    "mental"
                 ],
                 "effects": [
                     {
-                        "type": "cleanse_statuses",
-                        "scope": "all-allies",
-                        "count": 1,
-                        "harmfulOnly": true,
-                        "sourceRelation": "enemy",
-                        "useChosenSkillClassForSourceSkillClassesAny": true
+                        "type": "apply_status",
+                        "statusId": "invulnerable",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
                     }
                 ]
             }
@@ -3175,36 +3139,34 @@ const characters = [
         "characterId": "dosu-kinuta",
         "name": "Dosu Kinuta",
         "facePicture": "https://i.imgur.com/NY3b12m.png",
-        "characterdeescription": "Unlike reckless fighters, Dosu methodically tunes his opponents into collapse. By destabilizing their ability to defend or mitigate damage, he transforms every follow-up attack into a lethal crescendo. His vibrations linger, stacking pressure over time, while his drill techniques shatter both body and mind in a single, perfectly timed burst. When played patiently, Dosu becomes an executioner—silencing resistance, denying protection, and ending fights in a calculated final note.",
+        "characterdeescription": "One of the three sound genin, and possibly the strongest; Dosu is an intelligent and patient ninja that likes to act with logic. Using a powerful sound based arm, Dosu can disable his enemies by disrupting their hearing and throwing them off.",
         "skills": [
             {
-                "id": "dosu-kinuta-melody-arm-tuning",
-                "name": "Melody Arm Tuning",
+                "id": "dosu-kinuta-resonating-echo-drill",
+                "name": "Resonating Echo Drill",
                 "skillimage": "https://i.imgur.com/arSzsOV.png",
-                "skilldescription": "Dosu fine-tunes his Melody Arm to produce debilitating sound vibrations on an enemy and deals 5 damage to them then improves his next skill on them for 2 turns. If this skill is improved, this will also make them unable to reduce damage or become invulnerable for 3 turns.",
+                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
                 "energy": [
-                    "none"
+                    "Taijutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 0,
                 "classes": [
                     "Physical",
-                    "Melee",
-                    "Instant",
-                    "Unique"
+                    "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_melody_arm_lock",
-                        "duration": 3,
+                        "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
+                        "duration": 2,
                         "scope": "target",
-                        "condition": {
-                            "statusId": "dosu_kinuta_melody_arm_tuning_mark",
-                            "scope": "target",
-                            "consumeOnMatch": true
-                        },
                         "metadata": {
                             "harmful": true,
                             "cannotReduceDamage": true,
@@ -3213,72 +3175,14 @@ const characters = [
                         }
                     },
                     {
-                        "type": "damage",
-                        "amount": 5,
-                        "scope": "target"
-                    },
-                    {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_melody_arm_tuning_mark",
-                        "duration": 2,
+                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
+                        "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Dosu's next skill on this target is improved."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "dosu-kinuta-vibrating-sound-drill",
-                "name": "Vibrating Sound Drill",
-                "skillimage": "https://i.imgur.com/NtbIewT.png",
-                "skilldescription": "Dosu attacks with his drill, dealing 20 normal and 20 affliction damage to one enemy. If improved, the target has all their skills Silenced for 1 turn.",
-                "energy": [
-                    "Taijutsu",
-                    "Genjutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Physical",
-                    "Melee",
-                    "Instant",
-                    "Affliction",
-                    "Unique"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "metadata": {
-                            "afflictionDamage": true,
-                            "ignoreDamageReduction": true,
-                            "ignoreDestructibleDefense": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "dosu_kinuta_vibrating_sound_drill_silence",
-                        "duration": 1,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "dosu_kinuta_melody_arm_tuning_mark",
-                            "scope": "target",
-                            "consumeOnMatch": true
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "silenceNonDamageEffects": true,
-                            "tooltipText": "Silenced: only damage from this character's skills will work."
+                            "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
                         }
                     }
                 ]
@@ -3287,81 +3191,52 @@ const characters = [
                 "id": "dosu-kinuta-sound-manipulation",
                 "name": "Sound Manipulation",
                 "skillimage": "https://i.imgur.com/eSCnMmL.png",
-                "skilldescription": "Kinuta Dosu deals 15 damage to one enemy for 3 turns (stacks). If improved, their physical and mental damage is also lowered by 15 for 3 turns and this becomes piercing damage (stacks).",
+                "skilldescription": "Kinuta Dosu deals 10 damage to one enemy. For 1 turn, this enemy will take 5 additional damage from non-affliction skills and will deal 5 less damage with non-affliction skills. During 'Melody Arm Tuning', this skill's non-damage effects will last permanently instead and may stack.",
                 "energy": [
-                    "Genjutsu",
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 1,
                 "classes": [
                     "Mental",
-                    "Melee",
-                    "Instant",
-                    "Unique"
+                    "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "dosu_kinuta_sound_manipulation",
-                        "duration": 3,
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
                         "scope": "target",
                         "condition": {
-                            "missingStatusId": "dosu_kinuta_melody_arm_tuning_mark",
-                            "scope": "target"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "triggerOnApply": true,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "turnEndDamage": 15,
-                            "mergeNumericAddKeys": [
-                                "turnEndDamage"
-                            ],
-                            "tooltipText": "This character takes 15 damage each turn."
+                            "statusId": "dosu_kinuta_resonating_echo_drill_mark",
+                            "scope": "target",
+                            "consumeOnMatch": true
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_sound_manipulation_improved",
-                        "duration": 3,
+                        "statusId": "dosu_kinuta_sound_manipulation_debuff",
+                        "duration": 1,
                         "scope": "target",
-                        "condition": {
-                            "statusId": "dosu_kinuta_melody_arm_tuning_mark",
-                            "scope": "target",
-                            "consumeOnMatch": true
-                        },
                         "metadata": {
                             "harmful": true,
-                            "triggerOnApply": true,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "turnEndDamage": 15,
-                            "ignoreTargetDamageReduction": true,
-                            "damageDebuffBySkillClass": {
-                                "physical": 15,
-                                "mental": 15
-                            },
-                            "mergeNumericAddKeys": [
-                                "turnEndDamage"
-                            ],
-                            "mergeObjectNumericAddKeys": [
-                                "damageDebuffBySkillClass"
-                            ],
-                            "tooltipText": "This character takes 15 piercing damage each turn and deals 15 less physical and mental damage."
+                            "nonAfflictionDamageTakenBonusFlat": 5,
+                            "nonAfflictionDamageDebuffFlat": 5,
+                            "tooltipText": "This character takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills."
                         }
                     }
                 ]
             },
             {
-                "id": "dosu-kinuta-dosu-replacement-technique",
-                "name": "Dosu Replacement Technique",
+                "id": "dosu-kinuta-melody-arm-tuning",
+                "name": "Melody Arm Tuning",
                 "skillimage": "https://i.imgur.com/Irubt1X.png",
-                "skilldescription": "Dosu becomes invulnerable to enemy physical and mental skills and his next used skill will have its cooldown reduced by 1.",
+                "skilldescription": "For the following 4 turns, 'Resonating Echo Drill' will deal 20 additional damage and 'Sound Manipulation' will deal 10 additional damage.",
                 "energy": [
                     "Random"
                 ],
@@ -3369,32 +3244,147 @@ const characters = [
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
-                    "Mental",
+                    "Strategic",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_replacement_invulnerability",
-                        "duration": 1,
+                        "statusId": "dosu_kinuta_melody_arm_tuning_active",
+                        "duration": 4,
                         "scope": "self",
                         "metadata": {
-                            "invulnerableToSkillClasses": [
-                                "physical",
-                                "mental"
-                            ],
-                            "tooltipText": "Dosu is invulnerable to enemy physical and mental skills."
+                            "helpful": true,
+                            "skillReplacements": {
+                                "dosu-kinuta-resonating-echo-drill": "dosu-kinuta-resonating-echo-drill-improved",
+                                "dosu-kinuta-sound-manipulation": "dosu-kinuta-sound-manipulation-improved"
+                            },
+                            "tooltipText": "Resonating Echo Drill deals 20 additional damage and Sound Manipulation deals 10 additional damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "dosu-kinuta-resonating-echo-drill-improved",
+                "name": "Resonating Echo Drill",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/arSzsOV.png",
+                "skilldescription": "Kinuta Dosu deals 40 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "tooltipText": "This character cannot reduce damage or become invulnerable."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_replacement_cooldown",
+                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "dosu-kinuta-sound-manipulation-improved",
+                "name": "Sound Manipulation",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/eSCnMmL.png",
+                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks).",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "statusId": "dosu_kinuta_resonating_echo_drill_mark",
+                            "scope": "target",
+                            "consumeOnMatch": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "dosu_kinuta_sound_manipulation_debuff_permanent",
                         "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "nonAfflictionDamageTakenBonusFlat": 5,
+                            "nonAfflictionDamageDebuffFlat": 5,
+                            "mergeNumericAddKeys": [
+                                "nonAfflictionDamageTakenBonusFlat",
+                                "nonAfflictionDamageDebuffFlat"
+                            ],
+                            "tooltipText": "This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks)."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "dosu-kinuta-agile-leap",
+                "name": "Agile Leap",
+                "skillimage": "https://i.imgur.com/yqkQKWQ.png",
+                "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "invulnerable",
+                        "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "nextUsedSkillCooldownAdjustment": -1,
-                            "consumeOnNextSkillUse": true,
-                            "tooltipText": "Dosu's next used skill has its cooldown reduced by 1."
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
                         }
                     }
                 ]

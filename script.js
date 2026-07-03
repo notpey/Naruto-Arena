@@ -1001,6 +1001,80 @@ document.addEventListener('DOMContentLoaded', async () => {
             return target === 'single-enemy' || target === 'other-enemies' || target === 'all-enemy';
         };
 
+        const getLiveStatuses = (unit) =>
+            (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : []).filter(
+                (status) => Math.max(0, Number(status?.remainingTurns) || 0) > 0
+            );
+
+        const getNormalizedSkillClasses = (skill) =>
+            (Array.isArray(skill?.classes) ? skill.classes : [])
+                .map((entry) => (typeof entry === 'string' ? entry.trim().toLowerCase() : ''))
+                .filter(Boolean);
+
+        const hasLiveStatusMetadataFlag = (unit, flagName) =>
+            getLiveStatuses(unit).some((status) => Boolean(status?.metadata?.[flagName]));
+
+        const canActorIgnoreTargetInvulnerability = ({ actorUnit, skill, targetUnit }) => {
+            if (skill?.ignoreInvulnerability || hasLiveStatusMetadataFlag(actorUnit, 'ignoreEnemyInvulnerability')) {
+                return true;
+            }
+            const actorCharacter =
+                Number.isInteger(actorUnit?.rosterIndex) && Array.isArray(rosterData)
+                    ? rosterData[actorUnit.rosterIndex]
+                    : null;
+            const actorCharacterId = actorCharacter?.id || actorCharacter?.characterId || null;
+            return getLiveStatuses(targetUnit).some((status) => {
+                const skillIds = Array.isArray(status?.metadata?.ignoreInvulnerabilityFromSourceSkillIdsAny)
+                    ? status.metadata.ignoreInvulnerabilityFromSourceSkillIdsAny
+                    : [];
+                if (skillIds.includes(skill?.id)) return true;
+                return (
+                    actorCharacterId &&
+                    status?.metadata?.ignoreInvulnerabilityFromSourceCharacterId === actorCharacterId
+                );
+            });
+        };
+
+        const isUnitInvulnerableForSkill = (unit, skill) => {
+            const skillClasses = getNormalizedSkillClasses(skill);
+            const isAffliction = skillClasses.includes('affliction');
+            return getLiveStatuses(unit).some((status) => {
+                const metadata = status?.metadata || {};
+                if (metadata.invulnerable) return true;
+                if (metadata.invulnerableToNonAffliction && !isAffliction) return true;
+                const blockedClasses = Array.isArray(metadata.invulnerableToSkillClasses)
+                    ? metadata.invulnerableToSkillClasses
+                    : [];
+                return blockedClasses.some((entry) => skillClasses.includes(String(entry).toLowerCase()));
+            });
+        };
+
+        const filterTargetOptionsForCurrentBoard = (options, castingSkill = activeCastingSkill) => {
+            if (!options || !Array.isArray(options.targets)) return options;
+            if (!latestBoardState || typeof latestBoardState !== 'object') return options;
+            const skill = castingSkill?.skill || null;
+            const actorSlot = Number.parseInt(castingSkill?.actorSlot, 10);
+            const actorUnit = getActorUnitForSlot(currentPlayerUsername, actorSlot);
+            const enemyTargeting = skillIsEnemyTargeting(skill);
+            const targets = options.targets.filter((target) => {
+                const slot = Number.parseInt(target?.slot, 10);
+                const unit = latestBoardState?.[target?.username]?.[slot];
+                const hp = Number(unit?.hp);
+                const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
+                if (!unit || dead) return false;
+                if (
+                    enemyTargeting &&
+                    target.username !== currentPlayerUsername &&
+                    isUnitInvulnerableForSkill(unit, skill) &&
+                    !canActorIgnoreTargetInvulnerability({ actorUnit, skill, targetUnit: unit })
+                ) {
+                    return false;
+                }
+                return true;
+            });
+            return { ...options, targets };
+        };
+
         const isActorEnemyTargetingStunned = (actorUnit) => {
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
             return statuses.some((status) => status?.metadata?.cannotUseHarmfulSkills);
@@ -1313,8 +1387,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const renderTargetHighlights = (options) => {
             clearTargetHighlights();
-            if (!options || !Array.isArray(options.targets)) return;
-            options.targets.forEach((target) => {
+            const filteredOptions = filterTargetOptionsForCurrentBoard(options);
+            if (options === activeTargetOptions) {
+                activeTargetOptions = filteredOptions;
+            }
+            if (!filteredOptions || !Array.isArray(filteredOptions.targets)) return;
+            filteredOptions.targets.forEach((target) => {
                 const card = getCardByUsernameSlot(target.username, target.slot);
                 if (!card) return;
                 const face = card.querySelector('.character-face');
@@ -1850,6 +1928,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (Array.isArray(enemyCards) && Array.isArray(opponentUnits)) {
                 enemyCards.forEach((card, slot) => renderUnitHealth(card, opponentUnits[slot]));
             }
+            if (activeTargetOptions) {
+                renderTargetHighlights(activeTargetOptions);
+            }
         };
 
         window.refreshIngameHealthBars = () => {
@@ -2045,10 +2126,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                     groupStatuses[0]?.metadata?.sourceSkillName ||
                     'Status';
                 const groupedDamageDebuffTotal = groupStatuses.reduce((sum, status) => {
-                    return sum + Math.max(0, Number(status?.metadata?.DamageDebuff) || 0);
+                    return (
+                        sum +
+                        Math.max(
+                            0,
+                            (Number(status?.metadata?.DamageDebuff) || 0) +
+                                (Number(status?.metadata?.damageDebuffFlat) || 0)
+                        )
+                    );
                 }, 0);
                 const groupedNonAfflictionDebuffTotal = groupStatuses.reduce((sum, status) => {
-                    return sum + Math.max(0, Number(status?.metadata?.NonAfflictionDamageDebuff) || 0);
+                    return (
+                        sum +
+                        Math.max(
+                            0,
+                            (Number(status?.metadata?.NonAfflictionDamageDebuff) || 0) +
+                                (Number(status?.metadata?.nonAfflictionDamageDebuffFlat) || 0)
+                        )
+                    );
                 }, 0);
                 const groupedTurnEndDamageTotal = groupStatuses.reduce((sum, status) => {
                     return sum + Math.max(0, Number(status?.metadata?.turnEndDamage) || 0);
@@ -2097,10 +2192,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (key === 'turnEndDamage' && groupedTurnEndDamageTotal > 0) {
                                 return String(groupedTurnEndDamageTotal);
                             }
-                            if (key === 'NonAfflictionDamageDebuff' && groupedNonAfflictionDebuffTotal > 0) {
+                            if (
+                                (key === 'NonAfflictionDamageDebuff' ||
+                                    key === 'nonAfflictionDamageDebuffFlat') &&
+                                groupedNonAfflictionDebuffTotal > 0
+                            ) {
                                 return String(groupedNonAfflictionDebuffTotal);
                             }
-                            if (key === 'DamageDebuff' && groupedDamageDebuffTotal > 0) {
+                            if (
+                                (key === 'DamageDebuff' || key === 'damageDebuffFlat') &&
+                                groupedDamageDebuffTotal > 0
+                            ) {
                                 return String(groupedDamageDebuffTotal);
                             }
                             const rawValue = statusMetadata?.[key];
@@ -2117,14 +2219,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (groupedNonAfflictionDebuffTotal > 0 && !hasCustomTooltipText) {
                         const ownDebuff = Math.max(
                             0,
-                            Number(status?.metadata?.NonAfflictionDamageDebuff) || 0
+                            (Number(status?.metadata?.NonAfflictionDamageDebuff) || 0) +
+                            (Number(status?.metadata?.nonAfflictionDamageDebuffFlat) || 0)
                         );
                         if (ownDebuff > 0) {
                             text = `This character deals ${groupedNonAfflictionDebuffTotal} less non-affliction damage.`;
                         }
                     }
                     if (groupedDamageDebuffTotal > 0 && !hasCustomTooltipText) {
-                        const ownDebuff = Math.max(0, Number(status?.metadata?.DamageDebuff) || 0);
+                        const ownDebuff = Math.max(
+                            0,
+                            (Number(status?.metadata?.DamageDebuff) || 0) +
+                                (Number(status?.metadata?.damageDebuffFlat) || 0)
+                        );
                         if (ownDebuff > 0) {
                             text = `This character deals ${groupedDamageDebuffTotal} less damage.`;
                         }
@@ -2644,6 +2751,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeCastingSkill = {
                     actorSlot,
                     skillIdx,
+                    skill,
                     skillEl,
                     classChoiceOptions,
                     classChoice:
