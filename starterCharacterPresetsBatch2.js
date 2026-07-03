@@ -259,7 +259,7 @@
                 "id": "tenten-twin-rising-dragons",
                 "name": "Twin Rising Dragons",
                 "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and energy damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -302,7 +302,7 @@
                 "id": "tenten-twin-rising-dragons-trap",
                 "name": "Twin Rising Dragons Trap",
                 "skillimage": "https://i.imgur.com/pOsj115.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their physical and energy damage will be lowered by 5. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
+                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their physical and chakra damage will be lowered by 5. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
                 "energy": [
                     "Random"
                 ],
@@ -330,7 +330,7 @@
                                 "physical": 5,
                                 "energy": 5
                             },
-                            "tooltipText": "This character deals 5 less physical and energy damage."
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
                         }
                     },
                     {
@@ -399,7 +399,7 @@
                 "hiddenFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/mlelii2.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and energy damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -445,7 +445,7 @@
                 "hiddenFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/3bgTaua.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and energy damage will be lowered by 5.",
+                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
                 "energy": [
                     "Random"
                 ],
@@ -473,7 +473,7 @@
                                 "physical": 5,
                                 "energy": 5
                             },
-                            "tooltipText": "This character deals 5 less physical and energy damage."
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
                         }
                     },
                     {
@@ -565,7 +565,7 @@
                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                 "name": "Eight Trigrams Sixty-Four Palms",
                 "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                "skilldescription": "Hyuuga Neji deals 40 damage to one enemy and removes 1 random energy from them.",
+                "skilldescription": "Hyuuga Neji deals 40 damage to one enemy and removes 1 random chakra from them.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -610,7 +610,7 @@
                 "id": "gaara-of-the-desert-sand-coffin",
                 "name": "Sand Coffin",
                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, energy and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                "skilldescription": "Gaara stuns one enemy's physical, chakra and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -635,7 +635,7 @@
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     },
                     {

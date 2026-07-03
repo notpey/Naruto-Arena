@@ -479,8 +479,10 @@
 }
 
 .game-remaster .energy-pip.filled.energy-random {
-    background-color: #000;
-    border-color: rgba(255, 255, 255, 0.4);
+    background:
+        repeating-linear-gradient(135deg, #070707 0 4px, #b6bcc4 4px 8px);
+    border-color: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), 0 0 6px rgba(255, 255, 255, 0.35);
 }
 
 .game-remaster .character-bio,
@@ -1132,6 +1134,7 @@ body.hub-view-story .selectionpage {
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    min-height: 12px;
 }
 
 .selection-hub-mission-section {
@@ -1141,10 +1144,12 @@ body.hub-view-story .selectionpage {
     font-style: italic;
     line-height: 1.2;
     text-transform: none;
+    min-height: 27px;
 }
 
 .selection-hub-mission-art {
     aspect-ratio: 5 / 4;
+    width: 100%;
 }
 
 .selection-hub-mission-card:hover .selection-hub-mission-art {
@@ -2092,7 +2097,7 @@ text-transform: uppercase;
     white-space: nowrap;
     padding: 6px 6px 6px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(45, 21, 7, 0.65) transparent;
+    scrollbar-color: rgba(126, 54, 195, 0.95) rgba(45, 21, 7, 0.18);
     transform: scaleY(-1);
 }
 
@@ -2105,11 +2110,12 @@ text-transform: uppercase;
 }
 
 .skill-images::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(45, 21, 7, 0.18);
+    border-radius: 999px;
 }
 
 .skill-images::-webkit-scrollbar-thumb {
-    background: rgba(45, 21, 7, 0.65);
+    background: rgba(126, 54, 195, 0.95);
     border-radius: 999px;
 }
 
@@ -2130,6 +2136,16 @@ text-transform: uppercase;
 .skill-image.active {
     outline: 2px solid var(--na-crimson);
     box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.25);
+}
+
+.skill-image.alternate-skill {
+    border-color: #7e36c3;
+    box-shadow: 0 0 0 2px rgba(126, 54, 195, 0.45), 0 0 10px rgba(126, 54, 195, 0.65);
+}
+
+.skill-image.alternate-skill.active {
+    outline-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.35), 0 0 14px rgba(168, 85, 247, 0.85);
 }
 
 /* ── Skill Detail Card (selection screen modern panel) ─────── */
@@ -2252,8 +2268,10 @@ text-transform: uppercase;
 }
 
 .energy-pip.filled.energy-random {
-    background-color: #888;
-    border-color: rgba(255, 255, 255, 0.3);
+    background:
+        repeating-linear-gradient(135deg, #1f2329 0 3px, #a8adb5 3px 6px);
+    border-color: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
 }
 
 .energy-pip.filled.energy-genjutsu {
@@ -2701,13 +2719,30 @@ text-transform: uppercase;
     background-color: #ecf0f1;
 }
 .chakra-box.black {
-    background-color: #000;
+    background:
+        repeating-linear-gradient(135deg, #111111 0 4px, #777777 4px 8px);
+    border-color: #000;
 }
 
 .chakra-icon {
     font-weight: bold;
     font-size: 16px;
     color: #000;
+}
+
+.chakra-item.random-chakra .chakra-icon {
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000;
+    border-radius: 50%;
+    color: #ffffff;
+    background:
+        repeating-linear-gradient(135deg, #101010 0 4px, #6f747c 4px 8px);
+    font-size: 12px;
+    line-height: 1;
 }
 
 .chakra-count {
@@ -4057,6 +4092,13 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .chakra-count {
     font-size: 12px;
     line-height: 1;
+}
+
+.game-remaster .chakra-item.random-chakra .chakra-icon {
+    min-width: 19px;
+    height: 19px;
+    border: 0;
+    box-shadow: 0 1px 2px rgba(45, 21, 7, 0.35), 0 0 0 1px rgba(255, 248, 210, 0.85);
 }
 
 .game-remaster .exchange-label {

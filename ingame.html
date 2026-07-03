@@ -41,10 +41,6 @@
         } catch (e) {}
     })();
 </script>
-<label class="remaster-preview-toggle">
-    <input id="remaster-ingame-preview-toggle" type="checkbox">
-    <span>Remaster Mode</span>
-</label>
 <div class="backgroundingame">
     <div class="ingame-sound-controller" aria-label="Sound controller">
         <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
@@ -282,8 +278,8 @@
                     <span class="chakra-box white"></span>
                     <span class="chakra-count">x 0</span>
                 </span>
-                <span class="chakra-item" data-chakra-total>
-                    <span class="chakra-icon">T</span>
+                <span class="chakra-item random-chakra" data-chakra-total title="Random chakra spendable">
+                    <span class="chakra-icon">R</span>
                     <span class="chakra-count">x 0</span>
                 </span>
             </div>
@@ -434,7 +430,7 @@
             </div>
         </div>
         <div class="skill-info-meta">
-            <span class="sim-seg"><span class="sim-lbl">/ ENERGY</span><div class="energytext"></div></span>
+            <span class="sim-seg"><span class="sim-lbl">/ CHAKRA</span><div class="energytext"></div></span>
             <span class="sim-seg"><span class="sim-lbl">/ CLASSES</span><p class="ingameclasses"></p></span>
             <span class="sim-seg"><span class="sim-lbl">/ COOLDOWN</span><p class="ingamecooldown"></p></span>
             <div class="ingameclasspicker" style="display:none">
@@ -468,56 +464,5 @@
 </div>
 <script src="characters.js?v=3"></script>
 <script src="script.js?v=3"></script>
-<script>
-    (function () {
-        var key = "na-selection-remaster-preview";
-        var toggle = document.getElementById("remaster-ingame-preview-toggle");
-        if (!toggle) return;
-
-        function isEnabled() {
-            try { return localStorage.getItem(key) !== "disabled"; } catch (e) { return true; }
-        }
-
-        function resizeForMode(enabled) {
-            var targetWidth = enabled ? 1100 : 770;
-            var targetHeight = enabled ? 800 : 560;
-            var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
-            var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
-            var popupWidth = targetWidth + chromeWidth;
-            var popupHeight = targetHeight + chromeHeight;
-            try {
-                window.resizeTo(popupWidth, popupHeight);
-                window.moveTo(
-                    Math.max(0, Math.round((window.screen.width - popupWidth) / 2)),
-                    Math.max(0, Math.round((window.screen.height - popupHeight) / 2))
-                );
-            } catch (e) {}
-        }
-
-        function apply(enabled, shouldResize) {
-            document.body.classList.toggle("game-remaster", enabled);
-            toggle.checked = enabled;
-            try {
-                if (enabled) localStorage.removeItem(key);
-                else localStorage.setItem(key, "disabled");
-            } catch (e) {}
-            var viewportMeta = document.getElementById("viewport-meta");
-            if (viewportMeta) {
-                viewportMeta.setAttribute("content", "width=" + (enabled ? 1100 : 770) + ", initial-scale=1");
-            }
-            requestAnimationFrame(function () {
-                if (typeof window.refreshIngameHealthBars === "function") {
-                    window.refreshIngameHealthBars();
-                }
-            });
-            if (shouldResize) resizeForMode(enabled);
-        }
-
-        apply(isEnabled(), false);
-        toggle.addEventListener("change", function () {
-            apply(toggle.checked, true);
-        });
-    })();
-</script>
 </body>
 </html>

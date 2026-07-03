@@ -93,30 +93,6 @@ const DEFAULT_MISSION_CATALOG = [
         sortOrder: 2,
     },
     {
-        missionId: 'negan',
-        title: 'Negan',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'negan',
-        reward_character_name: 'Negan',
-        reward: 'Unlock Negan.',
-        image: 'https://i.imgur.com/csZvbwl.png',
-        imageAlt: 'Negan mission artwork',
-        characterName: 'Rick Grimes',
-        portrait: 'https://i.imgur.com/4p90X9r.png',
-        portraitAlt: 'Rick Grimes portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'rick-grimes',
-                character_name: 'Rick Grimes',
-                wins: 4,
-            },
-        ],
-        sortOrder: 3,
-    },
-    {
         missionId: 'a-rare-opportunity',
         title: 'A Rare Opportunity',
         level_requirement: 6,
@@ -1403,17 +1379,9 @@ const normalizeMissionGoalProgressEntry = (entry = {}) => {
 };
 
 const createDefaultMissionState = () => {
-    const neganProgress = normalizeMissionProgressEntry({
-        winStreak: 0,
-        completedAt: null,
-    });
     return {
-        progressByMissionId: {
-            negan: neganProgress,
-        },
-        progress: {
-            negan: neganProgress,
-        },
+        progressByMissionId: {},
+        progress: {},
         unlockedCharacterIds: [],
     };
 };
@@ -1436,23 +1404,11 @@ const normalizeMissionState = (missions = {}) => {
             sourceProgress[missionId]
         );
     });
-    if (!progressByMissionId.negan) {
-        progressByMissionId.negan = normalizeMissionProgressEntry(sourceProgress.negan || {});
-    }
     const unlockedCharacterIds = new Set(
         (Array.isArray(source.unlockedCharacterIds) ? source.unlockedCharacterIds : [])
             .map((entry) => normalizeCharacterId(entry))
             .filter(Boolean)
     );
-    Object.keys(progressByMissionId).forEach((missionId) => {
-        const progressEntry = progressByMissionId[missionId];
-        if (
-            missionId === 'negan' &&
-            Math.max(0, Number(progressEntry?.winStreak) || 0) >= 4
-        ) {
-            unlockedCharacterIds.add('negan');
-        }
-    });
     return {
         progressByMissionId,
         progress: progressByMissionId,
@@ -3399,6 +3355,32 @@ const buildCharacterCatalog = () =>
             skillimage: typeof skill.skillimage === 'string' ? skill.skillimage : '',
         })),
     }));
+
+const getMissionRankKey = (mission = {}) => {
+    const level = Math.max(0, Number(mission?.level_requirement) || 0) || 1;
+    if (level >= 40) return 's';
+    if (level >= 30) return 'a';
+    if (level >= 20) return 'b';
+    return 'dc';
+};
+
+const getShopPriceForMissionRank = (rankKey = 'dc') => {
+    const prices = {
+        dc: 500,
+        b: 1000,
+        a: 2500,
+        s: 5000,
+    };
+    return prices[rankKey] || prices.dc;
+};
+
+const getShopPriceForMissionId = (missionId = '', missionCatalog = []) => {
+    const normalizedMissionId = slugifyMissionId(missionId);
+    const mission = (Array.isArray(missionCatalog) ? missionCatalog : []).find(
+        (entry) => slugifyMissionId(entry?.missionId) === normalizedMissionId
+    );
+    return getShopPriceForMissionRank(getMissionRankKey(mission));
+};
 
 let characterCatalog = buildCharacterCatalog();
 
@@ -8059,11 +8041,18 @@ app.get('/api/shop', requireSession, async (req, res) => {
         }
         const profile = normalizeUserProfile(user);
         const lockedCharacterIds = await getMissionLockedCharacterIds();
+        const missionCatalog = await getStoredMissionCatalog();
         const characters = buildCharacterCatalog().filter((character) => {
             if (!character.requiredMissionId) {
                 return false;
             }
             return !profileHasUnlockedCharacter(profile, character.characterId, lockedCharacterIds);
+        }).map((character) => {
+            const shopPrice = getShopPriceForMissionId(character.requiredMissionId, missionCatalog);
+            return {
+                ...character,
+                shopPrice,
+            };
         });
         return res.json({
             ok: true,
@@ -8097,9 +8086,8 @@ app.post('/api/shop/purchase', requireSession, async (req, res) => {
         if (!characterEntry || !requiredMissionId) {
             return res.status(400).json({ error: 'This character is not available in the shop.' });
         }
-        const shopPrice = Number.isFinite(Number(characterEntry.shopPrice))
-            ? Math.max(0, Math.round(Number(characterEntry.shopPrice)))
-            : 0;
+        const missionCatalog = await getStoredMissionCatalog();
+        const shopPrice = getShopPriceForMissionId(requiredMissionId, missionCatalog);
 
         const profile = normalizeUserProfile(user);
         const lockedCharacterIds = await getMissionLockedCharacterIds();
@@ -8165,6 +8153,23 @@ app.get('/api/admin/missions', requireSession, async (req, res) => {
     }
 });
 
+app.get('/api/admin/story', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    try {
+        const chapters = await getStoredStoryCatalog();
+        return res.json({
+            ok: true,
+            chapters,
+        });
+    } catch (error) {
+        console.error('Admin story catalog load error:', error);
+        return res.status(500).json({ error: 'Unable to load story mode.' });
+    }
+});
+
 app.get('/api/admin/control-panel', requireSession, async (req, res) => {
     if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
         return res.status(403).json({ error: 'Admin access required.' });
@@ -8207,6 +8212,12 @@ app.get('/api/admin/control-panel', requireSession, async (req, res) => {
                     title: 'Mission Editor',
                     description: 'Manage unlock missions, rank requirements, goals, and rewards.',
                     status: 'Live editor',
+                },
+                {
+                    href: '#acp-story-panel',
+                    title: 'Story Thumbnails',
+                    description: 'Update story mode battle thumbnails and image alt text.',
+                    status: 'Inline editor',
                 },
                 {
                     href: 'playeraccounts.html',
@@ -8298,6 +8309,28 @@ app.put('/api/admin/missions', requireSession, async (req, res) => {
     } catch (error) {
         console.error('Admin mission catalog save error:', error);
         return res.status(400).json({ error: error.message || 'Unable to save missions.' });
+    }
+});
+
+app.put('/api/admin/story', requireSession, async (req, res) => {
+    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    const chapters = Array.isArray(req.body?.chapters) ? req.body.chapters : null;
+    if (!chapters) {
+        return res.status(400).json({ error: 'Story chapters are required.' });
+    }
+
+    try {
+        const savedChapters = await saveStoryCatalog(chapters, req.authUser.username);
+        return res.json({
+            ok: true,
+            chapters: savedChapters,
+        });
+    } catch (error) {
+        console.error('Admin story catalog save error:', error);
+        return res.status(400).json({ error: error.message || 'Unable to save story mode.' });
     }
 });
 

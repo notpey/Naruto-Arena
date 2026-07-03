@@ -1385,6 +1385,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             return null;
         };
 
+        const getAliveBoardTargets = (username) => {
+            const units = latestBoardState?.[username];
+            if (!username || !Array.isArray(units)) return [];
+            return units
+                .map((unit, slot) => {
+                    const hp = Number(unit?.hp);
+                    const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
+                    return unit && !dead ? { username, slot } : null;
+                })
+                .filter(Boolean);
+        };
+
+        const mergeHighlightTargets = (baseTargets, extraTargets) => {
+            const byKey = new Map();
+            [...(baseTargets || []), ...(extraTargets || [])].forEach((target) => {
+                const slot = Number.parseInt(target?.slot, 10);
+                if (!target?.username || !Number.isInteger(slot)) return;
+                byKey.set(`${target.username}:${slot}`, { username: target.username, slot });
+            });
+            return Array.from(byKey.values());
+        };
+
+        const getEffectPreviewHighlightTargets = (skill) => {
+            if (!skill || !latestBoardState || typeof latestBoardState !== 'object') return [];
+            const scopes = new Set(
+                (Array.isArray(skill.effects) ? skill.effects : [])
+                    .map((effect) => (typeof effect?.scope === 'string' ? effect.scope.trim().toLowerCase() : ''))
+                    .filter(Boolean)
+            );
+            let targets = [];
+            if (scopes.has('all-allies')) {
+                targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentPlayerUsername));
+            }
+            if (scopes.has('all-enemy') || scopes.has('all-other-enemy') || scopes.has('other-enemies')) {
+                targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentOpponentUsername));
+            }
+            if (scopes.has('all-characters')) {
+                targets = mergeHighlightTargets(
+                    targets,
+                    mergeHighlightTargets(
+                        getAliveBoardTargets(currentPlayerUsername),
+                        getAliveBoardTargets(currentOpponentUsername)
+                    )
+                );
+            }
+            return targets;
+        };
+
         const renderTargetHighlights = (options) => {
             clearTargetHighlights();
             const filteredOptions = filterTargetOptionsForCurrentBoard(options);
@@ -1392,7 +1440,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeTargetOptions = filteredOptions;
             }
             if (!filteredOptions || !Array.isArray(filteredOptions.targets)) return;
-            filteredOptions.targets.forEach((target) => {
+            const highlightTargets = mergeHighlightTargets(
+                filteredOptions.targets,
+                getEffectPreviewHighlightTargets(activeCastingSkill?.skill)
+            );
+            highlightTargets.forEach((target) => {
                 const card = getCardByUsernameSlot(target.username, target.slot);
                 if (!card) return;
                 const face = card.querySelector('.character-face');
@@ -2460,7 +2512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             random: 'black',
         };
 
-        const setSkillInfoMetaLabels = (labels = ['/ ENERGY', '/ CLASSES', '/ COOLDOWN']) => {
+        const setSkillInfoMetaLabels = (labels = ['/ CHAKRA', '/ CLASSES', '/ COOLDOWN']) => {
             if (!skillInfo.metaEl) return;
             Array.from(skillInfo.metaEl.querySelectorAll('.sim-lbl')).forEach((labelEl, index) => {
                 if (labels[index]) {
@@ -3872,10 +3924,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentCharacterIndex === null) return;
         const character = roster[currentCharacterIndex];
         if (!character || !Array.isArray(character.skills)) return;
-        const visibleSkills = character.skills.filter(
-            (skill) => skill && !Boolean(skill.hiddenFromSelectionViewer)
-        );
-        const skill = visibleSkills[skillIndex];
+        const viewerSkills = character.skills.filter(Boolean);
+        const skill = viewerSkills[skillIndex];
         if (!skill) return;
         renderSkill(skill, skillIndex);
     };
@@ -3898,24 +3948,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         renderCharacterOverview(character);
         if (Array.isArray(character.skills)) {
-            const visibleSkills = character.skills.filter(
-                (skill) => skill && !Boolean(skill.hiddenFromSelectionViewer)
-            );
-            ensureSkillImageSlots(visibleSkills.length);
+            const viewerSkills = character.skills.filter(Boolean);
+            ensureSkillImageSlots(viewerSkills.length);
             if (skillImagesContainer) {
                 skillImagesContainer.scrollLeft = 0;
             }
-            visibleSkills.forEach((skill, skillIdx) => {
+            viewerSkills.forEach((skill, skillIdx) => {
                 const targetImg = skillImages[skillIdx];
                 if (!targetImg) return;
                 if (skill) {
                     targetImg.src = skill.skillimage || '';
                     targetImg.alt = skill.name || `Skill ${skillIdx + 1}`;
+                    targetImg.title = skill.hiddenFromSelectionViewer
+                        ? `${skill.name || `Skill ${skillIdx + 1}`} (alternate)`
+                        : skill.name || `Skill ${skillIdx + 1}`;
+                    targetImg.classList.toggle('alternate-skill', Boolean(skill.hiddenFromSelectionViewer));
                     targetImg.style.visibility = 'visible';
                     targetImg.onclick = () => handleSkillSelect(skillIdx);
                 } else {
                     targetImg.src = '';
                     targetImg.alt = `Skill ${skillIdx + 1}`;
+                    targetImg.title = '';
+                    targetImg.classList.remove('alternate-skill');
                     targetImg.style.visibility = 'hidden';
                     targetImg.onclick = null;
                 }

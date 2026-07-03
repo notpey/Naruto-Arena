@@ -40,7 +40,7 @@
                 "id": "uzumaki-naruto-overwhelming-chakra-wave",
                 "name": "Overwhelming Chakra Wave",
                 "skillimage": "https://i.imgur.com/N1LUxVU.png",
-                "skilldescription": "Uzumaki Naruto will gain 1 random energy after 1 turn. For 1 turn 'Uzumaki Naruto Combo' and 'Rasengan' will be unable to be used.",
+                "skilldescription": "Uzumaki Naruto will gain 1 random chakra after 1 turn. For 1 turn 'Uzumaki Naruto Combo' and 'Rasengan' will be unable to be used.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,

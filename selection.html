@@ -86,7 +86,6 @@
                     <h1>Shop</h1>
                     <p>Unlock mission-bound characters and spend earned Ryo.</p>
                 </div>
-                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
             </div>
             <div class="selection-hub-env-toolbar">
                 <span class="selection-hub-env-status" data-shop-env-status>Loading shop...</span>
@@ -99,7 +98,6 @@
                     <h1>Ninja Missions</h1>
                     <p>Track unlock paths, rank categories, and completion progress.</p>
                 </div>
-                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
             </div>
             <div class="selection-hub-env-toolbar">
                 <button type="button" class="selection-hub-rank active" data-mission-rank="all">Overview</button>
@@ -122,18 +120,25 @@
                     <h1>Inventory</h1>
                     <p>Manage account rewards, cosmetics, and future client items.</p>
                 </div>
-                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
+            </div>
+            <div class="selection-hub-env-toolbar selection-hub-inventory-tabs">
+                <button type="button" class="selection-hub-rank active" data-inventory-tab="avatars">Avatars</button>
+                <button type="button" class="selection-hub-rank" data-inventory-tab="backgrounds">Backgrounds</button>
+                <button type="button" class="selection-hub-rank" data-inventory-tab="titles">Titles</button>
+                <button type="button" class="selection-hub-rank" data-inventory-tab="consumables">Consumables</button>
+                <button type="button" class="selection-hub-rank" data-inventory-tab="borders">Borders</button>
+                <button type="button" class="selection-hub-rank" data-inventory-tab="gear">Gear</button>
             </div>
             <div class="selection-hub-inventory-grid">
-                <article class="selection-hub-inventory-card">
+                <article class="selection-hub-inventory-card" data-inventory-content="avatars">
                     <span>Avatars</span>
                     <strong>Coming Soon</strong>
                 </article>
-                <article class="selection-hub-inventory-card">
+                <article class="selection-hub-inventory-card" data-inventory-content="backgrounds">
                     <span>Backgrounds</span>
                     <strong>Coming Soon</strong>
                 </article>
-                <article class="selection-hub-inventory-card">
+                <article class="selection-hub-inventory-card" data-inventory-content="titles">
                     <span>Titles</span>
                     <strong>Coming Soon</strong>
                 </article>
@@ -145,7 +150,6 @@
                     <h1>Story</h1>
                     <p>Fight scripted battles and unlock rewards, right here.</p>
                 </div>
-                <button type="button" class="selection-hub-env-close" data-hub-view="play">Back to Play</button>
             </div>
             <div class="selection-hub-story-list" data-story-list>
                 <div class="selection-hub-env-empty">Loading story battles...</div>
@@ -206,7 +210,7 @@
             </div>
         </div>
         <div class="skill-detail-meta">
-            <span class="sdm-seg"><span class="sdm-lbl">/ ENERGY</span><div class="energy-bar" id="energy-bar"></div></span>
+            <span class="sdm-seg"><span class="sdm-lbl">/ CHAKRA</span><div class="energy-bar" id="energy-bar"></div></span>
             <span class="sdm-seg"><span class="sdm-lbl">/ CLASSES</span><div class="skill-classes" id="skill-classes"></div></span>
             <span class="sdm-seg sdm-seg--last"><span class="sdm-lbl">/ COOLDOWN</span><span id="skill-cooldown" class="cooldown-value">-</span></span>
         </div>
@@ -323,6 +327,8 @@
         var missionGrid = document.querySelector("[data-mission-grid]");
         var missionSearch = document.querySelector("[data-mission-search]");
         var missionRankButtons = Array.prototype.slice.call(document.querySelectorAll("[data-mission-rank]"));
+        var inventoryGrid = document.querySelector(".selection-hub-inventory-grid");
+        var inventoryTabButtons = Array.prototype.slice.call(document.querySelectorAll("[data-inventory-tab]"));
         var storyListEl = document.querySelector("[data-story-list]");
         var storyBriefingEl = document.querySelector("[data-story-briefing]");
         var storyBattleStarting = false;
@@ -380,6 +386,29 @@
             empty.className = "selection-hub-env-empty";
             empty.textContent = message;
             shopGrid.appendChild(empty);
+        }
+
+        function renderInventoryTab(tab) {
+            if (!inventoryGrid) return;
+            var activeTab = tab || "avatars";
+            inventoryTabButtons.forEach(function (button) {
+                button.classList.toggle("active", button.getAttribute("data-inventory-tab") === activeTab);
+            });
+            Array.prototype.slice.call(inventoryGrid.querySelectorAll(".selection-hub-inventory-empty")).forEach(function (el) {
+                el.remove();
+            });
+            var visibleCount = 0;
+            Array.prototype.slice.call(inventoryGrid.querySelectorAll("[data-inventory-content]")).forEach(function (card) {
+                var visible = card.getAttribute("data-inventory-content") === activeTab;
+                card.hidden = !visible;
+                if (visible) visibleCount += 1;
+            });
+            if (!visibleCount) {
+                var empty = document.createElement("div");
+                empty.className = "selection-hub-env-empty selection-hub-inventory-empty";
+                empty.textContent = "No items in this category yet.";
+                inventoryGrid.appendChild(empty);
+            }
         }
 
         function renderShopCharacters(ryo, characters) {
@@ -864,6 +893,12 @@
             setSettingsOpen(false);
             if (nextView === "shop") loadShopEnvironment(false);
             if (nextView === "missions") loadMissionEnvironment(false);
+            if (nextView === "inventory") {
+                var activeInventoryButton = inventoryTabButtons.find(function (button) {
+                    return button.classList.contains("active");
+                });
+                renderInventoryTab(activeInventoryButton ? activeInventoryButton.getAttribute("data-inventory-tab") : "avatars");
+            }
             if (nextView === "story") { showStoryList(); loadStoryEnvironment(false); }
         }
 
@@ -897,6 +932,13 @@
                     candidate.classList.toggle("active", candidate === button);
                 });
                 renderMissions();
+            });
+        });
+
+        inventoryTabButtons.forEach(function (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                renderInventoryTab(button.getAttribute("data-inventory-tab") || "avatars");
             });
         });
 

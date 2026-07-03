@@ -60,9 +60,9 @@
       padding: 28px 26px;
       color: var(--ca-ink);
     }
-    .ms-card { display: block; }
-    .ms-card-level { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1f7a3f; }
-    .ms-card-name { font-size: 19px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 8px; line-height: 1.05; }
+    .ms-card { display: flex; flex-direction: column; min-height: 0; }
+    .ms-card-level { min-height: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1f7a3f; }
+    .ms-card-name { min-height: 42px; font-size: 19px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 8px; line-height: 1.05; }
     .ms-card-art { position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: #111; border: 1px solid var(--ca-line-ink); }
     .ms-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-base); }
     .ms-card:hover .ms-card-art { border-color: var(--ca-orange); }
@@ -464,12 +464,7 @@
           reward: 'Mission "The Yellow Flash" completion.', image: "ingamebgexample2.png",
           characterName: "Minato Namikaze", portrait: "deadcharacter.png", requirements: [],
           goals: ["Win the battle against Minato.", "Finish the mission to unlock its reward."],
-          available: true, sortOrder: 2 },
-        { missionId: "negan", title: "Negan", level_requirement: 16, reward_character: "negan",
-          reward_character_name: "Negan", reward: "Unlock Negan.", image: "https://i.imgur.com/csZvbwl.png",
-          characterName: "Rick Grimes", portrait: "https://i.imgur.com/4p90X9r.png", requirements: [],
-          goals: [{ type: "win_streak", character_id: "rick-grimes", character_name: "Rick Grimes", wins: 4 }],
-          available: true, sortOrder: 3 }
+          available: true, sortOrder: 2 }
       ];
 
       var landingView = document.getElementById("ms-landing");

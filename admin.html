@@ -135,6 +135,29 @@
     }
     .acp-rank-range { color: rgba(30, 24, 16, 0.7); font-size: 12px; font-weight: 900; }
     .acp-rank-message { margin-top: 10px; color: var(--ca-parchment); font-size: 12px; font-weight: 800; }
+    .acp-story { padding: 18px; overflow: auto; }
+    .acp-story-table { min-width: 760px; }
+    .acp-story-thumb {
+      width: 74px;
+      height: 54px;
+      object-fit: cover;
+      background: #10131c;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      display: block;
+    }
+    .acp-story-title {
+      color: var(--ca-ink);
+      font-weight: 900;
+    }
+    .acp-story-chapter {
+      display: block;
+      margin-top: 3px;
+      color: rgba(30, 24, 16, 0.66);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
     .acp-note {
       margin-top: 14px;
       padding: 12px 14px;
@@ -219,6 +242,35 @@
             <div class="acp-note" id="acp-hokage-note"></div>
           </div>
         </section>
+
+        <section class="acp-panel" id="acp-story-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">Story Thumbnails</h2>
+                <p class="acp-panel-copy">Edit the image URL and alt text used by story mode entries.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button secondary" type="button" id="acp-story-reload">Reload Story</button>
+                <button class="acp-button" type="button" id="acp-story-save">Save Thumbnails</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-story">
+            <table class="acp-table acp-story-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Story Entry</th>
+                  <th>Image URL</th>
+                  <th>Alt Text</th>
+                </tr>
+              </thead>
+              <tbody id="acp-story-table"></tbody>
+            </table>
+            <div class="acp-rank-message" id="acp-story-message"></div>
+          </div>
+        </section>
       </div>
 
       <aside class="acp-grid">
@@ -258,6 +310,11 @@
       var rankSaveButton = document.getElementById("acp-rank-save");
       var rankResetButton = document.getElementById("acp-rank-reset");
       var rankMessage = document.getElementById("acp-rank-message");
+      var storyTable = document.getElementById("acp-story-table");
+      var storySaveButton = document.getElementById("acp-story-save");
+      var storyReloadButton = document.getElementById("acp-story-reload");
+      var storyMessage = document.getElementById("acp-story-message");
+      var storyCatalog = [];
       function setText(id, value) {
         var el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -278,14 +335,32 @@
         errorEl.hidden = false;
         errorEl.textContent = message || "Unable to load admin control panel.";
       }
+      function fetchJson(url, options) {
+        return fetch(url, Object.assign({ credentials: "same-origin" }, options || {}))
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (!res.ok) throw new Error((data && data.error) || "Request failed.");
+              return data;
+            });
+          });
+      }
       function setRankMessage(message, isError) {
         if (!rankMessage) return;
         rankMessage.textContent = message || "";
         rankMessage.style.color = isError ? "#ffb0b0" : "var(--ca-parchment)";
       }
+      function setStoryMessage(message, isError) {
+        if (!storyMessage) return;
+        storyMessage.textContent = message || "";
+        storyMessage.style.color = isError ? "#ffb0b0" : "var(--ca-parchment)";
+      }
       function setRankButtonsDisabled(disabled) {
         if (rankSaveButton) rankSaveButton.disabled = disabled;
         if (rankResetButton) rankResetButton.disabled = disabled;
+      }
+      function setStoryButtonsDisabled(disabled) {
+        if (storySaveButton) storySaveButton.disabled = disabled;
+        if (storyReloadButton) storyReloadButton.disabled = disabled;
       }
       function renderTools(tools) {
         if (!toolsEl) return;
@@ -335,6 +410,65 @@
         }
         setRankMessage("");
       }
+      function renderStoryThumbnails(chapters) {
+        if (!storyTable) return;
+        storyCatalog = JSON.parse(JSON.stringify(Array.isArray(chapters) ? chapters : []));
+        storyTable.innerHTML = "";
+        storyCatalog.forEach(function (chapter) {
+          (Array.isArray(chapter.nodes) ? chapter.nodes : []).forEach(function (node) {
+            var row = document.createElement("tr");
+            row.setAttribute("data-story-node", node.nodeId || "");
+            row.innerHTML =
+              '<td><img class="acp-story-thumb" src="' + escapeHtml(node.image || "deadcharacter.png") + '" alt=""></td>' +
+              '<td><span class="acp-story-title">' + escapeHtml(node.title || "Story Battle") + '</span>' +
+              '<span class="acp-story-chapter">' + escapeHtml(chapter.title || "Chapter") + '</span></td>' +
+              '<td><input class="acp-rank-input" data-story-field="image" type="text" maxlength="500" value="' + escapeHtml(node.image || "") + '"></td>' +
+              '<td><input class="acp-rank-input" data-story-field="imageAlt" type="text" maxlength="160" value="' + escapeHtml(node.imageAlt || "") + '"></td>';
+            storyTable.appendChild(row);
+          });
+        });
+        if (!storyTable.children.length) {
+          var empty = document.createElement("tr");
+          empty.innerHTML = '<td colspan="4">No story entries are available.</td>';
+          storyTable.appendChild(empty);
+        }
+        setStoryMessage("");
+      }
+      function loadStoryThumbnails() {
+        setStoryButtonsDisabled(true);
+        setStoryMessage("Loading story entries...");
+        fetchJson("/api/admin/story")
+          .then(function (data) {
+            renderStoryThumbnails(data.chapters);
+          })
+          .catch(function (error) {
+            setStoryMessage(error && error.message ? error.message : "Unable to load story entries.", true);
+          })
+          .finally(function () {
+            setStoryButtonsDisabled(false);
+          });
+      }
+      function collectStoryThumbnails() {
+        var byNodeId = {};
+        Array.prototype.slice.call(document.querySelectorAll("[data-story-node]")).forEach(function (row) {
+          var nodeId = row.getAttribute("data-story-node") || "";
+          var imageInput = row.querySelector('[data-story-field="image"]');
+          var altInput = row.querySelector('[data-story-field="imageAlt"]');
+          byNodeId[nodeId] = {
+            image: imageInput ? imageInput.value.trim() : "",
+            imageAlt: altInput ? altInput.value.trim() : ""
+          };
+        });
+        storyCatalog.forEach(function (chapter) {
+          (Array.isArray(chapter.nodes) ? chapter.nodes : []).forEach(function (node) {
+            var next = byNodeId[node.nodeId];
+            if (!next) return;
+            node.image = next.image;
+            node.imageAlt = next.imageAlt || ((node.title || "Story Battle") + " artwork");
+          });
+        });
+        return storyCatalog;
+      }
       function collectRankTiers() {
         return Array.prototype.slice.call(document.querySelectorAll("[data-rank-row]")).map(function (row) {
           var minLevelInput = row.querySelector('[data-field="minLevel"]');
@@ -373,6 +507,25 @@
             setRankButtonsDisabled(false);
           });
       }
+      function saveStoryThumbnails() {
+        setStoryButtonsDisabled(true);
+        setStoryMessage("Saving story thumbnails...");
+        fetchJson("/api/admin/story", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chapters: collectStoryThumbnails() })
+        })
+          .then(function (data) {
+            renderStoryThumbnails(data.chapters);
+            setStoryMessage("Story thumbnails saved.");
+          })
+          .catch(function (error) {
+            setStoryMessage(error && error.message ? error.message : "Unable to save story thumbnails.", true);
+          })
+          .finally(function () {
+            setStoryButtonsDisabled(false);
+          });
+      }
       function resetRankRules() {
         setRankButtonsDisabled(true);
         setRankMessage("Restoring default Naruto-Arena ranks...");
@@ -399,13 +552,9 @@
       }
       if (rankSaveButton) rankSaveButton.addEventListener("click", saveRankRules);
       if (rankResetButton) rankResetButton.addEventListener("click", resetRankRules);
-      fetch("/api/admin/control-panel", { credentials: "same-origin" })
-        .then(function (res) {
-          return res.json().catch(function () { return {}; }).then(function (data) {
-            if (!res.ok) throw new Error((data && data.error) || "Admin access required.");
-            return data;
-          });
-        })
+      if (storySaveButton) storySaveButton.addEventListener("click", saveStoryThumbnails);
+      if (storyReloadButton) storyReloadButton.addEventListener("click", loadStoryThumbnails);
+      fetchJson("/api/admin/control-panel")
         .then(function (data) {
           var counts = data.counts || {};
           setText("count-characters", formatNumber(counts.characters));
@@ -428,6 +577,7 @@
           }
           renderTools(data.tools);
           renderRanks(data.ladderRules);
+          loadStoryThumbnails();
         })
         .catch(function (error) {
           showError(error && error.message ? error.message : "Unable to load admin control panel.");

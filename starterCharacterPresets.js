@@ -50,7 +50,7 @@
                 "id": "inuzuka-kiba-garouga",
                 "name": "Garouga",
                 "skillimage": "https://i.imgur.com/q3NdG8q.png",
-                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy. During 'Double Headed Wolf' this skill costs 1 less random energy.",
+                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy. During 'Double Headed Wolf' this skill costs 1 less random chakra.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -77,7 +77,7 @@
                 "id": "inuzuka-kiba-double-headed-wolf",
                 "name": "Double Headed Wolf",
                 "skillimage": "https://i.imgur.com/cKssLAR.png",
-                "skilldescription": "Inuzuka Kiba deals 15 damage to all enemies for 3 turns. For 3 turns, 'Garouga' will cost 1 random energy less. During this time, Inuzuka Kiba gains 15 points of damage reduction.",
+                "skilldescription": "Inuzuka Kiba deals 15 damage to all enemies for 3 turns. For 3 turns, 'Garouga' will cost 1 random chakra less. During this time, Inuzuka Kiba gains 15 points of damage reduction.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -116,7 +116,7 @@
                             "skillReplacements": {
                                 "inuzuka-kiba-garouga": "inuzuka-kiba-garouga-reduced"
                             },
-                            "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random energy."
+                            "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random chakra."
                         }
                     }
                 ]
@@ -209,7 +209,7 @@
                 "id": "aburame-shino-chakra-leach",
                 "name": "Chakra Leach",
                 "skillimage": "https://i.imgur.com/F9DLM31.png",
-                "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random energy from them. This skill deals 5 additional damage with each use.",
+                "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random chakra from them. This skill deals 5 additional damage with each use.",
                 "energy": [
                     "Bloodline",
                     "Random"
@@ -340,7 +340,7 @@
                 "id": "hyuuga-hinata-hinata-gentle-fist",
                 "name": "Hinata Gentle Fist",
                 "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns. If used during 'Byakugan', this skill will also remove 1 random energy each turn.",
+                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns. If used during 'Byakugan', this skill will also remove 1 random chakra each turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -449,7 +449,7 @@
                 "hiddenFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/k0nWgv6.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random energy from them each turn.",
+                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -621,7 +621,7 @@
                 "id": "nara-shikamaru-shadow-imitation",
                 "name": "Shadow Imitation",
                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                "skilldescription": "Nara Shikamaru stuns all enemies' physical, energy and strategic skills for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
+                "skilldescription": "Nara Shikamaru stuns all enemies' physical, chakra and strategic skills for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
                 "energy": [
                     "Random",
                     "Random"
@@ -646,7 +646,7 @@
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     },
                     {
@@ -665,7 +665,7 @@
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     }
                 ]
@@ -812,7 +812,7 @@
                 "name": "Mind Body Disturbance",
                 "ignoreInvulnerability": true,
                 "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "Yamanaka Ino stuns one enemy's physical, energy and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
+                "skilldescription": "Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
                 "energy": [
                     "Random",
                     "Random"
@@ -839,7 +839,7 @@
                             ],
                             "cannotReduceDamage": true,
                             "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned and they cannot reduce damage or become invulnerable."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned and they cannot reduce damage or become invulnerable."
                         }
                     },
                     {

@@ -33,7 +33,7 @@ const characters = [
                 "id": "uzumaki-naruto-overwhelming-chakra-wave",
                 "name": "Overwhelming Chakra Wave",
                 "skillimage": "https://i.imgur.com/N1LUxVU.png",
-                "skilldescription": "Uzumaki Naruto will gain 1 random energy after 1 turn. For 1 turn 'Uzumaki Naruto Combo' and 'Rasengan' will be unable to be used.",
+                "skilldescription": "Uzumaki Naruto will gain 1 random chakra after 1 turn. For 1 turn 'Uzumaki Naruto Combo' and 'Rasengan' will be unable to be used.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
@@ -473,7 +473,7 @@ const characters = [
                 "id": "inuzuka-kiba-garouga",
                 "name": "Garouga",
                 "skillimage": "https://i.imgur.com/q3NdG8q.png",
-                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy. During 'Double Headed Wolf' this skill costs 1 less random energy.",
+                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy. During 'Double Headed Wolf' this skill costs 1 less random chakra.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -500,7 +500,7 @@ const characters = [
                 "id": "inuzuka-kiba-double-headed-wolf",
                 "name": "Double Headed Wolf",
                 "skillimage": "https://i.imgur.com/cKssLAR.png",
-                "skilldescription": "Inuzuka Kiba deals 15 damage to all enemies for 3 turns. For 3 turns, 'Garouga' will cost 1 random energy less. During this time, Inuzuka Kiba gains 15 points of damage reduction.",
+                "skilldescription": "Inuzuka Kiba deals 15 damage to all enemies for 3 turns. For 3 turns, 'Garouga' will cost 1 random chakra less. During this time, Inuzuka Kiba gains 15 points of damage reduction.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -539,7 +539,7 @@ const characters = [
                             "skillReplacements": {
                                 "inuzuka-kiba-garouga": "inuzuka-kiba-garouga-reduced"
                             },
-                            "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random energy."
+                            "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random chakra."
                         }
                     }
                 ]
@@ -652,7 +652,7 @@ const characters = [
                 "id": "aburame-shino-chakra-leach",
                 "name": "Chakra Leach",
                 "skillimage": "https://i.imgur.com/F9DLM31.png",
-                "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random energy from them. This skill deals 5 additional damage with each use.",
+                "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random chakra from them. This skill deals 5 additional damage with each use.",
                 "energy": [
                     "Bloodline",
                     "Random"
@@ -804,7 +804,7 @@ const characters = [
                 "id": "hyuuga-hinata-hinata-gentle-fist",
                 "name": "Hinata Gentle Fist",
                 "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns. If used during 'Byakugan', this skill will also remove 1 random energy each turn.",
+                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns. If used during 'Byakugan', this skill will also remove 1 random chakra each turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -934,7 +934,7 @@ const characters = [
                 "name": "Hinata Gentle Fist",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/k0nWgv6.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random energy from them each turn.",
+                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -1104,7 +1104,7 @@ const characters = [
                 "id": "nara-shikamaru-shadow-imitation",
                 "name": "Shadow Imitation",
                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                "skilldescription": "Nara Shikamaru stuns all enemies' physical, energy and strategic skills for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
+                "skilldescription": "Nara Shikamaru stuns all enemies' physical, chakra and strategic skills for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1129,7 +1129,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     },
                     {
@@ -1148,7 +1148,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     }
                 ]
@@ -1337,7 +1337,7 @@ const characters = [
                 "name": "Mind Body Disturbance",
                 "ignoreInvulnerability": true,
                 "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "Yamanaka Ino stuns one enemy's physical, energy and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
+                "skilldescription": "Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1364,7 +1364,7 @@ const characters = [
                             ],
                             "cannotReduceDamage": true,
                             "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned and they cannot reduce damage or become invulnerable."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned and they cannot reduce damage or become invulnerable."
                         }
                     },
                     {
@@ -1829,7 +1829,7 @@ const characters = [
                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                 "name": "Eight Trigrams Sixty-Four Palms",
                 "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                "skilldescription": "Hyuuga Neji deals 40 damage to one enemy and removes 1 random energy from them.",
+                "skilldescription": "Hyuuga Neji deals 40 damage to one enemy and removes 1 random chakra from them.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -1895,7 +1895,7 @@ const characters = [
                 "id": "tenten-twin-rising-dragons",
                 "name": "Twin Rising Dragons",
                 "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and energy damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -1938,7 +1938,7 @@ const characters = [
                 "id": "tenten-twin-rising-dragons-trap",
                 "name": "Twin Rising Dragons Trap",
                 "skillimage": "https://i.imgur.com/pOsj115.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their physical and energy damage will be lowered by 5. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
+                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their physical and chakra damage will be lowered by 5. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
                 "energy": [
                     "Random"
                 ],
@@ -1966,7 +1966,7 @@ const characters = [
                                 "physical": 5,
                                 "energy": 5
                             },
-                            "tooltipText": "This character deals 5 less physical and energy damage."
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
                         }
                     },
                     {
@@ -2056,7 +2056,7 @@ const characters = [
                 "name": "Twin Rising Dragons",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/mlelii2.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and energy damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -2101,7 +2101,7 @@ const characters = [
                 "name": "Twin Rising Dragons Trap",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/3bgTaua.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and energy damage will be lowered by 5.",
+                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
                 "energy": [
                     "Random"
                 ],
@@ -2129,7 +2129,7 @@ const characters = [
                                 "physical": 5,
                                 "energy": 5
                             },
-                            "tooltipText": "This character deals 5 less physical and energy damage."
+                            "tooltipText": "This character deals 5 less physical and chakra damage."
                         }
                     },
                     {
@@ -2152,7 +2152,7 @@ const characters = [
                 "id": "gaara-of-the-desert-sand-coffin",
                 "name": "Sand Coffin",
                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, energy and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                "skilldescription": "Gaara stuns one enemy's physical, chakra and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -2177,7 +2177,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     },
                     {
@@ -3428,7 +3428,7 @@ const characters = [
                 "id": "haku-acupuncture",
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku targets one enemy, stunning them and making them unable to reduce damage or become invulnerable for 1 turn. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies and costs 1 additional random energy. This skill ignores invulnerability.",
+                "skilldescription": "Haku targets one enemy, stunning them and making them unable to reduce damage or become invulnerable for 1 turn. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies and costs 1 additional random chakra. This skill ignores invulnerability.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -3460,7 +3460,7 @@ const characters = [
                 "id": "haku-demonic-mirroring-ice-crystals",
                 "name": "Demonic Mirroring Ice Crystals",
                 "skillimage": "https://i.imgur.com/2sgPkS0.png",
-                "skilldescription": "Haku becomes invulnerable for 3 turns. While active, 'Flying Water Needles of Death' will target all enemies, and 'Acupuncture' will target all enemies and cost 1 additional random energy.",
+                "skilldescription": "Haku becomes invulnerable for 3 turns. While active, 'Flying Water Needles of Death' will target all enemies, and 'Acupuncture' will target all enemies and cost 1 additional random chakra.",
                 "energy": [
                     "Bloodline",
                     "Ninjutsu"
@@ -3485,7 +3485,7 @@ const characters = [
                                 "haku-flying-water-needles-of-death": "haku-flying-water-needles-of-death-empowered",
                                 "haku-acupuncture": "haku-acupuncture-empowered"
                             },
-                            "tooltipText": "Haku is invulnerable.\n'Flying Water Needles of Death' will target all enemies, and 'Acupuncture' will cost 1 additional random energy."
+                            "tooltipText": "Haku is invulnerable.\n'Flying Water Needles of Death' will target all enemies, and 'Acupuncture' will cost 1 additional random chakra."
                         }
                     }
                 ]
@@ -3549,7 +3549,7 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku targets one enemy, stunning them and making them unable to reduce damage or become invulnerable for 1 turn. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies and costs 1 additional random energy. This skill ignores invulnerability.",
+                "skilldescription": "Haku targets one enemy, stunning them and making them unable to reduce damage or become invulnerable for 1 turn. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies and costs 1 additional random chakra. This skill ignores invulnerability.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -3648,7 +3648,7 @@ const characters = [
                 "id": "umino-iruka-sealed-bomb-square-release",
                 "name": "Sealed Bomb Square Release",
                 "skillimage": "https://i.imgur.com/TeDfWJB.png",
-                "skilldescription": "The following turn, if one enemy uses a new harmful skill, they will take 40 damage that ignores invulnerability, and for 1 turn they will take 25 additional damage from physical and energy skills. This skill is invisible.",
+                "skilldescription": "The following turn, if one enemy uses a new harmful skill, they will take 40 damage that ignores invulnerability, and for 1 turn they will take 25 additional damage from physical and chakra skills. This skill is invisible.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -3680,7 +3680,7 @@ const characters = [
                                     "physical": 25,
                                     "energy": 25
                                 },
-                                "tooltipText": "This character takes 25 additional damage from physical and energy skills from Sealed Bomb Square Release."
+                                "tooltipText": "This character takes 25 additional damage from physical and chakra skills from Sealed Bomb Square Release."
                             },
                             "tooltipText": "An enemy that uses a new harmful skill will take 40 damage from Sealed Bomb Square Release."
                         }
@@ -4010,7 +4010,7 @@ const characters = [
                 "id": "demon-brothers-water-melding",
                 "name": "Water Melding",
                 "skillimage": "https://i.imgur.com/ogryqGA.png",
-                "skilldescription": "Demon Brothers gain 20 points of permanent destructible defense and 1 green energy.",
+                "skilldescription": "Demon Brothers gain 20 points of permanent destructible defense and 1 green chakra.",
                 "energy": [
                     "Random"
                 ],
@@ -4208,7 +4208,7 @@ const characters = [
                 "id": "momochi-zabuza-hidden-mist",
                 "name": "Hidden Mist",
                 "skillimage": "https://i.imgur.com/7mpGS0U.png",
-                "skilldescription": "For 2 turns, all enemies' physical and energy skills will cost 1 additional random energy and Momochi Zabuza will gain 5 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
+                "skilldescription": "For 2 turns, all enemies' physical and chakra skills will cost 1 additional random chakra and Momochi Zabuza will gain 5 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -4232,7 +4232,7 @@ const characters = [
                                 "physical": 1,
                                 "energy": 1
                             },
-                            "tooltipText": "This character's physical and energy skills cost 1 additional random energy from Hidden Mist."
+                            "tooltipText": "This character's physical and chakra skills cost 1 additional random chakra from Hidden Mist."
                         }
                     },
                     {
@@ -4333,7 +4333,7 @@ const characters = [
                 "id": "oboro-exploding-kunai",
                 "name": "Exploding Kunai",
                 "skillimage": "https://i.imgur.com/fo853Ic.png",
-                "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill will cost 1 less random energy and will deal 5 additional damage.",
+                "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill will cost 1 less random chakra and will deal 5 additional damage.",
                 "energy": [
                     "Random",
                     "Random"
@@ -4371,7 +4371,7 @@ const characters = [
                 "id": "oboro-earth-swim",
                 "name": "Earth Swim",
                 "skillimage": "https://i.imgur.com/8iLEEf6.png",
-                "skilldescription": "Oboro deals 20 damage to one enemy and stuns their physical, energy and affliction skills for 1 turn. During 'Haze Clone', this skill will target all enemies and will cost 1 less random energy.",
+                "skilldescription": "Oboro deals 20 damage to one enemy and stuns their physical, chakra and affliction skills for 1 turn. During 'Haze Clone', this skill will target all enemies and will cost 1 less random chakra.",
                 "energy": [
                     "Genjutsu",
                     "Random"
@@ -4401,7 +4401,7 @@ const characters = [
                                 "energy",
                                 "affliction"
                             ],
-                            "tooltipText": "This character's physical, energy and affliction skills are stunned."
+                            "tooltipText": "This character's physical, chakra and affliction skills are stunned."
                         }
                     }
                 ]
@@ -4410,7 +4410,7 @@ const characters = [
                 "id": "oboro-haze-clone",
                 "name": "Haze Clone",
                 "skillimage": "https://i.imgur.com/6zjMsdw.png",
-                "skilldescription": "For 2 turns, 'Exploding Kunai' will cost 1 less random energy and will deal 5 additional damage and 'Earth Swim' will target all enemies and will cost 1 less random energy. During this time, Oboro will become invulnerable to non-strategic skills.",
+                "skilldescription": "For 2 turns, 'Exploding Kunai' will cost 1 less random chakra and will deal 5 additional damage and 'Earth Swim' will target all enemies and will cost 1 less random chakra. During this time, Oboro will become invulnerable to non-strategic skills.",
                 "energy": [
                     "Random"
                 ],
@@ -4515,7 +4515,7 @@ const characters = [
                 "name": "Earth Swim",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "deadcharacter.png",
-                "skilldescription": "Oboro deals 20 damage to all enemies and stuns their physical, energy and affliction skills for 1 turn.",
+                "skilldescription": "Oboro deals 20 damage to all enemies and stuns their physical, chakra and affliction skills for 1 turn.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -4544,7 +4544,7 @@ const characters = [
                                 "energy",
                                 "affliction"
                             ],
-                            "tooltipText": "This character's physical, energy and affliction skills are stunned."
+                            "tooltipText": "This character's physical, chakra and affliction skills are stunned."
                         }
                     }
                 ]
@@ -4703,7 +4703,7 @@ const characters = [
                 "id": "shiore-orochimaru-five-elements-seal",
                 "name": "Five Elements Seal",
                 "skillimage": "https://i.imgur.com/c7GzZkw.png",
-                "skilldescription": "Shiore Orochimaru targets one enemy, removing 1 random energy from them and making their skills cost 1 additional random energy for 1 turn. If this skill is used on an enemy affected by 'Giant Snake Bind', this enemy will have 1 random energy stolen instead and the energy cost increase effect will last 2 turns.",
+                "skilldescription": "Shiore Orochimaru targets one enemy, removing 1 random chakra from them and making their skills cost 1 additional random chakra for 1 turn. If this skill is used on an enemy affected by 'Giant Snake Bind', this enemy will have 1 random chakra stolen instead and the chakra cost increase effect will last 2 turns.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -4732,7 +4732,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "randomCostIncrease": 1,
-                            "tooltipText": "This character's skills cost 1 additional random energy."
+                            "tooltipText": "This character's skills cost 1 additional random chakra."
                         }
                     },
                     {
@@ -4747,7 +4747,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "randomCostIncrease": 1,
-                            "tooltipText": "This character's skills cost 1 additional random energy."
+                            "tooltipText": "This character's skills cost 1 additional random chakra."
                         }
                     }
                 ]
@@ -5014,7 +5014,7 @@ const characters = [
                 "id": "akadou-yoroi-chakra-focus",
                 "name": "Chakra Focus",
                 "skillimage": "https://i.imgur.com/8oUT5Mk.png",
-                "skilldescription": "For 2 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random energy for their duration.",
+                "skilldescription": "For 2 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random chakra for their duration.",
                 "energy": [
                     "Random"
                 ],
@@ -5033,7 +5033,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "tooltipText": "Energy Drain and Draining Assault will also steal 1 random energy."
+                            "tooltipText": "Energy Drain and Draining Assault will also steal 1 random chakra."
                         }
                     }
                 ]
@@ -5371,7 +5371,13 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
-                            "damageTakenBonusFlat": 5,
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageFromSourceCharacterId": "mitarashi-anko",
+                            "bonusDamageAppliesToSkillIds": [
+                                "mitarashi-anko-dual-pin",
+                                "mitarashi-anko-hidden-shadow-snake-hand",
+                                "mitarashi-anko-twin-snakes-mutual-death"
+                            ],
                             "tooltipText": "This character takes 5 additional damage from Mitarashi Anko's skills."
                         }
                     }
@@ -5576,7 +5582,7 @@ const characters = [
                 "id": "jiroubou-earth-prison-of-magnificent-nothingness",
                 "name": "Earth Prison of Magnificent Nothingness",
                 "skillimage": "https://i.imgur.com/plmoESM.png",
-                "skilldescription": "For 3 turns, Jiroubou and all allies will gain 45 points of destructible defense. During this time, one target enemy will have 1 random energy stolen each turn. This skill's energy drain effect will end if Jiroubou's destructible defense is destroyed.",
+                "skilldescription": "For 3 turns, Jiroubou and all allies will gain 45 points of destructible defense. During this time, one target enemy will have 1 random chakra stolen each turn. This skill's chakra drain effect will end if Jiroubou's destructible defense is destroyed.",
                 "energy": [
                     "Ninjutsu",
                     "Ninjutsu",
@@ -5605,7 +5611,7 @@ const characters = [
                             "removeStatusIdsFromEnemyOnBreak": [
                                 "jiroubou_earth_prison_drain"
                             ],
-                            "tooltipText": "This character has 45 points of destructible defense from Earth Prison of Magnificent Nothingness. If it is destroyed, this skill's energy drain effect will end."
+                            "tooltipText": "This character has 45 points of destructible defense from Earth Prison of Magnificent Nothingness. If it is destroyed, this skill's chakra drain effect will end."
                         }
                     },
                     {
@@ -5632,7 +5638,7 @@ const characters = [
                             "harmful": true,
                             "turnEndRemoveRandomChakra": 1,
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character loses 1 random energy each turn from Earth Prison of Magnificent Nothingness."
+                            "tooltipText": "This character loses 1 random chakra each turn from Earth Prison of Magnificent Nothingness."
                         }
                     }
                 ]
@@ -5818,7 +5824,7 @@ const characters = [
                 "id": "tayuya-summoning-doki",
                 "name": "Summoning: Doki",
                 "skillimage": "https://i.imgur.com/SBJYjtZ.png",
-                "skilldescription": "Tayuya deals 15 damage to all enemies for 2 turns. During this time, Tayuya will gain 10 points of damage reduction and 'Demonic Flute: Phantom Wave' will also remove 1 random energy from its target if used.",
+                "skilldescription": "Tayuya deals 15 damage to all enemies for 2 turns. During this time, Tayuya will gain 10 points of damage reduction and 'Demonic Flute: Phantom Wave' will also remove 1 random chakra from its target if used.",
                 "energy": [
                     "Genjutsu",
                     "Random"
@@ -5852,7 +5858,7 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "damageReductionFlat": 10,
-                            "tooltipText": "Tayuya has 10 points of damage reduction. Demonic Flute: Phantom Wave will also remove 1 random energy from its target."
+                            "tooltipText": "Tayuya has 10 points of damage reduction. Demonic Flute: Phantom Wave will also remove 1 random chakra from its target."
                         }
                     }
                 ]
@@ -5861,7 +5867,7 @@ const characters = [
                 "id": "tayuya-demonic-flute-phantom-wave",
                 "name": "Demonic Flute: Phantom Wave",
                 "skillimage": "https://i.imgur.com/vgPEfaF.png",
-                "skilldescription": "Tayuya deals 10 affliction damage to one enemy. During 'Summoning: Doki', this skill will also remove 1 random energy from its target.",
+                "skilldescription": "Tayuya deals 10 affliction damage to one enemy. During 'Summoning: Doki', this skill will also remove 1 random chakra from its target.",
                 "energy": [
                     "Random"
                 ],
@@ -6202,7 +6208,7 @@ const characters = [
                 "id": "kimimaro-dance-of-the-seedling-fern",
                 "name": "Dance of the Seedling Fern",
                 "skillimage": "https://i.imgur.com/T9Usfo0.png",
-                "skilldescription": "Kimimaro deals 30 damage to all enemies and reduces their physical and energy damage by 20 for 1 turn. This skill cannot be countered or reflected. Kimimaro will take 10 affliction damage for 2 turns.",
+                "skilldescription": "Kimimaro deals 30 damage to all enemies and reduces their physical and chakra damage by 20 for 1 turn. This skill cannot be countered or reflected. Kimimaro will take 10 affliction damage for 2 turns.",
                 "energy": [
                     "Bloodline",
                     "Random",
@@ -6236,7 +6242,7 @@ const characters = [
                                 "physical": 20,
                                 "energy": 20
                             },
-                            "tooltipText": "This character deals 20 less physical and energy damage."
+                            "tooltipText": "This character deals 20 less physical and chakra damage."
                         }
                     },
                     {
@@ -6602,7 +6608,7 @@ const characters = [
                 "id": "hatake-kakashi-sharingan-counter",
                 "name": "Sharingan Counter",
                 "skillimage": "https://i.imgur.com/4sfYWaL.png",
-                "skilldescription": "The following turn, the first physical, energy or strategic skill used on Hatake Kakashi will be countered and will replace this skill for 1 turn. This skill is invisible.",
+                "skilldescription": "The following turn, the first physical, chakra or strategic skill used on Hatake Kakashi will be countered and will replace this skill for 1 turn. This skill is invisible.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -6629,7 +6635,7 @@ const characters = [
                             "counterCancelsSkill": true,
                             "counterCopySkillReplacementFor": "hatake-kakashi-sharingan-counter",
                             "counterCopySkillReplacementDuration": 1,
-                            "tooltipText": "The first physical, energy or strategic skill used on this character will be countered and copied, replacing this skill for 1 turn."
+                            "tooltipText": "The first physical, chakra or strategic skill used on this character will be countered and copied, replacing this skill for 1 turn."
                         }
                     }
                 ]
@@ -6638,7 +6644,7 @@ const characters = [
                 "id": "hatake-kakashi-summoning-ninja-dogs",
                 "name": "Summoning: Ninja Dogs",
                 "skillimage": "https://i.imgur.com/1TSYjNE.png",
-                "skilldescription": "Hatake Kakashi stuns one enemy's physical, energy and strategic skills for 1 turn. During this time, 'Raikiri' will deal 50 additional damage to this enemy.",
+                "skilldescription": "Hatake Kakashi stuns one enemy's physical, chakra and strategic skills for 1 turn. During this time, 'Raikiri' will deal 50 additional damage to this enemy.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -6663,7 +6669,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, energy and strategic skills are stunned. Raikiri deals 50 additional damage to this character."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned. Raikiri deals 50 additional damage to this character."
                         }
                     }
                 ]
@@ -6749,7 +6755,7 @@ const characters = [
                 "id": "yuhi-kurenai-demonic-illusion-entrap",
                 "name": "Demonic Illusion: Entrap",
                 "skillimage": "https://i.imgur.com/7TlVCo0.png",
-                "skilldescription": "Yuhi Kurenai targets one enemy. For 2 turns, they will take 10 damage each turn, will be unable to reduce damage or become invulnerable, their non-affliction damage will be reduced by 10, and the cost of their skills will be increased by 1 random energy.",
+                "skilldescription": "Yuhi Kurenai targets one enemy. For 2 turns, they will take 10 damage each turn, will be unable to reduce damage or become invulnerable, their non-affliction damage will be reduced by 10, and the cost of their skills will be increased by 1 random chakra.",
                 "energy": [
                     "Genjutsu",
                     "Random"
@@ -6775,7 +6781,7 @@ const characters = [
                             "randomCostIncrease": 1,
                             "turnEndDamage": 10,
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character takes 10 damage each turn, is unable to reduce damage or become invulnerable, deals 10 less non-affliction damage, and their skills cost 1 additional random energy."
+                            "tooltipText": "This character takes 10 damage each turn, is unable to reduce damage or become invulnerable, deals 10 less non-affliction damage, and their skills cost 1 additional random chakra."
                         }
                     }
                 ]
@@ -7507,7 +7513,7 @@ const characters = [
                 "id": "yakushi-kabuto-chakra-scalpel",
                 "name": "Chakra Scalpel",
                 "skillimage": "https://i.imgur.com/nHQweGx.png",
-                "skilldescription": "Yakushi Kabuto deals 15 piercing damage to one enemy. For 1 turn, that enemy's skills will cost 1 additional random energy and they will take 5 additional damage from physical and energy skills. The following turn, 'Chakra Scalpel' will deal 5 additional damage.",
+                "skilldescription": "Yakushi Kabuto deals 15 piercing damage to one enemy. For 1 turn, that enemy's skills will cost 1 additional random chakra and they will take 5 additional damage from physical and chakra skills. The following turn, 'Chakra Scalpel' will deal 5 additional damage.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -7539,7 +7545,7 @@ const characters = [
                                 "physical": 5,
                                 "energy": 5
                             },
-                            "tooltipText": "This character's skills cost 1 additional random energy and they take 5 additional damage from physical and energy skills."
+                            "tooltipText": "This character's skills cost 1 additional random chakra and they take 5 additional damage from physical and chakra skills."
                         }
                     },
                     {
@@ -7613,7 +7619,7 @@ const characters = [
                 "id": "yakushi-kabuto-temple-of-nirvana",
                 "name": "Temple of Nirvana",
                 "skillimage": "https://i.imgur.com/JyyJvB0.png",
-                "skilldescription": "The following turn, any enemy that does not use a new skill will be stunned for 1 turn and take 5 additional damage from physical and energy skills for 2 turns. This skill is invisible.",
+                "skilldescription": "The following turn, any enemy that does not use a new skill will be stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns. This skill is invisible.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -7656,11 +7662,11 @@ const characters = [
                                             "physical": 5,
                                             "energy": 5
                                         },
-                                        "tooltipText": "This character takes 5 additional damage from physical and energy skills."
+                                        "tooltipText": "This character takes 5 additional damage from physical and chakra skills."
                                     }
                                 }
                             ],
-                            "tooltipText": "If this character does not use a new skill, they will be stunned for 1 turn and take 5 additional damage from physical and energy skills for 2 turns."
+                            "tooltipText": "If this character does not use a new skill, they will be stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns."
                         }
                     }
                 ]
@@ -8163,7 +8169,7 @@ const characters = [
                 "id": "orochimaru-cursed-seal-technique",
                 "name": "Cursed Seal Technique",
                 "skillimage": "https://i.imgur.com/OPwllfS.png",
-                "skilldescription": "Orochimaru targets one ally or one enemy, dealing 15 affliction damage to them. The target will gain 1 random energy. This skill ignores invulnerability.",
+                "skilldescription": "Orochimaru targets one ally or one enemy, dealing 15 affliction damage to them. The target will gain 1 random chakra. This skill ignores invulnerability.",
                 "energy": [],
                 "target": "single-character",
                 "damage": 0,
@@ -8194,7 +8200,7 @@ const characters = [
                 "id": "orochimaru-major-summoning-manda",
                 "name": "Major Summoning: Manda",
                 "skillimage": "https://i.imgur.com/YQEJtJR.png",
-                "skilldescription": "Orochimaru deals 45 damage to one enemy. For the rest of the game, Orochimaru will gain 1 additional random energy each turn, and this skill will be replaced by 'Constrict and Bite'. This skill will end if Orochimaru dies.",
+                "skilldescription": "Orochimaru deals 45 damage to one enemy. For the rest of the game, Orochimaru will gain 1 additional random chakra each turn, and this skill will be replaced by 'Constrict and Bite'. This skill will end if Orochimaru dies.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline",
@@ -8225,7 +8231,7 @@ const characters = [
                                 "amount": 1
                             },
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "Orochimaru gains 1 additional random energy each turn."
+                            "tooltipText": "Orochimaru gains 1 additional random chakra each turn."
                         }
                     },
                     {
