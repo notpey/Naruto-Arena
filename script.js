@@ -980,6 +980,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const getPendingReservationState = (excludedActorSlot = null) => {
             const pending = normalizePendingTurn(pendingTurnState);
+            // playerPoolState comes straight from the server's chakraPools broadcast,
+            // which already has every currently-queued skill's reservedSpecific (and
+            // any assigned random chakra) subtracted at queue time. Do NOT subtract
+            // those again here or already-spent chakra gets double-deducted, making
+            // leftover chakra of a type disappear after just one skill uses it.
             const remainingPool = normalizePool(playerPoolState);
             const randomAssignments = normalizePool(pending.randomAssignments);
             let totalQueuedRandom = 0;
@@ -991,25 +996,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 totalQueuedRandom += queuedRequiredRandom;
                 if (Number.isInteger(excludedActorSlot) && queuedActorSlot === excludedActorSlot) {
                     excludedQueuedRandom += queuedRequiredRandom;
-                    return;
                 }
-                const reservedSpecific =
-                    queued?.reservedSpecific && typeof queued.reservedSpecific === 'object'
-                        ? queued.reservedSpecific
-                        : {};
-                chakraTypes.forEach((type) => {
-                    remainingPool[type] = Math.max(
-                        0,
-                        (Number(remainingPool[type]) || 0) - (Number(reservedSpecific[type]) || 0)
-                    );
-                });
-            });
-
-            chakraTypes.forEach((type) => {
-                remainingPool[type] = Math.max(
-                    0,
-                    (Number(remainingPool[type]) || 0) - (Number(randomAssignments[type]) || 0)
-                );
             });
 
             const assignedRandomTotal = totalPool(randomAssignments);
@@ -2326,22 +2313,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return `${remaining} TURN${remaining === 1 ? '' : 'S'} LEFT`;
                 };
                 const splitTooltipTextIntoLines = (text, statusMetadata = {}) => {
-                    const defensePoints = Math.max(0, Number(statusMetadata?.destructibleDefensePoints) || 0);
                     let normalized = String(text || '').trim();
-                    if (
-                        defensePoints > 0 &&
-                        /destructible defense/i.test(normalized) &&
-                        !new RegExp(`\\b${defensePoints}\\b`).test(normalized)
-                    ) {
-                        normalized = normalized.replace(
-                            /has permanent destructible defense/i,
-                            `has ${defensePoints} permanent destructible defense`
-                        );
-                        normalized = normalized.replace(
-                            /has destructible defense/i,
-                            `has ${defensePoints} destructible defense`
-                        );
-                    }
+                    // Several skills write generic tooltip text ("has permanent destructible
+                    // defense", "takes additional damage", "has damage reduction") and rely on
+                    // the actual point value being injected here at render time from the live
+                    // status metadata, since that value can grow via stacking (mergeNumericAddKeys)
+                    // after the status is first applied. Baking a fixed number into the source
+                    // text instead would go stale the moment the status stacks again.
+                    const injectMissingValue = (value, phraseRegex) => {
+                        if (!(value > 0)) return;
+                        if (new RegExp(`\\b${value}\\b`).test(normalized)) return;
+                        if (!phraseRegex.test(normalized)) return;
+                        normalized = normalized.replace(phraseRegex, (match, verb) => match.replace(verb, `${verb} ${value}`));
+                    };
+                    const defensePoints = Math.max(0, Number(statusMetadata?.destructibleDefensePoints) || 0);
+                    injectMissingValue(defensePoints, /\b(has|have)\s+permanent destructible defense\b/i);
+                    injectMissingValue(defensePoints, /\b(has|have)\s+destructible defense\b/i);
+                    const bonusDamage = Math.max(0, Number(statusMetadata?.bonusDamageFromSourceSkillsFlat) || 0);
+                    injectMissingValue(bonusDamage, /\b(takes|take)\s+additional damage\b/i);
+                    const damageReduction = Math.max(0, Number(statusMetadata?.damageReductionFlat) || 0);
+                    injectMissingValue(damageReduction, /\b(has|have)\s+damage reduction\b/i);
                     return normalized
                         .split(/\n+/)
                         .flatMap((part) => part.split(/(?<=\.)\s+(?=This character|They|Their|All enemies|If |For \d+ turns)/i))

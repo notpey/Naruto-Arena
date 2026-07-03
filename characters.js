@@ -1973,6 +1973,7 @@ const characters = [
                         },
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 10,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -1992,6 +1993,7 @@ const characters = [
                         },
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 20,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -2185,6 +2187,7 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 20,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -2685,6 +2688,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 5,
                             "bonusDamageFromSourceCharacterId": "kankuro",
                             "bonusDamageAppliesToSkillIds": [
@@ -2728,6 +2732,7 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 5,
                             "bonusDamageFromSourceCharacterId": "kankuro",
                             "bonusDamageAppliesToSkillIds": [
@@ -7505,6 +7510,7 @@ const characters = [
                             "helpful": true,
                             "destructibleDefensePoints": 50,
                             "cannotBeStunned": true,
+                            "stunImmune": true,
                             "invulnerableToSkillClasses": [
                                 "affliction"
                             ],

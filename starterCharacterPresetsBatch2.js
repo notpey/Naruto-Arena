@@ -292,6 +292,7 @@
                         },
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 10,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -311,6 +312,7 @@
                         },
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 20,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -482,6 +484,7 @@
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 20,
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
@@ -860,6 +863,7 @@
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 5,
                             "bonusDamageFromSourceCharacterId": "kankuro",
                             "bonusDamageAppliesToSkillIds": [
@@ -903,6 +907,7 @@
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 5,
                             "bonusDamageFromSourceCharacterId": "kankuro",
                             "bonusDamageAppliesToSkillIds": [
