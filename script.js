@@ -3014,7 +3014,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } finally {
                     matchPollInFlight = false;
                 }
-            }, 3000);
+            }, 1500);
         };
         startMatchPoll();
 

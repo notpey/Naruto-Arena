@@ -4,6 +4,7 @@ const https = require('https');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -17,6 +18,7 @@ const battleLogic = require('./battleLogic');
 let charactersData = require('./characters');
 
 const app = express();
+app.use(compression());
 
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
