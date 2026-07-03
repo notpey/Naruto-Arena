@@ -4385,8 +4385,8 @@ const validateAvatarUrl = async (url) => {
     if (!dimensions) {
         throw new Error('Unsupported image format.');
     }
-    if (dimensions.width !== 75 || dimensions.height !== 75) {
-        throw new Error('Avatars must be exactly 75x75.');
+    if (dimensions.width !== 100 || dimensions.height !== 100) {
+        throw new Error('Avatars must be exactly 100x100.');
     }
     return true;
 };

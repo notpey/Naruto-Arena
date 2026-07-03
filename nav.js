@@ -150,22 +150,6 @@
       }
     });
 
-    // ── Ryo shop trigger ──────────────────────────────────────
-    var accountEl = nav.querySelector(".ca-nav-account");
-    if (accountEl && !nav.querySelector(".ca-nav-shop")) {
-      var shopBtn = document.createElement("button");
-      shopBtn.type = "button";
-      shopBtn.className = "ca-nav-shop";
-      shopBtn.setAttribute("data-shop-trigger", "");
-      shopBtn.setAttribute("aria-label", "Open the Ryo shop");
-      shopBtn.title = "Ryo Shop";
-      shopBtn.innerHTML =
-        '<span class="ca-nav-shop-coin" aria-hidden="true">両</span>' +
-        '<span class="ca-nav-shop-label">Shop</span>' +
-        '<span class="ca-nav-shop-balance" data-shop-balance>0</span>';
-      accountEl.insertBefore(shopBtn, accountEl.firstChild);
-    }
-
     // ── Mobile hamburger ─────────────────────────────────────
     var inner = nav.querySelector(".ca-nav-inner") || nav;
     var burger = document.createElement("button");

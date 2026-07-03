@@ -312,7 +312,7 @@
 .game-remaster .skillviewer {
     left: 0;
     bottom: auto;
-    top: -430px;
+    top: -396px;
 }
 
 .game-remaster .skillscroll {
@@ -1904,7 +1904,7 @@ text-transform: uppercase;
 }
 
 .player-level-block {
-    margin: 3px 0 4px;
+    margin: 3px 10px 4px 0;
 }
 
 .player-level-row {

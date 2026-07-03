@@ -2690,13 +2690,17 @@
 
   function cacheSessionUser(user) {
     try {
+      var navAvatarEl = document.getElementById("ca-nav-avatar-circle");
       if (!user || !user.username) {
         localStorage.removeItem("narutoUser");
+        if (navAvatarEl) navAvatarEl.src = defaultProfileAvatar;
         return;
       }
+      var navAvatarUrl = user.profile && user.profile.avatarUrl ? user.profile.avatarUrl : defaultProfileAvatar;
+      if (navAvatarEl) navAvatarEl.src = navAvatarUrl;
       localStorage.setItem("narutoUser", JSON.stringify({
         username: user.username,
-        avatarUrl: user.profile && user.profile.avatarUrl ? user.profile.avatarUrl : defaultProfileAvatar,
+        avatarUrl: navAvatarUrl,
         clanAbbreviation: user.profile && user.profile.clan && user.profile.clan.abbreviation
           ? user.profile.clan.abbreviation
           : "",
