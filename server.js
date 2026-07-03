@@ -23,8 +23,12 @@ app.use(compression());
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
 const MATCH_FOUND_HOLD_MS = 3 * 1000;
-const BATTLE_BOT_QUEUE_TIMEOUT_MS = 2 * 1000;
-const BATTLE_BOT_ACTION_DELAY_MS = 15 * 1000;
+const BATTLE_BOT_QUEUE_TIMEOUT_MS = 3 * 1000;
+const BATTLE_BOT_ACTION_DELAY_MIN_MS = 3 * 1000;
+const BATTLE_BOT_ACTION_DELAY_MAX_MS = 7 * 1000;
+const getBattleBotActionDelayMs = () =>
+    BATTLE_BOT_ACTION_DELAY_MIN_MS +
+    Math.floor(Math.random() * (BATTLE_BOT_ACTION_DELAY_MAX_MS - BATTLE_BOT_ACTION_DELAY_MIN_MS + 1));
 const BATTLE_BOTS_ENABLED = process.env.ENABLE_BATTLE_BOTS !== 'false';
 const DEFAULT_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.MONGODB_DB || 'naruto-arena';
@@ -6020,7 +6024,7 @@ function scheduleBattleBotTurn(match) {
     const turnStartedAtMs = match.turnStartedAt ? new Date(match.turnStartedAt).getTime() : matchStartsAtMs;
     const earliestActionAtMs = Math.max(
         matchStartsAtMs,
-        Number.isNaN(turnStartedAtMs) ? matchStartsAtMs : turnStartedAtMs + BATTLE_BOT_ACTION_DELAY_MS
+        Number.isNaN(turnStartedAtMs) ? matchStartsAtMs : turnStartedAtMs + getBattleBotActionDelayMs()
     );
     const delayMs = Math.max(0, earliestActionAtMs - Date.now());
     scheduledBattleBotTurns.add(matchId);

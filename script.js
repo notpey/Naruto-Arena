@@ -553,7 +553,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const endTurnChooseCountEl = endTurnModalEl?.querySelector('.chakrachoosered');
         const timerBar = document.querySelector('.timer-bar');
         const TURN_DURATION_MS = 60_000;
-        const TIMER_MAX_WIDTH = 191;
+        // Read the CSS-declared full width instead of hardcoding it: classic and
+        // remaster stages use different .timer-bar widths (191px / 273px), and a
+        // hardcoded value silently drifts out of sync whenever that CSS changes.
+        const TIMER_MAX_WIDTH = timerBar
+            ? parseFloat(getComputedStyle(timerBar).width) || 191
+            : 191;
         const EXCHANGE_CHAKRA_COST = 5;
         const READY_TEXT_PLAYER = 'PRESS WHEN READY';
         const READY_TEXT_OPPONENT = "OPPONENT'S TURN...";
@@ -1151,72 +1156,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             return false;
         };
 
-        const updateSkillAffordability = () => {
+        const getCooldownRemainingForMeta = (meta, actorUnit) => {
+            const cooldowns = actorUnit?.state?.cooldowns || {};
+            const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
+            const skillId = effectiveSkill?.id;
+            if (!skillId) return 0;
+            return Math.max(0, Number(cooldowns[skillId]) || 0);
+        };
+        const isActorStunned = (actorUnit) => {
+            const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
+            return statuses.some((status) => status?.metadata?.cannotUseSkills);
+        };
+
+        // Single source of truth for "can this skill button be used right now",
+        // shared by the greyed-out rendering pass and the click handler so the two
+        // can never disagree (previously the click handler used a looser
+        // affordability check than the one driving the greyed-out visual state,
+        // so a visually-disabled skill could still be clicked).
+        const isSkillUsable = (meta, actorUnit) => {
+            const actorHp = Number(actorUnit?.hp);
+            const actorDead = actorUnit?.alive === false || (Number.isFinite(actorHp) && actorHp <= 0);
+            if (actorDead) return false;
+            const cooldownRemaining = getCooldownRemainingForMeta(meta, actorUnit);
+            if (cooldownRemaining > 0 || isActorStunned(actorUnit)) return false;
+            const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
+            if (isActorEnemyTargetingStunned(actorUnit) && skillIsEnemyTargeting(effectiveSkill)) return false;
+            if (isSkillBlockedByClassLock(actorUnit, effectiveSkill)) return false;
+            if (isSkillBlockedByIndexLock(actorUnit, meta.skillIdx)) return false;
+            if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) return false;
             const isPlayersTurn =
                 currentPlayerUsername && currentTurnUsername && currentPlayerUsername === currentTurnUsername;
+            if (!isPlayersTurn) return false;
+            const queued = getQueuedSkillForActorSlot(meta.actorSlot);
+            if (queued) {
+                // The already-queued skill stays clickable so it can be cancelled;
+                // every other skill for that actor is locked until it's cancelled.
+                return queued.skillIndex === meta.skillIdx;
+            }
+            return canAffordSkillWithPendingReservations(effectiveSkill?.energy, meta.actorSlot, effectiveSkill);
+        };
+
+        const updateSkillAffordability = () => {
             const playerUnits = currentPlayerUsername && latestBoardState
                 ? latestBoardState[currentPlayerUsername]
                 : null;
-            const getCooldownRemainingForMeta = (meta, actorUnit) => {
-                const cooldowns = actorUnit?.state?.cooldowns || {};
-                const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
-                const skillId = effectiveSkill?.id;
-                if (!skillId) return 0;
-                return Math.max(0, Number(cooldowns[skillId]) || 0);
-            };
-            const isActorStunned = (actorUnit) => {
-                const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
-                return statuses.some((status) => status?.metadata?.cannotUseSkills);
-            };
-            playerSkillMetaByKey.forEach((meta, key) => {
+            playerSkillMetaByKey.forEach((meta) => {
                 const imgEl = meta?.imgEl;
                 if (!imgEl) return;
                 const actorUnit = Array.isArray(playerUnits) ? playerUnits[meta.actorSlot] : null;
-                const actorHp = Number(actorUnit?.hp);
-                const actorDead =
-                    actorUnit?.alive === false || (Number.isFinite(actorHp) && actorHp <= 0);
-                if (actorDead) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                const cooldownRemaining = getCooldownRemainingForMeta(meta, actorUnit);
-                if (cooldownRemaining > 0 || isActorStunned(actorUnit)) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
-                if (isActorEnemyTargetingStunned(actorUnit) && skillIsEnemyTargeting(effectiveSkill)) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                if (isSkillBlockedByClassLock(actorUnit, effectiveSkill)) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                if (isSkillBlockedByIndexLock(actorUnit, meta.skillIdx)) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                if (!isPlayersTurn) {
-                    imgEl.style.opacity = '0.4';
-                    return;
-                }
-                const queued = getQueuedSkillForActorSlot(meta.actorSlot);
-                if (queued && queued.skillIndex === meta.skillIdx) {
-                    imgEl.style.opacity = '1';
-                    return;
-                }
-                imgEl.style.opacity = canAffordSkillWithPendingReservations(
-                    effectiveSkill?.energy,
-                    meta.actorSlot,
-                    effectiveSkill
-                )
-                    ? '1'
-                    : '0.4';
+                const usable = isSkillUsable(meta, actorUnit);
+                imgEl.style.opacity = usable ? '1' : '0.4';
+                imgEl.style.pointerEvents = usable ? '' : 'none';
             });
         };
 
@@ -3191,35 +3181,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         return;
                                     }
                                     const actorUnit = latestBoardState?.[currentPlayerUsername]?.[slotIndex];
-                                    const actorStatuses = Array.isArray(actorUnit?.state?.statuses)
-                                        ? actorUnit.state.statuses
-                                        : [];
-                                    if (actorStatuses.some((status) => status?.metadata?.cannotUseSkills)) {
-                                        return;
-                                    }
-                                    if (
-                                        actorStatuses.some((status) => status?.metadata?.cannotUseHarmfulSkills) &&
-                                        skillIsEnemyTargeting(effectiveSkill)
-                                    ) {
-                                        return;
-                                    }
-                                    if (isSkillBlockedByClassLock(actorUnit, effectiveSkill)) {
-                                        return;
-                                    }
-                                    if (isSkillBlockedByIndexLock(actorUnit, skillIdx)) {
-                                        return;
-                                    }
-                                    if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) {
-                                        return;
-                                    }
-                                    const cooldowns = actorUnit?.state?.cooldowns || {};
-                                    const cooldownRemaining = effectiveSkill?.id
-                                        ? Math.max(0, Number(cooldowns[effectiveSkill.id]) || 0)
-                                        : 0;
-                                    if (cooldownRemaining > 0) {
-                                        return;
-                                    }
-                                    if (!canAffordSkill(effectiveSkill?.energy, playerPoolState, slotIndex, effectiveSkill)) {
+                                    // Reuse the exact predicate driving the greyed-out visual state so a
+                                    // skill that looks disabled can never still be clicked (and vice versa),
+                                    // including the "another skill is already queued for this actor" case.
+                                    if (!isSkillUsable({ actorSlot: slotIndex, skillIdx }, actorUnit)) {
                                         return;
                                     }
                                     fetchTargetOptions(slotIndex, skillIdx, effectiveSkill).catch(() =>

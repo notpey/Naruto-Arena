@@ -1263,7 +1263,6 @@
             <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
           </ul>
         </li>
-        <li class="ca-nav-item"><a class="ca-nav-link" href="story.html" data-nav="story.html">Story Mode</a></li>
       </ul>
 
       <div class="ca-nav-account" id="ca-nav-account">
@@ -1394,6 +1393,10 @@
             <div class="mission-toolbar">
               <button class="mission-button primary" type="button" id="mission-add-button">Add Mission</button>
               <button class="mission-button secondary" type="button" id="mission-reload-button">Reload</button>
+              <select id="mission-list-sort" class="mission-search" style="flex:0 0 auto;">
+                <option value="order">Sort: List Order</option>
+                <option value="character">Sort: By Character</option>
+              </select>
             </div>
             <input class="mission-search" type="search" id="mission-list-search" placeholder="Search missions" autocomplete="off" />
             <div class="mission-list" id="mission-list"></div>
@@ -1750,6 +1753,7 @@
     (function () {
       const list = document.getElementById("mission-list");
       const listSearch = document.getElementById("mission-list-search");
+      const listSort = document.getElementById("mission-list-sort");
       const status = document.getElementById("mission-editor-status");
       const fields = {
         missionId: document.getElementById("mission-id"),
@@ -2272,10 +2276,26 @@
           sortOrder: Number(fields.sortOrder.value) || missions.length + 1,
         }, 0);
       }
+      function characterNameForMission(m) {
+        const characterId = normalizeCharacterId(m && m.reward_character ? m.reward_character : "");
+        if (!characterId) return "";
+        const character = characterCatalog.find((entry) => entry.characterId === characterId);
+        return character ? character.name : characterId;
+      }
       function renderList() {
         const q = String(listSearch.value || "").trim().toLowerCase();
         list.innerHTML = "";
-        const filtered = missions.filter((m) => !q || m.title.toLowerCase().includes(q) || m.missionId.toLowerCase().includes(q) || String(m.level_requirement || "").toLowerCase().includes(q));
+        let filtered = missions.filter((m) => !q || m.title.toLowerCase().includes(q) || m.missionId.toLowerCase().includes(q) || String(m.level_requirement || "").toLowerCase().includes(q));
+        if (listSort && listSort.value === "character") {
+          filtered = filtered.slice().sort((a, b) => {
+            const nameA = characterNameForMission(a);
+            const nameB = characterNameForMission(b);
+            // Missions with no linked character sort after every grouped character.
+            if (!nameA && nameB) return 1;
+            if (nameA && !nameB) return -1;
+            return nameA.localeCompare(nameB) || a.title.localeCompare(b.title);
+          });
+        }
         if (!filtered.length) {
           const empty = document.createElement("div");
           empty.className = "mission-list-item";
@@ -2336,6 +2356,7 @@
                 .map((character) => ({
                   characterId: normalizeCharacterId(character && character.characterId ? character.characterId : ""),
                   name: String(character && character.name ? character.name : "").trim(),
+                  facePicture: String(character && character.facePicture ? character.facePicture : "").trim(),
                 }))
                 .filter((character) => character.characterId && character.name)
             : [];
@@ -2374,6 +2395,7 @@
         }
       }
       listSearch.addEventListener("input", renderList);
+      if (listSort) listSort.addEventListener("change", renderList);
       addBtn.addEventListener("click", () => {
         const next = norm({ missionId: "", title: "New Mission", level_requirement: 1, reward_character: "", win_streak: { character_id: "", wins: 0 }, mode_restriction: { allowed_modes: ["quick", "ladder"] }, requirements: [], goals: [], sortOrder: missions.length + 1 }, missions.length);
         missions.push(next);
@@ -2450,6 +2472,22 @@
       }
       if (fields.image) fields.image.addEventListener("input", updateImageThumbs);
       if (fields.portrait) fields.portrait.addEventListener("input", updateImageThumbs);
+
+      // Autopopulate the character-name/portrait fields from the linked
+      // reward character instead of requiring the same identity to be
+      // typed/pasted in twice.
+      if (fields.rewardCharacter) {
+        fields.rewardCharacter.addEventListener("change", () => {
+          const character = characterCatalog.find(
+            (entry) => entry.characterId === fields.rewardCharacter.value
+          );
+          if (!character) return;
+          if (fields.characterName) fields.characterName.value = character.name;
+          if (fields.portrait) fields.portrait.value = character.facePicture;
+          if (fields.portraitAlt) fields.portraitAlt.value = character.name;
+          updateImageThumbs();
+        });
+      }
 
       const origFillEditor = fillEditor;
       fillEditor = function(m) {

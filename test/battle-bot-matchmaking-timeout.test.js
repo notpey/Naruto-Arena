@@ -5,9 +5,9 @@ const test = require('node:test');
 
 const serverSource = () => fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 
-test('battle bot fallback is configured for a two second queue wait', () => {
+test('battle bot fallback is configured for a three second queue wait', () => {
     const source = serverSource();
-    assert.match(source, /const BATTLE_BOT_QUEUE_TIMEOUT_MS = 2 \* 1000;/);
+    assert.match(source, /const BATTLE_BOT_QUEUE_TIMEOUT_MS = 3 \* 1000;/);
     assert.match(source, /const battleBotQueueTimers = new Map\(\);/);
 });
 
