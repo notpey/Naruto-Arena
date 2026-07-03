@@ -543,6 +543,12 @@
           if (!wins || (anyNames.length < 2 && anyIds.length < 2 && !groupLabel)) return null;
           return { type: type, character_names: anyNames, group_label: groupLabel, wins: wins };
         }
+        if (type === "use_skill") {
+          var skillId = String(s.skill_id || s.skillId || "").trim().toLowerCase();
+          var skillName = String(s.skill_name || s.skillName || "").trim();
+          if (!wins || !skillId) return null;
+          return { type: "use_skill", skill_id: skillId, skill_name: skillName, character_name: cname, wins: wins };
+        }
         var text = String(s.text || s.value || s.label || s.description || "").trim();
         return text ? { type: "text", text: text } : null;
       }
@@ -630,6 +636,7 @@
         if (n.type === "win_streak") return "Win " + n.wins + " battles in a row" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
         if (n.type === "win_streak_any") return "Win " + n.wins + " battles in a row with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
         if (n.type === "win_matches_any") return "Win " + n.wins + " battles with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+        if (n.type === "use_skill") return "Use " + (n.character_name ? n.character_name + "'s " : "") + "\"" + (n.skill_name || n.skill_id) + "\" " + n.wins + " times. (" + Math.min(c, n.wins) + "/" + n.wins + ")";
         return n.text || "";
       }
       function getModeText(m) {

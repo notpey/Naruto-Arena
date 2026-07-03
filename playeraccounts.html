@@ -596,6 +596,21 @@
       word-break: break-word;
     }
 
+    .player-account-role-select {
+      width: 100%;
+      margin: 0;
+      padding: 6px 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+    }
+    .player-account-role-select option {
+      color: #000;
+    }
+
     .player-account-editor {
       width: 100%;
       min-height: 380px;
@@ -1145,7 +1160,11 @@
           </div>
           <div class="player-account-summary-card">
             <p class="player-account-summary-label">Site Rank</p>
-            <p class="player-account-summary-value" id="player-account-role">-</p>
+            <select class="player-account-role-select" id="player-account-role-select">
+              <option value="player">Player</option>
+              <option value="moderator">Moderator (all characters unlocked, for testing)</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
           <div class="player-account-summary-card">
             <p class="player-account-summary-label">Ladder Ratio</p>

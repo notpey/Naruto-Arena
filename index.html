@@ -60,9 +60,9 @@
       <div class="ca-nav-account" id="ca-nav-account">
         <!-- guest state (shown by default, hidden by JS when logged in) -->
         <div id="ca-nav-guest" class="ca-nav-guest">
-          <a class="ca-nav-auth-link" href="index.html">Login</a>
+          <a class="ca-nav-auth-link" href="#auth-panel" id="ca-nav-login-link">Login</a>
           <span class="ca-nav-auth-sep">·</span>
-          <a class="ca-nav-auth-link" href="index.html">Register</a>
+          <a class="ca-nav-auth-link" href="#auth-panel" id="ca-nav-register-link">Register</a>
         </div>
         <!-- logged-in state (hidden by default, shown by JS) -->
         <div id="ca-nav-user" class="ca-nav-user" hidden>
@@ -321,6 +321,57 @@
 
       syncNav();
     })();
+  </script>
+
+  <!-- Nav auth links: scroll to the auth panel and switch to Register mode on request -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var authPanel = document.getElementById('auth-panel');
+      var authForm = document.getElementById('auth-form');
+      var authToggle = document.getElementById('auth-toggle');
+      var loginLink = document.getElementById('ca-nav-login-link');
+      var registerLink = document.getElementById('ca-nav-register-link');
+      if (!authPanel || !authForm) { return; }
+
+      function isRegisterModeActive() {
+        return Boolean(authToggle && authToggle.textContent.indexOf('Already registered') !== -1);
+      }
+      function focusUsername() {
+        var usernameInput = authForm.elements.username;
+        if (usernameInput) { usernameInput.focus(); }
+      }
+      function goToAuthPanel(wantRegister) {
+        if (wantRegister && authToggle && !isRegisterModeActive()) {
+          authToggle.click();
+        } else if (!wantRegister && authToggle && isRegisterModeActive()) {
+          authToggle.click();
+        }
+        authPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        focusUsername();
+      }
+
+      if (loginLink) {
+        loginLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          goToAuthPanel(false);
+        });
+      }
+      if (registerLink) {
+        registerLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          goToAuthPanel(true);
+        });
+      }
+
+      // Arriving here from another page's nav (index.html?authMode=register#auth-panel).
+      var wantsRegister = false;
+      try {
+        wantsRegister = new URLSearchParams(window.location.search).get('authMode') === 'register';
+      } catch (e) { wantsRegister = false; }
+      if (wantsRegister || window.location.hash === '#auth-panel') {
+        goToAuthPanel(wantsRegister);
+      }
+    });
   </script>
 
 </body>

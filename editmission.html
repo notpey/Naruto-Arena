@@ -1502,6 +1502,7 @@
                 <option value="win_matches">Win matches with character</option>
                 <option value="win_streak">Win streak with character</option>
                 <option value="win_matches_same_team">Win games with two characters on the same team</option>
+                <option value="use_skill">Use a character's skill N times</option>
               </select>
               <span class="mission-field-help">Choose a plain text goal or a character win target.</span>
             </label>
@@ -1921,6 +1922,19 @@
             wins,
           };
         }
+        if (type === "use_skill") {
+          const skillId = String(source.skill_id || source.skillId || "").trim().toLowerCase();
+          const skillName = String(source.skill_name || source.skillName || "").trim();
+          if (!wins || !skillId) return null;
+          return {
+            type: "use_skill",
+            skill_id: skillId,
+            skill_name: skillName,
+            character_id: characterId,
+            character_name: characterName || characterId,
+            wins,
+          };
+        }
         const text = String(source.text || source.value || source.label || source.description || "").trim();
         return text ? { type: "text", text } : null;
       };
@@ -1993,6 +2007,10 @@
           const label = normalized.character_name || (normalized.character_names || []).join(" or ");
           return `Win ${normalized.wins} battles with ${label}.`;
         }
+        if (normalized.type === "use_skill") {
+          const label = normalized.character_name || normalized.character_id;
+          return `Use ${label ? label + "'s " : ""}"${normalized.skill_name || normalized.skill_id}" ${normalized.wins} times.`;
+        }
         return normalized.text || "";
       }
       function goalMeta(goal) {
@@ -2009,6 +2027,9 @@
         }
         if (normalized.type === "win_matches" || normalized.type === "win_streak") {
           return `Type: ${normalized.type.replace(/_/g, " ")} | Character ID: ${normalized.character_id} | Count: ${normalized.wins}`;
+        }
+        if (normalized.type === "use_skill") {
+          return `Type: use skill | Skill ID: ${normalized.skill_id} | Character ID: ${normalized.character_id || "(any)"} | Count: ${normalized.wins} (edit as JSON — no form UI yet)`;
         }
         return "Type: custom text";
       }

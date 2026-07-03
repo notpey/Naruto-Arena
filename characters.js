@@ -538,8 +538,10 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "skillReplacements": {
-                                "inuzuka-kiba-garouga": "inuzuka-kiba-garouga-reduced"
+                            "skillCostOverridesBySkillId": {
+                                "inuzuka-kiba-garouga": {
+                                    "energy": ["Taijutsu"]
+                                }
                             },
                             "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random chakra."
                         }
@@ -578,7 +580,6 @@ const characters = [
                             "bonusDamageFromSourceCharacterId": "inuzuka-kiba",
                             "bonusDamageAppliesToSkillIds": [
                                 "inuzuka-kiba-garouga",
-                                "inuzuka-kiba-garouga-reduced",
                                 "inuzuka-kiba-double-headed-wolf"
                             ],
                             "tooltipText": "This character cannot reduce damage or become invulnerable and takes 5 additional damage from Garouga and Double Headed Wolf."
@@ -610,34 +611,6 @@ const characters = [
                         "metadata": {
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "inuzuka-kiba-garouga-reduced",
-                "name": "Garouga",
-                "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/dhx6Qvr.png",
-                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 30,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
                         }
                     }
                 ]
@@ -2485,8 +2458,10 @@ const characters = [
                                 "strategic",
                                 "affliction"
                             ],
-                            "skillReplacements": {
-                                "temari-summoning-quick-beheading-dance": "temari-summoning-quick-beheading-dance-reduced"
+                            "skillCostOverridesBySkillId": {
+                                "temari-summoning-quick-beheading-dance": {
+                                    "energy": ["Ninjutsu", "Random"]
+                                }
                             },
                             "tooltipText": "Temari is invulnerable to non-mental skills and Summoning Quick Beheading Dance costs 1 less random chakra."
                         }
@@ -2607,42 +2582,6 @@ const characters = [
                         "metadata": {
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "temari-summoning-quick-beheading-dance-reduced",
-                "name": "Summoning Quick Beheading Dance",
-                "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/AsbfOOH.png",
-                "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 2,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "temari_summoning_quick_beheading_dance",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 35,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
                         }
                     }
                 ]
@@ -3707,10 +3646,10 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "iruka_sealed_bomb_trap",
                         "duration": 1,
-                        "scope": "all-allies",
+                        "scope": "all-enemy",
                         "metadata": {
-                            "helpful": true,
-                            "hideTooltipFromEnemy": true,
+                            "harmful": true,
+                            "hideTooltipFromUnitOwner": true,
                             "triggerOnEnemyHarmfulSkill": true,
                             "counterDamage": 40,
                             "counterDamageIgnoresReduction": true,
@@ -3795,7 +3734,7 @@ const characters = [
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
                             "ongoingClass": "action",
-                            "ignoreTargetDestructibleDefense": true,
+                            "ignoreTargetDamageReduction": true,
                             "triggerOnApply": true,
                             "mergeNumericAddKeys": [
                                 "turnEndDamage"

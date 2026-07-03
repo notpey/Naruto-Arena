@@ -192,7 +192,7 @@
   var playerAccountsSearch = document.getElementById("player-accounts-search");
   var playerAccountOverlay = document.getElementById("player-account-overlay");
   var playerAccountUsername = document.getElementById("player-account-username");
-  var playerAccountRole = document.getElementById("player-account-role");
+  var playerAccountRole = document.getElementById("player-account-role-select");
   var playerAccountLadderRatio = document.getElementById("player-account-ladder-ratio");
   var playerAccountEditor = document.getElementById("player-account-editor");
   var playerAccountSave = document.getElementById("player-account-save");
@@ -1387,7 +1387,9 @@
 
       selectedAdminAccountUsername = username;
       setText(playerAccountUsername, data && data.username ? data.username : username);
-      setText(playerAccountRole, data && data.role ? formatRole(data.role) : "Player");
+      if (playerAccountRole) {
+        playerAccountRole.value = data && data.role ? String(data.role).trim().toLowerCase() : "player";
+      }
       setText(playerAccountLadderRatio, data && data.ladderRatio ? data.ladderRatio : "0.00%");
       if (playerAccountEditor) {
         playerAccountEditor.value = JSON.stringify(data && data.document ? data.document : {}, null, 2);
@@ -1493,6 +1495,10 @@
       return;
     }
 
+    if (playerAccountRole && playerAccountRole.value) {
+      documentValue.role = playerAccountRole.value;
+    }
+
     if (playerAccountSave) {
       playerAccountSave.disabled = true;
     }
@@ -1523,7 +1529,10 @@
         playerAccountEditor.value = JSON.stringify(data && data.user ? data.user : documentValue, null, 2);
       }
       setText(playerAccountUsername, selectedAdminAccountUsername);
-      setText(playerAccountRole, formatRole(data && data.user && data.user.role ? data.user.role : "player"));
+      if (playerAccountRole) {
+        playerAccountRole.value =
+          data && data.user && data.user.role ? String(data.user.role).trim().toLowerCase() : "player";
+      }
       var updatedProfile = data && data.user && data.user.profile ? data.user.profile : {};
       var wins = Number(updatedProfile && updatedProfile.ladder && updatedProfile.ladder.wins) || 0;
       var losses = Number(updatedProfile && updatedProfile.ladder && updatedProfile.ladder.losses) || 0;

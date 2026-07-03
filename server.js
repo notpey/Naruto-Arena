@@ -1994,6 +1994,8 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
                         ? 'win_streak_any'
                     : type === 'win_matches_any' || type === 'match_wins_any' || type === 'win_matches_either'
                         ? 'win_matches_any'
+                    : type === 'use_skill' || type === 'skill_uses' || type === 'use_skill_times'
+                        ? 'use_skill'
                 : 'text';
 
     if (normalizedType === 'win_matches' || normalizedType === 'win_streak') {
@@ -2125,6 +2127,34 @@ const normalizeMissionGoalEntry = (entry = {}, index = 0) => {
             character_ids: uniqueCharacterIds,
             character_names: characterNames,
             ...(groupLabel ? { character_name: groupLabel } : {}),
+            wins,
+        };
+    }
+
+    if (normalizedType === 'use_skill') {
+        const wins = Math.max(
+            0,
+            Number(source.wins ?? source.count ?? source.target ?? source.goal ?? 0) || 0
+        );
+        const skillId = String(source.skill_id ?? source.skillId ?? '')
+            .trim()
+            .toLowerCase();
+        const characterId = normalizeCharacterId(
+            source.character_id ?? source.characterId ?? source.character ?? ''
+        );
+        const characterName = String(
+            source.character_name ?? source.characterName ?? getCharacterDisplayNameById(characterId)
+        ).trim();
+        const skillName = String(source.skill_name ?? source.skillName ?? '').trim();
+        if (!wins || !skillId) {
+            return null;
+        }
+        return {
+            type: 'use_skill',
+            skill_id: skillId,
+            skill_name: skillName,
+            character_id: characterId,
+            character_name: characterName || getCharacterDisplayNameById(characterId),
             wins,
         };
     }
@@ -2544,7 +2574,8 @@ const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
     if (teamHasDuplicateCharacters(team)) {
         throw new Error('Team characters must be unique.');
     }
-    if (String(userRole || '').trim().toLowerCase() === 'admin') {
+    const normalizedRole = String(userRole || '').trim().toLowerCase();
+    if (normalizedRole === 'admin' || normalizedRole === 'moderator') {
         return;
     }
     const lockedCharacterIds = await getMissionLockedCharacterIds();
@@ -3068,6 +3099,25 @@ const teamHasCharacterId = (match, username, characterId) => {
     return team.some((rosterIndex) => getRosterCharacterId(rosterIndex) === characterId);
 };
 
+const getSkillUseCountForUser = (match, username, skillId, characterId = '') => {
+    if (!match || !username || !skillId) {
+        return 0;
+    }
+    const units = Array.isArray(match.board?.[username]) ? match.board[username] : [];
+    return units.reduce((total, unit) => {
+        if (!unit) {
+            return total;
+        }
+        if (characterId && getRosterCharacterId(unit.rosterIndex) !== characterId) {
+            return total;
+        }
+        const skillUses = unit?.state?.skillUses;
+        const uses =
+            skillUses && typeof skillUses === 'object' ? Math.max(0, Number(skillUses[skillId]) || 0) : 0;
+        return total + uses;
+    }, 0);
+};
+
 const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
     if (!match || !Array.isArray(match.players) || match.players.length < 2) {
         return null;
@@ -3175,7 +3225,8 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         goalType !== 'reach_rank' &&
                         goalType !== 'win_matches_same_team' &&
                         goalType !== 'win_streak_any' &&
-                        goalType !== 'win_matches_any'
+                        goalType !== 'win_matches_any' &&
+                        goalType !== 'use_skill'
                     ) {
                         return;
                     }
@@ -3253,6 +3304,22 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                                 targetCount,
                                 Math.max(0, Number(existingGoalProgress.count) || 0) + 1
                             );
+                        }
+                    } else if (goalType === 'use_skill') {
+                        const skillId = String(goal.skill_id || '').trim().toLowerCase();
+                        if (skillId) {
+                            const usesThisMatch = getSkillUseCountForUser(
+                                match,
+                                username,
+                                skillId,
+                                goalCharacterId || ''
+                            );
+                            if (usesThisMatch > 0) {
+                                nextGoalProgress.count = Math.min(
+                                    targetCount,
+                                    Math.max(0, Number(existingGoalProgress.count) || 0) + usesThisMatch
+                                );
+                            }
                         }
                     }
 
