@@ -3117,32 +3117,6 @@ const characters = [
                 "effects": []
             },
             {
-                "id": "zaku-abumi-extreme-decapitating-airwaves-active",
-                "name": "Extreme Decapitating Airwaves",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/BGu8oPg.png",
-                "skilldescription": "Abumi Zaku deals 45 damage to all enemies.",
-                "energy": [
-                    "Bloodline",
-                    "Random",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 45,
-                        "scope": "all-enemy"
-                    }
-                ]
-            },
-            {
                 "id": "zaku-abumi-airwave-deflection",
                 "name": "Airwave Deflection",
                 "skillimage": "https://i.imgur.com/yszdsLO.png",
@@ -3167,6 +3141,32 @@ const characters = [
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
+                    }
+                ]
+            },
+            {
+                "id": "zaku-abumi-extreme-decapitating-airwaves-active",
+                "name": "Extreme Decapitating Airwaves",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/BGu8oPg.png",
+                "skilldescription": "Abumi Zaku deals 45 damage to all enemies.",
+                "energy": [
+                    "Bloodline",
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "all-enemy"
                     }
                 ]
             }
@@ -3303,6 +3303,34 @@ const characters = [
                 ]
             },
             {
+                "id": "dosu-kinuta-agile-leap",
+                "name": "Agile Leap",
+                "skillimage": "https://i.imgur.com/Irubt1X.png",
+                "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "invulnerable",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
                 "id": "dosu-kinuta-resonating-echo-drill-improved",
                 "name": "Resonating Echo Drill",
                 "hiddenFromSelectionViewer": true,
@@ -3395,34 +3423,6 @@ const characters = [
                                 "nonAfflictionDamageDebuffFlat"
                             ],
                             "tooltipText": "This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks)."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "dosu-kinuta-agile-leap",
-                "name": "Agile Leap",
-                "skillimage": "https://i.imgur.com/Irubt1X.png",
-                "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "invulnerable",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
                         }
                     }
                 ]

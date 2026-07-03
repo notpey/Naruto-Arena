@@ -4123,7 +4123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const character = roster[currentCharacterIndex];
         if (!character || !Array.isArray(character.skills)) return;
         const viewerSkills = character.skills.filter(
-            (skill) => skill && !skill.omitFromSelectionViewer && !skill.hiddenFromSelectionViewer
+            (skill) => skill && !skill.omitFromSelectionViewer
         );
         const skill = viewerSkills[skillIndex];
         if (!skill) return;
@@ -4149,7 +4149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderCharacterOverview(character);
         if (Array.isArray(character.skills)) {
             const viewerSkills = character.skills.filter(
-                (skill) => skill && !skill.omitFromSelectionViewer && !skill.hiddenFromSelectionViewer
+                (skill) => skill && !skill.omitFromSelectionViewer
             );
             ensureSkillImageSlots(viewerSkills.length);
             if (skillImagesContainer) {
@@ -4161,7 +4161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (skill) {
                     targetImg.src = skill.skillimage || '';
                     targetImg.alt = skill.name || `Skill ${skillIdx + 1}`;
-                    targetImg.title = skill.name || `Skill ${skillIdx + 1}`;
+                    targetImg.title = skill.hiddenFromSelectionViewer
+                        ? `${skill.name || `Skill ${skillIdx + 1}`} (alternate)`
+                        : skill.name || `Skill ${skillIdx + 1}`;
+                    targetImg.classList.toggle('alternate-skill', Boolean(skill.hiddenFromSelectionViewer));
                     targetImg.style.visibility = 'visible';
                     targetImg.onclick = () => handleSkillSelect(skillIdx);
                 } else {

@@ -407,7 +407,11 @@
       }
       function visibleSkills(c) {
         var s = c && Array.isArray(c.skills) ? c.skills : [];
-        return s.filter(function (sk) { return sk && !sk.hiddenFromSelectionViewer; });
+        // hiddenFromSelectionViewer skills are alternate/unlockable forms,
+        // not truly hidden -- they still belong on this page, badged via
+        // isAlternateSkill below. omitFromSelectionViewer is the only flag
+        // that means "never show this anywhere."
+        return s.filter(function (sk) { return sk && !sk.omitFromSelectionViewer; });
       }
       function isAlternateSkill(sk, index) {
         if (!sk) return false;
