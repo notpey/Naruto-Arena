@@ -10018,6 +10018,1899 @@ const characters = [
                 ]
             }
         ]
+    },
+    {
+        "id": "rehabilitated-gaara",
+        "characterId": "rehabilitated-gaara",
+        "name": "Rehabilitated Gaara",
+        "characterdeescription": "After his fateful encounter with Naruto, Gaara has left behind his murderous ways, and has instead rehabilitated. Gaara has honed his abilities to shape and craft his sand, allowing him to create giant waves of sand or quicksand traps.",
+        "requiredMissionId": "the-redemption-of-gaara",
+        "skills": [
+            {
+                "id": "rehabilitated-gaara-sand-mastery",
+                "name": "Sand Mastery",
+                "skillimage": "",
+                "skilldescription": "Rehabilitated Gaara deals 15 damage to one enemy for 3 turns and gains 35 points of permanent destructible defense. This skill does not stack and will re-apply itself.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "targetCondition": {
+                    "missingStatusId": "rehabilitated_gaara_sand_mastery_defense"
+                },
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Physical",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_sand_mastery_dot",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Sand Mastery."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_sand_mastery_defense",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 35,
+                            "tooltipText": "Rehabilitated Gaara has permanent destructible defense from Sand Mastery."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rehabilitated-gaara-prison-sand-burial",
+                "name": "Prison Sand Burial",
+                "skillimage": "",
+                "skilldescription": "For 1 turn, all enemies' non-strategic skills will have their costs increased by 1 random energy. Afterwards, this skill will be replaced by 'Desert Imperial Funeral' for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_prison_sand_burial",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "randomCostIncreaseForSkillClasses": {
+                                "physical": 1,
+                                "energy": 1,
+                                "mental": 1,
+                                "affliction": 1
+                            },
+                            "tooltipText": "This character's non-strategic skills cost 1 additional random chakra."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_prison_sand_burial_ready",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "rehabilitated-gaara-prison-sand-burial": "rehabilitated-gaara-desert-imperial-funeral"
+                            },
+                            "tooltipText": "Prison Sand Burial is replaced by Desert Imperial Funeral."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rehabilitated-gaara-quicksand-waterfall-flow",
+                "name": "Quicksand Waterfall Flow",
+                "skillimage": "",
+                "skilldescription": "Rehabilitated Gaara deals 15 damage to all enemies for 4 turns.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_quicksand_dot",
+                        "duration": 4,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Quicksand Waterfall Flow."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rehabilitated-gaara-shield-of-shukaku",
+                "name": "Shield of Shukaku",
+                "skillimage": "",
+                "skilldescription": "This skill makes Rehabilitated Gaara invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rehabilitated_gaara_shield_of_shukaku",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rehabilitated-gaara-desert-imperial-funeral",
+                "name": "Desert Imperial Funeral",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Rehabilitated Gaara targets all enemies affected by 'Prison Sand Burial', destroying their destructible defense then dealing 40 piercing damage to them.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "targetCondition": {
+                    "statusId": "rehabilitated_gaara_prison_sand_burial"
+                },
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "destroy_destructible_defense",
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hoshigaki-kisame",
+        "characterId": "hoshigaki-kisame",
+        "name": "Hoshigaki Kisame",
+        "characterdeescription": "Formerly one of the Seven Swordsmen of the Mist Village, Kisame is an S-Rank missing ninja that is now a member of Akatsuki, having been partnered with Uchiha Itachi. Using his powerful, and ominous sword, mixed with his powerful water based ninjutsu, Kisame can disable enemies in every manner of way.",
+        "requiredMissionId": "s-rank-criminal-kisame",
+        "skills": [
+            {
+                "id": "hoshigaki-kisame-samehada-slash",
+                "name": "Samehada Slash",
+                "skillimage": "",
+                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their energy, mental and strategic skills for 1 turn.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hoshigaki_kisame_samehada_slash_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "cannotUseSkillClasses": [
+                                "energy",
+                                "mental",
+                                "strategic"
+                            ],
+                            "tooltipText": "This character's energy, mental and strategic skills are stunned."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hoshigaki-kisame-samehada-shred",
+                "name": "Samehada Shred",
+                "skillimage": "",
+                "skilldescription": "Hoshigaki Kisame deals 15 damage to one enemy for 2 turns, stealing 1 random non-bloodline energy from them each turn.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Action"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hoshigaki_kisame_samehada_shred_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndDrainNonBloodlineToSource": 1,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage each turn and loses 1 random non-bloodline chakra to Hoshigaki Kisame from Samehada Shred."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hoshigaki-kisame-water-shark-projectile",
+                "name": "Water Shark Projectile",
+                "skillimage": "",
+                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their physical, affliction and strategic skills for 1 turn.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hoshigaki_kisame_water_shark_projectile_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "affliction",
+                                "strategic"
+                            ],
+                            "tooltipText": "This character's physical, affliction and strategic skills are stunned."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hoshigaki-kisame-samehada-scale-block",
+                "name": "Samehada Scale Block",
+                "skillimage": "",
+                "skilldescription": "This skill makes Hoshigaki Kisame invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hoshigaki_kisame_samehada_scale_block",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "uchiha-itachi",
+        "characterId": "uchiha-itachi",
+        "name": "Uchiha Itachi",
+        "characterdeescription": "The only other surviving Uchiha, Itachi is a master of doujutsu, an S-Rank missing nin, and a member of Akatsuki, having been partnered with Hoshigaki Kisame. Despite being powerful, Itachi is slowly going blind, making his abilities weaker, but when Itachi activates his Sharingan he becomes an unstoppable force of pure power.",
+        "requiredMissionId": "s-rank-criminal-itachi",
+        "skills": [
+            {
+                "id": "uchiha-itachi-mangekyou-sharingan",
+                "name": "Mangekyou Sharingan",
+                "skillimage": "",
+                "maxUses": 1,
+                "skilldescription": "For the rest of the game, Uchiha Itachi becomes invulnerable to non-strategic skills, enhances 'Amaterasu' and 'Tsukuyomi', increases their cooldowns by 2 turns, and doubles their costs. During this time, Uchiha Itachi will take 15 affliction damage each turn and ignore healing effects and this skill cannot be used again.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_mangekyou_sharingan",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToSkillClasses": [
+                                "physical",
+                                "energy",
+                                "mental",
+                                "affliction"
+                            ],
+                            "skillCostOverridesBySkillId": {
+                                "uchiha-itachi-amaterasu": {
+                                    "energy": [
+                                        "Ninjutsu",
+                                        "Ninjutsu"
+                                    ]
+                                },
+                                "uchiha-itachi-tsukuyomi": {
+                                    "energy": [
+                                        "Genjutsu",
+                                        "Genjutsu"
+                                    ]
+                                }
+                            },
+                            "skillCooldownIncreaseBySkillId": {
+                                "uchiha-itachi-amaterasu": 2,
+                                "uchiha-itachi-tsukuyomi": 2
+                            },
+                            "skillDurationBonuses": {
+                                "uchiha-itachi-tsukuyomi": 2
+                            },
+                            "tooltipText": "Uchiha Itachi is invulnerable to non-strategic skills. Amaterasu and Tsukuyomi are enhanced but cost more and have increased cooldowns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_mangekyou_sharingan_toll",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "afflictionDamage": true,
+                            "healReceivedMultiplier": 0,
+                            "tooltipText": "Uchiha Itachi takes 15 affliction damage each turn and ignores healing effects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-itachi-amaterasu",
+                "name": "Amaterasu",
+                "skillimage": "",
+                "skilldescription": "Uchiha Itachi deals 15 affliction damage to one enemy, who will take 5 affliction damage each following turn. If used during 'Mangekyou Sharingan', this skill will target all enemies and deal double damage.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "uchiha_itachi_mangekyou_sharingan"
+                        },
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_amaterasu_dot",
+                        "duration": 99,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "uchiha_itachi_mangekyou_sharingan"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "afflictionDamage": true,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "tooltipText": "This character takes 5 affliction damage each turn from Amaterasu."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "uchiha_itachi_mangekyou_sharingan"
+                        },
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_amaterasu_dot",
+                        "duration": 99,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "uchiha_itachi_mangekyou_sharingan"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 10,
+                            "afflictionDamage": true,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "tooltipText": "This character takes 10 affliction damage each turn from Amaterasu."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-itachi-tsukuyomi",
+                "name": "Tsukuyomi",
+                "skillimage": "",
+                "skilldescription": "Uchiha Itachi deals 20 damage to one enemy and stuns them for 1 turn. If used during 'Mangekyou Sharingan', this skill will last 3 turns.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Control",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_tsukuyomi_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned by Tsukuyomi."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-itachi-sharingan-insight",
+                "name": "Sharingan Insight",
+                "skillimage": "",
+                "skilldescription": "This skill makes Uchiha Itachi invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_itachi_sharingan_insight",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "rokushou-aoi",
+        "characterId": "rokushou-aoi",
+        "name": "Rokushou Aoi",
+        "characterdeescription": "Aoi is a jounin from the Hidden Rain Village and a missing-nin from the Hidden Leaf Village. A former instructor in the Hidden Leaf, he tricked Idate to steal the legendary Sword of the Thunder God, which had once belonged to Senju Tobirama, the Second Hokage. ORIGINAL DESIGN: Liann",
+        "requiredMissionId": "the-theft-plan",
+        "skills": [
+            {
+                "id": "rokushou-aoi-senbon-shower",
+                "name": "Senbon Shower",
+                "skillimage": "",
+                "skilldescription": "Rokushou Aoi deals 5 piercing damage to all enemies, who will take 5 affliction damage the following 3 turns. During this time, the main target will ignore healing effects.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Affliction"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_senbon_shower_dot",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "afflictionDamage": true,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 5 affliction damage each turn from Senbon Shower."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_senbon_shower_no_heal",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "healReceivedMultiplier": 0,
+                            "tooltipText": "This character ignores healing effects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rokushou-aoi-umbrella-shock-wave",
+                "name": "Umbrella Shock Wave",
+                "skillimage": "",
+                "skilldescription": "Rokushou Aoi destroys all enemies' destructible defense and deals 10 damage to them. The next time 'Senbon Shower' is used, it will last 1 additional turn. This skill stacks.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "destroy_destructible_defense",
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_umbrella_shock_wave_stack",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDurationBonuses": {
+                                "rokushou-aoi-senbon-shower": 1
+                            },
+                            "mergeObjectNumericAddKeys": [
+                                "skillDurationBonuses"
+                            ],
+                            "tooltipText": "The next time Senbon Shower is used, it will last 1 additional turn. This effect stacks."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rokushou-aoi-sword-of-the-thunder-god",
+                "name": "Sword of the Thunder God",
+                "skillimage": "",
+                "skilldescription": "Permanently, Rokushou Aoi will deal 10 piercing damage instantly to any enemy who uses a new skill on him and during this time, 'Senbon Shower' and 'Umbrella Shock Wave' will be replaced by 'Lightning Moon Cut' and 'Ring of Electricity' respectively. This skill cannot be used while active and ends when Rokushou Aoi uses 'Lightning Moon Cut' 3 times or 'Ring of Electricity' once.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "targetCondition": {
+                    "missingStatusId": "rokushou_aoi_sword_of_the_thunder_god"
+                },
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_sword_of_the_thunder_god",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterDamage": 10,
+                            "counterDamageIgnoresDestructibleDefense": true,
+                            "trapReappliesSelf": true,
+                            "skillReplacements": {
+                                "rokushou-aoi-senbon-shower": "rokushou-aoi-lightning-moon-cut",
+                                "rokushou-aoi-umbrella-shock-wave": "rokushou-aoi-ring-of-electricity"
+                            },
+                            "removeSelfOnSkillUseCount": [
+                                {
+                                    "skillId": "rokushou-aoi-lightning-moon-cut",
+                                    "atLeast": 3
+                                },
+                                {
+                                    "skillId": "rokushou-aoi-ring-of-electricity",
+                                    "atLeast": 1
+                                }
+                            ],
+                            "tooltipText": "Any enemy who uses a new skill on this character takes 10 piercing damage. Senbon Shower is replaced by Lightning Moon Cut and Umbrella Shock Wave is replaced by Ring of Electricity."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rokushou-aoi-umbrella-shield",
+                "name": "Umbrella Shield",
+                "skillimage": "",
+                "skilldescription": "This skill makes Rokushou Aoi invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_umbrella_shield",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rokushou-aoi-lightning-moon-cut",
+                "name": "Lightning Moon Cut",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Rokushou Aoi deals 25 piercing damage to one enemy. For 3 turns, if they use a new skill, the cooldown of that skill will be increased by 1 turn. This skill stacks.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_lightning_moon_cut_penalty",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "usedSkillCooldownPenalty": 1,
+                            "tooltipText": "If this character uses a new skill, its cooldown is increased by 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rokushou-aoi-ring-of-electricity",
+                "name": "Ring of Electricity",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Rokushou Aoi deals 35 piercing damage to one enemy and then stuns them for 2 turns. For the rest of the game, if they use a new skill, the cooldown of that skill will be increased by 2 turns. This skill stacks.",
+                "energy": [
+                    "Ninjutsu",
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_ring_of_electricity_stun",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned by Ring of Electricity."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rokushou_aoi_ring_of_electricity_penalty",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "usedSkillCooldownPenalty": 2,
+                            "tooltipText": "If this character uses a new skill, its cooldown is increased by 2 turns."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "kurosuki-raiga",
+        "characterId": "kurosuki-raiga",
+        "name": "Kurosuki Raiga",
+        "characterdeescription": "Kurosuki Raiga, renowned as the Thunder of the Hidden Mist, was a jounin from the Hidden Mist Village as well as a member of the Seven Ninja Swordsmen of the Mist. Raiga wields Kiba, twin swords imbued with lightning. Considered the sharpest swords ever made, they can cut through anything. ORIGINAL DESIGN: Liann",
+        "requiredMissionId": "thunder-of-the-hidden-mist",
+        "skills": [
+            {
+                "id": "kurosuki-raiga-lightning-ball",
+                "name": "Lightning Ball",
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga deals 10 piercing damage to one enemy, who will take 5 additional damage from Kurosuki Raiga's skills permanently. This skill stacks and ends if Kurosuki Raiga dies.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_lightning_mark",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ongoingClass": "action",
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageFromSourceCharacterId": "kurosuki-raiga",
+                            "mergeNumericAddKeys": [
+                                "bonusDamageFromSourceSkillsFlat"
+                            ],
+                            "tooltipText": "This character takes 5 additional damage from Kurosuki Raiga's skills. This effect stacks."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-feast-of-lightning",
+                "name": "Feast of Lightning",
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga makes all enemies take 5 additional damage from his skills permanently. This skill stacks and ends if Kurosuki Raiga dies.",
+                "energy": [],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_lightning_mark",
+                        "duration": 99,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "ongoingClass": "action",
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageFromSourceCharacterId": "kurosuki-raiga",
+                            "mergeNumericAddKeys": [
+                                "bonusDamageFromSourceSkillsFlat"
+                            ],
+                            "tooltipText": "This character takes 5 additional damage from Kurosuki Raiga's skills. This effect stacks."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-fangs-of-lightning",
+                "name": "Fangs of Lightning",
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga deals 15 piercing damage to one enemy and increases the cost of that enemy's non-strategic skills by 1 random energy for 1 turn. This skill becomes 'Lightning Burial: Banquet of Lightning' permanently after used.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_fangs_of_lightning_cost",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "randomCostIncreaseForSkillClasses": {
+                                "physical": 1,
+                                "energy": 1,
+                                "mental": 1,
+                                "affliction": 1
+                            },
+                            "tooltipText": "This character's non-strategic skills cost 1 additional random chakra."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_stage_banquet",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "kurosuki-raiga-fangs-of-lightning": "kurosuki-raiga-lightning-burial-banquet-of-lightning"
+                            },
+                            "tooltipText": "Fangs of Lightning is replaced by Lightning Burial: Banquet of Lightning."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-lightning-strike-armor",
+                "name": "Lightning Strike Armor",
+                "skillimage": "",
+                "skilldescription": "This skill makes Kurosuki Raiga invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_lightning_strike_armor",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-lightning-burial-banquet-of-lightning",
+                "name": "Lightning Burial: Banquet of Lightning",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga deals 15 piercing damage to the main target and 5 piercing damage to all other enemies. This skill becomes 'Siege of Lightning' permanently after used.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "all-other-enemy",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_stage_siege",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "kurosuki-raiga-lightning-burial-banquet-of-lightning": "kurosuki-raiga-siege-of-lightning"
+                            },
+                            "tooltipText": "Lightning Burial: Banquet of Lightning is replaced by Siege of Lightning."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-siege-of-lightning",
+                "name": "Siege of Lightning",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga targets all enemies. For 2 turns, everytime they use a new skill, they will be dealt 15 piercing damage. This skill becomes 'Lightning Dragon Tornado' permanently after used.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_siege_trap",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "onOwnerUseSkillTrigger": true,
+                            "preserveOnOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 15,
+                                    "metadata": {
+                                        "ignoreDestructibleDefense": true
+                                    }
+                                }
+                            ],
+                            "tooltipText": "Everytime this character uses a new skill, they take 15 piercing damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_stage_dragon_tornado",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "kurosuki-raiga-siege-of-lightning": "kurosuki-raiga-lightning-dragon-tornado"
+                            },
+                            "tooltipText": "Siege of Lightning is replaced by Lightning Dragon Tornado."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-lightning-dragon-tornado",
+                "name": "Lightning Dragon Tornado",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Kurosuki Raiga deals 60 piercing damage to one enemy. This skill becomes 'Lightning Demon' permanently after used.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 60,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_stage_demon",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "kurosuki-raiga-lightning-dragon-tornado": "kurosuki-raiga-lightning-demon"
+                            },
+                            "tooltipText": "Lightning Dragon Tornado is replaced by Lightning Demon."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kurosuki-raiga-lightning-demon",
+                "name": "Lightning Demon",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "maxUses": 1,
+                "skilldescription": "For the rest of the game, everytime an enemy uses a new skill on Kurosuki Raiga, that enemy will be dealt 100 piercing damage. This skill can only be used once and cannot be removed.",
+                "energy": [
+                    "Ninjutsu",
+                    "Ninjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kurosuki_raiga_lightning_demon",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeCleansed": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterDamage": 100,
+                            "counterDamageIgnoresDestructibleDefense": true,
+                            "trapReappliesSelf": true,
+                            "tooltipText": "Any enemy who uses a new skill on this character takes 100 piercing damage."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "young-kakashi",
+        "characterId": "young-kakashi",
+        "name": "Young Kakashi",
+        "characterdeescription": "A jounin at the age of 13 and the son of the legendary White Fang, Kakashi is a member of Team Minato. Using his early ninjutsu, and borrowed sharingan, Kakashi can fight any adult on an equal level.",
+        "skills": [
+            {
+                "id": "young-kakashi-white-fang-slash",
+                "name": "White Fang Slash",
+                "skillimage": "",
+                "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_white_fang_slash_debuff",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "nonAfflictionDamageDebuffFlat": 5,
+                            "tooltipText": "This character deals 5 less non-affliction damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_white_fang_slash_bonus",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageBonusFlat": 5,
+                            "tooltipText": "Young Kakashi deals 5 additional damage with his skills."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "young-kakashi-amateur-raikiri",
+                "name": "Amateur Raikiri",
+                "skillimage": "",
+                "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_amateur_raikiri_debuff",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "nonAfflictionDamageDebuffFlat": 5,
+                            "tooltipText": "This character deals 5 less non-affliction damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_amateur_raikiri_bonus",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageBonusFlat": 5,
+                            "tooltipText": "Young Kakashi deals 5 additional damage with his skills."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "young-kakashi-implanted-sharingan",
+                "name": "Implanted Sharingan",
+                "skillimage": "",
+                "skilldescription": "For 2 turns, if one enemy uses a new skill on Young Kakashi, his skills will deal 10 additional damage for 1 turn. This skill is invisible and ends when triggered.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_implanted_sharingan_trap",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "hideTooltipFromEnemy": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterApplyStatusToRecipient": {
+                                "statusId": "young_kakashi_implanted_sharingan_bonus",
+                                "duration": 1,
+                                "metadata": {
+                                    "helpful": true,
+                                    "damageBonusFlat": 10,
+                                    "tooltipText": "Young Kakashi deals 10 additional damage with his skills."
+                                }
+                            },
+                            "tooltipText": "If an enemy uses a new skill on this character, his skills deal 10 additional damage for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "young-kakashi-sword-parry",
+                "name": "Sword Parry",
+                "skillimage": "",
+                "skilldescription": "This skill makes Young Kakashi invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_sword_parry",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "uchiha-obito",
+        "characterId": "uchiha-obito",
+        "name": "Uchiha Obito",
+        "characterdeescription": "A minor member of the Uchiha clan and a chuunin, Obito is a member of Team Minato. While Obito does not possess any singular powerful ability, he can use all of what he knows with his developing sharingan to put up a fight.",
+        "skills": [
+            {
+                "id": "uchiha-obito-piercing-stab",
+                "name": "Piercing Stab",
+                "skillimage": "",
+                "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "uchiha_obito_sharingan",
+                            "conditionalAmount": 25
+                        },
+                        "metadata": {
+                            "ignoreDestructibleDefense": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-obito-great-fireball",
+                "name": "Obito Great Fireball",
+                "skillimage": "",
+                "skilldescription": "Uchiha Obito deals 15 affliction damage to one enemy for 2 turns. During 'Obito Sharingan', this skill will deal 30 affliction damage instantly.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_great_fireball_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "uchiha_obito_sharingan"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "afflictionDamage": true,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 affliction damage each turn from Obito Great Fireball."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "uchiha_obito_sharingan"
+                        },
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-obito-sharingan",
+                "name": "Obito Sharingan",
+                "skillimage": "",
+                "skilldescription": "For 4 turns, Uchiha Obito will gain 15 points of damage reduction. This skill becomes 'Sharingan-Enhanced Parry' for 4 turns after used.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_sharingan",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 15,
+                            "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_sharingan_replacement",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "uchiha-obito-sharingan": "uchiha-obito-sharingan-enhanced-parry"
+                            },
+                            "tooltipText": "Obito Sharingan is replaced by Sharingan-Enhanced Parry."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-obito-flee",
+                "name": "Obito Flee",
+                "skillimage": "",
+                "skilldescription": "This skill makes Uchiha Obito invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_flee",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uchiha-obito-sharingan-enhanced-parry",
+                "name": "Sharingan-Enhanced Parry",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "",
+                "skilldescription": "Uchiha Obito makes his allies invulnerable for 1 turn.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_sharingan_enhanced_parry",
+                        "duration": 1,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "nohara-rin",
+        "characterId": "nohara-rin",
+        "name": "Nohara Rin",
+        "characterdeescription": "A chuunin medical nin assigned to Team Minato, Rin is a quiet and passive girl who focuses on keeping her team mates alive. Using her healing abilities, and her intelligence, Rin is able to heal her allies while trapping her enemies.",
+        "skills": [
+            {
+                "id": "nohara-rin-pit-trap",
+                "name": "Pit Trap",
+                "skillimage": "",
+                "skilldescription": "For 1 turn, Nohara Rin will gain 15 points of damage reduction and one target enemy will take 15 piercing damage that ignores invulnerability at the end of their turn. If that enemy uses a new skill, they will also take another 15 damage from this skill. This skill is invisible and ignores invulnerability. This skill's damage isn't increased nor decreased by effects used on Nohara Rin.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "ignoreInvulnerability": true,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_pit_trap_defense",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "hideTooltipFromEnemy": true,
+                            "damageReductionFlat": 15,
+                            "tooltipText": "Nohara Rin has 15 points of damage reduction from Pit Trap."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_pit_trap",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "hideTooltipFromEnemy": true,
+                            "turnEndDamage": 15,
+                            "ignoreSourceNonAfflictionDamageBonus": true,
+                            "ignoreTargetDestructibleDefense": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterDamage": 15,
+                            "counterDamageIgnoresDestructibleDefense": true,
+                            "tooltipText": "This character takes 15 piercing damage that ignores invulnerability at the end of their turn. If they use a new skill, they take another 15 damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nohara-rin-mystical-palm-healing",
+                "name": "Rin Mystical Palm Healing",
+                "skillimage": "",
+                "skilldescription": "Nohara Rin heals herself or an ally for 25 health and removes all enemy affliction skills on this character.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "heal",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_mystical_palm_healing_cleanse",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "hideTooltip": true,
+                            "removeEnemyAfflictionStatusesOnApply": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nohara-rin-medical-kit",
+                "name": "Medical Kit",
+                "skillimage": "",
+                "skilldescription": "Nohara Rin targets herself or an ally. For 3 turns, that character will be healed for 10 health each turn. During this time, they will deal 5 additional damage with physical and energy skills.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_medical_kit",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "turnEndHealFlat": 10,
+                            "damageBonusBySkillClass": {
+                                "physical": 5,
+                                "energy": 5
+                            },
+                            "tooltipText": "This character heals 10 health each turn and deals 5 additional damage with physical and energy skills from Medical Kit."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nohara-rin-flee",
+                "name": "Flee",
+                "skillimage": "",
+                "skilldescription": "This skill makes Nohara Rin invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_flee",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hyuuga-hanabi",
+        "characterId": "hyuuga-hanabi",
+        "name": "Hyuuga Hanabi",
+        "characterdeescription": "The younger sister of Hinata, Hanabi is a Hyuuga clan member who trains endlessly to prove herself. Hanabi's skills surpass her elder sister's, and while lacking in strength, Hanabi makes up for it with her tenacity and speed.",
+        "skills": [
+            {
+                "id": "hyuuga-hanabi-gentle-fist",
+                "name": "Hanabi Gentle Fist",
+                "skillimage": "",
+                "skilldescription": "Hyuuga Hanabi deals 15 damage to one enemy for 2 turns. The following 2 turns, this enemy loses 1 random chakra each turn.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_gentle_fist_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Gentle Fist."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_gentle_fist_drain",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndRemoveRandomChakra": 1,
+                            "tooltipText": "This character loses 1 random chakra each turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hanabi-eight-trigrams-revolving-heaven",
+                "name": "Hanabi Eight Trigrams Revolving Heaven",
+                "skillimage": "",
+                "skilldescription": "Hyuuga Hanabi deals 15 damage to one enemy for 2 turns. The following 2 turns, this enemy deals 5 less damage.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Action",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_revolving_heaven_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 15,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "tooltipText": "This character takes 15 damage from Eight Trigrams Revolving Heaven."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_revolving_heaven_debuff",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDebuffFlat": 5,
+                            "tooltipText": "This character deals 5 less damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hanabi-unyielding-tenacity",
+                "name": "Unyielding Tenacity",
+                "skillimage": "",
+                "skilldescription": "For 2 turns, Hyuuga Hanabi will be unable to be killed and will ignore all enemy stun effects. During this time, 'Hanabi Gentle Fist' and 'Hanabi Eight Trigrams Revolving Heaven' will cost 1 random energy instead and Hyuuga Hanabi will deal 5 additional damage.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_unyielding_tenacity",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "minimumHp": 1,
+                            "cannotBeStunned": true,
+                            "stunImmune": true,
+                            "damageBonusFlat": 5,
+                            "skillCostOverridesBySkillId": {
+                                "hyuuga-hanabi-gentle-fist": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                },
+                                "hyuuga-hanabi-eight-trigrams-revolving-heaven": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Hyuuga Hanabi cannot be killed, ignores enemy stun effects, deals 5 additional damage, and Hanabi Gentle Fist and Hanabi Eight Trigrams Revolving Heaven cost 1 random chakra instead."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hanabi-byakugan",
+                "name": "Hanabi Byakugan",
+                "skillimage": "",
+                "skilldescription": "This skill makes Hyuuga Hanabi invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hanabi_byakugan_invuln",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
     }
 ];
 

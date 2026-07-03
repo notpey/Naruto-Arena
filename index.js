@@ -1668,9 +1668,10 @@
     if (!imgSkillsContainer) return;
     clearChildren(imgSkillsContainer);
     var skills = character && Array.isArray(character.skills) ? character.skills : [];
-    for (var si = 0; si < 4; si++) {
+    for (var si = 0; si < skills.length; si++) {
       var skill = skills[si] || null;
-      var skillName = skill && skill.name ? String(skill.name) : ("Skill " + (si + 1));
+      var isAltSkill = Boolean(skill && (skill.hiddenFromSelectionViewer || si >= 4));
+      var skillName = (skill && skill.name ? String(skill.name) : ("Skill " + (si + 1))) + (isAltSkill ? " (Alt)" : "");
       var skillImg = skill && skill.skillimage ? String(skill.skillimage) : "";
 
       var row = document.createElement("div");
@@ -1751,14 +1752,17 @@
       if (imgInputFace) imgInputFace.value = face;
       if (characterEditorFace) characterEditorFace.src = face || defaultProfileAvatar;
       var skills = Array.isArray(obj.skills) ? obj.skills : [];
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < skills.length; i++) {
         var skillImg = skills[i] && skills[i].skillimage ? String(skills[i].skillimage) : "";
         var thumb = document.getElementById("img-edit-skill-" + i);
         var inp = document.getElementById("img-input-skill-" + i);
         if (thumb) thumb.src = skillImg || defaultProfileAvatar;
         if (inp) inp.value = skillImg;
         var lbl = inp && inp.previousElementSibling;
-        if (lbl && skills[i] && skills[i].name) lbl.textContent = String(skills[i].name);
+        if (lbl && skills[i] && skills[i].name) {
+          var isAltSkillSync = Boolean(skills[i].hiddenFromSelectionViewer || i >= 4);
+          lbl.textContent = String(skills[i].name) + (isAltSkillSync ? " (Alt)" : "");
+        }
       }
       if (characterRequiredMission) {
         characterRequiredMission.value = obj.requiredMissionId ? String(obj.requiredMissionId) : "";

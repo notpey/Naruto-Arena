@@ -1896,6 +1896,18 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
     }, 0);
 };
 
+const getSkillSpecificCooldownIncrease = (actorState, skillId) => {
+    if (!skillId) return 0;
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    return statuses.reduce((sum, status) => {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) return sum;
+        const increases = status?.metadata?.skillCooldownIncreaseBySkillId;
+        if (!increases || typeof increases !== 'object') return sum;
+        return sum + (Number(increases[skillId]) || 0);
+    }, 0);
+};
+
 const getSkillSpecificDurationBonus = (actorState, skillId) => {
     if (!skillId) return 0;
     const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
@@ -2398,8 +2410,10 @@ const maybeTriggerReactiveDefenses = ({
         });
     }
 
-    statuses.splice(trapIndex, 1);
-    targetState.statuses = statuses;
+    if (!trapMetadata?.trapReappliesSelf) {
+        statuses.splice(trapIndex, 1);
+        targetState.statuses = statuses;
+    }
     return Boolean(trapMetadata?.counterCancelsSkill);
 };
 
@@ -3848,6 +3862,19 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             skillUses[skill.id] = (Number(skillUses[skill.id]) || 0) + 1;
             actorState.skillUses = skillUses;
             actorState.totalSkillUseCount = (Number(actorState.totalSkillUseCount) || 0) + 1;
+            const newUseCount = skillUses[skill.id];
+            actorState.statuses = (Array.isArray(actorState.statuses) ? actorState.statuses : []).filter(
+                (existingStatus) => {
+                    const rawRules = existingStatus?.metadata?.removeSelfOnSkillUseCount;
+                    const rules = Array.isArray(rawRules) ? rawRules : rawRules ? [rawRules] : [];
+                    const matchedRule = rules.find(
+                        (rule) => rule && typeof rule === 'object' && rule.skillId === skill.id
+                    );
+                    if (!matchedRule) return true;
+                    const atLeast = Math.max(1, Number(matchedRule.atLeast) || 1);
+                    return newUseCount < atLeast;
+                }
+            );
         }
         const skillCannotBeCountered = Boolean(skill?.cannotBeCountered);
         const actingCharacterId =
@@ -5827,6 +5854,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 getSkillCooldownRemaining(actorState, cooldownSkillId),
                 cooldownTurns + 1
             );
+            actorState._cooldownsStartedThisTurn = actorState._cooldownsStartedThisTurn || {};
+            actorState._cooldownsStartedThisTurn[cooldownSkillId] = true;
+        }
+        const selfSkillCooldownIncrease = getSkillSpecificCooldownIncrease(actorState, cooldownSkillId);
+        if (selfSkillCooldownIncrease > 0 && cooldownSkillId) {
+            actorState.cooldowns = actorState.cooldowns || {};
+            actorState.cooldowns[cooldownSkillId] =
+                Math.max(0, Number(actorState.cooldowns[cooldownSkillId]) || 0) + selfSkillCooldownIncrease;
             actorState._cooldownsStartedThisTurn = actorState._cooldownsStartedThisTurn || {};
             actorState._cooldownsStartedThisTurn[cooldownSkillId] = true;
         }
