@@ -156,6 +156,7 @@
             {
                 "id": "uzumaki-naruto-rasengan",
                 "name": "Rasengan",
+                "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/lro3e07.png",
                 "skilldescription": "Uzumaki Naruto deals 45 damage to one enemy and stuns their skills for 1 turn.",
                 "energy": [

@@ -197,6 +197,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             experiencePoints: Number.isFinite(Number(source.experiencePoints))
                 ? Math.max(0, Number(source.experiencePoints))
                 : 0,
+            experienceIntoLevel: Number.isFinite(Number(source.experienceIntoLevel))
+                ? Math.max(0, Number(source.experienceIntoLevel))
+                : 0,
+            experienceForNextLevel: Number.isFinite(Number(source.experienceForNextLevel))
+                ? Math.max(0, Number(source.experienceForNextLevel))
+                : 0,
             ladderRank: Number.isFinite(Number(source.ladderRank))
                 ? Math.max(1, Number(source.ladderRank))
                 : null,
@@ -285,6 +291,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const statElements = Array.from(document.querySelectorAll('.player-infoselection .player-stat'));
         const playerStatusEl = document.querySelector('.player-left .player-status');
         const playerHatEls = Array.from(document.querySelectorAll('.player-characters .rank-hat'));
+        const levelValueEl = document.querySelector('.player-level-value');
+        const levelXpEl = document.querySelector('.player-level-xp');
+        const levelBarFillEl = document.querySelector('.player-level-bar-fill');
+        if (levelValueEl) {
+            levelValueEl.textContent = ladder.level;
+        }
+        if (levelXpEl) {
+            const nextLevelCost = ladder.experienceForNextLevel;
+            levelXpEl.textContent = nextLevelCost
+                ? `${ladder.experienceIntoLevel.toLocaleString()} / ${nextLevelCost.toLocaleString()} XP`
+                : 'MAX LEVEL';
+        }
+        if (levelBarFillEl) {
+            const nextLevelCost = ladder.experienceForNextLevel;
+            const percent = nextLevelCost
+                ? Math.min(100, Math.max(0, (ladder.experienceIntoLevel / nextLevelCost) * 100))
+                : 100;
+            levelBarFillEl.style.width = `${percent}%`;
+        }
         nameElements.forEach((element) => {
             if (element && name) {
                 element.textContent = name;
@@ -303,10 +328,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 typeof element.textContent === 'string' ? element.textContent.trim().toUpperCase() : '';
             if (currentText.startsWith('CLAN:')) {
                 element.textContent = `CLAN: ${clanAbbreviation}`;
-                return;
-            }
-            if (currentText.startsWith('LEVEL:')) {
-                element.textContent = `LEVEL: ${ladder.level} (${ladder.experiencePoints.toLocaleString()} XP)`;
                 return;
             }
             if (currentText.startsWith('LADDERRANK:')) {
@@ -636,6 +657,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             classPickerEl: document.querySelector('.ingame-class-picker-field'),
             descEl: document.querySelector('.ingameskilldescription'),
             metaEl: document.querySelector('.skill-info-meta'),
+            browseNavEl: document.querySelector('.skill-browse-nav'),
+            browsePrevEl: document.querySelector('.skill-browse-prev'),
+            browseNextEl: document.querySelector('.skill-browse-next'),
+            browseLabelEl: document.querySelector('.skill-browse-label'),
         };
         const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];
         const emptyPool = () => ({
@@ -2769,6 +2794,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const renderSkillInfo = (character, skill, actorSlot = null, skillIdx = null) => {
             if (!skill || !character) return;
+            // Viewing one of the player's own skills (actorSlot set) always exits
+            // the enemy skill-browse mode so its prev/next controls don't linger.
+            if (actorSlot !== null && enemySkillBrowseState) {
+                enemySkillBrowseState = null;
+                if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
+            }
             document.querySelector('.skillinformation')?.classList.remove('profile-summary');
             setSkillInfoMetaLabels();
             if (skillInfo.imgEl) {
@@ -2851,6 +2882,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         };
+
+        let enemySkillBrowseState = null; // { character, skillIdx }
+
+        const updateSkillBrowseNav = () => {
+            if (!skillInfo.browseNavEl) return;
+            if (!enemySkillBrowseState) {
+                skillInfo.browseNavEl.style.display = 'none';
+                return;
+            }
+            const { character, skillIdx } = enemySkillBrowseState;
+            const total = Array.isArray(character?.skills) ? character.skills.length : 0;
+            skillInfo.browseNavEl.style.display = total > 1 ? 'flex' : 'none';
+            if (skillInfo.browseLabelEl) {
+                skillInfo.browseLabelEl.textContent = `${character?.name || 'Enemy'} — ${skillIdx + 1} / ${total}`;
+            }
+        };
+
+        const renderEnemySkillBrowse = () => {
+            if (!enemySkillBrowseState) return;
+            const { character, skillIdx } = enemySkillBrowseState;
+            const skill = character?.skills?.[skillIdx];
+            if (!skill) return;
+            renderSkillInfo(character, skill, null, null);
+            updateSkillBrowseNav();
+        };
+
+        const startEnemySkillBrowse = (character) => {
+            if (!character || !Array.isArray(character.skills) || !character.skills.length) return;
+            enemySkillBrowseState = { character, skillIdx: 0 };
+            renderEnemySkillBrowse();
+        };
+
+        if (skillInfo.browsePrevEl) {
+            skillInfo.browsePrevEl.addEventListener('click', () => {
+                if (!enemySkillBrowseState) return;
+                const total = enemySkillBrowseState.character.skills.length;
+                enemySkillBrowseState.skillIdx = (enemySkillBrowseState.skillIdx - 1 + total) % total;
+                renderEnemySkillBrowse();
+            });
+        }
+        if (skillInfo.browseNextEl) {
+            skillInfo.browseNextEl.addEventListener('click', () => {
+                if (!enemySkillBrowseState) return;
+                const total = enemySkillBrowseState.character.skills.length;
+                enemySkillBrowseState.skillIdx = (enemySkillBrowseState.skillIdx + 1) % total;
+                renderEnemySkillBrowse();
+            });
+        }
 
         const bindProfileInfoTrigger = (selector, side) => {
             Array.from(document.querySelectorAll(selector)).forEach((element) => {
@@ -3003,10 +3082,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const handleCardTargetClick = (event) => {
-            if (!activeTargetOptions || !activeCastingSkill || !matchIdFromUrl) return;
             const card = event.currentTarget;
             const username = card.dataset.username;
             const slot = Number.parseInt(card.dataset.slot, 10);
+            if (!activeTargetOptions || !activeCastingSkill || !matchIdFromUrl) {
+                // Not actively targeting: clicking an enemy portrait opens their
+                // kit in the skill-info panel so it can be browsed like the
+                // player's own skills.
+                if (username && username === currentOpponentUsername && Number.isInteger(slot)) {
+                    const rosterIndex = currentOpponentTeamIndices?.[slot];
+                    const character = Number.isInteger(rosterIndex) ? rosterData?.[rosterIndex] : null;
+                    if (character) startEnemySkillBrowse(character);
+                }
+                return;
+            }
             const validKeys = getValidTargetKeySet();
             if (!validKeys.has(`${username}:${slot}`)) return;
             const selection =
@@ -4173,6 +4262,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         buildRosterSlot(index);
     };
 
+    const selectedCountLabelEl = document.getElementById('selected-count-label');
+    const updateSelectedCountLabel = () => {
+        if (!selectedCountLabelEl) return;
+        const filled = selectedAssignments.filter(Boolean).length;
+        const total = selectedAssignments.length;
+        selectedCountLabelEl.textContent =
+            filled >= total ? 'TEAM READY' : `SELECTED ${filled} / ${total}`;
+        selectedCountLabelEl.classList.toggle('ready', filled >= total);
+    };
+
     const setSelectedSlot = (slotIndex, assignment) => {
         const slotElement = selectedSlots[slotIndex];
         if (!slotElement) return;
@@ -4181,6 +4280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         slotElement.classList.remove('drag-over');
         if (!assignment) {
             slotElement.textContent = String(slotIndex + 1);
+            updateSelectedCountLabel();
             return;
         }
         const character = roster[assignment.characterIndex];
@@ -4197,6 +4297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleCharacterSelect(assignment.characterIndex, { openViewer: false });
         updateGameButtons();
         persistTeamSelection();
+        updateSelectedCountLabel();
     };
 
     const handleSelectedSlotDrop = (event, targetSlotIndex) => {

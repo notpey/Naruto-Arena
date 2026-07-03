@@ -986,6 +986,7 @@
             {
                 "id": "yamanaka-ino-art-of-the-valentine",
                 "name": "Art of the Valentine",
+                "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/p25BBXs.png",
                 "skilldescription": "Yamanaka Ino deals 25 damage to one enemy.",
                 "energy": [

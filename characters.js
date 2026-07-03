@@ -149,6 +149,7 @@ const characters = [
             {
                 "id": "uzumaki-naruto-rasengan",
                 "name": "Rasengan",
+                "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/lro3e07.png",
                 "skilldescription": "Uzumaki Naruto deals 45 damage to one enemy and stuns their skills for 1 turn.",
                 "energy": [
@@ -1536,6 +1537,7 @@ const characters = [
             {
                 "id": "yamanaka-ino-art-of-the-valentine",
                 "name": "Art of the Valentine",
+                "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/p25BBXs.png",
                 "skilldescription": "Yamanaka Ino deals 25 damage to one enemy.",
                 "energy": [
@@ -3432,7 +3434,7 @@ const characters = [
         "characterId": "haku",
         "name": "Haku",
         "facePicture": "https://i.imgur.com/1iuyTS5.png",
-        "requiredMissionId": "adored-elder-sister",
+        "requiredMissionId": "hidden-hunter",
         "shopPrice": 500,
         "characterdeescription": "The sole survivor of the Yuki clan, and the subordinate of Zabuza; Haku, despite being young, holds enough potential strength to surpass almost any ninja. Using his ice based bloodline, and his intelligence, Haku can attack and defend nearly simultaneously.",
         "skills": [
