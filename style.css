@@ -1851,7 +1851,7 @@ h1, h2, h3 {
     font-family: 'Franklin', Arial, sans-serif;
     font-size: 13px;
     padding: 5px;
-    width: 280px;
+    width: 305px;
     left: 67%;
     bottom: 67.8%;
     position: relative;
@@ -1859,8 +1859,8 @@ text-transform: uppercase;
 }
 
 .player-avatar {
-    width: 75px;
-    height: 75px;
+    width: 100px;
+    height: 100px;
     border: 2px solid #000000;
     margin-right: 10px;
     box-shadow: 0 3px 6px rgba(45, 21, 7, 0.4);

@@ -98,9 +98,9 @@
     if (gameLink) {
       gameLink.addEventListener("click", function (e) {
         var url = gameLink.getAttribute("href") || "selection.html";
-        var useRemasterPreview = false;
+        var useRemasterPreview = true;
         try {
-          useRemasterPreview = localStorage.getItem("na-selection-remaster-preview") === "enabled";
+          useRemasterPreview = localStorage.getItem("na-selection-remaster-preview") !== "disabled";
         } catch (err0) {}
         var targetWidth = useRemasterPreview ? 1100 : 770;
         var targetHeight = useRemasterPreview ? 800 : 560;

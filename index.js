@@ -4911,11 +4911,11 @@
   if (playNowButton) {
     playNowButton.addEventListener("click", function () {
       var destination = accountPanel.hidden ? "selection-login.html" : "selection.html";
-      var useRemasterPreview = false;
+      var useRemasterPreview = destination === "selection.html";
       try {
         useRemasterPreview =
           destination === "selection.html" &&
-          localStorage.getItem("na-selection-remaster-preview") === "enabled";
+          localStorage.getItem("na-selection-remaster-preview") !== "disabled";
       } catch (error) {}
       var targetInnerWidth =
         destination === "selection.html" ? (useRemasterPreview ? 1100 : 770) : 760;

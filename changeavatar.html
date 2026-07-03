@@ -351,15 +351,15 @@
 
     .avatar-preview-row {
       display: grid;
-      grid-template-columns: 75px minmax(0, 1fr);
+      grid-template-columns: 100px minmax(0, 1fr);
       gap: 16px;
       align-items: center;
     }
 
     .avatar-preview {
       box-sizing: content-box;
-      width: 75px;
-      height: 75px;
+      width: 100px;
+      height: 100px;
       object-fit: cover;
       border: 1px solid rgba(232, 128, 26, 0.3);
       background: var(--ca-slate);
@@ -865,7 +865,7 @@
             required
           />
           <button class="avatar-save" type="submit" id="change-avatar-submit">Save Avatar</button>
-          <p class="avatar-hint">Avatars are to be 75x75 only.</p>
+          <p class="avatar-hint">Avatars are to be 100x100 only.</p>
           <p class="avatar-status" id="change-avatar-status" aria-live="polite"></p>
         </form>
       </section>

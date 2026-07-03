@@ -14,7 +14,9 @@
     (function () {
         var key = "na-selection-remaster-preview";
         try {
-            if (localStorage.getItem(key) === "enabled") {
+            // Remaster is the default experience now; storing "disabled" is
+            // the only way to opt back into the classic 770x560 client.
+            if (localStorage.getItem(key) !== "disabled") {
                 document.body.classList.add("game-remaster");
             }
         } catch (e) {}
@@ -454,7 +456,7 @@
         if (!toggle) return;
 
         function isEnabled() {
-            try { return localStorage.getItem(key) === "enabled"; } catch (e) { return false; }
+            try { return localStorage.getItem(key) !== "disabled"; } catch (e) { return true; }
         }
 
         function resizeForMode(enabled) {
@@ -477,8 +479,8 @@
             document.body.classList.toggle("game-remaster", enabled);
             toggle.checked = enabled;
             try {
-                if (enabled) localStorage.setItem(key, "enabled");
-                else localStorage.removeItem(key);
+                if (enabled) localStorage.removeItem(key);
+                else localStorage.setItem(key, "disabled");
             } catch (e) {}
             requestAnimationFrame(function () {
                 if (typeof window.refreshIngameHealthBars === "function") {
