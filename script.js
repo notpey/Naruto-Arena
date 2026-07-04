@@ -2668,7 +2668,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? `Claim +${storyRyoDelta.toLocaleString()} Ryo`
                         : 'Continue';
                     showStoryDialogue(outroEntries, continueLabel, () => {
-                        window.location.href = 'story.html';
+                        window.location.href = 'selection.html?view=story';
                     });
                     return;
                 }

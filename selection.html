@@ -1292,6 +1292,13 @@
             });
         });
 
+        try {
+            var initialHubView = new URLSearchParams(window.location.search).get("view");
+            if (initialHubView === "story") {
+                setHubView("story");
+            }
+        } catch (error) {}
+
         if (shopGrid) {
             shopGrid.addEventListener("click", function (event) {
                 var button = event.target.closest("[data-shop-env-buy]");

@@ -1527,52 +1527,275 @@ const PART_ONE_STORY_PLAN = [
     },
 ];
 
+const getPartOneStoryDialogue = (entry = {}) => {
+    const naruto = STORY_PORTRAIT_NARUTO;
+    const sasuke = STORY_PORTRAIT_SASUKE;
+    const sakura = STORY_PORTRAIT_SAKURA;
+    const kakashi = STORY_PORTRAIT_KAKASHI;
+    const gaara = STORY_PORTRAIT_GAARA;
+    const shikamaru = STORY_PORTRAIT_SHIKAMARU;
+    const linesByNodeId = {
+        'story-001-nine-tails-vessel': {
+            intro: [
+                { speaker: 'Mizuki', portrait: STORY_PORTRAIT_MIZUKI, text: 'Naruto, the village has lied to you long enough. Take the scroll and prove you deserve that headband.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'If this is my shot, I am not wasting it. I will master every jutsu in there!' },
+                { speaker: 'Iruka', portrait: STORY_PORTRAIT_IRUKA, text: 'Naruto, stop! Mizuki is using you. That scroll is forbidden for a reason.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'Multi Shadow Clone Jutsu!' },
+                { speaker: 'Iruka', portrait: STORY_PORTRAIT_IRUKA, text: 'You protected what matters. Naruto, you pass.' },
+            ],
+            loss: [
+                { speaker: 'Mizuki', portrait: STORY_PORTRAIT_MIZUKI, text: 'The scroll, the fox, the village... none of it matters if you are still this weak.' },
+            ],
+        },
+        'story-002-team-7-begins': {
+            intro: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'Take these bells before noon. Anyone without one goes back to the academy.' },
+                { speaker: 'Sasuke', portrait: sasuke, text: 'He is baiting us into fighting separately.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Then we hit him together. That is what a squad does, right?' },
+            ],
+            win: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'Those who abandon their comrades are worse than trash. Remember that.' },
+            ],
+            loss: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'Three rookies, three separate plans. That is why you failed.' },
+            ],
+        },
+        'story-003-land-of-waves': {
+            intro: [
+                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Hand over the bridge builder and I may leave the brats breathing.' },
+                { speaker: 'Kakashi', portrait: kakashi, text: 'Naruto, Sasuke, protect Tazuna. This is no longer a C-rank mission.' },
+            ],
+            win: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'This is the world beyond the academy. Keep your guard up.' },
+            ],
+            loss: [
+                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Children playing ninja have no place on a battlefield.' },
+            ],
+        },
+        'story-004-bridge-of-tears': {
+            intro: [
+                { speaker: 'Haku', portrait: STORY_PORTRAIT_HAKU, text: 'For Zabuza, I will become a weapon sharp enough to cut through you.' },
+                { speaker: 'Sasuke', portrait: sasuke, text: 'Naruto, stay alive. I am starting to see his movements.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'Haku fought for someone precious. Zabuza, did you ever see that?' },
+                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Say no more, kid.' },
+            ],
+            loss: [
+                { speaker: 'Haku', portrait: STORY_PORTRAIT_HAKU, text: 'A shinobi who cannot protect their precious person cannot defeat me.' },
+            ],
+        },
+        'story-005-chunin-exams-begin': {
+            intro: [
+                { speaker: 'Shikamaru', portrait: shikamaru, text: 'This exam is already troublesome. Too many teams are hiding what they can do.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Good. Let them hide. I will beat them anyway.' },
+            ],
+            win: [
+                { speaker: 'Shikamaru', portrait: shikamaru, text: 'Winning is nice. Surviving the next phase is the hard part.' },
+            ],
+            loss: [
+                { speaker: 'Dosu', portrait: getStoryPortrait('dosu-kinuta'), text: 'Noise, pressure, panic. You rookies break easily.' },
+            ],
+        },
+        'story-006-forest-of-death': {
+            intro: [
+                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_SHIORE_OROCHIMARU, text: 'Sasuke, your eyes deserve a stage larger than this village.' },
+                { speaker: 'Sakura', portrait: sakura, text: 'Naruto and Sasuke cannot move. That means I stand here.' },
+            ],
+            win: [
+                { speaker: 'Sakura', portrait: sakura, text: 'I was scared. I fought anyway.' },
+            ],
+            loss: [
+                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_SHIORE_OROCHIMARU, text: 'Fear is honest. Power is what you do with it.' },
+            ],
+        },
+        'story-007-preliminary-battles': {
+            intro: [
+                { speaker: 'Naruto', portrait: naruto, text: 'Kiba, Neji, Gaara... fine. I will climb over all of them.' },
+                { speaker: 'Gaara', portrait: gaara, text: 'Then show me whether your life has weight.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'Nobody gets to decide someone is a failure before the fight starts.' },
+            ],
+            loss: [
+                { speaker: 'Gaara', portrait: gaara, text: 'Weakness exists to be crushed.' },
+            ],
+        },
+        'story-008-finals-under-fire': {
+            intro: [
+                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'You want control over that chakra? Stop borrowing fear and start using will.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Neji called destiny fixed. I am going to prove him wrong.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'If destiny is a cage, I will break it open.' },
+            ],
+            loss: [
+                { speaker: 'Baki', portrait: getStoryPortrait('baki'), text: 'The signal has been given. Konoha falls now.' },
+            ],
+        },
+        'story-009-konoha-crush': {
+            intro: [
+                { speaker: 'Hiruzen', portrait: STORY_PORTRAIT_HIRUZEN, text: 'I failed to stop you once, Orochimaru. I will not fail this village again.' },
+                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Then show me the strength of the professor before time takes the rest.' },
+            ],
+            win: [
+                { speaker: 'Hiruzen', portrait: STORY_PORTRAIT_HIRUZEN, text: 'Even if I cannot take your life, I can take the hands you use to threaten Konoha.' },
+            ],
+            loss: [
+                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Sentiment makes even legends slow.' },
+            ],
+        },
+        'story-010-naruto-vs-gaara': {
+            intro: [
+                { speaker: 'Gaara', portrait: gaara, text: 'I exist by killing. That is the only proof I am alive.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'I know what being alone feels like. That is why I will stop you.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'You do not have to stay alone, Gaara.' },
+            ],
+            loss: [
+                { speaker: 'Gaara', portrait: gaara, text: 'Your bonds made you weak enough to lose them.' },
+            ],
+        },
+        'story-011-akatsuki-appears': {
+            intro: [
+                { speaker: 'Itachi', portrait: STORY_PORTRAIT_ITACHI, text: 'We are here for the Nine-Tails. Do not interfere.' },
+                { speaker: 'Sasuke', portrait: sasuke, text: 'Itachi... I have lived for this moment.' },
+            ],
+            win: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'If this is Akatsuki, then Orochimaru was only one warning.' },
+            ],
+            loss: [
+                { speaker: 'Itachi', portrait: STORY_PORTRAIT_ITACHI, text: 'Hatred alone does not close the distance between us, Sasuke.' },
+            ],
+        },
+        'story-012-fifth-hokage': {
+            intro: [
+                { speaker: 'Tsunade', portrait: STORY_PORTRAIT_TSUNADE, text: 'The title of Hokage is not a joke. It is a promise paid for in blood.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Then watch me protect that promise with the Rasengan!' },
+            ],
+            win: [
+                { speaker: 'Tsunade', portrait: STORY_PORTRAIT_TSUNADE, text: 'Fine, brat. I will become the Fifth Hokage.' },
+            ],
+            loss: [
+                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Dreams are fragile things. I prefer bodies that can be replaced.' },
+            ],
+        },
+        'story-013-land-of-tea-escort': {
+            intro: [
+                { speaker: 'Aoi', portrait: STORY_PORTRAIT_AOI, text: 'A shinobi who abandons his village learns one thing: loyalty is just another tool.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'No. People who trust you are not tools.' },
+            ],
+            win: [
+                { speaker: 'Sasuke', portrait: sasuke, text: 'The mission is not over until Idate crosses the line.' },
+            ],
+            loss: [
+                { speaker: 'Aoi', portrait: STORY_PORTRAIT_AOI, text: 'Run home, Leaf brats. The sword has already chosen the stronger shinobi.' },
+            ],
+        },
+        'story-014-rooftop-clash': {
+            intro: [
+                { speaker: 'Sasuke', portrait: sasuke, text: 'How did you get so strong while I stayed behind?' },
+                { speaker: 'Naruto', portrait: naruto, text: 'I am not your enemy, Sasuke!' },
+            ],
+            win: [
+                { speaker: 'Kakashi', portrait: kakashi, text: 'Power without purpose will only hollow you out.' },
+            ],
+            loss: [
+                { speaker: 'Sasuke', portrait: sasuke, text: 'If bonds make me hesitate, I will cut them away.' },
+            ],
+        },
+        'story-015-retrieval-squad': {
+            intro: [
+                { speaker: 'Shikamaru', portrait: shikamaru, text: 'The plan is ugly, but it works: one of us stays, the rest keep moving.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Then nobody loses. We bring Sasuke home together.' },
+            ],
+            win: [
+                { speaker: 'Shikamaru', portrait: shikamaru, text: 'Every second they bought us matters. Keep running.' },
+            ],
+            loss: [
+                { speaker: 'Tayuya', portrait: getStoryPortrait('tayuya'), text: 'Your little formation falls apart as soon as one piece breaks.' },
+            ],
+        },
+        'story-016-allied-sand-rescue': {
+            intro: [
+                { speaker: 'Gaara', portrait: gaara, text: 'I once fought only for myself. Now I will protect someone else.' },
+                { speaker: 'Temari', portrait: getStoryPortrait('temari'), text: 'Leaf owes us one after this.' },
+            ],
+            win: [
+                { speaker: 'Gaara', portrait: gaara, text: 'Naruto showed me another path. This is where I start walking it.' },
+            ],
+            loss: [
+                { speaker: 'Kimimaro', portrait: getStoryPortrait('kimimaro'), text: 'My body may fail, but my loyalty does not.' },
+            ],
+        },
+        'story-017-valley-of-the-end': {
+            intro: [
+                { speaker: 'Sasuke', portrait: sasuke, text: 'I am going to Orochimaru. I need power, no matter what it costs.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Then I will drag you back by force!' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'I said I would bring you back. I do not break promises.' },
+            ],
+            loss: [
+                { speaker: 'Sasuke', portrait: sasuke, text: 'This is the path I chose. Do not follow me.' },
+            ],
+        },
+        'story-018-departure': {
+            intro: [
+                { speaker: 'Sakura', portrait: sakura, text: 'Next time, I want to stand beside both of you instead of watching from behind.' },
+                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'Then train. The next threats will not wait for you to catch up.' },
+                { speaker: 'Naruto', portrait: naruto, text: 'Sasuke left, but I am not giving up. Not now. Not ever.' },
+            ],
+            win: [
+                { speaker: 'Naruto', portrait: naruto, text: 'I will get stronger, and I will bring him home.' },
+            ],
+            loss: [
+                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'Losing hurts. Good. Remember it, then turn it into discipline.' },
+            ],
+        },
+    };
+    const fallback = {
+        intro: [{ speaker: entry.nodeTitle || 'Story', portrait: '', text: entry.summary || 'The story continues.' }],
+        win: [{ speaker: 'Story', portrait: '', text: `${entry.nodeTitle || 'Battle'} cleared.` }],
+        loss: [{ speaker: 'Story', portrait: '', text: 'Regroup, adjust your plan, and try again.' }],
+    };
+    return linesByNodeId[entry.nodeId] || fallback;
+};
+
 const buildPartOneStoryCatalog = () =>
-    PART_ONE_STORY_PLAN.map((entry, index) => ({
-        chapterId: entry.chapterId,
-        title: entry.title,
-        sortOrder: index + 1,
-        nodes: [
-            {
-                nodeId: entry.nodeId,
-                title: entry.nodeTitle,
-                arcTitle: entry.arcTitle,
-                episodeRange: entry.episodeRange,
-                summary: entry.summary,
-                level_requirement: 1,
-                image: '',
-                imageAlt: `${entry.nodeTitle} story artwork`,
-                enemyTeam: entry.enemyTeam,
-                playerTeam: entry.playerTeam,
-                enemyDisplayName: entry.enemyDisplayName,
-                introDialogue: [
-                    {
-                        speaker: entry.title.replace(/^Chapter\s+\d+:\s*/i, ''),
-                        portrait: '',
-                        text: entry.summary,
-                    },
-                ],
-                outroDialogueWin: [
-                    {
-                        speaker: 'Story',
-                        portrait: '',
-                        text: `${entry.nodeTitle} cleared. The next chapter is now within reach.`,
-                    },
-                ],
-                outroDialogueLoss: [
-                    {
-                        speaker: 'Story',
-                        portrait: '',
-                        text: 'Regroup, adjust your plan, and try this chapter again.',
-                    },
-                ],
-                reward_character: entry.reward_character || null,
-                rewardText: entry.rewardText || 'Story progression.',
-                requiresPreviousNode: index > 0,
-                sortOrder: 1,
-            },
-        ],
-    }));
+    PART_ONE_STORY_PLAN.map((entry, index) => {
+        const dialogue = getPartOneStoryDialogue(entry);
+        return {
+            chapterId: entry.chapterId,
+            title: entry.title,
+            sortOrder: index + 1,
+            nodes: [
+                {
+                    nodeId: entry.nodeId,
+                    title: entry.nodeTitle,
+                    arcTitle: entry.arcTitle,
+                    episodeRange: entry.episodeRange,
+                    summary: entry.summary,
+                    level_requirement: 1,
+                    image: '',
+                    imageAlt: `${entry.nodeTitle} story artwork`,
+                    enemyTeam: entry.enemyTeam,
+                    playerTeam: entry.playerTeam,
+                    enemyDisplayName: entry.enemyDisplayName,
+                    introDialogue: dialogue.intro,
+                    outroDialogueWin: dialogue.win,
+                    outroDialogueLoss: dialogue.loss,
+                    reward_character: entry.reward_character || null,
+                    rewardText: entry.rewardText || 'Story progression.',
+                    requiresPreviousNode: index > 0,
+                    sortOrder: 1,
+                },
+            ],
+        };
+    });
 
 let mongoClient;
 let usersCollection;
@@ -2795,6 +3018,40 @@ const normalizeStoryCatalog = (chapters = []) =>
 
 const getDefaultStoryCatalog = () => normalizeStoryCatalog(buildPartOneStoryCatalog());
 
+const isGeneratedStoryDialogueNode = (node = {}) => {
+    const planEntry = PART_ONE_STORY_PLAN.find((entry) => entry.nodeId === node.nodeId);
+    if (!planEntry) {
+        return false;
+    }
+    const intro = Array.isArray(node.introDialogue) ? node.introDialogue[0] : null;
+    const win = Array.isArray(node.outroDialogueWin) ? node.outroDialogueWin[0] : null;
+    const loss = Array.isArray(node.outroDialogueLoss) ? node.outroDialogueLoss[0] : null;
+    const generatedIntroSpeaker = planEntry.title.replace(/^Chapter\s+\d+:\s*/i, '');
+    return (
+        intro?.speaker === generatedIntroSpeaker &&
+        intro?.text === planEntry.summary &&
+        win?.speaker === 'Story' &&
+        win?.text === `${planEntry.nodeTitle} cleared. The next chapter is now within reach.` &&
+        loss?.speaker === 'Story' &&
+        loss?.text === 'Regroup, adjust your plan, and try this chapter again.'
+    );
+};
+
+const mergeStoryNodeWithDefault = (storedNode = {}, defaultNode = {}) => {
+    if (!defaultNode?.nodeId) {
+        return storedNode;
+    }
+    if (!isGeneratedStoryDialogueNode(storedNode)) {
+        return storedNode;
+    }
+    return {
+        ...storedNode,
+        introDialogue: defaultNode.introDialogue,
+        outroDialogueWin: defaultNode.outroDialogueWin,
+        outroDialogueLoss: defaultNode.outroDialogueLoss,
+    };
+};
+
 const mergeStoredStoryCatalogWithDefaults = (storedCatalog = [], defaultCatalog = []) => {
     if (!Array.isArray(storedCatalog) || !storedCatalog.length) {
         return defaultCatalog;
@@ -2817,13 +3074,21 @@ const mergeStoredStoryCatalogWithDefaults = (storedCatalog = [], defaultCatalog 
         if (!defaultChapter) {
             return chapter;
         }
-        const storedNodeIds = new Set((Array.isArray(chapter.nodes) ? chapter.nodes : []).map((node) => node.nodeId));
+        const defaultNodesById = new Map(
+            (Array.isArray(defaultChapter.nodes) ? defaultChapter.nodes : [])
+                .filter((node) => node?.nodeId)
+                .map((node) => [node.nodeId, node])
+        );
+        const storedNodes = (Array.isArray(chapter.nodes) ? chapter.nodes : []).map((node) =>
+            mergeStoryNodeWithDefault(node, defaultNodesById.get(node.nodeId))
+        );
+        const storedNodeIds = new Set(storedNodes.map((node) => node.nodeId));
         const missingDefaultNodes = (Array.isArray(defaultChapter.nodes) ? defaultChapter.nodes : []).filter(
             (node) => node?.nodeId && !storedNodeIds.has(node.nodeId)
         );
         return missingDefaultNodes.length
-            ? { ...chapter, nodes: [...(Array.isArray(chapter.nodes) ? chapter.nodes : []), ...missingDefaultNodes] }
-            : chapter;
+            ? { ...chapter, nodes: [...storedNodes, ...missingDefaultNodes] }
+            : { ...chapter, nodes: storedNodes };
     });
     const missingDefaultChapters = defaultCatalog.filter(
         (chapter) => chapter?.chapterId && !storedChapterIds.has(chapter.chapterId)
