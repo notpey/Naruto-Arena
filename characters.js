@@ -51,7 +51,7 @@ const characters = [
                         "metadata": {
                             "cannotUseSkillIndices": [
                                 0,
-                                2
+                                4
                             ],
                             "tooltipText": "Uzumaki Naruto Combo and Rasengan cannot be used."
                         }
@@ -940,82 +940,6 @@ const characters = [
                         }
                     }
                 ]
-            },
-            {
-                "id": "hyuuga-hinata-hinata-gentle-fist-byakugan",
-                "name": "Hinata Gentle Fist",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Physical",
-                    "Action"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hinata_gentle_fist_byakugan",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 15,
-                            "turnEndRemoveRandomChakra": 1,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage and loses 1 random chakra from Gentle Fist."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan",
-                "name": "Protective Eight Trigrams Sixty-Four Palms",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                "skilldescription": "Hyuuga Hinata deals 15 piercing damage to all enemies and grants her team 10 points of destructible defense for 1 turn.",
-                "energy": [
-                    "Ninjutsu"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Energy",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hinata_protective_palms_defense",
-                        "duration": 1,
-                        "scope": "all-allies",
-                        "metadata": {
-                            "destructibleDefensePoints": 10,
-                            "tooltipText": "This character has 10 destructible defense."
-                        }
-                    }
-                ]
             }
         ]
     },
@@ -1353,7 +1277,7 @@ const characters = [
                 "name": "Mind Body Disturbance",
                 "ignoreInvulnerability": true,
                 "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
+                "skilldescription": "This skill ignores invulnerability. Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1442,7 +1366,7 @@ const characters = [
                 "id": "yamanaka-ino-chakra-hair-strand-trap",
                 "name": "Chakra Hair Strand Trap",
                 "skillimage": "https://i.imgur.com/CH2jrFU.png",
-                "skilldescription": "For 1 turn, if one target enemy uses a new harmful skill, they will have the cooldowns of their skills increased by 1 for 2 turns. This skill is invisible until triggered.",
+                "skilldescription": "For 1 turn, if one target enemy uses a new harmful skill, the next skill they use afterward will have its cooldown increased by 1. This skill is invisible until triggered.",
                 "energy": [
                     "Random"
                 ],
@@ -1676,7 +1600,8 @@ const characters = [
                 "effects": [
                     {
                         "type": "cleanse_harmful",
-                        "scope": "self"
+                        "scope": "self",
+                        "count": 0
                     },
                     {
                         "type": "apply_status",
@@ -1913,7 +1838,7 @@ const characters = [
                 "id": "tenten-twin-rising-dragons",
                 "name": "Twin Rising Dragons",
                 "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and chakra damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -2124,97 +2049,6 @@ const characters = [
                         }
                     }
                 ]
-            },
-            {
-                "id": "tenten-twin-rising-dragons-full-release-version",
-                "name": "Twin Rising Dragons",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "all-other-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_mark",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 20,
-                            "bonusDamageFromSourceCharacterId": "tenten",
-                            "bonusDamageAppliesToSkillIds": [
-                                "tenten-twin-rising-dragons-trap",
-                                "tenten-twin-rising-dragons-trap-full-release-version"
-                            ],
-                            "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "tenten-twin-rising-dragons-trap-full-release-version",
-                "name": "Twin Rising Dragons Trap",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/pOsj115.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 5,
-                        "scope": "all-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_trap_debuff",
-                        "duration": 2,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "damageDebuffBySkillClass": {
-                                "physical": 5,
-                                "energy": 5
-                            },
-                            "tooltipText": "This character deals 5 less physical and chakra damage."
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "all-enemy",
-                        "statusId": "tenten_twin_rising_dragons_mark"
-                    }
-                ]
             }
         ]
     },
@@ -2287,7 +2121,7 @@ const characters = [
                 "id": "gaara-of-the-desert-sand-clone",
                 "name": "Sand Clone",
                 "skillimage": "https://i.imgur.com/SCRKMIU.png",
-                "skilldescription": "Until the next time Gaara receives new non-affliction damage, he will ignore all enemy stun effects. This skill cannot be used while active.",
+                "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
                 "energy": [
                     "none"
                 ],
@@ -2311,7 +2145,7 @@ const characters = [
                             "cannotBeStunned": true,
                             "stunImmune": true,
                             "triggerOnEnemyHarmfulNonMental": true,
-                            "tooltipText": "Gaara ignores stuns until he next takes non-affliction damage."
+                            "tooltipText": "Gaara ignores stuns until an enemy next uses a harmful non-mental skill on him."
                         }
                     }
                 ]
@@ -2320,7 +2154,7 @@ const characters = [
                 "id": "gaara-of-the-desert-armor-of-sand",
                 "name": "Armor of Sand",
                 "skillimage": "https://i.imgur.com/qfrA8gB.png",
-                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot stack and will re-apply itself.",
+                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot be used again while it is still active.",
                 "energy": [
                     "Random"
                 ],
@@ -3011,7 +2845,7 @@ const characters = [
                 "id": "zaku-abumi-wall-of-air",
                 "name": "Wall of Air",
                 "skillimage": "https://i.imgur.com/1bKTzwA.png",
-                "skilldescription": "Abumi Zaku targets one ally. The following turn, the first non-strategic skill used on this ally will be countered. This skill is invisible.",
+                "skilldescription": "Abumi Zaku targets one ally. The following turn, the first harmful non-strategic skill used on this ally will be countered. This skill is invisible.",
                 "energy": [
                     "Random"
                 ],
@@ -3748,7 +3582,7 @@ const characters = [
                 "id": "mizuki-execution-shuriken",
                 "name": "Execution Shuriken",
                 "skillimage": "https://i.imgur.com/sqwpwQd.png",
-                "skilldescription": "Mizuki deals 20 damage to one enemy and 10 additional damage for each 20 health they have lost. This skill can only be used twice. This skill cannot be removed.",
+                "skilldescription": "Mizuki deals 20 damage to one enemy and 10 additional damage for each 20 health they have lost. This skill can only be used twice.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -3852,7 +3686,7 @@ const characters = [
                 "name": "Kunai Assault",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "deadcharacter.png",
-                "skilldescription": "Mizuki deals 30 damage to one enemy instantly.",
+                "skilldescription": "Mizuki deals 30 piercing damage to one enemy instantly.",
                 "energy": [
                     "Random"
                 ],
@@ -4765,9 +4599,11 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "afflictionDamage": true,
+                            "cannotBeCleansed": true,
+                            "cannotBeEvaded": true,
                             "turnEndDamage": 20,
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character takes 20 affliction damage each turn from Fire Release: Fire Ball."
+                            "tooltipText": "This character takes 20 affliction damage each turn from Fire Release: Fire Ball. This effect cannot be ignored or removed."
                         }
                     }
                 ]
@@ -4814,6 +4650,10 @@ const characters = [
                         "statusId": "shiore_orochimaru_giant_snake_bind_followup",
                         "duration": 1,
                         "scope": "self",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "shiore_orochimaru_giant_snake_bind_followup"
+                        },
                         "metadata": {
                             "helpful": true,
                             "skillCostOverridesBySkillId": {
@@ -4998,7 +4838,7 @@ const characters = [
                 "id": "akadou-yoroi-chakra-focus",
                 "name": "Chakra Focus",
                 "skillimage": "https://i.imgur.com/8oUT5Mk.png",
-                "skilldescription": "For 2 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random chakra for their duration.",
+                "skilldescription": "For 2 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random chakra.",
                 "energy": [
                     "Random"
                 ],
@@ -5146,6 +4986,7 @@ const characters = [
                             "helpful": true,
                             "reflectNextIncomingSkill": true,
                             "reflectToFixedTarget": true,
+                            "persistReflectAcrossTriggers": true,
                             "copyTargetUsernameToKeys": [
                                 "reflectTargetUsername"
                             ],
@@ -6950,7 +6791,7 @@ const characters = [
                 "id": "sarutobi-asuma-flying-swallow",
                 "name": "Flying Swallow",
                 "skillimage": "https://i.imgur.com/a50zdDY.png",
-                "skilldescription": "Sarutobi Asuma deals 15 damage to all enemies for 2 turns. The following 2 turns, Sarutobi Asuma's team will gain 15 points of damage reduction. During this time, this skill will be replaced by 'Finishing Blow' and 'Sharpen Blades' will be replaced by 'Flying Kick'. This skill cannot be countered or reflected.",
+                "skilldescription": "Sarutobi Asuma deals 15 damage to all enemies for 2 turns; during this time, this skill will be replaced by 'Finishing Blow' and 'Sharpen Blades' will be replaced by 'Flying Kick'. The following 2 turns, Sarutobi Asuma's team will gain 15 points of damage reduction instead. This skill cannot be countered or reflected.",
                 "energy": [
                     "Taijutsu",
                     "Ninjutsu"
@@ -7059,6 +6900,9 @@ const characters = [
                     "Random"
                 ],
                 "target": "single-ally",
+                "actorCondition": {
+                    "missingStatusId": "asuma_self_sacrifice_active"
+                },
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
@@ -7071,26 +6915,56 @@ const characters = [
                         "statusId": "asuma_self_sacrifice_reflect",
                         "duration": 99,
                         "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "missingStatusId": "asuma_self_sacrifice_reflect"
-                        },
                         "metadata": {
                             "helpful": true,
                             "reflectNextIncomingSkill": true,
                             "reflectToSourceCaster": true,
+                            "persistReflectAcrossTriggers": true,
                             "tooltipText": "All harmful skills used on this character will be reflected to Sarutobi Asuma."
                         }
                     },
                     {
-                        "type": "cleanse_statuses",
-                        "scope": "target",
-                        "statusId": "asuma_self_sacrifice_reflect",
-                        "count": 1,
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "asuma_self_sacrifice_reflect"
+                        "type": "apply_status",
+                        "statusId": "asuma_self_sacrifice_active",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "sarutobi-asuma-self-sacrifice": "sarutobi-asuma-cancel-self-sacrifice"
+                            },
+                            "tooltipText": "Self-Sacrifice is replaced by a free skill that cancels it."
                         }
+                    }
+                ]
+            },
+            {
+                "id": "sarutobi-asuma-cancel-self-sacrifice",
+                "name": "Self-Sacrifice",
+                "hiddenFromSelectionViewer": true,
+                "omitFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/i3HWtZR.png",
+                "skilldescription": "Cancels Self-Sacrifice for no cost.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "all-allies",
+                        "statusId": "asuma_self_sacrifice_reflect",
+                        "count": 1
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "statusId": "asuma_self_sacrifice_active",
+                        "count": 1
                     }
                 ]
             },
@@ -7432,7 +7306,7 @@ const characters = [
                 "id": "baki-flak-jacket",
                 "name": "Flak Jacket",
                 "skillimage": "https://i.imgur.com/4i77YrB.png",
-                "skilldescription": "Baki targets himself or an ally, granting this character 50 points of destructible defense for 4 turns. During this time, they will ignore enemy stun effects and harmful non-conditional affliction damage. This skill ends if the destructible defense is destroyed.",
+                "skilldescription": "Baki targets himself or an ally, granting this character 50 points of destructible defense for 4 turns. During this time, they will ignore enemy stun effects and affliction damage. This skill ends if the destructible defense is destroyed.",
                 "energy": [
                     "Random",
                     "Random"
@@ -7825,6 +7699,7 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "turnEndHealFlat": 5,
                             "tooltipText": "This character heals 5 health each turn from Major Summoning: Katsuyu."
                         }
@@ -7836,6 +7711,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "skillReplacements": {
                                 "tsunade-major-summoning-katsuyu": "tsunade-slug-division"
                             },
@@ -8009,7 +7885,7 @@ const characters = [
                 "id": "jiraiya-major-summoning-gamabunta",
                 "name": "Major Summoning: Gamabunta",
                 "skillimage": "https://i.imgur.com/Qti5Che.png",
-                "skilldescription": "Jiraiya deals 25 affliction damage to all enemies. For the rest of the game, the enemy team will take 5 additional damage from affliction-only skills and this skill will be replaced by 'Toad Oil Flame Bullet'.",
+                "skilldescription": "Jiraiya deals 25 affliction damage to all enemies. For the rest of the game, the enemy team will take 5 additional damage from affliction skills and this skill will be replaced by 'Toad Oil Flame Bullet'.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline",
@@ -8219,6 +8095,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "turnEndGainChakra": {
                                 "chakraType": "random",
                                 "amount": 1
@@ -8234,6 +8111,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "skillReplacements": {
                                 "orochimaru-major-summoning-manda": "orochimaru-constrict-and-bite"
                             },
@@ -8414,7 +8292,7 @@ const characters = [
                 "id": "edo-tensei-hashirama-a-world-of-trees",
                 "name": "A World of Trees",
                 "skillimage": "",
-                "skilldescription": "For 2 turns, all enemies' physical, energy and strategic skills will cost 1 additional random energy and their cooldowns will be increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
+                "skilldescription": "For 2 turns, all enemies' physical, energy and strategic skills will cost 1 additional random chakra and their cooldowns will be increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
                 "energy": [
                     "Bloodline",
                     "Bloodline"
@@ -8755,6 +8633,7 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "ongoingClass": "action",
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotReduceDamage": true,
@@ -8772,6 +8651,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "harmful": true,
+                            "ongoingClass": "action",
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotBeCleansed": true,
@@ -8818,6 +8698,7 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "ongoingClass": "action",
                             "turnEndDamage": 5,
                             "turnEndTrigger": "source_turn",
                             "tooltipText": "This character takes 5 damage each turn from Major Summoning: Enma."
@@ -8830,6 +8711,7 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "damageReductionFlat": 5,
                             "tooltipText": "This character has 5 points of damage reduction from Major Summoning: Enma."
                         }
@@ -8841,6 +8723,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "action",
                             "skillReplacements": {
                                 "sarutobi-hiruzen-major-summoning-enma": "sarutobi-hiruzen-adamantine-prison-wall"
                             },
@@ -8902,9 +8785,9 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
-                            "damageReductionFlat": 20,
+                            "unpierceableDamageReductionFlat": 20,
                             "minimumHp": 1,
-                            "tooltipText": "This character has 20 points of damage reduction and cannot be killed."
+                            "tooltipText": "This character has 20 points of unpierceable damage reduction and cannot be killed."
                         }
                     }
                 ]
@@ -9030,11 +8913,6 @@ const characters = [
                     "Instant"
                 ],
                 "effects": [
-                    {
-                        "type": "heal",
-                        "amount": 15,
-                        "scope": "self"
-                    },
                     {
                         "type": "apply_status",
                         "statusId": "kyuubi_naruto_chakra_buff",
@@ -9187,7 +9065,7 @@ const characters = [
                 "id": "cursed-seal-lv1-sasuke-cursed-sharingan",
                 "name": "Cursed Sharingan",
                 "skillimage": "",
-                "skilldescription": "For 3 turns, Cursed Seal Lv1 Sasuke gains 10 points of damage reduction and targets all enemies. If they use a new harmful skill, they will receive 10 additional damage from 'Silent Blow' and 'Cursed Chidori' for 1 turn. This skill cannot be countered and ends if Cursed Seal Lv1 Sasuke dies.",
+                "skilldescription": "For 3 turns, Cursed Seal Lv1 Sasuke gains 10 points of damage reduction and targets all enemies. If they use a new harmful skill, they will take 10 additional physical and chakra damage for 1 turn. This skill cannot be countered and ends if Cursed Seal Lv1 Sasuke dies.",
                 "energy": [
                     "Random"
                 ],
@@ -9228,9 +9106,9 @@ const characters = [
                                     "physical": 10,
                                     "energy": 10
                                 },
-                                "tooltipText": "This character takes 10 additional damage from Silent Blow and Cursed Chidori."
+                                "tooltipText": "This character takes 10 additional physical and chakra damage."
                             },
-                            "tooltipText": "If this character uses a new harmful skill, they will take additional damage from Silent Blow and Cursed Chidori."
+                            "tooltipText": "If this character uses a new harmful skill, they will take 10 additional physical and chakra damage."
                         }
                     }
                 ]
@@ -9666,11 +9544,13 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "damageBonusFlat": 5,
-                            "mergeNumericAddKeys": [
-                                "damageBonusFlat"
+                            "skillDamageBonuses": {
+                                "drunken-lee-unpredictable-assault": 5
+                            },
+                            "mergeObjectNumericAddKeys": [
+                                "skillDamageBonuses"
                             ],
-                            "tooltipText": "This character's skills deal 5 additional damage. This effect stacks each time Unpredictable Assault is used."
+                            "tooltipText": "Unpredictable Assault deals 5 additional damage. This effect stacks each time Unpredictable Assault is used."
                         }
                     }
                 ]
@@ -9679,7 +9559,7 @@ const characters = [
                 "id": "drunken-lee-drunken-counter",
                 "name": "Drunken Counter",
                 "skillimage": "",
-                "skilldescription": "Drunken Lee targets himself or an ally. For 1 turn, the first harmful non-strategic skill used on the target will be countered and the countered enemy will have 'Unpredictable Assault' applied on them. This skill is invisible.",
+                "skilldescription": "Drunken Lee targets himself or an ally. For 1 turn, the first harmful non-strategic skill used on the target will be countered for 20 damage. This skill is invisible.",
                 "energy": [
                     "Random"
                 ],
@@ -9833,7 +9713,7 @@ const characters = [
                 "id": "shukaku-gaara-constricting-sand-prison",
                 "name": "Constricting Sand Prison",
                 "skillimage": "",
-                "skilldescription": "Shukaku Gaara deals 10 damage to one enemy each turn. The first skill that this enemy uses will be countered, and this skill will end.",
+                "skilldescription": "Shukaku Gaara deals 10 damage to one enemy each turn. The first harmful skill that this enemy uses will be countered, and this skill will end.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -10036,7 +9916,7 @@ const characters = [
                     "Random"
                 ],
                 "target": "single-enemy",
-                "targetCondition": {
+                "actorCondition": {
                     "missingStatusId": "rehabilitated_gaara_sand_mastery_defense"
                 },
                 "damage": 0,
@@ -10216,6 +10096,7 @@ const characters = [
                         "amount": 40,
                         "scope": "all-enemy",
                         "metadata": {
+                            "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true
                         }
                     }
@@ -10611,7 +10492,7 @@ const characters = [
                 "id": "rokushou-aoi-senbon-shower",
                 "name": "Senbon Shower",
                 "skillimage": "",
-                "skilldescription": "Rokushou Aoi deals 5 piercing damage to all enemies, who will take 5 affliction damage the following 3 turns. During this time, the main target will ignore healing effects.",
+                "skilldescription": "Rokushou Aoi deals 5 piercing damage to all enemies, who will take 5 affliction damage each turn for 3 turns. During this time, the main target will ignore healing effects.",
                 "energy": [
                     "Random",
                     "Random"
@@ -10667,7 +10548,7 @@ const characters = [
                 "id": "rokushou-aoi-umbrella-shock-wave",
                 "name": "Umbrella Shock Wave",
                 "skillimage": "",
-                "skilldescription": "Rokushou Aoi destroys all enemies' destructible defense and deals 10 damage to them. The next time 'Senbon Shower' is used, it will last 1 additional turn. This skill stacks.",
+                "skilldescription": "Rokushou Aoi destroys all enemies' destructible defense and deals 10 damage to them. From now on, 'Senbon Shower' will last 1 additional turn. This effect stacks each time this skill is used.",
                 "energy": [
                     "Random"
                 ],
@@ -10701,7 +10582,7 @@ const characters = [
                             "mergeObjectNumericAddKeys": [
                                 "skillDurationBonuses"
                             ],
-                            "tooltipText": "The next time Senbon Shower is used, it will last 1 additional turn. This effect stacks."
+                            "tooltipText": "Senbon Shower lasts 1 additional turn. This effect stacks."
                         }
                     }
                 ]
@@ -11775,18 +11656,19 @@ const characters = [
                             "turnDurationAnchor": "source_turn",
                             "ongoingClass": "action",
                             "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage from Gentle Fist."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hanabi_gentle_fist_drain",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndRemoveRandomChakra": 1,
-                            "tooltipText": "This character loses 1 random chakra each turn."
+                            "tooltipText": "This character takes 15 damage from Gentle Fist. Afterward, this character loses 1 random chakra each turn for 2 turns.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "hyuuga_hanabi_gentle_fist_drain",
+                                    "duration": 2,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "turnEndRemoveRandomChakra": 1,
+                                        "tooltipText": "This character loses 1 random chakra each turn from Gentle Fist."
+                                    }
+                                }
+                            ]
                         }
                     }
                 ]
@@ -11820,18 +11702,19 @@ const characters = [
                             "turnDurationAnchor": "source_turn",
                             "ongoingClass": "action",
                             "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage from Eight Trigrams Revolving Heaven."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hanabi_revolving_heaven_debuff",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "damageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less damage."
+                            "tooltipText": "This character takes 15 damage from Eight Trigrams Revolving Heaven. Afterward, this character deals 5 less damage for 2 turns.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "hyuuga_hanabi_revolving_heaven_debuff",
+                                    "duration": 2,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "damageDebuffFlat": 5,
+                                        "tooltipText": "This character deals 5 less damage from Eight Trigrams Revolving Heaven."
+                                    }
+                                }
+                            ]
                         }
                     }
                 ]

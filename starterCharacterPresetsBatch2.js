@@ -177,7 +177,8 @@
                 "effects": [
                     {
                         "type": "cleanse_harmful",
-                        "scope": "self"
+                        "scope": "self",
+                        "count": 0
                     },
                     {
                         "type": "apply_status",
@@ -259,7 +260,7 @@
                 "id": "tenten-twin-rising-dragons",
                 "name": "Twin Rising Dragons",
                 "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their physical and chakra damage lowered by 10 additional points from it.",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -448,98 +449,7 @@
                 name: "Spiked Boulder Wall",
                 ownerName: "Tenten",
                 image: "https://i.imgur.com/45XopDc.png"
-            }),
-            {
-                "id": "tenten-twin-rising-dragons-full-release-version",
-                "name": "Twin Rising Dragons",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from Twin Rising Dragons Trap and will have their physical and chakra damage lowered by 10 additional points from it.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "all-other-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_mark",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 20,
-                            "bonusDamageFromSourceCharacterId": "tenten",
-                            "bonusDamageAppliesToSkillIds": [
-                                "tenten-twin-rising-dragons-trap",
-                                "tenten-twin-rising-dragons-trap-full-release-version"
-                            ],
-                            "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "tenten-twin-rising-dragons-trap-full-release-version",
-                "name": "Twin Rising Dragons Trap",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/pOsj115.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. For 2 turns, their physical and chakra damage will be lowered by 5.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 5,
-                        "scope": "all-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_trap_debuff",
-                        "duration": 2,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "damageDebuffBySkillClass": {
-                                "physical": 5,
-                                "energy": 5
-                            },
-                            "tooltipText": "This character deals 5 less physical and chakra damage."
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "all-enemy",
-                        "statusId": "tenten_twin_rising_dragons_mark"
-                    }
-                ]
-            }
+            })
         ]
     };
 
@@ -725,7 +635,7 @@
                 "id": "gaara-of-the-desert-sand-clone",
                 "name": "Sand Clone",
                 "skillimage": "https://i.imgur.com/SCRKMIU.png",
-                "skilldescription": "Until the next time Gaara receives new non-affliction damage, he will ignore all enemy stun effects. This skill cannot be used while active.",
+                "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
                 "energy": [
                     "none"
                 ],
@@ -749,7 +659,7 @@
                             "cannotBeStunned": true,
                             "stunImmune": true,
                             "triggerOnEnemyHarmfulNonMental": true,
-                            "tooltipText": "Gaara ignores stuns until he next takes non-affliction damage."
+                            "tooltipText": "Gaara ignores stuns until an enemy next uses a harmful non-mental skill on him."
                         }
                     }
                 ]
@@ -758,7 +668,7 @@
                 "id": "gaara-of-the-desert-armor-of-sand",
                 "name": "Armor of Sand",
                 "skillimage": "https://i.imgur.com/qfrA8gB.png",
-                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot stack and will re-apply itself.",
+                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot be used again while it is still active.",
                 "energy": [
                     "Random"
                 ],
@@ -1022,8 +932,10 @@
                                 "strategic",
                                 "affliction"
                             ],
-                            "skillReplacements": {
-                                "temari-summoning-quick-beheading-dance": "temari-summoning-quick-beheading-dance-reduced"
+                            "skillCostOverridesBySkillId": {
+                                "temari-summoning-quick-beheading-dance": {
+                                    "energy": ["Ninjutsu", "Random"]
+                                }
                             },
                             "tooltipText": "Temari is invulnerable to non-mental skills and Summoning Quick Beheading Dance costs 1 less random chakra."
                         }
@@ -1125,43 +1037,7 @@
                 name: "Fan Defence Technique",
                 ownerName: "Temari",
                 image: "https://i.imgur.com/nnNAsmM.png"
-            }),
-            {
-                "id": "temari-summoning-quick-beheading-dance-reduced",
-                "name": "Summoning Quick Beheading Dance",
-                "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/AsbfOOH.png",
-                "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 2,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "temari_summoning_quick_beheading_dance",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 35,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
-                        }
-                    }
-                ]
-            }
+            })
         ]
     };
 

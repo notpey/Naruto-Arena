@@ -4023,7 +4023,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         });
                     });
                     if (!reflectStatus) continue;
-                    mentalGuardReflectHolder = { username, slot, unit, state, reflectStatusId: reflectStatus.id };
+                    mentalGuardReflectHolder = {
+                        username,
+                        slot,
+                        unit,
+                        state,
+                        reflectStatusId: reflectStatus.id,
+                        reflectStatusMetadata: reflectStatus.metadata || {},
+                    };
                     break;
                 }
                 if (mentalGuardReflectHolder) break;
@@ -4054,13 +4061,18 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             targetReflectStatusByKey.set(key, reflectStatus || null);
             return reflectStatus || null;
         };
-        if (shouldReflectTargetsByPersonalStatus && personalReflectStatus?.id) {
+        if (
+            shouldReflectTargetsByPersonalStatus &&
+            personalReflectStatus?.id &&
+            !Boolean(personalReflectStatus?.metadata?.persistReflectAcrossTriggers)
+        ) {
             consumeStatus(actorState, personalReflectStatus.id);
         }
         if (
             shouldReflectTargetsByMentalGuard &&
             mentalGuardReflectHolder?.state &&
-            mentalGuardReflectHolder?.reflectStatusId
+            mentalGuardReflectHolder?.reflectStatusId &&
+            !Boolean(mentalGuardReflectHolder?.reflectStatusMetadata?.persistReflectAcrossTriggers)
         ) {
             consumeStatus(mentalGuardReflectHolder.state, mentalGuardReflectHolder.reflectStatusId);
         }
@@ -4090,8 +4102,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 const targetReflectStatus = getTargetReflectStatus(recipient);
                 if (targetReflectStatus?.id) {
                     const targetState = ensureUnitStateShape(recipient.unit);
-                    consumeStatus(targetState, targetReflectStatus.id);
                     const metadata = targetReflectStatus?.metadata || {};
+                    if (!Boolean(metadata?.persistReflectAcrossTriggers)) {
+                        consumeStatus(targetState, targetReflectStatus.id);
+                    }
                     const fixedTarget = resolveFixedReflectTarget(metadata, targetReflectStatus);
                     if (fixedTarget) {
                         return fixedTarget;
@@ -4702,8 +4716,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -4711,8 +4724,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';
@@ -5378,8 +5391,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     const targetState = ensureUnitStateShape(recipient.unit);
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -5387,8 +5399,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';
@@ -5469,8 +5481,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -5478,8 +5489,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';
@@ -5650,8 +5661,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -5659,8 +5669,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';
@@ -5707,8 +5717,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -5716,8 +5725,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';
@@ -5760,8 +5769,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     const condition = effect?.condition;
                     if (condition) {
-                        if (
-                            !doesEffectConditionMatch({
+                        const conditionMatched = doesEffectConditionMatch({
                                 condition,
                                 actorState,
                                 targetState,
@@ -5769,8 +5777,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 actorUsername: actingUsername,
                                 targetUnit: recipient.unit,
                                 targetUsername: recipient.username,
-                            })
-                        )
+                            });
+                        if (!conditionMatched)
                             return;
                         if (condition.consumeOnMatch && condition.statusId) {
                             const scope = condition.scope === 'target' ? 'target' : 'self';

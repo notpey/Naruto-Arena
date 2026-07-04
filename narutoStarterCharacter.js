@@ -58,7 +58,7 @@
                         "metadata": {
                             "cannotUseSkillIndices": [
                                 0,
-                                2
+                                4
                             ],
                             "tooltipText": "Uzumaki Naruto Combo and Rasengan cannot be used."
                         }

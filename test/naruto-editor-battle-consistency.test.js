@@ -13,6 +13,7 @@ const {
     buildInitialBoard,
     resolvePendingTurnSkills,
     resolveEffectiveSkill,
+    computeEffectiveEnergyCost,
     tickStatusesForTurnEnd,
     isSkillIndexBlockedForActor,
 } = require('../battleLogic.js');
@@ -171,7 +172,7 @@ test('battleLogic resolves Naruto starter kit behavior used by the editor data',
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const stateAfterWave = match.board.p1[0].state;
     assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 0), true);
-    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 2), true);
+    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 4), true);
     assert.equal(Object.values(match.chakraPools.p1).reduce((sum, amount) => sum + amount, 0), 0);
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
@@ -281,7 +282,22 @@ test('battleLogic resolves Kiba starter kit behavior used by the editor data', (
             skillIndex: 0,
             actorState: kibaState,
         }).id,
-        'inuzuka-kiba-garouga-reduced'
+        'inuzuka-kiba-garouga'
+    );
+    assert.deepEqual(
+        computeEffectiveEnergyCost({
+            skill: characters[3].skills[0],
+            actorState: kibaState,
+        }),
+        {
+            reservedSpecific: {
+                taijutsu: 1,
+                ninjutsu: 0,
+                bloodline: 0,
+                genjutsu: 0,
+            },
+            requiredRandom: 0,
+        }
     );
     assert.equal(
         kibaState.statuses.some(
@@ -648,6 +664,21 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
             skillIndex: 1,
             actorState: match.board.p1[0].state,
         }).id,
-        'temari-summoning-quick-beheading-dance-reduced'
+        'temari-summoning-quick-beheading-dance'
+    );
+    assert.deepEqual(
+        computeEffectiveEnergyCost({
+            skill: characters[13].skills[1],
+            actorState: match.board.p1[0].state,
+        }),
+        {
+            reservedSpecific: {
+                taijutsu: 0,
+                ninjutsu: 1,
+                bloodline: 0,
+                genjutsu: 0,
+            },
+            requiredRandom: 1,
+        }
     );
 });

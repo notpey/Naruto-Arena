@@ -113,8 +113,10 @@
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "skillReplacements": {
-                                "inuzuka-kiba-garouga": "inuzuka-kiba-garouga-reduced"
+                            "skillCostOverridesBySkillId": {
+                                "inuzuka-kiba-garouga": {
+                                    "energy": ["Taijutsu"]
+                                }
                             },
                             "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random chakra."
                         }
@@ -153,7 +155,6 @@
                             "bonusDamageFromSourceCharacterId": "inuzuka-kiba",
                             "bonusDamageAppliesToSkillIds": [
                                 "inuzuka-kiba-garouga",
-                                "inuzuka-kiba-garouga-reduced",
                                 "inuzuka-kiba-double-headed-wolf"
                             ],
                             "tooltipText": "This character cannot reduce damage or become invulnerable and takes 5 additional damage from Garouga and Double Headed Wolf."
@@ -166,35 +167,7 @@
                 name: "Smoke Bomb",
                 ownerName: "Inuzuka Kiba",
                 image: "https://i.imgur.com/CwFqO2U.png"
-            }),
-            {
-                "id": "inuzuka-kiba-garouga-reduced",
-                "name": "Garouga",
-                "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/dhx6Qvr.png",
-                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 30,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    }
-                ]
-            }
+            })
         ]
     };
 
@@ -478,83 +451,7 @@
                 name: "Hinata Block",
                 ownerName: "Hyuuga Hinata",
                 image: "https://i.imgur.com/jRh5417.png"
-            }),
-            {
-                "id": "hyuuga-hinata-hinata-gentle-fist-byakugan",
-                "name": "Hinata Gentle Fist",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns and removes 1 random chakra from them each turn.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Physical",
-                    "Action"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hinata_gentle_fist_byakugan",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 15,
-                            "turnEndRemoveRandomChakra": 1,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage and loses 1 random chakra from Gentle Fist."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms-byakugan",
-                "name": "Protective Eight Trigrams Sixty-Four Palms",
-                "hiddenFromSelectionViewer": true,
-                "omitFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                "skilldescription": "Hyuuga Hinata deals 15 piercing damage to all enemies and grants her team 10 points of destructible defense for 1 turn.",
-                "energy": [
-                    "Ninjutsu"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Energy",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hinata_protective_palms_defense",
-                        "duration": 1,
-                        "scope": "all-allies",
-                        "metadata": {
-                            "destructibleDefensePoints": 10,
-                            "tooltipText": "This character has 10 destructible defense."
-                        }
-                    }
-                ]
-            }
+            })
         ]
     };
 
@@ -850,7 +747,7 @@
                 "name": "Mind Body Disturbance",
                 "ignoreInvulnerability": true,
                 "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage that ignores invulnerability.",
+                "skilldescription": "This skill ignores invulnerability. Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage.",
                 "energy": [
                     "Random",
                     "Random"
@@ -939,7 +836,7 @@
                 "id": "yamanaka-ino-chakra-hair-strand-trap",
                 "name": "Chakra Hair Strand Trap",
                 "skillimage": "https://i.imgur.com/CH2jrFU.png",
-                "skilldescription": "For 1 turn, if one target enemy uses a new harmful skill, they will have the cooldowns of their skills increased by 1 for 2 turns. This skill is invisible until triggered.",
+                "skilldescription": "For 1 turn, if one target enemy uses a new harmful skill, the next skill they use afterward will have its cooldown increased by 1. This skill is invisible until triggered.",
                 "energy": [
                     "Random"
                 ],
