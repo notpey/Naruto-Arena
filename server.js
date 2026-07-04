@@ -36,7 +36,6 @@ const USERS_COLLECTION = process.env.MONGODB_USERS_COLLECTION || 'users';
 const MATCHES_COLLECTION = process.env.MONGODB_MATCHES_COLLECTION || 'matches';
 const APP_STATE_COLLECTION = process.env.MONGODB_APP_STATE_COLLECTION || 'app_state';
 const NEWS_POSTS_COLLECTION = process.env.MONGODB_NEWS_POSTS_COLLECTION || 'news_posts';
-const CHARACTERS_FILE_PATH = path.join(__dirname, 'characters.js');
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || 'naruto_session';
@@ -57,6 +56,7 @@ const DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/3JqVcPXm/default.png';
 const LEGACY_DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/zG3W1w6K/itachi.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
 let missionCatalogCache = null;
+const CHARACTERS_STATE_KEY = 'characters';
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
 const DEFAULT_MISSION_CATALOG = [
@@ -4030,11 +4030,65 @@ const serializeCharactersDataFile = (nextCharacters) =>
     JSON.stringify(nextCharacters, null, 4) +
     ';\n\nif (typeof module !== \'undefined\') {\n    module.exports = characters;\n}\n';
 
-const saveCharactersDataFile = async (nextCharacters) => {
-    const serialized = serializeCharactersDataFile(nextCharacters);
-    await fs.promises.writeFile(CHARACTERS_FILE_PATH, serialized, 'utf8');
+const saveCharacters = async (nextCharacters) => {
+    if (!appStateCollection) {
+        throw new Error('Database not connected.');
+    }
+    await appStateCollection.updateOne(
+        { key: CHARACTERS_STATE_KEY },
+        {
+            $set: {
+                key: CHARACTERS_STATE_KEY,
+                characters: nextCharacters,
+                updatedAt: new Date(),
+            },
+        },
+        { upsert: true }
+    );
     charactersData = nextCharacters;
     characterCatalog = buildCharacterCatalog();
+};
+
+// Admin edits made through the Character Editor (including images) are stored in
+// Mongo so they survive redeploys/restarts on hosts with an ephemeral filesystem.
+// characters.js remains the version-controlled seed and the source for new
+// characters shipped in code; it is merged in below without resurrecting anything
+// the admin has deliberately deleted by characterId.
+const getStoredCharacters = async () => {
+    const defaultCharacters = Array.isArray(charactersData) ? charactersData : [];
+    if (!appStateCollection) {
+        return defaultCharacters;
+    }
+
+    const storedState = await appStateCollection.findOne({ key: CHARACTERS_STATE_KEY });
+    if (!storedState || !Array.isArray(storedState.characters)) {
+        await appStateCollection.updateOne(
+            { key: CHARACTERS_STATE_KEY },
+            { $set: { key: CHARACTERS_STATE_KEY, characters: defaultCharacters, updatedAt: new Date() } },
+            { upsert: true }
+        );
+        return defaultCharacters;
+    }
+
+    const storedIds = new Set(
+        storedState.characters
+            .map((entry) => (entry && typeof entry.characterId === 'string' ? entry.characterId : ''))
+            .filter(Boolean)
+    );
+    const newDefaultCharacters = defaultCharacters.filter(
+        (entry) => entry && typeof entry.characterId === 'string' && !storedIds.has(entry.characterId)
+    );
+    if (!newDefaultCharacters.length) {
+        return storedState.characters;
+    }
+
+    const mergedCharacters = [...storedState.characters, ...newDefaultCharacters];
+    await appStateCollection.updateOne(
+        { key: CHARACTERS_STATE_KEY },
+        { $set: { key: CHARACTERS_STATE_KEY, characters: mergedCharacters, updatedAt: new Date() } },
+        { upsert: true }
+    );
+    return mergedCharacters;
 };
 
 const resolveNewsChangeAssets = (entry = {}) => {
@@ -7162,6 +7216,8 @@ async function initDb() {
     await matchesCollection.createIndex({ matchId: 1 }, { unique: true });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
     await newsPostsCollection.createIndex({ createdAt: -1 });
+    charactersData = await getStoredCharacters();
+    characterCatalog = buildCharacterCatalog();
     await getStoredLadderRankTiers();
     await backfillUserProfiles();
     console.log('Connected to MongoDB.');
@@ -9103,7 +9159,7 @@ app.put('/api/admin/characters/:characterId', requireSession, async (req, res) =
     try {
         const updatedCharacters = currentCharacters.slice();
         updatedCharacters[characterIndex] = nextCharacter;
-        await saveCharactersDataFile(updatedCharacters);
+        await saveCharacters(updatedCharacters);
         return res.json({
             ok: true,
             character: updatedCharacters[characterIndex],
@@ -9131,7 +9187,7 @@ app.post('/api/admin/characters', requireSession, async (req, res) => {
     }
     try {
         const updatedCharacters = [...currentCharacters, newCharacter];
-        await saveCharactersDataFile(updatedCharacters);
+        await saveCharacters(updatedCharacters);
         return res.status(201).json({ ok: true, character: newCharacter });
     } catch (error) {
         console.error('Admin character create error:', error);
@@ -9156,7 +9212,7 @@ app.delete('/api/admin/characters/:characterId', requireSession, async (req, res
     }
     try {
         const updatedCharacters = currentCharacters.filter((_, i) => i !== characterIndex);
-        await saveCharactersDataFile(updatedCharacters);
+        await saveCharacters(updatedCharacters);
         return res.json({ ok: true });
     } catch (error) {
         console.error('Admin character delete error:', error);
