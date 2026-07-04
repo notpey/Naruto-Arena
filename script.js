@@ -93,6 +93,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         `${window.location.protocol}//${window.location.hostname}${
             window.location.port ? `:${window.location.port}` : ''
         }`;
+    const getStaticCharacterRoster = () => {
+        if (typeof characters !== 'undefined' && Array.isArray(characters)) {
+            return characters;
+        }
+        if (Array.isArray(window.characters)) {
+            return window.characters;
+        }
+        return [];
+    };
+    const loadCharacterRoster = async () => {
+        const fallbackRoster = getStaticCharacterRoster();
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/characters`, {
+                credentials: 'include',
+                cache: 'no-store',
+            });
+            const data = await response.json();
+            if (!response.ok || !data?.ok || !Array.isArray(data.characters)) {
+                throw new Error(data?.error || 'Unable to load character data.');
+            }
+            window.characters = data.characters;
+            return data.characters;
+        } catch (error) {
+            console.warn('Using bundled character data because live character data could not be loaded.', error);
+            window.characters = fallbackRoster;
+            return fallbackRoster;
+        }
+    };
+    const pageCharacterRoster = shouldUseCustomCursor ? await loadCharacterRoster() : getStaticCharacterRoster();
     const loginForm = document.querySelector('.login-form');
     const loginButton = document.querySelector('.ok-button');
     const usernameInput = document.getElementById('username');
@@ -501,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const matchIdFromUrl = new URLSearchParams(window.location.search).get('matchId');
 
     if (!slotList) {
-        const rosterData = typeof characters !== 'undefined' ? characters : window.characters;
+        const rosterData = pageCharacterRoster;
         let matchPoll = null;
         let matchPollInFlight = false;
         let currentPlayerUsername = null;
@@ -4004,12 +4033,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    let roster = [];
-    if (typeof characters !== 'undefined' && Array.isArray(characters)) {
-        roster = characters;
-    } else if (Array.isArray(window.characters)) {
-        roster = window.characters;
-    }
+    let roster = Array.isArray(pageCharacterRoster) ? pageCharacterRoster : [];
 
     const CHARACTERS_PER_PAGE = 21;
     const totalSlots = Math.max(roster.length, CHARACTERS_PER_PAGE);

@@ -9086,6 +9086,14 @@ app.get('/api/characters/catalog', (req, res) => {
     });
 });
 
+app.get('/api/characters', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({
+        ok: true,
+        characters: Array.isArray(charactersData) ? charactersData : [],
+    });
+});
+
 app.get('/api/admin/characters', requireSession, (req, res) => {
     if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
         return res.status(403).json({ error: 'Admin access required.' });

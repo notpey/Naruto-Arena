@@ -317,7 +317,7 @@
     </div>
 </div>
 <script src="characters.js?v=3"></script>
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 <script src="shop.js"></script>
 <script>
     (function () {
@@ -957,7 +957,9 @@
         }
 
         function findCharacterById(characterId) {
-            var roster = typeof characters !== "undefined" ? characters : (window.characters || []);
+            var roster = Array.isArray(window.characters)
+                ? window.characters
+                : (typeof characters !== "undefined" ? characters : []);
             return roster.find(function (c) { return c && c.characterId === characterId; }) || null;
         }
 
