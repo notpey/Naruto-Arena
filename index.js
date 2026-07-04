@@ -2638,13 +2638,13 @@
     var pathname = String(window.location.pathname || "").toLowerCase();
     var pageName = pathname.split("/").pop() || "index.html";
     var pageMap = {
-      "index.html": "Comic Arena > Home",
-      "profile.html": "Comic Arena > Profile",
-      "clanprofile.html": "Comic Arena > Clan Profile",
-      "selection.html": "Comic Arena > Selection",
-      "ingame.html": "Comic Arena > In Game"
+      "index.html": "Naruto Arena > Home",
+      "profile.html": "Naruto Arena > Profile",
+      "clanprofile.html": "Naruto Arena > Clan Profile",
+      "selection.html": "Naruto Arena > Selection",
+      "ingame.html": "Naruto Arena > In Game"
     };
-    return pageMap[pageName] || "Comic Arena > " + pageName.replace(/\.html$/i, "").replace(/[-_]+/g, " ");
+    return pageMap[pageName] || "Naruto Arena > " + pageName.replace(/\.html$/i, "").replace(/[-_]+/g, " ");
   }
 
   function isUserCurrentlyOnline(user) {
@@ -3665,7 +3665,7 @@
     }
 
     authTitle.textContent = "Login";
-    authDescription.textContent = "Sign in with your Comic-Arena account.";
+    authDescription.textContent = "Sign in with your Naruto-Arena account.";
     authSubmit.textContent = "Login";
     authToggle.textContent = "Need an account? Register";
     passwordInput.autocomplete = "current-password";
