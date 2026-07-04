@@ -943,17 +943,33 @@
                 chapterTitle: String(chapterTitle || "").trim(),
                 chapterSortOrder: Number(chapterSortOrder) || 1,
                 title: String(src.title || "Battle").trim(),
+                arcTitle: String(src.arcTitle || "").trim(),
+                episodeRange: String(src.episodeRange || "").trim(),
+                summary: String(src.summary || "").trim(),
                 level_requirement: Number(src.level_requirement) || 0,
                 image: String(src.image || "").trim(),
                 imageAlt: String(src.imageAlt || src.title || "Battle artwork").trim(),
                 enemyDisplayName: String(src.enemyDisplayName || "Rogue Ninja").trim(),
-                playerTeam: Array.isArray(src.playerTeam) ? src.playerTeam : []
+                playerTeam: Array.isArray(src.playerTeam) ? src.playerTeam : [],
+                rewardText: String(src.rewardText || "").trim(),
+                requiresPreviousNode: src.requiresPreviousNode !== false
             };
         }
 
         function isStoryNodeCompleted(nodeId) {
             var progress = storyProgressByNodeId[nodeId];
             return Boolean(progress && progress.completedAt);
+        }
+
+        function getPreviousStoryNode(node) {
+            var index = storyNodes.findIndex(function (entry) { return entry.nodeId === node.nodeId; });
+            return index > 0 ? storyNodes[index - 1] : null;
+        }
+
+        function isStoryNodeLocked(node) {
+            if (!node || node.requiresPreviousNode === false) return false;
+            var previous = getPreviousStoryNode(node);
+            return Boolean(previous && !isStoryNodeCompleted(previous.nodeId));
         }
 
         function findCharacterById(characterId) {
@@ -1010,6 +1026,14 @@
             opponentLine.className = "selection-hub-story-briefing-line";
             opponentLine.innerHTML = "<strong>Opponent:</strong> " + node.enemyDisplayName;
 
+            var summaryLine = document.createElement("p");
+            summaryLine.className = "selection-hub-story-briefing-line";
+            summaryLine.textContent = node.summary || "";
+
+            var rewardLine = document.createElement("p");
+            rewardLine.className = "selection-hub-story-briefing-line";
+            rewardLine.innerHTML = "<strong>Reward:</strong> " + (node.rewardText || "Story progression.");
+
             var noteLine = document.createElement("p");
             noteLine.className = "selection-hub-story-briefing-line";
             noteLine.textContent = "This battle uses a preset team so the story plays out consistently.";
@@ -1041,7 +1065,9 @@
             var beginBtn = document.createElement("button");
             beginBtn.type = "button";
             beginBtn.className = "selection-hub-story-begin";
-            beginBtn.textContent = "Begin Battle";
+            var locked = isStoryNodeLocked(node);
+            beginBtn.textContent = locked ? "Locked" : "Begin Battle";
+            beginBtn.disabled = locked;
             var status = document.createElement("span");
             status.className = "selection-hub-story-status";
             beginBtn.addEventListener("click", function () {
@@ -1053,6 +1079,8 @@
             storyBriefingEl.appendChild(back);
             storyBriefingEl.appendChild(title);
             storyBriefingEl.appendChild(opponentLine);
+            if (summaryLine.textContent) storyBriefingEl.appendChild(summaryLine);
+            storyBriefingEl.appendChild(rewardLine);
             storyBriefingEl.appendChild(noteLine);
             storyBriefingEl.appendChild(teamLabel);
             storyBriefingEl.appendChild(teamRow);
@@ -1061,8 +1089,10 @@
 
         function buildStoryRow(node) {
             var completed = isStoryNodeCompleted(node.nodeId);
+            var locked = isStoryNodeLocked(node);
             var row = document.createElement("div");
             row.className = "selection-hub-story-row";
+            if (locked) row.classList.add("locked");
             row.setAttribute("data-story-node", node.nodeId);
 
             var thumb = document.createElement("div");
@@ -1079,20 +1109,36 @@
             title.textContent = node.title;
             var meta = document.createElement("p");
             meta.className = "selection-hub-story-meta";
-            meta.textContent = "Vs. " + node.enemyDisplayName + " · Level " + (node.level_requirement || 1) + "+";
+            meta.textContent = [
+                node.arcTitle,
+                node.episodeRange,
+                "Vs. " + node.enemyDisplayName,
+                "Level " + (node.level_requirement || 1) + "+"
+            ].filter(Boolean).join(" - ");
             body.appendChild(title);
             body.appendChild(meta);
+            if (node.summary) {
+                var summary = document.createElement("p");
+                summary.className = "selection-hub-story-meta";
+                summary.textContent = node.summary;
+                body.appendChild(summary);
+            }
+            if (node.rewardText) {
+                var reward = document.createElement("p");
+                reward.className = "selection-hub-story-meta";
+                reward.textContent = node.rewardText;
+                body.appendChild(reward);
+            }
 
             var pill = document.createElement("span");
-            pill.className = "selection-hub-status-pill " + (completed ? "completed" : "available");
-            pill.textContent = completed ? "Completed" : "Available";
+            pill.className = "selection-hub-status-pill " + (completed ? "completed" : locked ? "locked" : "available");
+            pill.textContent = completed ? "Completed" : locked ? "Locked" : "Available";
 
             row.appendChild(thumb);
             row.appendChild(body);
             row.appendChild(pill);
             return row;
         }
-
         function renderStoryPanel() {
             if (!storyListEl) return;
             storyListEl.innerHTML = "";
@@ -1149,6 +1195,9 @@
                     (Array.isArray(chapter.nodes) ? chapter.nodes : []).forEach(function (node) {
                         storyNodes.push(normalizeStoryNode(node, chapter.title, chapter.sortOrder));
                     });
+                });
+                storyNodes.sort(function (a, b) {
+                    return (a.chapterSortOrder || 1) - (b.chapterSortOrder || 1);
                 });
                 storyProgressByNodeId = (data.storyProgressByNodeId && typeof data.storyProgressByNodeId === "object")
                     ? data.storyProgressByNodeId : {};

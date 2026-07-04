@@ -1245,161 +1245,333 @@ const DEFAULT_MISSION_CATALOG = [
     },
 ];
 
-const STORY_PORTRAIT_NARUTO = 'https://i.imgur.com/jp3OIOA.png';
-const STORY_PORTRAIT_IRUKA = 'https://i.imgur.com/snz8zD4.png';
-const STORY_PORTRAIT_MIZUKI = 'https://i.imgur.com/NZS59L7.png';
+const getStoryPortrait = (characterId, fallback = '') => {
+    const normalized = String(characterId || '').trim().toLowerCase();
+    const character = (Array.isArray(charactersData) ? charactersData : []).find(
+        (entry) => String(entry?.characterId || '').trim().toLowerCase() === normalized
+    );
+    return typeof character?.facePicture === 'string' && character.facePicture.trim()
+        ? character.facePicture.trim()
+        : fallback;
+};
 
-const DEFAULT_STORY_CATALOG = [
+const STORY_PORTRAIT_NARUTO = getStoryPortrait('uzumaki-naruto', 'https://i.imgur.com/jp3OIOA.png');
+const STORY_PORTRAIT_IRUKA = getStoryPortrait('umino-iruka', 'https://i.imgur.com/snz8zD4.png');
+const STORY_PORTRAIT_MIZUKI = getStoryPortrait('mizuki', 'https://i.imgur.com/NZS59L7.png');
+const STORY_PORTRAIT_SASUKE = getStoryPortrait('uchiha-sasuke');
+const STORY_PORTRAIT_SAKURA = getStoryPortrait('haruno-sakura');
+const STORY_PORTRAIT_KAKASHI = getStoryPortrait('hatake-kakashi');
+const STORY_PORTRAIT_ZABUZA = getStoryPortrait('momochi-zabuza');
+const STORY_PORTRAIT_HAKU = getStoryPortrait('haku');
+const STORY_PORTRAIT_OROCHIMARU = getStoryPortrait('orochimaru');
+const STORY_PORTRAIT_SHIORE_OROCHIMARU = getStoryPortrait('shiore-orochimaru');
+const STORY_PORTRAIT_HIRUZEN = getStoryPortrait('sarutobi-hiruzen');
+const STORY_PORTRAIT_GAARA = getStoryPortrait('gaara-of-the-desert');
+const STORY_PORTRAIT_JIRAIYA = getStoryPortrait('jiraiya');
+const STORY_PORTRAIT_TSUNADE = getStoryPortrait('tsunade');
+const STORY_PORTRAIT_ITACHI = getStoryPortrait('uchiha-itachi');
+const STORY_PORTRAIT_KISAME = getStoryPortrait('hoshigaki-kisame');
+const STORY_PORTRAIT_AOI = getStoryPortrait('rokushou-aoi');
+const STORY_PORTRAIT_SHIKAMARU = getStoryPortrait('nara-shikamaru');
+
+const PART_ONE_STORY_PLAN = [
     {
         chapterId: 'chapter-1',
-        title: 'Chapter 1: Enter, Naruto Uzumaki!',
-        sortOrder: 1,
-        nodes: [
-            {
-                nodeId: 'chapter-1-node-1',
-                title: 'The Forbidden Scroll',
-                level_requirement: 1,
-                image: 'https://i.imgur.com/fo7Yfff.png',
-                imageAlt: 'Mizuki lurking in the forest, artwork',
-                enemyTeam: ['mizuki'],
-                playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
-                enemyDisplayName: 'Mizuki',
-                bossScript: [
-                    {
-                        skillId: 'mizuki-genjutsu-ambush-tactics',
-                        when: { turnGte: 1 },
-                    },
-                ],
-                introDialogue: [
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: 'Psst... Naruto. There IS a secret way to graduate that old man Hokage never told you about.',
-                    },
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: "A secret scroll?! Believe it, I'll ace this makeup exam and become a real ninja!",
-                    },
-                    {
-                        speaker: 'Iruka',
-                        portrait: STORY_PORTRAIT_IRUKA,
-                        text: 'Naruto! Put that down — that is the Forbidden Scroll of Sealing. Mizuki lied to you!',
-                    },
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: "Too late for warnings, Iruka. The scroll — and the boy — are already mine to use."
-                    },
-                ],
-                outroDialogueWin: [
-                    {
-                        speaker: 'Iruka',
-                        portrait: STORY_PORTRAIT_IRUKA,
-                        text: "Get behind me, Naruto. I won't let him lay a hand on you.",
-                    },
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: "How touching. Next time, sensei, I won't miss.",
-                    },
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: 'Iruka-sensei... thank you.',
-                    },
-                ],
-                outroDialogueLoss: [
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: "You're not ready for this, Naruto. Run home to that empty apartment of yours.",
-                    },
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: "This isn't over, Mizuki. I'll show you — believe it!",
-                    },
-                ],
-                reward_character: 'umino-iruka',
-                sortOrder: 1,
-            },
-            {
-                nodeId: 'chapter-1-node-2',
-                title: 'Nine Shadows, One Truth',
-                level_requirement: 1,
-                image: 'https://i.imgur.com/fo7Yfff.png',
-                imageAlt: 'Mizuki wielding a giant shuriken, artwork',
-                enemyTeam: ['mizuki'],
-                playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
-                enemyDisplayName: 'Mizuki',
-                bossScript: [
-                    {
-                        skillId: 'mizuki-execution-shuriken',
-                        when: { turnGte: 1 },
-                    },
-                    {
-                        skillId: 'mizuki-execution-shuriken-empowered',
-                        when: { turnGte: 1 },
-                    },
-                ],
-                introDialogue: [
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: 'You want to know why this whole village looks at you like a monster, Naruto? It is because you ARE one — the Nine-Tailed Fox itself.',
-                    },
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: '...',
-                    },
-                    {
-                        speaker: 'Iruka',
-                        portrait: STORY_PORTRAIT_IRUKA,
-                        text: "Don't listen to him! You are Uzumaki Naruto. Nothing more, and nothing less.",
-                    },
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: "Then let's see what 'nothing more' can do against THIS!",
-                    },
-                ],
-                outroDialogueWin: [
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: 'Multi Shadow Clone Jutsu! One Naruto wasn\'t enough — so here come a thousand!',
-                    },
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: 'Impossible... a single Genin, the dead-last of the class, did all of this?!',
-                    },
-                    {
-                        speaker: 'Iruka',
-                        portrait: STORY_PORTRAIT_IRUKA,
-                        text: 'Naruto... close your eyes for a second. Congratulations — you graduate. Believe it.',
-                    },
-                ],
-                outroDialogueLoss: [
-                    {
-                        speaker: 'Mizuki',
-                        portrait: STORY_PORTRAIT_MIZUKI,
-                        text: 'The Fox\'s power means nothing if the boy carrying it is still this weak.',
-                    },
-                    {
-                        speaker: 'Naruto',
-                        portrait: STORY_PORTRAIT_NARUTO,
-                        text: "I'm not done yet. I'll prove you wrong if it's the last thing I do!",
-                    },
-                ],
-                reward_character: 'mizuki',
-                sortOrder: 2,
-            },
-        ],
+        title: 'Chapter 1: The Nine-Tails Vessel',
+        nodeId: 'story-001-nine-tails-vessel',
+        nodeTitle: 'The Forbidden Scroll',
+        arcTitle: 'Prologue',
+        episodeRange: 'Episode 1',
+        summary: 'Naruto is introduced as the village outcast and the jinchuriki of the Nine-Tails. Mizuki tricks him into stealing the Scroll of Seals, but Iruka protects him.',
+        playerTeam: ['uzumaki-naruto', 'umino-iruka'],
+        enemyTeam: ['mizuki'],
+        enemyDisplayName: 'Mizuki',
+        reward_character: 'umino-iruka',
+        rewardText: 'Unlock Umino Iruka.',
+    },
+    {
+        chapterId: 'chapter-2',
+        title: 'Chapter 2: Team 7 Begins',
+        nodeId: 'story-002-team-7-begins',
+        nodeTitle: 'The Bell Test',
+        arcTitle: 'Prologue',
+        episodeRange: 'Episodes 2-5',
+        summary: 'Naruto, Sasuke, and Sakura are placed under Kakashi. The bell test teaches them that teamwork matters more than individual talent.',
+        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
+        enemyTeam: ['hatake-kakashi'],
+        enemyDisplayName: 'Kakashi',
+        rewardText: 'Story progression.',
+    },
+    {
+        chapterId: 'chapter-3',
+        title: 'Chapter 3: The Land of Waves',
+        nodeId: 'story-003-land-of-waves',
+        nodeTitle: 'Mist on the Road',
+        arcTitle: 'Land of Waves',
+        episodeRange: 'Episodes 6-12',
+        summary: 'Team 7 first real mission turns dangerous when enemy ninja attack. Zabuza appears and Kakashi reveals the Sharingan.',
+        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'hatake-kakashi'],
+        enemyTeam: ['demon-brothers', 'momochi-zabuza'],
+        enemyDisplayName: 'Zabuza and the Demon Brothers',
+        reward_character: 'demon-brothers',
+        rewardText: 'Unlock Demon Brothers.',
+    },
+    {
+        chapterId: 'chapter-4',
+        title: 'Chapter 4: The Bridge of Tears',
+        nodeId: 'story-004-bridge-of-tears',
+        nodeTitle: 'Haku and Zabuza',
+        arcTitle: 'Land of Waves',
+        episodeRange: 'Episodes 13-19',
+        summary: 'Haku fights Naruto and Sasuke on the bridge. Sasuke awakens his Sharingan, Naruto taps Nine-Tails chakra, and Zabuza humanity resurfaces.',
+        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'hatake-kakashi'],
+        enemyTeam: ['haku', 'momochi-zabuza'],
+        enemyDisplayName: 'Haku and Zabuza',
+        reward_character: 'haku',
+        rewardText: 'Unlock Haku.',
+    },
+    {
+        chapterId: 'chapter-5',
+        title: 'Chapter 5: The Chunin Exams Begin',
+        nodeId: 'story-005-chunin-exams-begin',
+        nodeTitle: 'Rookies and Rivals',
+        arcTitle: 'Chunin Exams',
+        episodeRange: 'Episodes 20-27',
+        summary: 'The Rookie Nine, Team Guy, Sand Siblings, and Sound Genin enter the exam. This chapter introduces story progression using default characters.',
+        playerTeam: ['uzumaki-naruto', 'nara-shikamaru', 'rock-lee'],
+        enemyTeam: ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin'],
+        enemyDisplayName: 'Sound Genin',
+        rewardText: 'Story progression.',
+    },
+    {
+        chapterId: 'chapter-6',
+        title: 'Chapter 6: The Forest of Death',
+        nodeId: 'story-006-forest-of-death',
+        nodeTitle: 'The Curse Mark',
+        arcTitle: 'Chunin Exams',
+        episodeRange: 'Episodes 27-37',
+        summary: 'Orochimaru attacks Team 7, gives Sasuke the Cursed Seal, and Sakura defends her unconscious teammates against the Sound Genin.',
+        playerTeam: ['haruno-sakura', 'uchiha-sasuke', 'uzumaki-naruto'],
+        enemyTeam: ['shiore-orochimaru', 'dosu-kinuta', 'zaku-abumi'],
+        enemyDisplayName: 'Shiore Orochimaru and Sound Genin',
+        reward_character: 'shiore-orochimaru',
+        rewardText: 'Unlock Shiore Orochimaru.',
+    },
+    {
+        chapterId: 'chapter-7',
+        title: 'Chapter 7: Preliminary Battles',
+        nodeId: 'story-007-preliminary-battles',
+        nodeTitle: 'The Arena Narrows',
+        arcTitle: 'Chunin Exams',
+        episodeRange: 'Episodes 38-51',
+        summary: 'The preliminaries spotlight Sakura, Ino, Naruto, Kiba, Hinata, Neji, Shikamaru, Lee, and Gaara.',
+        playerTeam: ['uzumaki-naruto', 'hyuuga-hinata', 'rock-lee'],
+        enemyTeam: ['inuzuka-kiba', 'neji-hyuuga', 'gaara-of-the-desert'],
+        enemyDisplayName: 'Exam Finalists',
+        rewardText: 'Story progression.',
+    },
+    {
+        chapterId: 'chapter-8',
+        title: 'Chapter 8: Finals Under Fire',
+        nodeId: 'story-008-finals-under-fire',
+        nodeTitle: 'The Finals Collapse',
+        arcTitle: 'Chunin Exams',
+        episodeRange: 'Episodes 52-67',
+        summary: 'Naruto trains with Jiraiya, learns to better access Nine-Tails chakra, defeats Neji, and the finals collapse when the invasion begins.',
+        playerTeam: ['uzumaki-naruto', 'jiraiya', 'shikamaru'],
+        enemyTeam: ['neji-hyuuga', 'gaara-of-the-desert', 'baki'],
+        enemyDisplayName: 'Finals Opposition',
+        reward_character: 'jiraiya',
+        rewardText: 'Unlock Jiraiya.',
+    },
+    {
+        chapterId: 'chapter-9',
+        title: 'Chapter 9: Konoha Crush',
+        nodeId: 'story-009-konoha-crush',
+        nodeTitle: 'The Third Hokage Stands',
+        arcTitle: 'Konoha Crush',
+        episodeRange: 'Episodes 68-80',
+        summary: 'Orochimaru launches his attack on Konoha. Hiruzen battles Orochimaru and the reanimated First and Second Hokage.',
+        playerTeam: ['sarutobi-hiruzen'],
+        enemyTeam: ['orochimaru', 'edo-tensei-hashirama', 'edo-tensei-tobirama'],
+        enemyDisplayName: 'Orochimaru and Edo Tensei',
+        reward_character: 'sarutobi-hiruzen',
+        rewardText: 'Unlock Sarutobi Hiruzen.',
+    },
+    {
+        chapterId: 'chapter-10',
+        title: 'Chapter 10: Naruto vs Gaara',
+        nodeId: 'story-010-naruto-vs-gaara',
+        nodeTitle: 'Lonely Monsters',
+        arcTitle: 'Konoha Crush',
+        episodeRange: 'Episodes 74-80',
+        summary: 'Naruto pursues Gaara, sees the lonely monster he could have become, and reaches Gaara through empathy and strength.',
+        playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
+        enemyTeam: ['shukaku-gaara'],
+        enemyDisplayName: 'Shukaku Gaara',
+        reward_character: 'shukaku-gaara',
+        rewardText: 'Unlock Shukaku Gaara.',
+    },
+    {
+        chapterId: 'chapter-11',
+        title: 'Chapter 11: Akatsuki Appears',
+        nodeId: 'story-011-akatsuki-appears',
+        nodeTitle: 'Itachi Returns',
+        arcTitle: 'Search for Tsunade',
+        episodeRange: 'Episodes 81-85',
+        summary: 'Itachi and Kisame enter Konoha looking for Naruto. Sasuke is humiliated, Kakashi is overwhelmed, and a larger threat is revealed.',
+        playerTeam: ['hatake-kakashi', 'uchiha-sasuke', 'sarutobi-asuma'],
+        enemyTeam: ['uchiha-itachi', 'hoshigaki-kisame'],
+        enemyDisplayName: 'Itachi and Kisame',
+        reward_character: 'hoshigaki-kisame',
+        rewardText: 'Unlock Hoshigaki Kisame.',
+    },
+    {
+        chapterId: 'chapter-12',
+        title: 'Chapter 12: The Fifth Hokage',
+        nodeId: 'story-012-fifth-hokage',
+        nodeTitle: 'The Sannin Deadlock',
+        arcTitle: 'Search for Tsunade',
+        episodeRange: 'Episodes 86-100',
+        summary: 'Naruto trains the Rasengan while Jiraiya searches for Tsunade. Orochimaru also seeks her out, leading to the Sannin confrontation.',
+        playerTeam: ['uzumaki-naruto', 'jiraiya', 'tsunade'],
+        enemyTeam: ['orochimaru', 'yakushi-kabuto'],
+        enemyDisplayName: 'Orochimaru and Kabuto',
+        reward_character: 'tsunade',
+        rewardText: 'Unlock Tsunade.',
+    },
+    {
+        chapterId: 'chapter-13',
+        title: 'Chapter 13: Land of Tea Escort',
+        nodeId: 'story-013-land-of-tea-escort',
+        nodeTitle: 'The Thunder God Sword',
+        arcTitle: 'Land of Tea',
+        episodeRange: 'Episodes 102-106',
+        summary: 'Team 7 protects Idate during a dangerous race. Aoi, a rogue Leaf ninja, becomes the main enemy.',
+        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
+        enemyTeam: ['rokushou-aoi'],
+        enemyDisplayName: 'Rokushou Aoi',
+        reward_character: 'rokushou-aoi',
+        rewardText: 'Unlock Rokushou Aoi.',
+    },
+    {
+        chapterId: 'chapter-14',
+        title: 'Chapter 14: The Rooftop Clash',
+        nodeId: 'story-014-rooftop-clash',
+        nodeTitle: 'Rasengan and Chidori',
+        arcTitle: 'Sasuke Recovery',
+        episodeRange: 'Episodes 107-111',
+        summary: 'Sasuke jealousy and trauma boil over. Naruto and Sasuke clash, Kakashi stops them, and the Sound Four tempt Sasuke away.',
+        playerTeam: ['uzumaki-naruto', 'hatake-kakashi', 'haruno-sakura'],
+        enemyTeam: ['cursed-seal-lv1-sasuke', 'sakon-and-ukon'],
+        enemyDisplayName: 'Sasuke and the Sound Four',
+        reward_character: 'cursed-seal-lv1-sasuke',
+        rewardText: 'Unlock Cursed Seal Lv1 Sasuke.',
+    },
+    {
+        chapterId: 'chapter-15',
+        title: 'Chapter 15: The Retrieval Squad',
+        nodeId: 'story-015-retrieval-squad',
+        nodeTitle: 'Sound Four Gauntlet',
+        arcTitle: 'Sasuke Recovery',
+        episodeRange: 'Episodes 112-126',
+        summary: 'Shikamaru leads Naruto, Neji, Chouji, and Kiba after Sasuke. Each member stays behind for a survival battle.',
+        playerTeam: ['nara-shikamaru', 'neji-hyuuga', 'akimichi-chouji'],
+        enemyTeam: ['jiroubou', 'kidoumaru', 'tayuya'],
+        enemyDisplayName: 'Sound Four',
+        reward_character: 'jiroubou',
+        rewardText: 'Unlock Jiroubou.',
+    },
+    {
+        chapterId: 'chapter-16',
+        title: 'Chapter 16: Allied Sand Rescue',
+        nodeId: 'story-016-allied-sand-rescue',
+        nodeTitle: 'Changed Sand',
+        arcTitle: 'Sasuke Recovery',
+        episodeRange: 'Episodes 124-127',
+        summary: 'The Sand Siblings return as allies. Kankuro, Temari, and Gaara save the Leaf Genin and show how much they have changed.',
+        playerTeam: ['kankuro', 'temari', 'gaara-of-the-desert'],
+        enemyTeam: ['sakon-and-ukon', 'tayuya', 'kimimaro'],
+        enemyDisplayName: 'Sound Reinforcements',
+        reward_character: 'rehabilitated-gaara',
+        rewardText: 'Unlock Rehabilitated Gaara.',
+    },
+    {
+        chapterId: 'chapter-17',
+        title: 'Chapter 17: Valley of the End',
+        nodeId: 'story-017-valley-of-the-end',
+        nodeTitle: 'One Tail Against Curse Mark',
+        arcTitle: 'Sasuke Recovery',
+        episodeRange: 'Episodes 128-135',
+        summary: 'Naruto catches Sasuke at the Valley of the End. Their friendship and rivalry erupt into the defining Part I battle.',
+        playerTeam: ['kyuubi-naruto'],
+        enemyTeam: ['cursed-seal-sasuke'],
+        enemyDisplayName: 'Cursed Seal Sasuke',
+        reward_character: 'cursed-seal-sasuke',
+        rewardText: 'Unlock Cursed Seal Sasuke.',
+    },
+    {
+        chapterId: 'chapter-18',
+        title: 'Chapter 18: Departure',
+        nodeId: 'story-018-departure',
+        nodeTitle: 'The Promise Continues',
+        arcTitle: 'End of Part I',
+        episodeRange: 'Episode 220',
+        summary: 'Naruto fails to bring Sasuke back, Sakura begins training under Tsunade, and Naruto leaves with Jiraiya to prepare for the road ahead.',
+        playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'jiraiya'],
+        enemyTeam: ['orochimaru', 'yakushi-kabuto', 'cursed-seal-sasuke'],
+        enemyDisplayName: 'The Road Ahead',
+        reward_character: 'kyuubi-naruto',
+        rewardText: 'Unlock Kyuubi Naruto.',
     },
 ];
+
+const buildPartOneStoryCatalog = () =>
+    PART_ONE_STORY_PLAN.map((entry, index) => ({
+        chapterId: entry.chapterId,
+        title: entry.title,
+        sortOrder: index + 1,
+        nodes: [
+            {
+                nodeId: entry.nodeId,
+                title: entry.nodeTitle,
+                arcTitle: entry.arcTitle,
+                episodeRange: entry.episodeRange,
+                summary: entry.summary,
+                level_requirement: 1,
+                image: '',
+                imageAlt: `${entry.nodeTitle} story artwork`,
+                enemyTeam: entry.enemyTeam,
+                playerTeam: entry.playerTeam,
+                enemyDisplayName: entry.enemyDisplayName,
+                introDialogue: [
+                    {
+                        speaker: entry.title.replace(/^Chapter\s+\d+:\s*/i, ''),
+                        portrait: '',
+                        text: entry.summary,
+                    },
+                ],
+                outroDialogueWin: [
+                    {
+                        speaker: 'Story',
+                        portrait: '',
+                        text: `${entry.nodeTitle} cleared. The next chapter is now within reach.`,
+                    },
+                ],
+                outroDialogueLoss: [
+                    {
+                        speaker: 'Story',
+                        portrait: '',
+                        text: 'Regroup, adjust your plan, and try this chapter again.',
+                    },
+                ],
+                reward_character: entry.reward_character || null,
+                rewardText: entry.rewardText || 'Story progression.',
+                requiresPreviousNode: index > 0,
+                sortOrder: 1,
+            },
+        ],
+    }));
 
 let mongoClient;
 let usersCollection;
@@ -2560,6 +2732,9 @@ const normalizeStoryNode = (node = {}, index = 0) => {
     return {
         nodeId,
         title,
+        arcTitle: typeof source.arcTitle === 'string' ? source.arcTitle.trim() : '',
+        episodeRange: typeof source.episodeRange === 'string' ? source.episodeRange.trim() : '',
+        summary: typeof source.summary === 'string' ? source.summary.trim() : '',
         level_requirement: Math.max(0, Number(source.level_requirement) || 0),
         image: typeof source.image === 'string' ? source.image.trim() : '',
         imageAlt:
@@ -2577,6 +2752,8 @@ const normalizeStoryNode = (node = {}, index = 0) => {
         outroDialogueWin: normalizeDialogue(source.outroDialogueWin),
         outroDialogueLoss: normalizeDialogue(source.outroDialogueLoss),
         reward_character: normalizeCharacterId(source.reward_character) || null,
+        rewardText: typeof source.rewardText === 'string' ? source.rewardText.trim() : '',
+        requiresPreviousNode: source.requiresPreviousNode !== false,
         sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1,
     };
 };
@@ -2602,7 +2779,45 @@ const normalizeStoryCatalog = (chapters = []) =>
         .filter((chapter) => chapter.chapterId && chapter.nodes.length)
         .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
 
-const getDefaultStoryCatalog = () => normalizeStoryCatalog(DEFAULT_STORY_CATALOG);
+const getDefaultStoryCatalog = () => normalizeStoryCatalog(buildPartOneStoryCatalog());
+
+const mergeStoredStoryCatalogWithDefaults = (storedCatalog = [], defaultCatalog = []) => {
+    if (!Array.isArray(storedCatalog) || !storedCatalog.length) {
+        return defaultCatalog;
+    }
+    const storedNodeIds = storedCatalog.reduce((ids, chapter) => {
+        (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
+            if (node?.nodeId) ids.push(node.nodeId);
+        });
+        return ids;
+    }, []);
+    const legacyDefaultNodeIds = new Set(['chapter-1-node-1', 'chapter-1-node-2']);
+    const isOnlyLegacyDefaultStory =
+        storedNodeIds.length > 0 && storedNodeIds.every((nodeId) => legacyDefaultNodeIds.has(nodeId));
+    if (isOnlyLegacyDefaultStory) {
+        return defaultCatalog;
+    }
+    const storedChapterIds = new Set(storedCatalog.map((chapter) => chapter.chapterId).filter(Boolean));
+    const merged = storedCatalog.map((chapter) => {
+        const defaultChapter = defaultCatalog.find((entry) => entry.chapterId === chapter.chapterId);
+        if (!defaultChapter) {
+            return chapter;
+        }
+        const storedNodeIds = new Set((Array.isArray(chapter.nodes) ? chapter.nodes : []).map((node) => node.nodeId));
+        const missingDefaultNodes = (Array.isArray(defaultChapter.nodes) ? defaultChapter.nodes : []).filter(
+            (node) => node?.nodeId && !storedNodeIds.has(node.nodeId)
+        );
+        return missingDefaultNodes.length
+            ? { ...chapter, nodes: [...(Array.isArray(chapter.nodes) ? chapter.nodes : []), ...missingDefaultNodes] }
+            : chapter;
+    });
+    const missingDefaultChapters = defaultCatalog.filter(
+        (chapter) => chapter?.chapterId && !storedChapterIds.has(chapter.chapterId)
+    );
+    return [...merged, ...missingDefaultChapters].sort(
+        (left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0)
+    );
+};
 
 const getStoredStoryCatalog = async () => {
     const defaultCatalog = getDefaultStoryCatalog();
@@ -2610,13 +2825,19 @@ const getStoredStoryCatalog = async () => {
         storyCatalogCache = defaultCatalog;
         return defaultCatalog;
     }
-    const storedState = await appStateCollection.findOne({ key: STORY_CATALOG_STATE_KEY });
-    const storedCatalog = normalizeStoryCatalog(
-        storedState && Array.isArray(storedState.chapters) ? storedState.chapters : []
-    );
-    const nextCatalog = storedCatalog.length ? storedCatalog : defaultCatalog;
-    storyCatalogCache = nextCatalog;
-    return nextCatalog;
+    try {
+        const storedState = await appStateCollection.findOne({ key: STORY_CATALOG_STATE_KEY });
+        const storedCatalog = normalizeStoryCatalog(
+            storedState && Array.isArray(storedState.chapters) ? storedState.chapters : []
+        );
+        const nextCatalog = mergeStoredStoryCatalogWithDefaults(storedCatalog, defaultCatalog);
+        storyCatalogCache = nextCatalog;
+        return nextCatalog;
+    } catch (error) {
+        console.error('Stored story catalog is invalid; falling back to default story catalog:', error);
+        storyCatalogCache = defaultCatalog;
+        return defaultCatalog;
+    }
 };
 
 const saveStoryCatalog = async (chapters, updatedBy) => {
@@ -2650,6 +2871,23 @@ const findStoryNode = (catalog, nodeId) => {
         }
     }
     return null;
+};
+
+const flattenStoryNodes = (catalog = []) =>
+    (Array.isArray(catalog) ? catalog : [])
+        .slice()
+        .sort((left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0))
+        .flatMap((chapter) =>
+            (Array.isArray(chapter?.nodes) ? chapter.nodes : [])
+                .slice()
+                .sort((left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0))
+                .map((node) => ({ chapter, node }))
+        );
+
+const getPreviousStoryNode = (catalog = [], nodeId = '') => {
+    const nodes = flattenStoryNodes(catalog);
+    const index = nodes.findIndex((entry) => entry?.node?.nodeId === nodeId);
+    return index > 0 ? nodes[index - 1] : null;
 };
 
 const getMissionLockedCharacterIds = async () => {
@@ -7844,6 +8082,18 @@ app.post('/api/story/start', requireSession, async (req, res) => {
         const userLevel = Number(profile?.ladder?.level) || 1;
         if (found.node.level_requirement > 0 && userLevel < found.node.level_requirement) {
             return res.status(403).json({ error: 'You are not a high enough level for this battle yet.' });
+        }
+        if (found.node.requiresPreviousNode !== false) {
+            const previous = getPreviousStoryNode(storyCatalog, found.node.nodeId);
+            if (previous?.node?.nodeId) {
+                const storyState = normalizeStoryState(profile.story);
+                const previousProgress = storyState.progressByNodeId[previous.node.nodeId];
+                if (!previousProgress?.completedAt) {
+                    return res.status(403).json({
+                        error: `Clear "${previous.node.title}" before starting this battle.`,
+                    });
+                }
+            }
         }
 
         const team = resolveRosterIndicesForCharacterIds(found.node.playerTeam);

@@ -1343,6 +1343,14 @@ body.hub-view-story .selectionpage {
     background: rgba(124, 77, 255, 0.08);
 }
 
+.selection-hub-story-row.locked {
+    opacity: 0.68;
+}
+
+.selection-hub-story-row.locked:hover {
+    background: transparent;
+}
+
 .selection-hub-story-thumb {
     position: relative;
     aspect-ratio: 16 / 9;
