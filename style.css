@@ -1226,6 +1226,11 @@ body.hub-view-story .selectionpage {
     background: #69707c;
 }
 
+.selection-hub-status-pill.hard {
+    color: #231507;
+    background: #f6b73c;
+}
+
 .selection-hub-mission-view {
     margin-top: 8px;
     color: #4c5562;
@@ -1349,6 +1354,11 @@ body.hub-view-story .selectionpage {
 
 .selection-hub-story-row.locked:hover {
     background: transparent;
+}
+
+.selection-hub-story-begin.hard {
+    background: #f6b73c;
+    color: #231507;
 }
 
 .selection-hub-story-thumb {

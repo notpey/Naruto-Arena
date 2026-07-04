@@ -961,6 +961,11 @@
             return Boolean(progress && progress.completedAt);
         }
 
+        function isStoryNodeHardCompleted(nodeId) {
+            var progress = storyProgressByNodeId[nodeId];
+            return Boolean(progress && progress.hardCompletedAt);
+        }
+
         function getPreviousStoryNode(node) {
             var index = storyNodes.findIndex(function (entry) { return entry.nodeId === node.nodeId; });
             return index > 0 ? storyNodes[index - 1] : null;
@@ -984,28 +989,44 @@
             if (storyBriefingEl) { storyBriefingEl.hidden = true; storyBriefingEl.innerHTML = ""; }
         }
 
-        function startStoryBattleFromHub(node, statusEl, beginBtn) {
+        function getSelectedStoryTeamIndices() {
+            return Array.prototype.slice.call(document.querySelectorAll(".selected-character-slot"))
+                .map(function (slot) { return Number(slot.dataset.characterIndex); })
+                .filter(function (index) { return Number.isInteger(index); });
+        }
+
+        function startStoryBattleFromHub(node, statusEl, beginBtn, difficulty) {
             if (storyBattleStarting) return;
+            var isHard = difficulty === "hard";
+            var hardTeam = isHard ? getSelectedStoryTeamIndices() : [];
+            if (isHard && hardTeam.length !== 3) {
+                statusEl.textContent = "Select and save a full team of 3 before starting Hard Mode.";
+                statusEl.classList.add("error");
+                return;
+            }
             storyBattleStarting = true;
             beginBtn.disabled = true;
-            beginBtn.textContent = "Starting Battle…";
-            statusEl.textContent = "Assembling your team…";
+            beginBtn.textContent = "Starting Battle...";
+            statusEl.textContent = isHard ? "Assembling your selected team..." : "Assembling your team...";
             statusEl.classList.remove("error");
             fetchJson("/api/story/start", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nodeId: node.nodeId })
+                body: JSON.stringify({
+                    nodeId: node.nodeId,
+                    difficulty: isHard ? "hard" : "normal",
+                    team: isHard ? hardTeam : undefined
+                })
             }).then(function (data) {
                 window.location.href = "ingame.html?matchId=" + encodeURIComponent(data.matchId);
             }).catch(function (error) {
                 storyBattleStarting = false;
                 beginBtn.disabled = false;
-                beginBtn.textContent = "Begin Battle";
+                beginBtn.textContent = isHard ? "Hard Mode" : "Begin Battle";
                 statusEl.textContent = (error && error.message) || "Could not start this battle.";
                 statusEl.classList.add("error");
             });
         }
-
         function showStoryBriefing(node) {
             if (!storyBriefingEl) return;
             if (storyListEl) storyListEl.hidden = true;
@@ -1033,6 +1054,10 @@
             var rewardLine = document.createElement("p");
             rewardLine.className = "selection-hub-story-briefing-line";
             rewardLine.innerHTML = "<strong>Reward:</strong> " + (node.rewardText || "Story progression.");
+
+            var hardLine = document.createElement("p");
+            hardLine.className = "selection-hub-story-briefing-line";
+            hardLine.innerHTML = "<strong>Hard Mode:</strong> Use your selected team against empowered enemies for 250 Ryo on first clear.";
 
             var noteLine = document.createElement("p");
             noteLine.className = "selection-hub-story-briefing-line";
@@ -1071,9 +1096,20 @@
             var status = document.createElement("span");
             status.className = "selection-hub-story-status";
             beginBtn.addEventListener("click", function () {
-                startStoryBattleFromHub(node, status, beginBtn);
+                startStoryBattleFromHub(node, status, beginBtn, "normal");
             });
             actions.appendChild(beginBtn);
+            var hardBtn = document.createElement("button");
+            hardBtn.type = "button";
+            hardBtn.className = "selection-hub-story-begin hard";
+            var normalCompleted = isStoryNodeCompleted(node.nodeId);
+            var hardCompleted = isStoryNodeHardCompleted(node.nodeId);
+            hardBtn.textContent = hardCompleted ? "Hard Cleared" : "Hard Mode";
+            hardBtn.disabled = locked || !normalCompleted;
+            hardBtn.addEventListener("click", function () {
+                startStoryBattleFromHub(node, status, hardBtn, "hard");
+            });
+            actions.appendChild(hardBtn);
             actions.appendChild(status);
 
             storyBriefingEl.appendChild(back);
@@ -1081,6 +1117,7 @@
             storyBriefingEl.appendChild(opponentLine);
             if (summaryLine.textContent) storyBriefingEl.appendChild(summaryLine);
             storyBriefingEl.appendChild(rewardLine);
+            storyBriefingEl.appendChild(hardLine);
             storyBriefingEl.appendChild(noteLine);
             storyBriefingEl.appendChild(teamLabel);
             storyBriefingEl.appendChild(teamRow);
@@ -1089,6 +1126,7 @@
 
         function buildStoryRow(node) {
             var completed = isStoryNodeCompleted(node.nodeId);
+            var hardCompleted = isStoryNodeHardCompleted(node.nodeId);
             var locked = isStoryNodeLocked(node);
             var row = document.createElement("div");
             row.className = "selection-hub-story-row";
@@ -1131,8 +1169,8 @@
             }
 
             var pill = document.createElement("span");
-            pill.className = "selection-hub-status-pill " + (completed ? "completed" : locked ? "locked" : "available");
-            pill.textContent = completed ? "Completed" : locked ? "Locked" : "Available";
+            pill.className = "selection-hub-status-pill " + (hardCompleted ? "hard" : completed ? "completed" : locked ? "locked" : "available");
+            pill.textContent = hardCompleted ? "Hard Clear" : completed ? "Completed" : locked ? "Locked" : "Available";
 
             row.appendChild(thumb);
             row.appendChild(body);

@@ -59,6 +59,7 @@ let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
+const STORY_HARD_MODE_RYO_REWARD = 250;
 const DEFAULT_MISSION_CATALOG = [
     {
         missionId: 'a-rare-opportunity',
@@ -2114,7 +2115,20 @@ const normalizeStoryProgressEntry = (entry = {}) => {
         source.completedAt instanceof Date || typeof source.completedAt === 'string'
             ? source.completedAt
             : null;
-    return { completedAt };
+    const hardCompletedAt =
+        source.hardCompletedAt instanceof Date || typeof source.hardCompletedAt === 'string'
+            ? source.hardCompletedAt
+            : null;
+    const hardRyoAwardedAt =
+        source.hardRyoAwardedAt instanceof Date || typeof source.hardRyoAwardedAt === 'string'
+            ? source.hardRyoAwardedAt
+            : null;
+    return {
+        completedAt,
+        hardCompletedAt,
+        hardRyoAwardedAt,
+        hardRyoAwarded: Math.max(0, Math.round(Number(source.hardRyoAwarded) || 0)),
+    };
 };
 
 const normalizeStoryState = (story = {}) => {
@@ -3822,9 +3836,21 @@ const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
     const profile = normalizeUserProfile(user);
     const storyState = normalizeStoryState(profile.story);
     const progressByNodeId = { ...storyState.progressByNodeId };
-    const alreadyCompleted = Boolean(progressByNodeId[nodeId]?.completedAt);
+    const previousProgress = normalizeStoryProgressEntry(progressByNodeId[nodeId]);
+    const isHardMode = match.storyMatch?.difficulty === 'hard';
+    const completedAt = previousProgress.completedAt || endedAt || new Date();
+    const hardCompletedAt = isHardMode
+        ? previousProgress.hardCompletedAt || endedAt || new Date()
+        : previousProgress.hardCompletedAt;
+    const shouldAwardHardRyo = isHardMode && !previousProgress.hardRyoAwardedAt;
+    const hardRyoAwarded = previousProgress.hardRyoAwarded + (shouldAwardHardRyo ? STORY_HARD_MODE_RYO_REWARD : 0);
     progressByNodeId[nodeId] = normalizeStoryProgressEntry({
-        completedAt: progressByNodeId[nodeId]?.completedAt || endedAt || new Date(),
+        completedAt,
+        hardCompletedAt,
+        hardRyoAwardedAt: shouldAwardHardRyo
+            ? endedAt || new Date()
+            : previousProgress.hardRyoAwardedAt,
+        hardRyoAwarded,
     });
 
     const rewardCharacterId = normalizeCharacterId(found?.node?.reward_character);
@@ -3836,7 +3862,28 @@ const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
         unlockedIdsChanged = true;
     }
 
-    if (alreadyCompleted && !unlockedIdsChanged) {
+    if (shouldAwardHardRyo) {
+        profile.ryo = Math.max(0, Number(profile.ryo) || 0) + STORY_HARD_MODE_RYO_REWARD;
+    }
+
+    const progressChanged =
+        progressByNodeId[nodeId].completedAt !== previousProgress.completedAt ||
+        progressByNodeId[nodeId].hardCompletedAt !== previousProgress.hardCompletedAt ||
+        progressByNodeId[nodeId].hardRyoAwardedAt !== previousProgress.hardRyoAwardedAt ||
+        progressByNodeId[nodeId].hardRyoAwarded !== previousProgress.hardRyoAwarded;
+    const result = {
+        nodeId,
+        difficulty: isHardMode ? 'hard' : 'normal',
+        hardCompleted: Boolean(progressByNodeId[nodeId].hardCompletedAt),
+        hardFirstClear: shouldAwardHardRyo,
+        ryoDelta: shouldAwardHardRyo ? STORY_HARD_MODE_RYO_REWARD : 0,
+        rewardCharacterId: unlockedIdsChanged ? rewardCharacterId : null,
+        unlockedCharacters: unlockedIdsChanged
+            ? [{ characterId: rewardCharacterId, name: getCharacterDisplayNameById(rewardCharacterId) }]
+            : [],
+    };
+
+    if (!progressChanged && !unlockedIdsChanged && !shouldAwardHardRyo) {
         return null;
     }
 
@@ -3857,7 +3904,7 @@ const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
             },
         }
     );
-    return true;
+    return { [humanPlayer.username]: result };
 };
 
 const addClanExperience = async (clanName, clanExpDelta) => {
@@ -4002,7 +4049,9 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         missionResults && Object.keys(missionResults).length > 0 ? missionResults : null;
 
     if (match.mode === 'story') {
-        await applyStoryProgressForUsers(match, winnerUsername, endedAt);
+        const storyResults = await applyStoryProgressForUsers(match, winnerUsername, endedAt);
+        match.storyResults =
+            storyResults && Object.keys(storyResults).length > 0 ? storyResults : null;
         return null;
     }
 
@@ -5464,10 +5513,13 @@ const buildMatchPayloadForUser = (match, username) => {
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
+        storyResult: match.storyResults?.[username] || null,
         storyMatch: match.storyMatch
             ? {
                   chapterId: match.storyMatch.chapterId || null,
                   nodeId: match.storyMatch.nodeId || null,
+                  difficulty: match.storyMatch.difficulty || 'normal',
+                  hardModeRyoReward: Math.max(0, Number(match.storyMatch.hardModeRyoReward) || 0),
                   enemyDisplayName: match.storyMatch.enemyDisplayName || null,
                   introDialogue: Array.isArray(match.storyMatch.introDialogue) ? match.storyMatch.introDialogue : [],
                   outroDialogueWin: Array.isArray(match.storyMatch.outroDialogueWin)
@@ -6187,14 +6239,43 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
     return matchDocument;
 };
 
-const buildStoryBattleBotMatch = async ({ username, team, chapter, node }) => {
+const applyHardStoryModifiersToBoard = (board, botUsername) => {
+    const botUnits = Array.isArray(board?.[botUsername]) ? board[botUsername] : [];
+    const aliveEnemyCount = Math.max(1, botUnits.filter((unit) => unit && unit.alive !== false).length || 1);
+    const pressureScale = aliveEnemyCount === 1 ? 3 : aliveEnemyCount === 2 ? 2 : 1;
+    botUnits.forEach((unit) => {
+        if (!unit || unit.alive === false) return;
+        unit.state = unit.state && typeof unit.state === 'object' ? unit.state : {};
+        unit.state.statuses = Array.isArray(unit.state.statuses) ? unit.state.statuses : [];
+        unit.state.statuses.push({
+            id: 'story_hard_mode_enemy_pressure',
+            remainingTurns: 99,
+            sourceUsername: botUsername,
+            metadata: {
+                helpful: true,
+                destructibleDefensePoints: 15 + pressureScale * 15,
+                damageReductionFlat: pressureScale * 5,
+                damageBonusFlat: pressureScale * 5,
+                turnEndGainChakra: {
+                    chakraType: 'random',
+                    amount: pressureScale,
+                },
+                tooltipText:
+                    'Hard Mode: This character has destructible defense, damage reduction, bonus damage, and gains 1 random chakra each turn.',
+            },
+        });
+    });
+};
+
+const buildStoryBattleBotMatch = async ({ username, team, chapter, node, difficulty = 'normal' }) => {
+    const isHardMode = difficulty === 'hard';
     const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const enemyRosterIndices = resolveRosterIndicesForCharacterIds(node.enemyTeam);
     const botPlayer = createBattleBotPlayer({
         matchId,
         team: enemyRosterIndices.length ? enemyRosterIndices : buildBattleBotTeam(),
-        ladderLevel: 1,
-        displayName: node.enemyDisplayName,
+        ladderLevel: isHardMode ? 30 : 1,
+        displayName: isHardMode ? `${node.enemyDisplayName} (Hard)` : node.enemyDisplayName,
     });
     const aliveLookup = {
         [username]: Array.isArray(team) ? team.length : 3,
@@ -6210,6 +6291,9 @@ const buildStoryBattleBotMatch = async ({ username, team, chapter, node }) => {
         botPlayer,
     ];
     const board = battleLogic.buildInitialBoard(playerDocs);
+    if (isHardMode) {
+        applyHardStoryModifiersToBoard(board, botPlayer.username);
+    }
     const matchDocument = {
         matchId: built.matchId,
         mode: 'story',
@@ -6227,13 +6311,15 @@ const buildStoryBattleBotMatch = async ({ username, team, chapter, node }) => {
         players: playerDocs,
         botMatch: {
             enabled: true,
-            displayName: node.enemyDisplayName,
+            displayName: botPlayer.displayName || node.enemyDisplayName,
         },
         storyMatch: {
             chapterId: chapter.chapterId,
             nodeId: node.nodeId,
+            difficulty: isHardMode ? 'hard' : 'normal',
+            hardModeRyoReward: isHardMode ? STORY_HARD_MODE_RYO_REWARD : 0,
             bossScript: node.bossScript || null,
-            enemyDisplayName: node.enemyDisplayName,
+            enemyDisplayName: isHardMode ? `${node.enemyDisplayName} (Hard)` : node.enemyDisplayName,
             introDialogue: node.introDialogue || [],
             outroDialogueWin: node.outroDialogueWin || [],
             outroDialogueLoss: node.outroDialogueLoss || [],
@@ -7326,6 +7412,7 @@ const finalizeTurn = async (match, username) => {
                     pendingTurns: match.pendingTurns,
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
+                    storyResults: match.storyResults || null,
                 },
             }
         );
@@ -7597,6 +7684,8 @@ const matchJoinSchema = Joi.object({
 
 const storyStartSchema = Joi.object({
     nodeId: Joi.string().trim().min(1).max(128).required(),
+    difficulty: Joi.string().valid('normal', 'hard').default('normal'),
+    team: teamSchema.optional(),
 });
 
 const publicProfileLookupSchema = Joi.object({
@@ -8055,7 +8144,8 @@ app.post('/api/story/start', requireSession, async (req, res) => {
         if (validationError) {
             return res.status(400).json({ error: 'A story battle is required.' });
         }
-        const { nodeId } = value;
+        const { nodeId, difficulty } = value;
+        const isHardMode = difficulty === 'hard';
 
         if (userToMatch.has(username)) {
             return res.status(409).json({ error: 'You are already in a match.' });
@@ -8095,11 +8185,28 @@ app.post('/api/story/start', requireSession, async (req, res) => {
                 }
             }
         }
+        const storyState = normalizeStoryState(profile.story);
+        if (isHardMode && !storyState.progressByNodeId[found.node.nodeId]?.completedAt) {
+            return res.status(403).json({ error: 'Clear this story battle before starting Hard Mode.' });
+        }
 
-        const team = resolveRosterIndicesForCharacterIds(found.node.playerTeam);
-        if (team.length !== found.node.playerTeam.length) {
+        const normalTeam = resolveRosterIndicesForCharacterIds(found.node.playerTeam);
+        if (normalTeam.length !== found.node.playerTeam.length) {
             console.error(`Story node ${nodeId} has an invalid playerTeam entry.`);
             return res.status(500).json({ error: 'This story battle is misconfigured.' });
+        }
+        const hardTeam = Array.isArray(value.team) ? value.team : Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
+        const team = isHardMode ? hardTeam : normalTeam;
+        if (isHardMode) {
+            const { error: hardTeamError } = teamSchema.validate(team);
+            if (hardTeamError) {
+                return res.status(400).json({ error: 'Save a full selected team before starting Hard Mode.' });
+            }
+            try {
+                await assertTeamCanBeUsed(profile, team, user.role);
+            } catch (error) {
+                return res.status(403).json({ error: error.message || 'Your saved team contains a locked character.' });
+            }
         }
 
         const matchDocument = await buildStoryBattleBotMatch({
@@ -8107,8 +8214,10 @@ app.post('/api/story/start', requireSession, async (req, res) => {
             team,
             chapter: found.chapter,
             node: found.node,
+            difficulty,
         });
-        userToMatch.set(username, { matchId: matchDocument.matchId, opponent: found.node.enemyDisplayName });
+        const opponentDisplayName = isHardMode ? `${found.node.enemyDisplayName} (Hard)` : found.node.enemyDisplayName;
+        userToMatch.set(username, { matchId: matchDocument.matchId, opponent: opponentDisplayName });
         scheduleBattleBotTurn(matchDocument);
         const safePayload = buildMatchPayloadForUser(matchDocument, username);
         return res.json({
@@ -8116,7 +8225,7 @@ app.post('/api/story/start', requireSession, async (req, res) => {
             matchFound: true,
             matchId: matchDocument.matchId,
             mode: 'story',
-            opponent: found.node.enemyDisplayName,
+            opponent: opponentDisplayName,
             matchStartsAt: matchDocument.matchStartsAt,
             matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
             currentTurn: matchDocument.currentTurn || null,
@@ -8314,6 +8423,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
             endedAt: match.endedAt || null,
             ladderResult: match.ladderResults?.[username] || null,
             missionResult: match.missionResults?.[username] || null,
+            storyResult: match.storyResults?.[username] || null,
         });
     }
     const opponentEntry = match.players.find((p) => p.username !== username);
@@ -8337,6 +8447,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
                 turnExpiresAt: null,
                 ladderResults: ladderResults || null,
                 missionResults: match.missionResults || null,
+                storyResults: match.storyResults || null,
             },
         }
     );
@@ -8353,6 +8464,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
         endedAt,
         ladderResult: ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
+        storyResult: match.storyResults?.[username] || null,
     });
 });
 

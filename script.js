@@ -2663,7 +2663,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     activeTargetOptions = null;
                     activeCastingSkill = null;
                     const outroEntries = didWin ? data.storyMatch.outroDialogueWin : data.storyMatch.outroDialogueLoss;
-                    showStoryDialogue(outroEntries, 'Continue ▶', () => {
+                    const storyRyoDelta = Math.max(0, Number(data.storyResult?.ryoDelta) || 0);
+                    const continueLabel = storyRyoDelta > 0
+                        ? `Claim +${storyRyoDelta.toLocaleString()} Ryo`
+                        : 'Continue';
+                    showStoryDialogue(outroEntries, continueLabel, () => {
                         window.location.href = 'story.html';
                     });
                     return;
@@ -4343,11 +4347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedAssignments[slotIndex] = assignment;
         slotElement.innerHTML = '';
         slotElement.classList.remove('drag-over');
+        delete slotElement.dataset.characterIndex;
         if (!assignment) {
             slotElement.textContent = String(slotIndex + 1);
             updateSelectedCountLabel();
             return;
         }
+        slotElement.dataset.characterIndex = String(assignment.characterIndex);
         const character = roster[assignment.characterIndex];
         const img = document.createElement('img');
         img.src = character?.facePicture || '';
