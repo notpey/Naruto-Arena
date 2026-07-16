@@ -57,6 +57,19 @@ const LEGACY_DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/zG3W1w6K/itachi.png'
 const MISSION_CATALOG_STATE_KEY = 'missions';
 let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
+const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
+const STARTER_REBALANCE_MIGRATION_ID = 'starter-rebalance-2026-07-16';
+const STARTER_REBALANCE_CHARACTER_IDS = new Set([
+    'uzumaki-naruto',
+    'haruno-sakura',
+    'uchiha-sasuke',
+    'inuzuka-kiba',
+    'hyuuga-hinata',
+    'nara-shikamaru',
+    'akimichi-chouji',
+    'yamanaka-ino',
+    'rock-lee',
+]);
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
 const STORY_HARD_MODE_RYO_REWARD = 250;
@@ -4614,32 +4627,83 @@ const getStoredCharacters = async () => {
 
     const storedState = await appStateCollection.findOne({ key: CHARACTERS_STATE_KEY });
     if (!storedState || !Array.isArray(storedState.characters)) {
+        const now = new Date();
         await appStateCollection.updateOne(
             { key: CHARACTERS_STATE_KEY },
-            { $set: { key: CHARACTERS_STATE_KEY, characters: defaultCharacters, updatedAt: new Date() } },
+            { $set: { key: CHARACTERS_STATE_KEY, characters: defaultCharacters, updatedAt: now } },
+            { upsert: true }
+        );
+        await appStateCollection.updateOne(
+            { key: CHARACTER_MIGRATIONS_STATE_KEY },
+            {
+                $set: {
+                    key: CHARACTER_MIGRATIONS_STATE_KEY,
+                    [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
+                    updatedAt: now,
+                },
+            },
             { upsert: true }
         );
         return defaultCharacters;
     }
 
+    const migrationState =
+        (await appStateCollection.findOne({ key: CHARACTER_MIGRATIONS_STATE_KEY })) || {};
+    const completedMigrations =
+        migrationState.completed && typeof migrationState.completed === 'object'
+            ? migrationState.completed
+            : {};
+    const shouldApplyStarterRebalance = !completedMigrations[STARTER_REBALANCE_MIGRATION_ID];
+    const defaultByCharacterId = new Map(
+        defaultCharacters
+            .filter((entry) => entry && typeof entry.characterId === 'string' && entry.characterId)
+            .map((entry) => [entry.characterId, entry])
+    );
     const storedIds = new Set(
         storedState.characters
             .map((entry) => (entry && typeof entry.characterId === 'string' ? entry.characterId : ''))
             .filter(Boolean)
     );
+    const migratedStoredCharacters = storedState.characters.map((entry) => {
+        const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
+        if (
+            shouldApplyStarterRebalance &&
+            STARTER_REBALANCE_CHARACTER_IDS.has(characterId) &&
+            defaultByCharacterId.has(characterId)
+        ) {
+            return defaultByCharacterId.get(characterId);
+        }
+        return entry;
+    });
     const newDefaultCharacters = defaultCharacters.filter(
         (entry) => entry && typeof entry.characterId === 'string' && !storedIds.has(entry.characterId)
     );
-    if (!newDefaultCharacters.length) {
+    if (!shouldApplyStarterRebalance && !newDefaultCharacters.length) {
         return storedState.characters;
     }
 
-    const mergedCharacters = [...storedState.characters, ...newDefaultCharacters];
-    await appStateCollection.updateOne(
-        { key: CHARACTERS_STATE_KEY },
-        { $set: { key: CHARACTERS_STATE_KEY, characters: mergedCharacters, updatedAt: new Date() } },
-        { upsert: true }
-    );
+    const mergedCharacters = [...migratedStoredCharacters, ...newDefaultCharacters];
+    const updates = {
+        [CHARACTERS_STATE_KEY]: appStateCollection.updateOne(
+            { key: CHARACTERS_STATE_KEY },
+            { $set: { key: CHARACTERS_STATE_KEY, characters: mergedCharacters, updatedAt: new Date() } },
+            { upsert: true }
+        ),
+    };
+    if (shouldApplyStarterRebalance) {
+        updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
+            { key: CHARACTER_MIGRATIONS_STATE_KEY },
+            {
+                $set: {
+                    key: CHARACTER_MIGRATIONS_STATE_KEY,
+                    [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: new Date(),
+                    updatedAt: new Date(),
+                },
+            },
+            { upsert: true }
+        );
+    }
+    await Promise.all(Object.values(updates));
     return mergedCharacters;
 };
 
