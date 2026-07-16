@@ -13,147 +13,171 @@
         "facePicture": "https://i.imgur.com/bwuEwsM.png",
         "characterdeescription": "A Genin from Team 7, Sasuke is the lone survivor of the Uchiha clan and has sworn vengeance against his brother. Using his sharingan, Sasuke is able to anticipate incoming attacks and is capable of advanced offensive moves.",
         "skills": [
-            {
-                "id": "uchiha-sasuke-lion-combo",
-                "name": "Lion Combo",
-                "skillimage": "https://i.imgur.com/z0L2daw.png",
-                "skilldescription": "Uchiha Sasuke deals 35 damage to one enemy. This skill will deal 10 additional damage to an enemy affected by 'Sharingan'.",
-                "energy": [
-                    "Taijutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 35,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "uchiha_sasuke_sharingan_target",
-                            "scope": "target"
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uchiha-sasuke-chidori",
-                "name": "Chidori",
-                "skillimage": "https://i.imgur.com/rJ3WZmI.png",
-                "skilldescription": "Uchiha Sasuke deals 35 piercing damage to one enemy. This skill will deal 25 additional damage to an enemy affected by 'Sharingan'.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Energy",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 35,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 25,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "uchiha_sasuke_sharingan_target",
-                            "scope": "target"
-                        },
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uchiha-sasuke-sharingan",
-                "name": "Sharingan",
-                "skillimage": "https://i.imgur.com/IkTLWta.png",
-                "skilldescription": "Uchiha Sasuke targets one enemy. For 3 turns, Uchiha Sasuke will gain 10 points of damage reduction. During this time, that enemy will be unable to reduce damage or become invulnerable. This skill will end if Uchiha Sasuke dies.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "uchiha_sasuke_sharingan_target",
-                        "duration": 3,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "ongoingClass": "action",
-                            "tooltipText": "This character is affected by Sharingan and cannot reduce damage or become invulnerable."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "uchiha_sasuke_sharingan_focus",
-                        "duration": 3,
-                        "scope": "self",
-                        "metadata": {
-                            "damageReductionFlat": 10,
-                            "tooltipText": "Sasuke has 10 damage reduction while Sharingan is active."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uchiha-sasuke-swift-block",
-                "name": "Swift Block",
-                "skillimage": "https://i.imgur.com/dit1Ltq.png",
-                "skilldescription": "This skill makes Uchiha Sasuke invulnerable for 1 turn.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "invulnerable",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            }
+                {
+                        "id": "uchiha-sasuke-lion-combo",
+                        "name": "Lion Combo",
+                        "skillimage": "https://i.imgur.com/z0L2daw.png",
+                        "skilldescription": "Uchiha Sasuke deals 25 damage to one enemy.",
+                        "energy": [
+                                "Bloodline"
+                        ],
+                        "target": "single-enemy",
+                        "damage": 0,
+                        "cooldown": 0,
+                        "classes": [
+                                "Physical",
+                                "Instant"
+                        ],
+                        "effects": [
+                                {
+                                        "type": "damage",
+                                        "amount": 25,
+                                        "scope": "target"
+                                }
+                        ]
+                },
+                {
+                        "id": "uchiha-sasuke-chidori",
+                        "name": "Chidori",
+                        "skillimage": "https://i.imgur.com/rJ3WZmI.png",
+                        "skilldescription": "Uchiha Sasuke deals 35 piercing damage to one enemy. For 1 turn, 'Lion Combo' and 'Grand Fireball Technique' will cost 1 random chakra.",
+                        "energy": [
+                                "Ninjutsu",
+                                "Random"
+                        ],
+                        "target": "single-enemy",
+                        "damage": 0,
+                        "cooldown": 1,
+                        "classes": [
+                                "Energy",
+                                "Instant"
+                        ],
+                        "effects": [
+                                {
+                                        "type": "damage",
+                                        "amount": 35,
+                                        "scope": "target",
+                                        "metadata": {
+                                                "ignoreDamageReduction": true
+                                        }
+                                },
+                                {
+                                        "type": "apply_status",
+                                        "statusId": "uchiha_sasuke_chidori_cost_shift",
+                                        "duration": 1,
+                                        "scope": "self",
+                                        "metadata": {
+                                                "skillCostOverridesBySkillId": {
+                                                        "uchiha-sasuke-lion-combo": {
+                                                                "energy": [
+                                                                        "Random"
+                                                                ]
+                                                        },
+                                                        "uchiha-sasuke-grand-fireball-technique": {
+                                                                "energy": [
+                                                                        "Random"
+                                                                ]
+                                                        }
+                                                },
+                                                "tooltipText": "Lion Combo and Grand Fireball Technique cost 1 random chakra."
+                                        }
+                                }
+                        ]
+                },
+                {
+                        "id": "uchiha-sasuke-sharingan",
+                        "name": "Sharingan",
+                        "skillimage": "https://i.imgur.com/IkTLWta.png",
+                        "skilldescription": "Uchiha Sasuke gains 10 damage reduction permanently. If he uses a skill on an enemy he used a skill on the previous turn, it deals 5 additional damage. This skill is replaced by 'Grand Fireball Technique'.",
+                        "energy": [],
+                        "target": "self",
+                        "damage": 0,
+                        "cooldown": 4,
+                        "classes": [
+                                "Strategic",
+                                "Instant"
+                        ],
+                        "effects": [
+                                {
+                                        "type": "apply_status",
+                                        "statusId": "uchiha_sasuke_sharingan_focus",
+                                        "duration": 99,
+                                        "scope": "self",
+                                        "metadata": {
+                                                "damageReductionFlat": 10,
+                                                "samePreviousTargetDamageBonusFlat": 5,
+                                                "skillReplacements": {
+                                                        "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
+                                                },
+                                                "tooltipText": "Sasuke has 10 damage reduction, deals 5 additional damage to the enemy he targeted last turn, and Sharingan is replaced by Grand Fireball Technique."
+                                        }
+                                }
+                        ]
+                },
+                {
+                        "id": "uchiha-sasuke-swift-block",
+                        "name": "Swift Block",
+                        "skillimage": "https://i.imgur.com/dit1Ltq.png",
+                        "skilldescription": "This skill makes Uchiha Sasuke invulnerable for 1 turn.",
+                        "energy": [
+                                "Random"
+                        ],
+                        "target": "self",
+                        "damage": 0,
+                        "cooldown": 4,
+                        "classes": [
+                                "Strategic",
+                                "Instant"
+                        ],
+                        "effects": [
+                                {
+                                        "type": "apply_status",
+                                        "statusId": "invulnerable",
+                                        "duration": 1,
+                                        "scope": "self",
+                                        "metadata": {
+                                                "invulnerable": true,
+                                                "tooltipText": "This character is invulnerable."
+                                        }
+                                }
+                        ]
+                },
+                {
+                        "id": "uchiha-sasuke-grand-fireball-technique",
+                        "name": "Grand Fireball Technique",
+                        "hiddenFromSelectionViewer": true,
+                        "skillimage": "https://i.imgur.com/IkTLWta.png",
+                        "skilldescription": "Uchiha Sasuke deals 5 affliction damage to all enemies this turn and 5 affliction damage to them the following turn.",
+                        "energy": [
+                                "Ninjutsu"
+                        ],
+                        "target": "all-enemy",
+                        "damage": 0,
+                        "cooldown": 1,
+                        "classes": [
+                                "Affliction",
+                                "Instant"
+                        ],
+                        "effects": [
+                                {
+                                        "type": "apply_status",
+                                        "statusId": "uchiha_sasuke_grand_fireball_burn",
+                                        "duration": 2,
+                                        "scope": "all-enemy",
+                                        "metadata": {
+                                                "harmful": true,
+                                                "turnEndDamage": 5,
+                                                "turnEndTrigger": "source_turn",
+                                                "turnDurationAnchor": "source_turn",
+                                                "triggerOnApply": true,
+                                                "afflictionDamage": true,
+                                                "ignoreDamageReduction": true,
+                                                "ignoreDestructibleDefense": true,
+                                                "tooltipText": "This character takes 5 affliction damage from Grand Fireball Technique."
+                                        }
+                                }
+                        ]
+                }
         ]
-    };
+};
 });

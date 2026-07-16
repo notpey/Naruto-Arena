@@ -129,19 +129,16 @@ test('Naruto skill IDs and replacements are internally consistent', () => {
 test('battleLogic resolves Naruto starter kit behavior used by the editor data', () => {
     let match = makeMatch();
 
-    queueSkill(match, 'p1', 2);
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     const narutoState = match.board.p1[0].state;
     assert.equal(
         narutoState.statuses.some(
-            (status) => status.id === 'uzumaki_naruto_shadow_clones_defense' && status.remainingTurns === 4
-        ),
-        true
-    );
-    assert.equal(
-        narutoState.statuses.some(
-            (status) => status.id === 'uzumaki_naruto_shadow_clones_active' && status.remainingTurns === 3
+            (status) =>
+                status.id === 'uzumaki_naruto_shadow_clones_active' &&
+                status.remainingTurns === 99 &&
+                status.metadata.damageReductionFlat === 10
         ),
         true
     );
@@ -157,13 +154,18 @@ test('battleLogic resolves Naruto starter kit behavior used by the editor data',
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'Combo should deal 30 during Shadow Clones');
+    assert.equal(match.board.p2[0].hp, 75, 'Combo should deal 25 during Shadow Clones');
 
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 25, 'Rasengan replacement should deal 45');
+    assert.equal(match.board.p2[0].hp, 40, 'Rasengan replacement should deal 35');
     assert.equal(
-        match.board.p2[0].state.statuses.some((status) => status.id === 'stunned' && status.metadata.cannotUseSkills),
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'uzumaki_naruto_rasengan_stun' &&
+                status.metadata.cannotUseSkillClasses.includes('physical') &&
+                !status.metadata.cannotUseSkillClasses.includes('strategic')
+        ),
         true
     );
 
@@ -171,8 +173,17 @@ test('battleLogic resolves Naruto starter kit behavior used by the editor data',
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const stateAfterWave = match.board.p1[0].state;
-    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 0), true);
-    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 4), true);
+    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 0), false);
+    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 4), false);
+    assert.equal(
+        stateAfterWave.statuses.some(
+            (status) =>
+                status.id === 'uzumaki_naruto_overwhelming_chakra_wave_focus' &&
+                status.metadata.skillDamageBonuses?.['uzumaki-naruto-combo'] === 5 &&
+                status.metadata.skillDamageBonuses?.['uzumaki-naruto-rasengan'] === 5
+        ),
+        true
+    );
     assert.equal(Object.values(match.chakraPools.p1).reduce((sum, amount) => sum + amount, 0), 0);
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
@@ -185,30 +196,52 @@ test('battleLogic resolves Naruto starter kit behavior used by the editor data',
 test('battleLogic resolves Sakura starter kit behavior used by the editor data', () => {
     const match = makeMatch([1], [2]);
 
-    queueSkill(match, 'p1', 2);
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const sakuraState = match.board.p1[0].state;
     assert.equal(
         sakuraState.statuses.some(
             (status) =>
                 status.id === 'haruno_sakura_inner_sakura_active' &&
-                status.remainingTurns === 4 &&
-                status.metadata.damageReductionFlat === 10 &&
+                status.remainingTurns === 99 &&
+                status.metadata.damageReductionFlat === 5 &&
                 status.metadata.cannotBeStunned === true &&
-                status.metadata.skillDamageBonuses?.['haruno-sakura-ko-punch'] === 10
+                status.metadata.skillReplacements?.['haruno-sakura-inner-sakura'] ===
+                    'haruno-sakura-inner-sakura-strangle'
         ),
         true
+    );
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: 1,
+            skillIndex: 2,
+            actorState: sakuraState,
+        }).id,
+        'haruno-sakura-inner-sakura-strangle'
     );
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'KO Punch should deal 30 during Inner Sakura');
+    assert.equal(match.board.p2[0].hp, 80, 'KO Punch should deal 20 during Inner Sakura');
     assert.equal(
         match.board.p2[0].state.statuses.some(
             (status) =>
                 status.id === 'haruno_sakura_ko_punch_stun' &&
                 status.metadata.cannotUseSkillClasses.includes('physical') &&
                 status.metadata.cannotUseSkillClasses.includes('strategic')
+        ),
+        true
+    );
+
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 60, 'Inner Sakura Strangle should deal 20 to an enemy');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'haruno_sakura_inner_sakura_strangle_enemy_weakness' &&
+                status.metadata.damageDebuffFlat === 10
         ),
         true
     );
@@ -232,34 +265,43 @@ test('battleLogic resolves Sasuke starter kit behavior used by the editor data',
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const sasukeState = match.board.p1[0].state;
-    const targetState = match.board.p2[0].state;
     assert.equal(
         sasukeState.statuses.some(
             (status) =>
                 status.id === 'uchiha_sasuke_sharingan_focus' &&
-                status.remainingTurns === 3 &&
-                status.metadata.damageReductionFlat === 10
+                status.remainingTurns === 99 &&
+                status.metadata.damageReductionFlat === 10 &&
+                status.metadata.samePreviousTargetDamageBonusFlat === 5 &&
+                status.metadata.skillReplacements?.['uchiha-sasuke-sharingan'] ===
+                    'uchiha-sasuke-grand-fireball-technique'
         ),
         true
     );
     assert.equal(
-        targetState.statuses.some(
-            (status) =>
-                status.id === 'uchiha_sasuke_sharingan_target' &&
-                status.remainingTurns === 3 &&
-                status.metadata.cannotReduceDamage === true &&
-                status.metadata.cannotBecomeInvulnerable === true
-        ),
-        true
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: 2,
+            skillIndex: 2,
+            actorState: sasukeState,
+        }).id,
+        'uchiha-sasuke-grand-fireball-technique'
     );
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55, 'Lion Combo should deal 45 to a Sharingan target');
+    assert.equal(match.board.p2[0].hp, 70, 'Lion Combo should deal 30 to the previous Sharingan target');
 
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 0, 'Chidori should deal 60 piercing damage to a Sharingan target');
+    assert.equal(match.board.p2[0].hp, 30, 'Chidori should deal 40 piercing damage to the previous target');
+    assert.equal(
+        match.board.p1[0].state.statuses.some(
+            (status) =>
+                status.id === 'uchiha_sasuke_chidori_cost_shift' &&
+                status.metadata.skillCostOverridesBySkillId?.['uchiha-sasuke-lion-combo']
+        ),
+        true
+    );
 
     queueSkill(match, 'p1', 3);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -296,7 +338,7 @@ test('battleLogic resolves Kiba starter kit behavior used by the editor data', (
                 bloodline: 0,
                 genjutsu: 0,
             },
-            requiredRandom: 0,
+            requiredRandom: 1,
         }
     );
     assert.equal(
@@ -308,7 +350,7 @@ test('battleLogic resolves Kiba starter kit behavior used by the editor data', (
         true
     );
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 85, 'Double Headed Wolf should deal 15 to all enemies');
+    assert.equal(match.board.p2[0].hp, 90, 'Double Headed Wolf should deal 10 to all enemies');
 
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -323,7 +365,7 @@ test('battleLogic resolves Kiba starter kit behavior used by the editor data', (
     );
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 50, 'Garouga should deal 35 to a Dynamic Marking target');
+    assert.equal(match.board.p2[0].hp, 55, 'Garouga should deal 35 during Double Headed Wolf to a Dynamic Marking target');
 });
 
 test('battleLogic resolves Shino starter kit behavior used by the editor data', () => {
@@ -383,16 +425,27 @@ test('battleLogic resolves Hinata starter kit behavior used by the editor data',
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 85, 'Byakugan Gentle Fist should deal 15 on its first tick');
-    assert.equal(match.chakraPools.p2.taijutsu, 0, 'Byakugan Gentle Fist should remove 1 random chakra');
+    assert.equal(match.board.p2[0].hp, 80, 'Byakugan Gentle Fist should deal 20 immediately');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'hyuuga_hinata_gentle_fist_cost' &&
+                status.remainingTurns === 2 &&
+                status.metadata.randomCostIncrease === 1
+        ),
+        true
+    );
 
-    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'Byakugan Protective Palms should deal 15 piercing damage');
+    assert.equal(match.board.p2[0].hp, 80, 'Protective Palms should no longer deal damage');
     assert.equal(
         match.board.p1[0].state.statuses.some(
-            (status) => status.id === 'hyuuga_hinata_protective_palms_defense'
+            (status) =>
+                status.id === 'hyuuga_hinata_protective_palms_defense' &&
+                status.remainingTurns === 2 &&
+                status.metadata.onBreakApplyStatusToSource?.statusId ===
+                    'hyuuga_hinata_protective_palms_cost'
         ),
         true
     );
@@ -409,11 +462,11 @@ test('battleLogic resolves Shikamaru starter kit behavior used by the editor dat
     const meditatedTargetStatus = match.board.p2[0].state.statuses.find(
         (status) => status.id === 'nara_shikamaru_shadow_neck_bind'
     );
-    const regularTargetStatus = match.board.p2[1].state.statuses.find(
-        (status) => status.id === 'nara_shikamaru_shadow_neck_bind'
-    );
     assert.equal(meditatedTargetStatus?.remainingTurns, 2);
-    assert.equal(regularTargetStatus?.remainingTurns, 1);
+    assert.equal(
+        match.board.p2[1].state.statuses.some((status) => status.id === 'nara_shikamaru_shadow_neck_bind'),
+        false
+    );
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -423,9 +476,8 @@ test('battleLogic resolves Shikamaru starter kit behavior used by the editor dat
         2
     );
     assert.equal(
-        match.board.p2[1].state.statuses.find((status) => status.id === 'nara_shikamaru_shadow_imitation')
-            ?.remainingTurns,
-        1
+        match.board.p2[1].state.statuses.some((status) => status.id === 'nara_shikamaru_shadow_imitation'),
+        false
     );
 });
 
@@ -472,7 +524,9 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
     );
     assert.equal(
         match.board.p2[0].state.statuses.some(
-            (status) => status.id === 'yamanaka_ino_mind_body_switch_target' && status.metadata.cannotUseSkills
+            (status) =>
+                status.id === 'yamanaka_ino_mind_body_switch_stage_1' &&
+                status.metadata.cannotUseSkillClasses.includes('physical')
         ),
         true
     );
@@ -483,20 +537,28 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
     queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
     assert.equal(
-        match.board.p2[0].state.cooldowns['uchiha-sasuke-chidori'],
-        3,
-        'Chakra Hair Strand Trap should increase the triggered harmful skill cooldown by 1'
+        match.board.p2[0].hp,
+        90,
+        'Chakra Hair Strand Trap should damage the target when they use a skill'
+    );
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'yamanaka_ino_chakra_hair_strand_trap_strategic_stun' &&
+                status.metadata.cannotUseSkillClasses.includes('strategic')
+        ),
+        true
     );
 
     match = makeMatch([8], [2]);
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'Mind Body Disturbance should deal 30 piercing damage');
+    assert.equal(match.board.p2[0].hp, 75, 'Mind Body Disturbance should deal 25 piercing damage');
     assert.equal(
         match.board.p2[0].state.statuses.some(
             (status) =>
                 status.id === 'yamanaka_ino_mind_body_disturbance_control' &&
-                status.metadata.cannotBecomeInvulnerable
+                status.metadata.cannotUseSkillClasses.includes('energy')
         ),
         true
     );
@@ -507,19 +569,25 @@ test('battleLogic resolves Rock Lee starter kit behavior used by the editor data
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 90, 'High Speed Taijutsu should cost Lee 10 health');
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 90, 'High Speed Taijutsu should deal 10 on Lee turn end');
+    assert.equal(match.board.p1[0].hp, 95, 'High Speed Taijutsu should cost Lee 5 health');
+    assert.equal(match.board.p2[0].hp, 75, 'High Speed Taijutsu should deal 25 piercing damage immediately');
 
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 50, 'Front Lotus should deal 40 to a High Speed Taijutsu target');
+    assert.equal(match.board.p2[0].hp, 40, 'Front Lotus should deal 35 piercing damage');
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: 9,
+            skillIndex: 1,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'rock-lee-final-lotus'
+    );
 
     match = makeMatch([9], [1]);
-    match.board.p1[0].hp = 80;
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 50, 'Fifth Gate Opening should cost Lee 30 health');
     assert.equal(
         resolveEffectiveSkill({
             characters,
@@ -527,7 +595,7 @@ test('battleLogic resolves Rock Lee starter kit behavior used by the editor data
             skillIndex: 2,
             actorState: match.board.p1[0].state,
         }).id,
-        'rock-lee-final-lotus'
+        'rock-lee-fiery-spirit'
     );
 });
 

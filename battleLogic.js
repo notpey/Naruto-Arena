@@ -1444,6 +1444,13 @@ const resolveScalarEffectAmount = ({ effect, actorUnit, targetUnit = null }) => 
     if (Boolean(effect?.metadata?.amountFromSourceMissingHp)) {
         amount += Math.max(0, DEFAULT_HP - Math.max(0, Number(actorUnit?.hp) || 0));
     }
+    if (Number.isFinite(effect?.metadata?.amountPerSourceMissingHpStep)) {
+        const step = Math.max(1, Number(effect?.metadata?.sourceMissingHpStep) || 1);
+        const missingHp = Math.max(0, DEFAULT_HP - Math.max(0, Number(actorUnit?.hp) || 0));
+        amount +=
+            Math.floor(missingHp / step) *
+            Math.max(0, Number(effect.metadata.amountPerSourceMissingHpStep) || 0);
+    }
     if (Boolean(effect?.metadata?.amountFromTargetCurrentHp)) {
         amount += Math.max(0, Number(targetUnit?.hp) || 0);
     }
@@ -1893,6 +1900,26 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
         const bonuses = status?.metadata?.skillDamageBonuses;
         if (!bonuses || typeof bonuses !== 'object') return sum;
         return sum + (Number(bonuses[skillId]) || 0);
+    }, 0);
+};
+
+const getSamePreviousTargetDamageBonus = ({ actorState, recipient, skillId }) => {
+    if (!actorState || !recipient || !skillId) return 0;
+    const previousTargetKey =
+        typeof actorState?.snapshots?.previousSkillTargetKey === 'string'
+            ? actorState.snapshots.previousSkillTargetKey
+            : '';
+    if (!previousTargetKey || previousTargetKey !== `${recipient.username}:${recipient.slot}`) return 0;
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    return statuses.reduce((sum, status) => {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) return sum;
+        const metadata = status?.metadata || {};
+        const allowedSkillIds = Array.isArray(metadata.samePreviousTargetDamageBonusSkillIds)
+            ? metadata.samePreviousTargetDamageBonusSkillIds.filter((entry) => typeof entry === 'string' && entry)
+            : [];
+        if (allowedSkillIds.length > 0 && !allowedSkillIds.includes(skillId)) return sum;
+        return sum + Math.max(0, Number(metadata.samePreviousTargetDamageBonusFlat) || 0);
     }, 0);
 };
 
@@ -2544,6 +2571,28 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                         username: context.sourceUsername,
                         amount: 1,
                     });
+                }
+                const onBreakApplyStatusToSource = status?.metadata?.onBreakApplyStatusToSource;
+                if (
+                    onBreakApplyStatusToSource?.statusId &&
+                    context?.match &&
+                    context?.sourceUsername &&
+                    Number.isInteger(context?.sourceSlot)
+                ) {
+                    const sourceUnit =
+                        context.match.board?.[context.sourceUsername]?.[Number(context.sourceSlot)] || null;
+                    if (sourceUnit && sourceUnit.alive !== false) {
+                        applyStatus({
+                            targetState: ensureUnitStateShape(sourceUnit),
+                            statusId: onBreakApplyStatusToSource.statusId,
+                            duration: onBreakApplyStatusToSource.duration,
+                            sourceSkillId: status?.sourceSkillId || null,
+                            sourceUsername: status?.sourceUsername || null,
+                            sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
+                            metadata: onBreakApplyStatusToSource.metadata || {},
+                            fresh: false,
+                        });
+                    }
                 }
                 const removeStatusIdsFromEnemyOnBreak = Array.isArray(
                     status?.metadata?.removeStatusIdsFromEnemyOnBreak
@@ -3986,6 +4035,18 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 );
             });
         const skillIsHarmful = skillHasHarmfulEffects(skill);
+        const previousSkillTargetKey = actorState?.snapshots?.currentSkillTargetKey || '';
+        const primaryEnemyTarget = selectedTargets.find(
+            (entry) =>
+                entry?.username &&
+                Number.isInteger(entry?.slot) &&
+                entry.username !== actingUsername
+        );
+        actorState.snapshots = actorState.snapshots || {};
+        actorState.snapshots.previousSkillTargetKey = previousSkillTargetKey;
+        actorState.snapshots.currentSkillTargetKey = primaryEnemyTarget
+            ? `${primaryEnemyTarget.username}:${primaryEnemyTarget.slot}`
+            : '';
         const personalReflectStatus = (Array.isArray(actorState.statuses) ? actorState.statuses : []).find(
             (status) => {
                 const remaining = Number(status?.remainingTurns) || 0;
@@ -4621,6 +4682,11 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         skillClasses: skill.classes || [],
                     });
                     const skillSpecificBonus = getSkillSpecificDamageBonus(actorState, skill.id || null);
+                    const samePreviousTargetBonus = getSamePreviousTargetDamageBonus({
+                        actorState,
+                        recipient,
+                        skillId: skill.id || null,
+                    });
                     const targetSourceBonus = getTargetBonusDamageFromSource({
                         targetState,
                         sourceCharacterId: actingCharacterId,
@@ -4628,7 +4694,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         skillClasses: skill.classes || [],
                         afflictionDamage: Boolean(effect?.metadata?.afflictionDamage) || hasSkillClass(skill.classes || [], 'affliction'),
                     });
-                    const totalAmount = Math.max(0, amount + skillSpecificBonus + targetSourceBonus);
+                    const totalAmount = Math.max(
+                        0,
+                        amount + skillSpecificBonus + samePreviousTargetBonus + targetSourceBonus
+                    );
                     queueDamage(recipient, totalAmount, effect);
                 });
                 return;
@@ -4852,7 +4921,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             runtimeMetadata.cannotUseSkillIndices.length > 0) ||
                         (Array.isArray(runtimeMetadata?.cannotUseSkillClasses) &&
                             runtimeMetadata.cannotUseSkillClasses.length > 0);
-                    if (applyingStun && hasStatusMetadataFlag(destinationState, 'cannotBeStunned')) {
+                    const stunImmunityDisabled =
+                        Boolean(runtimeMetadata?.cannotIgnoreStuns) ||
+                        hasStatusMetadataFlag(destinationState, 'cannotIgnoreStuns');
+                    if (
+                        applyingStun &&
+                        hasStatusMetadataFlag(destinationState, 'cannotBeStunned') &&
+                        !stunImmunityDisabled
+                    ) {
                         // Keep stun feedback visible, but strip all functional stun locks.
                         applyStatus({
                             targetState: destinationState,
@@ -5188,6 +5264,21 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             targetState,
                             skillClasses: skill.classes || [],
                             isEnemySkill: recipient.username !== actingUsername,
+                        })
+                    ) {
+                        return;
+                    }
+                    const condition = effect?.condition;
+                    if (
+                        condition &&
+                        !doesEffectConditionMatch({
+                            condition,
+                            actorState,
+                            targetState,
+                            actorUnit,
+                            actorUsername: actingUsername,
+                            targetUnit: recipient.unit,
+                            targetUsername: recipient.username,
                         })
                     ) {
                         return;

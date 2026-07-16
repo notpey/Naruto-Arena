@@ -10,7 +10,7 @@ const characters = [
                 "id": "uzumaki-naruto-combo",
                 "name": "Uzumaki Naruto Combo",
                 "skillimage": "https://i.imgur.com/wZVMrBY.png",
-                "skilldescription": "Uzumaki Naruto deals 20 damage to one enemy. During 'Shadow Clones' this skill will deal 10 additional damage.",
+                "skilldescription": "Uzumaki Naruto deals 25 damage to one enemy.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -24,7 +24,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
+                        "amount": 25,
                         "scope": "target"
                     }
                 ]
@@ -33,7 +33,7 @@ const characters = [
                 "id": "uzumaki-naruto-overwhelming-chakra-wave",
                 "name": "Overwhelming Chakra Wave",
                 "skillimage": "https://i.imgur.com/N1LUxVU.png",
-                "skilldescription": "Uzumaki Naruto will gain 1 random chakra after 1 turn. For 1 turn 'Uzumaki Naruto Combo' and 'Rasengan' will be unable to be used.",
+                "skilldescription": "Uzumaki Naruto will gain 1 random chakra after 1 turn. Permanently, 'Uzumaki Naruto Combo' and 'Rasengan' deal 5 additional damage.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
@@ -45,15 +45,15 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uzumaki_naruto_overwhelming_chakra_wave_lock",
-                        "duration": 1,
+                        "statusId": "uzumaki_naruto_overwhelming_chakra_wave_focus",
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "cannotUseSkillIndices": [
-                                0,
-                                4
-                            ],
-                            "tooltipText": "Uzumaki Naruto Combo and Rasengan cannot be used."
+                            "skillDamageBonuses": {
+                                "uzumaki-naruto-combo": 5,
+                                "uzumaki-naruto-rasengan": 5
+                            },
+                            "tooltipText": "Uzumaki Naruto Combo and Rasengan deal 5 additional damage."
                         }
                     },
                     {
@@ -79,10 +79,8 @@ const characters = [
                 "id": "uzumaki-naruto-shadow-clones",
                 "name": "Shadow Clones",
                 "skillimage": "https://i.imgur.com/eQSV2d1.png",
-                "skilldescription": "Uzumaki Naruto gains 15 points of damage reduction for 4 turns. For 3 turns 'Uzumaki Naruto Combo' will deal 10 additional damage and this skill will be replaced by 'Rasengan'.",
-                "energy": [
-                    "Random"
-                ],
+                "skilldescription": "Uzumaki Naruto gains 10 points of damage reduction permanently and this skill is replaced by 'Rasengan'.",
+                "energy": [],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 4,
@@ -93,27 +91,15 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uzumaki_naruto_shadow_clones_defense",
-                        "duration": 4,
-                        "scope": "self",
-                        "metadata": {
-                            "damageReductionFlat": 15,
-                            "tooltipText": "Naruto has 15 damage reduction."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
                         "statusId": "uzumaki_naruto_shadow_clones_active",
-                        "duration": 3,
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "skillDamageBonuses": {
-                                "uzumaki-naruto-combo": 10
-                            },
+                            "damageReductionFlat": 10,
                             "skillReplacements": {
                                 "uzumaki-naruto-shadow-clones": "uzumaki-naruto-rasengan"
                             },
-                            "tooltipText": "Uzumaki Naruto Combo deals 10 additional damage and Shadow Clones is replaced by Rasengan."
+                            "tooltipText": "Naruto has 10 damage reduction and Shadow Clones is replaced by Rasengan."
                         }
                     }
                 ]
@@ -151,7 +137,7 @@ const characters = [
                 "name": "Rasengan",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/lro3e07.png",
-                "skilldescription": "Uzumaki Naruto deals 45 damage to one enemy and stuns their skills for 1 turn.",
+                "skilldescription": "Uzumaki Naruto deals 35 damage to one enemy and stuns their non-strategic skills for 1 turn.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -166,18 +152,22 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 45,
+                        "amount": 35,
                         "scope": "target"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "stunned",
+                        "statusId": "uzumaki_naruto_rasengan_stun",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "tooltipText": "This character is stunned and cannot use skills."
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "mental"
+                            ],
+                            "tooltipText": "This character's non-strategic skills are stunned."
                         }
                     }
                 ]
@@ -195,7 +185,7 @@ const characters = [
                 "id": "haruno-sakura-ko-punch",
                 "name": "KO Punch",
                 "skillimage": "https://i.imgur.com/CoiXCFk.png",
-                "skilldescription": "Haruno Sakura deals 20 damage to one enemy and stuns their physical and strategic skills for 1 turn. During 'Inner Sakura', 'KO Punch' deals 10 additional damage.",
+                "skilldescription": "Haruno Sakura deals 20 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -255,10 +245,8 @@ const characters = [
                 "id": "haruno-sakura-inner-sakura",
                 "name": "Inner Sakura",
                 "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "For 4 turns, Haruno Sakura will gain 10 points of damage reduction and will ignore all enemy stun effects. During this time 'KO Punch' will deal 10 additional damage.",
-                "energy": [
-                    "Random"
-                ],
+                "skilldescription": "Haruno Sakura gains 5 points of damage reduction and ignores all enemy stun effects permanently. This skill is replaced by 'Inner Sakura Strangle'.",
+                "energy": [],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 4,
@@ -270,16 +258,16 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "haruno_sakura_inner_sakura_active",
-                        "duration": 4,
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "damageReductionFlat": 10,
+                            "damageReductionFlat": 5,
                             "cannotBeStunned": true,
                             "stunImmune": true,
-                            "skillDamageBonuses": {
-                                "haruno-sakura-ko-punch": 10
+                            "skillReplacements": {
+                                "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
                             },
-                            "tooltipText": "Sakura has 10 damage reduction, ignores stuns, and KO Punch deals 10 additional damage."
+                            "tooltipText": "Sakura has 5 damage reduction, ignores stuns, and Inner Sakura is replaced by Inner Sakura Strangle."
                         }
                     }
                 ]
@@ -311,6 +299,72 @@ const characters = [
                         }
                     }
                 ]
+            },
+            {
+                "id": "haruno-sakura-inner-sakura-strangle",
+                "name": "Inner Sakura Strangle",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/srHzKvO.png",
+                "skilldescription": "Haruno Sakura targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-character",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "HealthLoss",
+                        "amount": 5,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "targetRelation": "ally"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_inner_sakura_strangle_ally_power",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "damageBonusFlat": 5,
+                            "tooltipText": "This character deals 5 additional damage."
+                        },
+                        "condition": {
+                            "scope": "target",
+                            "targetRelation": "ally"
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "targetRelation": "enemy"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_inner_sakura_strangle_enemy_weakness",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDebuffFlat": 10,
+                            "tooltipText": "This character's next damaging skill deals 10 less damage."
+                        },
+                        "condition": {
+                            "scope": "target",
+                            "targetRelation": "enemy"
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -325,10 +379,9 @@ const characters = [
                 "id": "uchiha-sasuke-lion-combo",
                 "name": "Lion Combo",
                 "skillimage": "https://i.imgur.com/z0L2daw.png",
-                "skilldescription": "Uchiha Sasuke deals 35 damage to one enemy. This skill will deal 10 additional damage to an enemy affected by 'Sharingan'.",
+                "skilldescription": "Uchiha Sasuke deals 25 damage to one enemy.",
                 "energy": [
-                    "Taijutsu",
-                    "Random"
+                    "Bloodline"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -340,17 +393,8 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 35,
+                        "amount": 25,
                         "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "uchiha_sasuke_sharingan_target",
-                            "scope": "target"
-                        }
                     }
                 ]
             },
@@ -358,7 +402,7 @@ const characters = [
                 "id": "uchiha-sasuke-chidori",
                 "name": "Chidori",
                 "skillimage": "https://i.imgur.com/rJ3WZmI.png",
-                "skilldescription": "Uchiha Sasuke deals 35 piercing damage to one enemy. This skill will deal 25 additional damage to an enemy affected by 'Sharingan'.",
+                "skilldescription": "Uchiha Sasuke deals 35 piercing damage to one enemy. For 1 turn, 'Lion Combo' and 'Grand Fireball Technique' will cost 1 random chakra.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -380,15 +424,24 @@ const characters = [
                         }
                     },
                     {
-                        "type": "damage",
-                        "amount": 25,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "uchiha_sasuke_sharingan_target",
-                            "scope": "target"
-                        },
+                        "type": "apply_status",
+                        "statusId": "uchiha_sasuke_chidori_cost_shift",
+                        "duration": 1,
+                        "scope": "self",
                         "metadata": {
-                            "ignoreDamageReduction": true
+                            "skillCostOverridesBySkillId": {
+                                "uchiha-sasuke-lion-combo": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                },
+                                "uchiha-sasuke-grand-fireball-technique": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Lion Combo and Grand Fireball Technique cost 1 random chakra."
                         }
                     }
                 ]
@@ -397,11 +450,9 @@ const characters = [
                 "id": "uchiha-sasuke-sharingan",
                 "name": "Sharingan",
                 "skillimage": "https://i.imgur.com/IkTLWta.png",
-                "skilldescription": "Uchiha Sasuke targets one enemy. For 3 turns, Uchiha Sasuke will gain 10 points of damage reduction. During this time, that enemy will be unable to reduce damage or become invulnerable. This skill will end if Uchiha Sasuke dies.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "single-enemy",
+                "skilldescription": "Uchiha Sasuke gains 10 damage reduction permanently. If he uses a skill on an enemy he used a skill on the previous turn, it deals 5 additional damage. This skill is replaced by 'Grand Fireball Technique'.",
+                "energy": [],
+                "target": "self",
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
@@ -411,25 +462,16 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uchiha_sasuke_sharingan_target",
-                        "duration": 3,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "ongoingClass": "action",
-                            "tooltipText": "This character is affected by Sharingan and cannot reduce damage or become invulnerable."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
                         "statusId": "uchiha_sasuke_sharingan_focus",
-                        "duration": 3,
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 10,
-                            "tooltipText": "Sasuke has 10 damage reduction while Sharingan is active."
+                            "samePreviousTargetDamageBonusFlat": 5,
+                            "skillReplacements": {
+                                "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
+                            },
+                            "tooltipText": "Sasuke has 10 damage reduction, deals 5 additional damage to the enemy he targeted last turn, and Sharingan is replaced by Grand Fireball Technique."
                         }
                     }
                 ]
@@ -461,6 +503,42 @@ const characters = [
                         }
                     }
                 ]
+            },
+            {
+                "id": "uchiha-sasuke-grand-fireball-technique",
+                "name": "Grand Fireball Technique",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/IkTLWta.png",
+                "skilldescription": "Uchiha Sasuke deals 5 affliction damage to all enemies this turn and 5 affliction damage to them the following turn.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_sasuke_grand_fireball_burn",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "triggerOnApply": true,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "This character takes 5 affliction damage from Grand Fireball Technique."
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -475,10 +553,9 @@ const characters = [
                 "id": "inuzuka-kiba-garouga",
                 "name": "Garouga",
                 "skillimage": "https://i.imgur.com/q3NdG8q.png",
-                "skilldescription": "Inuzuka Kiba deals 30 piercing damage to one enemy. During 'Double Headed Wolf' this skill costs 1 less random chakra.",
+                "skilldescription": "Inuzuka Kiba deals 20 piercing damage to one enemy. During 'Double Headed Wolf,' it deals 30 piercing damage and costs 1 Taijutsu and 1 random chakra.",
                 "energy": [
-                    "Taijutsu",
-                    "Random"
+                    "Taijutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -490,7 +567,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 30,
+                        "amount": 20,
                         "scope": "target",
                         "metadata": {
                             "ignoreDamageReduction": true
@@ -502,7 +579,7 @@ const characters = [
                 "id": "inuzuka-kiba-double-headed-wolf",
                 "name": "Double Headed Wolf",
                 "skillimage": "https://i.imgur.com/cKssLAR.png",
-                "skilldescription": "Inuzuka Kiba deals 15 damage to all enemies for 3 turns. For 3 turns, 'Garouga' will cost 1 random chakra less. During this time, Inuzuka Kiba gains 15 points of damage reduction.",
+                "skilldescription": "Inuzuka Kiba deals 10 damage to all enemies for 3 turns. During this time, 'Garouga' deals 10 additional damage and costs 1 Taijutsu and 1 random chakra. Inuzuka Kiba gains 15 points of damage reduction.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -523,12 +600,12 @@ const characters = [
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
-                            "turnEndDamage": 15,
+                            "turnEndDamage": 10,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
                             "ongoingClass": "action",
                             "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage from Double Headed Wolf."
+                            "tooltipText": "This character takes 10 damage from Double Headed Wolf."
                         }
                     },
                     {
@@ -540,10 +617,16 @@ const characters = [
                             "damageReductionFlat": 15,
                             "skillCostOverridesBySkillId": {
                                 "inuzuka-kiba-garouga": {
-                                    "energy": ["Taijutsu"]
+                                    "energy": [
+                                        "Taijutsu",
+                                        "Random"
+                                    ]
                                 }
                             },
-                            "tooltipText": "Kiba has 15 damage reduction and Garouga costs 1 less random chakra."
+                            "tooltipText": "Kiba has 15 damage reduction, Garouga deals 10 additional damage, and Garouga costs 1 Taijutsu and 1 random chakra.",
+                            "skillDamageBonuses": {
+                                "inuzuka-kiba-garouga": 10
+                            }
                         }
                     }
                 ]
@@ -561,7 +644,7 @@ const characters = [
                     "missingStatusId": "inuzuka_kiba_dynamic_marking"
                 },
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -780,7 +863,7 @@ const characters = [
                 "id": "hyuuga-hinata-hinata-gentle-fist",
                 "name": "Hinata Gentle Fist",
                 "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 15 damage to one enemy for 2 turns. If used during 'Byakugan', this skill will also remove 1 random chakra each turn.",
+                "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -789,46 +872,42 @@ const characters = [
                 "cooldown": 1,
                 "classes": [
                     "Physical",
-                    "Action"
+                    "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
                         "type": "apply_status",
-                        "statusId": "hyuuga_hinata_gentle_fist",
-                        "duration": 2,
+                        "statusId": "hyuuga_hinata_gentle_fist_cost",
+                        "duration": 1,
                         "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "randomCostIncrease": 1,
+                            "tooltipText": "This character's skills cost 1 additional random chakra."
+                        },
                         "condition": {
                             "scope": "self",
                             "missingStatusId": "hyuuga_hinata_byakugan"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 15,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage from Gentle Fist."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "hyuuga_hinata_gentle_fist_byakugan",
+                        "statusId": "hyuuga_hinata_gentle_fist_cost",
                         "duration": 2,
                         "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "randomCostIncrease": 1,
+                            "tooltipText": "This character's skills cost 1 additional random chakra."
+                        },
                         "condition": {
                             "scope": "self",
                             "statusId": "hyuuga_hinata_byakugan"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 15,
-                            "turnEndRemoveRandomChakra": 1,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 damage from Gentle Fist and loses 1 random chakra."
                         }
                     }
                 ]
@@ -837,42 +916,18 @@ const characters = [
                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                 "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                "skilldescription": "Hyuuga Hinata deals 10 piercing damage to all enemies and grants her team 10 points of destructible defense for 1 turn. If used during 'Byakugan', this skill will deal 5 additional damage.",
+                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
-                "target": "all-enemy",
+                "target": "all-allies",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Strategic",
                     "Instant"
                 ],
                 "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "all-enemy",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "hyuuga_hinata_byakugan"
-                        },
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "all-enemy",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "hyuuga_hinata_byakugan"
-                        },
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
                     {
                         "type": "apply_status",
                         "statusId": "hyuuga_hinata_protective_palms_defense",
@@ -880,7 +935,43 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "destructibleDefensePoints": 10,
+                            "onBreakApplyStatusToSource": {
+                                "statusId": "hyuuga_hinata_protective_palms_cost",
+                                "duration": 1,
+                                "metadata": {
+                                    "harmful": true,
+                                    "randomCostIncrease": 1,
+                                    "tooltipText": "This character's skills cost 1 additional random chakra."
+                                }
+                            },
                             "tooltipText": "This character has 10 destructible defense."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_protective_palms_defense",
+                        "duration": 2,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "destructibleDefensePoints": 10,
+                            "onBreakApplyStatusToSource": {
+                                "statusId": "hyuuga_hinata_protective_palms_cost",
+                                "duration": 1,
+                                "metadata": {
+                                    "harmful": true,
+                                    "randomCostIncrease": 1,
+                                    "tooltipText": "This character's skills cost 1 additional random chakra."
+                                }
+                            },
+                            "tooltipText": "This character has 10 destructible defense."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
                         }
                     }
                 ]
@@ -889,13 +980,13 @@ const characters = [
                 "id": "hyuuga-hinata-byakugan",
                 "name": "Byakugan",
                 "skillimage": "https://i.imgur.com/TcjSSGB.png",
-                "skilldescription": "Hyuuga Hinata gains 15 points of damage reduction for 4 turns. The following 4 turns, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' will be improved.",
+                "skilldescription": "Hyuuga Hinata gains 15 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 3,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -904,11 +995,11 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "hyuuga_hinata_byakugan",
-                        "duration": 4,
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "tooltipText": "Hinata has 15 damage reduction and her skills are improved."
+                            "tooltipText": "Hinata has 15 damage reduction and her skills last 1 additional turn."
                         }
                     }
                 ]
@@ -956,7 +1047,7 @@ const characters = [
                 "cannotBeCountered": true,
                 "cannotBeReflected": true,
                 "skillimage": "https://i.imgur.com/s3o4f1D.png",
-                "skilldescription": "Nara Shikamaru targets one enemy for 5 turns. During this time 'Shadow-Neck Bind' and 'Shadow Imitation' will be improved on them. This skill cannot be countered or reflected and cannot be used on an enemy already being affected.",
+                "skilldescription": "Nara Shikamaru targets one enemy permanently. During this time 'Shadow-Neck Bind' and 'Shadow Imitation' can be used on them. This skill ignores invulnerability and cannot be countered or reflected.",
                 "energy": [
                     "none"
                 ],
@@ -974,20 +1065,21 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "nara_shikamaru_meditate",
-                        "duration": 5,
+                        "duration": 99,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "tooltipText": "Shadow-Neck Bind and Shadow Imitation last 1 additional turn on this character."
+                            "tooltipText": "Shadow-Neck Bind and Shadow Imitation can be used on this character."
                         }
                     }
-                ]
+                ],
+                "ignoreInvulnerability": true
             },
             {
                 "id": "nara-shikamaru-shadow-neck-bind",
                 "name": "Shadow-Neck Bind",
                 "skillimage": "https://i.imgur.com/qrtbpQH.png",
-                "skilldescription": "Nara Shikamaru makes all enemies unable to reduce damage or become invulnerable and deals 15 damage to them for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
+                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies are unable to reduce damage or become invulnerable and take 15 damage for 2 turns.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -1003,29 +1095,8 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "nara_shikamaru_shadow_neck_bind",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "turnEndDamage": 15,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character cannot reduce damage or become invulnerable and takes 15 damage."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "nara_shikamaru_shadow_neck_bind",
                         "duration": 2,
                         "scope": "all-enemy",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "nara_shikamaru_meditate"
-                        },
                         "metadata": {
                             "harmful": true,
                             "cannotReduceDamage": true,
@@ -1038,13 +1109,16 @@ const characters = [
                             "tooltipText": "This character cannot reduce damage or become invulnerable and takes 15 damage."
                         }
                     }
-                ]
+                ],
+                "targetCondition": {
+                    "statusId": "nara_shikamaru_meditate"
+                }
             },
             {
                 "id": "nara-shikamaru-shadow-imitation",
                 "name": "Shadow Imitation",
                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                "skilldescription": "Nara Shikamaru stuns all enemies' physical, chakra and strategic skills for 1 turn. This skill lasts 1 additional turn on enemies affected by 'Meditate'.",
+                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra and strategic skills are stunned for 2 turns.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1060,27 +1134,8 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "nara_shikamaru_shadow_imitation",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "strategic"
-                            ],
-                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "nara_shikamaru_shadow_imitation",
                         "duration": 2,
                         "scope": "all-enemy",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "nara_shikamaru_meditate"
-                        },
                         "metadata": {
                             "harmful": true,
                             "cannotUseSkillClasses": [
@@ -1091,7 +1146,10 @@ const characters = [
                             "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     }
-                ]
+                ],
+                "targetCondition": {
+                    "statusId": "nara_shikamaru_meditate"
+                }
             },
             {
                 "id": "nara-shikamaru-shikamaru-hide",
@@ -1157,7 +1215,7 @@ const characters = [
                 "id": "akimichi-chouji-meat-tank",
                 "name": "Meat Tank",
                 "skillimage": "https://i.imgur.com/Iwup0It.png",
-                "skilldescription": "Akimichi Chouji deals 10 damage to one enemy for 2 turns and becomes invulnerable for 2 turns.",
+                "skilldescription": "Akimichi Chouji deals 10 damage to one enemy for 2 turns, becomes invulnerable for 2 turns, and ignores all healing effects while active.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -1192,7 +1250,8 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "invulnerable": true,
-                            "tooltipText": "Chouji is invulnerable."
+                            "tooltipText": "Chouji is invulnerable and ignores healing effects.",
+                            "healReceivedMultiplier": 0
                         }
                     }
                 ]
@@ -1275,16 +1334,15 @@ const characters = [
             {
                 "id": "yamanaka-ino-mind-body-disturbance",
                 "name": "Mind Body Disturbance",
-                "ignoreInvulnerability": true,
+                "ignoreInvulnerability": false,
                 "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "This skill ignores invulnerability. Yamanaka Ino stuns one enemy's physical, chakra and strategic skills and makes them unable to reduce damage or become invulnerable for 1 turn. One random enemy will take 30 piercing damage.",
+                "skilldescription": "Yamanaka Ino targets one random enemy, stunning their physical, chakra, and strategic skills for 1 turn. Another random enemy takes 25 piercing damage.",
                 "energy": [
-                    "Random",
-                    "Random"
+                    "Genjutsu"
                 ],
-                "target": "single-enemy",
+                "target": "self",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Mental",
                     "Instant"
@@ -1294,7 +1352,7 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "yamanaka_ino_mind_body_disturbance_control",
                         "duration": 1,
-                        "scope": "target",
+                        "scope": "random-enemy",
                         "metadata": {
                             "harmful": true,
                             "cannotUseSkillClasses": [
@@ -1302,14 +1360,12 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character's physical, chakra and strategic skills are stunned and they cannot reduce damage or become invulnerable."
+                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
                         }
                     },
                     {
                         "type": "damage",
-                        "amount": 30,
+                        "amount": 25,
                         "scope": "random-enemy",
                         "metadata": {
                             "ignoreDamageReduction": true,
@@ -1322,7 +1378,7 @@ const characters = [
                 "id": "yamanaka-ino-mind-body-switch",
                 "name": "Mind Body Switch",
                 "skillimage": "https://i.imgur.com/dHM9uYL.png",
-                "skilldescription": "Yamanaka Ino targets one enemy for 4 turns, making them unable to reduce damage or become invulnerable and stunning their skills. During this time, this skill will be replaced by 'Art of the Valentine'.",
+                "skilldescription": "Yamanaka Ino targets one enemy for 3 turns. On the first turn, their physical skills are stunned. On the second turn, their physical and chakra skills are stunned. On the third turn, they are fully stunned for 1 turn. During this time, this skill becomes 'Art of the Valentine'.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1337,21 +1393,50 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "yamanaka_ino_mind_body_switch_target",
-                        "duration": 4,
+                        "statusId": "yamanaka_ino_mind_body_switch_stage_1",
+                        "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character is controlled by Mind Body Switch."
+                            "cannotUseSkillClasses": [
+                                "physical"
+                            ],
+                            "tooltipText": "This character's physical skills are stunned.",
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "yamanaka_ino_mind_body_switch_stage_2",
+                                    "duration": 1,
+                                    "scope": "self",
+                                    "metadata": {
+                                        "harmful": true,
+                                        "cannotUseSkillClasses": [
+                                            "physical",
+                                            "energy"
+                                        ],
+                                        "tooltipText": "This character's physical and chakra skills are stunned.",
+                                        "onExpireEffects": [
+                                            {
+                                                "type": "apply_status",
+                                                "statusId": "yamanaka_ino_mind_body_switch_stage_3",
+                                                "duration": 1,
+                                                "scope": "self",
+                                                "metadata": {
+                                                    "harmful": true,
+                                                    "cannotUseSkills": true,
+                                                    "tooltipText": "This character is stunned and cannot use skills."
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     },
                     {
                         "type": "apply_status",
                         "statusId": "yamanaka_ino_mind_body_switch_active",
-                        "duration": 4,
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
                             "skillReplacements": {
@@ -1366,15 +1451,13 @@ const characters = [
                 "id": "yamanaka-ino-chakra-hair-strand-trap",
                 "name": "Chakra Hair Strand Trap",
                 "skillimage": "https://i.imgur.com/CH2jrFU.png",
-                "skilldescription": "For 1 turn, if one target enemy uses a new harmful skill, the next skill they use afterward will have its cooldown increased by 1. This skill is invisible until triggered.",
-                "energy": [
-                    "Random"
-                ],
+                "skilldescription": "Yamanaka Ino targets one enemy. For 1 turn, if they use a skill, they receive 10 damage, have their strategic skills stunned for 1 turn, and become unable to ignore stun effects for 1 turn. This skill is invisible.",
+                "energy": [],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Strategic",
+                    "Energy",
                     "Instant"
                 ],
                 "effects": [
@@ -1387,19 +1470,28 @@ const characters = [
                             "harmful": true,
                             "hideTooltipFromUnitOwner": true,
                             "onOwnerUseSkillTrigger": true,
-                            "onOwnerUseSkillHarmfulOnly": true,
                             "onOwnerUseSkillEffects": [
                                 {
+                                    "type": "damage",
+                                    "amount": 10,
+                                    "scope": "self"
+                                },
+                                {
                                     "type": "apply_status",
-                                    "statusId": "yamanaka_ino_chakra_hair_strand_trap_cooldown",
-                                    "duration": 2,
+                                    "statusId": "yamanaka_ino_chakra_hair_strand_trap_strategic_stun",
+                                    "duration": 1,
+                                    "scope": "self",
                                     "metadata": {
-                                        "nextUsedSkillCooldownAdjustment": 1,
-                                        "tooltipText": "This character's next used skill has its cooldown increased by 1."
+                                        "harmful": true,
+                                        "cannotUseSkillClasses": [
+                                            "strategic"
+                                        ],
+                                        "cannotIgnoreStuns": true,
+                                        "tooltipText": "This character's strategic skills are stunned and they cannot ignore stun effects."
                                     }
                                 }
                             ],
-                            "tooltipText": "If this character uses a new harmful skill, their cooldowns are increased."
+                            "tooltipText": "If this character uses a skill, they are damaged and their strategic skills are stunned."
                         }
                     }
                 ]
@@ -1437,7 +1529,7 @@ const characters = [
                 "name": "Art of the Valentine",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/p25BBXs.png",
-                "skilldescription": "Yamanaka Ino deals 25 damage to one enemy.",
+                "skilldescription": "Yamanaka Ino deals 15 damage to one enemy. If the target is affected by a stun effect, this skill deals 10 additional damage.",
                 "energy": [
                     "Random"
                 ],
@@ -1451,8 +1543,26 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 15,
                         "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusIdsAny": [
+                                "stunned",
+                                "yamanaka_ino_mind_body_disturbance_control",
+                                "yamanaka_ino_mind_body_switch_stage_1",
+                                "yamanaka_ino_mind_body_switch_stage_2",
+                                "yamanaka_ino_mind_body_switch_stage_3",
+                                "nara_shikamaru_shadow_imitation",
+                                "haruno_sakura_ko_punch_stun",
+                                "uzumaki_naruto_rasengan_stun"
+                            ]
+                        }
                     }
                 ]
             }
@@ -1469,7 +1579,7 @@ const characters = [
                 "id": "rock-lee-high-speed-taijutsu",
                 "name": "High Speed Taijutsu",
                 "skillimage": "https://i.imgur.com/f59XWBW.png",
-                "skilldescription": "Rock Lee deals 10 damage to one enemy for 3 turns and takes 10 affliction damage. The following 3 turns, Rock Lee will gain 10 points of damage reduction and that enemy will take 10 additional damage from 'Front Lotus'. This skill stacks and will deal 15 additional damage during 'Fifth Gate Opening'.",
+                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -1478,60 +1588,32 @@ const characters = [
                 "cooldown": 0,
                 "classes": [
                     "Physical",
-                    "Action",
+                    "Melee",
                     "Instant",
                     "Affliction"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "rock_lee_high_speed_taijutsu_damage",
-                        "duration": 3,
+                        "type": "damage",
+                        "amount": 25,
                         "scope": "target",
                         "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 10,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 10 damage from High Speed Taijutsu."
+                            "ignoreDamageReduction": true
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "rock_lee_high_speed_taijutsu_front_lotus_mark",
-                        "duration": 3,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "bonusDamageFromSourceSkillsFlat": 10,
-                            "bonusDamageFromSourceCharacterId": "rock-lee",
-                            "bonusDamageAppliesToSkillIds": [
-                                "rock-lee-front-lotus"
-                            ],
-                            "mergeNumericAddKeys": [
-                                "bonusDamageFromSourceSkillsFlat"
-                            ],
-                            "tooltipText": "This character takes additional damage from Front Lotus."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "rock_lee_high_speed_taijutsu_defense",
-                        "duration": 3,
+                        "statusId": "rock_lee_high_speed_taijutsu_minimum_hp",
+                        "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "damageReductionFlat": 10,
-                            "mergeNumericAddKeys": [
-                                "damageReductionFlat"
-                            ],
-                            "tooltipText": "Rock Lee has damage reduction from High Speed Taijutsu."
+                            "minimumHp": 1,
+                            "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
                         }
                     },
                     {
                         "type": "HealthLoss",
-                        "amount": 10,
+                        "amount": 5,
                         "scope": "self"
                     }
                 ]
@@ -1540,40 +1622,38 @@ const characters = [
                 "id": "rock-lee-front-lotus",
                 "name": "Front Lotus",
                 "skillimage": "https://i.imgur.com/4boHWJ0.png",
-                "skilldescription": "Rock Lee deals 30 damage to one enemy, takes 10 affliction damage and gains 20 points of permanent destructible defense that stacks. This skill deals 30 additional damage during 'Fifth Gate Opening'.",
+                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'.",
                 "energy": [
                     "Taijutsu",
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
+                    "Melee",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 30,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "HealthLoss",
-                        "amount": 10,
-                        "scope": "self"
+                        "amount": 35,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "rock_lee_front_lotus_defense",
-                        "duration": 99,
+                        "statusId": "rock_lee_front_lotus_final_lotus",
+                        "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "destructibleDefensePoints": 20,
-                            "mergeNumericAddKeys": [
-                                "destructibleDefensePoints"
-                            ],
-                            "tooltipText": "Rock Lee has permanent destructible defense from Front Lotus."
+                            "skillReplacements": {
+                                "rock-lee-front-lotus": "rock-lee-final-lotus"
+                            },
+                            "tooltipText": "Front Lotus is replaced by Final Lotus."
                         }
                     }
                 ]
@@ -1582,57 +1662,40 @@ const characters = [
                 "id": "rock-lee-fifth-gate-opening",
                 "name": "Fifth Gate Opening",
                 "skillimage": "https://i.imgur.com/OvlloQo.png",
-                "skilldescription": "Rock Lee removes all harmful effects on him, losing 30 health, and then becoming invulnerable to all harmful skills for 2 turns. The following 2 turns, this skill will be replaced by 'Final Lotus'. The affliction damage dealt by this skill cannot be ignored and cannot kill Rock Lee. This skill can only be used if Rock Lee has 80 or less health.",
-                "energy": [
-                    "Taijutsu"
-                ],
+                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee will deal 5 additional damage each time he is damaged by a skill. This skill is replaced by 'Fiery Spirit'.",
+                "energy": [],
                 "target": "self",
-                "actorCondition": {
-                    "sourceCurrentHpAtMost": 80
-                },
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 0,
                 "classes": [
                     "Strategic",
-                    "Instant",
-                    "Affliction"
+                    "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "cleanse_harmful",
-                        "scope": "self",
-                        "count": 0
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "rock_lee_fifth_gate_minimum_hp",
-                        "duration": 2,
-                        "scope": "self",
-                        "metadata": {
-                            "minimumHp": 1,
-                            "tooltipText": "Fifth Gate Opening cannot kill Rock Lee."
-                        }
-                    },
-                    {
-                        "type": "HealthLoss",
-                        "amount": 30,
-                        "scope": "self"
-                    },
-                    {
                         "type": "apply_status",
                         "statusId": "rock_lee_fifth_gate_opening",
-                        "duration": 2,
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "invulnerable": true,
-                            "skillDamageBonuses": {
-                                "rock-lee-high-speed-taijutsu": 15,
-                                "rock-lee-front-lotus": 30
+                            "onOwnerDamagedByBaseDamageAtLeastApplyStatusToOwner": {
+                                "threshold": 1,
+                                "enemyOnly": true,
+                                "duration": 99,
+                                "statusId": "rock_lee_fifth_gate_damage_growth",
+                                "metadata": {
+                                    "skillDamageBonuses": {
+                                        "rock-lee-high-speed-taijutsu": 5,
+                                        "rock-lee-front-lotus": 5,
+                                        "rock-lee-final-lotus": 5
+                                    },
+                                    "tooltipText": "Rock Lee's harmful skills deal 5 additional damage."
+                                }
                             },
                             "skillReplacements": {
-                                "rock-lee-fifth-gate-opening": "rock-lee-final-lotus"
+                                "rock-lee-fifth-gate-opening": "rock-lee-fiery-spirit"
                             },
-                            "tooltipText": "Rock Lee is invulnerable, High Speed Taijutsu and Front Lotus are improved, and Fifth Gate Opening is replaced by Final Lotus."
+                            "tooltipText": "Fifth Gate is open. Lee gains damage each time he is damaged by an enemy skill and Fifth Gate Opening is replaced by Fiery Spirit."
                         }
                     }
                 ]
@@ -1671,7 +1734,7 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/h658CGb.png",
-                "skilldescription": "Rock Lee deals 100 damage to one enemy.",
+                "skilldescription": "Rock Lee expends all his chakra and deals 50 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage. This skill cannot be countered.",
                 "energy": [
                     "Taijutsu",
                     "Taijutsu"
@@ -1681,13 +1744,68 @@ const characters = [
                 "cooldown": 0,
                 "classes": [
                     "Physical",
-                    "Instant"
+                    "Melee",
+                    "Instant",
+                    "Affliction"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 100,
-                        "scope": "target"
+                        "amount": 50,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rock_lee_final_lotus_minimum_hp",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "minimumHp": 1,
+                            "tooltipText": "Final Lotus cannot kill Rock Lee."
+                        }
+                    },
+                    {
+                        "type": "HealthLoss",
+                        "amount": 5,
+                        "scope": "self"
+                    }
+                ],
+                "cannotBeCountered": true
+            },
+            {
+                "id": "rock-lee-fiery-spirit",
+                "name": "Fiery Spirit",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/OvlloQo.png",
+                "skilldescription": "Rock Lee gains 1 taijutsu chakra and heals 10 health plus an additional 10 health for each 25 health he has lost.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "gain_chakra",
+                        "chakraType": "taijutsu",
+                        "amount": 1,
+                        "scope": "self"
+                    },
+                    {
+                        "type": "heal",
+                        "amount": 10,
+                        "scope": "self",
+                        "metadata": {
+                            "amountPerSourceMissingHpStep": 10,
+                            "sourceMissingHpStep": 25
+                        }
                     }
                 ]
             }
@@ -2294,7 +2412,10 @@ const characters = [
                             ],
                             "skillCostOverridesBySkillId": {
                                 "temari-summoning-quick-beheading-dance": {
-                                    "energy": ["Ninjutsu", "Random"]
+                                    "energy": [
+                                        "Ninjutsu",
+                                        "Random"
+                                    ]
                                 }
                             },
                             "tooltipText": "Temari is invulnerable to non-mental skills and Summoning Quick Beheading Dance costs 1 less random chakra."
@@ -2664,7 +2785,7 @@ const characters = [
                             "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
                             "consumeOnMatch": true
                         }
-                    },
+                    }
                 ]
             },
             {
@@ -8186,8 +8307,7 @@ const characters = [
                 ]
             }
         ]
-    }
-,
+    },
     {
         "id": "edo-tensei-hashirama",
         "characterId": "edo-tensei-hashirama",
@@ -8518,7 +8638,10 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
-                            "invulnerableToSkillClasses": ["physical", "strategic"],
+                            "invulnerableToSkillClasses": [
+                                "physical",
+                                "strategic"
+                            ],
                             "tooltipText": "This character is invulnerable to physical and strategic skills."
                         }
                     }
@@ -9389,7 +9512,11 @@ const characters = [
                             "turnEndTrigger": "source_turn",
                             "damageBonusFlat": 5,
                             "growPerTurn": [
-                                { "key": "damageBonusFlat", "amount": 5, "max": 50 }
+                                {
+                                    "key": "damageBonusFlat",
+                                    "amount": 5,
+                                    "max": 50
+                                }
                             ],
                             "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense, takes 5 affliction damage each turn, and his skills deal 5 additional damage. This bonus grows by 5 each turn, up to a maximum of 10 stacks."
                         }
@@ -9770,7 +9897,11 @@ const characters = [
                                 "destructibleDefensePoints"
                             ],
                             "growPerTurn": [
-                                { "key": "destructibleDefensePoints", "amount": 10, "max": 40 }
+                                {
+                                    "key": "destructibleDefensePoints",
+                                    "amount": 10,
+                                    "max": 40
+                                }
                             ],
                             "tooltipText": "This character has 10 points of destructible defense from Sand Transformation. This grows by 10 each turn, up to 40.",
                             "onExpireEffects": [
