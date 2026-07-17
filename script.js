@@ -622,12 +622,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const endTurnChooseCountEl = endTurnModalEl?.querySelector('.chakrachoosered');
         const timerBar = document.querySelector('.timer-bar');
         const TURN_DURATION_MS = 60_000;
-        // Read the CSS-declared full width instead of hardcoding it: classic and
-        // remaster stages use different .timer-bar widths (191px / 273px), and a
-        // hardcoded value silently drifts out of sync whenever that CSS changes.
+        // In-game is remaster-only; read the CSS-declared width so future remaster
+        // sizing tweaks do not require a script change.
         const TIMER_MAX_WIDTH = timerBar
-            ? parseFloat(getComputedStyle(timerBar).width) || 191
-            : 191;
+            ? parseFloat(getComputedStyle(timerBar).width) || 273
+            : 273;
         const EXCHANGE_CHAKRA_COST = 5;
         const READY_TEXT_PLAYER = 'PRESS WHEN READY';
         const READY_TEXT_OPPONENT = "OPPONENT'S TURN...";
@@ -652,6 +651,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         let latestBoardState = null;
         let globalStatusTooltipEl = null;
         let globalStatusTooltipHideTimer = null;
+        const INGAME_PERF_WARN_MS = 16;
+        const isIngamePerfLoggingEnabled = () =>
+            window.localStorage?.getItem('naPerf') === '1' || window.location.search.includes('perf=1');
+        const measureIngameStep = (label, callback, warnMs = INGAME_PERF_WARN_MS) => {
+            const start = performance.now();
+            const result = callback();
+            const elapsed = performance.now() - start;
+            if (elapsed >= warnMs && isIngamePerfLoggingEnabled()) {
+                console.warn(`[NA perf] ${label}: ${elapsed.toFixed(1)}ms`);
+            }
+            return result;
+        };
+        let statusRenderSignatureByCard = new WeakMap();
+        const dynamicSkillSignatureByKey = new Map();
+        let queuedTargetSignatureByCard = new WeakMap();
+        let lastMatchStateSignature = '';
         const cancelGlobalStatusTooltipHide = () => {
             if (globalStatusTooltipHideTimer) {
                 clearTimeout(globalStatusTooltipHideTimer);
@@ -1104,6 +1119,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             return pending.queuedByActorSlot?.[String(actorSlot)] || null;
         };
 
+        const clonePendingTurnState = (pending = pendingTurnState) =>
+            JSON.parse(JSON.stringify(normalizePendingTurn(pending)));
+
+        const applyOptimisticQueuedSkill = ({ actorSlot, skillIdx, skill, selection, classChoice = null }) => {
+            const pending = clonePendingTurnState();
+            const actorKey = String(actorSlot);
+            const effectiveEnergy = getEffectiveEnergyList(skill?.energy || [], actorSlot, skill);
+            const { specific, random } = getEnergyCost(effectiveEnergy);
+            const nextPool = normalizePool(playerPoolState);
+
+            const existing = pending.queuedByActorSlot?.[actorKey];
+            if (existing) {
+                chakraTypes.forEach((type) => {
+                    nextPool[type] = (Number(nextPool[type]) || 0) + (Number(existing.reservedSpecific?.[type]) || 0);
+                });
+                pending.unresolvedRandom = Math.max(0, pending.unresolvedRandom - (Number(existing.requiredRandom) || 0));
+            }
+
+            chakraTypes.forEach((type) => {
+                nextPool[type] = Math.max(0, (Number(nextPool[type]) || 0) - (Number(specific[type]) || 0));
+            });
+            pending.queuedByActorSlot = {
+                ...(pending.queuedByActorSlot || {}),
+                [actorKey]: {
+                    actorSlot,
+                    skillIndex: skillIdx,
+                    targetSelection: selection,
+                    ...(classChoice ? { classChoice } : {}),
+                    reservedSpecific: { ...specific },
+                    requiredRandom: random,
+                },
+            };
+            pending.queueOrder = (Array.isArray(pending.queueOrder) ? pending.queueOrder : []).filter(
+                (slot) => slot !== actorSlot
+            );
+            pending.queueOrder.push(actorSlot);
+            pending.unresolvedRandom = Math.max(0, (Number(pending.unresolvedRandom) || 0) + random);
+            pendingTurnState = pending;
+            playerPoolState = nextPool;
+            renderChakra(playerPoolState);
+            applyQueuedSkillVisuals();
+        };
+
+        const applyOptimisticCancelQueuedSkill = (actorSlot) => {
+            const pending = clonePendingTurnState();
+            const actorKey = String(actorSlot);
+            const existing = pending.queuedByActorSlot?.[actorKey];
+            if (!existing) return;
+            const nextPool = normalizePool(playerPoolState);
+            chakraTypes.forEach((type) => {
+                nextPool[type] = (Number(nextPool[type]) || 0) + (Number(existing.reservedSpecific?.[type]) || 0);
+            });
+            pending.unresolvedRandom = Math.max(0, pending.unresolvedRandom - (Number(existing.requiredRandom) || 0));
+            delete pending.queuedByActorSlot[actorKey];
+            pending.queueOrder = (Array.isArray(pending.queueOrder) ? pending.queueOrder : []).filter(
+                (slot) => slot !== actorSlot
+            );
+            pendingTurnState = pending;
+            playerPoolState = nextPool;
+            renderChakra(playerPoolState);
+            applyQueuedSkillVisuals();
+        };
+
         const updateEndTurnButtons = () => {
             const pending = normalizePendingTurn(pendingTurnState);
             const hasUnresolvedRandom = pending.unresolvedRandom > 0;
@@ -1370,30 +1448,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const applyQueuedSkillVisuals = () => {
-            const pending = normalizePendingTurn(pendingTurnState);
-            const nextQueuedKeys = new Set();
-            Object.values(pending.queuedByActorSlot || {}).forEach((queued) => {
-                const key = `${queued.actorSlot}:${queued.skillIndex}`;
-                nextQueuedKeys.add(key);
-                const meta = playerSkillMetaByKey.get(key);
-                if (!meta?.imgEl) return;
-                meta.imgEl.classList.add('selected-target');
-                if (!queuedSkillKeySet.has(key) || !meta.imgEl.style.transform) {
-                    animateSkillToQueue(meta.imgEl);
-                }
+            measureIngameStep('applyQueuedSkillVisuals', () => {
+                const pending = normalizePendingTurn(pendingTurnState);
+                const nextQueuedKeys = new Set();
+                Object.values(pending.queuedByActorSlot || {}).forEach((queued) => {
+                    const key = `${queued.actorSlot}:${queued.skillIndex}`;
+                    nextQueuedKeys.add(key);
+                    const meta = playerSkillMetaByKey.get(key);
+                    if (!meta?.imgEl) return;
+                    meta.imgEl.classList.add('selected-target');
+                    if (!queuedSkillKeySet.has(key) || !meta.imgEl.style.transform) {
+                        animateSkillToQueue(meta.imgEl);
+                    }
+                });
+                queuedSkillKeySet.forEach((key) => {
+                    if (nextQueuedKeys.has(key)) return;
+                    const meta = playerSkillMetaByKey.get(key);
+                    if (!meta?.imgEl) return;
+                    meta.imgEl.classList.remove('selected-target');
+                    meta.imgEl.style.transform = '';
+                });
+                queuedSkillKeySet = nextQueuedKeys;
+                renderSkillOrderQueue();
+                updateSkillAffordability();
+                renderQueuedTargetTooltips();
+                renderDynamicSkillIcons();
             });
-            queuedSkillKeySet.forEach((key) => {
-                if (nextQueuedKeys.has(key)) return;
-                const meta = playerSkillMetaByKey.get(key);
-                if (!meta?.imgEl) return;
-                meta.imgEl.classList.remove('selected-target');
-                meta.imgEl.style.transform = '';
-            });
-            queuedSkillKeySet = nextQueuedKeys;
-            renderSkillOrderQueue();
-            updateSkillAffordability();
-            renderQueuedTargetTooltips();
-            renderDynamicSkillIcons();
         };
 
         const getOrderedQueuedEntries = () => {
@@ -1490,6 +1570,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const clearTargetHighlights = () => {
             document.querySelectorAll('.target-overlay').forEach((el) => el.remove());
+        };
+
+        const clearTargetingSkillVisual = () => {
+            document.querySelectorAll('.skillimage.targeting-skill').forEach((el) =>
+                el.classList.remove('targeting-skill')
+            );
         };
 
         const getCardByUsernameSlot = (username, slot) => {
@@ -2328,6 +2414,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         )
                 )
                 : [];
+            const statusSignature = JSON.stringify(
+                statuses.map((status) => ({
+                    id: status?.id || '',
+                    sourceSkillId: status?.sourceSkillId || '',
+                    remainingTurns: Math.max(0, Number(status?.remainingTurns) || 0),
+                    metadata: status?.metadata || {},
+                }))
+            );
+            const renderSignature = `${dead ? 'dead' : 'alive'}:${currentPlayerUsername || ''}:${unitUsername || ''}:${isEnemySide ? 'enemy' : 'ally'}:${statusSignature}`;
+            if (statusRenderSignatureByCard.get(card) === renderSignature) {
+                return;
+            }
+            statusRenderSignatureByCard.set(card, renderSignature);
             tooltipWrap
                 .querySelectorAll('.skilltooltipimage.dynamic-status-icon')
                 .forEach((node) => node.remove());
@@ -2718,27 +2817,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const renderBoardStatuses = (data) => {
-            if (!data || typeof data !== 'object') return;
-            const board = data.board && typeof data.board === 'object' ? data.board : null;
-            if (!board) return;
-            const playerUnits = currentPlayerUsername ? board[currentPlayerUsername] : null;
-            const opponentUsername = data.opponent?.username || currentOpponentUsername;
-            const opponentUnits = opponentUsername ? board[opponentUsername] : null;
-            if (Array.isArray(playerCards) && Array.isArray(playerUnits)) {
-                playerCards.forEach((card, slot) =>
-                    renderStatusTooltipForCard(card, playerUnits[slot], currentPlayerUsername || '')
-                );
-            }
-            if (Array.isArray(enemyCards) && Array.isArray(opponentUnits)) {
-                enemyCards.forEach((card, slot) =>
-                    renderStatusTooltipForCard(card, opponentUnits[slot], opponentUsername || '')
-                );
-            }
+            measureIngameStep('renderBoardStatuses', () => {
+                if (!data || typeof data !== 'object') return;
+                const board = data.board && typeof data.board === 'object' ? data.board : null;
+                if (!board) return;
+                const playerUnits = currentPlayerUsername ? board[currentPlayerUsername] : null;
+                const opponentUsername = data.opponent?.username || currentOpponentUsername;
+                const opponentUnits = opponentUsername ? board[opponentUsername] : null;
+                if (Array.isArray(playerCards) && Array.isArray(playerUnits)) {
+                    playerCards.forEach((card, slot) =>
+                        renderStatusTooltipForCard(card, playerUnits[slot], currentPlayerUsername || '')
+                    );
+                }
+                if (Array.isArray(enemyCards) && Array.isArray(opponentUnits)) {
+                    enemyCards.forEach((card, slot) =>
+                        renderStatusTooltipForCard(card, opponentUnits[slot], opponentUsername || '')
+                    );
+                }
+            });
         };
 
         const applyMatchState = (data) => {
             if (!data || typeof data !== 'object') return;
             if (battleEndShown) return;
+            const matchStateSignature = JSON.stringify({
+                currentTurn: data.currentTurn || '',
+                turnExpiresAt: data.turnExpiresAt || '',
+                status: data.status || '',
+                winner: data.winner || '',
+                board: data.board || null,
+                chakraPools: data.chakraPools || null,
+                pendingTurn: data.pendingTurn || null,
+            });
+            if (matchStateSignature === lastMatchStateSignature) {
+                return;
+            }
+            lastMatchStateSignature = matchStateSignature;
+            measureIngameStep('applyMatchState', () => {
             if (data.player?.username) {
                 currentPlayerUsername = data.player.username;
             }
@@ -2825,6 +2940,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             syncTurnState(data.currentTurn, data.turnExpiresAt);
+            }, 24);
         };
 
         setSkillInteractivity(true);
@@ -2920,66 +3036,79 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const renderQueuedTargetTooltips = () => {
-            const allCards = [...(Array.isArray(playerCards) ? playerCards : []), ...(Array.isArray(enemyCards) ? enemyCards : [])];
-            allCards.forEach((card) => {
-                const wrap = card?.querySelector('.skilltooltips');
-                if (!wrap) return;
-                wrap.querySelectorAll('.skilltooltipimage.dynamic-queued-target-icon').forEach((node) => node.remove());
-            });
-
-            const pending = normalizePendingTurn(pendingTurnState);
-            const queuedByTargetKey = new Map();
-            Object.values(pending.queuedByActorSlot || {}).forEach((queued) => {
-                const actorSlot = Number.parseInt(queued?.actorSlot, 10);
-                const skillIdx = Number.parseInt(queued?.skillIndex, 10);
-                const effectiveSkill = getEffectiveSkillForActorSlot(actorSlot, skillIdx);
-                const iconSrc = effectiveSkill?.skillimage || '';
-                const selection = Array.isArray(queued?.targetSelection)
-                    ? queued.targetSelection
-                    : queued?.targetSelection
-                        ? [queued.targetSelection]
-                        : [];
-                selection.forEach((target) => {
-                    const username = target?.username;
-                    const slot = Number.parseInt(target?.slot, 10);
-                    if (!username || !Number.isInteger(slot) || slot < 0) return;
-                    const unit = latestBoardState?.[username]?.[slot];
-                    const hp = Number(unit?.hp);
-                    const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
-                    if (dead) return;
-                    const key = `${slot} ${username}`;
-                    if (!queuedByTargetKey.has(key)) {
-                        queuedByTargetKey.set(key, { username, slot, entries: [] });
-                    }
-                    queuedByTargetKey.get(key).entries.push({
-                        iconSrc,
-                        skillName: effectiveSkill?.name || 'Queued Skill',
+            measureIngameStep('renderQueuedTargetTooltips', () => {
+                const allCards = [
+                    ...(Array.isArray(playerCards) ? playerCards : []),
+                    ...(Array.isArray(enemyCards) ? enemyCards : []),
+                ];
+                const pending = normalizePendingTurn(pendingTurnState);
+                const queuedByTargetKey = new Map();
+                Object.values(pending.queuedByActorSlot || {}).forEach((queued) => {
+                    const actorSlot = Number.parseInt(queued?.actorSlot, 10);
+                    const skillIdx = Number.parseInt(queued?.skillIndex, 10);
+                    const effectiveSkill = getEffectiveSkillForActorSlot(actorSlot, skillIdx);
+                    const iconSrc = effectiveSkill?.skillimage || '';
+                    const selection = Array.isArray(queued?.targetSelection)
+                        ? queued.targetSelection
+                        : queued?.targetSelection
+                            ? [queued.targetSelection]
+                            : [];
+                    selection.forEach((target) => {
+                        const username = target?.username;
+                        const slot = Number.parseInt(target?.slot, 10);
+                        if (!username || !Number.isInteger(slot) || slot < 0) return;
+                        const unit = latestBoardState?.[username]?.[slot];
+                        const hp = Number(unit?.hp);
+                        const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
+                        if (dead) return;
+                        const key = `${slot} ${username}`;
+                        if (!queuedByTargetKey.has(key)) {
+                            queuedByTargetKey.set(key, { username, slot, entries: [] });
+                        }
+                        queuedByTargetKey.get(key).entries.push({
+                            iconSrc,
+                            skillName: effectiveSkill?.name || 'Queued Skill',
+                        });
                     });
                 });
-            });
 
-            queuedByTargetKey.forEach(({ username, slot, entries }) => {
-                const cards = username === currentPlayerUsername ? playerCards : enemyCards;
-                const card = Array.isArray(cards) ? cards[slot] : null;
-                const tooltipWrap = card?.querySelector('.skilltooltips');
-                const tooltipImgTemplate =
-                    tooltipWrap?.querySelector('.skilltooltipimage.status-icon-template') ||
-                    tooltipWrap?.querySelector('.skilltooltipimage');
-                if (!tooltipWrap || !tooltipImgTemplate) return;
-                if (!tooltipImgTemplate.classList.contains('status-icon-template')) {
-                    tooltipImgTemplate.classList.add('status-icon-template');
-                }
-                tooltipWrap.style.visibility = 'visible';
-                entries.forEach((entry) => {
-                    const iconEl = tooltipImgTemplate.cloneNode(true);
-                    iconEl.classList.remove('status-icon-template', 'dynamic-status-icon');
-                    iconEl.classList.add('dynamic-queued-target-icon');
-                    iconEl.style.display = 'block';
-                    if (entry.iconSrc) {
-                        iconEl.src = entry.iconSrc;
+                allCards.forEach((card) => {
+                    if (!card) return;
+                    const username = card.dataset.username || '';
+                    const slot = Number.parseInt(card.dataset.slot, 10);
+                    const targetKey = `${slot} ${username}`;
+                    const entries = queuedByTargetKey.get(targetKey)?.entries || [];
+                    const signature = entries
+                        .map((entry) => `${entry.iconSrc || ''}|${entry.skillName || ''}`)
+                        .join('||');
+                    if (queuedTargetSignatureByCard.get(card) === signature) {
+                        return;
                     }
-                    iconEl.title = `Targeted by: ${entry.skillName}`;
-                    tooltipWrap.appendChild(iconEl);
+                    queuedTargetSignatureByCard.set(card, signature);
+                    const tooltipWrap = card.querySelector('.skilltooltips');
+                    const tooltipImgTemplate =
+                        tooltipWrap?.querySelector('.skilltooltipimage.status-icon-template') ||
+                        tooltipWrap?.querySelector('.skilltooltipimage');
+                    if (!tooltipWrap || !tooltipImgTemplate) return;
+                    tooltipWrap
+                        .querySelectorAll('.skilltooltipimage.dynamic-queued-target-icon')
+                        .forEach((node) => node.remove());
+                    if (!entries.length) return;
+                    if (!tooltipImgTemplate.classList.contains('status-icon-template')) {
+                        tooltipImgTemplate.classList.add('status-icon-template');
+                    }
+                    tooltipWrap.style.visibility = 'visible';
+                    entries.forEach((entry) => {
+                        const iconEl = tooltipImgTemplate.cloneNode(true);
+                        iconEl.classList.remove('status-icon-template', 'dynamic-status-icon');
+                        iconEl.classList.add('dynamic-queued-target-icon');
+                        iconEl.style.display = 'block';
+                        if (entry.iconSrc) {
+                            iconEl.src = entry.iconSrc;
+                        }
+                        iconEl.title = `Targeted by: ${entry.skillName}`;
+                        tooltipWrap.appendChild(iconEl);
+                    });
                 });
             });
         };
@@ -3141,21 +3270,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         bindProfileInfoTrigger('.player-right .player-name, .player-avatar-right', 'opponent');
 
         const renderDynamicSkillIcons = () => {
-            playerSkillMetaByKey.forEach((meta) => {
-                if (!meta?.imgEl) return;
-                const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.baseSkill;
-                if (!effectiveSkill) return;
-                meta.skill = effectiveSkill;
-                meta.imgEl.src = effectiveSkill.skillimage || '';
-                meta.imgEl.alt = effectiveSkill.name || `Skill ${meta.skillIdx + 1}`;
+            measureIngameStep('renderDynamicSkillIcons', () => {
+                playerSkillMetaByKey.forEach((meta, key) => {
+                    if (!meta?.imgEl) return;
+                    const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.baseSkill;
+                    if (!effectiveSkill) return;
+                    const nextSignature = `${effectiveSkill.id || ''}|${effectiveSkill.skillimage || ''}|${effectiveSkill.name || ''}`;
+                    if (dynamicSkillSignatureByKey.get(key) === nextSignature) {
+                        meta.skill = effectiveSkill;
+                        return;
+                    }
+                    dynamicSkillSignatureByKey.set(key, nextSignature);
+                    meta.skill = effectiveSkill;
+                    if (meta.imgEl.getAttribute('src') !== (effectiveSkill.skillimage || '')) {
+                        meta.imgEl.src = effectiveSkill.skillimage || '';
+                    }
+                    meta.imgEl.alt = effectiveSkill.name || `Skill ${meta.skillIdx + 1}`;
+                });
             });
         };
 
         const fetchTargetOptions = async (actorSlot, skillIdx, skill = null) => {
             if (!matchIdFromUrl) return;
             clearTargetHighlights();
+            clearTargetingSkillVisual();
             activeTargetOptions = null;
             activeCastingSkill = null;
+            const skillEl = playerSkillMetaByKey.get(`${actorSlot}:${skillIdx}`)?.imgEl || null;
+            if (skillEl) {
+                skillEl.classList.add('targeting-skill');
+            }
             try {
                 const res = await fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/targets`,
@@ -3176,7 +3320,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pendingTurnState = normalizePendingTurn(data.pendingTurn);
                 applyQueuedSkillVisuals();
                 activeTargetOptions = data;
-                const skillEl = playerSkillMetaByKey.get(`${actorSlot}:${skillIdx}`)?.imgEl || null;
                 const classChoiceOptions = getClassChoiceOptions(skill);
                 const key = getClassChoiceKey(actorSlot, skillIdx);
                 const classChoice = normalizeClassChoice(classChoiceBySkillKey.get(key));
@@ -3196,6 +3339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.warn('Target fetch failed.', error);
                 activeTargetOptions = null;
                 activeCastingSkill = null;
+                clearTargetingSkillVisual();
             }
         };
 
@@ -3216,6 +3360,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const queueSelectedSkill = ({ actorSlot, skillIdx, selection, classChoice = null }) => {
             if (!matchIdFromUrl) return Promise.resolve();
+            const previousPendingTurnState = clonePendingTurnState();
+            const previousPlayerPoolState = normalizePool(playerPoolState);
+            const optimisticSkill =
+                activeCastingSkill?.actorSlot === actorSlot && activeCastingSkill?.skillIdx === skillIdx
+                    ? activeCastingSkill.skill
+                    : getEffectiveSkillForActorSlot(actorSlot, skillIdx);
+            applyOptimisticQueuedSkill({
+                actorSlot,
+                skillIdx,
+                skill: optimisticSkill,
+                selection,
+                classChoice,
+            });
             return fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/queue`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -3239,12 +3396,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     syncTurnState(data.currentTurn, data.turnExpiresAt);
                 })
                 .catch((error) => {
+                    pendingTurnState = previousPendingTurnState;
+                    playerPoolState = previousPlayerPoolState;
+                    renderChakra(playerPoolState);
+                    applyQueuedSkillVisuals();
                     console.warn('Failed to queue skill.', error);
                     showGameActionMessage(error?.message || 'Unable to queue skill.');
                 })
                 .finally(() => {
                     closeClassChoicePopup();
                     clearTargetHighlights();
+                    clearTargetingSkillVisual();
                     activeTargetOptions = null;
                     activeCastingSkill = null;
                 });
@@ -3300,6 +3462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : [];
             if (classChoiceOptions.length > 0) {
                 clearTargetHighlights();
+                clearTargetingSkillVisual();
                 openClassChoicePopup({
                     actorSlot: activeCastingSkill.actorSlot,
                     skillIdx: activeCastingSkill.skillIdx,
@@ -3319,6 +3482,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             classChoicePopupCancelButton.addEventListener('click', () => {
                 closeClassChoicePopup();
                 clearTargetHighlights();
+                clearTargetingSkillVisual();
                 activeTargetOptions = null;
                 activeCastingSkill = null;
             });
@@ -3328,6 +3492,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (event.target !== classChoicePopupEl) return;
                 closeClassChoicePopup();
                 clearTargetHighlights();
+                clearTargetingSkillVisual();
                 activeTargetOptions = null;
                 activeCastingSkill = null;
             });
@@ -3364,6 +3529,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentPlayerTeamIndices = team.slice();
                 currentOpponentTeamIndices = enemyTeam.slice();
                 playerSkillMetaByKey.clear();
+                statusRenderSignatureByCard = new WeakMap();
+                queuedTargetSignatureByCard = new WeakMap();
+                dynamicSkillSignatureByKey.clear();
+                queuedSkillKeySet = new Set();
+                lastMatchStateSignature = '';
 
                 const playerNameEl = document.querySelector('.player-name.red');
                 if (playerNameEl && data.player?.username) {
@@ -3434,8 +3604,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     const queued = getQueuedSkillForActorSlot(slotIndex);
                                     if (queued && queued.skillIndex === skillIdx) {
                                         clearTargetHighlights();
+                                        clearTargetingSkillVisual();
                                         activeTargetOptions = null;
                                         activeCastingSkill = null;
+                                        const previousPendingTurnState = clonePendingTurnState();
+                                        const previousPlayerPoolState = normalizePool(playerPoolState);
+                                        applyOptimisticCancelQueuedSkill(slotIndex);
                                         fetch(
                                             `${API_BASE_URL}/api/match/${encodeURIComponent(
                                                 matchIdFromUrl
@@ -3459,7 +3633,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                                 applyQueuedSkillVisuals();
                                                 syncTurnState(data.currentTurn, data.turnExpiresAt);
                                             })
-                                            .catch((error) => console.warn('Failed to cancel skill.', error));
+                                            .catch((error) => {
+                                                pendingTurnState = previousPendingTurnState;
+                                                playerPoolState = previousPlayerPoolState;
+                                                renderChakra(playerPoolState);
+                                                applyQueuedSkillVisuals();
+                                                console.warn('Failed to cancel skill.', error);
+                                            });
                                         return;
                                     }
                                     const actorUnit = latestBoardState?.[currentPlayerUsername]?.[slotIndex];
