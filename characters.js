@@ -8606,13 +8606,14 @@ const characters = [
         "id": "edo-tensei-hashirama",
         "characterId": "edo-tensei-hashirama",
         "name": "Edo Tensei Hashirama",
+        "facePicture": "https://i.imgur.com/XKnOdST.png",
         "characterdeescription": "The first Hokage, and founder of the Hidden Leaf Village; Hashirama, a member of the legendary Senju clan. Hashirama has the unique ability to give life to trees, creating them, and manipulating them to assault the enemy team while protecting his own.",
         "requiredMissionId": "the-resurrection-of-the-first",
         "skills": [
             {
                 "id": "edo-tensei-hashirama-tree-wave-destruction",
                 "name": "Tree Wave Destruction",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/N1okEw0.png",
                 "skilldescription": "Edo Tensei Hashirama deals 10 damage to all enemies and grants his team 5 points of permanent destructible defense.",
                 "energy": [
                     "Random"
@@ -8649,7 +8650,7 @@ const characters = [
             {
                 "id": "edo-tensei-hashirama-tree-strangulation",
                 "name": "Tree Strangulation",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/A3Xmo68.png",
                 "skilldescription": "Edo Tensei Hashirama deals 20 damage to one enemy and stuns their physical and energy skills for 1 turn. During 'A World of Trees', this skill will stun all skills.",
                 "energy": [
                     "Bloodline"
@@ -8705,7 +8706,7 @@ const characters = [
             {
                 "id": "edo-tensei-hashirama-a-world-of-trees",
                 "name": "A World of Trees",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/spbtu4f.png",
                 "skilldescription": "For 2 turns, all enemies' physical, energy and strategic skills will cost 1 additional random chakra and their cooldowns will be increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
                 "energy": [
                     "Bloodline",
@@ -8791,7 +8792,7 @@ const characters = [
             {
                 "id": "edo-tensei-hashirama-deflection",
                 "name": "Deflection",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/GKhZ1S9.png",
                 "skilldescription": "This skill makes Edo Tensei Hashirama invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -8823,13 +8824,14 @@ const characters = [
         "id": "edo-tensei-tobirama",
         "characterId": "edo-tensei-tobirama",
         "name": "Edo Tensei Tobirama",
+        "facePicture": "https://i.imgur.com/D1qp4Pu.png",
         "characterdeescription": "The second Hokage of the Hidden Leaf Village; Tobirama, a member of the Senju clan, puts the well being of the village and people above all else. Tobirama is a master of many jutsu, using both ninjutsu and genjutsu to stop his enemies in different ways.",
         "requiredMissionId": "the-resurrection-of-the-second",
         "skills": [
             {
                 "id": "edo-tensei-tobirama-water-assault",
                 "name": "Water Assault",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/fMuYLsW.png",
                 "skilldescription": "Edo Tensei Tobirama makes one enemy ignore all helpful effects except energy cost changes for 1 turn and deals 15 damage to them.",
                 "energy": [
                     "Ninjutsu",
@@ -8864,7 +8866,7 @@ const characters = [
             {
                 "id": "edo-tensei-tobirama-water-colliding-wave",
                 "name": "Water Colliding Wave",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/rt5NJBN.png",
                 "skilldescription": "Edo Tensei Tobirama deals 15 damage to all enemies for 3 turns and stuns their affliction skills each turn. During this time, 'Water Assault' will deal 15 additional damage.",
                 "energy": [
                     "Ninjutsu",
@@ -8912,7 +8914,7 @@ const characters = [
             {
                 "id": "edo-tensei-tobirama-bringer-of-darkness",
                 "name": "Bringer of Darkness",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Jq7lvi0.png",
                 "skilldescription": "Edo Tensei Tobirama makes his team invulnerable to all physical and strategic skills for 1 turn.",
                 "energy": [
                     "Genjutsu"
@@ -8944,7 +8946,7 @@ const characters = [
             {
                 "id": "edo-tensei-tobirama-water-encampment-wall",
                 "name": "Water Encampment Wall",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/3rOMjSA.png",
                 "skilldescription": "This skill makes Edo Tensei Tobirama invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -8976,13 +8978,14 @@ const characters = [
         "id": "sarutobi-hiruzen",
         "characterId": "sarutobi-hiruzen",
         "name": "Sarutobi Hiruzen",
+        "facePicture": "https://i.imgur.com/OVXPrec.png",
         "characterdeescription": "The third and most recent Hokage of the Hidden Leaf Village to die; Hiruzen, known as the God of Shinobi was considered to be one of the strongest ninja alive in his prime. While powerful using just his normal jutsu, Hiruzen is able to pull out a trump card when desperation strikes.",
         "requiredMissionId": "the-god-of-the-shinobi",
         "skills": [
             {
                 "id": "sarutobi-hiruzen-fire-dragon-flame-bullet",
                 "name": "Fire Dragon Flame Bullet",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/ljmijF8.png",
                 "skilldescription": "Sarutobi Hiruzen deals 30 affliction damage to one enemy. The following turn, that enemy will take 10 affliction damage.",
                 "energy": [
                     "Ninjutsu",
@@ -9028,7 +9031,7 @@ const characters = [
             {
                 "id": "sarutobi-hiruzen-dead-demon-consuming-seal",
                 "name": "Dead Demon Consuming Seal",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/HjM3iLD.png",
                 "skilldescription": "Permanently, one enemy takes 40 affliction damage, is stunned and cannot reduce damage or become invulnerable each turn. Sarutobi Hiruzen himself takes 20 affliction damage and is stunned each turn. This skill cannot be removed or ignored and will end when Sarutobi Hiruzen dies.",
                 "energy": [
                     "Random",
@@ -9082,7 +9085,7 @@ const characters = [
             {
                 "id": "sarutobi-hiruzen-major-summoning-enma",
                 "name": "Major Summoning: Enma",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/O3lc03n.png",
                 "skilldescription": "Sarutobi Hiruzen and his team become invulnerable for 1 turn. For the rest of the game, Sarutobi Hiruzen will deal 5 damage to all enemies each turn, Sarutobi Hiruzen's team will gain 5 points of damage reduction, and this skill will be replaced by 'Adamantine Prison Wall'. This skill will end if Sarutobi Hiruzen dies.",
                 "energy": [
                     "Taijutsu",
@@ -9152,7 +9155,7 @@ const characters = [
             {
                 "id": "sarutobi-hiruzen-earth-style-wall",
                 "name": "Earth-Style Wall",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/w8Zg0Py.png",
                 "skilldescription": "This skill makes Sarutobi Hiruzen invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -9215,13 +9218,14 @@ const characters = [
         "id": "kyuubi-naruto",
         "characterId": "kyuubi-naruto",
         "name": "Kyuubi Naruto",
+        "facePicture": "https://i.imgur.com/hOCQuU9.png",
         "characterdeescription": "Naruto's anger and desperation has forced the Kyuubi's chakra to come up to the surface, changing Naruto into a single-minded beast with a nearly endless amount of chakra. With the Kyuubi chakra around Naruto, he is able to unleash powerful waves of raw chakra to endow his power further, or gather it back to guard and heal him.",
         "requiredMissionId": "the-rise-of-a-jinchuuriki",
         "skills": [
             {
                 "id": "kyuubi-naruto-kyuubi-rasengan",
                 "name": "Kyuubi Rasengan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/X6CF3vc.png",
                 "skilldescription": "Kyuubi Naruto deals 35 damage to one enemy and stuns them for 1 turn. Kyuubi Naruto will take 5 affliction damage.",
                 "energy": [
                     "Ninjutsu",
@@ -9265,7 +9269,7 @@ const characters = [
             {
                 "id": "kyuubi-naruto-kyuubi-rage",
                 "name": "Kyuubi Rage",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/wAfz5KW.png",
                 "skilldescription": "Kyuubi Naruto deals 15 damage to all enemies for 3 turns. During this time, 'Kyuubi Rasengan' will deal 10 additional damage. 'Kyuubi Chakra' may not be used during this time.",
                 "energy": [
                     "Taijutsu",
@@ -9313,7 +9317,7 @@ const characters = [
             {
                 "id": "kyuubi-naruto-kyuubi-chakra",
                 "name": "Kyuubi Chakra",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/LazNndR.png",
                 "skilldescription": "Kyuubi Naruto heals himself for 15 health each turn for 5 turns. During this time, Kyuubi Naruto will gain 15 points of damage reduction and 'Kyuubi Rasengan' will deal 5 less damage. 'Kyuubi Rage' may not be used during this time.",
                 "energy": [
                     "Bloodline",
@@ -9350,7 +9354,7 @@ const characters = [
             {
                 "id": "kyuubi-naruto-kyuubi-dodge",
                 "name": "Kyuubi Dodge",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/4ZFrdfW.png",
                 "skilldescription": "This skill makes Kyuubi Naruto invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -9382,13 +9386,14 @@ const characters = [
         "id": "cursed-seal-lv1-sasuke",
         "characterId": "cursed-seal-lv1-sasuke",
         "name": "Cursed Seal Lv1 Sasuke",
+        "facePicture": "https://i.imgur.com/9KgJEk8.png",
         "characterdeescription": "Sasuke is pushed into his maximum during the Chuunin Exams and ends awakening his Cursed Seal to fight the Sound Genin and save Sakura. Sasuke is not in full control of the seal yet, but his anger and power were already raised a lot. ORIGINAL DESIGN: TheDarkLegend",
         "requiredMissionId": "dark-enhancing",
         "skills": [
             {
                 "id": "cursed-seal-lv1-sasuke-silent-blow",
                 "name": "Silent Blow",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/CDW4x4g.png",
                 "skilldescription": "Cursed Seal Lv1 Sasuke deals 25 damage to one enemy. The following turn, Cursed Seal Lv1 Sasuke's skills will deal 5 additional damage.",
                 "energy": [
                     "Taijutsu"
@@ -9433,7 +9438,7 @@ const characters = [
             {
                 "id": "cursed-seal-lv1-sasuke-cursed-chidori",
                 "name": "Cursed Chidori",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/ApGd3KB.png",
                 "skilldescription": "Cursed Seal Lv1 Sasuke deals 25 piercing damage to one enemy. The following turn, Cursed Seal Lv1 Sasuke's skills will deal 5 additional damage.",
                 "energy": [
                     "Ninjutsu"
@@ -9481,7 +9486,7 @@ const characters = [
             {
                 "id": "cursed-seal-lv1-sasuke-cursed-sharingan",
                 "name": "Cursed Sharingan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/QKXCpCn.png",
                 "skilldescription": "For 3 turns, Cursed Seal Lv1 Sasuke gains 10 points of damage reduction and targets all enemies. If they use a new harmful skill, they will take 10 additional physical and chakra damage for 1 turn. This skill cannot be countered and ends if Cursed Seal Lv1 Sasuke dies.",
                 "energy": [
                     "Random"
@@ -9533,7 +9538,7 @@ const characters = [
             {
                 "id": "cursed-seal-lv1-sasuke-dark-aura",
                 "name": "Dark Aura",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/WQWQgc5.png",
                 "skilldescription": "This skill makes Cursed Seal Lv1 Sasuke invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -9565,13 +9570,14 @@ const characters = [
         "id": "cursed-seal-sasuke",
         "characterId": "cursed-seal-sasuke",
         "name": "Cursed Seal Sasuke",
+        "facePicture": "https://i.imgur.com/h62tBoY.png",
         "characterdeescription": "Having gotten used to the Cursed Seal, Sasuke is able to draw Orochimaru's vile chakra through it, becoming a twisted hideous version of himself, but also getting stronger and faster. With the Cursed Seal, Sasuke's powers have exponentially increased, allowing him to pierce or trap enemies with his dark chakra.",
         "requiredMissionId": "descent-into-darkness",
         "skills": [
             {
                 "id": "cursed-seal-sasuke-corrupt-chidori",
                 "name": "Corrupt Chidori",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/JuEWNgD.png",
                 "skilldescription": "Cursed Seal Sasuke deals 45 damage to one enemy, reducing their non-affliction damage by 20 for 2 turns.",
                 "energy": [
                     "Ninjutsu",
@@ -9606,7 +9612,7 @@ const characters = [
             {
                 "id": "cursed-seal-sasuke-dark-void",
                 "name": "Dark Void",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/ybMA3WL.png",
                 "skilldescription": "Cursed Seal Sasuke stuns one enemy for 2 turns, makes them invulnerable to harmful skills for 1 turn and invulnerable to helpful skills for 2 turns. When this skill ends, this enemy will take 55 damage. This skill will end if Cursed Seal Sasuke dies.",
                 "energy": [
                     "Ninjutsu",
@@ -9655,7 +9661,7 @@ const characters = [
             {
                 "id": "cursed-seal-sasuke-cursed-seal",
                 "name": "Cursed Seal",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/0Fk3SCs.png",
                 "skilldescription": "Cursed Seal Sasuke becomes invulnerable for 1 turn and takes 15 affliction damage that cannot kill him. For 1 turn, 'Corrupt Chidori' will cost 1 random energy instead and 'Dark Void' will cost 2 random energies instead. For 2 turns, Cursed Seal Sasuke will ignore healing effects.",
                 "energy": [
                     "Bloodline"
@@ -9738,7 +9744,7 @@ const characters = [
             {
                 "id": "cursed-seal-sasuke-sharingan-evasion",
                 "name": "Sharingan Evasion",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/gz8961h.png",
                 "skilldescription": "This skill makes Cursed Seal Sasuke invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -9770,13 +9776,14 @@ const characters = [
         "id": "butterfly-chouji",
         "characterId": "butterfly-chouji",
         "name": "Butterfly Chouji",
+        "facePicture": "https://i.imgur.com/UoRyA7v.png",
         "characterdeescription": "Chouji has evolved into butterfly mode by consuming all three akimichi's coloured pills, gaining incredible speed and strenght at the cost of rapid weight loss. ORIGINAL DESIGN: AnteMito",
         "requiredMissionId": "chouji-awakens",
         "skills": [
             {
                 "id": "butterfly-chouji-chakra-wings",
                 "name": "Chakra Wings",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/4J4U6wU.png",
                 "skilldescription": "Butterfly Chouji gains 10 points of damage reduction and 10 points of destructible defense. He will take 5 affliction damage each turn. Butterfly Chouji can use his other skills while this is active. Butterfly Chouji's skills will deal 5 additional damage every turn with a max of 10 stacks. This skill may be used once and is permanent. This skill cannot be removed.",
                 "energy": [],
                 "target": "self",
@@ -9820,7 +9827,7 @@ const characters = [
             {
                 "id": "butterfly-chouji-butterfly-bullet-bombing",
                 "name": "Butterfly Bullet Bombing",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Icq6uAf.png",
                 "skilldescription": "Butterfly Chouji targets one enemy, destroying all destructible defense that target has and then dealing 20 damage to them. This skill cannot be countered and can only be used during 'Chakra Wings'.",
                 "energy": [
                     "Taijutsu",
@@ -9852,7 +9859,7 @@ const characters = [
             {
                 "id": "butterfly-chouji-enemy-immobilization",
                 "name": "Enemy Immobilization",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/yGZ8NW9.png",
                 "skilldescription": "Butterfly Chouji deals 5 damage to one enemy. For 1 turn, that enemy's skills will be stunned and Butterfly Chouji will ignore enemy stun effects. This skill may only be used during 'Chakra Wings'.",
                 "energy": [
                     "Taijutsu"
@@ -9901,7 +9908,7 @@ const characters = [
             {
                 "id": "butterfly-chouji-effortless-block",
                 "name": "Effortless Block",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/csCBOSU.png",
                 "skilldescription": "This skill makes Butterfly Chouji invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -9933,13 +9940,14 @@ const characters = [
         "id": "drunken-lee",
         "characterId": "drunken-lee",
         "name": "Drunken Lee",
+        "facePicture": "https://i.imgur.com/gLFtzf2.png",
         "characterdeescription": "Having accidentally drank sake, Lee's hidden Drunken Fist powers have awakened, completely changing his fighting style. While drunk, Lee attacks randomly, but is harder to stop the more he keeps fighting.",
         "requiredMissionId": "the-drunken-master",
         "skills": [
             {
                 "id": "drunken-lee-unpredictable-assault",
                 "name": "Unpredictable Assault",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/IWFEmKO.png",
                 "skilldescription": "Drunken Lee deals 20 damage to a random enemy. This skill cannot be countered. Each time this skill is used, it will deal 5 additional damage.",
                 "energy": [
                     "Taijutsu"
@@ -9979,7 +9987,7 @@ const characters = [
             {
                 "id": "drunken-lee-drunken-counter",
                 "name": "Drunken Counter",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/UTArdyQ.png",
                 "skilldescription": "Drunken Lee targets himself or an ally. For 1 turn, the first harmful non-strategic skill used on the target will be countered for 20 damage. This skill is invisible.",
                 "energy": [
                     "Random"
@@ -10011,7 +10019,7 @@ const characters = [
             {
                 "id": "drunken-lee-drunken-fist",
                 "name": "Drunken Fist",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/sJakDhe.png",
                 "skilldescription": "Drunken Lee deals 15 damage to one enemy for 3 turns. The following 3 turns, Drunken Lee will ignore all enemy stun effects, and 'Unpredictable Assault' will deal 5 additional damage.",
                 "energy": [
                     "Random",
@@ -10057,7 +10065,7 @@ const characters = [
             {
                 "id": "drunken-lee-drunken-leap",
                 "name": "Drunken Leap",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/rXB5r9a.png",
                 "skilldescription": "This skill makes Drunken Lee invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -10089,13 +10097,14 @@ const characters = [
         "id": "shukaku-gaara",
         "characterId": "shukaku-gaara",
         "name": "Shukaku Gaara",
+        "facePicture": "https://i.imgur.com/tNBIXfI.png",
         "characterdeescription": "Having lived inside him the whole time, Shukaku is one of the nine tailed beasts and is very eager to escape and cause chaos to the world. While Shukaku slowly takes over Gaara, his own power increases, allowing him to demolish his foes with powerful sand attacks.",
         "requiredMissionId": "the-beast-inside",
         "skills": [
             {
                 "id": "shukaku-gaara-sand-claw",
                 "name": "Sand Claw",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/SBibatM.png",
                 "skilldescription": "Shukaku Gaara deals 30 damage to one enemy and gains 10 points of permanent destructible defense.",
                 "energy": [
                     "Bloodline",
@@ -10133,7 +10142,7 @@ const characters = [
             {
                 "id": "shukaku-gaara-constricting-sand-prison",
                 "name": "Constricting Sand Prison",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/RlM6KsX.png",
                 "skilldescription": "Shukaku Gaara deals 10 damage to one enemy each turn. The first harmful skill that this enemy uses will be countered, and this skill will end.",
                 "energy": [
                     "Bloodline"
@@ -10165,7 +10174,7 @@ const characters = [
             {
                 "id": "shukaku-gaara-sand-transformation",
                 "name": "Sand Transformation",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/yy4K7qp.png",
                 "skilldescription": "Shukaku Gaara will gain 10 points of destructible defense each turn for 4 turns. When this skill ends, for 3 turns 'Sand Claw' will cost 1 less random energy and 'Constricting Sand Prison' and 'Sand Transformation' will be replaced.",
                 "energy": [
                     "Random",
@@ -10227,7 +10236,7 @@ const characters = [
             {
                 "id": "shukaku-gaara-thick-sand-coat",
                 "name": "Thick Sand Coat",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/1zFEDxZ.png",
                 "skilldescription": "This skill makes Shukaku Gaara invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -10328,13 +10337,14 @@ const characters = [
         "id": "rehabilitated-gaara",
         "characterId": "rehabilitated-gaara",
         "name": "Rehabilitated Gaara",
+        "facePicture": "https://i.imgur.com/bF8DLyH.png",
         "characterdeescription": "After his fateful encounter with Naruto, Gaara has left behind his murderous ways, and has instead rehabilitated. Gaara has honed his abilities to shape and craft his sand, allowing him to create giant waves of sand or quicksand traps.",
         "requiredMissionId": "the-redemption-of-gaara",
         "skills": [
             {
                 "id": "rehabilitated-gaara-sand-mastery",
                 "name": "Sand Mastery",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/q60UfkP.png",
                 "skilldescription": "Rehabilitated Gaara deals 15 damage to one enemy for 3 turns and gains 35 points of permanent destructible defense. This skill does not stack and will re-apply itself.",
                 "energy": [
                     "Random",
@@ -10383,7 +10393,7 @@ const characters = [
             {
                 "id": "rehabilitated-gaara-prison-sand-burial",
                 "name": "Prison Sand Burial",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/WoNpe2N.png",
                 "skilldescription": "For 1 turn, all enemies' non-strategic skills will have their costs increased by 1 random energy. Afterwards, this skill will be replaced by 'Desert Imperial Funeral' for 1 turn.",
                 "energy": [
                     "Random"
@@ -10430,7 +10440,7 @@ const characters = [
             {
                 "id": "rehabilitated-gaara-quicksand-waterfall-flow",
                 "name": "Quicksand Waterfall Flow",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/fFk2WGR.png",
                 "skilldescription": "Rehabilitated Gaara deals 15 damage to all enemies for 4 turns.",
                 "energy": [
                     "Bloodline",
@@ -10465,7 +10475,7 @@ const characters = [
             {
                 "id": "rehabilitated-gaara-shield-of-shukaku",
                 "name": "Shield of Shukaku",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Kr87iAU.png",
                 "skilldescription": "This skill makes Rehabilitated Gaara invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -10533,13 +10543,14 @@ const characters = [
         "id": "hoshigaki-kisame",
         "characterId": "hoshigaki-kisame",
         "name": "Hoshigaki Kisame",
+        "facePicture": "https://i.imgur.com/tij8Nxm.png",
         "characterdeescription": "Formerly one of the Seven Swordsmen of the Mist Village, Kisame is an S-Rank missing ninja that is now a member of Akatsuki, having been partnered with Uchiha Itachi. Using his powerful, and ominous sword, mixed with his powerful water based ninjutsu, Kisame can disable enemies in every manner of way.",
         "requiredMissionId": "s-rank-criminal-kisame",
         "skills": [
             {
                 "id": "hoshigaki-kisame-samehada-slash",
                 "name": "Samehada Slash",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Knwkie7.png",
                 "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their energy, mental and strategic skills for 1 turn.",
                 "energy": [
                     "Taijutsu"
@@ -10578,7 +10589,7 @@ const characters = [
             {
                 "id": "hoshigaki-kisame-samehada-shred",
                 "name": "Samehada Shred",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/PC7su7O.png",
                 "skilldescription": "Hoshigaki Kisame deals 15 damage to one enemy for 2 turns, stealing 1 random non-bloodline energy from them each turn.",
                 "energy": [
                     "Taijutsu",
@@ -10613,7 +10624,7 @@ const characters = [
             {
                 "id": "hoshigaki-kisame-water-shark-projectile",
                 "name": "Water Shark Projectile",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Cvpp0VQ.png",
                 "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their physical, affliction and strategic skills for 1 turn.",
                 "energy": [
                     "Ninjutsu"
@@ -10652,7 +10663,7 @@ const characters = [
             {
                 "id": "hoshigaki-kisame-samehada-scale-block",
                 "name": "Samehada Scale Block",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/mSXuepK.png",
                 "skilldescription": "This skill makes Hoshigaki Kisame invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -10684,13 +10695,14 @@ const characters = [
         "id": "uchiha-itachi",
         "characterId": "uchiha-itachi",
         "name": "Uchiha Itachi",
+        "facePicture": "https://i.imgur.com/KOjV2Qf.png",
         "characterdeescription": "The only other surviving Uchiha, Itachi is a master of doujutsu, an S-Rank missing nin, and a member of Akatsuki, having been partnered with Hoshigaki Kisame. Despite being powerful, Itachi is slowly going blind, making his abilities weaker, but when Itachi activates his Sharingan he becomes an unstoppable force of pure power.",
         "requiredMissionId": "s-rank-criminal-itachi",
         "skills": [
             {
                 "id": "uchiha-itachi-mangekyou-sharingan",
                 "name": "Mangekyou Sharingan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/5jjNw5f.png",
                 "maxUses": 1,
                 "skilldescription": "For the rest of the game, Uchiha Itachi becomes invulnerable to non-strategic skills, enhances 'Amaterasu' and 'Tsukuyomi', increases their cooldowns by 2 turns, and doubles their costs. During this time, Uchiha Itachi will take 15 affliction damage each turn and ignore healing effects and this skill cannot be used again.",
                 "energy": [
@@ -10760,7 +10772,7 @@ const characters = [
             {
                 "id": "uchiha-itachi-amaterasu",
                 "name": "Amaterasu",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/XbFWWxp.png",
                 "skilldescription": "Uchiha Itachi deals 15 affliction damage to one enemy, who will take 5 affliction damage each following turn. If used during 'Mangekyou Sharingan', this skill will target all enemies and deal double damage.",
                 "energy": [
                     "Ninjutsu"
@@ -10842,7 +10854,7 @@ const characters = [
             {
                 "id": "uchiha-itachi-tsukuyomi",
                 "name": "Tsukuyomi",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/EmcZEZB.png",
                 "skilldescription": "Uchiha Itachi deals 20 damage to one enemy and stuns them for 1 turn. If used during 'Mangekyou Sharingan', this skill will last 3 turns.",
                 "energy": [
                     "Genjutsu"
@@ -10878,7 +10890,7 @@ const characters = [
             {
                 "id": "uchiha-itachi-sharingan-insight",
                 "name": "Sharingan Insight",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/u3zgHCh.png",
                 "skilldescription": "This skill makes Uchiha Itachi invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -10910,13 +10922,14 @@ const characters = [
         "id": "rokushou-aoi",
         "characterId": "rokushou-aoi",
         "name": "Rokushou Aoi",
+        "facePicture": "https://i.imgur.com/XtzW95D.png",
         "characterdeescription": "Aoi is a jounin from the Hidden Rain Village and a missing-nin from the Hidden Leaf Village. A former instructor in the Hidden Leaf, he tricked Idate to steal the legendary Sword of the Thunder God, which had once belonged to Senju Tobirama, the Second Hokage. ORIGINAL DESIGN: Liann",
         "requiredMissionId": "the-theft-plan",
         "skills": [
             {
                 "id": "rokushou-aoi-senbon-shower",
                 "name": "Senbon Shower",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/6QupUQg.png",
                 "skilldescription": "Rokushou Aoi deals 5 piercing damage to all enemies, who will take 5 affliction damage each turn for 3 turns. During this time, the main target will ignore healing effects.",
                 "energy": [
                     "Random",
@@ -10972,7 +10985,7 @@ const characters = [
             {
                 "id": "rokushou-aoi-umbrella-shock-wave",
                 "name": "Umbrella Shock Wave",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/uExBxVs.png",
                 "skilldescription": "Rokushou Aoi destroys all enemies' destructible defense and deals 10 damage to them. From now on, 'Senbon Shower' will last 1 additional turn. This effect stacks each time this skill is used.",
                 "energy": [
                     "Random"
@@ -11015,7 +11028,7 @@ const characters = [
             {
                 "id": "rokushou-aoi-sword-of-the-thunder-god",
                 "name": "Sword of the Thunder God",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/lIkGCvd.png",
                 "skilldescription": "Permanently, Rokushou Aoi will deal 10 piercing damage instantly to any enemy who uses a new skill on him and during this time, 'Senbon Shower' and 'Umbrella Shock Wave' will be replaced by 'Lightning Moon Cut' and 'Ring of Electricity' respectively. This skill cannot be used while active and ends when Rokushou Aoi uses 'Lightning Moon Cut' 3 times or 'Ring of Electricity' once.",
                 "energy": [
                     "Random"
@@ -11064,7 +11077,7 @@ const characters = [
             {
                 "id": "rokushou-aoi-umbrella-shield",
                 "name": "Umbrella Shield",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/zxodmCK.png",
                 "skilldescription": "This skill makes Rokushou Aoi invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -11186,13 +11199,14 @@ const characters = [
         "id": "kurosuki-raiga",
         "characterId": "kurosuki-raiga",
         "name": "Kurosuki Raiga",
+        "facePicture": "https://i.imgur.com/ndeHzMP.png",
         "characterdeescription": "Kurosuki Raiga, renowned as the Thunder of the Hidden Mist, was a jounin from the Hidden Mist Village as well as a member of the Seven Ninja Swordsmen of the Mist. Raiga wields Kiba, twin swords imbued with lightning. Considered the sharpest swords ever made, they can cut through anything. ORIGINAL DESIGN: Liann",
         "requiredMissionId": "thunder-of-the-hidden-mist",
         "skills": [
             {
                 "id": "kurosuki-raiga-lightning-ball",
                 "name": "Lightning Ball",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/Zbv3Opt.png",
                 "skilldescription": "Kurosuki Raiga deals 10 piercing damage to one enemy, who will take 5 additional damage from Kurosuki Raiga's skills permanently. This skill stacks and ends if Kurosuki Raiga dies.",
                 "energy": [
                     "Random"
@@ -11234,7 +11248,7 @@ const characters = [
             {
                 "id": "kurosuki-raiga-feast-of-lightning",
                 "name": "Feast of Lightning",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/LOoAU6E.png",
                 "skilldescription": "Kurosuki Raiga makes all enemies take 5 additional damage from his skills permanently. This skill stacks and ends if Kurosuki Raiga dies.",
                 "energy": [],
                 "target": "all-enemy",
@@ -11266,7 +11280,7 @@ const characters = [
             {
                 "id": "kurosuki-raiga-fangs-of-lightning",
                 "name": "Fangs of Lightning",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/tLaGdI3.png",
                 "skilldescription": "Kurosuki Raiga deals 15 piercing damage to one enemy and increases the cost of that enemy's non-strategic skills by 1 random energy for 1 turn. This skill becomes 'Lightning Burial: Banquet of Lightning' permanently after used.",
                 "energy": [
                     "Random"
@@ -11322,7 +11336,7 @@ const characters = [
             {
                 "id": "kurosuki-raiga-lightning-strike-armor",
                 "name": "Lightning Strike Armor",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/xJZHpqR.png",
                 "skilldescription": "This skill makes Kurosuki Raiga invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -11535,12 +11549,13 @@ const characters = [
         "id": "young-kakashi",
         "characterId": "young-kakashi",
         "name": "Young Kakashi",
+        "facePicture": "https://i.imgur.com/U3Ivdp4.png",
         "characterdeescription": "A jounin at the age of 13 and the son of the legendary White Fang, Kakashi is a member of Team Minato. Using his early ninjutsu, and borrowed sharingan, Kakashi can fight any adult on an equal level.",
         "skills": [
             {
                 "id": "young-kakashi-white-fang-slash",
                 "name": "White Fang Slash",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/UOC5Fsb.png",
                 "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
                 "energy": [
                     "Taijutsu"
@@ -11588,7 +11603,7 @@ const characters = [
             {
                 "id": "young-kakashi-amateur-raikiri",
                 "name": "Amateur Raikiri",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/uy8jRiS.png",
                 "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
                 "energy": [
                     "Ninjutsu"
@@ -11636,7 +11651,7 @@ const characters = [
             {
                 "id": "young-kakashi-implanted-sharingan",
                 "name": "Implanted Sharingan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/VrPbW1z.png",
                 "skilldescription": "For 2 turns, if one enemy uses a new skill on Young Kakashi, his skills will deal 10 additional damage for 1 turn. This skill is invisible and ends when triggered.",
                 "energy": [],
                 "target": "self",
@@ -11673,7 +11688,7 @@ const characters = [
             {
                 "id": "young-kakashi-sword-parry",
                 "name": "Sword Parry",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/V9vfQQQ.png",
                 "skilldescription": "This skill makes Young Kakashi invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -11705,12 +11720,13 @@ const characters = [
         "id": "uchiha-obito",
         "characterId": "uchiha-obito",
         "name": "Uchiha Obito",
+        "facePicture": "https://i.imgur.com/JbvGcwk.png",
         "characterdeescription": "A minor member of the Uchiha clan and a chuunin, Obito is a member of Team Minato. While Obito does not possess any singular powerful ability, he can use all of what he knows with his developing sharingan to put up a fight.",
         "skills": [
             {
                 "id": "uchiha-obito-piercing-stab",
                 "name": "Piercing Stab",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/YjvbfdY.png",
                 "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage.",
                 "energy": [
                     "Random"
@@ -11741,7 +11757,7 @@ const characters = [
             {
                 "id": "uchiha-obito-great-fireball",
                 "name": "Obito Great Fireball",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/YQwIDCR.png",
                 "skilldescription": "Uchiha Obito deals 15 affliction damage to one enemy for 2 turns. During 'Obito Sharingan', this skill will deal 30 affliction damage instantly.",
                 "energy": [
                     "Ninjutsu"
@@ -11792,7 +11808,7 @@ const characters = [
             {
                 "id": "uchiha-obito-sharingan",
                 "name": "Obito Sharingan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/HB5GL7k.png",
                 "skilldescription": "For 4 turns, Uchiha Obito will gain 15 points of damage reduction. This skill becomes 'Sharingan-Enhanced Parry' for 4 turns after used.",
                 "energy": [
                     "Random"
@@ -11834,7 +11850,7 @@ const characters = [
             {
                 "id": "uchiha-obito-flee",
                 "name": "Obito Flee",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/WJAbDGt.png",
                 "skilldescription": "This skill makes Uchiha Obito invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -11897,12 +11913,13 @@ const characters = [
         "id": "nohara-rin",
         "characterId": "nohara-rin",
         "name": "Nohara Rin",
+        "facePicture": "https://i.imgur.com/nVN2Va7.png",
         "characterdeescription": "A chuunin medical nin assigned to Team Minato, Rin is a quiet and passive girl who focuses on keeping her team mates alive. Using her healing abilities, and her intelligence, Rin is able to heal her allies while trapping her enemies.",
         "skills": [
             {
                 "id": "nohara-rin-pit-trap",
                 "name": "Pit Trap",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/h7PnmYi.png",
                 "skilldescription": "For 1 turn, Nohara Rin will gain 15 points of damage reduction and one target enemy will take 15 piercing damage that ignores invulnerability at the end of their turn. If that enemy uses a new skill, they will also take another 15 damage from this skill. This skill is invisible and ignores invulnerability. This skill's damage isn't increased nor decreased by effects used on Nohara Rin.",
                 "energy": [
                     "Genjutsu"
@@ -11950,7 +11967,7 @@ const characters = [
             {
                 "id": "nohara-rin-mystical-palm-healing",
                 "name": "Rin Mystical Palm Healing",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/vMIpkz6.png",
                 "skilldescription": "Nohara Rin heals herself or an ally for 25 health and removes all enemy affliction skills on this character.",
                 "energy": [
                     "Ninjutsu"
@@ -11984,7 +12001,7 @@ const characters = [
             {
                 "id": "nohara-rin-medical-kit",
                 "name": "Medical Kit",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/uLva4cB.png",
                 "skilldescription": "Nohara Rin targets herself or an ally. For 3 turns, that character will be healed for 10 health each turn. During this time, they will deal 5 additional damage with physical and energy skills.",
                 "energy": [
                     "Random",
@@ -12018,7 +12035,7 @@ const characters = [
             {
                 "id": "nohara-rin-flee",
                 "name": "Flee",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/10ydruj.png",
                 "skilldescription": "This skill makes Nohara Rin invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -12050,12 +12067,13 @@ const characters = [
         "id": "hyuuga-hanabi",
         "characterId": "hyuuga-hanabi",
         "name": "Hyuuga Hanabi",
+        "facePicture": "https://i.imgur.com/UgOE7eF.png",
         "characterdeescription": "The younger sister of Hinata, Hanabi is a Hyuuga clan member who trains endlessly to prove herself. Hanabi's skills surpass her elder sister's, and while lacking in strength, Hanabi makes up for it with her tenacity and speed.",
         "skills": [
             {
                 "id": "hyuuga-hanabi-gentle-fist",
                 "name": "Hanabi Gentle Fist",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/nPYcr3w.png",
                 "skilldescription": "Hyuuga Hanabi deals 15 damage to one enemy for 2 turns. The following 2 turns, this enemy loses 1 random chakra each turn.",
                 "energy": [
                     "Taijutsu"
@@ -12101,7 +12119,7 @@ const characters = [
             {
                 "id": "hyuuga-hanabi-eight-trigrams-revolving-heaven",
                 "name": "Hanabi Eight Trigrams Revolving Heaven",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/peE9cHB.png",
                 "skilldescription": "Hyuuga Hanabi deals 15 damage to one enemy for 2 turns. The following 2 turns, this enemy deals 5 less damage.",
                 "energy": [
                     "Taijutsu"
@@ -12147,7 +12165,7 @@ const characters = [
             {
                 "id": "hyuuga-hanabi-unyielding-tenacity",
                 "name": "Unyielding Tenacity",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/8EqBz4y.png",
                 "skilldescription": "For 2 turns, Hyuuga Hanabi will be unable to be killed and will ignore all enemy stun effects. During this time, 'Hanabi Gentle Fist' and 'Hanabi Eight Trigrams Revolving Heaven' will cost 1 random energy instead and Hyuuga Hanabi will deal 5 additional damage.",
                 "energy": [
                     "Random",
@@ -12192,7 +12210,7 @@ const characters = [
             {
                 "id": "hyuuga-hanabi-byakugan",
                 "name": "Hanabi Byakugan",
-                "skillimage": "",
+                "skillimage": "https://i.imgur.com/BEe5lIp.png",
                 "skilldescription": "This skill makes Hyuuga Hanabi invulnerable for 1 turn.",
                 "energy": [
                     "Random"

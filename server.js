@@ -4703,6 +4703,52 @@ const getStoredCharacters = async () => {
             .filter((entry) => entry && typeof entry.characterId === 'string' && entry.characterId)
             .map((entry) => [entry.characterId, entry])
     );
+    let backfilledMissingImages = false;
+    const withSeedImageFallback = (entry) => {
+        const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
+        const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
+        const storedFace = typeof entry?.facePicture === 'string' ? entry.facePicture.trim() : '';
+        const seedFace = typeof seedEntry?.facePicture === 'string' ? seedEntry.facePicture.trim() : '';
+        let nextEntry = entry;
+        if (!storedFace && seedFace) {
+            backfilledMissingImages = true;
+            nextEntry = {
+                ...nextEntry,
+                facePicture: seedFace,
+            };
+        }
+        const seedSkillsById = new Map(
+            (Array.isArray(seedEntry?.skills) ? seedEntry.skills : [])
+                .filter((skill) => skill && typeof skill.id === 'string' && skill.id)
+                .map((skill) => [skill.id, skill])
+        );
+        const skills = Array.isArray(nextEntry?.skills) ? nextEntry.skills : [];
+        if (!seedSkillsById.size || !skills.length) {
+            return nextEntry;
+        }
+        let changedSkills = false;
+        const nextSkills = skills.map((skill) => {
+            const seedSkill = skill?.id ? seedSkillsById.get(skill.id) : null;
+            const storedImage = typeof skill?.skillimage === 'string' ? skill.skillimage.trim() : '';
+            const seedImage = typeof seedSkill?.skillimage === 'string' ? seedSkill.skillimage.trim() : '';
+            if (storedImage || !seedImage) {
+                return skill;
+            }
+            changedSkills = true;
+            return {
+                ...skill,
+                skillimage: seedImage,
+            };
+        });
+        if (!changedSkills) {
+            return nextEntry;
+        }
+        backfilledMissingImages = true;
+        return {
+            ...nextEntry,
+            skills: nextSkills,
+        };
+    };
     const storedIds = new Set(
         storedState.characters
             .map((entry) => (entry && typeof entry.characterId === 'string' ? entry.characterId : ''))
@@ -4713,12 +4759,12 @@ const getStoredCharacters = async () => {
         if (characterIdsToRefresh.has(characterId) && defaultByCharacterId.has(characterId)) {
             return defaultByCharacterId.get(characterId);
         }
-        return entry;
+        return withSeedImageFallback(entry);
     });
     const newDefaultCharacters = defaultCharacters.filter(
         (entry) => entry && typeof entry.characterId === 'string' && !storedIds.has(entry.characterId)
     );
-    if (!characterIdsToRefresh.size && !newDefaultCharacters.length) {
+    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages) {
         return storedState.characters;
     }
 
