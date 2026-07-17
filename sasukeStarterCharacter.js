@@ -109,7 +109,7 @@
                                                 "skillReplacements": {
                                                         "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
                                                 },
-                                                "tooltipText": "Sasuke has 10 damage reduction, deals 5 additional damage to the enemy he targeted last turn, and Sharingan is replaced by Grand Fireball Technique."
+                                                "tooltipText": "Sasuke has 10 damage reduction\nSasuke deals 5 additional damage to any enemy he targeted last turn\nSharingan is replaced by Grand Fireball Jutsu."
                                         }
                                 }
                         ]

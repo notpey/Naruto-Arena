@@ -99,7 +99,7 @@
                                                 "skillReplacements": {
                                                         "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
                                                 },
-                                                "tooltipText": "Sakura has 5 damage reduction, ignores stuns, and Inner Sakura is replaced by Inner Sakura Strangle."
+                                                "tooltipText": "Sakura has 5 damage reduction\nSakura ignores all stun effects\nInner Sakura is replaced by Inner Sakura Strangle."
                                         }
                                 }
                         ]

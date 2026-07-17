@@ -604,13 +604,23 @@ test('battleLogic resolves Tenten starter kit behavior used by the editor data',
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'Twin Rising Dragons should deal 20 to the primary target');
+    assert.equal(match.board.p2[0].hp, 85, 'Twin Rising Dragons should deal 15 to the primary target');
     assert.equal(match.board.p2[1].hp, 90, 'Twin Rising Dragons should deal 10 to other enemies');
 
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 65, 'Twin Rising Dragons Trap should gain bonus damage on marked targets');
+    assert.equal(match.board.p2[0].hp, 70, 'Twin Rising Dragons Trap should gain bonus damage on marked targets');
     assert.equal(match.board.p2[1].hp, 75, 'Twin Rising Dragons Trap should also hit other marked enemies');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'tenten_twin_rising_dragons_trap_skill_stun' &&
+                status.metadata.cannotUseSkillClasses.includes('physical') &&
+                status.metadata.cannotUseSkillClasses.includes('energy')
+        ),
+        true,
+        'Twin Rising Dragons Trap should stun marked enemies physical and chakra skills'
+    );
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -643,16 +653,33 @@ test('battleLogic resolves Tenten starter kit behavior used by the editor data',
 
 test('battleLogic resolves Neji starter kit behavior used by the editor data', () => {
     const match = makeMatch([10], [1, 2]);
-    match.chakraPools.p2.taijutsu = 1;
+    match.chakraPools.p2.taijutsu = 2;
 
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'neji_hyuuga_neji_gentle_fist' &&
+                status.metadata.NonAfflictionDamageDebuff === 10
+        ),
+        true,
+        'Gentle Fist should apply its stronger damage debuff'
+    );
+
+    match.board.p1[0].state.cooldowns = {};
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 60, 'Eight Trigrams Sixty-Four Palms should deal 40 damage');
-    assert.equal(match.chakraPools.p2.taijutsu, 0, 'Eight Trigrams Sixty-Four Palms should remove random chakra');
+    assert.equal(match.board.p2[0].hp, 65, 'Eight Trigrams Sixty-Four Palms should deal 35 damage');
+    assert.equal(
+        match.chakraPools.p2.taijutsu,
+        0,
+        'Eight Trigrams Sixty-Four Palms should remove extra chakra from a Gentle Fist target'
+    );
 
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 50, 'Revolving Heaven should damage all enemies');
+    assert.equal(match.board.p2[0].hp, 55, 'Revolving Heaven should damage all enemies');
     assert.equal(match.board.p2[1].hp, 90, 'Revolving Heaven should damage all enemies');
     assert.equal(
         match.board.p1[0].state.statuses.some((status) => status.id === 'invulnerable' && status.metadata.invulnerable),
@@ -683,7 +710,8 @@ test('battleLogic resolves Gaara starter kit behavior used by the editor data', 
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].alive, false, 'Sand Burial should kill a Sand Coffin target');
+    assert.equal(match.board.p2[0].alive, true, 'Sand Burial should no longer instantly kill a Sand Coffin target');
+    assert.equal(match.board.p2[0].hp, 50, 'Sand Burial should deal 50 piercing damage');
 });
 
 test('battleLogic resolves Kankuro starter kit behavior used by the editor data', () => {
@@ -692,11 +720,30 @@ test('battleLogic resolves Kankuro starter kit behavior used by the editor data'
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 90, 'Poison Bomb should deal 10 affliction damage');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'kankuro_poison_bomb_mark' &&
+                status.metadata.tooltipText ===
+                    'This character takes 5 additional damage from Black Secret Machine One Shot.'
+        ),
+        true,
+        'Poison Bomb mark tooltip should include the additional damage value'
+    );
 
     match.board.p1[0].state.cooldowns = {};
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 55, 'Black Secret Machine One Shot should deal 35 to a Poison Bomb target');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'kankuro_black_secret_machine_one_shot_mark' &&
+                status.metadata.tooltipText === 'This character takes 5 additional damage from Poison Bomb.'
+        ),
+        true,
+        'Black Secret Machine One Shot mark tooltip should include the additional damage value'
+    );
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -704,9 +751,51 @@ test('battleLogic resolves Kankuro starter kit behavior used by the editor data'
         match.board.p1[0].state.statuses.some(
             (status) =>
                 status.id === 'kankuro_puppet_preparation_defense' &&
-                status.metadata.destructibleDefensePoints === 15
+                status.metadata.destructibleDefensePoints === 15 &&
+                status.metadata.tooltipText ===
+                    'Kankuro has 15 points of permanent destructible defense from Puppet Preparation.'
         ),
         true
+    );
+});
+
+test('Kankuro Poison Bomb resolves correctly after Puppet Preparation', () => {
+    const match = makeMatch([14], [1, 2, 3]);
+
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+
+    assert.equal(
+        match.board.p1[0].state.statuses.some(
+            (status) =>
+                status.id === 'kankuro_puppet_preparation_bonus' &&
+                status.metadata.skillDamageBonuses?.['kankuro-poison-bomb'] === 10
+        ),
+        true,
+        'Puppet Preparation should grant Poison Bomb its damage bonus'
+    );
+
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.deepEqual(
+        match.board.p2.map((unit) => unit.hp),
+        [80, 80, 80],
+        'Prepared Poison Bomb should damage all enemies for 20'
+    );
+    assert.equal(
+        match.board.p2.every((unit) =>
+            unit.state.statuses.some(
+                (status) =>
+                    status.id === 'kankuro_poison_bomb_mark' &&
+                    status.remainingTurns === 2 &&
+                    status.metadata.tooltipText ===
+                        'This character takes 5 additional damage from Black Secret Machine One Shot.'
+            )
+        ),
+        true,
+        'Prepared Poison Bomb should apply its extended Black Secret Machine One Shot mark'
     );
 });
 

@@ -4,6 +4,7 @@ const test = require('node:test');
 const characters = require('../characters.js');
 const {
     buildInitialBoard,
+    resolveEffectiveSkill,
     resolvePendingTurnSkills,
     tickStatusesForTurnEnd,
 } = require('../battleLogic.js');
@@ -77,8 +78,30 @@ test('Gaara Sand Coffin stun decrements on target turns and expires', () => {
     assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_coffin_stun'), undefined);
 });
 
+test('Gaara Sand Coffin remains replaced by Sand Burial on Gaara next turn', () => {
+    const match = makeMatch([indexById['gaara-of-the-desert']], [indexById.tenten]);
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['gaara-of-the-desert'],
+            skillIndex: 0,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'gaara-of-the-desert-sand-burial'
+    );
+});
+
 test('Tenten Twin Rising Dragons Trap debuff expires instead of freezing', () => {
     const match = makeMatch([indexById.tenten], [indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -86,6 +109,20 @@ test('Tenten Twin Rising Dragons Trap debuff expires instead of freezing', () =>
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff')?.remainingTurns, 1);
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff'), undefined);
+});
+
+test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
+    const match = makeMatch([indexById.tenten], [indexById['gaara-of-the-desert'], indexById['tsuchi-kin']]);
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[1].hp, 90);
+
+    queueSkill(match, 'p1', 0, 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 70);
+    assert.equal(match.board.p2[1].hp, 75);
 });
 
 test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {
@@ -148,5 +185,84 @@ test('Kakashi Raikiri still gets its Ninja Dogs bonus on his next turn', () => {
     const hpBefore = match.board.p2[0].hp;
     queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(hpBefore - match.board.p2[0].hp, 100);
+    assert.equal(hpBefore - match.board.p2[0].hp, 45);
+});
+
+test('Asuma Sharpen Blades unlocks Flying Swallow and Finishing Blow cycles with Flying Kick', () => {
+    const match = makeMatch([indexById['sarutobi-asuma']], [indexById.tenten]);
+
+    queueSkill(match, 'p1', 0, 0);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['sarutobi-asuma'],
+            skillIndex: 0,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'sarutobi-asuma-flying-swallow'
+    );
+
+    queueSkill(match, 'p1', 0, 0);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['sarutobi-asuma'],
+            skillIndex: 0,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'sarutobi-asuma-sharpen-blades'
+    );
+
+    queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['sarutobi-asuma'],
+            skillIndex: 1,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'sarutobi-asuma-flying-kick'
+    );
+
+    match.board.p1[0].state.cooldowns = {};
+    queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['sarutobi-asuma'],
+            skillIndex: 1,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'sarutobi-asuma-finishing-blow'
+    );
+});
+
+test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () => {
+    const match = makeMatch([indexById['maito-gai'], indexById.tenten], [indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(
+        resolveEffectiveSkill({
+            characters,
+            rosterIndex: indexById['maito-gai'],
+            skillIndex: 2,
+            actorState: match.board.p1[0].state,
+        }).id,
+        'maito-gai-morning-peacock-feint'
+    );
+
+    queueSkill(match, 'p1', 0, 2, [{ username: 'p1', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(getStatus(match, 'p1', 1, 'gai_morning_peacock_feint')?.remainingTurns, 1);
+
+    const hpBefore = match.board.p2[0].hp;
+    queueSkill(match, 'p2', 0, 0, [{ username: 'p1', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(hpBefore - match.board.p2[0].hp, 30);
+    assert.equal(match.board.p1[1].hp, 100);
 });

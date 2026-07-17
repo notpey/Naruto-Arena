@@ -571,6 +571,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const readyTextEl = document.querySelector('.ready-text');
         const readySectionEl = document.querySelector('.ready-section');
         let gameModalBackdropEl = null;
+        let gameActionMessageEl = null;
+        let gameActionMessageTimeout = null;
         const setModalBackdropVisible = (visible) => {
             if (!gameModalBackdropEl) {
                 gameModalBackdropEl = document.createElement('div');
@@ -578,6 +580,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.body.appendChild(gameModalBackdropEl);
             }
             gameModalBackdropEl.classList.toggle('visible', Boolean(visible));
+        };
+        const showGameActionMessage = (message) => {
+            const text = String(message || '').trim();
+            if (!text) return;
+            if (!gameActionMessageEl) {
+                gameActionMessageEl = document.createElement('div');
+                gameActionMessageEl.className = 'game-action-message';
+                document.body.appendChild(gameActionMessageEl);
+            }
+            gameActionMessageEl.textContent = text;
+            gameActionMessageEl.classList.add('visible');
+            if (gameActionMessageTimeout) {
+                window.clearTimeout(gameActionMessageTimeout);
+            }
+            gameActionMessageTimeout = window.setTimeout(() => {
+                gameActionMessageEl?.classList.remove('visible');
+            }, 2600);
         };
         const endTurnModalEl = document.querySelector('.ChakraChooseEndTurn');
         const skillOrderEl = endTurnModalEl?.querySelector('.skillorder');
@@ -1335,12 +1354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     badge.textContent = '';
                     badge.style.display = 'none';
                 }
-                const rect = meta.imgEl.getBoundingClientRect();
-                const parentRect = meta.imgEl.parentElement.getBoundingClientRect();
-                badge.style.left = `${rect.left - parentRect.left}px`;
-                badge.style.top = `${rect.top - parentRect.top}px`;
-                badge.style.width = `${rect.width}px`;
-                badge.style.height = `${rect.height}px`;
             });
         };
 
@@ -1920,7 +1933,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<div class="battle-end-unlocks">Unlocked: ${escapeHtml(unlockNames.join(', '))}</div>`
                 : `<div class="battle-end-unlocks">No new character unlocks.</div>`;
             if (battleEndPortraitEl) {
-                battleEndPortraitEl.src = didWin ? 'win.png' : 'lose.png';
+                battleEndPortraitEl.src = didWin ? 'win-remaster.png' : 'lose-remaster.png';
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
@@ -2373,19 +2386,103 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // status metadata, since that value can grow via stacking (mergeNumericAddKeys)
                     // after the status is first applied. Baking a fixed number into the source
                     // text instead would go stale the moment the status stacks again.
-                    const injectMissingValue = (value, phraseRegex) => {
+                    const injectMissingValue = (value, phraseRegex, buildReplacement) => {
                         if (!(value > 0)) return;
-                        if (new RegExp(`\\b${value}\\b`).test(normalized)) return;
                         if (!phraseRegex.test(normalized)) return;
-                        normalized = normalized.replace(phraseRegex, (match, verb) => match.replace(verb, `${verb} ${value}`));
+                        normalized = normalized.replace(phraseRegex, (...args) =>
+                            typeof buildReplacement === 'function'
+                                ? buildReplacement(value, ...args)
+                                : args[0]
+                        );
                     };
                     const defensePoints = Math.max(0, Number(statusMetadata?.destructibleDefensePoints) || 0);
-                    injectMissingValue(defensePoints, /\b(has|have)\s+permanent destructible defense\b/i);
-                    injectMissingValue(defensePoints, /\b(has|have)\s+destructible defense\b/i);
+                    injectMissingValue(
+                        defensePoints,
+                        /\b(has|have)\s+permanent destructible defense\b/i,
+                        (value, match, verb) => `${verb} ${value} points of permanent destructible defense`
+                    );
+                    injectMissingValue(
+                        defensePoints,
+                        /\b(has|have)\s+destructible defense\b/i,
+                        (value, match, verb) => `${verb} ${value} points of destructible defense`
+                    );
                     const bonusDamage = Math.max(0, Number(statusMetadata?.bonusDamageFromSourceSkillsFlat) || 0);
-                    injectMissingValue(bonusDamage, /\b(takes|take)\s+additional damage\b/i);
+                    injectMissingValue(
+                        bonusDamage,
+                        /\b(takes|take)\s+additional damage\b/i,
+                        (value, match, verb) => `${verb} ${value} additional damage`
+                    );
+                    const nonAfflictionBonusDamage = Math.max(
+                        0,
+                        Number(statusMetadata?.bonusDamageFromSourceNonAfflictionFlat) || 0
+                    );
+                    injectMissingValue(
+                        nonAfflictionBonusDamage,
+                        /\b(takes|take)\s+additional non-affliction damage\b/i,
+                        (value, match, verb) => `${verb} ${value} additional non-affliction damage`
+                    );
+                    const incomingNonAfflictionBonus = Math.max(
+                        0,
+                        Number(statusMetadata?.nonAfflictionDamageTakenBonusFlat) || 0
+                    );
+                    injectMissingValue(
+                        incomingNonAfflictionBonus,
+                        /\b(takes|take)\s+additional damage from non-affliction skills\b/i,
+                        (value, match, verb) => `${verb} ${value} additional damage from non-affliction skills`
+                    );
                     const damageReduction = Math.max(0, Number(statusMetadata?.damageReductionFlat) || 0);
-                    injectMissingValue(damageReduction, /\b(has|have)\s+damage reduction\b/i);
+                    injectMissingValue(
+                        damageReduction,
+                        /\b(has|have)\s+damage reduction\b/i,
+                        (value, match, verb) => `${verb} ${value} damage reduction`
+                    );
+                    injectMissingValue(
+                        damageReduction,
+                        /\b(has|have)\s+points of damage reduction\b/i,
+                        (value, match, verb) => `${verb} ${value} points of damage reduction`
+                    );
+                    const nonAfflictionDebuff = Math.max(
+                        0,
+                        (Number(statusMetadata?.NonAfflictionDamageDebuff) || 0) +
+                            (Number(statusMetadata?.nonAfflictionDamageDebuffFlat) || 0)
+                    );
+                    injectMissingValue(
+                        nonAfflictionDebuff,
+                        /\b(deals|deal)\s+less non-affliction damage\b/i,
+                        (value, match, verb) => `${verb} ${value} less non-affliction damage`
+                    );
+                    const flatDamageDebuff = Math.max(
+                        0,
+                        (Number(statusMetadata?.DamageDebuff) || 0) +
+                            (Number(statusMetadata?.damageDebuffFlat) || 0)
+                    );
+                    injectMissingValue(
+                        flatDamageDebuff,
+                        /\b(deals|deal)\s+less damage\b/i,
+                        (value, match, verb) => `${verb} ${value} less damage`
+                    );
+                    const turnEndDamage = Math.max(0, Number(statusMetadata?.turnEndDamage) || 0);
+                    injectMissingValue(
+                        turnEndDamage,
+                        /\b(takes|take)\s+(?:piercing |affliction )?damage\b/i,
+                        (value, match, verb) => {
+                            const damageTypeMatch = match.match(/\b(piercing|affliction)\s+damage\b/i);
+                            const damageType = damageTypeMatch ? `${damageTypeMatch[1].toLowerCase()} ` : '';
+                            return `${verb} ${value} ${damageType}damage`;
+                        }
+                    );
+                    const turnEndHeal = Math.max(0, Number(statusMetadata?.turnEndHealFlat) || 0);
+                    injectMissingValue(
+                        turnEndHeal,
+                        /\b(heals|heal)\s+health\b/i,
+                        (value, match, verb) => `${verb} ${value} health`
+                    );
+                    const turnEndHealthSteal = Math.max(0, Number(statusMetadata?.turnEndHealthSteal) || 0);
+                    injectMissingValue(
+                        turnEndHealthSteal,
+                        /\b(steals|steal)\s+health\b/i,
+                        (value, match, verb) => `${verb} ${value} health`
+                    );
                     return normalized
                         .split(/\n+/)
                         .flatMap((part) => part.split(/(?<=\.)\s+(?=This character|They|Their|All enemies|If |For \d+ turns)/i))
@@ -2501,7 +2598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 if (!skillId || bonus <= 0) return null;
                                 const bonusSkill = findSkillById(skillId);
                                 const bonusSkillName = bonusSkill?.name || 'This skill';
-                                return `${bonusSkillName} deals ${bonus} additional permanent damage.`;
+                                return `${bonusSkillName} deals ${bonus} additional damage.`;
                             })
                             .filter(Boolean);
                         if (bonusLines.length > 0) {
@@ -2538,16 +2635,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 const textLinesHtml = textRows
                     .map((row, idx) => {
+                        const turns = escapeHtml(formatTurnsLabel(row.remaining));
+                        const formatTooltipEffectText = (value) => {
+                            const escaped = escapeHtml(value);
+                            return escaped.replace(
+                                /\b(\d+(?:\s+(?:additional|less|points? of|random|piercing|affliction|physical|chakra|non-affliction|damage|health|turns?|turn))?|Infinite|damage reduction|destructible defense|invulnerable|stunned?|ignores? stun effects?|additional damage|less damage|random chakra|piercing damage|affliction damage)\b/gi,
+                                '<strong class="status-tooltip-emphasis">$1</strong>'
+                            );
+                        };
                         const line = (Array.isArray(row.lines) && row.lines.length ? row.lines : [row.text])
-                            .map((sub) => `<div class="status-tooltip-desc-line">- ${escapeHtml(sub)}</div>`)
+                            .map(
+                                (sub) =>
+                                    `<div class="status-tooltip-effect">` +
+                                        `<span class="status-tooltip-bullet" aria-hidden="true"></span>` +
+                                        `<span class="status-tooltip-desc-line">${formatTooltipEffectText(sub)}</span>` +
+                                        `<span class="status-tooltip-turns">${turns}</span>` +
+                                    `</div>`
+                            )
                             .join('');
-                        const turns =
-                            `<div class="status-tooltip-turns">${escapeHtml(formatTurnsLabel(row.remaining))}</div>`;
                         const divider =
                             idx < textRows.length - 1
                                 ? `<div class="status-tooltip-line-divider"></div>`
                                 : '';
-                        return `${line}${turns}${divider}`;
+                        return `${line}${divider}`;
                     })
                     .join('');
                 return (
@@ -3118,6 +3228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
                 .catch((error) => {
                     console.warn('Failed to queue skill.', error);
+                    showGameActionMessage(error?.message || 'Unable to queue skill.');
                 })
                 .finally(() => {
                     closeClassChoicePopup();

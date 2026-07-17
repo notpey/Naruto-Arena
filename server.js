@@ -59,6 +59,7 @@ let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
 const STARTER_REBALANCE_MIGRATION_ID = 'starter-rebalance-2026-07-16';
+const EXAMS_REBALANCE_MIGRATION_ID = 'exams-rebalance-2026-07-16-v4';
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
@@ -69,6 +70,43 @@ const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'akimichi-chouji',
     'yamanaka-ino',
     'rock-lee',
+]);
+const EXAMS_REBALANCE_CHARACTER_IDS = new Set([
+    'uzumaki-naruto',
+    'haruno-sakura',
+    'uchiha-sasuke',
+    'neji-hyuuga',
+    'tenten',
+    'gaara-of-the-desert',
+    'temari',
+    'kankuro',
+    'tsuchi-kin',
+    'zaku-abumi',
+    'dosu-kinuta',
+    'haku',
+    'umino-iruka',
+    'mizuki',
+    'demon-brothers',
+    'momochi-zabuza',
+    'oboro',
+    'shigure',
+    'shiore-orochimaru',
+    'akadou-yoroi',
+    'tsurugi-misumi',
+    'mitarashi-anko',
+    'jiroubou',
+    'kidoumaru',
+    'tayuya',
+    'sakon-and-ukon',
+    'kimimaro',
+    'gekko-hayate',
+    'shizune',
+    'hatake-kakashi',
+    'yuhi-kurenai',
+    'sarutobi-asuma',
+    'maito-gai',
+    'baki',
+    'yakushi-kabuto',
 ]);
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
@@ -4639,6 +4677,7 @@ const getStoredCharacters = async () => {
                 $set: {
                     key: CHARACTER_MIGRATIONS_STATE_KEY,
                     [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
+                    [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -4654,6 +4693,11 @@ const getStoredCharacters = async () => {
             ? migrationState.completed
             : {};
     const shouldApplyStarterRebalance = !completedMigrations[STARTER_REBALANCE_MIGRATION_ID];
+    const shouldApplyExamsRebalance = !completedMigrations[EXAMS_REBALANCE_MIGRATION_ID];
+    const characterIdsToRefresh = new Set([
+        ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
+        ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
+    ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
             .filter((entry) => entry && typeof entry.characterId === 'string' && entry.characterId)
@@ -4666,11 +4710,7 @@ const getStoredCharacters = async () => {
     );
     const migratedStoredCharacters = storedState.characters.map((entry) => {
         const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
-        if (
-            shouldApplyStarterRebalance &&
-            STARTER_REBALANCE_CHARACTER_IDS.has(characterId) &&
-            defaultByCharacterId.has(characterId)
-        ) {
+        if (characterIdsToRefresh.has(characterId) && defaultByCharacterId.has(characterId)) {
             return defaultByCharacterId.get(characterId);
         }
         return entry;
@@ -4678,7 +4718,7 @@ const getStoredCharacters = async () => {
     const newDefaultCharacters = defaultCharacters.filter(
         (entry) => entry && typeof entry.characterId === 'string' && !storedIds.has(entry.characterId)
     );
-    if (!shouldApplyStarterRebalance && !newDefaultCharacters.length) {
+    if (!characterIdsToRefresh.size && !newDefaultCharacters.length) {
         return storedState.characters;
     }
 
@@ -4690,14 +4730,22 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance) {
+        const completedMigrationUpdates = {};
+        const migrationCompletedAt = new Date();
+        if (shouldApplyStarterRebalance) {
+            completedMigrationUpdates[`completed.${STARTER_REBALANCE_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyExamsRebalance) {
+            completedMigrationUpdates[`completed.${EXAMS_REBALANCE_MIGRATION_ID}`] = migrationCompletedAt;
+        }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
             {
                 $set: {
                     key: CHARACTER_MIGRATIONS_STATE_KEY,
-                    [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: new Date(),
-                    updatedAt: new Date(),
+                    ...completedMigrationUpdates,
+                    updatedAt: migrationCompletedAt,
                 },
             },
             { upsert: true }

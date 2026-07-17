@@ -3222,6 +3222,25 @@ text-transform: uppercase;
     pointer-events: none;
     z-index: 12;
     margin-top: 3px;
+    top: 11px;
+    width: 54px;
+    height: 54px;
+}
+
+.skill-cooldown-badge[data-skill-idx="0"] {
+    left: 101px;
+}
+
+.skill-cooldown-badge[data-skill-idx="1"] {
+    left: 161px;
+}
+
+.skill-cooldown-badge[data-skill-idx="2"] {
+    left: 221px;
+}
+
+.skill-cooldown-badge[data-skill-idx="3"] {
+    left: 281px;
 }
 
 .skillqueue {
@@ -4114,13 +4133,15 @@ text-transform: uppercase;
     position: absolute;
     left: 85px;
     top: 24px;
-    min-width: 270px;
-    max-width: 320px;
-    padding: 8px 7px;
-    background: #efe8d1;
-    border: 1px solid #2d1507;
+    min-width: 240px;
+    max-width: 330px;
+    padding: 8px 9px;
+    background: #fff4d6;
+    border: 2px solid #2d1507;
     color: #2d1507;
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.32;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 .skilltooltips.has-status:hover .status-tooltip-content {
@@ -4129,31 +4150,79 @@ text-transform: uppercase;
 
 .status-tooltip-item + .status-tooltip-item {
     margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(45, 21, 7, 0.24);
 }
 
 .status-tooltip-title {
     color: #ba2310;
-    margin-bottom: 2px;
+    margin-bottom: 5px;
     font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 .status-tooltip-desc {
     color: #2d1507;
+    display: grid;
+    gap: 2px;
+}
+
+.status-tooltip-effect {
+    display: grid;
+    grid-template-columns: 6px minmax(0, 1fr);
+    column-gap: 6px;
+    row-gap: 3px;
+    align-items: start;
+    padding: 4px 0;
+}
+
+.status-tooltip-effect + .status-tooltip-effect {
+    border-top: 1px solid rgba(45, 21, 7, 0.12);
+}
+
+.status-tooltip-bullet {
+    width: 4px;
+    height: 4px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background: #ba2310;
+    box-shadow: 0 0 0 1px rgba(45, 21, 7, 0.25);
 }
 
 .status-tooltip-desc-line {
     color: #2d1507;
+    min-width: 0;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.status-tooltip-emphasis {
+    color: #8f1a0f;
+    font-weight: 900;
 }
 
 .status-tooltip-line-divider {
     height: 1px;
-    background: rgba(45, 21, 7, 0.35);
-    margin: 3px 0;
+    background: rgba(45, 21, 7, 0.22);
+    margin: 5px 0;
 }
 
 .status-tooltip-turns {
-    margin-top: 2px;
-    color: #aa1e11;
+    align-self: start;
+    justify-self: start;
+    grid-column: 2;
+    padding: 2px 5px;
+    border: 1px solid #9d170d;
+    background: rgba(157, 23, 13, 0.1);
+    color: #8f1a0f;
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .enemy-characters .status-tooltip-content {
@@ -4175,47 +4244,39 @@ text-transform: uppercase;
     position: fixed;
     left: 0;
     top: 0;
-    min-width: 300px;
+    min-width: 250px;
     max-width: 340px;
-    padding: 7px 8px;
-    background: #fff8dd;
+    padding: 8px 9px;
+    background: #fff4d6;
     border: 2px solid #2d1507;
     color: #211105;
-    font-size: 12px;
-    line-height: 1.3;
+    font-size: 13px;
+    line-height: 1.32;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
     z-index: 99999;
 }
 
 .global-status-tooltip .status-tooltip-item + .status-tooltip-item {
     margin-top: 6px;
-    padding-top: 5px;
-    border-top: 1px solid rgba(45, 21, 7, 0.28);
+    padding-top: 6px;
+    border-top: 1px solid rgba(45, 21, 7, 0.24);
 }
 
 .global-status-tooltip .status-tooltip-title {
-    margin-bottom: 3px;
+    margin-bottom: 5px;
     color: #9d170d;
     font-size: 13px;
     font-weight: 900;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
 }
 
 .global-status-tooltip .status-tooltip-desc-line {
-    margin: 1px 0;
     color: #211105;
 }
 
 .global-status-tooltip .status-tooltip-turns {
-    display: inline-block;
-    margin-top: 3px;
-    padding: 2px 6px;
-    color: #fff8dd;
-    background: #9d170d;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.06em;
+    background: rgba(157, 23, 13, 0.1);
 }
 
 .energy-none {
@@ -4578,6 +4639,28 @@ body.ingame-client-page .backgroundingame {
     left: 57px;
 }
 
+.game-remaster .skill-cooldown-badge {
+    top: 16px;
+    width: var(--remaster-skill-icon);
+    height: var(--remaster-skill-icon);
+}
+
+.game-remaster .skill-cooldown-badge[data-skill-idx="0"] {
+    left: 143px;
+}
+
+.game-remaster .skill-cooldown-badge[data-skill-idx="1"] {
+    left: 229px;
+}
+
+.game-remaster .skill-cooldown-badge[data-skill-idx="2"] {
+    left: 315px;
+}
+
+.game-remaster .skill-cooldown-badge[data-skill-idx="3"] {
+    left: 401px;
+}
+
 /* --- Skill information panel (bottom, right of surrender buttons)
    left: 352px puts the right edge at 352+748=1100px (stage edge).
    Horizontally clear of the 260px surrender buttons at left: 43px.
@@ -4857,6 +4940,33 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .game-modal-backdrop.visible {
     display: block;
     background: rgba(0, 0, 0, 0.6);
+}
+
+.game-action-message {
+    position: fixed;
+    left: 50%;
+    top: 18px;
+    z-index: 10020;
+    max-width: min(520px, calc(100vw - 32px));
+    padding: 10px 14px;
+    border: 2px solid #3d160d;
+    background: #fff4cf;
+    color: #791b12;
+    font-family: "Libre Franklin", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -8px);
+    transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.game-action-message.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
 }
 
 .game-remaster .ChakraChooseEndTurn .chakrachoose {

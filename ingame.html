@@ -4,42 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
     <script>
-        // The game stage is a fixed-pixel-width layout (1100px remaster /
-        // 770px classic), not a responsive one. On mobile, telling the
+        // The game stage is a fixed-pixel-width remaster layout (1100px),
+        // not a responsive one. On mobile, telling the
         // browser the viewport is "device-width" makes it render that fixed
         // layout at 1:1 scale and clip most of it. Instead, tell the browser
         // the viewport's true width so it auto-scales the whole stage down
         // to fit the screen (pinch-zoom still works; this only sets the
         // starting scale).
         (function () {
-            try {
-                var isRemaster = localStorage.getItem("na-selection-remaster-preview") !== "disabled";
-                var stageWidth = isRemaster ? 1100 : 770;
-                var meta = document.getElementById("viewport-meta");
-                if (meta) {
-                    meta.setAttribute("content", "width=" + stageWidth + ", initial-scale=1");
-                }
-            } catch (error) {}
+            var meta = document.getElementById("viewport-meta");
+            if (meta) {
+                meta.setAttribute("content", "width=1100, initial-scale=1");
+            }
         })();
     </script>
     <title>Naruto-Arena Game</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="preload" as="image" href="ingamebg-remaster.png">
+    <link rel="preload" as="image" href="ingamescrollbehind-remaster.png">
+    <link rel="preload" as="image" href="ingameskillscroll-remaster.png">
+    <link rel="preload" as="image" href="ingamebottomscroll-remaster.png">
+    <link rel="preload" as="image" href="optionscroll-remaster.png">
+    <link rel="stylesheet" href="style.css?v=17">
 </head>
-<body class="ingame-client-page">
+<body class="ingame-client-page game-remaster">
 <script>
     (function () {
-        var key = "na-selection-remaster-preview";
-        try {
-            // Remaster is the default experience now; storing "disabled" is
-            // the only way to opt back into the classic 770x560 client.
-            if (localStorage.getItem(key) !== "disabled") {
-                document.body.classList.add("game-remaster");
-            }
-        } catch (e) {}
-
         // Mobile landscape: even scaled to fit the device's width, the fixed
         // 800px-tall stage is still much taller than a phone's landscape
         // height, so it needed pinch-zoom/scrolling to see the whole screen.
@@ -47,12 +39,8 @@
         // with the leftover width left black, rather than stretching it.
         var viewportMeta = document.getElementById("viewport-meta");
         function applyMobileLandscapeFit() {
-            var isRemasterNow = true;
-            try {
-                isRemasterNow = localStorage.getItem(key) !== "disabled";
-            } catch (error) {}
-            var stageWidth = isRemasterNow ? 1100 : 770;
-            var stageHeight = isRemasterNow ? 800 : 560;
+            var stageWidth = 1100;
+            var stageHeight = 800;
             var isLandscape = window.innerWidth > window.innerHeight;
             var isPhoneSized = Math.min(window.innerWidth, window.innerHeight) <= 500;
             if (isLandscape && isPhoneSized) {
@@ -107,7 +95,7 @@
         </div>
     </div>
 
-    <div class="ChakraChooseEndTurn" style="background-image: url('searchingscroll.png');">
+    <div class="ChakraChooseEndTurn">
         <p class="chakrachoose">CHOOSE <span class="chakrachoosered">0</span> RANDOM CHAKRA (S)</p>
         <div class="chakra-container">
             <div class="chakra-column">
@@ -268,7 +256,7 @@
                 <p class="surrender-confirm-title">ARE YOU SURE YOU WISH TO SURRENDER?</p>
 
                 <div class="surrender-confirm-preview-row">
-                    <img src="surrenderimage.png" alt="Surrender preview" class="surrender-confirm-preview-image">
+                    <img src="surrenderimage-remaster.png" alt="Surrender preview" class="surrender-confirm-preview-image">
                 </div>
 
                 <div class="surrender-confirm-actions">
@@ -281,7 +269,7 @@
 
     <div class="battle-end-overlay">
         <div class="battle-end-panel">
-            <img src="lose.png" alt="Defeated character portrait" class="battle-end-portrait">
+            <img src="lose-remaster.png" alt="Defeated character portrait" class="battle-end-portrait">
             <div class="battle-end-copy">
                 <p class="battle-end-title">LOSER</p>
                 <p class="battle-end-message">TOO BAD!<br>YOU HAVE LOST A QUICK BATTLE AGAINST USERNAME.</p>
@@ -332,7 +320,7 @@
         </div>
 
         <div class="player-right">
-            <img src="found.png" alt="Opponent Avatar" class="player-avatar-right">
+            <img src="found-remaster.png" alt="Opponent Avatar" class="player-avatar-right">
             <div class="player-inforight">
                 <div class="player-name red">ALLDEAD</div>
                 <div class="player-status">ACADEMY STUDENT</div>
@@ -356,9 +344,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -380,9 +368,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -404,9 +392,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -499,7 +487,7 @@
     </div>
 
     <div class="bottomrender">
-        <img src="render.png" alt="render" class="render">
+        <img src="render-remaster.png" alt="render" class="render">
     </div>
 
     <div class="bottomgame">
@@ -512,7 +500,6 @@
 </div>
 
 </div>
-<script src="characters.js?v=3"></script>
-<script src="script.js?v=4"></script>
+<script src="script.js?v=12"></script>
 </body>
 </html>

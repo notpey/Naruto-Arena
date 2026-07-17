@@ -261,7 +261,7 @@
                                 "id": "tenten-twin-rising-dragons",
                                 "name": "Twin Rising Dragons",
                                 "skillimage": "https://i.imgur.com/735M5GV.png",
-                                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
+                                "skilldescription": "Tenten deals 15 damage to one enemy and 10 damage to all others. For 2 turns, all enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -275,7 +275,7 @@
                                 "effects": [
                                         {
                                                 "type": "damage",
-                                                "amount": 20,
+                                                "amount": 15,
                                                 "scope": "target"
                                         },
                                         {
@@ -286,7 +286,7 @@
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 1,
+                                                "duration": 2,
                                                 "scope": "all-enemy",
                                                 "condition": {
                                                         "scope": "self",
@@ -300,13 +300,13 @@
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "tenten-twin-rising-dragons-trap"
                                                         ],
-                                                        "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                                                        "tooltipText": "This character takes 10 additional damage from Twin Rising Dragons Trap."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 1,
+                                                "duration": 2,
                                                 "scope": "all-enemy",
                                                 "condition": {
                                                         "scope": "self",
@@ -320,7 +320,7 @@
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "tenten-twin-rising-dragons-trap"
                                                         ],
-                                                        "tooltipText": "This character takes additional damage from Twin Rising Dragons Trap."
+                                                        "tooltipText": "This character takes 20 additional damage from Twin Rising Dragons Trap."
                                                 }
                                         },
                                         {
@@ -338,7 +338,7 @@
                                 "id": "tenten-twin-rising-dragons-trap",
                                 "name": "Twin Rising Dragons Trap",
                                 "skillimage": "https://i.imgur.com/pOsj115.png",
-                                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their physical and chakra damage will be lowered by 5. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
+                                "skilldescription": "Tenten deals 5 damage to all enemies. Enemies affected by 'Twin Rising Dragons' will have their physical and chakra skills stunned for 1 turn and will deal 10 less physical and chakra damage. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -361,16 +361,24 @@
                                                 "duration": 1,
                                                 "scope": "all-enemy",
                                                 "condition": {
-                                                        "scope": "self",
-                                                        "missingStatusId": "tenten_full_release_active"
+                                                        "all": [
+                                                                {
+                                                                        "scope": "target",
+                                                                        "statusId": "tenten_twin_rising_dragons_mark"
+                                                                },
+                                                                {
+                                                                        "scope": "self",
+                                                                        "missingStatusId": "tenten_full_release_active"
+                                                                }
+                                                        ]
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
                                                         "damageDebuffBySkillClass": {
-                                                                "physical": 5,
-                                                                "energy": 5
+                                                                "physical": 10,
+                                                                "energy": 10
                                                         },
-                                                        "tooltipText": "This character deals 5 less physical and chakra damage."
+                                                        "tooltipText": "This character deals 10 less physical and chakra damage."
                                                 }
                                         },
                                         {
@@ -379,16 +387,42 @@
                                                 "duration": 2,
                                                 "scope": "all-enemy",
                                                 "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
+                                                        "all": [
+                                                                {
+                                                                        "scope": "target",
+                                                                        "statusId": "tenten_twin_rising_dragons_mark"
+                                                                },
+                                                                {
+                                                                        "scope": "self",
+                                                                        "statusId": "tenten_full_release_active"
+                                                                }
+                                                        ]
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
                                                         "damageDebuffBySkillClass": {
-                                                                "physical": 5,
-                                                                "energy": 5
+                                                                "physical": 10,
+                                                                "energy": 10
                                                         },
-                                                        "tooltipText": "This character deals 5 less physical and chakra damage."
+                                                        "tooltipText": "This character deals 10 less physical and chakra damage."
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "tenten_twin_rising_dragons_trap_skill_stun",
+                                                "duration": 1,
+                                                "scope": "all-enemy",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusId": "tenten_twin_rising_dragons_mark"
+                                                },
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "cannotUseSkillClasses": [
+                                                                "physical",
+                                                                "energy"
+                                                        ],
+                                                        "tooltipText": "This character's physical and chakra skills are stunned."
                                                 }
                                         },
                                         {
@@ -411,13 +445,13 @@
                                 "id": "tenten-twin-rising-dragons-full-release",
                                 "name": "Twin Rising Dragons Full Release",
                                 "skillimage": "https://i.imgur.com/5cUbYBW.png",
-                                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons will apply its non-damage effect twice and the damage reduction effect of Twin Rising Dragons Trap will last 1 additional turn.",
+                                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons marks will cause Twin Rising Dragons Trap to deal 20 additional damage, and Twin Rising Dragons Trap's damage reduction will last 1 additional turn.",
                                 "energy": [
                                         "Random"
                                 ],
                                 "target": "self",
                                 "damage": 0,
-                                "cooldown": 1,
+                                "cooldown": 2,
                                 "classes": [
                                         "Strategic",
                                         "Instant"
@@ -486,7 +520,7 @@
                                 "id": "neji-hyuuga-neji-gentle-fist",
                                 "name": "Neji Gentle Fist",
                                 "skillimage": "https://i.imgur.com/q8jlVNU.png",
-                                "skilldescription": "Hyuuga Neji deals 25 damage to one enemy for 2 turns. During this time, this enemy's non-affliction damage will be lowered by 5.",
+                                "skilldescription": "Hyuuga Neji deals 20 damage to one enemy for 2 turns. During this time, this enemy's non-affliction damage will be lowered by 10.",
                                 "energy": [
                                         "Taijutsu",
                                         "Random"
@@ -506,13 +540,13 @@
                                                 "scope": "target",
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnEndDamage": 25,
+                                                        "turnEndDamage": 20,
                                                         "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
                                                         "ongoingClass": "action",
                                                         "triggerOnApply": true,
-                                                        "NonAfflictionDamageDebuff": 5,
-                                                        "tooltipText": "This character takes 25 damage and deals 5 less non-affliction damage."
+                                                        "NonAfflictionDamageDebuff": 10,
+                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
                                                 }
                                         }
                                 ]
@@ -554,7 +588,7 @@
                                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                                 "name": "Eight Trigrams Sixty-Four Palms",
                                 "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                                "skilldescription": "Hyuuga Neji deals 40 damage to one enemy and removes 1 random chakra from them.",
+                                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them. If this enemy is affected by 'Gentle Fist', 1 additional random chakra will be removed.",
                                 "energy": [
                                         "Taijutsu",
                                         "Bloodline"
@@ -569,13 +603,22 @@
                                 "effects": [
                                         {
                                                 "type": "damage",
-                                                "amount": 40,
+                                                "amount": 35,
                                                 "scope": "target"
                                         },
                                         {
                                                 "type": "remove_random_chakra",
                                                 "amount": 1,
                                                 "scope": "target"
+                                        },
+                                        {
+                                                "type": "remove_random_chakra",
+                                                "amount": 1,
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusId": "neji_hyuuga_neji_gentle_fist"
+                                                }
                                         }
                                 ]
                         },
@@ -669,7 +712,8 @@
                                                         "skillReplacements": {
                                                                 "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
                                                         },
-                                                        "tooltipText": "Sand Coffin is replaced by Sand Burial."
+                                                        "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Sand Coffin is replaced by Sand Burial."
                                                 }
                                         }
                                 ]
@@ -773,7 +817,7 @@
                                 "cannotBeCountered": true,
                                 "cannotBeReflected": true,
                                 "skillimage": "https://i.imgur.com/ljX9izT.png",
-                                "skilldescription": "Gaara kills one enemy. This skill requires 'Sand Coffin' to be active on this enemy. This skill cannot be countered or reflected.",
+                                "skilldescription": "Gaara destroys all destructible defense on one enemy, deals 50 piercing damage to them, and removes 1 random chakra. This skill requires 'Sand Coffin' to be active on this enemy. This skill cannot be countered or reflected.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Ninjutsu"
@@ -790,8 +834,20 @@
                                 ],
                                 "effects": [
                                         {
-                                                "type": "execute_below_hp",
-                                                "threshold": 999,
+                                                "type": "destroy_destructible_defense",
+                                                "scope": "target"
+                                        },
+                                        {
+                                                "type": "damage",
+                                                "amount": 50,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "ignoreDamageReduction": true
+                                                }
+                                        },
+                                        {
+                                                "type": "remove_random_chakra",
+                                                "amount": 1,
                                                 "scope": "target"
                                         }
                                 ]
@@ -843,7 +899,7 @@
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "kankuro-poison-bomb"
                                                         ],
-                                                        "tooltipText": "This character takes additional damage from Poison Bomb."
+                                                        "tooltipText": "This character takes 5 additional damage from Poison Bomb."
                                                 }
                                         }
                                 ]
@@ -852,7 +908,7 @@
                                 "id": "kankuro-poison-bomb",
                                 "name": "Poison Bomb",
                                 "skillimage": "https://i.imgur.com/3MFMSHu.png",
-                                "skilldescription": "Kankuro deals 10 affliction damage to all enemies. For 1 turn, these enemies will take 5 additional damage from 'Black Secret Machine One Shot'.",
+                                "skilldescription": "Kankuro deals 10 affliction damage to all enemies. For 1 turn, these enemies will take 5 additional damage from 'Black Secret Machine One Shot'. If Kankuro has 'Puppet Preparation', this effect will last 2 turns.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -879,6 +935,10 @@
                                                 "statusId": "kankuro_poison_bomb_mark",
                                                 "duration": 1,
                                                 "scope": "all-enemy",
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "missingStatusId": "kankuro_puppet_preparation_bonus"
+                                                },
                                                 "metadata": {
                                                         "harmful": true,
                                                         "turnDurationAnchor": "source_turn",
@@ -887,7 +947,27 @@
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "kankuro-black-secret-machine-one-shot"
                                                         ],
-                                                        "tooltipText": "This character takes additional damage from Black Secret Machine One Shot."
+                                                        "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "kankuro_poison_bomb_mark",
+                                                "duration": 2,
+                                                "scope": "all-enemy",
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "statusId": "kankuro_puppet_preparation_bonus"
+                                                },
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "bonusDamageFromSourceSkillsFlat": 5,
+                                                        "bonusDamageFromSourceCharacterId": "kankuro",
+                                                        "bonusDamageAppliesToSkillIds": [
+                                                                "kankuro-black-secret-machine-one-shot"
+                                                        ],
+                                                        "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
                                                 }
                                         }
                                 ]
@@ -896,7 +976,7 @@
                                 "id": "kankuro-puppet-preparation",
                                 "name": "Puppet Preparation",
                                 "skillimage": "https://i.imgur.com/ghx3V0n.png",
-                                "skilldescription": "Kankuro gains 15 points of permanent destructible defense. For 4 turns, 'Black Secret Machine One Shot' and 'Poison Bomb' will deal 5 additional damage. This skill stacks.",
+                                "skilldescription": "Kankuro gains 15 points of permanent destructible defense. For 4 turns, 'Black Secret Machine One Shot' and 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -918,7 +998,7 @@
                                                         "mergeNumericAddKeys": [
                                                                 "destructibleDefensePoints"
                                                         ],
-                                                        "tooltipText": "Kankuro has permanent destructible defense from Puppet Preparation."
+                                                        "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} points of permanent destructible defense from Puppet Preparation."
                                                 }
                                         },
                                         {
@@ -928,9 +1008,10 @@
                                                 "scope": "self",
                                                 "metadata": {
                                                         "skillDamageBonuses": {
-                                                                "kankuro-black-secret-machine-one-shot": 5,
-                                                                "kankuro-poison-bomb": 5
+                                                                "kankuro-black-secret-machine-one-shot": 10,
+                                                                "kankuro-poison-bomb": 10
                                                         },
+                                                        "replaceSkillDamageBonuses": true,
                                                         "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal additional damage."
                                                 }
                                         }
@@ -1097,6 +1178,10 @@
                                                 "statusId": "temari_dust_wind_debuff",
                                                 "duration": 1,
                                                 "scope": "all-enemy",
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "missingStatusId": "temari_cutting_whirlwind_active"
+                                                },
                                                 "metadata": {
                                                         "harmful": true,
                                                         "NonAfflictionDamageDebuff": 20,

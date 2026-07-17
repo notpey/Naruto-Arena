@@ -282,7 +282,7 @@
                                                         "mergeNumericAddKeys": [
                                                                 "destructibleDefensePoints"
                                                         ],
-                                                        "tooltipText": "This character has permanent destructible defense from Bug Wall."
+                                                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} points of permanent destructible defense from Bug Wall."
                                                 }
                                         }
                                 ]

@@ -106,7 +106,7 @@
                                                 "skillReplacements": {
                                                         "uzumaki-naruto-shadow-clones": "uzumaki-naruto-rasengan"
                                                 },
-                                                "tooltipText": "Naruto has 10 damage reduction and Shadow Clones is replaced by Rasengan."
+                                                "tooltipText": "Naruto has 10 damage reduction\nShadow Clones is replaced by Rasengan."
                                         }
                                 }
                         ]

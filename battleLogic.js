@@ -1060,6 +1060,19 @@ const doesEffectConditionMatch = ({
     targetUsername = null,
 }) => {
     if (!condition || typeof condition !== 'object') return true;
+    if (Array.isArray(condition.all) && condition.all.length > 0) {
+        return condition.all.every((entry) =>
+            doesEffectConditionMatch({
+                condition: entry,
+                actorState,
+                targetState,
+                actorUnit,
+                targetUnit,
+                actorUsername,
+                targetUsername,
+            })
+        );
+    }
     const scope = condition.scope === 'target' ? 'target' : 'self';
     const scopedState = scope === 'target' ? targetState : actorState;
     if (!scopedState) return false;
@@ -1138,8 +1151,16 @@ const doesEffectConditionMatch = ({
 const isConditionalDamageOverrideOnly = (condition) => {
     if (!condition || typeof condition !== 'object') return false;
     if (!Number.isFinite(condition?.conditionalAmount)) return false;
+    if (Array.isArray(condition.all)) {
+        return condition.all.every((entry) => isConditionalDamageOverrideOnly({
+            ...(entry || {}),
+            conditionalAmount: condition.conditionalAmount,
+        }));
+    }
     const recognizedKeys = new Set([
         'statusId',
+        'statusIdsAny',
+        'missingStatusId',
         'scope',
         'conditionalAmount',
         'consumeOnMatch',
@@ -1226,10 +1247,14 @@ const applyStatus = ({
                 : null;
         if (prevBonuses || incomingBonuses) {
             const mergedBonuses = { ...(prevBonuses || {}) };
-            Object.entries(incomingBonuses || {}).forEach(([skillId, value]) => {
-                mergedBonuses[skillId] = (Number(mergedBonuses[skillId]) || 0) + (Number(value) || 0);
-            });
-            nextMetadata.skillDamageBonuses = mergedBonuses;
+            if (metadata?.replaceSkillDamageBonuses) {
+                nextMetadata.skillDamageBonuses = { ...(incomingBonuses || {}) };
+            } else {
+                Object.entries(incomingBonuses || {}).forEach(([skillId, value]) => {
+                    mergedBonuses[skillId] = (Number(mergedBonuses[skillId]) || 0) + (Number(value) || 0);
+                });
+                nextMetadata.skillDamageBonuses = mergedBonuses;
+            }
         }
         const mergeObjectNumericAddKeys = Array.isArray(metadata?.mergeObjectNumericAddKeys)
             ? metadata.mergeObjectNumericAddKeys.filter((key) => typeof key === 'string' && key)
@@ -2355,6 +2380,15 @@ const maybeTriggerReactiveDefenses = ({
                 metadata: {
                     helpful: true,
                     skillReplacements: { [counterCopySkillReplacementFor]: sourceSkillId },
+                    ...(Array.isArray(trapMetadata?.counterCopiedSkillEnergy)
+                        ? {
+                              skillCostOverridesBySkillId: {
+                                  [sourceSkillId]: {
+                                      energy: trapMetadata.counterCopiedSkillEnergy,
+                                  },
+                              },
+                          }
+                        : {}),
                     tooltipText: 'This character has copied an enemy skill.',
                 },
                 fresh: true,
@@ -2624,7 +2658,10 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     }
 
     const totals = getStatusMetadataTotals(targetState, unit);
-    const contextualMinimumHp = getContextualMinimumHp(targetState, unit, context);
+    const contextualMinimumHp = Math.max(
+        Math.max(0, Number(context?.minimumHp) || 0),
+        getContextualMinimumHp(targetState, unit, context)
+    );
     const isPhysical = skillClasses.some(
         (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'physical'
     );
@@ -4429,6 +4466,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 afflictionDamage: Boolean(effect?.metadata?.afflictionDamage),
                 skillClasses: effectSkillClasses,
                 sourceSkillId: skill?.id || null,
+                minimumHp: Math.max(0, Number(effect?.metadata?.minimumHp) || 0),
                 onSuccessfulDamageApplyStatusToTarget:
                     effect?.metadata?.onSuccessfulDamageApplyStatusToTarget || null,
                 healthStealDamage:
@@ -5907,6 +5945,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         targetUsername: entry.recipient.username,
                         targetSlot: entry.recipient.slot,
                         sourceBaseDamage: entry.sourceBaseDamage,
+                        minimumHp: Math.max(0, Number(entry.minimumHp) || 0),
                         skillClasses: entry.skillClasses || skill.classes || [],
                         ignoreDamageReduction:
                             Boolean(entry.ignoreDamageReduction) || Boolean(entry.healthStealDamage),
