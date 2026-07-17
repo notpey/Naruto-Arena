@@ -1138,6 +1138,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (skill?.ignoreInvulnerability || hasLiveStatusMetadataFlag(actorUnit, 'ignoreEnemyInvulnerability')) {
                 return true;
             }
+            const skillId = typeof skill?.id === 'string' ? skill.id.trim() : '';
+            if (
+                skillId &&
+                getLiveStatuses(actorUnit).some((status) => {
+                    const skillIds = Array.isArray(status?.metadata?.ignoreInvulnerabilityForSkillIds)
+                        ? status.metadata.ignoreInvulnerabilityForSkillIds
+                        : [];
+                    return skillIds.includes(skillId);
+                })
+            ) {
+                return true;
+            }
             const actorCharacter =
                 Number.isInteger(actorUnit?.rosterIndex) && Array.isArray(rosterData)
                     ? rosterData[actorUnit.rosterIndex]

@@ -409,7 +409,7 @@
                                                                         "tooltipText": "This character's skills cost 1 additional random chakra."
                                                                 }
                                                         },
-                                                        "tooltipText": "This character has 10 destructible defense."
+                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -432,7 +432,7 @@
                                                                         "tooltipText": "This character's skills cost 1 additional random chakra."
                                                                 }
                                                         },
-                                                        "tooltipText": "This character has 10 destructible defense."
+                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -749,7 +749,7 @@
                                                                 "akimichi-chouji-partial-double-size": 20,
                                                                 "akimichi-chouji-meat-tank": 10
                                                         },
-                                                        "tooltipText": "Partial Double Size and Meat Tank deal additional damage."
+                                                        "tooltipText": "Partial Double Size deals 20 additional damage and Meat Tank deals 10 additional damage."
                                                 }
                                         },
                                         {
@@ -956,7 +956,7 @@
                                                                         }
                                                                 }
                                                         ],
-                                                        "tooltipText": "If this character uses a skill, they are damaged and their strategic skills are stunned."
+                                                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned."
                                                 }
                                         }
                                 ]

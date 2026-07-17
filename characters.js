@@ -944,7 +944,7 @@ const characters = [
                                     "tooltipText": "This character's skills cost 1 additional random chakra."
                                 }
                             },
-                            "tooltipText": "This character has 10 destructible defense."
+                            "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                         },
                         "condition": {
                             "scope": "self",
@@ -967,7 +967,7 @@ const characters = [
                                     "tooltipText": "This character's skills cost 1 additional random chakra."
                                 }
                             },
-                            "tooltipText": "This character has 10 destructible defense."
+                            "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                         },
                         "condition": {
                             "scope": "self",
@@ -1284,7 +1284,7 @@ const characters = [
                                 "akimichi-chouji-partial-double-size": 20,
                                 "akimichi-chouji-meat-tank": 10
                             },
-                            "tooltipText": "Partial Double Size and Meat Tank deal additional damage."
+                            "tooltipText": "Partial Double Size deals 20 additional damage and Meat Tank deals 10 additional damage."
                         }
                     },
                     {
@@ -1491,7 +1491,7 @@ const characters = [
                                     }
                                 }
                             ],
-                            "tooltipText": "If this character uses a skill, they are damaged and their strategic skills are stunned."
+                            "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned."
                         }
                     }
                 ]
@@ -2761,7 +2761,7 @@ const characters = [
                                 "kankuro-poison-bomb": 10
                             },
                             "replaceSkillDamageBonuses": true,
-                            "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal additional damage."
+                            "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal 10 additional damage."
                         }
                     }
                 ]
@@ -3729,7 +3729,7 @@ const characters = [
                                 },
                                 "tooltipText": "This character takes 25 additional damage from physical and chakra skills from Sealed Bomb Square Release."
                             },
-                            "tooltipText": "An enemy that uses a new harmful skill will take 40 damage from Sealed Bomb Square Release."
+                            "tooltipText": "An enemy that uses a new harmful skill will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills."
                         }
                     }
                 ]
@@ -4312,7 +4312,7 @@ const characters = [
                                 "id": "momochi-zabuza-hidden-mist",
                                 "name": "Hidden Mist",
                                 "skillimage": "https://i.imgur.com/7mpGS0U.png",
-                                "skilldescription": "For 2 turns, all enemies' physical and chakra skills will cost 1 additional random chakra and Momochi Zabuza will gain 10 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
+                                "skilldescription": "For 2 turns, all enemies' physical and chakra skills will cost 1 additional random chakra and Momochi Zabuza will gain 5 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
                                 "energy": [
                                         "Genjutsu"
                                 ],
@@ -4748,7 +4748,7 @@ const characters = [
                                 "id": "shigure-sprinkling-needles",
                                 "name": "Sprinkling Needles",
                                 "skillimage": "https://i.imgur.com/LOYbNWz.png",
-                                "skilldescription": "Shigure deals 5 piercing damage to all enemies for 3 turns and applies 'Needle Field' to them. During this time, 'Needle Barrage' can be used on them. This skill cannot be countered.",
+                                "skilldescription": "Shigure deals 10 piercing damage to all enemies for 3 turns and applies 'Needle Field' to them. During this time, 'Needle Barrage' can be used on them. This skill cannot be countered.",
                                 "energy": [
                                         "Random",
                                         "Random"
@@ -4844,7 +4844,20 @@ const characters = [
                                         {
                                                 "type": "remove_random_chakra",
                                                 "amount": 1,
-                                                "scope": "target"
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "missingStatusId": "shiore_orochimaru_giant_snake_bind"
+                                                }
+                                        },
+                                        {
+                                                "type": "drain_chakra_random_from_target_to_self",
+                                                "amount": 1,
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusId": "shiore_orochimaru_giant_snake_bind"
+                                                }
                                         },
                                         {
                                                 "type": "apply_status",
@@ -5056,32 +5069,13 @@ const characters = [
                                                 }
                                         },
                                         {
-                                                "type": "remove_random_chakra",
-                                                "amount": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "akadou_yoroi_chakra_focus"
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_random_chakra",
+                                                "type": "drain_chakra_random_from_target_to_self",
                                                 "amount": 1,
                                                 "scope": "target",
                                                 "condition": {
                                                         "scope": "self",
                                                         "statusId": "akadou_yoroi_chakra_focus",
                                                         "consumeOnMatch": true
-                                                }
-                                        },
-                                        {
-                                                "type": "gain_chakra",
-                                                "amount": 1,
-                                                "chakraType": "random",
-                                                "scope": "self",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "akadou_yoroi_chakra_focus"
                                                 }
                                         }
                                 ]
@@ -5090,7 +5084,7 @@ const characters = [
                                 "id": "akadou-yoroi-draining-assault",
                                 "name": "Draining Assault",
                                 "skillimage": "https://i.imgur.com/zBoZAxl.png",
-                                "skilldescription": "For 3 turns, Akadou Yoroi steals 10 health from one enemy each turn. Their non-affliction damage will be lowered by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills. During 'Chakra Focus', this skill also steals 1 random chakra on use.",
+                                "skilldescription": "For 3 turns, Akadou Yoroi steals 15 health from one enemy each turn. Their non-affliction damage will be lowered by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills. During 'Chakra Focus', this skill also steals 1 random chakra on use.",
                                 "energy": [
                                         "Taijutsu",
                                         "Random",
@@ -5151,32 +5145,13 @@ const characters = [
                                                 }
                                         },
                                         {
-                                                "type": "remove_random_chakra",
-                                                "amount": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "akadou_yoroi_chakra_focus"
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_random_chakra",
+                                                "type": "drain_chakra_random_from_target_to_self",
                                                 "amount": 1,
                                                 "scope": "target",
                                                 "condition": {
                                                         "scope": "self",
                                                         "statusId": "akadou_yoroi_chakra_focus",
                                                         "consumeOnMatch": true
-                                                }
-                                        },
-                                        {
-                                                "type": "gain_chakra",
-                                                "amount": 1,
-                                                "chakraType": "random",
-                                                "scope": "self",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "akadou_yoroi_chakra_focus"
                                                 }
                                         }
                                 ]
@@ -6024,7 +5999,7 @@ const characters = [
                                 "id": "tayuya-summoning-doki",
                                 "name": "Summoning: Doki",
                                 "skillimage": "https://i.imgur.com/SBJYjtZ.png",
-                                "skilldescription": "Tayuya deals 15 damage to all enemies for 2 turns. During this time, Tayuya will gain 10 points of damage reduction and 'Demonic Flute: Phantom Wave' will also remove 1 random chakra from its target if used.",
+                                "skilldescription": "Tayuya deals 15 damage to all enemies for 2 turns. During this time, Tayuya will gain 15 points of damage reduction and 'Demonic Flute: Phantom Wave' will also remove 1 random chakra from its target if used.",
                                 "energy": [
                                         "Genjutsu",
                                         "Random"
@@ -6620,7 +6595,7 @@ const characters = [
                                                         "ignoreInvulnerabilityForSkillIds": [
                                                                 "gekko-hayate-crescent-moon-slash"
                                                         ],
-                                                        "tooltipText": "Hayate is invulnerable to physical and chakra skills. Crescent Moon Slash deals additional damage and ignores invulnerability."
+                                                        "tooltipText": "Hayate is invulnerable to physical and chakra skills. Crescent Moon Slash deals 15 additional damage and ignores invulnerability."
                                                 }
                                         }
                                 ]
@@ -7060,7 +7035,7 @@ const characters = [
                                                                                 "mergeNumericAddKeys": [
                                                                                         "destructibleDefensePoints"
                                                                                 ],
-                                                                                "tooltipText": "This character has permanent destructible defense from Illusionary Tree Meld."
+                                                                                "tooltipText": "This character has 5 permanent destructible defense from Illusionary Tree Meld."
                                                                         }
                                                                 }
                                                         ],
@@ -7641,7 +7616,7 @@ const characters = [
                                                         "counterDamage": 30,
                                                         "counterDamageIgnoresReduction": true,
                                                         "counterDamageIgnoresDestructibleDefense": true,
-                                                        "tooltipText": "The first harmful non-mental skill used on this character will be countered."
+                                                        "tooltipText": "The first harmful non-mental skill used on this character will be countered and the attacker will take 30 piercing damage."
                                                 }
                                         }
                                 ]
@@ -8595,7 +8570,7 @@ const characters = [
                                     "amount": 30
                                 }
                             ],
-                            "tooltipText": "This character is stunned by Constrict and Bite."
+                            "tooltipText": "This character is stunned by Constrict and Bite and will take 30 damage when it ends."
                         }
                     }
                 ]
@@ -9418,7 +9393,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "tooltipText": "This character's skills will deal additional damage next turn.",
+                            "tooltipText": "This character's skills will deal 5 additional damage next turn.",
                             "onExpireEffects": [
                                 {
                                     "type": "apply_status",
@@ -9466,7 +9441,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "tooltipText": "This character's skills will deal additional damage next turn.",
+                            "tooltipText": "This character's skills will deal 5 additional damage next turn.",
                             "onExpireEffects": [
                                 {
                                     "type": "apply_status",
@@ -9636,7 +9611,7 @@ const characters = [
                             "harmful": true,
                             "cannotUseSkills": true,
                             "invulnerableToHelpfulSkills": true,
-                            "tooltipText": "This character is stunned and invulnerable to helpful skills.",
+                            "tooltipText": "This character is stunned, invulnerable to helpful skills, and will take 55 damage when this ends.",
                             "onExpireEffects": [
                                 {
                                     "type": "damage",
@@ -9819,7 +9794,7 @@ const characters = [
                                     "max": 50
                                 }
                             ],
-                            "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense, takes 5 affliction damage each turn, and his skills deal 5 additional damage. This bonus grows by 5 each turn, up to a maximum of 10 stacks."
+                            "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense, takes 5 affliction damage each turn, and his skills deal 5 additional damage. This bonus grows by 5 each turn, up to 50 additional damage."
                         }
                     }
                 ]
@@ -10011,7 +9986,7 @@ const characters = [
                             "triggerOnEnemyHarmfulNonStrategic": true,
                             "counterCancelsSkill": true,
                             "counterDamage": 20,
-                            "tooltipText": "The first non-strategic skill used on this character will be countered."
+                            "tooltipText": "The first non-strategic skill used on this character will be countered and the attacker will take 20 damage."
                         }
                     }
                 ]
@@ -10311,7 +10286,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "tooltipText": "Sand Claw and Drilling Air Bullet will deal double damage next turn.",
+                            "tooltipText": "Sand Claw will deal 30 additional damage and Drilling Air Bullet will deal 60 additional damage next turn.",
                             "onExpireEffects": [
                                 {
                                     "type": "apply_status",
@@ -10323,7 +10298,7 @@ const characters = [
                                             "shukaku-gaara-sand-claw": 30,
                                             "shukaku-gaara-drilling-air-bullet": 60
                                         },
-                                        "tooltipText": "Sand Claw and Drilling Air Bullet deal double damage."
+                                        "tooltipText": "Sand Claw deals 30 additional damage and Drilling Air Bullet deals 60 additional damage."
                                     }
                                 }
                             ]

@@ -65,10 +65,251 @@ const queueSkill = (match, username, skillIndex, targetSelection = []) => {
     };
 };
 
+const chakraTotal = (pool) =>
+    Object.values(pool || {}).reduce((sum, amount) => sum + Math.max(0, Number(amount) || 0), 0);
+
 const getNaruto = () => characters.find((character) => character?.characterId === 'uzumaki-naruto');
 const getSakura = () => characters.find((character) => character?.characterId === 'haruno-sakura');
 const getSasuke = () => characters.find((character) => character?.characterId === 'uchiha-sasuke');
 const getCharacter = (characterId) => characters.find((character) => character?.characterId === characterId);
+
+const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const collectCharacterMetadataKeys = () => {
+    const metadataKeys = new Set();
+    const metadataAnyKeys = new Set();
+    const walk = (value) => {
+        if (Array.isArray(value)) {
+            value.forEach(walk);
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+
+        if (Array.isArray(value.metadataAny)) {
+            value.metadataAny.forEach((entry) => {
+                if (typeof entry === 'string' && entry.trim()) metadataAnyKeys.add(entry.trim());
+            });
+        }
+
+        Object.entries(value).forEach(([key, entry]) => {
+            if (key === 'metadata' && entry && typeof entry === 'object' && !Array.isArray(entry)) {
+                Object.keys(entry).forEach((metadataKey) => metadataKeys.add(metadataKey));
+            }
+            walk(entry);
+        });
+    };
+
+    walk(characters);
+    return { metadataKeys, metadataAnyKeys };
+};
+
+const collectCharacterEffectTypes = () => {
+    const effectTypes = new Set();
+    const walk = (value) => {
+        if (Array.isArray(value)) {
+            value.forEach(walk);
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+        if (typeof value.type === 'string' && value.type.trim()) {
+            effectTypes.add(value.type.trim());
+        }
+        Object.values(value).forEach(walk);
+    };
+
+    walk(characters);
+    return effectTypes;
+};
+
+const collectCharacterStatusReferences = () => {
+    const producedStatusIds = new Set(['invulnerable', 'stunned']);
+    const referencedStatusIds = [];
+    const isStatusProducerPath = (pathParts) =>
+        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus/i.test(pathParts.join('.'));
+    const addReference = (statusId) => {
+        if (typeof statusId === 'string' && statusId.trim()) {
+            referencedStatusIds.push(statusId.trim());
+        }
+    };
+    const walk = (value, pathParts = []) => {
+        if (Array.isArray(value)) {
+            value.forEach((entry, index) => walk(entry, pathParts.concat(index)));
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+
+        if (typeof value.statusId === 'string' && value.statusId.trim()) {
+            if (value.type === 'apply_status' || isStatusProducerPath(pathParts)) {
+                producedStatusIds.add(value.statusId.trim());
+            }
+            addReference(value.statusId);
+        }
+
+        Object.entries(value).forEach(([key, entry]) => {
+            if (['missingStatusId', 'trackerStatusId'].includes(key)) {
+                addReference(entry);
+            }
+            if (
+                ['statusIdsAny', 'statusIdsAll', 'statusIdsMissing', 'statusIdsToConsume', 'statusIds'].includes(key) &&
+                Array.isArray(entry)
+            ) {
+                entry.forEach(addReference);
+            }
+            walk(entry, pathParts.concat(key));
+        });
+    };
+
+    walk(characters);
+    return { producedStatusIds, referencedStatusIds };
+};
+
+const collectCharacterSkillReferences = () => {
+    const skillIds = new Set();
+    characters.forEach((character) => {
+        (Array.isArray(character?.skills) ? character.skills : []).forEach((skill) => {
+            if (typeof skill?.id === 'string' && skill.id.trim()) skillIds.add(skill.id.trim());
+        });
+    });
+
+    const referencedSkillIds = [];
+    const referencesSkillId = (key) =>
+        /skillid|skillids|skillreplacements|bonusesbyskillid|skilldamagebonuses|skillcostoverridesbyskillid|skillcooldownincreasebyskillid|skilldurationbonuses|skilldamagecapbyskillid/i.test(
+            key
+        );
+    const addReference = (skillId) => {
+        if (typeof skillId === 'string' && skillId.trim()) referencedSkillIds.push(skillId.trim());
+    };
+    const walk = (value, parentKey = '') => {
+        if (Array.isArray(value)) {
+            if (referencesSkillId(parentKey)) value.forEach(addReference);
+            value.forEach((entry) => walk(entry, parentKey));
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+        Object.entries(value).forEach(([key, entry]) => {
+            if (referencesSkillId(key)) {
+                if (typeof entry === 'string') {
+                    addReference(entry);
+                } else if (Array.isArray(entry)) {
+                    entry.forEach(addReference);
+                } else if (entry && typeof entry === 'object') {
+                    Object.keys(entry).forEach(addReference);
+                }
+            }
+            walk(entry, key);
+        });
+    };
+
+    walk(characters);
+    return { skillIds, referencedSkillIds };
+};
+
+const collectTooltipNumericOmissions = () => {
+    const omissions = [];
+    const walk = (value, onTooltipEffect, path = '') => {
+        if (Array.isArray(value)) {
+            value.forEach((entry, index) => walk(entry, onTooltipEffect, `${path}.${index}`));
+            return;
+        }
+        if (!value || typeof value !== 'object') return;
+        if (value.metadata && typeof value.metadata.tooltipText === 'string') {
+            onTooltipEffect(value);
+        }
+        Object.entries(value).forEach(([key, entry]) => walk(entry, onTooltipEffect, path ? `${path}.${key}` : key));
+    };
+    const collectPositiveNumericValues = (value) => {
+        const values = [];
+        const visit = (entry, path = '') => {
+            if (Array.isArray(entry)) {
+                entry.forEach((item, index) => visit(item, `${path}.${index}`));
+                return;
+            }
+            if (!entry || typeof entry !== 'object') return;
+            Object.entries(entry).forEach(([key, child]) => {
+                const childPath = path ? `${path}.${key}` : key;
+                if (
+                    typeof child === 'number' &&
+                    Number.isFinite(child) &&
+                    child > 0 &&
+                    !/duration|cooldown|remaining|maxuses|minimumhp|threshold|atleast/i.test(childPath)
+                ) {
+                    values.push(child);
+                } else {
+                    visit(child, childPath);
+                }
+            });
+        };
+        visit(value);
+        return values;
+    };
+
+    characters.forEach((character) => {
+        (Array.isArray(character?.skills) ? character.skills : []).forEach((skill) => {
+            walk(skill.effects || [], (effect) => {
+                const tooltipText = effect.metadata.tooltipText;
+                const displayedNumbers = new Set([...tooltipText.matchAll(/\b\d+\b/g)].map((match) => Number(match[0])));
+                const missingNumbers = collectPositiveNumericValues(effect).filter(
+                    (value) => !displayedNumbers.has(value)
+                );
+                if (missingNumbers.length > 0) {
+                    omissions.push(`${character.characterId || character.name}:${skill.id}:${effect.statusId || effect.type}`);
+                }
+            });
+        });
+    });
+    return omissions;
+};
+
+test('character metadata keys are consumed by runtime code', () => {
+    const runtimeSource = ['battleLogic.js', 'script.js', 'server.js']
+        .map((fileName) => fs.readFileSync(path.join(__dirname, '..', fileName), 'utf8'))
+        .join('\n');
+    const { metadataKeys, metadataAnyKeys } = collectCharacterMetadataKeys();
+    const unreferencedKeys = [...metadataKeys]
+        .filter((metadataKey) => !metadataAnyKeys.has(metadataKey))
+        .filter((metadataKey) => !new RegExp(`\\b${escapeRegExp(metadataKey)}\\b`).test(runtimeSource))
+        .sort();
+
+    assert.deepEqual(unreferencedKeys, [], 'character metadata keys should be read by battle or tooltip runtime code');
+});
+
+test('character effect types are handled by battle runtime code', () => {
+    const runtimeSource = fs.readFileSync(path.join(__dirname, '..', 'battleLogic.js'), 'utf8');
+    const unhandledEffectTypes = [...collectCharacterEffectTypes()]
+        .filter((effectType) => {
+            const escapedEffectType = escapeRegExp(effectType);
+            return !new RegExp(
+                `effectType === ['"]${escapedEffectType}['"]|effect\\.type === ['"]${escapedEffectType}['"]|case ['"]${escapedEffectType}['"]`
+            ).test(runtimeSource);
+        })
+        .sort();
+
+    assert.deepEqual(unhandledEffectTypes, [], 'character effect types should be handled by battle runtime code');
+});
+
+test('character status references point to produced statuses', () => {
+    const { producedStatusIds, referencedStatusIds } = collectCharacterStatusReferences();
+    const danglingStatusIds = [...new Set(referencedStatusIds)]
+        .filter((statusId) => !producedStatusIds.has(statusId))
+        .sort();
+
+    assert.deepEqual(danglingStatusIds, [], 'status references should point to statuses produced by character data');
+});
+
+test('character skill references point to defined skills', () => {
+    const { skillIds, referencedSkillIds } = collectCharacterSkillReferences();
+    const danglingSkillIds = [...new Set(referencedSkillIds)].filter((skillId) => !skillIds.has(skillId)).sort();
+
+    assert.deepEqual(danglingSkillIds, [], 'skill references should point to defined character skills');
+});
+
+test('status tooltips display their positive numeric metadata values', () => {
+    assert.deepEqual(
+        collectTooltipNumericOmissions(),
+        [],
+        'tooltip text should display positive numeric values carried by its effect metadata'
+    );
+});
 
 test('character editor presets match starter kits in characters.js', () => {
     assert.deepEqual(getNaruto(), narutoStarterCharacter);
@@ -797,6 +1038,157 @@ test('Kankuro Poison Bomb resolves correctly after Puppet Preparation', () => {
         true,
         'Prepared Poison Bomb should apply its extended Black Secret Machine One Shot mark'
     );
+});
+
+test('Hayate Meld into Shadows lets Crescent Moon Slash hit invulnerable enemies', () => {
+    const hayateIndex = characters.findIndex((character) => character?.characterId === 'gekko-hayate');
+    assert.ok(hayateIndex >= 0, 'Gekko Hayate must exist in characters.js');
+    const match = makeMatch([hayateIndex], [1]);
+    const hayate = match.board.p1[0];
+    const target = match.board.p2[0];
+
+    hayate.state.statuses.push({
+        id: 'gekko_hayate_meld_into_shadows',
+        remainingTurns: 1,
+        metadata: {
+            skillDamageBonuses: {
+                'gekko-hayate-crescent-moon-slash': 15,
+            },
+            ignoreInvulnerabilityForSkillIds: ['gekko-hayate-crescent-moon-slash'],
+        },
+    });
+    target.state.statuses.push({
+        id: 'test_invulnerable',
+        remainingTurns: 1,
+        metadata: {
+            invulnerable: true,
+        },
+    });
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(target.hp, 65, 'Crescent Moon Slash should deal 20 plus 15 through invulnerability');
+});
+
+test('Akadou Yoroi Chakra Focus steals exactly one random chakra and is consumed', () => {
+    const yoroiIndex = characters.findIndex((character) => character?.characterId === 'akadou-yoroi');
+    assert.ok(yoroiIndex >= 0, 'Akadou Yoroi must exist in characters.js');
+    const match = makeMatch([yoroiIndex], [1]);
+    const yoroi = match.board.p1[0];
+    yoroi.state.statuses.push({
+        id: 'akadou_yoroi_chakra_focus',
+        remainingTurns: 3,
+        metadata: {
+            helpful: true,
+        },
+    });
+    match.chakraPools.p1 = emptyPool();
+    match.chakraPools.p2 = {
+        taijutsu: 1,
+        ninjutsu: 0,
+        bloodline: 0,
+        genjutsu: 0,
+    };
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(chakraTotal(match.chakraPools.p2), 0, 'target should lose exactly one chakra');
+    assert.equal(chakraTotal(match.chakraPools.p1), 1, 'Yoroi should gain exactly one chakra');
+    assert.equal(
+        yoroi.state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus' && status.remainingTurns > 0),
+        false,
+        'Chakra Focus should be consumed after the steal'
+    );
+});
+
+test('Tayuya Summoning Doki description matches its damage reduction value', () => {
+    const tayuya = getCharacter('tayuya');
+    const doki = tayuya.skills.find((skill) => skill.id === 'tayuya-summoning-doki');
+    const selfStatus = doki.effects.find((effect) => effect.statusId === 'tayuya_summoning_doki_self');
+
+    assert.equal(selfStatus.metadata.damageReductionFlat, 15);
+    assert.match(doki.skilldescription, /15 points of damage reduction/);
+    assert.match(selfStatus.metadata.tooltipText, /15 damage reduction/);
+});
+
+test('Zabuza Hidden Mist description matches its damage reduction value', () => {
+    const zabuza = getCharacter('momochi-zabuza');
+    const hiddenMist = zabuza.skills.find((skill) => skill.id === 'momochi-zabuza-hidden-mist');
+    const defenseStatus = hiddenMist.effects.find(
+        (effect) => effect.statusId === 'momochi_zabuza_hidden_mist_defense'
+    );
+
+    assert.equal(defenseStatus.metadata.damageReductionFlat, 5);
+    assert.match(hiddenMist.skilldescription, /5 points of damage reduction/);
+    assert.match(defenseStatus.metadata.tooltipText, /5 damage reduction/);
+});
+
+test('Shiore Five Elements Seal steals chakra from Giant Snake Bind targets', () => {
+    const shioreIndex = characters.findIndex((character) => character?.characterId === 'shiore-orochimaru');
+    assert.ok(shioreIndex >= 0, 'Shiore Orochimaru must exist in characters.js');
+    const match = makeMatch([shioreIndex], [1]);
+    const target = match.board.p2[0];
+    target.state.statuses.push({
+        id: 'shiore_orochimaru_giant_snake_bind',
+        remainingTurns: 1,
+        metadata: {
+            harmful: true,
+        },
+    });
+    match.chakraPools.p1 = emptyPool();
+    match.chakraPools.p2 = {
+        taijutsu: 1,
+        ninjutsu: 0,
+        bloodline: 0,
+        genjutsu: 0,
+    };
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(chakraTotal(match.chakraPools.p2), 0, 'bound target should lose one chakra');
+    assert.equal(chakraTotal(match.chakraPools.p1), 1, 'Shiore should gain the stolen chakra');
+    assert.equal(
+        target.state.statuses.some(
+            (status) =>
+                status.id === 'shiore_orochimaru_five_elements_seal_cost' &&
+                status.remainingTurns === 2 &&
+                status.metadata.randomCostIncrease === 1
+        ),
+        true,
+        'bound target should receive the extended chakra cost increase'
+    );
+});
+
+test('Shigure Sprinkling Needles description matches its turn damage value', () => {
+    const shigure = getCharacter('shigure');
+    const sprinklingNeedles = shigure.skills.find((skill) => skill.id === 'shigure-sprinkling-needles');
+    const damageStatus = sprinklingNeedles.effects.find(
+        (effect) => effect.statusId === 'shigure_sprinkling_needles_mark'
+    );
+
+    assert.equal(damageStatus.metadata.turnEndDamage, 10);
+    assert.match(sprinklingNeedles.skilldescription, /10 piercing damage/);
+    assert.match(damageStatus.metadata.tooltipText, /10 piercing damage/);
+});
+
+test('Akadou Yoroi Draining Assault description matches its health steal values', () => {
+    const yoroi = getCharacter('akadou-yoroi');
+    const drainingAssault = yoroi.skills.find((skill) => skill.id === 'akadou-yoroi-draining-assault');
+    const damageStatus = drainingAssault.effects.find(
+        (effect) => effect.statusId === 'akadou_yoroi_draining_assault_dot'
+    );
+    const healStatus = drainingAssault.effects.find(
+        (effect) => effect.statusId === 'akadou_yoroi_draining_assault_heal'
+    );
+
+    assert.equal(damageStatus.metadata.turnEndDamage, 15);
+    assert.equal(healStatus.metadata.turnEndHealFlat, 15);
+    assert.match(drainingAssault.skilldescription, /steals 15 health/);
+    assert.match(damageStatus.metadata.tooltipText, /15 health/);
+    assert.match(healStatus.metadata.tooltipText, /15 health/);
 });
 
 test('battleLogic resolves Temari starter kit behavior used by the editor data', () => {

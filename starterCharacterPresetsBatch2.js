@@ -1012,7 +1012,7 @@
                                                                 "kankuro-poison-bomb": 10
                                                         },
                                                         "replaceSkillDamageBonuses": true,
-                                                        "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal additional damage."
+                                                        "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal 10 additional damage."
                                                 }
                                         }
                                 ]

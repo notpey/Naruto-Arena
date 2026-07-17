@@ -443,10 +443,23 @@ const isUnitInvulnerableForSkill = (unit, skillClasses = []) => {
     return false;
 };
 
-const canActorIgnoreEnemyInvulnerability = (actorUnit) => {
+const canActorIgnoreEnemyInvulnerability = (actorUnit, actorSkillId = null) => {
     if (!actorUnit) return false;
     const actorState = ensureUnitStateShape(actorUnit);
-    return hasStatusMetadataFlag(actorState, 'ignoreEnemyInvulnerability');
+    if (hasStatusMetadataFlag(actorState, 'ignoreEnemyInvulnerability')) return true;
+    const skillId = typeof actorSkillId === 'string' ? actorSkillId.trim() : '';
+    if (!skillId) return false;
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    return statuses.some((status) => {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) return false;
+        const allowedSkillIds = Array.isArray(status?.metadata?.ignoreInvulnerabilityForSkillIds)
+            ? status.metadata.ignoreInvulnerabilityForSkillIds
+                  .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+                  .filter(Boolean)
+            : [];
+        return allowedSkillIds.includes(skillId);
+    });
 };
 
 const canActorIgnoreTargetInvulnerabilityBySourceMark = ({ actorCharacterId, actorSkillId = null, targetUnit }) => {
@@ -594,7 +607,8 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
         return result;
     }
     const bypassEnemyInvulnerability =
-        canActorIgnoreEnemyInvulnerability(actorUnit) || Boolean(effectiveSkill?.ignoreInvulnerability);
+        canActorIgnoreEnemyInvulnerability(actorUnit, effectiveSkill?.id || null) ||
+        Boolean(effectiveSkill?.ignoreInvulnerability);
     const targetType = effectiveSkill?.target || null;
     result.targetType = targetType;
 
@@ -3981,7 +3995,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         );
         const selection = normalizeTargetSelection(queued.targetSelection);
         const bypassEnemyInvulnerability =
-            canActorIgnoreEnemyInvulnerability(actorUnit) || Boolean(skill?.ignoreInvulnerability);
+            canActorIgnoreEnemyInvulnerability(actorUnit, skill?.id || null) || Boolean(skill?.ignoreInvulnerability);
         const opponentEntry = (match.players || []).find((p) => p.username !== actingUsername);
         const opponentUsername = opponentEntry?.username;
         const actorAllies = (match.board?.[actingUsername] || [])
@@ -4066,6 +4080,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     bypassEnemyInvulnerability ||
                     canActorIgnoreTargetInvulnerabilityBySourceMark({
                         actorCharacterId: actingCharacterId,
+                        actorSkillId: skill?.id || null,
                         targetUnit: entry.unit,
                     }) ||
                     !isUnitInvulnerableForSkill(entry.unit, skill.classes || [])
