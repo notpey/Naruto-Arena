@@ -15,6 +15,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
+const gauntlet = require('./gauntlet');
 let charactersData = require('./characters');
 
 const app = express();
@@ -2418,6 +2419,116 @@ const normalizeStoryState = (story = {}) => {
     return { progressByNodeId };
 };
 
+const normalizeGauntletRunState = (run = {}) => {
+    if (!run || typeof run !== 'object') return null;
+    const status = typeof run.status === 'string' ? run.status.trim().toLowerCase() : 'active';
+    const validStatus = ['active', 'won', 'lost', 'abandoned'].includes(status) ? status : 'active';
+    const team = Array.isArray(run.team)
+        ? run.team
+              .map((entry) => Number.parseInt(entry, 10))
+              .filter((entry) => Number.isInteger(entry) && entry >= 0)
+              .slice(0, 3)
+        : [];
+    const teamHp = team.map((_, index) => {
+        const hp = Number(Array.isArray(run.teamHp) ? run.teamHp[index] : 100);
+        return Math.max(0, Math.min(100, Number.isFinite(hp) ? Math.round(hp) : 100));
+    });
+    const map = run.map && typeof run.map === 'object' ? run.map : null;
+    return {
+        seed: typeof run.seed === 'string' && run.seed.trim() ? run.seed.trim() : `gauntlet-${Date.now()}`,
+        status: validStatus,
+        startingScrollType:
+            run.startingScrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
+                ? gauntlet.EXAM_SCROLL_TYPES.EARTH
+                : gauntlet.EXAM_SCROLL_TYPES.HEAVEN,
+        team,
+        teamHp,
+        actOneStep: Math.max(0, Math.min(3, Math.round(Number(run.actOneStep) || 0))),
+        actThreeStep:
+            typeof run.actThreeStep === 'string' && ['preliminary', 'finals', 'complete'].includes(run.actThreeStep)
+                ? run.actThreeStep
+                : '',
+        benchAvailable: Boolean(run.benchAvailable),
+        heavenScrolls: Math.max(0, Math.round(Number(run.heavenScrolls) || 0)),
+        earthScrolls: Math.max(0, Math.round(Number(run.earthScrolls) || 0)),
+        ryo: Math.max(0, Math.round(Number(run.ryo) || 0)),
+        scrollFragments: Math.max(0, Math.round(Number(run.scrollFragments) || 0)),
+        relics: (Array.isArray(run.relics) ? run.relics : [])
+            .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+            .filter(Boolean),
+        pendingOffers: (Array.isArray(run.pendingOffers) ? run.pendingOffers : [])
+            .map((entry) => {
+                if (!entry || typeof entry !== 'object') return null;
+                const type = typeof entry.type === 'string' ? entry.type.trim().toLowerCase() : '';
+                const id = typeof entry.id === 'string' ? entry.id.trim() : '';
+                return type && id ? { type, id, sourceNodeId: entry.sourceNodeId || null } : null;
+            })
+            .filter(Boolean),
+        currentAct: [1, 2, 3].includes(Number(run.currentAct)) ? Number(run.currentAct) : 2,
+        currentNodeId: typeof run.currentNodeId === 'string' && run.currentNodeId.trim() ? run.currentNodeId.trim() : null,
+        visitedNodeIds: Array.from(
+            new Set(
+                (Array.isArray(run.visitedNodeIds) ? run.visitedNodeIds : [])
+                    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+                    .filter(Boolean)
+            )
+        ),
+        lockedNodeIds: Array.from(
+            new Set(
+                (Array.isArray(run.lockedNodeIds) ? run.lockedNodeIds : [])
+                    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+                    .filter(Boolean)
+            )
+        ),
+        pendingBattle:
+            run.pendingBattle && typeof run.pendingBattle === 'object'
+                ? {
+                      nodeId:
+                          typeof run.pendingBattle.nodeId === 'string' && run.pendingBattle.nodeId.trim()
+                              ? run.pendingBattle.nodeId.trim()
+                              : '',
+                      matchId:
+                          typeof run.pendingBattle.matchId === 'string' && run.pendingBattle.matchId.trim()
+                              ? run.pendingBattle.matchId.trim()
+                              : '',
+                  }
+                : null,
+        map,
+        startedAt: run.startedAt || null,
+        endedAt: run.endedAt || null,
+        lastNodeResult: run.lastNodeResult && typeof run.lastNodeResult === 'object' ? run.lastNodeResult : null,
+    };
+};
+
+const createDefaultGauntletState = () => ({
+    activeRun: null,
+    completedRuns: 0,
+    wins: 0,
+    losses: 0,
+    abandonedRuns: 0,
+    examMerit: 0,
+    unlockedCharacterIds: [],
+});
+
+const normalizeGauntletState = (gauntletState = {}) => {
+    const source = gauntletState && typeof gauntletState === 'object' ? gauntletState : {};
+    return {
+        activeRun: normalizeGauntletRunState(source.activeRun),
+        completedRuns: Math.max(0, Math.round(Number(source.completedRuns) || 0)),
+        wins: Math.max(0, Math.round(Number(source.wins) || 0)),
+        losses: Math.max(0, Math.round(Number(source.losses) || 0)),
+        abandonedRuns: Math.max(0, Math.round(Number(source.abandonedRuns) || 0)),
+        examMerit: Math.max(0, Math.round(Number(source.examMerit) || 0)),
+        unlockedCharacterIds: Array.from(
+            new Set(
+                (Array.isArray(source.unlockedCharacterIds) ? source.unlockedCharacterIds : [])
+                    .map((entry) => normalizeCharacterId(entry))
+                    .filter(Boolean)
+            )
+        ),
+    };
+};
+
 const normalizeMissionTextList = (entries = []) =>
     (Array.isArray(entries) ? entries : [])
         .map((entry) => {
@@ -3337,6 +3448,8 @@ const buildDefaultUserProfile = (user = {}) => {
         recentPrivateGames: [],
         recentLadderGames: [],
         missions: createDefaultMissionState(),
+        story: normalizeStoryState(),
+        gauntlet: createDefaultGauntletState(),
         matchmaking: {
             battleBotEnabled: true,
         },
@@ -3631,6 +3744,7 @@ const normalizeUserProfile = (user = {}) => {
         recentLadderGamesCount24Hours: normalizeRecentLadderGames(source.recentLadderGames).length,
         missions: normalizeMissionState(source.missions),
         story: normalizeStoryState(source.story),
+        gauntlet: normalizeGauntletState(source.gauntlet),
         matchmaking: {
             battleBotEnabled:
                 typeof matchmaking.battleBotEnabled === 'boolean'
@@ -4223,6 +4337,378 @@ const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
     return { [humanPlayer.username]: result };
 };
 
+const pickGauntletRandomEntry = (rng, entries = []) => {
+    const pool = Array.isArray(entries) ? entries.filter(Boolean) : [];
+    return pool[Math.floor(rng() * pool.length)] || pool[0] || null;
+};
+
+const buildGauntletModifierSummary = (runState = {}) =>
+    Array.from(new Set(Array.isArray(runState.relics) ? runState.relics : []))
+        .map((id) => {
+            const relic = gauntlet.getRelicById(id);
+            const curse = gauntlet.getCurseById(id);
+            const source = relic || curse;
+            if (!source) return null;
+            return {
+                id: source.id,
+                name: source.name || source.id,
+                description: source.description || '',
+                isCurse: Boolean(source.isCurse || curse),
+            };
+        })
+        .filter(Boolean);
+
+const getGauntletRng = (runState = {}, node = {}, purpose = '') =>
+    gauntlet.createSeededRng(`${runState.seed || 'gauntlet'}:${node.id || ''}:${purpose}`);
+
+const getOppositeGauntletScrollType = (runState = {}) =>
+    runState.startingScrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
+        ? gauntlet.EXAM_SCROLL_TYPES.HEAVEN
+        : gauntlet.EXAM_SCROLL_TYPES.EARTH;
+
+const applyGauntletHpDelta = (runState = {}, target = 'all', amount = 0, rng = Math.random) => {
+    const delta = Math.round(Number(amount) || 0);
+    const hp = Array.isArray(runState.teamHp) ? runState.teamHp.slice() : [];
+    const applyAtIndex = (index) => {
+        const current = Math.max(1, Math.min(100, Math.round(Number(hp[index]) || 100)));
+        hp[index] = Math.max(1, Math.min(100, current + delta));
+    };
+    if (target === 'one') {
+        const livingIndices = hp.map((value, index) => (Number(value) > 0 ? index : null)).filter((index) => index !== null);
+        const pickedIndex = livingIndices[Math.floor(rng() * livingIndices.length)] ?? 0;
+        applyAtIndex(pickedIndex);
+    } else {
+        hp.forEach((_, index) => applyAtIndex(index));
+    }
+    runState.teamHp = hp;
+};
+
+const addGauntletRewardToRun = (runState = {}, reward = {}) => {
+    runState.ryo = Math.max(0, (Number(runState.ryo) || 0) + (Number(reward.ryo) || 0));
+    runState.scrollFragments = Math.max(
+        0,
+        (Number(runState.scrollFragments) || 0) + (Number(reward.scrollFragments) || 0)
+    );
+    runState.heavenScrolls = Math.max(0, (Number(runState.heavenScrolls) || 0) + (Number(reward.heavenScrolls) || 0));
+    runState.earthScrolls = Math.max(0, (Number(runState.earthScrolls) || 0) + (Number(reward.earthScrolls) || 0));
+    runState.relics = Array.from(
+        new Set([...(Array.isArray(runState.relics) ? runState.relics : []), ...(Array.isArray(reward.relics) ? reward.relics : [])])
+    );
+    if (reward.benchAvailable) {
+        runState.benchAvailable = true;
+    }
+    const curseOffers = Array.isArray(reward.curseOffers) ? reward.curseOffers : [];
+    if (curseOffers.length > 0) {
+        const existing = Array.isArray(runState.pendingOffers) ? runState.pendingOffers : [];
+        runState.pendingOffers = [
+            ...existing,
+            ...curseOffers.map((id) => ({
+                type: 'curse',
+                id,
+                sourceNodeId: reward.nodeId || reward.eventId || null,
+            })),
+        ];
+    }
+};
+
+const getGauntletActOneEventForRun = (runState = {}) => {
+    const step = Math.max(0, Math.min(3, Math.round(Number(runState.actOneStep) || 0)));
+    return step < 3 ? gauntlet.ACT_ONE_EVENTS[step] || null : null;
+};
+
+const resolveGauntletActOneChoice = (runState = {}, choiceIndex = 0) => {
+    const nextRun = normalizeGauntletRunState(runState);
+    const event = getGauntletActOneEventForRun(nextRun);
+    const pickedChoice = Array.isArray(event?.choices) ? event.choices[choiceIndex] || null : null;
+    if (!event || !pickedChoice) {
+        throw new Error('A valid Written Test choice is required.');
+    }
+    const fakeNode = {
+        id: `act1-${nextRun.actOneStep + 1}`,
+        row: 0,
+        type: gauntlet.NODE_TYPES.EVENT,
+        content: { eventId: event.eventId },
+    };
+    const reward = getGauntletNodeReward(nextRun, fakeNode, { choiceIndex });
+    addGauntletRewardToRun(nextRun, reward);
+    nextRun.actOneStep += 1;
+    nextRun.currentAct = nextRun.actOneStep >= 3 ? 2 : 1;
+    nextRun.lastNodeResult = {
+        nodeId: fakeNode.id,
+        nodeType: 'act1_event',
+        clearedAt: new Date(),
+        reward,
+    };
+    return nextRun;
+};
+
+const getGauntletBattleReward = (runState = {}, node = {}) => {
+    const reward = {
+        ryo: 0,
+        scrollFragments: 0,
+        heavenScrolls: 0,
+        earthScrolls: 0,
+        relics: [],
+        curseOffers: [],
+        recruitOffer: false,
+        benchAvailable: false,
+    };
+    const type = typeof node?.type === 'string' ? node.type : '';
+    if (type === gauntlet.NODE_TYPES.BATTLE || type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
+        const rng = getGauntletRng(runState, node, 'battle-reward');
+        const rewardRange = Array.isArray(node.content?.rewardRyo) ? node.content.rewardRyo : [25, 40];
+        const minRyo = Math.max(0, Math.round(Number(rewardRange[0]) || 0));
+        const maxRyo = Math.max(minRyo, Math.round(Number(rewardRange[1]) || minRyo));
+        reward.ryo = minRyo + Math.floor(rng() * (maxRyo - minRyo + 1));
+        const scrollDropChance = Math.max(0, Math.min(1, Number(node.content?.scrollDropChance) || 0));
+        if (rng() < scrollDropChance) {
+            const scrollType = getOppositeGauntletScrollType(runState);
+            if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
+                reward.earthScrolls = 1;
+            } else {
+                reward.heavenScrolls = 1;
+            }
+        }
+        if (type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
+            reward.scrollFragments = 1;
+            const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
+            if (relic?.id) {
+                reward.relics.push(relic.id);
+            }
+        }
+        return reward;
+    }
+    return reward;
+};
+
+const getGauntletNodeReward = (runState = {}, node = {}, options = {}) => {
+    const reward = getGauntletBattleReward(runState, node);
+    const type = typeof node?.type === 'string' ? node.type : '';
+    if (type === gauntlet.NODE_TYPES.BATTLE || type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
+        return reward;
+    }
+    if (type === gauntlet.NODE_TYPES.EVENT) {
+        const event = gauntlet.getEventById(node.content?.eventId);
+        const choiceIndex = Math.max(0, Number.parseInt(options.choiceIndex, 10) || 0);
+        const pickedChoice = Array.isArray(event?.choices) ? event.choices[choiceIndex] || event.choices[0] : null;
+        const rng = getGauntletRng(runState, node, `event-${choiceIndex}`);
+        if (pickedChoice) {
+            (Array.isArray(pickedChoice.effects) ? pickedChoice.effects : []).forEach((effect = {}) => {
+                const amount = Math.round(Number(effect.amount) || 0);
+                if (effect.kind === 'ryo') {
+                    reward.ryo += amount;
+                    return;
+                }
+                if (effect.kind === 'ryo_range') {
+                    const min = Math.round(Number(effect.min) || 0);
+                    const max = Math.max(min, Math.round(Number(effect.max) || min));
+                    reward.ryo += min + Math.floor(rng() * (max - min + 1));
+                    return;
+                }
+                if (effect.kind === 'fragment') {
+                    reward.scrollFragments += amount;
+                    return;
+                }
+                if (effect.kind === 'scroll') {
+                    if (effect.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
+                        reward.earthScrolls += amount;
+                    } else {
+                        reward.heavenScrolls += amount;
+                    }
+                    return;
+                }
+                if (effect.kind === 'random_scroll') {
+                    for (let index = 0; index < Math.max(1, amount || 1); index += 1) {
+                        if (rng() < 0.5) {
+                            reward.heavenScrolls += 1;
+                        } else {
+                            reward.earthScrolls += 1;
+                        }
+                    }
+                    return;
+                }
+                if (effect.kind === 'opposite_scroll') {
+                    const scrollType = getOppositeGauntletScrollType(runState);
+                    if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
+                        reward.earthScrolls += Math.max(1, amount || 1);
+                    } else {
+                        reward.heavenScrolls += Math.max(1, amount || 1);
+                    }
+                    return;
+                }
+                if (effect.kind === 'relic' && gauntlet.getRelicById(effect.relicId)) {
+                    reward.relics.push(effect.relicId);
+                    return;
+                }
+                if (effect.kind === 'random_relic') {
+                    const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
+                    if (relic?.id) reward.relics.push(relic.id);
+                    return;
+                }
+                if (effect.kind === 'curse_offer' && gauntlet.getCurseById(effect.curseId)) {
+                    reward.curseOffers.push(effect.curseId);
+                    return;
+                }
+                if (effect.kind === 'hp') {
+                    applyGauntletHpDelta(runState, effect.target, amount, rng);
+                    return;
+                }
+                if (effect.kind === 'recruit_offer') {
+                    reward.recruitOffer = true;
+                    reward.benchAvailable = true;
+                }
+            });
+            reward.eventId = event.eventId;
+            reward.choiceIndex = choiceIndex;
+            reward.choiceLabel = pickedChoice.label;
+        }
+        return reward;
+    }
+    if (type === gauntlet.NODE_TYPES.MERCHANT) {
+        return reward;
+    }
+    if (type === gauntlet.NODE_TYPES.REST_CAMP) {
+        return reward;
+    }
+    if (type === gauntlet.NODE_TYPES.SCROLL_CACHE) {
+        const scrollType = node.content?.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
+            ? gauntlet.EXAM_SCROLL_TYPES.EARTH
+            : gauntlet.EXAM_SCROLL_TYPES.HEAVEN;
+        if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
+            reward.earthScrolls = 1;
+        } else {
+            reward.heavenScrolls = 1;
+        }
+    }
+    return reward;
+};
+
+const applyGauntletNodeClearToRun = (runState = {}, node = {}, options = {}) => {
+    const nextRun = normalizeGauntletRunState(runState);
+    if (!nextRun || !node) return nextRun;
+    const reward = getGauntletNodeReward(nextRun, node, options);
+    nextRun.currentAct = node.row >= gauntlet.DEFAULT_ROWS ? 3 : 2;
+    nextRun.currentNodeId = node.id;
+    nextRun.visitedNodeIds = Array.from(new Set([...(nextRun.visitedNodeIds || []), node.id]));
+    nextRun.lockedNodeIds = Array.from(
+        new Set([...(nextRun.lockedNodeIds || []), ...(Array.isArray(node.locksSiblings) ? node.locksSiblings : [])])
+    );
+    nextRun.pendingBattle = null;
+    addGauntletRewardToRun(nextRun, reward);
+    if (node.type === gauntlet.NODE_TYPES.REST_CAMP) {
+        nextRun.teamHp = (Array.isArray(nextRun.teamHp) ? nextRun.teamHp : []).map(() => 100);
+    }
+    if (node.row === gauntlet.DEFAULT_ROWS) {
+        nextRun.currentAct = 3;
+        nextRun.actThreeStep = 'preliminary';
+    }
+    if (node.id === 'act3-preliminary') {
+        nextRun.currentAct = 3;
+        nextRun.actThreeStep = 'finals';
+    }
+    if (node.id === 'act3-finals') {
+        nextRun.status = 'won';
+        nextRun.currentAct = 3;
+        nextRun.actThreeStep = 'complete';
+        nextRun.endedAt = new Date();
+        nextRun.pendingBattle = null;
+    }
+    nextRun.lastNodeResult = {
+        nodeId: node.id,
+        nodeType: node.type,
+        clearedAt: new Date(),
+        reward,
+    };
+    return nextRun;
+};
+
+const applyGauntletProgressForUsers = async (match, winnerUsername, endedAt) => {
+    if (!match || match.mode !== 'gauntlet') {
+        return null;
+    }
+    const humanPlayer = (Array.isArray(match.players) ? match.players : []).find(
+        (player) => player?.username && !isGameBotUsername(player.username)
+    );
+    if (!humanPlayer) {
+        return null;
+    }
+    const user = await usersCollection.findOne(
+        { username: humanPlayer.username },
+        { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
+    );
+    if (!user) {
+        return null;
+    }
+    const profile = normalizeUserProfile(user);
+    const gauntletState = normalizeGauntletState(profile.gauntlet);
+    const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+    const matchId = typeof match.matchId === 'string' ? match.matchId : '';
+    if (!activeRun?.pendingBattle || activeRun.pendingBattle.matchId !== matchId) {
+        return null;
+    }
+    const node = gauntlet.getNodeById(activeRun.map, activeRun.pendingBattle.nodeId);
+    if (!node) {
+        return null;
+    }
+    const humanUnits = Array.isArray(match.board?.[humanPlayer.username]) ? match.board[humanPlayer.username] : [];
+    activeRun.teamHp = activeRun.team.map((_, index) => {
+        const unit = humanUnits[index];
+        if (!unit) return 0;
+        return Math.max(0, Math.min(battleLogic.DEFAULT_HP, Math.round(Number(unit.hp) || 0)));
+    });
+
+    const didWin = Boolean(winnerUsername) && winnerUsername === humanPlayer.username;
+    let nextRun;
+    if (didWin) {
+        nextRun = applyGauntletNodeClearToRun(activeRun, node);
+    } else {
+        nextRun = {
+            ...activeRun,
+            status: 'lost',
+            pendingBattle: null,
+            endedAt: endedAt || new Date(),
+            lastNodeResult: {
+                nodeId: node.id,
+                nodeType: node.type,
+                clearedAt: endedAt || new Date(),
+                reward: getGauntletNodeReward(activeRun, node),
+                lost: true,
+            },
+        };
+    }
+
+    const runEnded = nextRun.status === 'won' || nextRun.status === 'lost';
+    const nextGauntletState = {
+        ...gauntletState,
+        activeRun: runEnded ? null : nextRun,
+        completedRuns: gauntletState.completedRuns + (runEnded ? 1 : 0),
+        wins: gauntletState.wins + (nextRun.status === 'won' ? 1 : 0),
+        losses: gauntletState.losses + (nextRun.status === 'lost' ? 1 : 0),
+    };
+    profile.gauntlet = normalizeGauntletState(nextGauntletState);
+    const normalizedProfile = normalizeUserProfile({ ...user, profile });
+    await usersCollection.updateOne(
+        { _id: user._id },
+        {
+            $set: {
+                profile: normalizedProfile,
+            },
+        }
+    );
+
+    return {
+        [humanPlayer.username]: {
+            didWin,
+            nodeId: node.id,
+            nodeType: node.type,
+            runStatus: nextRun.status,
+            runEnded,
+            reward: nextRun.lastNodeResult?.reward || null,
+            activeRun: runEnded ? null : nextRun,
+        },
+    };
+};
+
 const addClanExperience = async (clanName, clanExpDelta) => {
     const normalizedClanName = typeof clanName === 'string' ? clanName.trim().toLowerCase() : '';
     const gain = Math.max(0, Number(clanExpDelta) || 0);
@@ -4357,6 +4843,13 @@ const recalculatePlayerLadderStandings = async () => {
 
 const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
     if (!match || !Array.isArray(match.players) || match.players.length < 2) {
+        return null;
+    }
+
+    if (match.mode === 'gauntlet') {
+        const gauntletResults = await applyGauntletProgressForUsers(match, winnerUsername, endedAt);
+        match.gauntletResults =
+            gauntletResults && Object.keys(gauntletResults).length > 0 ? gauntletResults : null;
         return null;
     }
 
@@ -5937,6 +6430,36 @@ const buildMatchPayloadForUser = (match, username) => {
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
         storyResult: match.storyResults?.[username] || null,
+        gauntletResult: match.gauntletResults?.[username] || null,
+        gauntletMatch: match.gauntletMatch
+            ? {
+                  runSeed: match.gauntletMatch.runSeed || null,
+                  nodeId: match.gauntletMatch.nodeId || null,
+                  nodeType: match.gauntletMatch.nodeType || null,
+                  enemyTeamId: match.gauntletMatch.enemyTeamId || null,
+                  enemyDisplayName: match.gauntletMatch.enemyDisplayName || null,
+                  aggressionTier: Math.max(1, Math.min(3, Number(match.gauntletMatch.aggressionTier) || 1)),
+                  resources:
+                      match.gauntletMatch.resources && typeof match.gauntletMatch.resources === 'object'
+                          ? {
+                                heavenScrolls: Math.max(0, Number(match.gauntletMatch.resources.heavenScrolls) || 0),
+                                earthScrolls: Math.max(0, Number(match.gauntletMatch.resources.earthScrolls) || 0),
+                                scrollFragments: Math.max(0, Number(match.gauntletMatch.resources.scrollFragments) || 0),
+                                ryo: Math.max(0, Number(match.gauntletMatch.resources.ryo) || 0),
+                            }
+                          : null,
+                  modifiers: Array.isArray(match.gauntletMatch.modifiers)
+                      ? match.gauntletMatch.modifiers
+                            .map((modifier) => ({
+                                id: typeof modifier?.id === 'string' ? modifier.id : '',
+                                name: typeof modifier?.name === 'string' ? modifier.name : '',
+                                description: typeof modifier?.description === 'string' ? modifier.description : '',
+                                isCurse: Boolean(modifier?.isCurse),
+                            }))
+                            .filter((modifier) => modifier.id && modifier.name)
+                      : [],
+              }
+            : null,
         storyMatch: match.storyMatch
             ? {
                   chapterId: match.storyMatch.chapterId || null,
@@ -6752,6 +7275,77 @@ const buildStoryBattleBotMatch = async ({ username, team, chapter, node, difficu
     return matchDocument;
 };
 
+const buildGauntletBattleBotMatch = async ({ username, runState, node }) => {
+    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const enemyTeam = gauntlet.getEnemyTeamById(node?.content?.enemyTeamId) || gauntlet.ENEMY_TEAMS[0];
+    const enemyRosterIndices = resolveRosterIndicesForCharacterIds(enemyTeam?.characterIds || []);
+    const botPlayer = createBattleBotPlayer({
+        matchId,
+        team: enemyRosterIndices.length ? enemyRosterIndices : buildBattleBotTeam(),
+        ladderLevel: Math.max(1, Number(node?.content?.aggressionTier) || 1),
+        displayName: enemyTeam?.name || 'Forest Rival Team',
+    });
+    const team = Array.isArray(runState?.team) ? runState.team.slice(0, 3) : [];
+    const aliveLookup = {
+        [username]: team.length || 3,
+        [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
+    };
+    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
+    const playerDocs = [
+        {
+            username,
+            team,
+            aliveCount: aliveLookup[username],
+        },
+        botPlayer,
+    ];
+    const board = battleLogic.buildInitialBoard(playerDocs);
+    const playerUnits = Array.isArray(board?.[username]) ? board[username] : [];
+    playerUnits.forEach((unit, index) => {
+        if (!unit) return;
+        const hp = Number(Array.isArray(runState?.teamHp) ? runState.teamHp[index] : battleLogic.DEFAULT_HP);
+        unit.hp = Math.max(1, Math.min(battleLogic.DEFAULT_HP, Number.isFinite(hp) ? Math.round(hp) : battleLogic.DEFAULT_HP));
+        unit.alive = unit.hp > 0;
+    });
+    const matchDocument = {
+        matchId: built.matchId,
+        mode: 'gauntlet',
+        status: 'active',
+        createdAt: new Date(),
+        matchStartsAt: built.matchStartsAt,
+        chakraPools: built.chakraPools,
+        economy: built.economy,
+        pendingTurns: built.pendingTurns,
+        currentTurn: built.currentTurn,
+        turnStartedAt: built.turnStartedAt,
+        turnOrder: built.turnOrder,
+        turnExpiresAt: built.turnExpiresAt,
+        board,
+        players: playerDocs,
+        botMatch: {
+            enabled: true,
+            displayName: botPlayer.displayName || enemyTeam?.name || 'Forest Rival Team',
+        },
+        gauntletMatch: {
+            runSeed: runState?.seed || null,
+            nodeId: node?.id || null,
+            nodeType: node?.type || null,
+            enemyTeamId: enemyTeam?.id || null,
+            enemyDisplayName: enemyTeam?.name || 'Forest Rival Team',
+            aggressionTier: Math.max(1, Math.min(3, Number(node?.content?.aggressionTier) || 1)),
+            resources: {
+                heavenScrolls: Math.max(0, Number(runState?.heavenScrolls) || 0),
+                earthScrolls: Math.max(0, Number(runState?.earthScrolls) || 0),
+                scrollFragments: Math.max(0, Number(runState?.scrollFragments) || 0),
+                ryo: Math.max(0, Number(runState?.ryo) || 0),
+            },
+            modifiers: buildGauntletModifierSummary(runState),
+        },
+    };
+    await matchesCollection.insertOne(matchDocument);
+    return matchDocument;
+};
+
 const clearScheduledBattleBotQueueCheck = (username) => {
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
     if (!normalizedUsername) return;
@@ -7093,6 +7687,21 @@ const botCanAffordSkill = ({ match, username, skill, actorState }) => {
     return remainingPool >= Math.max(0, Number(pending.unresolvedRandom) || 0) + requiredRandom;
 };
 
+const getBattleBotTurnActionLimit = ({ match, username }) => {
+    if (match?.mode !== 'gauntlet') {
+        return Number.POSITIVE_INFINITY;
+    }
+    const tier = Math.max(1, Math.min(3, Number(match?.gauntletMatch?.aggressionTier) || 1));
+    const botTurnCount = Math.max(0, Number(match?.economy?.turnCounts?.[username]) || 0);
+    if (tier <= 1) {
+        return 1;
+    }
+    if (tier === 2) {
+        return botTurnCount === 0 ? 1 : 2;
+    }
+    return 2;
+};
+
 const chooseBattleBotTargetSelection = (options = {}) => {
     const targets = Array.isArray(options.targets) ? options.targets : [];
     if (!targets.length) {
@@ -7343,12 +7952,17 @@ const runBattleBotTurn = async (matchId) => {
         }
 
         const team = Array.isArray(hydrated.board?.[username]) ? hydrated.board[username] : [];
+        const actionLimit = getBattleBotTurnActionLimit({ match: hydrated, username });
+        let queuedActionCount = Object.keys(pendingTurn.queuedByActorSlot || {}).length;
         const actorSlots = shuffleList(
             team
                 .map((unit, slot) => (unit && unit.alive !== false ? slot : null))
                 .filter((slot) => Number.isInteger(slot))
         );
         actorSlots.forEach((actorSlot) => {
+            if (queuedActionCount >= actionLimit) {
+                return;
+            }
             const actorUnit = hydrated.board?.[username]?.[actorSlot];
             if (!actorUnit || actorUnit.alive === false) {
                 return;
@@ -7358,7 +7972,7 @@ const runBattleBotTurn = async (matchId) => {
                 return;
             }
             const character = charactersData?.[actorUnit.rosterIndex];
-            const isStoryBot = hydrated.mode === 'story';
+            const isStoryBot = hydrated.mode === 'story' || hydrated.mode === 'gauntlet';
             // Hidden alt-skill entries (e.g. Dosu's "-improved" variants, Jiraiya's
             // locked follow-ups) only exist to be swapped in at their base skill's
             // slot via skillReplacements once unlocked -- they are not independent
@@ -7418,6 +8032,7 @@ const runBattleBotTurn = async (matchId) => {
                         targetSelection,
                         classChoice: classChoiceOptions[0] || null,
                     });
+                    queuedActionCount += 1;
                     break;
                 } catch (error) {
                     continue;
@@ -7836,6 +8451,7 @@ const finalizeTurn = async (match, username) => {
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
                     storyResults: match.storyResults || null,
+                    gauntletResults: match.gauntletResults || null,
                 },
             }
         );
@@ -8109,6 +8725,34 @@ const storyStartSchema = Joi.object({
     nodeId: Joi.string().trim().min(1).max(128).required(),
     difficulty: Joi.string().valid('normal', 'hard').default('normal'),
     team: teamSchema.optional(),
+});
+
+const gauntletRunStartSchema = Joi.object({
+    team: teamSchema.optional(),
+    seed: Joi.string().trim().min(1).max(128).optional(),
+    startingScrollType: Joi.string().valid('heaven', 'earth').default('heaven'),
+});
+
+const gauntletNodeEnterSchema = Joi.object({
+    nodeId: Joi.string().trim().min(1).max(32).required(),
+    choiceIndex: Joi.number().integer().min(0).max(8).optional(),
+});
+
+const gauntletActOneChoiceSchema = Joi.object({
+    choiceIndex: Joi.number().integer().min(0).max(8).required(),
+});
+
+const gauntletMerchantBuySchema = Joi.object({
+    itemType: Joi.string().valid('heaven_scroll', 'earth_scroll', 'heal', 'random_relic').required(),
+});
+
+const gauntletForgeScrollSchema = Joi.object({
+    scrollType: Joi.string().valid('heaven', 'earth').required(),
+});
+
+const gauntletOfferAcceptSchema = Joi.object({
+    offerType: Joi.string().valid('curse').required(),
+    offerId: Joi.string().trim().min(1).max(128).required(),
 });
 
 const publicProfileLookupSchema = Joi.object({
@@ -8847,6 +9491,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
             ladderResult: match.ladderResults?.[username] || null,
             missionResult: match.missionResults?.[username] || null,
             storyResult: match.storyResults?.[username] || null,
+            gauntletResult: match.gauntletResults?.[username] || null,
         });
     }
     const opponentEntry = match.players.find((p) => p.username !== username);
@@ -8871,6 +9516,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
                 ladderResults: ladderResults || null,
                 missionResults: match.missionResults || null,
                 storyResults: match.storyResults || null,
+                gauntletResults: match.gauntletResults || null,
             },
         }
     );
@@ -8888,6 +9534,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
         ladderResult: ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
         storyResult: match.storyResults?.[username] || null,
+        gauntletResult: match.gauntletResults?.[username] || null,
     });
 });
 
@@ -11682,6 +12329,532 @@ app.post('/api/clan/invitations/accept', requireSession, async (req, res) => {
     } catch (error) {
         console.error('Clan invitation accept error:', error);
         return res.status(500).json({ error: 'Unable to accept clan invitation.' });
+    }
+});
+
+app.get('/api/gauntlet/catalog', (req, res) => {
+    return res.json({
+        ok: true,
+        relicScrolls: gauntlet.RELIC_SCROLLS,
+        curses: gauntlet.CURSES,
+        actOneEvents: gauntlet.ACT_ONE_EVENTS,
+        actTwoEvents: gauntlet.ACT_TWO_EVENTS,
+        enemyTeams: gauntlet.ENEMY_TEAMS,
+    });
+});
+
+app.get('/api/gauntlet/map-preview', (req, res) => {
+    const rawSeed = typeof req.query?.seed === 'string' ? req.query.seed.trim() : '';
+    const rawStartingScroll =
+        typeof req.query?.startingScrollType === 'string' ? req.query.startingScrollType.trim().toLowerCase() : '';
+    const startingScrollType =
+        rawStartingScroll === gauntlet.EXAM_SCROLL_TYPES.EARTH
+            ? gauntlet.EXAM_SCROLL_TYPES.EARTH
+            : gauntlet.EXAM_SCROLL_TYPES.HEAVEN;
+    const seed = rawSeed || `preview-${Date.now()}`;
+    const map = gauntlet.generateAct2Map({ seed, startingScrollType });
+
+    return res.json({
+        ok: true,
+        map,
+        invariants: {
+            everyPathHasRestAndScrollSources: gauntlet
+                .findAllPaths(map)
+                .every((pathEntries) => gauntlet.pathHasRestAndScrollSource(pathEntries)),
+        },
+    });
+});
+
+app.post('/api/gauntlet/run/start', requireSession, async (req, res) => {
+    try {
+        const username = req.authUser.username;
+        const { error: validationError, value } = gauntletRunStartSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A valid Gauntlet team is required.' });
+        }
+        if (userToMatch.has(username)) {
+            return res.status(409).json({ error: 'Finish your current match before starting a Gauntlet run.' });
+        }
+        const existingMatch = await matchesCollection.findOne({
+            'players.username': username,
+            status: { $ne: 'ended' },
+        });
+        if (existingMatch) {
+            return res.status(409).json({ error: 'Finish your current match before starting a Gauntlet run.' });
+        }
+
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        if (gauntletState.activeRun?.status === 'active') {
+            return res.status(409).json({ error: 'A Gauntlet run is already active.' });
+        }
+
+        const team = Array.isArray(value.team) ? value.team : Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
+        const { error: teamError } = teamSchema.validate(team);
+        if (teamError) {
+            return res.status(400).json({ error: 'Save or provide a full selected team before starting Gauntlet.' });
+        }
+        try {
+            await assertTeamCanBeUsed(profile, team, user.role);
+        } catch (error) {
+            return res.status(403).json({ error: error.message || 'Your Gauntlet team contains a locked character.' });
+        }
+
+        const seed = value.seed || `gauntlet-${Date.now()}`;
+        const map = gauntlet.generateAct2Map({ seed, startingScrollType: value.startingScrollType });
+        const activeRun = {
+            ...gauntlet.createInitialRunState({
+                seed,
+                team,
+                startingScrollType: value.startingScrollType,
+                map,
+            }),
+        };
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+
+        return res.status(201).json({
+            ok: true,
+            run: normalizedProfile.gauntlet.activeRun,
+            actOneEvent: getGauntletActOneEventForRun(normalizedProfile.gauntlet.activeRun),
+            reachableNodeIds: gauntlet.getReachableNodeIds(normalizedProfile.gauntlet.activeRun),
+        });
+    } catch (error) {
+        console.error('Gauntlet run start error:', error);
+        return res.status(500).json({ error: 'Unable to start Gauntlet run.' });
+    }
+});
+
+app.get('/api/gauntlet/run', requireSession, async (req, res) => {
+    try {
+        const user = await usersCollection.findOne(
+            { username: req.authUser.username },
+            { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
+        );
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const activeRun = normalizeGauntletState(profile.gauntlet).activeRun;
+        return res.json({
+            ok: true,
+            run: activeRun,
+            actOneEvent: activeRun ? getGauntletActOneEventForRun(activeRun) : null,
+            reachableNodeIds: activeRun ? gauntlet.getReachableNodeIds(activeRun) : [],
+        });
+    } catch (error) {
+        console.error('Gauntlet run load error:', error);
+        return res.status(500).json({ error: 'Unable to load Gauntlet run.' });
+    }
+});
+
+app.post('/api/gauntlet/run/abandon', requireSession, async (req, res) => {
+    try {
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = gauntletState.activeRun;
+        if (!activeRun) {
+            return res.json({ ok: true, run: null });
+        }
+        if (activeRun.pendingBattle?.matchId) {
+            const match = await matchesCollection.findOne({ matchId: activeRun.pendingBattle.matchId });
+            if (match && match.status !== 'ended') {
+                return res.status(409).json({ error: 'Surrender the active Gauntlet battle before abandoning the run.' });
+            }
+        }
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun: null,
+            abandonedRuns: gauntletState.abandonedRuns + 1,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        return res.json({ ok: true, run: null });
+    } catch (error) {
+        console.error('Gauntlet run abandon error:', error);
+        return res.status(500).json({ error: 'Unable to abandon Gauntlet run.' });
+    }
+});
+
+app.post('/api/gauntlet/run/act1/choose', requireSession, async (req, res) => {
+    try {
+        const { error: validationError, value } = gauntletActOneChoiceSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A valid Written Test choice is required.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+        if (!activeRun || activeRun.status !== 'active') {
+            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
+        }
+        if (activeRun.currentAct !== 1) {
+            return res.status(409).json({ error: 'The Written Test is already complete.' });
+        }
+        let nextRun;
+        try {
+            nextRun = resolveGauntletActOneChoice(activeRun, value.choiceIndex);
+        } catch (error) {
+            return res.status(400).json({ error: error.message || 'A valid Written Test choice is required.' });
+        }
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun: nextRun,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        const run = normalizedProfile.gauntlet.activeRun;
+        return res.json({
+            ok: true,
+            run,
+            actOneEvent: getGauntletActOneEventForRun(run),
+            nodeResult: nextRun.lastNodeResult,
+            reachableNodeIds: gauntlet.getReachableNodeIds(run),
+        });
+    } catch (error) {
+        console.error('Gauntlet Act 1 choice error:', error);
+        return res.status(500).json({ error: 'Unable to resolve Written Test choice.' });
+    }
+});
+
+app.post('/api/gauntlet/run/offer/accept', requireSession, async (req, res) => {
+    try {
+        const { error: validationError, value } = gauntletOfferAcceptSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A valid Gauntlet offer is required.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+        if (!activeRun || activeRun.status !== 'active') {
+            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
+        }
+        const offerIndex = (activeRun.pendingOffers || []).findIndex(
+            (offer) => offer.type === value.offerType && offer.id === value.offerId
+        );
+        if (offerIndex < 0 || value.offerType !== 'curse' || !gauntlet.getCurseById(value.offerId)) {
+            return res.status(404).json({ error: 'Gauntlet offer not found.' });
+        }
+        activeRun.pendingOffers.splice(offerIndex, 1);
+        activeRun.relics = Array.from(new Set([...(activeRun.relics || []), value.offerId]));
+        activeRun.lastNodeResult = {
+            nodeId: activeRun.currentNodeId || null,
+            nodeType: 'offer_accept',
+            clearedAt: new Date(),
+            reward: { relics: [value.offerId] },
+        };
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        return res.json({
+            ok: true,
+            run: normalizedProfile.gauntlet.activeRun,
+            acceptedOffer: { type: value.offerType, id: value.offerId },
+        });
+    } catch (error) {
+        console.error('Gauntlet offer accept error:', error);
+        return res.status(500).json({ error: 'Unable to accept Gauntlet offer.' });
+    }
+});
+
+app.post('/api/gauntlet/run/merchant/buy', requireSession, async (req, res) => {
+    try {
+        const { error: validationError, value } = gauntletMerchantBuySchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A valid merchant item is required.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+        if (!activeRun || activeRun.status !== 'active') {
+            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
+        }
+        const currentNode = gauntlet.getNodeById(activeRun.map, activeRun.currentNodeId);
+        if (!currentNode || currentNode.type !== gauntlet.NODE_TYPES.MERCHANT) {
+            return res.status(403).json({ error: 'You are not at a Merchant node.' });
+        }
+        const prices = {
+            heaven_scroll: activeRun.relics.includes('scroll-hoarder') ? 70 : 100,
+            earth_scroll: activeRun.relics.includes('scroll-hoarder') ? 70 : 100,
+            heal: 55,
+            random_relic: 120,
+        };
+        const price = prices[value.itemType];
+        if ((Number(activeRun.ryo) || 0) < price) {
+            return res.status(400).json({ error: 'Not enough Ryo.' });
+        }
+        activeRun.ryo -= price;
+        const reward = {
+            ryo: 0,
+            scrollFragments: 0,
+            heavenScrolls: value.itemType === 'heaven_scroll' ? 1 : 0,
+            earthScrolls: value.itemType === 'earth_scroll' ? 1 : 0,
+            relics: [],
+        };
+        if (value.itemType === 'heal') {
+            activeRun.teamHp = activeRun.teamHp.map((hp) => Math.min(100, Math.max(1, Number(hp) || 1) + 30));
+        }
+        if (value.itemType === 'random_relic') {
+            const rng = gauntlet.createSeededRng(`${activeRun.seed}:${activeRun.currentNodeId}:merchant:${activeRun.relics.length}`);
+            const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
+            if (relic?.id) reward.relics.push(relic.id);
+        }
+        addGauntletRewardToRun(activeRun, reward);
+        activeRun.lastNodeResult = {
+            nodeId: activeRun.currentNodeId,
+            nodeType: 'merchant_purchase',
+            clearedAt: new Date(),
+            reward: { ...reward, ryo: -price, itemType: value.itemType },
+        };
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        return res.json({
+            ok: true,
+            run: normalizedProfile.gauntlet.activeRun,
+            purchase: activeRun.lastNodeResult.reward,
+        });
+    } catch (error) {
+        console.error('Gauntlet merchant purchase error:', error);
+        return res.status(500).json({ error: 'Unable to complete merchant purchase.' });
+    }
+});
+
+app.post('/api/gauntlet/run/fragments/forge', requireSession, async (req, res) => {
+    try {
+        const { error: validationError, value } = gauntletForgeScrollSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'Choose a Heaven or Earth Scroll to forge.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+        if (!activeRun || activeRun.status !== 'active') {
+            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
+        }
+        const fragmentCount = Math.max(0, Math.round(Number(activeRun.scrollFragments) || 0));
+        if (fragmentCount < 3) {
+            return res.status(400).json({ error: 'You need 3 Scroll Fragments to forge an exam scroll.' });
+        }
+        activeRun.scrollFragments = fragmentCount - 3;
+        if (value.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
+            activeRun.earthScrolls = Math.max(0, Number(activeRun.earthScrolls) || 0) + 1;
+        } else {
+            activeRun.heavenScrolls = Math.max(0, Number(activeRun.heavenScrolls) || 0) + 1;
+        }
+        activeRun.lastNodeResult = {
+            nodeId: activeRun.currentNodeId || null,
+            nodeType: 'fragment_forge',
+            clearedAt: new Date(),
+            reward: {
+                scrollFragments: -3,
+                heavenScrolls: value.scrollType === gauntlet.EXAM_SCROLL_TYPES.HEAVEN ? 1 : 0,
+                earthScrolls: value.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH ? 1 : 0,
+            },
+        };
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun,
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        const run = normalizedProfile.gauntlet.activeRun;
+        return res.json({
+            ok: true,
+            run,
+            nodeResult: activeRun.lastNodeResult,
+            reachableNodeIds: gauntlet.getReachableNodeIds(run),
+        });
+    } catch (error) {
+        console.error('Gauntlet fragment forge error:', error);
+        return res.status(500).json({ error: 'Unable to forge an exam scroll.' });
+    }
+});
+
+app.post('/api/gauntlet/run/node/enter', requireSession, async (req, res) => {
+    try {
+        const username = req.authUser.username;
+        const { error: validationError, value } = gauntletNodeEnterSchema.validate(req.body || {});
+        if (validationError) {
+            return res.status(400).json({ error: 'A Gauntlet node is required.' });
+        }
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        const gauntletState = normalizeGauntletState(profile.gauntlet);
+        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
+        if (!activeRun || activeRun.status !== 'active') {
+            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
+        }
+        if (activeRun.pendingBattle?.matchId) {
+            return res.status(409).json({ error: 'Finish the current Gauntlet battle before entering another node.' });
+        }
+        const node = gauntlet.getNodeById(activeRun.map, value.nodeId);
+        if (!node) {
+            return res.status(404).json({ error: 'Gauntlet node not found.' });
+        }
+        const reachableNodeIds = gauntlet.getReachableNodeIds(activeRun);
+        if (!reachableNodeIds.includes(node.id)) {
+            return res.status(403).json({ error: 'That Gauntlet node is not reachable.' });
+        }
+        if (!gauntlet.canEnterNode(activeRun, node)) {
+            return res.status(403).json({ error: 'You need both Heaven and Earth Scrolls to enter an exit node.' });
+        }
+        if (node.type === gauntlet.NODE_TYPES.EVENT) {
+            const event = gauntlet.getEventById(node.content?.eventId);
+            const choiceIndex = Number.isInteger(value.choiceIndex) ? value.choiceIndex : 0;
+            if (!event || !Array.isArray(event.choices) || !event.choices[choiceIndex]) {
+                return res.status(400).json({ error: 'A valid event choice is required.' });
+            }
+        }
+
+        if (node.type === gauntlet.NODE_TYPES.BATTLE || node.type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
+            if (userToMatch.has(username)) {
+                return res.status(409).json({ error: 'Finish your current match before entering a Gauntlet battle.' });
+            }
+            const existingMatch = await matchesCollection.findOne({
+                'players.username': username,
+                status: { $ne: 'ended' },
+            });
+            if (existingMatch) {
+                return res.status(409).json({ error: 'Finish your current match before entering a Gauntlet battle.' });
+            }
+            const matchDocument = await buildGauntletBattleBotMatch({ username, runState: activeRun, node });
+            activeRun.pendingBattle = { nodeId: node.id, matchId: matchDocument.matchId };
+            activeRun.currentNodeId = node.id;
+            profile.gauntlet = normalizeGauntletState({
+                ...gauntletState,
+                activeRun,
+            });
+            const normalizedProfile = normalizeUserProfile({ ...user, profile });
+            await usersCollection.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        profile: normalizedProfile,
+                    },
+                }
+            );
+            userToMatch.set(username, {
+                matchId: matchDocument.matchId,
+                opponent: matchDocument.gauntletMatch?.enemyDisplayName || 'Forest Rival Team',
+            });
+            scheduleBattleBotTurn(matchDocument);
+            return res.json({
+                ok: true,
+                battleStarted: true,
+                run: normalizedProfile.gauntlet.activeRun,
+                match: buildMatchPayloadForUser(matchDocument, username),
+            });
+        }
+
+        const nextRun = applyGauntletNodeClearToRun(activeRun, node, {
+            choiceIndex: Number.isInteger(value.choiceIndex) ? value.choiceIndex : 0,
+        });
+        profile.gauntlet = normalizeGauntletState({
+            ...gauntletState,
+            activeRun: nextRun.status === 'active' ? nextRun : null,
+            completedRuns: gauntletState.completedRuns + (nextRun.status === 'won' ? 1 : 0),
+            wins: gauntletState.wins + (nextRun.status === 'won' ? 1 : 0),
+        });
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            {
+                $set: {
+                    profile: normalizedProfile,
+                },
+            }
+        );
+        const run = normalizedProfile.gauntlet.activeRun;
+        return res.json({
+            ok: true,
+            battleStarted: false,
+            run,
+            nodeResult: nextRun.lastNodeResult,
+            reachableNodeIds: run ? gauntlet.getReachableNodeIds(run) : [],
+        });
+    } catch (error) {
+        console.error('Gauntlet node enter error:', error);
+        return res.status(500).json({ error: 'Unable to enter Gauntlet node.' });
     }
 });
 

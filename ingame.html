@@ -22,12 +22,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="ingamebg-remaster.png">
-    <link rel="preload" as="image" href="ingamescrollbehind-remaster.png">
-    <link rel="preload" as="image" href="ingameskillscroll-remaster.png">
-    <link rel="preload" as="image" href="ingamebottomscroll-remaster.png">
-    <link rel="preload" as="image" href="optionscroll-remaster.png">
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="preload" as="image" href="ingamebg-remaster.png?v=2">
+    <link rel="preload" as="image" href="ingamescrollbehind-remaster.png?v=2">
+    <link rel="preload" as="image" href="ingameskillscroll-remaster.png?v=2">
+    <link rel="preload" as="image" href="ingamebottomscroll-remaster.png?v=2">
+    <link rel="preload" as="image" href="optionscroll-remaster.png?v=2">
+    <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body class="ingame-client-page game-remaster">
 <script>
@@ -75,6 +75,13 @@
     })();
 </script>
 <div class="backgroundingame">
+    <div class="gauntlet-battle-indicator" id="gauntlet-battle-indicator" hidden>
+        <button type="button" class="gauntlet-battle-chip" id="gauntlet-battle-chip" aria-expanded="false">
+            <span class="gauntlet-battle-dot" aria-hidden="true"></span>
+            <span id="gauntlet-battle-summary">Chunin Exams</span>
+        </button>
+        <div class="gauntlet-battle-popover" id="gauntlet-battle-popover" hidden></div>
+    </div>
     <div class="ingame-sound-controller" aria-label="Sound controller">
         <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
     </div>
@@ -256,7 +263,7 @@
                 <p class="surrender-confirm-title">ARE YOU SURE YOU WISH TO SURRENDER?</p>
 
                 <div class="surrender-confirm-preview-row">
-                    <img src="surrenderimage-remaster.png" alt="Surrender preview" class="surrender-confirm-preview-image">
+                    <img src="surrenderimage-remaster.png?v=2" alt="Surrender preview" class="surrender-confirm-preview-image">
                 </div>
 
                 <div class="surrender-confirm-actions">
@@ -269,7 +276,7 @@
 
     <div class="battle-end-overlay">
         <div class="battle-end-panel">
-            <img src="lose-remaster.png" alt="Defeated character portrait" class="battle-end-portrait">
+            <img src="lose-remaster.png?v=2" alt="Defeated character portrait" class="battle-end-portrait">
             <div class="battle-end-copy">
                 <p class="battle-end-title">LOSER</p>
                 <p class="battle-end-message">TOO BAD!<br>YOU HAVE LOST A QUICK BATTLE AGAINST USERNAME.</p>
@@ -344,9 +351,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png?v=2" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png?v=2" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -368,9 +375,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png?v=2" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png?v=2" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -392,9 +399,9 @@
                 </div>
             </div>
             <div class="skillholder">
-                <img src="ingamescrollbehind-remaster.png" alt="Skill" class="ingamescrollbehind">
+                <img src="ingamescrollbehind-remaster.png?v=2" alt="Skill" class="ingamescrollbehind">
                 <div class="skillscrollingame">
-                    <img src="skillqqueue-remaster.png" alt="Skillqueue" class="skillqueue">
+                    <img src="skillqqueue-remaster.png?v=2" alt="Skillqueue" class="skillqueue">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
                     <img src="https://i.imgur.com/Uy1TKG3.png" alt="Skill" class="skillimage">
@@ -487,7 +494,7 @@
     </div>
 
     <div class="bottomrender">
-        <img src="render-remaster.png" alt="render" class="render">
+        <img src="render-remaster.png?v=2" alt="render" class="render">
     </div>
 
     <div class="bottomgame">
@@ -500,6 +507,6 @@
 </div>
 
 </div>
-<script src="script.js?v=12"></script>
+<script src="script.js?v=16"></script>
 </body>
 </html>

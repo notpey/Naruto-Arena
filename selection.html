@@ -26,7 +26,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=27">
     <link rel="stylesheet" href="shop.css">
 </head>
 <body class="selection-client-page">
@@ -104,7 +104,7 @@
             <button type="button" class="selection-hub-tab" data-hub-view="shop">Shop</button>
             <button type="button" class="selection-hub-tab" data-hub-view="missions">Missions</button>
             <button type="button" class="selection-hub-tab" data-hub-view="inventory">Inventory</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="story">Story</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="story">PvE</button>
         </div>
         <button type="button" class="selection-hub-ryo" data-hub-view="shop" aria-label="Open the Ryo shop">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
@@ -193,24 +193,31 @@
         <div class="selection-hub-env-panel" data-hub-panel="story" hidden>
             <div class="selection-hub-env-header">
                 <div>
-                    <h1>Story</h1>
-                    <p>Fight scripted battles and unlock rewards, right here.</p>
+                    <h1>PvE</h1>
+                    <p>Fight scripted battles, run exam gauntlets, and unlock rewards.</p>
                 </div>
+            </div>
+            <div class="selection-hub-env-toolbar selection-hub-pve-tabs">
+                <button type="button" class="selection-hub-rank active" data-pve-mode="story">Story</button>
+                <button type="button" class="selection-hub-rank" data-pve-mode="gauntlet">Chunin Exams</button>
             </div>
             <div class="selection-hub-story-list" data-story-list>
                 <div class="selection-hub-env-empty">Loading story battles...</div>
             </div>
             <div class="selection-hub-story-briefing" data-story-briefing hidden></div>
+            <div class="selection-hub-gauntlet" data-gauntlet-panel hidden>
+                <div class="selection-hub-env-empty">Loading Chunin Exams...</div>
+            </div>
         </div>
     </section>
-    <img class="selectionscroll" src="selectionscroll.png" alt="selectionscroll">
+    <img class="selectionscroll" src="selectionscroll-remaster.png?v=2" alt="selectionscroll">
     <div class="selectionpage">
 
         <div class="searching-backdrop hidden">
             <div class="searchingscroll">
                 <P class="searching">Searching for an opponent</P>
-                <img src="sharingan.png" alt="searchingscroll" class="sharingan">
-                <img src="sasukesearch.png" alt="Matchmaking status" class="sasukesearch">
+                <img src="sharingan-remaster.png?v=2" alt="searchingscroll" class="sharingan">
+                <img src="sasukesearch-remaster.png?v=2" alt="Matchmaking status" class="sasukesearch">
                 <button type="submit" class="cancel-button">Cancel</button>
             </div>
         </div>
@@ -226,7 +233,7 @@
         </div>
 
     <div class="skillviewer collapsed">
-    <img class="skillscroll" src="skillscroll.png" alt="selectionscroll">
+    <img class="skillscroll" src="skillscroll-remaster.png?v=2" alt="selectionscroll">
 
     <div class="skillpage">
 
@@ -267,9 +274,13 @@
 
     </div>
 
-<img class="nextpage" src="nextpage.png" alt="nextpage">
+<button type="button" class="nextpage roster-page-button" aria-label="Next character page">
+    <span aria-hidden="true">›</span>
+</button>
 <ul class="slot-list"></ul>
-<img class="lastpage" src="nextpage.png" alt="lastpage">
+<button type="button" class="lastpage roster-page-button" aria-label="Previous character page">
+    <span aria-hidden="true">‹</span>
+</button>
 
 
 <div class="player-card">
@@ -317,7 +328,7 @@
     </div>
 </div>
 <script src="characters.js?v=3"></script>
-<script src="script.js?v=4"></script>
+<script src="script.js?v=16"></script>
 <script src="shop.js"></script>
 <script>
     (function () {
@@ -388,17 +399,30 @@
         var missionRankButtons = Array.prototype.slice.call(document.querySelectorAll("[data-mission-rank]"));
         var inventoryGrid = document.querySelector(".selection-hub-inventory-grid");
         var inventoryTabButtons = Array.prototype.slice.call(document.querySelectorAll("[data-inventory-tab]"));
+        var pveModeButtons = Array.prototype.slice.call(document.querySelectorAll("[data-pve-mode]"));
         var storyListEl = document.querySelector("[data-story-list]");
         var storyBriefingEl = document.querySelector("[data-story-briefing]");
+        var gauntletPanelEl = document.querySelector("[data-gauntlet-panel]");
         var storyBattleStarting = false;
+        var gauntletBusy = false;
         var loadedShop = false;
         var loadedMissions = false;
         var loadedStory = false;
+        var loadedGauntlet = false;
         var missions = [];
         var missionProgressByMissionId = {};
         var missionRank = "all";
         var storyNodes = [];
         var storyProgressByNodeId = {};
+        var gauntletState = {
+            run: null,
+            actOneEvent: null,
+            reachableNodeIds: [],
+            catalog: null,
+            activeEventNodeId: "",
+            status: "",
+            statusType: ""
+        };
 
         var rankMeta = {
             dc: "D & C Rank Missions",
@@ -430,6 +454,15 @@
         function formatRyo(value) {
             var amount = Math.max(0, Math.round(Number(value) || 0));
             return amount.toLocaleString("en-US");
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? "" : value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
         }
 
         function updateBalanceDisplays(ryo) {
@@ -747,7 +780,7 @@
                 art.className = "selection-hub-mission-art";
                 var img = document.createElement("img");
                 img.loading = "lazy";
-                img.src = mission.image || mission.portrait || "deadcharacter.png";
+                img.src = mission.image || mission.portrait || "deadcharacter-remaster.png?v=2";
                 img.alt = mission.imageAlt || mission.title;
 
                 var overlay = document.createElement("div");
@@ -830,7 +863,7 @@
 
             var art = document.createElement("img");
             art.className = "selection-hub-mission-detail-art";
-            art.src = mission.image || mission.portrait || "deadcharacter.png";
+            art.src = mission.image || mission.portrait || "deadcharacter-remaster.png?v=2";
             art.alt = mission.imageAlt || mission.title;
 
             var infoCol = document.createElement("div");
@@ -984,9 +1017,49 @@
             return roster.find(function (c) { return c && c.characterId === characterId; }) || null;
         }
 
+        function findCharacterByIndex(index) {
+            var roster = Array.isArray(window.characters)
+                ? window.characters
+                : (typeof characters !== "undefined" ? characters : []);
+            return roster[Number(index)] || null;
+        }
+
+        function getCharacterNameByIndex(index) {
+            var character = findCharacterByIndex(index);
+            return (character && (character.name || character.characterName || character.characterId)) || ("Character " + index);
+        }
+
+        function getCharacterFaceByIndex(index) {
+            var character = findCharacterByIndex(index);
+            return (character && (character.facePicture || character.face || character.image || character.avatar)) || "deadcharacter-remaster.png?v=2";
+        }
+
+        function setPveMode(mode) {
+            var nextMode = mode === "gauntlet" ? "gauntlet" : "story";
+            pveModeButtons.forEach(function (button) {
+                button.classList.toggle("active", button.getAttribute("data-pve-mode") === nextMode);
+            });
+            if (storyListEl) storyListEl.hidden = nextMode !== "story";
+            if (storyBriefingEl) {
+                storyBriefingEl.hidden = true;
+                if (nextMode !== "story") storyBriefingEl.innerHTML = "";
+            }
+            if (gauntletPanelEl) gauntletPanelEl.hidden = nextMode !== "gauntlet";
+            if (nextMode === "story") {
+                showStoryList();
+                loadStoryEnvironment(false);
+            } else {
+                loadGauntletEnvironment(false);
+            }
+        }
+
         function showStoryList() {
             if (storyListEl) storyListEl.hidden = false;
             if (storyBriefingEl) { storyBriefingEl.hidden = true; storyBriefingEl.innerHTML = ""; }
+            if (gauntletPanelEl) gauntletPanelEl.hidden = true;
+            pveModeButtons.forEach(function (button) {
+                button.classList.toggle("active", button.getAttribute("data-pve-mode") === "story");
+            });
         }
 
         function getSelectedStoryTeamIndices() {
@@ -1075,7 +1148,7 @@
                 member.className = "selection-hub-story-team-member";
                 var img = document.createElement("img");
                 img.className = "selection-hub-story-team-portrait";
-                img.src = (character && character.facePicture) || "deadcharacter.png";
+                img.src = (character && character.facePicture) || "deadcharacter-remaster.png?v=2";
                 img.alt = (character && character.name) || characterId;
                 var name = document.createElement("div");
                 name.className = "selection-hub-story-team-name";
@@ -1137,7 +1210,7 @@
             thumb.className = "selection-hub-story-thumb";
             var img = document.createElement("img");
             img.loading = "lazy";
-            img.src = node.image || "deadcharacter.png";
+            img.src = node.image || "deadcharacter-remaster.png?v=2";
             img.alt = node.imageAlt;
             thumb.appendChild(img);
 
@@ -1247,6 +1320,449 @@
             });
         }
 
+        function gauntletNodeTypeLabel(type) {
+            var labels = {
+                battle: "Battle",
+                elite_battle: "Elite",
+                event: "Event",
+                rest_camp: "Rest",
+                merchant: "Merchant",
+                scroll_cache: "Scroll"
+            };
+            return labels[type] || String(type || "Node").replace(/_/g, " ");
+        }
+
+        function gauntletNodeName(node) {
+            if (!node) return "Unknown";
+            if (node.type === "battle" || node.type === "elite_battle") {
+                var enemyTeamId = node.enemyTeamId || (node.content && node.content.enemyTeamId) || "";
+                var enemyTeam = findGauntletCatalogEntry("enemyTeams", enemyTeamId);
+                return (enemyTeam && enemyTeam.name) || gauntletDisplayId(enemyTeamId || "Rival Team");
+            }
+            if (node.type === "event") return "Forest Event";
+            if (node.type === "rest_camp") return "Camp";
+            if (node.type === "merchant") return "Trader";
+            if (node.type === "scroll_cache") return "Scroll Cache";
+            return "Exam Node";
+        }
+
+        function gauntletHasBothScrolls(run) {
+            return (Number(run && run.heavenScrolls) || 0) > 0 && (Number(run && run.earthScrolls) || 0) > 0;
+        }
+
+        function findGauntletNode(run, nodeId) {
+            var rows = Array.isArray(run && run.map && run.map.rows) ? run.map.rows : [];
+            for (var i = 0; i < rows.length; i += 1) {
+                var nodes = getGauntletRowNodes(rows[i]);
+                for (var j = 0; j < nodes.length; j += 1) {
+                    if (nodes[j] && nodes[j].id === nodeId) return nodes[j];
+                }
+            }
+            if (nodeId === "act3-preliminary") return { id: "act3-preliminary", type: "elite_battle", enemyTeamId: "Preliminaries" };
+            if (nodeId === "act3-finals") return { id: "act3-finals", type: "elite_battle", enemyTeamId: "Finals" };
+            return null;
+        }
+
+        function getGauntletRowNodes(row) {
+            if (Array.isArray(row)) return row;
+            if (row && Array.isArray(row.nodes)) return row.nodes;
+            return [];
+        }
+
+        function getGauntletRowNumber(row, fallback) {
+            if (Array.isArray(row)) {
+                var first = row.find(function (node) { return node && Number(node.row); });
+                return first ? Number(first.row) : fallback;
+            }
+            return Number(row && row.row) || fallback;
+        }
+
+        function findGauntletEvent(eventId) {
+            var catalog = gauntletState.catalog || {};
+            var events = []
+                .concat(Array.isArray(catalog.actOneEvents) ? catalog.actOneEvents : [])
+                .concat(Array.isArray(catalog.actTwoEvents) ? catalog.actTwoEvents : []);
+            return events.find(function (event) { return event && event.eventId === eventId; }) || null;
+        }
+
+        function findGauntletCatalogEntry(collectionName, entryId) {
+            var catalog = gauntletState.catalog || {};
+            var entries = Array.isArray(catalog[collectionName]) ? catalog[collectionName] : [];
+            return entries.find(function (entry) { return entry && entry.id === entryId; }) || null;
+        }
+
+        function findGauntletModifier(modifierId) {
+            return findGauntletCatalogEntry("relicScrolls", modifierId) ||
+                findGauntletCatalogEntry("curses", modifierId) ||
+                null;
+        }
+
+        function gauntletDisplayId(id) {
+            return String(id || "Unknown").replace(/-/g, " ").replace(/\b\w/g, function (letter) {
+                return letter.toUpperCase();
+            });
+        }
+
+        function gauntletNodeHelp(node, run) {
+            if (!node) return "Unknown exam space.";
+            if (node.type === "battle") return "Fight a normal enemy team. Rewards Ryo and has a small chance to drop an exam scroll.";
+            if (node.type === "elite_battle" && Number(node.row) === 7 && !gauntletHasBothScrolls(run)) return "Exit battle locked: you need at least 1 Heaven and 1 Earth Scroll to enter.";
+            if (node.type === "elite_battle") return "Harder battle with better Ryo and a high chance to drop an exam scroll.";
+            if (node.type === "event") return "Choose one outcome. Events can grant Ryo, healing, relics, fragments, scrolls, or risky curse offers.";
+            if (node.type === "rest_camp") return "Recover before the next stretch. Rest camps are guaranteed somewhere on each generated path.";
+            if (node.type === "merchant") return "Spend Ryo on healing, relics, or missing Heaven/Earth scrolls.";
+            if (node.type === "scroll_cache") return "Guaranteed exam scroll. Taking it can lock sibling choices from the same branch.";
+            return "Advance through the exam route.";
+        }
+
+        function renderGauntletGuide(run) {
+            var act = Number(run && run.currentAct) || 0;
+            var title = !run ? "How This Run Works" : act === 1 ? "Act 1 - Written Test" : act === 2 ? "Act 2 - Forest of Death" : "Act 3 - Preliminaries and Finals";
+            var copy = !run
+                ? "Choose three characters, pick your first exam scroll, then build enough resources to survive a branching PvE run."
+                : act === 1
+                    ? "This is not a fight. Pick one exam-room approach to gain your first advantage before the Forest of Death opens."
+                    : act === 2
+                        ? "Your goal is to reach the exit battles on Row 7 with at least one Heaven Scroll and one Earth Scroll."
+                        : "The scroll gate is passed. Win the preliminary battle, then the finals, to complete the exam.";
+            return '<div class="selection-hub-gauntlet-card selection-hub-gauntlet-guide">' +
+                '<p class="selection-hub-gauntlet-title">' + title + '</p>' +
+                '<p class="selection-hub-gauntlet-copy">' + copy + '</p>' +
+                '<div class="selection-hub-gauntlet-steps">' +
+                    '<span class="' + (act === 1 ? "active" : run ? "done" : "") + '">1 Written Test: pick a starting reward</span>' +
+                    '<span class="' + (act === 2 ? "active" : act > 2 ? "done" : "") + '">2 Forest: route through battles, events, shops, and rest</span>' +
+                    '<span class="' + (act === 3 ? "active" : "") + '">3 Finals: clear two elite fights</span>' +
+                '</div></div>';
+        }
+
+        function renderGauntletHero(run) {
+            var act = Number(run && run.currentAct) || 0;
+            var eyebrow = run ? "Active Run" : "PvE Roguelike";
+            var title = run
+                ? (act === 1 ? "Written Test" : act === 2 ? "Forest of Death" : "Final Exam")
+                : "Chunin Exams";
+            var copy = run
+                ? (act === 1
+                    ? "Make three setup decisions. Each choice changes your resources before the route begins."
+                    : act === 2
+                        ? "Pick a route, preserve your team, and bring one Heaven plus one Earth Scroll to the Row 7 gate."
+                        : "The gate is open. Clear the preliminary match and the final battle to finish the run.")
+                : "A compact PvE run using your selected team: decisions, route choices, battles, shops, and run-long relics.";
+            var action = run
+                ? ""
+                : '<button type="button" class="selection-hub-story-begin" data-gauntlet-start>Start Run</button>';
+            var scrollPicker = run ? "" : '<select class="selection-hub-gauntlet-select" data-gauntlet-start-scroll><option value="heaven">Heaven Scroll Start</option><option value="earth">Earth Scroll Start</option></select>';
+            return '<section class="selection-hub-gauntlet-hero"><div><p class="selection-hub-gauntlet-eyebrow">' + eyebrow + '</p><h2>' + title + '</h2><p>' + copy + '</p></div><div class="selection-hub-gauntlet-hero-actions">' + scrollPicker + action + '</div></section>';
+        }
+
+        function renderGauntletTeam(run) {
+            var team = Array.isArray(run && run.team) ? run.team : getSelectedStoryTeamIndices();
+            var hp = Array.isArray(run && run.teamHp) ? run.teamHp : [];
+            if (!team.length) return '<p class="selection-hub-gauntlet-copy">Select three characters on the Start Playing screen first.</p>';
+            return '<section class="selection-hub-gauntlet-section"><div class="selection-hub-gauntlet-section-head"><h3>Team</h3></div><div class="selection-hub-gauntlet-team">' + team.map(function (index, slot) {
+                return '<div class="selection-hub-gauntlet-member">' +
+                    '<img src="' + escapeHtml(getCharacterFaceByIndex(index)) + '" alt="">' +
+                    '<div><strong>' + escapeHtml(getCharacterNameByIndex(index)) + '</strong>' +
+                    '<p class="selection-hub-gauntlet-meta">HP ' + (hp[slot] == null ? 100 : hp[slot]) + '/100</p></div>' +
+                '</div>';
+            }).join("") + '</div></section>';
+        }
+
+        function renderGauntletResources(run) {
+            var items = [
+                ["Ryo", Number(run && run.ryo) || 0, "Spend at merchants."],
+                ["Heaven", Number(run && run.heavenScrolls) || 0, "One half of the Row 7 exit requirement."],
+                ["Earth", Number(run && run.earthScrolls) || 0, "One half of the Row 7 exit requirement."],
+                ["Fragments", Number(run && run.scrollFragments) || 0, "Forge 3 into a Heaven or Earth Scroll."]
+            ];
+            return '<section class="selection-hub-gauntlet-section selection-hub-gauntlet-resources-section"><div class="selection-hub-gauntlet-section-head"><h3>Resources</h3><p>Keep both scroll types before the gate.</p></div><div class="selection-hub-gauntlet-resources">' + items.map(function (entry) {
+                return '<div class="selection-hub-gauntlet-resource"><span>' + entry[0] + '</span><strong>' + entry[1] + '</strong><em>' + entry[2] + '</em></div>';
+            }).join("") + '</div>' + renderGauntletForge(run) + '</section>';
+        }
+
+        function renderGauntletRelics(run) {
+            var relicIds = Array.from(new Set(Array.isArray(run && run.relics) ? run.relics : []));
+            if (!relicIds.length) {
+                return '<section class="selection-hub-gauntlet-section selection-hub-gauntlet-relics-section"><div class="selection-hub-gauntlet-section-head"><h3>Relics</h3><p>Run-long effects</p></div><p class="selection-hub-gauntlet-copy">No relic or curse effects are active yet.</p></section>';
+            }
+            return '<section class="selection-hub-gauntlet-section selection-hub-gauntlet-relics-section"><div class="selection-hub-gauntlet-section-head"><h3>Relics</h3><p>Hover for details</p></div><div class="selection-hub-gauntlet-relic-list">' +
+                relicIds.map(function (id) {
+                    var modifier = findGauntletModifier(id);
+                    var name = (modifier && modifier.name) || gauntletDisplayId(id);
+                    var description = (modifier && modifier.description) || "No effect description available.";
+                    var isCurse = Boolean(modifier && modifier.isCurse);
+                    return '<span class="selection-hub-gauntlet-relic' + (isCurse ? " curse" : "") + '" tabindex="0" title="' + escapeHtml(description) + '" data-tooltip="' + escapeHtml(description) + '"><strong>' + escapeHtml(name) + '</strong></span>';
+                }).join("") +
+            '</div></section>';
+        }
+
+        function renderGauntletForge(run) {
+            var fragments = Number(run && run.scrollFragments) || 0;
+            if (!run || fragments < 3) return "";
+            return '<div class="selection-hub-gauntlet-callout"><p>You have enough fragments to forge an exam scroll. Use this to fix a missing Heaven/Earth requirement before Row 7.</p><div class="selection-hub-gauntlet-actions">' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-forge="heaven">Forge Heaven Scroll</button>' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-forge="earth">Forge Earth Scroll</button>' +
+            '</div></div>';
+        }
+
+        function renderGauntletLastResult(run) {
+            var result = run && run.lastNodeResult;
+            var reward = result && result.reward;
+            if (!reward) return "";
+            var bits = [];
+            if (reward.ryo) bits.push((reward.ryo > 0 ? "+" : "") + reward.ryo + " Ryo");
+            if (reward.heavenScrolls) bits.push("+" + reward.heavenScrolls + " Heaven");
+            if (reward.earthScrolls) bits.push("+" + reward.earthScrolls + " Earth");
+            if (reward.scrollFragments) bits.push((reward.scrollFragments > 0 ? "+" : "") + reward.scrollFragments + " Fragments");
+            if (Array.isArray(reward.relics) && reward.relics.length) {
+                bits.push("Relic: " + reward.relics.map(function (id) {
+                    var modifier = findGauntletModifier(id);
+                    return (modifier && modifier.name) || gauntletDisplayId(id);
+                }).join(", "));
+            }
+            if (!bits.length) return "";
+            return '<div class="selection-hub-gauntlet-last"><span>Last Result</span><strong>' + escapeHtml(bits.join(" / ")) + '</strong></div>';
+        }
+
+        function renderGauntletOffers(run) {
+            var offers = Array.isArray(run && run.pendingOffers) ? run.pendingOffers : [];
+            if (!offers.length) return "";
+            return '<section class="selection-hub-gauntlet-section"><div class="selection-hub-gauntlet-section-head"><h3>Pending Offers</h3><p>Curses are optional run-long tradeoffs.</p></div><div class="selection-hub-gauntlet-offers">' +
+                offers.map(function (offer) {
+                    return '<button type="button" class="selection-hub-story-begin hard" data-gauntlet-offer-type="' + escapeHtml(offer.type || "") + '" data-gauntlet-offer-id="' + escapeHtml(offer.id || "") + '">Accept ' + escapeHtml(String(offer.id || "Offer").replace(/-/g, " ")) + '</button>';
+                }).join("") + '</div></section>';
+        }
+
+        function renderGauntletMerchant(run) {
+            var mapRows = Array.isArray(run && run.map && run.map.rows) ? run.map.rows : [];
+            var current = null;
+            mapRows.forEach(function (row) {
+                getGauntletRowNodes(row).forEach(function (node) {
+                    if (node && node.id === run.currentNodeId) current = node;
+                });
+            });
+            if (!current || current.type !== "merchant") return "";
+            return '<section class="selection-hub-gauntlet-section"><div class="selection-hub-gauntlet-section-head"><h3>Forest Trader</h3><p>Spend Ryo before choosing the next node.</p></div><div class="selection-hub-gauntlet-actions">' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-buy="heaven_scroll">Heaven - 100</button>' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-buy="earth_scroll">Earth - 100</button>' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-buy="heal">Heal - 55</button>' +
+                '<button type="button" class="selection-hub-story-begin" data-gauntlet-buy="random_relic">Relic - 120</button>' +
+            '</div></section>';
+        }
+
+        function renderGauntletMap(run) {
+            var rows = Array.isArray(run && run.map && run.map.rows) ? run.map.rows : [];
+            var reachable = getGauntletReachableNodeIds(run);
+            var visited = Array.isArray(run && run.visitedNodeIds) ? run.visitedNodeIds : [];
+            if (Number(run && run.currentAct) === 3) {
+                rows = [
+                    { row: 8, nodes: [{ id: "act3-preliminary", type: "elite_battle", enemyTeamId: "Preliminaries" }] },
+                    { row: 9, nodes: [{ id: "act3-finals", type: "elite_battle", enemyTeamId: "Finals" }] }
+                ];
+            }
+            return '<section class="selection-hub-gauntlet-section selection-hub-gauntlet-route"><div class="selection-hub-gauntlet-section-head"><h3>Route</h3><p>Choose highlighted nodes. The Row 7 gate needs both scrolls.</p></div><div class="selection-hub-gauntlet-map">' + rows.map(function (row, idx) {
+                var nodes = getGauntletRowNodes(row);
+                var rowNumber = getGauntletRowNumber(row, idx + 1);
+                return '<div class="selection-hub-gauntlet-row"><div class="selection-hub-gauntlet-row-label">Row ' + rowNumber + '</div><div class="selection-hub-gauntlet-nodes">' +
+                    nodes.map(function (node) {
+                        var isReachable = reachable.indexOf(node.id) !== -1;
+                        var blockedByScrollGate = Number(node.row || rowNumber) === 7 && !gauntletHasBothScrolls(run);
+                        var canUseNode = isReachable && !blockedByScrollGate;
+                        var classes = "selection-hub-gauntlet-node type-" + String(node.type || "node").replace(/_/g, "-") + (canUseNode ? " reachable" : "") + (visited.indexOf(node.id) !== -1 ? " visited" : "") + (!canUseNode && visited.indexOf(node.id) === -1 ? " locked" : "");
+                        var nodeState = visited.indexOf(node.id) !== -1
+                            ? "Cleared"
+                            : blockedByScrollGate
+                                ? "Needs both scrolls"
+                                : canUseNode ? "Available" : "Locked";
+                        return '<button type="button" class="' + classes + '" data-gauntlet-node="' + escapeHtml(node.id) + '" title="' + escapeHtml(gauntletNodeHelp(node, run)) + '"' + (canUseNode ? "" : " disabled") + '><span>' + escapeHtml(gauntletNodeTypeLabel(node.type)) + '</span><strong>' + escapeHtml(gauntletNodeName(node)) + '</strong><em>' + escapeHtml(nodeState) + '</em></button>';
+                    }).join("") + '</div></div>';
+            }).join("") + '</div></section>';
+        }
+
+        function renderGauntletNextSteps(run) {
+            var usableNodes = getGauntletUsableNodes(run);
+            if (!usableNodes.length) {
+                return '<section class="selection-hub-gauntlet-next"><div><span>Next Step</span><strong>Gate blocked</strong><p>No reachable node is available. If you are at Row 7, gather or forge both a Heaven Scroll and an Earth Scroll.</p></div></section>';
+            }
+            return '<section class="selection-hub-gauntlet-next"><div><span>Next Step</span><strong>Advance the run</strong><p>Pick one available node. Battles open the fight client immediately.</p></div><div class="selection-hub-gauntlet-actions">' +
+                usableNodes.map(function (node) {
+                    var label = node.type === "battle" || node.type === "elite_battle"
+                        ? "Start " + gauntletNodeTypeLabel(node.type)
+                        : "Enter " + gauntletNodeTypeLabel(node.type);
+                    return '<button type="button" class="selection-hub-story-begin" data-gauntlet-node="' + escapeHtml(node.id) + '">' + escapeHtml(label) + '</button>';
+                }).join("") +
+            '</div></section>';
+        }
+
+        function getGauntletUsableNodes(run) {
+            var reachable = getGauntletReachableNodeIds(run);
+            return reachable
+                .map(function (nodeId) { return findGauntletNode(run, nodeId); })
+                .filter(function (node) { return node && !(Number(node.row) === 7 && !gauntletHasBothScrolls(run)); });
+        }
+
+        function renderGauntletCommandBar(run) {
+            if (!run) return "";
+            var act = Number(run.currentAct) || 1;
+            var usableNodes = getGauntletUsableNodes(run);
+            var summary = act === 1
+                ? "Finish the Written Test choices to open the Forest route."
+                : !usableNodes.length
+                    ? "The gate is blocked. Forge or find the missing Heaven/Earth Scroll."
+                    : usableNodes.length === 1
+                        ? gauntletNodeTypeLabel(usableNodes[0].type) + ": " + gauntletNodeName(usableNodes[0])
+                        : usableNodes.length + " route choices are available.";
+            var primary = "";
+            if (act !== 1 && usableNodes.length === 1) {
+                var onlyNode = usableNodes[0];
+                var label = onlyNode.type === "battle" || onlyNode.type === "elite_battle" ? "Start Battle" : "Enter Node";
+                primary = '<button type="button" class="selection-hub-story-begin" data-gauntlet-node="' + escapeHtml(onlyNode.id) + '">' + label + '</button>';
+            } else if (act !== 1 && usableNodes.length > 1) {
+                primary = '<span class="selection-hub-gauntlet-command-hint">Pick a highlighted route node below</span>';
+            }
+            return '<section class="selection-hub-gauntlet-command"><div><span>Next</span><strong>' + escapeHtml(summary) + '</strong></div><div class="selection-hub-gauntlet-command-actions">' + primary + '<button type="button" class="selection-hub-story-begin hard compact" data-gauntlet-abandon>Abandon</button></div></section>';
+        }
+
+        function getGauntletReachableNodeIds(run) {
+            var fromServer = Array.isArray(gauntletState.reachableNodeIds) ? gauntletState.reachableNodeIds.filter(Boolean) : [];
+            if (fromServer.length) return fromServer;
+            if (!run || Number(run.currentAct) === 1) return [];
+            if (Number(run.currentAct) === 3) {
+                var act3Visited = Array.isArray(run.visitedNodeIds) ? run.visitedNodeIds : [];
+                if (act3Visited.indexOf("act3-preliminary") === -1) return ["act3-preliminary"];
+                if (act3Visited.indexOf("act3-finals") === -1) return ["act3-finals"];
+                return [];
+            }
+            var rows = Array.isArray(run.map && run.map.rows) ? run.map.rows : [];
+            var visited = Array.isArray(run.visitedNodeIds) ? run.visitedNodeIds : [];
+            var locked = Array.isArray(run.lockedNodeIds) ? run.lockedNodeIds : [];
+            if (!run.currentNodeId) {
+                var firstRow = rows.find(function (row) { return getGauntletRowNumber(row, 0) === 1; });
+                return getGauntletRowNodes(firstRow).map(function (node) { return node.id; }).filter(function (id) {
+                    return visited.indexOf(id) === -1 && locked.indexOf(id) === -1;
+                });
+            }
+            var current = findGauntletNode(run, run.currentNodeId);
+            return (Array.isArray(current && current.connectsTo) ? current.connectsTo : []).filter(function (id) {
+                return visited.indexOf(id) === -1 && locked.indexOf(id) === -1;
+            });
+        }
+
+        function renderGauntletEventDecision(run) {
+            var node = findGauntletNode(run, gauntletState.activeEventNodeId);
+            var event = node && findGauntletEvent(node.content && node.content.eventId);
+            if (!node || !event) return "";
+            return '<section class="selection-hub-gauntlet-section selection-hub-gauntlet-event-card"><div class="selection-hub-gauntlet-section-head"><h3>' + escapeHtml(event.title) + '</h3><p>Choose one result. The run advances after this decision.</p></div>' +
+                (Array.isArray(event.choices) ? event.choices : []).map(function (choice, index) {
+                    return '<div class="selection-hub-gauntlet-choice"><strong>' + escapeHtml(choice.label) + '</strong><p>' + escapeHtml(choice.outcomeSummary || "") + '</p><button type="button" class="selection-hub-story-begin" data-gauntlet-event-choice="' + index + '">Choose</button></div>';
+                }).join("") +
+                '<button type="button" class="selection-hub-story-begin hard" data-gauntlet-event-cancel>Back to Map</button></section>';
+        }
+
+        function renderGauntletPanel() {
+            if (!gauntletPanelEl) return;
+            var run = gauntletState.run;
+            var status = gauntletState.status
+                ? '<p class="selection-hub-gauntlet-status ' + escapeHtml(gauntletState.statusType) + '">' + escapeHtml(gauntletState.status) + '</p>'
+                : "";
+            if (!run) {
+                gauntletPanelEl.innerHTML = renderGauntletHero(null) +
+                    '<div class="selection-hub-gauntlet-dashboard">' +
+                        '<div class="selection-hub-gauntlet-main">' + renderGauntletGuide(null) + '</div>' +
+                        '<aside class="selection-hub-gauntlet-side">' + renderGauntletTeam(null) + '</aside>' +
+                    '</div>' +
+                    status;
+                return;
+            }
+            if (Number(run.currentAct) === 1 && gauntletState.actOneEvent) {
+                var event = gauntletState.actOneEvent;
+                var writtenTest = '<section class="selection-hub-gauntlet-section"><div class="selection-hub-gauntlet-section-head"><h3>' + escapeHtml(event.title) + '</h3><p>Choose the setup reward you want before entering the Forest.</p></div><div class="selection-hub-gauntlet-choice-list">' + (Array.isArray(event.choices) ? event.choices : []).map(function (choice, index) {
+                    return '<div class="selection-hub-gauntlet-choice"><strong>' + escapeHtml(choice.label) + '</strong><p>' + escapeHtml(choice.outcomeSummary || "") + '</p><button type="button" class="selection-hub-story-begin" data-gauntlet-act1="' + index + '">Choose</button></div>';
+                }).join("") + '</div></section>';
+                gauntletPanelEl.innerHTML = renderGauntletHero(run) +
+                    renderGauntletCommandBar(run) +
+                    '<div class="selection-hub-gauntlet-dashboard">' +
+                        '<div class="selection-hub-gauntlet-main">' + renderGauntletGuide(run) + writtenTest + status + '</div>' +
+                        '<aside class="selection-hub-gauntlet-side">' + renderGauntletResources(run) + renderGauntletRelics(run) + renderGauntletTeam(run) + renderGauntletLastResult(run) + '</aside>' +
+                    '</div>';
+                return;
+            }
+            gauntletPanelEl.innerHTML = renderGauntletHero(run) +
+                renderGauntletCommandBar(run) +
+                '<div class="selection-hub-gauntlet-dashboard">' +
+                    '<div class="selection-hub-gauntlet-main">' +
+                        renderGauntletEventDecision(run) +
+                        renderGauntletMerchant(run) +
+                        renderGauntletOffers(run) +
+                        renderGauntletMap(run) +
+                        status +
+                    '</div>' +
+                    '<aside class="selection-hub-gauntlet-side">' +
+                        renderGauntletGuide(run) +
+                        renderGauntletResources(run) +
+                        renderGauntletRelics(run) +
+                        renderGauntletLastResult(run) +
+                        renderGauntletTeam(run) +
+                    '</aside>' +
+                '</div>';
+        }
+
+        function loadGauntletEnvironment(force) {
+            if (!gauntletPanelEl || (loadedGauntlet && !force)) return;
+            loadedGauntlet = true;
+            gauntletPanelEl.innerHTML = '<div class="selection-hub-env-empty">Loading Chunin Exams...</div>';
+            Promise.all([
+                fetchJson("/api/gauntlet/run"),
+                gauntletState.catalog ? Promise.resolve(gauntletState.catalog) : fetchJson("/api/gauntlet/catalog")
+            ]).then(function (results) {
+                var data = results[0] || {};
+                gauntletState.catalog = results[1] || gauntletState.catalog;
+                gauntletState.run = data.run || null;
+                gauntletState.actOneEvent = data.actOneEvent || null;
+                gauntletState.reachableNodeIds = Array.isArray(data.reachableNodeIds) ? data.reachableNodeIds : [];
+                gauntletState.activeEventNodeId = "";
+                gauntletState.status = "";
+                gauntletState.statusType = "";
+                renderGauntletPanel();
+            }).catch(function (error) {
+                loadedGauntlet = false;
+                gauntletState.status = (error && error.message) || "Log in to use Chunin Exams.";
+                gauntletState.statusType = "error";
+                renderGauntletPanel();
+            });
+        }
+
+        function updateGauntletFromResponse(data, message) {
+            gauntletState.run = data.run || null;
+            gauntletState.actOneEvent = data.actOneEvent || null;
+            gauntletState.reachableNodeIds = Array.isArray(data.reachableNodeIds) ? data.reachableNodeIds : [];
+            gauntletState.activeEventNodeId = "";
+            gauntletState.status = message || "";
+            gauntletState.statusType = message ? "success" : "";
+            loadedGauntlet = true;
+            renderGauntletPanel();
+        }
+
+        function runGauntletRequest(button, request, resetText) {
+            if (gauntletBusy) return;
+            gauntletBusy = true;
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Working...";
+            }
+            request().catch(function (error) {
+                gauntletState.status = (error && error.message) || "Gauntlet action failed.";
+                gauntletState.statusType = "error";
+                renderGauntletPanel();
+            }).finally(function () {
+                gauntletBusy = false;
+                if (button && document.body.contains(button)) {
+                    button.disabled = false;
+                    button.textContent = resetText || button.textContent;
+                }
+            });
+        }
+
         function setHubView(view) {
             var nextView = view || "play";
             var isEnvironment = nextView !== "play";
@@ -1325,6 +1841,13 @@
             });
         });
 
+        pveModeButtons.forEach(function (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                setPveMode(button.getAttribute("data-pve-mode") || "story");
+            });
+        });
+
         if (missionSearch) {
             missionSearch.addEventListener("input", renderMissions);
         }
@@ -1337,6 +1860,142 @@
                 var node = storyNodes.find(function (n) { return n.nodeId === nodeId; });
                 if (!node) return;
                 showStoryBriefing(node);
+            });
+        }
+
+        if (gauntletPanelEl) {
+            gauntletPanelEl.addEventListener("click", function (event) {
+                var start = event.target.closest("[data-gauntlet-start]");
+                if (start) {
+                    runGauntletRequest(start, function () {
+                        var team = getSelectedStoryTeamIndices();
+                        var scrollSelect = gauntletPanelEl.querySelector("[data-gauntlet-start-scroll]");
+                        return fetchJson("/api/gauntlet/run/start", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                team: team.length === 3 ? team : undefined,
+                                startingScrollType: scrollSelect ? scrollSelect.value : "heaven"
+                            })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Gauntlet started.");
+                        });
+                    }, "Start Gauntlet");
+                    return;
+                }
+                var actOne = event.target.closest("[data-gauntlet-act1]");
+                if (actOne) {
+                    runGauntletRequest(actOne, function () {
+                        return fetchJson("/api/gauntlet/run/act1/choose", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ choiceIndex: Number(actOne.getAttribute("data-gauntlet-act1")) || 0 })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Written Test cleared.");
+                        });
+                    }, actOne.textContent);
+                    return;
+                }
+                var nodeButton = event.target.closest("[data-gauntlet-node]");
+                if (nodeButton) {
+                    var clickedNode = findGauntletNode(gauntletState.run, nodeButton.getAttribute("data-gauntlet-node"));
+                    if (clickedNode && clickedNode.type === "event") {
+                        gauntletState.activeEventNodeId = clickedNode.id;
+                        gauntletState.status = "";
+                        gauntletState.statusType = "";
+                        renderGauntletPanel();
+                        return;
+                    }
+                    runGauntletRequest(nodeButton, function () {
+                        return fetchJson("/api/gauntlet/run/node/enter", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ nodeId: nodeButton.getAttribute("data-gauntlet-node") })
+                        }).then(function (data) {
+                            if (data.battleStarted && data.match && data.match.matchId) {
+                                window.location.href = "ingame.html?matchId=" + encodeURIComponent(data.match.matchId);
+                                return;
+                            }
+                            updateGauntletFromResponse(data, "Node cleared.");
+                        });
+                    }, "Enter");
+                    return;
+                }
+                var eventChoice = event.target.closest("[data-gauntlet-event-choice]");
+                if (eventChoice) {
+                    runGauntletRequest(eventChoice, function () {
+                        return fetchJson("/api/gauntlet/run/node/enter", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                nodeId: gauntletState.activeEventNodeId,
+                                choiceIndex: Number(eventChoice.getAttribute("data-gauntlet-event-choice")) || 0
+                            })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Event resolved.");
+                        });
+                    }, "Choose");
+                    return;
+                }
+                if (event.target.closest("[data-gauntlet-event-cancel]")) {
+                    gauntletState.activeEventNodeId = "";
+                    renderGauntletPanel();
+                    return;
+                }
+                var buy = event.target.closest("[data-gauntlet-buy]");
+                if (buy) {
+                    runGauntletRequest(buy, function () {
+                        return fetchJson("/api/gauntlet/run/merchant/buy", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ itemType: buy.getAttribute("data-gauntlet-buy") })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Purchase complete.");
+                        });
+                    }, buy.textContent);
+                    return;
+                }
+                var forge = event.target.closest("[data-gauntlet-forge]");
+                if (forge) {
+                    runGauntletRequest(forge, function () {
+                        return fetchJson("/api/gauntlet/run/fragments/forge", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ scrollType: forge.getAttribute("data-gauntlet-forge") })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Scroll forged.");
+                        });
+                    }, forge.textContent);
+                    return;
+                }
+                var offer = event.target.closest("[data-gauntlet-offer-id]");
+                if (offer) {
+                    runGauntletRequest(offer, function () {
+                        return fetchJson("/api/gauntlet/run/offer/accept", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                offerType: offer.getAttribute("data-gauntlet-offer-type"),
+                                offerId: offer.getAttribute("data-gauntlet-offer-id")
+                            })
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Offer accepted.");
+                        });
+                    }, offer.textContent);
+                    return;
+                }
+                var abandon = event.target.closest("[data-gauntlet-abandon]");
+                if (abandon) {
+                    runGauntletRequest(abandon, function () {
+                        return fetchJson("/api/gauntlet/run/abandon", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: "{}"
+                        }).then(function (data) {
+                            updateGauntletFromResponse(data, "Run abandoned.");
+                        });
+                    }, "Abandon");
+                }
             });
         }
 

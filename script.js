@@ -93,6 +93,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         `${window.location.protocol}//${window.location.hostname}${
             window.location.port ? `:${window.location.port}` : ''
         }`;
+    const REMASTER_ASSETS = {
+        characterFallback: 'deadcharacter-remaster.png?v=2',
+        skillFallback: 'skillqqueue-remaster.png?v=2',
+        sharingan: 'sharingan-remaster.png?v=2',
+        found: 'found-remaster.png',
+        win: 'win-remaster.png?v=2',
+        lose: 'lose-remaster.png?v=2',
+        surrender: 'surrenderimage-remaster.png?v=2',
+        render: 'render-remaster.png?v=2',
+    };
+    const attachImageFallback = (img, fallbackSrc) => {
+        if (!(img instanceof HTMLImageElement) || !fallbackSrc || img.dataset.fallbackBound === 'true') {
+            return;
+        }
+        img.dataset.fallbackBound = 'true';
+        img.dataset.fallbackSrc = fallbackSrc;
+        img.addEventListener('error', () => {
+            if (img.dataset.fallbackApplied === 'true') return;
+            img.dataset.fallbackApplied = 'true';
+            img.src = img.dataset.fallbackSrc || fallbackSrc;
+        });
+    };
+    const setImageSrcWithFallback = (img, src, fallbackSrc) => {
+        if (!(img instanceof HTMLImageElement)) return;
+        attachImageFallback(img, fallbackSrc);
+        delete img.dataset.fallbackApplied;
+        img.src = src || fallbackSrc || '';
+    };
+    const attachGameImageFallbacks = () => {
+        document
+            .querySelectorAll(
+                '.slot-image, .selected-slot-image, .character-portrait, .player-avatar, .battle-end-portrait'
+            )
+            .forEach((img) => attachImageFallback(img, REMASTER_ASSETS.characterFallback));
+        document
+            .querySelectorAll('.skill-image, .skill-detail-image, .skillimage, .skillqueue')
+            .forEach((img) => attachImageFallback(img, REMASTER_ASSETS.skillFallback));
+        document
+            .querySelectorAll('.sharingan')
+            .forEach((img) => attachImageFallback(img, REMASTER_ASSETS.sharingan));
+        document
+            .querySelectorAll('.surrender-confirm-preview-image')
+            .forEach((img) => attachImageFallback(img, REMASTER_ASSETS.surrender));
+        document
+            .querySelectorAll('.render')
+            .forEach((img) => attachImageFallback(img, REMASTER_ASSETS.render));
+    };
     const getStaticCharacterRoster = () => {
         if (typeof characters !== 'undefined' && Array.isArray(characters)) {
             return characters;
@@ -122,6 +169,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     const pageCharacterRoster = shouldUseCustomCursor ? await loadCharacterRoster() : getStaticCharacterRoster();
+    if (shouldUseCustomCursor) {
+        attachGameImageFallbacks();
+    }
     const loginForm = document.querySelector('.login-form');
     const loginButton = document.querySelector('.ok-button');
     const usernameInput = document.getElementById('username');
@@ -616,6 +666,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const storyDialogueTextEl = document.getElementById('story-dialogue-text');
         const storyDialogueProgressEl = document.getElementById('story-dialogue-progress');
         const storyDialogueNextButton = document.getElementById('story-dialogue-next');
+        const gauntletIndicatorEl = document.getElementById('gauntlet-battle-indicator');
+        const gauntletChipEl = document.getElementById('gauntlet-battle-chip');
+        const gauntletSummaryEl = document.getElementById('gauntlet-battle-summary');
+        const gauntletPopoverEl = document.getElementById('gauntlet-battle-popover');
         const classChoicePopupEl = document.querySelector('.class-choice-popup');
         const classChoicePopupOptionsEl = classChoicePopupEl?.querySelector('.class-choice-popup-options');
         const classChoicePopupCancelButton = classChoicePopupEl?.querySelector('.class-choice-popup-cancel');
@@ -667,6 +721,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dynamicSkillSignatureByKey = new Map();
         let queuedTargetSignatureByCard = new WeakMap();
         let lastMatchStateSignature = '';
+        let latestGauntletIndicatorMatch = null;
+        let gauntletRunIndicatorFallback = null;
+        let gauntletRunIndicatorFallbackKey = '';
+        let gauntletRunIndicatorFetchInFlight = false;
         const cancelGlobalStatusTooltipHide = () => {
             if (globalStatusTooltipHideTimer) {
                 clearTimeout(globalStatusTooltipHideTimer);
@@ -2031,7 +2089,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<div class="battle-end-unlocks">Unlocked: ${escapeHtml(unlockNames.join(', '))}</div>`
                 : `<div class="battle-end-unlocks">No new character unlocks.</div>`;
             if (battleEndPortraitEl) {
-                battleEndPortraitEl.src = didWin ? 'win-remaster.png' : 'lose-remaster.png';
+                setImageSrcWithFallback(
+                    battleEndPortraitEl,
+                    didWin ? REMASTER_ASSETS.win : REMASTER_ASSETS.lose,
+                    REMASTER_ASSETS.characterFallback
+                );
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
@@ -2173,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (dead) {
                     card.dataset.wasDead = 'true';
                     if (face.dataset.deadApplied === 'true') {
-                        face.src = 'deadcharacter.png';
+                        setImageSrcWithFallback(face, REMASTER_ASSETS.characterFallback, REMASTER_ASSETS.characterFallback);
                         return;
                     }
                     if (face.dataset.deadTransitioning === 'true') {
@@ -2183,7 +2245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     face.classList.add('death-fade');
                     window.setTimeout(() => {
                         if (card.dataset.wasDead === 'true') {
-                            face.src = 'deadcharacter.png';
+                            setImageSrcWithFallback(face, REMASTER_ASSETS.characterFallback, REMASTER_ASSETS.characterFallback);
                             face.dataset.deadApplied = 'true';
                         }
                         delete face.dataset.deadTransitioning;
@@ -2204,7 +2266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             status.metadata.facePictureOverride.trim()
                     )
                     ?.metadata?.facePictureOverride;
-                face.src = faceOverride || face.dataset.aliveSrc;
+                setImageSrcWithFallback(face, faceOverride || face.dataset.aliveSrc, REMASTER_ASSETS.characterFallback);
             }
         };
 
@@ -2301,6 +2363,122 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
+
+        const formatGauntletNodeType = (nodeType = '') => {
+            const labels = {
+                battle: 'Battle',
+                elite_battle: 'Elite Battle',
+                event: 'Event',
+                rest_camp: 'Rest',
+                merchant: 'Merchant',
+                scroll_cache: 'Scroll Cache',
+            };
+            return labels[nodeType] || String(nodeType || 'Node').replaceAll('_', ' ');
+        };
+
+        const fetchGauntletIndicatorFallback = async (expectedKey = '') => {
+            if (gauntletRunIndicatorFetchInFlight) return;
+            gauntletRunIndicatorFetchInFlight = true;
+            try {
+                const [runResponse, catalogResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/gauntlet/run`, { credentials: 'include' }),
+                    fetch(`${API_BASE_URL}/api/gauntlet/catalog`, { credentials: 'include' }),
+                ]);
+                if (!runResponse.ok || !catalogResponse.ok) return;
+                const runData = await runResponse.json();
+                const catalogData = await catalogResponse.json();
+                const run = runData?.run && typeof runData.run === 'object' ? runData.run : null;
+                const relicIds = Array.from(new Set(Array.isArray(run?.relics) ? run.relics : []));
+                const catalogEntries = [
+                    ...(Array.isArray(catalogData?.relicScrolls) ? catalogData.relicScrolls : []),
+                    ...(Array.isArray(catalogData?.curses) ? catalogData.curses : []),
+                ];
+                const modifiers = relicIds
+                    .map((id) => {
+                        const entry = catalogEntries.find((candidate) => candidate?.id === id);
+                        if (!entry) return null;
+                        return {
+                            id: entry.id,
+                            name: entry.name || entry.id,
+                            description: entry.description || '',
+                            isCurse: Boolean(entry.isCurse),
+                        };
+                    })
+                    .filter(Boolean);
+                if (expectedKey && expectedKey !== gauntletRunIndicatorFallbackKey) return;
+                gauntletRunIndicatorFallback = {
+                    modifiers,
+                    resources: run
+                        ? {
+                              heavenScrolls: Number(run.heavenScrolls) || 0,
+                              earthScrolls: Number(run.earthScrolls) || 0,
+                              scrollFragments: Number(run.scrollFragments) || 0,
+                              ryo: Number(run.ryo) || 0,
+                          }
+                        : null,
+                };
+                if (latestGauntletIndicatorMatch) {
+                    renderGauntletBattleIndicator(latestGauntletIndicatorMatch);
+                }
+            } catch (error) {
+                if (!expectedKey || expectedKey === gauntletRunIndicatorFallbackKey) {
+                    gauntletRunIndicatorFallback = { modifiers: [], resources: null };
+                }
+            } finally {
+                gauntletRunIndicatorFetchInFlight = false;
+            }
+        };
+
+        const renderGauntletBattleIndicator = (gauntletMatch = null) => {
+            if (!gauntletIndicatorEl || !gauntletSummaryEl || !gauntletPopoverEl) return;
+            if (!gauntletMatch || typeof gauntletMatch !== 'object') {
+                latestGauntletIndicatorMatch = null;
+                gauntletIndicatorEl.hidden = true;
+                gauntletPopoverEl.hidden = true;
+                gauntletPopoverEl.innerHTML = '';
+                if (gauntletChipEl) gauntletChipEl.setAttribute('aria-expanded', 'false');
+                return;
+            }
+            latestGauntletIndicatorMatch = gauntletMatch;
+            const fallbackKey = `${gauntletMatch.runSeed || ''}:${gauntletMatch.nodeId || ''}`;
+            if (fallbackKey !== gauntletRunIndicatorFallbackKey) {
+                gauntletRunIndicatorFallbackKey = fallbackKey;
+                gauntletRunIndicatorFallback = null;
+            }
+            const matchModifiers = Array.isArray(gauntletMatch.modifiers) ? gauntletMatch.modifiers : [];
+            if (!matchModifiers.length && !gauntletRunIndicatorFallback) {
+                fetchGauntletIndicatorFallback(fallbackKey);
+            }
+            const modifiers = matchModifiers.length
+                ? matchModifiers
+                : (Array.isArray(gauntletRunIndicatorFallback?.modifiers) ? gauntletRunIndicatorFallback.modifiers : []);
+            const fallbackResources = gauntletRunIndicatorFallback?.resources || null;
+            const resources = gauntletMatch.resources && typeof gauntletMatch.resources === 'object'
+                ? gauntletMatch.resources
+                : (fallbackResources || {});
+            const nodeLabel = formatGauntletNodeType(gauntletMatch.nodeType);
+            const enemyLabel = gauntletMatch.enemyDisplayName || 'Forest Rival Team';
+            const modifierCount = modifiers.length;
+            gauntletIndicatorEl.hidden = false;
+            gauntletPopoverEl.hidden = false;
+            gauntletSummaryEl.textContent = modifierCount
+                ? `Chunin Exams: ${modifierCount} effect${modifierCount === 1 ? '' : 's'}`
+                : 'Chunin Exams';
+            gauntletPopoverEl.innerHTML =
+                '<p class="gauntlet-battle-title">Chunin Exams</p>' +
+                '<p class="gauntlet-battle-line">' + escapeHtml(nodeLabel) + ' vs. ' + escapeHtml(enemyLabel) + '</p>' +
+                '<p class="gauntlet-battle-line">Scrolls: H ' + (Number(resources.heavenScrolls) || 0) +
+                ' / E ' + (Number(resources.earthScrolls) || 0) +
+                ' / Fragments ' + (Number(resources.scrollFragments) || 0) + '</p>' +
+                (modifiers.length
+                    ? '<div class="gauntlet-battle-mods">' + modifiers.map((modifier) =>
+                        '<div class="gauntlet-battle-mod' + (modifier.isCurse ? ' curse' : '') + '">' +
+                            '<strong>' + escapeHtml(modifier.name || modifier.id || 'Run Effect') + '</strong>' +
+                            '<span>' + escapeHtml(modifier.description || 'Active for this run.') + '</span>' +
+                        '</div>'
+                    ).join('') + '</div>'
+                    : '<p class="gauntlet-battle-empty">No relic or curse effects are active yet.</p>');
+        };
 
         const ensureGlobalStatusTooltip = () => {
             if (globalStatusTooltipEl) return globalStatusTooltipEl;
@@ -2848,6 +3026,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 board: data.board || null,
                 chakraPools: data.chakraPools || null,
                 pendingTurn: data.pendingTurn || null,
+                gauntletMatch: data.gauntletMatch || null,
             });
             if (matchStateSignature === lastMatchStateSignature) {
                 return;
@@ -2860,6 +3039,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof data.mode === 'string' && data.mode.trim()) {
                 currentMatchMode = data.mode.trim().toLowerCase();
             }
+            renderGauntletBattleIndicator(data.gauntletMatch || null);
             if (data.opponent?.username) {
                 const nextOpponentUsername = data.opponent.username;
                 currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
@@ -4034,7 +4214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state === 'found') {
             searchingMessage.textContent = 'Opponent found!';
             if (searchingSpinner) {
-                searchingSpinner.src = 'found.png';
+                setImageSrcWithFallback(searchingSpinner, REMASTER_ASSETS.found, REMASTER_ASSETS.sharingan);
                 searchingSpinner.style.visibility = 'visible';
                 searchingSpinner.style.animation = 'none';
             }
@@ -4059,7 +4239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `Searching for ${activeSearchTargetUsername}`
                 : 'Searching for an opponent';
         if (searchingSpinner) {
-            searchingSpinner.src = 'sharingan.png';
+            setImageSrcWithFallback(searchingSpinner, REMASTER_ASSETS.sharingan, REMASTER_ASSETS.sharingan);
             searchingSpinner.style.visibility = 'visible';
             searchingSpinner.style.animation = '';
         }
@@ -4409,6 +4589,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.dataset.skillIndex = String(i);
                 img.alt = `Skill ${i + 1}`;
                 img.src = '';
+                attachImageFallback(img, REMASTER_ASSETS.skillFallback);
                 skillImagesContainer.appendChild(img);
             }
         } else if (current.length > required) {
@@ -4427,7 +4608,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             skillDescEl.textContent = skill.skilldescription || '';
         }
         if (skillDetailImageEl) {
-            skillDetailImageEl.src = skill.skillimage || '';
+            attachImageFallback(skillDetailImageEl, REMASTER_ASSETS.skillFallback);
+            setImageSrcWithFallback(skillDetailImageEl, skill.skillimage, REMASTER_ASSETS.skillFallback);
             skillDetailImageEl.alt = skill.name || 'Selected skill';
         }
         if (skillDetailMetaEl) {
@@ -4450,7 +4632,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             skillDescEl.textContent = '';
         }
         if (skillDetailImageEl) {
-            skillDetailImageEl.src = '';
+            setImageSrcWithFallback(skillDetailImageEl, '', REMASTER_ASSETS.skillFallback);
             skillDetailImageEl.alt = '';
         }
         if (skillDetailMetaEl) {
@@ -4489,7 +4671,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 '';
         }
         if (portraitEl) {
-            portraitEl.src = character.facePicture || '';
+            attachImageFallback(portraitEl, REMASTER_ASSETS.characterFallback);
+            setImageSrcWithFallback(portraitEl, character.facePicture, REMASTER_ASSETS.characterFallback);
             portraitEl.alt = character.name ? `${character.name} portrait` : 'Character portrait';
         }
         renderCharacterOverview(character);
@@ -4504,8 +4687,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             viewerSkills.forEach((skill, skillIdx) => {
                 const targetImg = skillImages[skillIdx];
                 if (!targetImg) return;
+                attachImageFallback(targetImg, REMASTER_ASSETS.skillFallback);
                 if (skill) {
-                    targetImg.src = skill.skillimage || '';
+                    setImageSrcWithFallback(targetImg, skill.skillimage, REMASTER_ASSETS.skillFallback);
                     targetImg.alt = skill.name || `Skill ${skillIdx + 1}`;
                     targetImg.title = skill.hiddenFromSelectionViewer
                         ? `${skill.name || `Skill ${skillIdx + 1}`} (alternate)`
@@ -4514,7 +4698,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     targetImg.style.visibility = 'visible';
                     targetImg.onclick = () => handleSkillSelect(skillIdx);
                 } else {
-                    targetImg.src = '';
+                    setImageSrcWithFallback(targetImg, '', REMASTER_ASSETS.skillFallback);
                     targetImg.alt = `Skill ${skillIdx + 1}`;
                     targetImg.title = '';
                     targetImg.classList.remove('alternate-skill');
@@ -4573,6 +4757,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         startableButtons.forEach((btn) => {
             if (!btn) return;
             btn.disabled = !enabled;
+            btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
             btn.style.opacity = enabled ? '1' : '0.5';
             btn.style.pointerEvents = enabled ? 'auto' : 'none';
         });
@@ -4623,7 +4808,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         slot.draggable = true;
         const image = document.createElement('img');
         image.className = 'slot-image';
-        image.src = character.facePicture;
+        attachImageFallback(image, REMASTER_ASSETS.characterFallback);
+        setImageSrcWithFallback(image, character.facePicture, REMASTER_ASSETS.characterFallback);
         image.alt = character.name || `Character ${index + 1}`;
         slot.appendChild(image);
         image.addEventListener('dragstart', (event) => handleSlotDragStart(event, index));
@@ -4659,7 +4845,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         slotElement.dataset.characterIndex = String(assignment.characterIndex);
         const character = roster[assignment.characterIndex];
         const img = document.createElement('img');
-        img.src = character?.facePicture || '';
+        attachImageFallback(img, REMASTER_ASSETS.characterFallback);
+        setImageSrcWithFallback(img, character?.facePicture, REMASTER_ASSETS.characterFallback);
         img.alt = character?.name || 'Selected character';
         img.className = 'selected-slot-image';
         img.draggable = true;
@@ -4798,11 +4985,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const canGoBack = currentRosterPage > 0;
             lastPageButton.style.opacity = canGoBack ? '1' : '0.45';
             lastPageButton.style.pointerEvents = canGoBack ? 'auto' : 'none';
+            lastPageButton.disabled = !canGoBack;
+            lastPageButton.setAttribute('aria-disabled', canGoBack ? 'false' : 'true');
         }
         if (nextPageButton) {
             const canGoNext = currentRosterPage < totalPages - 1;
             nextPageButton.style.opacity = canGoNext ? '1' : '0.45';
             nextPageButton.style.pointerEvents = canGoNext ? 'auto' : 'none';
+            nextPageButton.disabled = !canGoNext;
+            nextPageButton.setAttribute('aria-disabled', canGoNext ? 'false' : 'true');
         }
     };
 

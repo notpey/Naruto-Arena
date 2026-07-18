@@ -55,34 +55,33 @@
        selectors, so missing remaster files do not affect the 770x560
        client.
     */
-    --selection-bg-remaster-image: url("selectionbg-remaster.png");
-    --ingame-bg-remaster-image: url("ingamebg-remaster.png");
-    --login-panel-remaster-image: url("loginscroll-remaster.png");
-    --selection-panel-remaster-image: url("selectionpage-remaster.png");
-    --selection-skill-panel-remaster-image: url("skillpage-remaster.png");
-    --selection-scroll-remaster-image: url("selectionscroll-remaster.png");
-    --skill-scroll-remaster-image: url("skillscroll-remaster.png");
-    --modal-panel-remaster-image: url("searchingscroll-remaster.png");
-    --battle-skill-row-remaster-image: url("ingameskillscroll-remaster.png");
-    --battle-skill-info-remaster-image: url("ingamebottomscroll-remaster.png");
-    --battle-end-panel-remaster-image: url("endscroll-remaster.png");
-    --battle-scroll-behind-remaster-image: url("ingamescrollbehind-remaster.png");
-    --options-button-remaster-image: url("optionscroll-remaster.png");
+    --selection-bg-remaster-image: url("selectionbg-remaster.png?v=2");
+    --ingame-bg-remaster-image: url("ingamebg-remaster.png?v=2");
+    --login-panel-remaster-image: url("loginscroll-remaster.png?v=2");
+    --selection-panel-remaster-image: url("selectionpage-remaster.png?v=2");
+    --selection-skill-panel-remaster-image: url("skillpage-remaster.png?v=2");
+    --selection-scroll-remaster-image: url("selectionscroll-remaster.png?v=2");
+    --skill-scroll-remaster-image: url("skillscroll-remaster.png?v=2");
+    --modal-panel-remaster-image: url("searchingscroll-remaster.png?v=2");
+    --battle-skill-row-remaster-image: url("ingameskillscroll-remaster.png?v=2");
+    --battle-skill-info-remaster-image: url("ingamebottomscroll-remaster.png?v=2");
+    --battle-end-panel-remaster-image: url("endscroll-remaster.png?v=2");
+    --battle-scroll-behind-remaster-image: url("ingamescrollbehind-remaster.png?v=2");
+    --options-button-remaster-image: url("optionscroll-remaster.png?v=2");
     --ladder-button-remaster-image: url("ladderbutton-remaster.png");
     --quick-button-remaster-image: url("quickbutton-remaster.png");
     --private-button-remaster-image: url("privatebutton-remaster.png");
     --logout-button-remaster-image: url("logout-remaster.png");
-    --next-page-remaster-image: url("nextpage-remaster.png");
     --search-art-remaster-image: url("sasukesearch-remaster.png");
-    --surrender-art-remaster-image: url("surrenderimage-remaster.png");
-    --render-remaster-image: url("render-remaster.png");
-    --win-remaster-image: url("win-remaster.png");
-    --lose-remaster-image: url("lose-remaster.png");
-    --dead-character-remaster-image: url("deadcharacter-remaster.png");
+    --surrender-art-remaster-image: url("surrenderimage-remaster.png?v=2");
+    --render-remaster-image: url("render-remaster.png?v=2");
+    --win-remaster-image: url("win-remaster.png?v=2");
+    --lose-remaster-image: url("lose-remaster.png?v=2");
+    --dead-character-remaster-image: url("deadcharacter-remaster.png?v=2");
     --found-remaster-image: url("found-remaster.png");
     --loading-remaster-image: url("loading-remaster.png");
     --sharingan-remaster-image: url("sharingan-remaster.png");
-    --skill-queue-remaster-image: url("skillqqueue-remaster.png");
+    --skill-queue-remaster-image: url("skillqqueue-remaster.png?v=2");
 
     /* Future Remaster Asset Sizes
        Reference slots only. Existing elements keep their current
@@ -125,6 +124,14 @@
 .game-remaster {
     --game-stage-w: var(--game-remaster-stage-w);
     --game-stage-h: var(--game-remaster-stage-h);
+    --remaster-selection-panel-left: 82px;
+    --remaster-selection-panel-top: 468px;
+    --remaster-panel-shadow:
+        drop-shadow(0 10px 14px rgba(0, 0, 0, 0.38))
+        drop-shadow(0 24px 42px rgba(0, 0, 0, 0.28));
+    --remaster-button-shadow:
+        drop-shadow(0 5px 6px rgba(0, 0, 0, 0.42))
+        drop-shadow(0 13px 18px rgba(0, 0, 0, 0.26));
 }
 
 .game-remaster .background {
@@ -181,31 +188,46 @@
 }
 
 .game-remaster .selectionpage {
-    background-image: var(--selection-panel-remaster-image);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% 100%;
     width: var(--selection-panel-remaster-w);
     height: var(--selection-panel-remaster-h);
-    left: 77px;
-    top: 452px;
+    left: var(--remaster-selection-panel-left);
+    top: var(--remaster-selection-panel-top);
     z-index: 1;
+}
+
+.game-remaster .selectionpage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--selection-panel-remaster-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    filter: var(--remaster-panel-shadow);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .game-remaster .selectionscroll {
     content: var(--selection-scroll-remaster-image);
+    background-image: none;
     width: 66px;
     height: 342px;
-    left: 33px;
-    top: 440px;
+    left: calc(var(--remaster-selection-panel-left) - 49px);
+    top: calc(var(--remaster-selection-panel-top) - 12px);
     z-index: 2;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .slot-list {
     grid-template-columns: repeat(7, 72px);
     gap: 14px;
-    left: 55px;
-    top: 36px;
+    left: 62px;
+    top: 40px;
     z-index: 3;
 }
 
@@ -218,7 +240,7 @@
 .game-remaster .selected-character-slot-list {
     position: absolute;
     gap: 22px;
-    left: 690px;
+    left: 704px;
     right: auto;
     top: 206px;
     z-index: 5;
@@ -242,7 +264,7 @@
 
 .game-remaster .selected-count-label {
     position: absolute;
-    left: 665px;
+    left: 679px;
     top: 172px;
     width: 310px;
     margin: 0;
@@ -262,7 +284,7 @@
 .game-remaster .player-card {
     position: absolute;
     width: 300px;
-    left: 690px;
+    left: 704px;
     bottom: auto;
     top: 34px;
     gap: 16px;
@@ -312,15 +334,17 @@
 .game-remaster .skillviewer {
     left: 0;
     bottom: auto;
-    top: -396px;
+    top: -437px;
 }
 
 .game-remaster .skillscroll {
     content: var(--skill-scroll-remaster-image);
+    background-image: none;
     width: 66px;
     height: 342px;
     left: 930px;
     top: -12px;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .skillpage {
@@ -338,6 +362,7 @@
     align-items: stretch;
     padding: 25px 80px 25px 30px;
     box-sizing: border-box;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .skillviewer.collapsed {
@@ -505,7 +530,7 @@
     position: absolute;
     left: 0;
     right: auto;
-    top: -96px;
+    top: -102px;
     width: var(--selection-panel-remaster-w);
     gap: 0;
     justify-content: space-between;
@@ -533,30 +558,98 @@
 .game-remaster .game-button img {
     width: var(--remaster-wide-button-w);
     height: var(--remaster-wide-button-h);
+    filter: var(--remaster-button-shadow);
 }
 
 .game-remaster .logout-button img {
     content: var(--logout-button-remaster-image);
     width: 169px;
     height: var(--remaster-wide-button-h);
+    filter: var(--remaster-button-shadow);
+}
+
+.game-remaster .game-button:hover img,
+.game-remaster .logout-button:hover img {
+    filter: brightness(1.06) var(--remaster-button-shadow);
+}
+
+.game-remaster .game-button:disabled,
+.game-remaster .game-button[aria-disabled="true"],
+.game-remaster .roster-page-button:disabled,
+.selection-hub-shop-buy:disabled,
+.selection-hub-story-begin:disabled,
+.selection-hub-gauntlet-action:disabled,
+.selection-hub-gauntlet-route-node:disabled,
+.ok-button:disabled,
+.private-match-ok:disabled,
+.private-match-cancel:disabled,
+.cancel-button:disabled {
+    cursor: default;
+}
+
+.game-remaster .game-button:disabled img,
+.game-remaster .game-button[aria-disabled="true"] img {
+    filter: grayscale(0.18) brightness(0.78) var(--remaster-button-shadow);
+}
+
+.game-remaster .game-button:disabled:hover img,
+.game-remaster .game-button[aria-disabled="true"]:hover img {
+    filter: grayscale(0.18) brightness(0.78) var(--remaster-button-shadow);
 }
 
 .game-remaster .nextpage,
 .game-remaster .lastpage {
-    content: var(--next-page-remaster-image);
-    width: 59px;
-    height: 63px;
+    appearance: none;
+    width: 28px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(45, 21, 7, 0.24);
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 249, 225, 0.82), rgba(230, 184, 105, 0.82));
+    color: #5a3214;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 3px 8px rgba(45, 21, 7, 0.22);
+    cursor: pointer;
     z-index: 6;
+    filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.22));
+    transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+}
+
+.game-remaster .roster-page-button span {
+    display: block;
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 0.8;
+    transform: translateY(-2px);
+}
+
+.game-remaster .roster-page-button:hover {
+    filter: brightness(1.06) drop-shadow(0 5px 8px rgba(0, 0, 0, 0.26));
+}
+
+.game-remaster .roster-page-button:disabled:hover {
+    filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.22));
 }
 
 .game-remaster .nextpage {
-    left: 619px;
-    top: 200px;
+    left: 662px;
+    top: 140px;
 }
 
 .game-remaster .lastpage {
-    left: 0;
-    top: 24px;
+    left: 26px;
+    top: 140px;
+    transform: none;
+}
+
+.game-remaster .lastpage:hover {
+    transform: none;
 }
 
 .game-remaster .searchingscroll,
@@ -564,8 +657,13 @@
     background: var(--modal-panel-remaster-image) no-repeat center / contain;
     width: var(--modal-panel-remaster-w);
     height: var(--modal-panel-remaster-h);
+    --remaster-modal-tan-left: 146px;
+    --remaster-modal-tan-right: 28px;
+    --remaster-modal-content-left: 160px;
+    --remaster-modal-content-right: 42px;
     top: 0;
     left: 0;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .sasukesearch {
@@ -576,29 +674,42 @@
 
 .game-remaster .sharingan {
     content: var(--sharingan-remaster-image);
+    position: absolute;
     width: 92px;
     height: 92px;
-    /* clear inherited margin offsets; use explicit top/left instead */
     margin-top: 0;
     margin-left: 0;
-    top: 141px;
-    left: 272px;
+    top: 153px;
+    left: calc(var(--remaster-modal-tan-left) + ((var(--modal-panel-remaster-w) - var(--remaster-modal-tan-left) - var(--remaster-modal-tan-right)) / 2) - 42px);
+    z-index: 3;
+    pointer-events: none;
+    transform-origin: 50% 50%;
+    animation: spin 1s linear infinite;
 }
 
 /* Remaster searching modal inner content */
 .game-remaster .searching {
-    margin-top: 84px;
-    margin-left: 210px;
+    position: absolute;
+    top: 92px;
+    left: var(--remaster-modal-tan-left);
+    right: var(--remaster-modal-tan-right);
+    width: auto;
+    margin: 0;
+    text-align: center;
 }
 
 .game-remaster .sasukesearch {
     display: block;
-    margin-left: 173px;
+    position: absolute;
+    top: 114px;
+    left: calc(var(--remaster-modal-tan-left) + ((var(--modal-panel-remaster-w) - var(--remaster-modal-tan-left) - var(--remaster-modal-tan-right) - 275px) / 2));
+    margin: 0;
+    z-index: 2;
 }
 
 .game-remaster .cancel-button {
-    left: 266px;
-    top: 302px;
+    left: calc(var(--remaster-modal-tan-left) + ((var(--modal-panel-remaster-w) - var(--remaster-modal-tan-left) - var(--remaster-modal-tan-right) - 88px) / 2));
+    top: 314px;
 }
 
 /* Backdrop z-index must beat .button-container (z-index:5) in the selectionpage stacking context */
@@ -712,8 +823,71 @@
     border-color: transparent;
 }
 
+.selection-hub-tab:focus-visible,
+.selection-hub-ryo:focus-visible,
+.selection-hub-settings:focus-visible,
+.roster-page-button:focus-visible,
+.game-button:focus-visible {
+    outline: 2px solid rgba(255, 184, 77, 0.9);
+    outline-offset: 3px;
+}
+
 .selection-hub-tab.active::after {
     background: linear-gradient(90deg, #e8801a, #7c4dff);
+}
+
+@keyframes selection-nav-auto-hide {
+    0%,
+    72% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0.72;
+        transform: translateY(-44px);
+    }
+}
+
+.game-remaster .selection-hub-nav {
+    z-index: 80;
+    animation: selection-nav-auto-hide 5s ease 1.4s forwards;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.game-remaster .selection-hub-nav::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -18px;
+    height: 18px;
+}
+
+.game-remaster .selection-hub-nav::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -11px;
+    width: 48px;
+    height: 11px;
+    transform: translateX(-50%);
+    border: 1px solid rgba(232, 128, 26, 0.36);
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    background:
+        linear-gradient(rgba(255, 184, 77, 0.72), rgba(255, 184, 77, 0.72)) center 3px / 18px 2px no-repeat,
+        linear-gradient(rgba(255, 184, 77, 0.48), rgba(255, 184, 77, 0.48)) center 7px / 18px 2px no-repeat,
+        rgba(8, 10, 18, 0.9);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.36);
+    pointer-events: none;
+}
+
+.game-remaster .selection-hub-nav:hover,
+.game-remaster .selection-hub-nav:focus-within {
+    opacity: 1;
+    transform: translateY(0);
+    animation: none;
 }
 
 .selection-hub-ryo {
@@ -1271,12 +1445,18 @@ body.hub-view-story .selectionpage {
    how the shop/missions grids already sit on the panel's dark background. */
 .selection-hub-story-list[hidden],
 .selection-hub-story-briefing[hidden],
+.selection-hub-gauntlet[hidden],
 .selection-hub-mission-detail[hidden],
 .selection-hub-mission-grid[hidden] {
     display: none !important;
 }
 
-.selection-hub-story-list {
+.selection-hub-pve-tabs {
+    flex: 0 0 auto;
+}
+
+.selection-hub-story-list,
+.selection-hub-gauntlet {
     flex: 0 1 auto;
     max-height: 100%;
     min-height: 0;
@@ -1291,8 +1471,699 @@ body.hub-view-story .selectionpage {
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
 }
 
-.game-remaster .selection-hub-story-list {
+.game-remaster .selection-hub-story-list,
+.game-remaster .selection-hub-gauntlet {
     padding: 22px;
+}
+
+.selection-hub-gauntlet {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #f7f3ea;
+}
+
+.selection-hub-gauntlet-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 16px 18px;
+    border: 1px solid rgba(27, 35, 48, 0.1);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(27, 35, 48, 0.96), rgba(42, 31, 24, 0.96));
+    color: #f7f3ea;
+}
+
+.selection-hub-gauntlet-eyebrow {
+    margin: 0 0 4px;
+    color: #f8ae42;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-hero h2 {
+    margin: 0;
+    color: #f7f3ea;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-hero p {
+    max-width: 560px;
+    margin: 5px 0 0;
+    color: rgba(247, 243, 234, 0.78);
+    font-size: 11px;
+    line-height: 1.45;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 230px;
+}
+
+.selection-hub-gauntlet-dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 14px;
+    min-height: 0;
+}
+
+.selection-hub-gauntlet-main,
+.selection-hub-gauntlet-side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.selection-hub-gauntlet-side {
+    position: sticky;
+    top: 0;
+    align-self: start;
+}
+
+.selection-hub-gauntlet-section,
+.selection-hub-gauntlet-card {
+    border: 1px solid rgba(27, 35, 48, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.66);
+    padding: 12px;
+}
+
+.selection-hub-gauntlet-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.selection-hub-gauntlet-section-head h3,
+.selection-hub-gauntlet-title {
+    margin: 0;
+    color: #1b2330;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-section-head p {
+    margin: 0;
+    color: #69707c;
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: right;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-copy,
+.selection-hub-gauntlet-status,
+.selection-hub-gauntlet-meta {
+    margin: 0;
+    color: #4c5562;
+    font-size: 11px;
+    line-height: 1.45;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-guide {
+    background: rgba(255, 255, 255, 0.58);
+}
+
+.selection-hub-gauntlet-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.selection-hub-gauntlet-steps span {
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 7px;
+    color: #69707c;
+    background: rgba(255, 255, 255, 0.42);
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-steps span.active {
+    border-color: rgba(232, 128, 26, 0.65);
+    color: #1b2330;
+    background: rgba(232, 128, 26, 0.16);
+}
+
+.selection-hub-gauntlet-steps span.done {
+    color: #1f7a3f;
+}
+
+.selection-hub-gauntlet-status.error {
+    color: #d52235;
+}
+
+.selection-hub-gauntlet-status.success {
+    color: #1f7a3f;
+}
+
+.selection-hub-gauntlet-actions,
+.selection-hub-gauntlet-resources,
+.selection-hub-gauntlet-team,
+.selection-hub-gauntlet-offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.selection-hub-gauntlet-select {
+    height: 34px;
+    min-width: 170px;
+    padding: 0 10px;
+    border: 1px solid rgba(27, 35, 48, 0.18);
+    border-radius: 6px;
+    background: #fffdf8;
+    color: #1b2330;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-node,
+.selection-hub-gauntlet-resource,
+.selection-hub-gauntlet-member {
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.54);
+}
+
+.selection-hub-gauntlet-resources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selection-hub-gauntlet-resource {
+    padding: 9px;
+}
+
+.selection-hub-gauntlet-resource span,
+.selection-hub-gauntlet-node span {
+    display: block;
+    color: #69707c;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-resource strong {
+    display: block;
+    margin-top: 2px;
+    color: #1b2330;
+    font-size: 15px;
+}
+
+.selection-hub-gauntlet-resource em,
+.selection-hub-gauntlet-node em {
+    display: block;
+    margin-top: 4px;
+    color: #69707c;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.25;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-choice-list,
+.selection-hub-gauntlet-event-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.selection-hub-gauntlet-choice {
+    padding: 10px;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.54);
+}
+
+.selection-hub-gauntlet-choice strong {
+    display: block;
+    color: #1b2330;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-choice p {
+    margin: 4px 0 8px;
+    color: #4c5562;
+    font-size: 11px;
+    line-height: 1.35;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-team {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.selection-hub-gauntlet-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+}
+
+.selection-hub-gauntlet-member img {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #111;
+}
+
+.selection-hub-gauntlet-member strong,
+.selection-hub-gauntlet-node strong {
+    display: block;
+    color: #1b2330;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.selection-hub-gauntlet-map {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+}
+
+.selection-hub-gauntlet-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+
+.selection-hub-gauntlet-row-label {
+    color: #69707c;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-nodes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.selection-hub-gauntlet-node {
+    min-height: 76px;
+    padding: 8px;
+    color: #1b2330;
+    cursor: default;
+    text-align: left;
+    font-family: inherit;
+}
+
+.selection-hub-gauntlet-node.reachable {
+    border-color: rgba(232, 128, 26, 0.65);
+    box-shadow: 0 0 0 1px rgba(232, 128, 26, 0.22);
+    cursor: pointer;
+}
+
+.selection-hub-gauntlet-node.visited {
+    opacity: 0.55;
+}
+
+.selection-hub-gauntlet-node.locked {
+    opacity: 0.36;
+}
+
+.selection-hub-gauntlet-node.reachable:hover {
+    background: rgba(232, 128, 26, 0.12);
+}
+
+.selection-hub-gauntlet-next {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(232, 128, 26, 0.38);
+    background: rgba(232, 128, 26, 0.1);
+}
+
+.selection-hub-gauntlet-next span {
+    display: block;
+    margin-bottom: 2px;
+    color: #9b5a07;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-next strong {
+    display: block;
+    color: #1b2330;
+    font-size: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-next p,
+.selection-hub-gauntlet-callout p {
+    margin: 3px 0 0;
+    color: #4c5562;
+    font-size: 11px;
+    line-height: 1.35;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-callout,
+.selection-hub-gauntlet-last {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(232, 128, 26, 0.1);
+}
+
+.selection-hub-gauntlet-last span {
+    display: block;
+    color: #69707c;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-last strong {
+    display: block;
+    margin-top: 2px;
+    color: #1b2330;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.selection-hub-gauntlet {
+    gap: 12px;
+    background: #f4eee2;
+}
+
+.selection-hub-gauntlet-hero {
+    align-items: center;
+    border-color: rgba(27, 35, 48, 0.08);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #202833, #332720);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.selection-hub-gauntlet-command {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border: 1px solid rgba(168, 103, 24, 0.28);
+    border-radius: 8px;
+    background: #fff8ec;
+}
+
+.selection-hub-gauntlet-command span {
+    display: block;
+    color: #b76611;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-command strong {
+    display: block;
+    margin-top: 2px;
+    color: #1b2330;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.selection-hub-gauntlet-command-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.selection-hub-gauntlet-command .selection-hub-gauntlet-command-hint {
+    min-width: 180px;
+    color: #667080;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-align: right;
+    text-transform: none;
+}
+
+.selection-hub-gauntlet-choice-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selection-hub-story-begin.compact {
+    min-width: 92px;
+    height: 32px;
+    padding: 0 14px;
+}
+
+.selection-hub-gauntlet-dashboard {
+    grid-template-columns: minmax(0, 1fr) 272px;
+}
+
+.selection-hub-gauntlet-section,
+.selection-hub-gauntlet-card {
+    border: 0;
+    border-top: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 0;
+    background: transparent;
+    padding: 12px 0 0;
+}
+
+.selection-hub-gauntlet-main .selection-hub-gauntlet-section:first-child,
+.selection-hub-gauntlet-side .selection-hub-gauntlet-section:first-child,
+.selection-hub-gauntlet-side .selection-hub-gauntlet-card:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.selection-hub-gauntlet-guide {
+    background: transparent;
+}
+
+.selection-hub-gauntlet-steps {
+    gap: 6px;
+}
+
+.selection-hub-gauntlet-steps span {
+    min-height: 38px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.42);
+}
+
+.selection-hub-gauntlet-resources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.selection-hub-gauntlet-resource,
+.selection-hub-gauntlet-member,
+.selection-hub-gauntlet-choice {
+    border-radius: 7px;
+    background: rgba(255, 252, 246, 0.72);
+}
+
+.selection-hub-gauntlet-relic-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.selection-hub-gauntlet-relic {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
+    padding: 6px 9px;
+    border: 1px solid rgba(168, 103, 24, 0.32);
+    border-radius: 999px;
+    color: #1b2330;
+    background: #fff8ec;
+    cursor: help;
+}
+
+.selection-hub-gauntlet-relic strong {
+    overflow: hidden;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.selection-hub-gauntlet-relic.curse {
+    border-color: rgba(170, 43, 43, 0.34);
+    color: #8f2424;
+    background: #fff1f0;
+}
+
+.selection-hub-gauntlet-relic::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    z-index: 20;
+    display: none;
+    width: 220px;
+    padding: 9px 10px;
+    border: 1px solid rgba(27, 35, 48, 0.18);
+    border-radius: 7px;
+    color: #f7f3ea;
+    background: rgba(27, 35, 48, 0.96);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-transform: none;
+    white-space: normal;
+}
+
+.selection-hub-gauntlet-relic:hover::after,
+.selection-hub-gauntlet-relic:focus::after {
+    display: block;
+}
+
+.selection-hub-gauntlet-route {
+    padding: 12px;
+    border: 1px solid rgba(27, 35, 48, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 252, 246, 0.64);
+}
+
+.selection-hub-gauntlet-route .selection-hub-gauntlet-section-head {
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(27, 35, 48, 0.1);
+}
+
+.selection-hub-gauntlet-map {
+    gap: 7px;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #242832, #211c18);
+}
+
+.selection-hub-gauntlet-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 9px;
+}
+
+.selection-hub-gauntlet-row-label {
+    color: rgba(247, 243, 234, 0.72);
+}
+
+.selection-hub-gauntlet-nodes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.selection-hub-gauntlet-node {
+    position: relative;
+    min-height: 68px;
+    padding: 9px 10px 8px;
+    border: 1px solid rgba(247, 243, 234, 0.14);
+    border-left: 4px solid #858b95;
+    border-radius: 6px;
+    color: #1b2330;
+    background: #fffaf0;
+    transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, opacity 120ms ease;
+}
+
+.selection-hub-gauntlet-node.type-battle {
+    border-left-color: #d26d22;
+}
+
+.selection-hub-gauntlet-node.type-elite-battle {
+    border-left-color: #9a6dff;
+}
+
+.selection-hub-gauntlet-node.type-event {
+    border-left-color: #4d8dc8;
+}
+
+.selection-hub-gauntlet-node.type-rest-camp {
+    border-left-color: #4e9b62;
+}
+
+.selection-hub-gauntlet-node.type-merchant {
+    border-left-color: #c99d2f;
+}
+
+.selection-hub-gauntlet-node.type-scroll-cache {
+    border-left-color: #e4c857;
+}
+
+.selection-hub-gauntlet-node span {
+    color: #687180;
+}
+
+.selection-hub-gauntlet-node strong {
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.15;
+}
+
+.selection-hub-gauntlet-node em {
+    color: #5b6572;
+}
+
+.selection-hub-gauntlet-node.reachable {
+    border-color: rgba(248, 174, 66, 0.92);
+    border-left-color: #f08a18;
+    box-shadow: 0 0 0 2px rgba(248, 174, 66, 0.18), 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.selection-hub-gauntlet-node.reachable:hover {
+    transform: translateY(-1px);
+    background: #fff3dc;
+}
+
+.selection-hub-gauntlet-node.visited {
+    opacity: 0.58;
+}
+
+.selection-hub-gauntlet-node.locked {
+    opacity: 0.28;
+    filter: grayscale(0.2);
 }
 
 .selection-hub-story-chapter {
@@ -1687,7 +2558,7 @@ body.hub-view-story .selectionpage {
 }
 
 .game-remaster .button-container {
-    top: -76px;
+    top: -102px;
 }
 
 body {
@@ -2529,6 +3400,115 @@ text-transform: uppercase;
 
 .hidden {
     display: none !important;
+}
+
+.gauntlet-battle-indicator {
+    position: absolute;
+    left: 824px;
+    top: 500px;
+    transform: translate(-50%, -50%);
+    z-index: 180;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    text-transform: none;
+}
+
+.gauntlet-battle-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 28px;
+    padding: 0 11px;
+    border: 1px solid rgba(248, 174, 66, 0.55);
+    border-radius: 999px;
+    color: #f7ead2;
+    background: rgba(12, 10, 9, 0.78);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: default;
+}
+
+.gauntlet-battle-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f8ae42;
+    box-shadow: 0 0 10px rgba(248, 174, 66, 0.78);
+}
+
+.gauntlet-battle-popover {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 36px;
+    width: 230px;
+    max-height: 170px;
+    overflow: auto;
+    transform: translateX(-50%);
+    padding: 11px;
+    border: 1px solid rgba(248, 174, 66, 0.38);
+    border-radius: 8px;
+    color: #f7ead2;
+    background: rgba(12, 10, 9, 0.94);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.44);
+}
+
+.gauntlet-battle-indicator:hover .gauntlet-battle-popover,
+.gauntlet-battle-indicator:focus-within .gauntlet-battle-popover {
+    display: block;
+}
+
+.gauntlet-battle-title {
+    margin: 0 0 3px;
+    color: #f8ae42;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.gauntlet-battle-line,
+.gauntlet-battle-empty {
+    margin: 0;
+    color: rgba(247, 234, 210, 0.78);
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.gauntlet-battle-mods {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.gauntlet-battle-mod {
+    padding-top: 7px;
+    border-top: 1px solid rgba(247, 234, 210, 0.11);
+}
+
+.gauntlet-battle-mod strong {
+    display: block;
+    color: #f7ead2;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.gauntlet-battle-mod.curse strong {
+    color: #ff8d8d;
+}
+
+.gauntlet-battle-mod span {
+    display: block;
+    margin-top: 2px;
+    color: rgba(247, 234, 210, 0.72);
+    font-size: 10px;
+    line-height: 1.3;
 }
 
 .searching-backdrop {
@@ -4304,18 +5284,39 @@ text-transform: uppercase;
 }
 
 
+.roster-page-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: 'Franklin', Arial, sans-serif;
+    cursor: pointer;
+}
+
+.roster-page-button:disabled {
+    cursor: default;
+}
+
 .nextpage {
     position: absolute;
     left: 433px;
     top: 140px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #2d1507;
+    background: var(--na-parchment);
     z-index: 3;
 }
 
 .lastpage {
     position: absolute;
     top: 17px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #2d1507;
+    background: var(--na-parchment);
     z-index: 3;
-    transform: scaleX(-1);
 }
 
 /* ============================================================
@@ -4624,6 +5625,7 @@ body.ingame-client-page .backgroundingame {
     height: var(--battle-skill-row-remaster-h);
     left: 34px;
     top: 6px;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .skillscrollingame.not-turn {
@@ -4677,12 +5679,13 @@ body.ingame-client-page .backgroundingame {
     background-size: 100% 100%;
     width: var(--battle-skill-info-remaster-w);
     height: var(--battle-skill-info-remaster-h);
-    left: 355px;
+    left: 352px;
     top: 606px;
-    padding: 36px 26px 36px 54px;
-    gap: 20px;
+    padding: 36px 26px 34px 76px;
+    gap: 16px;
     justify-content: center;
     z-index: auto;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .skillviewimage {
@@ -4754,7 +5757,7 @@ body.ingame-client-page .backgroundingame {
 
 .game-remaster .skill-info-meta {
     font-size: 10px;
-    padding: 5px 8px;
+    padding: 5px 12px;
     justify-content: space-evenly;
 }
 
@@ -4782,6 +5785,7 @@ body.ingame-client-page .backgroundingame {
     padding-left: 38px;
     padding-right: 12px;
     cursor: pointer;
+    filter: var(--remaster-button-shadow);
 }
 
 .game-remaster .surrenderbutton span {
@@ -4800,6 +5804,7 @@ body.ingame-client-page .backgroundingame {
     height: var(--remaster-small-button-h);
     left: 43px;
     top: 686px;
+    filter: var(--remaster-button-shadow);
 }
 
 /* --- Decorative render (bottom character art) --- */
@@ -4840,38 +5845,45 @@ body.ingame-client-page .backgroundingame {
         0 4px 10px rgba(0, 0, 0, 0.22),
         0 16px 36px rgba(0, 0, 0, 0.28),
         0 40px 90px rgba(0, 0, 0, 0.32);
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .battle-end-portrait {
-    width: 338px;
-    height: 324px;
-    left: 116px;
-    top: 68px;
+    width: 332px;
+    height: 332px;
+    left: 169px;
+    top: 64px;
     object-fit: cover;
 }
 
 .game-remaster .battle-end-copy {
-    left: 476px;
-    top: 44px;
-    width: 390px;
+    left: 526px;
+    top: 58px;
+    width: 350px;
 }
 
 .game-remaster .battle-end-title {
-    font-size: 63px;
+    font-size: 58px;
     margin-left: 0;
     margin-top: 0;
 }
 
 .game-remaster .battle-end-message {
-    font-size: 16px;
+    font-size: 15px;
     margin-left: 0;
     overflow-wrap: break-word;
     word-break: break-word;
 }
 
+.game-remaster .battle-end-unlocks {
+    min-height: 40px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+}
+
 .game-remaster .battle-end-continue {
-    font-size: 38px;
-    top: 320px;
+    font-size: 36px;
+    top: 326px;
     margin-top: 0;
 }
 
@@ -4880,10 +5892,10 @@ body.ingame-client-page .backgroundingame {
     background: var(--modal-panel-remaster-image) no-repeat center / 100% 100% !important;
     width: var(--modal-panel-remaster-w);
     height: var(--modal-panel-remaster-h);
-    --remaster-modal-tan-left: 96px;
+    --remaster-modal-tan-left: 146px;
     --remaster-modal-tan-right: 28px;
-    --remaster-modal-content-left: 108px;
-    --remaster-modal-content-right: 40px;
+    --remaster-modal-content-left: 158px;
+    --remaster-modal-content-right: 42px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -4894,21 +5906,23 @@ body.ingame-client-page .backgroundingame {
     font-family: 'Franklin', Arial, sans-serif;
     color: #111111;
     overflow: visible;
+    filter: var(--remaster-panel-shadow);
 }
 
 .game-remaster .exchange_chakra {
     background: var(--modal-panel-remaster-image) no-repeat center / 100% 100% !important;
     width: var(--modal-panel-remaster-w);
     height: var(--modal-panel-remaster-h);
-    --remaster-modal-tan-left: 96px;
+    --remaster-modal-tan-left: 146px;
     --remaster-modal-tan-right: 28px;
-    --remaster-modal-content-left: 108px;
-    --remaster-modal-content-right: 40px;
+    --remaster-modal-content-left: 158px;
+    --remaster-modal-content-right: 42px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
     padding: 0;
+    filter: var(--remaster-panel-shadow);
     border: 0;
     z-index: 500;
     font-family: 'Franklin', Arial, sans-serif;
@@ -4926,6 +5940,7 @@ body.ingame-client-page .backgroundingame {
     transform: translate(-50%, -50%);
     border: 0;
     z-index: 500;
+    filter: var(--remaster-panel-shadow);
 }
 
 /* Full-viewport dim behind the end-turn/exchange-chakra/surrender modals.
@@ -4997,7 +6012,7 @@ body.ingame-client-page .backgroundingame {
     right: var(--remaster-modal-content-right);
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 50px;
+    gap: 32px;
     padding: 0;
     font-size: 13px;
 }
@@ -5043,7 +6058,7 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .ChakraChooseEndTurn .skillorder {
     position: absolute;
     top: 260px;
-    left: 174px;
+    left: 200px;
     width: 282px;
     min-height: 58px;
     justify-content: center;
@@ -5076,7 +6091,7 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .ok-buttonendturn,
 .game-remaster .ok-buttonexchange {
     top: auto;
-    left: 347px;
+    left: 366px;
     right: auto;
     bottom: 50px;
     width: auto;
@@ -5102,7 +6117,7 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .cancel-buttonendturn,
 .game-remaster .cancel-buttonexchange {
     top: auto;
-    left: 176px;
+    left: 206px;
     bottom: 54px;
     width: auto;
     min-width: 60px;
@@ -5153,7 +6168,7 @@ body.ingame-client-page .backgroundingame {
     width: auto;
     display: flex;
     justify-content: center;
-    gap: 34px;
+    gap: 40px;
     margin: 0;
 }
 
@@ -5179,7 +6194,7 @@ body.ingame-client-page .backgroundingame {
     right: var(--remaster-modal-content-right);
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 50px;
+    gap: 32px;
     font-size: 13px;
 }
 

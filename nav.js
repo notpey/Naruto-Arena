@@ -17,6 +17,24 @@
     var navLinks = document.querySelector(".ca-nav-links");
     if (!nav || !navLinks) { return; }
 
+    // Shared website hero banner rotation. Index has static markup for this;
+    // subpages get the same layer injected here so the game client stays untouched.
+    document.querySelectorAll(".ca-hero").forEach(function (hero) {
+      if (hero.querySelector(".ca-hero-banners")) { return; }
+
+      var banners = document.createElement("div");
+      banners.className = "ca-hero-banners";
+      banners.setAttribute("aria-hidden", "true");
+
+      ["cloud", "leaf", "sound", "sand"].forEach(function (name) {
+        var banner = document.createElement("span");
+        banner.className = "ca-hero-banner ca-hero-banner--" + name;
+        banners.appendChild(banner);
+      });
+
+      hero.insertBefore(banners, hero.firstChild);
+    });
+
     var menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
 
     // ── Dropdown open/close ──────────────────────────────────
