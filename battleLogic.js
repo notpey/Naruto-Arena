@@ -1,4 +1,4 @@
-const defaultCharacters = require('./characters.js');
+const defaultCharacters = require("./data/characters/index.js");
 
 const DEFAULT_HP = 100;
 const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];

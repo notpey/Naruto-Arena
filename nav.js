@@ -39,68 +39,66 @@
 
     // ── Dropdown open/close ──────────────────────────────────
     function closeAll(except) {
+      window.rebindNavEvents = function() {
+      menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
       menuItems.forEach(function (item) {
-        if (item === except) { return; }
-        item.classList.remove("open");
-        var t = item.querySelector(".ca-nav-toggle");
-        if (t) { t.setAttribute("aria-expanded", "false"); }
-      });
-    }
-    function openItem(item) {
-      closeAll(item);
-      item.classList.add("open");
-      var t = item.querySelector(".ca-nav-toggle");
-      if (t) { t.setAttribute("aria-expanded", "true"); }
-    }
-    function closeItem(item) {
-      item.classList.remove("open");
-      var t = item.querySelector(".ca-nav-toggle");
-      if (t) { t.setAttribute("aria-expanded", "false"); }
-    }
+        var toggle = item.querySelector(".ca-nav-toggle");
+        var menu = item.querySelector(".ca-nav-menu");
+        if (!toggle || !menu || toggle.dataset.bound) { return; }
+        toggle.dataset.bound = "true";
+        var links = Array.prototype.slice.call(menu.querySelectorAll('[role="menuitem"]'));
 
-    menuItems.forEach(function (item) {
-      var toggle = item.querySelector(".ca-nav-toggle");
-      var menu = item.querySelector(".ca-nav-menu");
-      if (!toggle || !menu) { return; }
-      var links = Array.prototype.slice.call(menu.querySelectorAll('[role="menuitem"]'));
-
-      toggle.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (item.classList.contains("open")) { closeItem(item); }
-        else { openItem(item); }
-      });
-
-      toggle.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+        toggle.addEventListener("click", function (e) {
           e.preventDefault();
-          openItem(item);
-          if (links[0]) { links[0].focus(); }
-        } else if (e.key === "Escape") {
-          closeItem(item);
-        }
-      });
+          e.stopPropagation();
+          if (item.classList.contains("open")) { closeItem(item); }
+          else { openItem(item); }
+        });
 
-      links.forEach(function (link, idx) {
-        link.addEventListener("keydown", function (e) {
-          if (e.key === "ArrowDown") {
+        toggle.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            (links[idx + 1] || links[0]).focus();
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            (links[idx - 1] || links[links.length - 1]).focus();
+            openItem(item);
+            if (links[0]) { links[0].focus(); }
           } else if (e.key === "Escape") {
-            e.preventDefault();
             closeItem(item);
-            toggle.focus();
-          } else if (e.key === "Tab") {
-            // allow natural tab-out; close after focus leaves
-            setTimeout(function () {
-              if (!item.contains(document.activeElement)) { closeItem(item); }
-            }, 0);
           }
         });
+
+        links.forEach(function (link, idx) {
+          link.addEventListener("keydown", function (e) {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              (links[idx + 1] || links[0]).focus();
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              (links[idx - 1] || links[links.length - 1]).focus();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              closeItem(item);
+              toggle.focus();
+            } else if (e.key === "Tab") {
+              setTimeout(function () {
+                if (!item.contains(document.activeElement)) { closeItem(item); }
+              }, 0);
+            }
+          });
+        });
       });
+    };
+    
+    window.injectAdminNav = function() {
+        if (!navLinks || document.querySelector("#admin-nav-item")) return;
+        var li = document.createElement("li");
+        li.className = "ca-nav-item ca-has-menu";
+        li.id = "admin-nav-item";
+        li.innerHTML = '<button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="admin.html charactereditor.html editmission.html playeraccounts.html newspost.html winrates.html">Admin Tools<span class="ca-caret" aria-hidden="true">&#9662;</span></button><ul class="ca-nav-menu" role="menu" aria-label="Admin Tools"><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="admin.html">Control Panel</a></li><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactereditor.html">Character Editor</a></li><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="editmission.html">Mission Editor</a></li><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="playeraccounts.html">Player Accounts</a></li><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="newspost.html">News & Updates</a></li><li role="none"><a role="menuitem" class="ca-nav-menu-link" href="winrates.html">Winrates</a></li></ul>';
+        navLinks.appendChild(li);
+        window.rebindNavEvents();
+    };
+    
+    window.rebindNavEvents();
+
     });
 
     // Close on outside click / Esc

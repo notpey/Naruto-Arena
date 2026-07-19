@@ -5000,9 +5000,13 @@
 
   fetchSessionUser().then(function (user) {
     var isAdminOnlyPage = /(?:admin|winrates|playeraccounts|newspost|charactereditor|editmission)(?:\.html)?$/i.test(window.location.pathname || "");
-    if (isAdminOnlyPage && !(user && String(user.role || "").trim().toLowerCase() === "admin")) {
+    var isAdmin = (user && String(user.role || "").trim().toLowerCase() === "admin");
+    if (isAdminOnlyPage && !isAdmin) {
       window.location.replace("index.html");
       return;
+    }
+    if (isAdmin && window.injectAdminNav) {
+      window.injectAdminNav();
     }
 
     var safeRequestedClanName = sanitizeClanRouteName(requestedClanName);

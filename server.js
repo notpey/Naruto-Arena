@@ -16,7 +16,8 @@ const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
 const gauntlet = require('./gauntlet');
-let charactersData = require('./characters');
+let charactersData = require('./data/characters/index.js');
+const charactersBrowserScript = `const characters = ${JSON.stringify(charactersData)};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
 const app = express();
 app.use(compression());
@@ -5938,6 +5939,12 @@ app.use(async (req, res, next) => {
         return next();
     }
 });
+
+app.get('/characters.js', (req, res) => {
+    res.type('application/javascript');
+    res.send(charactersBrowserScript);
+});
+
 app.use(express.static(path.join(__dirname), {
     setHeaders(res, filePath) {
         if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
@@ -6593,7 +6600,21 @@ const attachWebSocketSupport = (server) => {
     });
 };
 
+const heartbeatInterval = setInterval(() => {
+  wsServer.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
+wsServer.on('close', () => {
+  clearInterval(heartbeatInterval);
+});
+
 wsServer.on('connection', async (ws) => {
+    ws.isAlive = true;
+    ws.on('pong', () => { ws.isAlive = true; });
     if (!ws?.matchId || !ws?.username) {
         try {
             ws.close();

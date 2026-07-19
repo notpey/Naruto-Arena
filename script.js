@@ -3443,8 +3443,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillInfo.cooldownEl.textContent = skill.cooldown ?? '-';
             }
             if (skillInfo.classesEl) {
-                const classes = getVisibleSkillClasses(skill.classes).join(', ');
-                skillInfo.classesEl.textContent = classes;
+                skillInfo.classesEl.innerHTML = '';
+                const classes = getVisibleSkillClasses(skill.classes);
+                if (classes.length === 0) {
+                    skillInfo.classesEl.textContent = 'None';
+                } else {
+                    classes.forEach(cls => {
+                        const badge = document.createElement('span');
+                        badge.className = 'skill-class-badge class-' + cls.toLowerCase();
+                        badge.textContent = cls;
+                        skillInfo.classesEl.appendChild(badge);
+                    });
+                }
             }
             if (skillInfo.classPickerWrapEl && skillInfo.classPickerEl) {
                 const options = getClassChoiceOptions(skill);
@@ -4002,6 +4012,78 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         loadMatchForIngame();
 
+        
+        let wsConnection = null;
+        let wsReconnectTimer = null;
+        let wsHeartbeatTimer = null;
+        
+        const connectBattleWebSocket = () => {
+            if (wsConnection || !matchIdFromUrl || battleEndShown) return;
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws?matchId=${encodeURIComponent(matchIdFromUrl)}`;
+            
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('Battle WebSocket connected.');
+                if (matchPoll) {
+                    clearInterval(matchPoll);
+                    matchPoll = null;
+                }
+                if (wsReconnectTimer) {
+                    clearTimeout(wsReconnectTimer);
+                    wsReconnectTimer = null;
+                }
+                
+                wsHeartbeatTimer = setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type: 'ping' }));
+                    }
+                }, 25000);
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data?.type === 'match_state' && data.payload) {
+                        if (data.payload.player?.username) {
+                            currentPlayerUsername = data.payload.player.username;
+                        }
+                        applyMatchState(data.payload);
+                    }
+                } catch (e) {
+                    console.error('WebSocket message parsing error', e);
+                }
+            };
+            
+            ws.onclose = () => {
+                wsConnection = null;
+                if (wsHeartbeatTimer) {
+                    clearInterval(wsHeartbeatTimer);
+                    wsHeartbeatTimer = null;
+                }
+                
+                if (!battleEndShown && !document.hidden) {
+                    console.warn('Battle WebSocket closed. Attempting reconnect in 2s...');
+                    wsReconnectTimer = setTimeout(() => {
+                        connectBattleWebSocket();
+                    }, 2000);
+                    
+                    startMatchPoll();
+        connectBattleWebSocket();
+                }
+            };
+            
+            ws.onerror = (err) => {
+                console.error('Battle WebSocket error:', err);
+                ws.close();
+            };
+            
+            wsConnection = ws;
+        };
+
         const startMatchPoll = () => {
             if (matchPoll || !matchIdFromUrl) return;
             matchPoll = setInterval(async () => {
@@ -4033,7 +4115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1500);
         };
         startMatchPoll();
-
+        connectBattleWebSocket();
         const surrenderButton = document.querySelector('.surrenderbutton');
         const handleReadySectionClick = async () => {
             if (!currentPlayerUsername || !currentTurnUsername) return;

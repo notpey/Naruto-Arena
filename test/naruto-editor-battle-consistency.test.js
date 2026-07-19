@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 
-const characters = require('../characters.js');
+const characters = require("../data/characters/index.js");
 const narutoStarterCharacter = require('../narutoStarterCharacter.js');
 const sakuraStarterCharacter = require('../sakuraStarterCharacter.js');
 const sasukeStarterCharacter = require('../sasukeStarterCharacter.js');

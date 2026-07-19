@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const characters = require('../characters.js');
+const characters = require("../data/characters/index.js");
 const {
     buildInitialBoard,
     computeTargetOptions,

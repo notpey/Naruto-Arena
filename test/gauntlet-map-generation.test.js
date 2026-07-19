@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const gauntlet = require('../gauntlet');
-const characters = require('../characters');
+const characters = require("../data/characters/index.js");
 
 test('act 2 map generation is deterministic by seed', () => {
     const first = gauntlet.generateAct2Map({ seed: 'team-7-seed', startingScrollType: 'heaven' });
