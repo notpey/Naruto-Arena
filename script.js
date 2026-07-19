@@ -4072,7 +4072,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }, 2000);
                     
                     startMatchPoll();
-        connectBattleWebSocket();
                 }
             };
             

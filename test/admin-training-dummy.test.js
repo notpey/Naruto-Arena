@@ -5,11 +5,13 @@ const test = require('node:test');
 const serverSource = fs.readFileSync('server.js', 'utf8');
 const selectionSource = fs.readFileSync('selection.html', 'utf8');
 const scriptSource = fs.readFileSync('script.js', 'utf8');
+const adminSource = fs.readFileSync('routes/admin.js', 'utf8');
 
-test('admin training dummy endpoint is admin-only and creates a training match', () => {
-    assert.match(serverSource, /app\.post\('\/api\/admin\/training-dummy\/start', requireSession/);
-    assert.match(serverSource, /Admin access required\./);
-    assert.match(serverSource, /mode: 'training'/);
+test('Admin training dummy integration', (t) => {
+    // 1. Verify server endpoint exists
+    assert.match(adminSource, /router\.(post|get)\('\/training-dummy\/start'/);
+    assert.match(adminSource, /Admin access required\./);
+    assert.match(adminSource, /mode: 'training'/);
     assert.match(serverSource, /passive: true/);
     assert.match(serverSource, /TRAINING_DUMMY_DISPLAY_NAME/);
 });

@@ -6420,3 +6420,8 @@ body.ingame-client-page .backgroundingame {
  . c h a k r a - b o x . r e d   {   b a c k g r o u n d :   r a d i a l - g r a d i e n t ( c i r c l e   a t   3 0 %   3 0 % ,   # f 6 6 ,   # 6 1 1 )   ! i m p o r t a n t ;   } 
   
  
+.class-type { margin-right: 4px; }
+.class-type:last-child { margin-right: 0; }
+
+.skill-class-badge { margin-right: 4px; }
+.skill-class-badge:last-child { margin-right: 0; }

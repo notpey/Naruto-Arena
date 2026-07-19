@@ -39,7 +39,26 @@
 
     // ── Dropdown open/close ──────────────────────────────────
     function closeAll(except) {
-      window.rebindNavEvents = function() {
+      menuItems.forEach(function (item) {
+        if (item === except) { return; }
+        item.classList.remove("open");
+        var t = item.querySelector(".ca-nav-toggle");
+        if (t) { t.setAttribute("aria-expanded", "false"); }
+      });
+    }
+    function openItem(item) {
+      closeAll(item);
+      item.classList.add("open");
+      var t = item.querySelector(".ca-nav-toggle");
+      if (t) { t.setAttribute("aria-expanded", "true"); }
+    }
+    function closeItem(item) {
+      item.classList.remove("open");
+      var t = item.querySelector(".ca-nav-toggle");
+      if (t) { t.setAttribute("aria-expanded", "false"); }
+    }
+
+    window.rebindNavEvents = function() {
       menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
       menuItems.forEach(function (item) {
         var toggle = item.querySelector(".ca-nav-toggle");
@@ -98,6 +117,7 @@
     };
     
     window.rebindNavEvents();
+    });
 
     });
 
