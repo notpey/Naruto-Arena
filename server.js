@@ -1861,7 +1861,7 @@ const activeMatchesMap = new Map();
 
 async function getMatchActive(matchId) {
     if (activeMatchesMap.has(matchId)) return activeMatchesMap.get(matchId);
-    const match = await getMatchActive(matchId);
+    const match = await matchesCollection.findOne({ matchId });
     if (match && match.status !== 'ended') {
         activeMatchesMap.set(matchId, match);
     }
@@ -1877,7 +1877,7 @@ function updateMatchActive(matchId, updateObj) {
         }
     }
     // Background save
-    updateMatchActive(matchId, updateObj).catch(err => console.error("Active match save error:", err));
+    matchesCollection.updateOne({ matchId }, updateObj).catch(err => console.error("Active match save error:", err));
     return Promise.resolve({ matchedCount: 1, modifiedCount: 1 });
 }
 
@@ -1885,7 +1885,7 @@ function insertMatchActive(matchObj) {
     if (matchObj && matchObj.matchId && matchObj.status !== 'ended') {
         activeMatchesMap.set(matchObj.matchId, matchObj);
     }
-    return insertMatchActive(matchObj);
+    return matchesCollection.insertOne(matchObj);
 }
 
 const wsConnections = new Set();
