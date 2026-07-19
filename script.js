@@ -3617,22 +3617,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillEl.classList.add('targeting-skill');
             }
             try {
-                const res = await fetch(
-                    `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/targets`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ actorSlot, skillIndex: skillIdx }),
-                    }
-                );
-                if (!res.ok) {
+                
+                // Use WebSocket RPC for instant targets
+                let data = null;
+                if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+                    const reqId = Date.now().toString() + Math.random().toString();
+                    const wsPromise = new Promise((resolve, reject) => {
+                        wsRequests.set(reqId, { resolve, reject });
+                        setTimeout(() => reject(new Error('WS timeout')), 3000);
+                    });
+                    
+                    wsConnection.send(JSON.stringify({
+                        type: 'skill_targets',
+                        reqId,
+                        matchId: matchIdFromUrl,
+                        actingUsername: currentPlayerUsername,
+                        actorSlot,
+                        skillIndex: skillIdx
+                    }));
+                    
+                    data = await wsPromise;
+                } else {
+                    const res = await fetch(
+                        `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/targets`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ actorSlot, skillIndex: skillIdx }),
+                        }
+                    );
+                    if (!res.ok) throw new Error('Unable to fetch targets.');
+                    data = await res.json();
+                }
+                
+                if (!data || (!data.ok && !data.targetType)) {
                     throw new Error('Unable to fetch targets.');
                 }
-                const data = await res.json();
-                if (!data?.ok) {
-                    throw new Error('Unable to fetch targets.');
-                }
+
                 pendingTurnState = normalizePendingTurn(data.pendingTurn);
                 applyQueuedSkillVisuals();
                 activeTargetOptions = data;
@@ -4014,6 +4036,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         
         let wsConnection = null;
+
+let wsRequests = new Map();
+
         let wsReconnectTimer = null;
         let wsHeartbeatTimer = null;
         
@@ -4044,10 +4069,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 25000);
             };
             
+            
             ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
+                    
+                    if (data?.type === 'skill_targets_response' && data.reqId) {
+                        if (wsRequests.has(data.reqId)) {
+                            wsRequests.get(data.reqId).resolve(data.payload);
+                            wsRequests.delete(data.reqId);
+                        }
+                        return;
+                    }
+                    
                     if (data?.type === 'match_state' && data.payload) {
+
                         if (data.payload.player?.username) {
                             currentPlayerUsername = data.payload.player.username;
                         }

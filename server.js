@@ -1856,6 +1856,38 @@ let matchesCollection;
 let appStateCollection;
 let newsPostsCollection;
 const matchSocketRooms = new Map();
+
+const activeMatchesMap = new Map();
+
+async function getMatchActive(matchId) {
+    if (activeMatchesMap.has(matchId)) return activeMatchesMap.get(matchId);
+    const match = await getMatchActive(matchId);
+    if (match && match.status !== 'ended') {
+        activeMatchesMap.set(matchId, match);
+    }
+    return match;
+}
+
+function updateMatchActive(matchId, updateObj) {
+    const match = activeMatchesMap.get(matchId);
+    if (match && updateObj.$set) {
+        Object.assign(match, updateObj.$set);
+        if (updateObj.$set.status === 'ended') {
+            activeMatchesMap.delete(matchId);
+        }
+    }
+    // Background save
+    updateMatchActive(matchId, updateObj).catch(err => console.error("Active match save error:", err));
+    return Promise.resolve({ matchedCount: 1, modifiedCount: 1 });
+}
+
+function insertMatchActive(matchObj) {
+    if (matchObj && matchObj.matchId && matchObj.status !== 'ended') {
+        activeMatchesMap.set(matchObj.matchId, matchObj);
+    }
+    return insertMatchActive(matchObj);
+}
+
 const wsConnections = new Set();
 const wsServer = new WebSocketServer({ noServer: true });
 let turnSweepTimer = null;
@@ -6494,7 +6526,7 @@ const buildMatchPayloadForUser = (match, username) => {
 const hydrateMatchForBroadcast = async (matchOrMatchId) => {
     const match =
         typeof matchOrMatchId === 'string'
-            ? await matchesCollection.findOne({ matchId: matchOrMatchId })
+            ? await getMatchActive(matchOrMatchId)
             : matchOrMatchId;
     if (!match) return null;
     const hydratedTurn = await ensureMatchTurnData(match);
@@ -6557,7 +6589,9 @@ const { attachWebSocketSupport } = require('./sockets/battleSocket.js')({
     removeSocketFromRoom,
     hydrateMatchForBroadcast,
     buildMatchPayloadForUser,
-    sendJsonToSocket
+    sendJsonToSocket,
+    battleLogic,
+    getCharactersData: () => charactersData
 });
 
 // In-memory matchmaking queues (demo)
@@ -7142,7 +7176,7 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
             displayName: GAME_BOT_DISPLAY_NAME,
         },
     };
-    await matchesCollection.insertOne(matchDocument);
+    await insertMatchActive(matchDocument);
     return matchDocument;
 };
 
@@ -7217,7 +7251,7 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
         pendingTurns: matchDocument.pendingTurns,
         turnExpiresAt: matchDocument.turnExpiresAt,
     });
-    await matchesCollection.insertOne(matchDocument);
+    await insertMatchActive(matchDocument);
     userToMatch.set(username, { matchId: matchDocument.matchId, opponent: TRAINING_DUMMY_DISPLAY_NAME });
     return matchDocument;
 };
@@ -7308,7 +7342,7 @@ const buildStoryBattleBotMatch = async ({ username, team, chapter, node, difficu
             outroDialogueLoss: node.outroDialogueLoss || [],
         },
     };
-    await matchesCollection.insertOne(matchDocument);
+    await insertMatchActive(matchDocument);
     return matchDocument;
 };
 
@@ -7379,7 +7413,7 @@ const buildGauntletBattleBotMatch = async ({ username, runState, node }) => {
             modifiers: buildGauntletModifierSummary(runState),
         },
     };
-    await matchesCollection.insertOne(matchDocument);
+    await insertMatchActive(matchDocument);
     return matchDocument;
 };
 
@@ -7551,8 +7585,7 @@ const ensureMatchTurnData = async (match) => {
     const { turnOrder, currentTurn } = pickInitialTurn(usernames);
     const turnStartedAt = new Date();
     const turnExpiresAt = new Date(Date.now() + getTurnDurationMsForUser(match, currentTurn));
-    await matchesCollection.updateOne(
-        { matchId: match.matchId },
+    await updateMatchActive(match.matchId,
         { $set: { currentTurn, turnOrder, turnStartedAt, turnExpiresAt } }
     );
     return { ...match, currentTurn, turnOrder, turnStartedAt, turnExpiresAt };
@@ -7623,8 +7656,7 @@ const ensureMatchEconomy = async (match) => {
     }
 
     if (changed) {
-        await matchesCollection.updateOne(
-            { matchId: match.matchId },
+        await updateMatchActive(match.matchId,
             {
                 $set: {
                     chakraPools: match.chakraPools,
@@ -7660,8 +7692,7 @@ const ensurePendingTurnState = async (match) => {
         }
     });
     if (changed) {
-        await matchesCollection.updateOne(
-            { matchId: match.matchId },
+        await updateMatchActive(match.matchId,
             {
                 $set: {
                     pendingTurns: match.pendingTurns,
@@ -7686,7 +7717,7 @@ const hasPendingTurnStartChoice = (pendingTurn) =>
     );
 
 const persistMatchState = async (match, fields = {}) => {
-    await matchesCollection.updateOne({ matchId: match.matchId }, { $set: fields });
+    await updateMatchActive(match.matchId, { $set: fields });
     if (quickMatches.has(match.matchId)) {
         quickMatches.set(match.matchId, {
             ...(quickMatches.get(match.matchId) || {}),
@@ -7963,7 +7994,7 @@ const runBattleBotTurn = async (matchId) => {
     }
     activeBattleBotTurns.add(matchId);
     try {
-        const match = await matchesCollection.findOne({ matchId });
+        const match = await getMatchActive(matchId);
         if (!match) {
             return;
         }
@@ -8449,8 +8480,7 @@ const ensureBoardState = async (match) => {
         }
     });
     if (changed) {
-        await matchesCollection.updateOne(
-            { matchId: match.matchId },
+        await updateMatchActive(match.matchId,
             { $set: { board: match.board, players } }
         );
     }
@@ -8509,8 +8539,7 @@ const finalizeTurn = async (match, username) => {
             match.winner,
             match.endedAt
         );
-        await matchesCollection.updateOne(
-            { matchId: match.matchId },
+        await updateMatchActive(match.matchId,
             {
                 $set: {
                     mode: match.mode || 'quick',
@@ -8587,8 +8616,7 @@ const finalizeTurn = async (match, username) => {
     match.turnExpiresAt = new Date(Date.now() + getTurnDurationMsForUser(match, nextTurn));
     match.pendingTurns[username] = makeEmptyPendingTurn();
 
-    await matchesCollection.updateOne(
-        { matchId: match.matchId },
+    await updateMatchActive(match.matchId,
         {
             $set: {
                 currentTurn: match.currentTurn,
@@ -8920,7 +8948,7 @@ app.post('/api/match/join', requireSession, async (req, res) => {
         // Already matched
         if (userToMatch.has(username)) {
             const { matchId, opponent } = userToMatch.get(username);
-            const existing = await matchesCollection.findOne({ matchId });
+            const existing = await getMatchActive(matchId);
             if (!existing || existing.status === 'ended') {
                 userToMatch.delete(username);
             } else {
@@ -9029,7 +9057,7 @@ app.post('/api/match/join', requireSession, async (req, res) => {
                 { username: opponent.username, team: opponent.team, aliveCount: aliveLookup[opponent.username] },
             ];
             const board = battleLogic.buildInitialBoard(playerDocs);
-            await matchesCollection.insertOne({
+            await insertMatchActive({
                 matchId,
                 mode,
                 status: 'active',
@@ -9243,7 +9271,7 @@ app.get('/api/match/status', requireSession, async (req, res) => {
         const normalizedProfile = user ? normalizeUserProfile(user) : null;
         const mapping = userToMatch.get(username);
         if (mapping) {
-            const match = await matchesCollection.findOne({ matchId: mapping.matchId });
+            const match = await getMatchActive(mapping.matchId);
             if (!match || match.status === 'ended') {
                 userToMatch.delete(username);
                 return res.json({ ok: true, matchFound: false });
@@ -9375,7 +9403,7 @@ app.post('/api/match/cancel', requireSession, (req, res) => {
 
 app.get('/api/match/:matchId', requireSession, async (req, res) => {
     const { matchId } = req.params;
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     const hydratedTurn = await ensureMatchTurnData(match);
     const hydratedEcon = await ensureMatchEconomy(hydratedTurn);
     const hydratedPending = await ensurePendingTurnState(hydratedEcon);
@@ -9407,7 +9435,7 @@ app.get('/api/match/:matchId', requireSession, async (req, res) => {
 
 app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
     const { matchId } = req.params;
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9438,8 +9466,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
         opponentEntry ? opponentEntry.username : null,
         endedAt
     );
-    await matchesCollection.updateOne(
-        { matchId },
+    await updateMatchActive(matchId,
         {
             $set: {
                 mode: match.mode || 'quick',
@@ -9478,7 +9505,7 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
 app.post('/api/match/:matchId/turn/end', requireSession, async (req, res) => {
     try {
         const { matchId } = req.params;
-        const match = await matchesCollection.findOne({ matchId });
+        const match = await getMatchActive(matchId);
         if (!match) {
             return res.status(404).json({ error: 'Match not found.' });
         }
@@ -9531,7 +9558,7 @@ app.post('/api/match/:matchId/skill/queue', requireSession, async (req, res) => 
     if (!Number.isInteger(actorSlot) || actorSlot < 0 || !Number.isInteger(skillIndex) || skillIndex < 0) {
         return res.status(400).json({ error: 'actorSlot and skillIndex are required.' });
     }
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9606,7 +9633,7 @@ app.post('/api/match/:matchId/turn/start-choice', requireSession, async (req, re
         if (!choiceKey) {
             return res.status(400).json({ error: 'choiceKey is required.' });
         }
-        const match = await matchesCollection.findOne({ matchId });
+        const match = await getMatchActive(matchId);
         if (!match) {
             return res.status(404).json({ error: 'Match not found.' });
         }
@@ -9659,7 +9686,7 @@ app.post('/api/match/:matchId/skill/cancel', requireSession, async (req, res) =>
     if (!Number.isInteger(actorSlot) || actorSlot < 0) {
         return res.status(400).json({ error: 'actorSlot is required.' });
     }
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9706,7 +9733,7 @@ app.post('/api/match/:matchId/skill/cancel', requireSession, async (req, res) =>
 app.post('/api/match/:matchId/skill/reorder', requireSession, async (req, res) => {
     const { matchId } = req.params;
     const actorSlots = Array.isArray(req.body?.actorSlots) ? req.body.actorSlots : [];
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9753,7 +9780,7 @@ app.post('/api/match/:matchId/turn/random/adjust', requireSession, async (req, r
     if (!chakraTypes.includes(chakraType) || !delta) {
         return res.status(400).json({ error: 'chakraType and delta are required.' });
     }
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9809,7 +9836,7 @@ app.post('/api/match/:matchId/chakra/exchange', requireSession, async (req, res)
     if (!chakraTypes.includes(chakraType)) {
         return res.status(400).json({ error: 'chakraType is required.' });
     }
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -9868,7 +9895,7 @@ app.post('/api/match/:matchId/skill/targets', requireSession, async (req, res) =
     if (!Number.isInteger(actorSlot) || actorSlot < 0 || !Number.isInteger(skillIndex) || skillIndex < 0) {
         return res.status(400).json({ error: 'actorSlot and skillIndex are required.' });
     }
-    const match = await matchesCollection.findOne({ matchId });
+    const match = await getMatchActive(matchId);
     if (!match) {
         return res.status(404).json({ error: 'Match not found.' });
     }
@@ -11744,7 +11771,7 @@ app.post('/api/gauntlet/run/abandon', requireSession, async (req, res) => {
             return res.json({ ok: true, run: null });
         }
         if (activeRun.pendingBattle?.matchId) {
-            const match = await matchesCollection.findOne({ matchId: activeRun.pendingBattle.matchId });
+            const match = await getMatchActive(activeRun.pendingBattle.matchId);
             if (match && match.status !== 'ended') {
                 return res.status(409).json({ error: 'Surrender the active Gauntlet battle before abandoning the run.' });
             }

@@ -10,7 +10,9 @@ module.exports = function(context) {
         removeSocketFromRoom,
         hydrateMatchForBroadcast,
         buildMatchPayloadForUser,
-        sendJsonToSocket
+        sendJsonToSocket,
+        battleLogic,
+        getCharactersData
     } = context;
 
     const attachWebSocketSupport = (server) => {
@@ -100,6 +102,34 @@ module.exports = function(context) {
             if (payload) {
                 sendJsonToSocket(ws, { type: 'match_state', payload });
             }
+            
+            ws.on('message', async (message) => {
+                try {
+                    const data = JSON.parse(message);
+                    if (data.type === 'skill_targets') {
+                        // Look up match in active DB or cache
+                        const match = await matchesCollection.findOne({ matchId: data.matchId });
+                        if (!match || match.status === 'ended') return;
+                        
+                        const options = battleLogic.computeTargetOptions({
+                            match,
+                            actingUsername: data.actingUsername,
+                            actorSlot: data.actorSlot,
+                            skillIndex: data.skillIndex,
+                            characters: getCharactersData()
+                        });
+                        
+                        sendJsonToSocket(ws, {
+                            type: 'skill_targets_response',
+                            reqId: data.reqId,
+                            payload: options
+                        });
+                    }
+                } catch(e) {
+                    // ignore bad messages
+                }
+            });
+            
         } catch (error) {
             try {
                 ws.close();
