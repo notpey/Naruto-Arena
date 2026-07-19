@@ -29,13 +29,9 @@
     --na-ink:         #141414; /* dark text on parchment */
 
     /* Game Client Dimensions
-       Current live client: 770x560
-       Future remaster target: 1280x800
-       Future proportional stage option: 1100x800
-
-       The live aliases below intentionally point at the current
-       770x560 client. Do not switch them to remaster values until
-       the remaster layout is built and QA-ready.
+       The remaster (1100x800) is the permanent game client.
+       The legacy 770x560 values are kept as named variables for reference
+       only; no live selectors use them.
     */
     --game-current-w: 770px;
     --game-current-h: 560px;
@@ -44,10 +40,11 @@
     --game-remaster-stage-w: 1100px;
     --game-remaster-stage-h: 800px;
     --game-remaster-side-gutter: 90px;
-    --game-stage-w: var(--game-current-w);
-    --game-stage-h: var(--game-current-h);
-    --selection-bg-image: url("selectionbg.png");
-    --ingame-bg-image: url("ingamebg.png");
+    /* Live aliases always point at the remaster stage. */
+    --game-stage-w: var(--game-remaster-stage-w);
+    --game-stage-h: var(--game-remaster-stage-h);
+    --selection-bg-image: url("selectionbg-remaster.png?v=2");
+    --ingame-bg-image: url("ingamebg-remaster.png?v=2");
 
     /* Future Remaster Asset Slots
        These filenames are placeholders for later Photoshop/export
@@ -112,14 +109,12 @@
    GAME CLIENT REMASTER MODE
    Disabled by default.
 
-   This class only changes the stage dimension aliases when a
-   developer temporarily applies `.game-remaster` to a wrapper or
-   body for manual testing. It is not present in selection.html or
-   ingame.html by default, so the live client remains 770x560.
-
-   Future phases will add remaster-specific selection and in-game
-   layout rules behind this class. Popup sizing should be updated
-   only after the remaster layout is ready.
+/* ============================================================
+   GAME-CLIENT REMASTER LAYOUT SCOPE
+   The remaster (1100x800) is the permanent, only game client.
+   The .game-remaster class is applied unconditionally to
+   <body> in selection.html and ingame.html. These rules scope
+   all remaster-specific layout overrides safely.
    ============================================================ */
 .game-remaster {
     --game-stage-w: var(--game-remaster-stage-w);

@@ -116,12 +116,8 @@
     if (gameLink) {
       gameLink.addEventListener("click", function (e) {
         var url = gameLink.getAttribute("href") || "selection.html";
-        var useRemasterPreview = true;
-        try {
-          useRemasterPreview = localStorage.getItem("na-selection-remaster-preview") !== "disabled";
-        } catch (err0) {}
-        var targetWidth = useRemasterPreview ? 1100 : 770;
-        var targetHeight = useRemasterPreview ? 800 : 560;
+        var targetWidth = 1100;
+        var targetHeight = 800;
         var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
         var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
         var popupWidth = targetWidth + chromeWidth;
@@ -136,9 +132,8 @@
           "resizable=yes",
           "scrollbars=no"
         ].join(",");
-        // The game client renders in a fixed 770×560 stage (see style.css
-        // .background); size the popup to that natural size so it doesn't look
-        // stretched. A little extra height covers minor window chrome.
+        // The game client renders in a fixed 1100×800 stage (see style.css
+        // .backgroundingame); size the popup to that natural size.
         var win = null;
         try {
           win = window.open(url, "narutoArenaGame", features);

@@ -4953,16 +4953,10 @@
   if (playNowButton) {
     playNowButton.addEventListener("click", function () {
       var destination = accountPanel.hidden ? "selection-login.html" : "selection.html";
-      var useRemasterPreview = destination === "selection.html";
-      try {
-        useRemasterPreview =
-          destination === "selection.html" &&
-          localStorage.getItem("na-selection-remaster-preview") !== "disabled";
-      } catch (error) {}
       var targetInnerWidth =
-        destination === "selection.html" ? (useRemasterPreview ? 1100 : 770) : 760;
+        destination === "selection.html" ? 1100 : 760;
       var targetInnerHeight =
-        destination === "selection.html" ? (useRemasterPreview ? 800 : 560) : 580;
+        destination === "selection.html" ? 800 : 580;
       var chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
       var chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
       var popupWidth = targetInnerWidth + chromeWidth;

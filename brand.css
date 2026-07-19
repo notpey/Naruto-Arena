@@ -52,7 +52,7 @@
   --ca-violet:        #b19af2;
   --ca-danger:        #d15a5d;
 
-  /* --- Chakra trinity (shinobi ember / crimson / chakra blue) --- */
+  /* --- Shinobi accent trinity (ember / crimson / chakra blue) --- */
   --ca-purple:      #d7953a;   /* Shinobi Ember — primary CTA, active state */
   --ca-purple-lit:  #f0bd62;   /* warm amber chakra glow / hover */
   --ca-purple-dim:  #2f2214;   /* ember tint surface */
@@ -61,12 +61,7 @@
   --ca-blue:        #5aa7b5;   /* Chakra Blue — info / ally */
   --ca-blue-dim:    #14272c;   /* chakra blue tint surface */
 
-  /* Legacy names retained for older page CSS. Prefer the tokens above. */
-  --ca-purple:      var(--ca-orange);
-  --ca-purple-lit:  var(--ca-amber);
-  --ca-red:         var(--ca-danger);
-
-  /* --- Forward-facing shinobi aliases (prefer these) --- */
+  /* --- Forward-facing shinobi aliases (prefer these over --ca-purple* names) --- */
   --ca-ember:       var(--ca-orange);      /* primary action / active state */
   --ca-amber:       #f0bd62;               /* amber chakra glow / hover */
   --ca-crimson:     var(--ca-danger);      /* danger / enemy state */
