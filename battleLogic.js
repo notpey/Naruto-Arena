@@ -211,6 +211,18 @@ const resolveEffectiveSkill = ({ characters, rosterIndex, skillIndex, actorState
         }
         resolvedSkill = replacementSkill;
     }
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    for (const status of statuses) {
+        const remaining = Number(status?.remainingTurns) || 0;
+        if (remaining <= 0) continue;
+        const targetOverrides = status?.metadata?.skillTargetOverrides;
+        if (!targetOverrides || typeof targetOverrides !== 'object') continue;
+        const targetOverride =
+            typeof targetOverrides[resolvedSkill?.id] === 'string' ? targetOverrides[resolvedSkill.id].trim() : '';
+        if (targetOverride) {
+            return { ...resolvedSkill, target: targetOverride };
+        }
+    }
     return resolvedSkill || baseSkill;
 };
 
@@ -6204,7 +6216,8 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     endedOngoingStatuses.add(status.id);
                     return;
                 }
-                if (ongoingClass === 'control' && (sourceStunned || targetInvulnerable)) {
+                const ignoreOngoingSourceStun = Boolean(status?.metadata?.ignoreOngoingSourceStun);
+                if (ongoingClass === 'control' && ((sourceStunned && !ignoreOngoingSourceStun) || targetInvulnerable)) {
                     if (status?.id) {
                         endedOngoingStatuses.add(status.id);
                     }
@@ -6462,7 +6475,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                         status?.metadata?.removeEnemyAfflictionStatusesOnTurnEndCount
                     );
                 }
-                if (ongoingClass === 'action' && (sourceStunned || targetInvulnerable)) return;
+                if (ongoingClass === 'action' && ((sourceStunned && !ignoreOngoingSourceStun) || targetInvulnerable)) return;
                 const baseTurnEndDamage = Math.max(0, Number(status?.metadata?.turnEndDamage) || 0);
                 let turnEndDamage = baseTurnEndDamage;
                 const turnEndIsAffliction = Boolean(status?.metadata?.afflictionDamage);

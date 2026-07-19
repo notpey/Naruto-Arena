@@ -1863,6 +1863,7 @@ const activeBattleBotTurns = new Set();
 const scheduledBattleBotTurns = new Set();
 const GAME_BOT_USERNAME_PREFIX = '__game_bot__:';
 const GAME_BOT_DISPLAY_NAME = 'Rogue Ninja';
+const TRAINING_DUMMY_DISPLAY_NAME = 'Training Dummy';
 
 const DEFAULT_CLAN_RANK_NAMES = {
     clanLeader: 'Clan Leader',
@@ -4846,6 +4847,10 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         return null;
     }
 
+    if (match.mode === 'training') {
+        return null;
+    }
+
     if (match.mode === 'gauntlet') {
         const gauntletResults = await applyGauntletProgressForUsers(match, winnerUsername, endedAt);
         match.gauntletResults =
@@ -7185,6 +7190,82 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
     return matchDocument;
 };
 
+const buildTrainingDummyMatch = async ({ username, team }) => {
+    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const botPlayer = createBattleBotPlayer({
+        matchId,
+        team: buildBattleBotTeam(),
+        ladderLevel: 1,
+        displayName: TRAINING_DUMMY_DISPLAY_NAME,
+    });
+    const aliveLookup = {
+        [username]: Array.isArray(team) ? team.length : 3,
+        [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
+    };
+    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
+    const playerDocs = [
+        {
+            username,
+            team,
+            aliveCount: aliveLookup[username],
+        },
+        botPlayer,
+    ];
+    const board = battleLogic.buildInitialBoard(playerDocs);
+
+    if (built.currentTurn !== username) {
+        built.turnOrder = [username, botPlayer.username];
+        built.currentTurn = username;
+        const initialized = initializeEconomyState(built.turnOrder, username, aliveLookup);
+        built.chakraPools = initialized.chakraPools;
+        built.economy = initialized.economy;
+        built.turnExpiresAt = initialized.turnExpiresAt
+            ? new Date(new Date(initialized.turnExpiresAt).getTime() + MATCH_FOUND_HOLD_MS)
+            : built.matchStartsAt;
+    }
+
+    const matchDocument = {
+        matchId: built.matchId,
+        mode: 'training',
+        status: 'active',
+        createdAt: new Date(),
+        matchStartsAt: built.matchStartsAt,
+        chakraPools: built.chakraPools,
+        economy: built.economy,
+        pendingTurns: built.pendingTurns,
+        currentTurn: built.currentTurn,
+        turnStartedAt: built.turnStartedAt,
+        turnOrder: built.turnOrder,
+        turnExpiresAt: built.turnExpiresAt,
+        board,
+        players: playerDocs,
+        botMatch: {
+            enabled: true,
+            passive: true,
+            displayName: TRAINING_DUMMY_DISPLAY_NAME,
+        },
+        trainingMatch: {
+            adminOnly: true,
+            passiveDummy: true,
+        },
+    };
+    quickMatches.set(matchDocument.matchId, {
+        players: built.turnOrder,
+        createdAt: matchDocument.createdAt,
+        matchStartsAt: matchDocument.matchStartsAt,
+        turnOrder: matchDocument.turnOrder,
+        currentTurn: matchDocument.currentTurn,
+        turnStartedAt: matchDocument.turnStartedAt,
+        chakraPools: matchDocument.chakraPools,
+        economy: matchDocument.economy,
+        pendingTurns: matchDocument.pendingTurns,
+        turnExpiresAt: matchDocument.turnExpiresAt,
+    });
+    await matchesCollection.insertOne(matchDocument);
+    userToMatch.set(username, { matchId: matchDocument.matchId, opponent: TRAINING_DUMMY_DISPLAY_NAME });
+    return matchDocument;
+};
+
 const applyHardStoryModifiersToBoard = (board, botUsername) => {
     const botUnits = Array.isArray(board?.[botUsername]) ? board[botUsername] : [];
     const aliveEnemyCount = Math.max(1, botUnits.filter((unit) => unit && unit.alive !== false).length || 1);
@@ -7665,6 +7746,8 @@ const getBattleBotUsername = (match) => getBattleBotPlayer(match)?.username || n
 
 const isBattleBotTurn = (match) => isGameBotUsername(match?.currentTurn || '');
 
+const isPassiveBattleBotMatch = (match) => Boolean(match?.botMatch?.passive);
+
 const botCanAffordSkill = ({ match, username, skill, actorState }) => {
     const pool = match?.chakraPools?.[username];
     if (!pool || !skill) {
@@ -7938,7 +8021,8 @@ const runBattleBotTurn = async (matchId) => {
         }
         const username = hydrated.currentTurn;
         const pendingTurn = getPendingTurn(hydrated, username);
-        if (hasPendingTurnStartChoice(pendingTurn)) {
+        const passiveBot = isPassiveBattleBotMatch(hydrated);
+        if (!passiveBot && hasPendingTurnStartChoice(pendingTurn)) {
             const choice = Array.isArray(pendingTurn.turnStartChoice?.options)
                 ? pendingTurn.turnStartChoice.options[0]
                 : null;
@@ -7959,7 +8043,7 @@ const runBattleBotTurn = async (matchId) => {
                 .map((unit, slot) => (unit && unit.alive !== false ? slot : null))
                 .filter((slot) => Number.isInteger(slot))
         );
-        actorSlots.forEach((actorSlot) => {
+        if (!passiveBot) actorSlots.forEach((actorSlot) => {
             if (queuedActionCount >= actionLimit) {
                 return;
             }
@@ -9200,6 +9284,70 @@ app.post('/api/match/join', requireSession, async (req, res) => {
         return res.json({ ok: true, queued: true, mode });
     } catch (error) {
         console.error('Matchmaking error:', error);
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
+app.post('/api/admin/training-dummy/start', requireSession, async (req, res) => {
+    try {
+        const username = req.authUser.username;
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        const { error: validationError, value } = teamSchema.validate(req.body?.team);
+        if (validationError) {
+            return res.status(400).json({ error: 'A valid three-character team is required.' });
+        }
+
+        if (userToMatch.has(username)) {
+            return res.status(409).json({ error: 'You are already in a match.' });
+        }
+        const existingMatch = await matchesCollection.findOne({
+            'players.username': username,
+            status: { $ne: 'ended' },
+        });
+        if (existingMatch) {
+            return res.status(409).json({ error: 'You are already in a match.' });
+        }
+
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        if (String(user.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        const profile = normalizeUserProfile(user);
+        try {
+            await assertTeamCanBeUsed(profile, value, user.role);
+        } catch (error) {
+            return res.status(403).json({ error: error.message || 'Character is locked.' });
+        }
+
+        removeQueuedEntry(username);
+        const matchDocument = await buildTrainingDummyMatch({
+            username,
+            team: value,
+        });
+        const safePayload = buildMatchPayloadForUser(matchDocument, username);
+        return res.json({
+            ok: true,
+            matchFound: true,
+            matchId: matchDocument.matchId,
+            mode: 'training',
+            opponent: TRAINING_DUMMY_DISPLAY_NAME,
+            matchStartsAt: matchDocument.matchStartsAt,
+            matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
+            currentTurn: matchDocument.currentTurn || null,
+            turnOrder: matchDocument.turnOrder || null,
+            turnExpiresAt: matchDocument.turnExpiresAt || null,
+            turnDurationMs: getTurnDurationMsForUser(matchDocument, matchDocument?.currentTurn),
+            chakraPools: safePayload?.chakraPools || null,
+            lastChakraGain: safePayload?.lastChakraGain || null,
+            pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
+        });
+    } catch (error) {
+        console.error('Training dummy start error:', error);
         return res.status(500).json({ error: 'Internal server error.' });
     }
 });

@@ -4,6 +4,7 @@ const test = require('node:test');
 const characters = require('../characters.js');
 const {
     buildInitialBoard,
+    computeTargetOptions,
     resolveEffectiveSkill,
     resolvePendingTurnSkills,
     tickStatusesForTurnEnd,
@@ -125,6 +126,22 @@ test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
     assert.equal(match.board.p2[1].hp, 75);
 });
 
+test('Tenten Twin Rising Dragons marks stack their Trap damage bonus', () => {
+    const match = makeMatch([indexById.tenten], [indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    match.board.p1[0].state.cooldowns = {};
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(
+        getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark')?.metadata?.bonusDamageFromSourceSkillsFlat,
+        20
+    );
+});
+
 test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {
     const match = makeMatch([indexById['tsuchi-kin']], [indexById['gaara-of-the-desert']]);
 
@@ -239,6 +256,70 @@ test('Asuma Sharpen Blades unlocks Flying Swallow and Finishing Blow cycles with
         }).id,
         'sarutobi-asuma-finishing-blow'
     );
+});
+
+test('Itachi Mangekyou changes Amaterasu targeting to all enemies without a replacement skill', () => {
+    const match = makeMatch([indexById['uchiha-itachi']], [indexById.tenten, indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 0);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    const effectiveAmaterasu = resolveEffectiveSkill({
+        characters,
+        rosterIndex: indexById['uchiha-itachi'],
+        skillIndex: 1,
+        actorState: match.board.p1[0].state,
+    });
+    const targetOptions = computeTargetOptions({
+        match,
+        actingUsername: 'p1',
+        actorSlot: 0,
+        skillIndex: 1,
+        characters,
+    });
+
+    assert.equal(effectiveAmaterasu.id, 'uchiha-itachi-amaterasu');
+    assert.equal(effectiveAmaterasu.target, 'all-enemy');
+    assert.equal(targetOptions.mode, 'all');
+    assert.equal(targetOptions.targets.length, 2);
+});
+
+test('Iruka Sealed Bomb Square marks only the chosen enemy', () => {
+    const match = makeMatch([indexById['umino-iruka']], [indexById.tenten, indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.ok(getStatus(match, 'p2', 0, 'iruka_sealed_bomb_trap'));
+    assert.equal(getStatus(match, 'p2', 1, 'iruka_sealed_bomb_trap'), undefined);
+});
+
+test('Hiruzen Dead Demon Consuming Seal ticks while Hiruzen is self-stunned', () => {
+    const match = makeMatch([indexById['sarutobi-hiruzen']], [indexById.tenten]);
+
+    queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+
+    assert.equal(match.board.p2[0].hp, 60);
+    assert.equal(match.board.p1[0].hp, 80);
+});
+
+test('Jiroubou Earth Prison drains chakra each source turn while it survives', () => {
+    const match = makeMatch([indexById.jiroubou], [indexById.tenten]);
+
+    queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 35);
+
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 34);
+
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 33);
 });
 
 test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () => {

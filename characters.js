@@ -213,7 +213,7 @@ const characters = [
                                 "physical",
                                 "strategic"
                             ],
-                            "tooltipText": "This character physical and strategic skills are stunned."
+                            "tooltipText": "This character's physical and strategic skills are stunned."
                         }
                     }
                 ]
@@ -245,7 +245,7 @@ const characters = [
                 "id": "haruno-sakura-inner-sakura",
                 "name": "Inner Sakura",
                 "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "Haruno Sakura gains 5 points of damage reduction and ignores all enemy stun effects permanently. This skill is replaced by 'Inner Sakura Strangle'.",
+                "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently. This skill is replaced by 'Inner Sakura Strangle'.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
@@ -262,12 +262,10 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 5,
-                            "cannotBeStunned": true,
-                            "stunImmune": true,
                             "skillReplacements": {
                                 "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
                             },
-                            "tooltipText": "Sakura has 5 damage reduction\nSakura ignores all stun effects\nInner Sakura is replaced by Inner Sakura Strangle."
+                            "tooltipText": "Sakura has 5 damage reduction\nInner Sakura is replaced by Inner Sakura Strangle."
                         }
                     }
                 ]
@@ -863,7 +861,7 @@ const characters = [
                 "id": "hyuuga-hinata-hinata-gentle-fist",
                 "name": "Hinata Gentle Fist",
                 "skillimage": "https://i.imgur.com/guOfm9P.png",
-                "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn.",
+                "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn and the target takes 20 damage each turn for 2 turns.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -909,6 +907,23 @@ const characters = [
                             "scope": "self",
                             "statusId": "hyuuga_hinata_byakugan"
                         }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_gentle_fist_damage",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnEndDamage": 20,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character takes 20 damage each turn from Hinata Gentle Fist."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "hyuuga_hinata_byakugan"
+                        }
                     }
                 ]
             },
@@ -916,7 +931,7 @@ const characters = [
                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                 "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn.",
+                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn and refreshes 10 destructible defense on Hinata's next turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -935,6 +950,16 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "destructibleDefensePoints": 10,
+                            "turnEndApplyStatusToSelf": {
+                                "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
+                                "duration": 1,
+                                "metadata": {
+                                    "helpful": true,
+                                    "destructibleDefensePoints": 10,
+                                    "tooltipText": "This character has 10 refreshed destructible defense from Protective Eight Trigrams Sixty-Four Palms."
+                                }
+                            },
+                            "turnEndTrigger": "source_turn",
                             "onBreakApplyStatusToSource": {
                                 "statusId": "hyuuga_hinata_protective_palms_cost",
                                 "duration": 1,
@@ -944,7 +969,7 @@ const characters = [
                                     "tooltipText": "This character's skills cost 1 additional random chakra."
                                 }
                             },
-                            "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                            "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                         },
                         "condition": {
                             "scope": "self",
@@ -999,7 +1024,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "damageReductionFlat": 15,
-                            "tooltipText": "Hinata has 15 damage reduction and her skills last 1 additional turn."
+                            "tooltipText": "Hinata has 15 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
                         }
                     }
                 ]
@@ -1118,7 +1143,7 @@ const characters = [
                 "id": "nara-shikamaru-shadow-imitation",
                 "name": "Shadow Imitation",
                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra and strategic skills are stunned for 2 turns.",
+                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
                 "energy": [
                     "Random",
                     "Random"
@@ -1143,8 +1168,13 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                         }
+                    },
+                    {
+                        "type": "cleanse_statuses",
+                        "statusId": "nara_shikamaru_meditate",
+                        "scope": "all-enemy"
                     }
                 ],
                 "targetCondition": {
@@ -1360,7 +1390,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                         }
                     },
                     {
@@ -1579,11 +1609,14 @@ const characters = [
                 "id": "rock-lee-high-speed-taijutsu",
                 "name": "High Speed Taijutsu",
                 "skillimage": "https://i.imgur.com/f59XWBW.png",
-                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him.",
+                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him. This skill requires 'Fifth Gate Opening'.",
                 "energy": [
                     "Taijutsu"
                 ],
                 "target": "single-enemy",
+                "actorCondition": {
+                    "statusId": "rock_lee_fifth_gate_opening"
+                },
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
@@ -1608,6 +1641,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "minimumHp": 1,
+                            "hideTooltip": true,
                             "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
                         }
                     },
@@ -1622,12 +1656,15 @@ const characters = [
                 "id": "rock-lee-front-lotus",
                 "name": "Front Lotus",
                 "skillimage": "https://i.imgur.com/4boHWJ0.png",
-                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'.",
+                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'. This skill requires 'Fifth Gate Opening'.",
                 "energy": [
                     "Taijutsu",
                     "Random"
                 ],
                 "target": "single-enemy",
+                "actorCondition": {
+                    "statusId": "rock_lee_fifth_gate_opening"
+                },
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
@@ -1662,7 +1699,7 @@ const characters = [
                 "id": "rock-lee-fifth-gate-opening",
                 "name": "Fifth Gate Opening",
                 "skillimage": "https://i.imgur.com/OvlloQo.png",
-                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee will deal 5 additional damage each time he is damaged by a skill. This skill is replaced by 'Fiery Spirit'.",
+                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee's harmful skills deal 5 additional damage each time he is damaged by an enemy skill. This skill is replaced by 'Fiery Spirit'.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
@@ -2000,11 +2037,14 @@ const characters = [
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 10,
+                            "mergeNumericAddKeys": [
+                                "bonusDamageFromSourceSkillsFlat"
+                            ],
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
                                 "tenten-twin-rising-dragons-trap"
                             ],
-                            "tooltipText": "This character takes 10 additional damage from Twin Rising Dragons Trap."
+                            "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
                         }
                     },
                     {
@@ -2020,11 +2060,14 @@ const characters = [
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
                             "bonusDamageFromSourceSkillsFlat": 20,
+                            "mergeNumericAddKeys": [
+                                "bonusDamageFromSourceSkillsFlat"
+                            ],
                             "bonusDamageFromSourceCharacterId": "tenten",
                             "bonusDamageAppliesToSkillIds": [
                                 "tenten-twin-rising-dragons-trap"
                             ],
-                            "tooltipText": "This character takes 20 additional damage from Twin Rising Dragons Trap."
+                            "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
                         }
                     },
                     {
@@ -2224,7 +2267,7 @@ const characters = [
                 "id": "gaara-of-the-desert-sand-coffin",
                 "name": "Sand Coffin",
                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, chakra and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -2249,7 +2292,7 @@ const characters = [
                                 "energy",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                            "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                         }
                     },
                     {
@@ -2621,7 +2664,7 @@ const characters = [
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -2725,10 +2768,8 @@ const characters = [
                 "id": "kankuro-puppet-preparation",
                 "name": "Puppet Preparation",
                 "skillimage": "https://i.imgur.com/ghx3V0n.png",
-                "skilldescription": "Kankuro gains 15 points of permanent destructible defense. For 4 turns, 'Black Secret Machine One Shot' and 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
-                "energy": [
-                    "Random"
-                ],
+                "skilldescription": "Kankuro gains 10 points of permanent destructible defense. His next 'Black Secret Machine One Shot' or 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
+                "energy": [],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 1,
@@ -2743,7 +2784,7 @@ const characters = [
                         "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "destructibleDefensePoints": 15,
+                            "destructibleDefensePoints": 10,
                             "mergeNumericAddKeys": [
                                 "destructibleDefensePoints"
                             ],
@@ -2753,15 +2794,19 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "kankuro_puppet_preparation_bonus",
-                        "duration": 4,
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
                             "skillDamageBonuses": {
                                 "kankuro-black-secret-machine-one-shot": 10,
                                 "kankuro-poison-bomb": 10
                             },
+                            "onOwnerUseSkillIdsAny": [
+                                "kankuro-black-secret-machine-one-shot",
+                                "kankuro-poison-bomb"
+                            ],
                             "replaceSkillDamageBonuses": true,
-                            "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal 10 additional damage."
+                            "tooltipText": "Kankuro's next Black Secret Machine One Shot or Poison Bomb deals 10 additional damage."
                         }
                     }
                 ]
@@ -3532,7 +3577,7 @@ const characters = [
                                 "haku-flying-water-needles-of-death": "haku-flying-water-needles-of-death-empowered",
                                 "haku-acupuncture": "haku-acupuncture-empowered"
                             },
-                            "tooltipText": "Haku is invulnerable. Flying Water Needles of Death and Acupuncture target all enemies, and Acupuncture costs 1 additional random chakra."
+                            "tooltipText": "Haku is invulnerable.\nFlying Water Needles of Death targets all enemies.\nAcupuncture targets all enemies.\nAcupuncture costs 1 additional random chakra."
                         }
                     }
                 ]
@@ -3695,11 +3740,11 @@ const characters = [
                 "id": "umino-iruka-sealed-bomb-square-release",
                 "name": "Sealed Bomb Square Release",
                 "skillimage": "https://i.imgur.com/TeDfWJB.png",
-                "skilldescription": "The following turn, any enemy that uses a new harmful skill will take 40 damage that ignores invulnerability, and for 1 turn they will take 25 additional damage from physical and chakra skills. This skill is invisible.",
+                "skilldescription": "Umino Iruka targets one enemy. The following turn, if that enemy uses a new harmful skill, they will take 40 damage that ignores invulnerability, and for 1 turn they will take 25 additional damage from physical and chakra skills. This skill is invisible.",
                 "energy": [
                     "Ninjutsu"
                 ],
-                "target": "self",
+                "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
@@ -3711,7 +3756,7 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "iruka_sealed_bomb_trap",
                         "duration": 1,
-                        "scope": "all-enemy",
+                        "scope": "target",
                         "metadata": {
                             "harmful": true,
                             "hideTooltipFromUnitOwner": true,
@@ -3729,7 +3774,7 @@ const characters = [
                                 },
                                 "tooltipText": "This character takes 25 additional damage from physical and chakra skills from Sealed Bomb Square Release."
                             },
-                            "tooltipText": "An enemy that uses a new harmful skill will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills."
+                            "tooltipText": "If this character uses a new harmful skill, they will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills."
                         }
                     }
                 ]
@@ -3993,7 +4038,7 @@ const characters = [
                                 "id": "demon-brothers-chain-wrap",
                                 "name": "Chain Wrap",
                                 "skillimage": "https://i.imgur.com/qm5cAjZ.png",
-                                "skilldescription": "Demon Brothers stun one enemy's physical, mental and strategic skills for 1 turn and bind them with chains for 2 turns. The following turn, this skill will be replaced by 'Chain Shred'.",
+                "skilldescription": "Demon Brothers stun one enemy's physical, mental, and strategic skills for 1 turn and bind them with chains for 2 turns. The following turn, this skill will be replaced by 'Chain Shred'.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -4018,7 +4063,7 @@ const characters = [
                                                                 "mental",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, mental and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, mental, and strategic skills are stunned."
                                                 }
                                         },
                                         {
@@ -4215,7 +4260,7 @@ const characters = [
                                                                 "mental",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, mental and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, mental, and strategic skills are stunned."
                                                 }
                                         },
                                         {
@@ -5327,7 +5372,7 @@ const characters = [
                                                         "harmful": true,
                                                         "cannotReduceDamage": true,
                                                         "cannotBecomeInvulnerable": true,
-                                                        "tooltipText": "This character is unable to reduce damage or become invulnerable."
+                                                        "tooltipText": "This character cannot reduce damage or become invulnerable."
                                                 }
                                         }
                                 ]
@@ -5463,7 +5508,7 @@ const characters = [
                                                         "harmful": true,
                                                         "cannotReduceDamage": true,
                                                         "cannotBecomeInvulnerable": true,
-                                                        "tooltipText": "This character is unable to reduce damage or become invulnerable."
+                                                        "tooltipText": "This character cannot reduce damage or become invulnerable."
                                                 }
                                         },
                                         {
@@ -5799,15 +5844,9 @@ const characters = [
                                                 "scope": "target",
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnEndRemoveRandomChakra": 0,
+                                                        "turnEndRemoveRandomChakra": 1,
                                                         "turnEndTrigger": "source_turn",
-                                                        "tooltipText": "This character will lose 1 random chakra if Earth Prison survives.",
-                                                        "onExpireEffects": [
-                                                                {
-                                                                        "type": "remove_random_chakra",
-                                                                        "amount": 1
-                                                                }
-                                                        ]
+                                                        "tooltipText": "This character loses 1 random chakra each turn while Earth Prison survives."
                                                 }
                                         },
                                         {
@@ -6830,7 +6869,7 @@ const characters = [
                                 "id": "hatake-kakashi-summoning-ninja-dogs",
                                 "name": "Summoning: Ninja Dogs",
                                 "skillimage": "https://i.imgur.com/1TSYjNE.png",
-                                "skilldescription": "Hatake Kakashi stuns one enemy's physical, chakra and strategic skills for 1 turn. During this time, allies deal 10 additional non-affliction damage to this enemy and 'Raikiri' deals 45 piercing damage to them.",
+                "skilldescription": "Hatake Kakashi stuns one enemy's physical, chakra, and strategic skills for 1 turn. During this time, allies deal 10 additional non-affliction damage to this enemy and 'Raikiri' deals 45 piercing damage to them.",
                                 "energy": [
                                         "Ninjutsu"
                                 ],
@@ -7069,6 +7108,7 @@ const characters = [
                                                 "metadata": {
                                                         "harmful": true,
                                                         "cannotUseSkills": true,
+                                                        "turnDurationAnchor": "source_turn",
                                                         "tooltipText": "This character is stunned by Demonic Illusion: Tree Binding Death."
                                                 }
                                         },
@@ -7304,7 +7344,7 @@ const characters = [
                                 "id": "sarutobi-asuma-flying-swallow",
                                 "name": "Flying Swallow",
                                 "skillimage": "https://i.imgur.com/a50zdDY.png",
-                                "skilldescription": "Sarutobi Asuma deals 15 damage to all enemies for 3 turns. This skill requires 'Sharpen Blades' to be used first and returns to 'Sharpen Blades' after use.",
+                                "skilldescription": "Sarutobi Asuma deals 10 damage to all enemies for 3 turns. This ongoing action requires 'Sharpen Blades' to be used first and returns to 'Sharpen Blades' after use.",
                                 "energy": [
                                         "Taijutsu",
                                         "Ninjutsu"
@@ -7327,12 +7367,12 @@ const characters = [
                                                 "scope": "all-enemy",
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnEndDamage": 15,
+                                                        "turnEndDamage": 10,
                                                         "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
                                                         "ongoingClass": "action",
                                                         "triggerOnApply": true,
-                                                        "tooltipText": "This character takes 15 damage from Flying Swallow."
+                                                        "tooltipText": "This character takes 10 damage from Flying Swallow. This action ends if Asuma is stunned or the target becomes invulnerable."
                                                 }
                                         },
                                         {
@@ -7875,7 +7915,7 @@ const characters = [
                                 "id": "yakushi-kabuto-temple-of-nirvana",
                                 "name": "Temple of Nirvana",
                                 "skillimage": "https://i.imgur.com/JyyJvB0.png",
-                                "skilldescription": "The following turn, any enemy that does not use a new skill will be stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns. This skill is invisible.",
+                                "skilldescription": "The following turn, any enemy that skips using a new skill will be stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns. This skill is invisible.",
                                 "energy": [
                                         "Genjutsu"
                                 ],
@@ -7923,7 +7963,7 @@ const characters = [
                                                                         }
                                                                 }
                                                         ],
-                                                        "tooltipText": "If this character does not use a new skill, they will be stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns."
+                                                        "tooltipText": "If this character skips using a new skill, they are stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns."
                                                 }
                                         }
                                 ]
@@ -7994,7 +8034,7 @@ const characters = [
                 "id": "tsunade-heavenly-foot-of-pain",
                 "name": "Heavenly Foot of Pain",
                 "skillimage": "https://i.imgur.com/pZx6mNz.png",
-                "skilldescription": "Tsunade deals 30 damage to one enemy and stuns their physical, mental and strategic skills for 1 turn.",
+                "skilldescription": "Tsunade deals 30 damage to one enemy and stuns their physical, mental, and strategic skills for 1 turn.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -8024,7 +8064,7 @@ const characters = [
                                 "mental",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, mental and strategic skills are stunned."
+                            "tooltipText": "This character's physical, mental, and strategic skills are stunned."
                         }
                     }
                 ]
@@ -8224,7 +8264,7 @@ const characters = [
                 "id": "jiraiya-summoning-toad-mouth-bind",
                 "name": "Summoning: Toad Mouth Bind",
                 "skillimage": "https://i.imgur.com/E0vmRac.png",
-                "skilldescription": "For 2 turns, all enemies will be unable to reduce damage or become invulnerable. During this time, if Jiraiya or one of his allies receives a new harmful physical skill, they will become invulnerable for 1 turn.",
+                "skilldescription": "For 2 turns, all enemies cannot reduce damage or become invulnerable. During this time, if Jiraiya or one of his allies is targeted by a new harmful physical skill, they become invulnerable for 1 turn.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -8245,7 +8285,7 @@ const characters = [
                             "harmful": true,
                             "cannotReduceDamage": true,
                             "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character is unable to reduce damage or become invulnerable."
+                            "tooltipText": "This character cannot reduce damage or become invulnerable."
                         }
                     },
                     {
@@ -8266,7 +8306,7 @@ const characters = [
                                     "tooltipText": "This character is invulnerable."
                                 }
                             },
-                            "tooltipText": "If this character receives a new harmful physical skill, they will become invulnerable for 1 turn."
+                            "tooltipText": "If this character is targeted by a new harmful physical skill, they become invulnerable for 1 turn."
                         }
                     }
                 ]
@@ -8682,7 +8722,7 @@ const characters = [
                 "id": "edo-tensei-hashirama-a-world-of-trees",
                 "name": "A World of Trees",
                 "skillimage": "https://i.imgur.com/spbtu4f.png",
-                "skilldescription": "For 2 turns, all enemies' physical, energy and strategic skills will cost 1 additional random chakra and their cooldowns will be increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
+                "skilldescription": "For 2 turns, all enemies' physical, energy, and strategic skills cost 1 additional random chakra and their cooldowns are increased by 1 turn. During this time, this skill can be used again to grant Edo Tensei Hashirama's team 30 points of permanent destructible defense and to stun all enemies' skills for 1 turn.",
                 "energy": [
                     "Bloodline",
                     "Bloodline"
@@ -8744,7 +8784,7 @@ const characters = [
                                 "energy": 1,
                                 "strategic": 1
                             },
-                            "tooltipText": "This character's physical, energy and strategic skills cost 1 additional random chakra."
+                            "tooltipText": "This character's physical, energy, and strategic skills cost 1 additional random chakra."
                         }
                     },
                     {
@@ -9029,6 +9069,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "ongoingClass": "action",
+                            "ignoreOngoingSourceStun": true,
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotReduceDamage": true,
@@ -9036,7 +9077,7 @@ const characters = [
                             "cannotBeCleansed": true,
                             "turnEndDamage": 40,
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character takes 40 affliction damage each turn, is stunned, and is unable to reduce damage or become invulnerable. This effect cannot be removed or ignored and ends if Sarutobi Hiruzen dies."
+                            "tooltipText": "This character takes 40 affliction damage each turn, is stunned, and cannot reduce damage or become invulnerable. This effect cannot be removed or ignored and ends if Sarutobi Hiruzen dies."
                         }
                     },
                     {
@@ -9047,6 +9088,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "ongoingClass": "action",
+                            "ignoreOngoingSourceStun": true,
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotBeCleansed": true,
@@ -9794,7 +9836,7 @@ const characters = [
                                     "max": 50
                                 }
                             ],
-                            "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense, takes 5 affliction damage each turn, and his skills deal 5 additional damage. This bonus grows by 5 each turn, up to 50 additional damage."
+                            "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense.\nButterfly Chouji takes 5 affliction damage each turn.\nButterfly Chouji's skills deal 5 additional damage, increasing by 5 each turn up to 50 additional damage."
                         }
                     }
                 ]
@@ -10526,7 +10568,7 @@ const characters = [
                 "id": "hoshigaki-kisame-samehada-slash",
                 "name": "Samehada Slash",
                 "skillimage": "https://i.imgur.com/Knwkie7.png",
-                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their energy, mental and strategic skills for 1 turn.",
+                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their energy, mental, and strategic skills for 1 turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -10556,7 +10598,7 @@ const characters = [
                                 "mental",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's energy, mental and strategic skills are stunned."
+                            "tooltipText": "This character's energy, mental, and strategic skills are stunned."
                         }
                     }
                 ]
@@ -10600,7 +10642,7 @@ const characters = [
                 "id": "hoshigaki-kisame-water-shark-projectile",
                 "name": "Water Shark Projectile",
                 "skillimage": "https://i.imgur.com/Cvpp0VQ.png",
-                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their physical, affliction and strategic skills for 1 turn.",
+                "skilldescription": "Hoshigaki Kisame deals 20 damage to one enemy and stuns their physical, affliction, and strategic skills for 1 turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -10630,7 +10672,7 @@ const characters = [
                                 "affliction",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical, affliction and strategic skills are stunned."
+                            "tooltipText": "This character's physical, affliction, and strategic skills are stunned."
                         }
                     }
                 ]
@@ -10723,10 +10765,13 @@ const characters = [
                                 "uchiha-itachi-amaterasu": 2,
                                 "uchiha-itachi-tsukuyomi": 2
                             },
+                            "skillTargetOverrides": {
+                                "uchiha-itachi-amaterasu": "all-enemy"
+                            },
                             "skillDurationBonuses": {
                                 "uchiha-itachi-tsukuyomi": 2
                             },
-                            "tooltipText": "Uchiha Itachi is invulnerable to non-strategic skills. Amaterasu and Tsukuyomi are enhanced but cost more and have increased cooldowns."
+                            "tooltipText": "Uchiha Itachi is invulnerable to non-strategic skills. Amaterasu and Tsukuyomi are enhanced: double cost and +2 cooldowns."
                         }
                     },
                     {
@@ -11391,7 +11436,7 @@ const characters = [
                 "name": "Siege of Lightning",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "",
-                "skilldescription": "Kurosuki Raiga targets all enemies. For 2 turns, everytime they use a new skill, they will be dealt 15 piercing damage. This skill becomes 'Lightning Dragon Tornado' permanently after used.",
+                "skilldescription": "Kurosuki Raiga targets all enemies. For 2 turns, every time they use a new skill, they will be dealt 15 piercing damage. This skill becomes 'Lightning Dragon Tornado' permanently after used.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -11423,7 +11468,7 @@ const characters = [
                                     }
                                 }
                             ],
-                            "tooltipText": "Everytime this character uses a new skill, they take 15 piercing damage."
+                            "tooltipText": "Every time this character uses a new skill, they take 15 piercing damage."
                         }
                     },
                     {
@@ -11488,7 +11533,7 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "",
                 "maxUses": 1,
-                "skilldescription": "For the rest of the game, everytime an enemy uses a new skill on Kurosuki Raiga, that enemy will be dealt 100 piercing damage. This skill can only be used once and cannot be removed.",
+                "skilldescription": "For the rest of the game, every time an enemy uses a new skill on Kurosuki Raiga, that enemy will be dealt 100 piercing damage. This skill can only be used once and cannot be removed.",
                 "energy": [
                     "Ninjutsu",
                     "Ninjutsu"

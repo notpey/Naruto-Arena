@@ -18,11 +18,14 @@
                                 "id": "rock-lee-high-speed-taijutsu",
                                 "name": "High Speed Taijutsu",
                                 "skillimage": "https://i.imgur.com/f59XWBW.png",
-                                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him.",
+                                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him. This skill requires 'Fifth Gate Opening'.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
                                 "target": "single-enemy",
+                                "actorCondition": {
+                                        "statusId": "rock_lee_fifth_gate_opening"
+                                },
                                 "damage": 0,
                                 "cooldown": 0,
                                 "classes": [
@@ -47,6 +50,7 @@
                                                 "scope": "self",
                                                 "metadata": {
                                                         "minimumHp": 1,
+                                                        "hideTooltip": true,
                                                         "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
                                                 }
                                         },
@@ -61,12 +65,15 @@
                                 "id": "rock-lee-front-lotus",
                                 "name": "Front Lotus",
                                 "skillimage": "https://i.imgur.com/4boHWJ0.png",
-                                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'.",
+                                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'. This skill requires 'Fifth Gate Opening'.",
                                 "energy": [
                                         "Taijutsu",
                                         "Random"
                                 ],
                                 "target": "single-enemy",
+                                "actorCondition": {
+                                        "statusId": "rock_lee_fifth_gate_opening"
+                                },
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [
@@ -101,7 +108,7 @@
                                 "id": "rock-lee-fifth-gate-opening",
                                 "name": "Fifth Gate Opening",
                                 "skillimage": "https://i.imgur.com/OvlloQo.png",
-                                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee will deal 5 additional damage each time he is damaged by a skill. This skill is replaced by 'Fiery Spirit'.",
+                                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee's harmful skills deal 5 additional damage each time he is damaged by an enemy skill. This skill is replaced by 'Fiery Spirit'.",
                                 "energy": [],
                                 "target": "self",
                                 "damage": 0,
@@ -296,11 +303,14 @@
                                                         "harmful": true,
                                                         "turnDurationAnchor": "source_turn",
                                                         "bonusDamageFromSourceSkillsFlat": 10,
+                                                        "mergeNumericAddKeys": [
+                                                                "bonusDamageFromSourceSkillsFlat"
+                                                        ],
                                                         "bonusDamageFromSourceCharacterId": "tenten",
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "tenten-twin-rising-dragons-trap"
                                                         ],
-                                                        "tooltipText": "This character takes 10 additional damage from Twin Rising Dragons Trap."
+                                                        "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
                                                 }
                                         },
                                         {
@@ -316,11 +326,14 @@
                                                         "harmful": true,
                                                         "turnDurationAnchor": "source_turn",
                                                         "bonusDamageFromSourceSkillsFlat": 20,
+                                                        "mergeNumericAddKeys": [
+                                                                "bonusDamageFromSourceSkillsFlat"
+                                                        ],
                                                         "bonusDamageFromSourceCharacterId": "tenten",
                                                         "bonusDamageAppliesToSkillIds": [
                                                                 "tenten-twin-rising-dragons-trap"
                                                         ],
-                                                        "tooltipText": "This character takes 20 additional damage from Twin Rising Dragons Trap."
+                                                        "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
                                                 }
                                         },
                                         {
@@ -663,7 +676,7 @@
                                 "id": "gaara-of-the-desert-sand-coffin",
                                 "name": "Sand Coffin",
                                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                                "skilldescription": "Gaara stuns one enemy's physical, chakra and strategic skills for 2 turns. For 1 turn, this enemy will be unable to reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Random"
@@ -688,7 +701,7 @@
                                                                 "energy",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                                                 }
                                         },
                                         {
@@ -872,7 +885,7 @@
                                 ],
                                 "target": "single-enemy",
                                 "damage": 0,
-                                "cooldown": 0,
+                                "cooldown": 1,
                                 "classes": [
                                         "Physical",
                                         "Instant"
@@ -976,10 +989,8 @@
                                 "id": "kankuro-puppet-preparation",
                                 "name": "Puppet Preparation",
                                 "skillimage": "https://i.imgur.com/ghx3V0n.png",
-                                "skilldescription": "Kankuro gains 15 points of permanent destructible defense. For 4 turns, 'Black Secret Machine One Shot' and 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
-                                "energy": [
-                                        "Random"
-                                ],
+                                "skilldescription": "Kankuro gains 10 points of permanent destructible defense. His next 'Black Secret Machine One Shot' or 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
+                                "energy": [],
                                 "target": "self",
                                 "damage": 0,
                                 "cooldown": 1,
@@ -994,7 +1005,7 @@
                                                 "duration": 99,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "destructibleDefensePoints": 15,
+                                                        "destructibleDefensePoints": 10,
                                                         "mergeNumericAddKeys": [
                                                                 "destructibleDefensePoints"
                                                         ],
@@ -1004,15 +1015,19 @@
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "kankuro_puppet_preparation_bonus",
-                                                "duration": 4,
+                                                "duration": 99,
                                                 "scope": "self",
                                                 "metadata": {
                                                         "skillDamageBonuses": {
                                                                 "kankuro-black-secret-machine-one-shot": 10,
                                                                 "kankuro-poison-bomb": 10
                                                         },
+                                                        "onOwnerUseSkillIdsAny": [
+                                                                "kankuro-black-secret-machine-one-shot",
+                                                                "kankuro-poison-bomb"
+                                                        ],
                                                         "replaceSkillDamageBonuses": true,
-                                                        "tooltipText": "Black Secret Machine One Shot and Poison Bomb deal 10 additional damage."
+                                                        "tooltipText": "Kankuro's next Black Secret Machine One Shot or Poison Bomb deals 10 additional damage."
                                                 }
                                         }
                                 ]

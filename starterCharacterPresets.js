@@ -328,7 +328,7 @@
                                 "id": "hyuuga-hinata-hinata-gentle-fist",
                                 "name": "Hinata Gentle Fist",
                                 "skillimage": "https://i.imgur.com/guOfm9P.png",
-                                "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn.",
+                                "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn and the target takes 20 damage each turn for 2 turns.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -374,6 +374,23 @@
                                                         "scope": "self",
                                                         "statusId": "hyuuga_hinata_byakugan"
                                                 }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "hyuuga_hinata_gentle_fist_damage",
+                                                "duration": 2,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "turnEndDamage": 20,
+                                                        "turnEndTrigger": "source_turn",
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "tooltipText": "This character takes 20 damage each turn from Hinata Gentle Fist."
+                                                },
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "statusId": "hyuuga_hinata_byakugan"
+                                                }
                                         }
                                 ]
                         },
@@ -381,7 +398,7 @@
                                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
                                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                                 "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn.",
+                                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn and refreshes 10 destructible defense on Hinata's next turn.",
                                 "energy": [
                                         "Ninjutsu"
                                 ],
@@ -400,6 +417,16 @@
                                                 "scope": "all-allies",
                                                 "metadata": {
                                                         "destructibleDefensePoints": 10,
+                                                        "turnEndApplyStatusToSelf": {
+                                                                "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
+                                                                "duration": 1,
+                                                                "metadata": {
+                                                                        "helpful": true,
+                                                                        "destructibleDefensePoints": 10,
+                                                                        "tooltipText": "This character has 10 refreshed destructible defense from Protective Eight Trigrams Sixty-Four Palms."
+                                                                }
+                                                        },
+                                                        "turnEndTrigger": "source_turn",
                                                         "onBreakApplyStatusToSource": {
                                                                 "statusId": "hyuuga_hinata_protective_palms_cost",
                                                                 "duration": 1,
@@ -409,7 +436,7 @@
                                                                         "tooltipText": "This character's skills cost 1 additional random chakra."
                                                                 }
                                                         },
-                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                                                        "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -464,7 +491,7 @@
                                                 "scope": "self",
                                                 "metadata": {
                                                         "damageReductionFlat": 15,
-                                                        "tooltipText": "Hinata has 15 damage reduction and her skills last 1 additional turn."
+                                                        "tooltipText": "Hinata has 15 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
                                                 }
                                         }
                                 ]
@@ -583,7 +610,7 @@
                                 "id": "nara-shikamaru-shadow-imitation",
                                 "name": "Shadow Imitation",
                                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra and strategic skills are stunned for 2 turns.",
+                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
                                 "energy": [
                                         "Random",
                                         "Random"
@@ -608,8 +635,13 @@
                                                                 "energy",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                                                 }
+                                        },
+                                        {
+                                                "type": "cleanse_statuses",
+                                                "statusId": "nara_shikamaru_meditate",
+                                                "scope": "all-enemy"
                                         }
                                 ],
                                 "targetCondition": {
@@ -825,7 +857,7 @@
                                                                 "energy",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, chakra and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                                                 }
                                         },
                                         {

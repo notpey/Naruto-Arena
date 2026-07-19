@@ -446,7 +446,6 @@ test('battleLogic resolves Sakura starter kit behavior used by the editor data',
                 status.id === 'haruno_sakura_inner_sakura_active' &&
                 status.remainingTurns === 99 &&
                 status.metadata.damageReductionFlat === 5 &&
-                status.metadata.cannotBeStunned === true &&
                 status.metadata.skillReplacements?.['haruno-sakura-inner-sakura'] ===
                     'haruno-sakura-inner-sakura-strangle'
         ),
@@ -808,6 +807,9 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
 test('battleLogic resolves Rock Lee starter kit behavior used by the editor data', () => {
     let match = makeMatch([9], [1]);
 
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p1[0].hp, 95, 'High Speed Taijutsu should cost Lee 5 health');
@@ -992,9 +994,9 @@ test('battleLogic resolves Kankuro starter kit behavior used by the editor data'
         match.board.p1[0].state.statuses.some(
             (status) =>
                 status.id === 'kankuro_puppet_preparation_defense' &&
-                status.metadata.destructibleDefensePoints === 15 &&
+                status.metadata.destructibleDefensePoints === 10 &&
                 status.metadata.tooltipText ===
-                    'Kankuro has 15 points of permanent destructible defense from Puppet Preparation.'
+                    'Kankuro has 10 points of permanent destructible defense from Puppet Preparation.'
         ),
         true
     );

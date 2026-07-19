@@ -904,6 +904,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             return map;
         };
 
+        const getSkillTargetOverrideFromUnit = (unit, skillId) => {
+            if (!skillId) return '';
+            const statuses = Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [];
+            for (const status of statuses) {
+                const remaining = Number(status?.remainingTurns) || 0;
+                if (remaining <= 0) continue;
+                const overrides = status?.metadata?.skillTargetOverrides;
+                if (!overrides || typeof overrides !== 'object') continue;
+                const override = typeof overrides[skillId] === 'string' ? overrides[skillId].trim() : '';
+                if (override) return override;
+            }
+            return '';
+        };
+
         const getEffectiveSkillForActorSlot = (actorSlot, baseSkillIdx) => {
             const meta = playerSkillMetaByKey.get(`${actorSlot}:${baseSkillIdx}`);
             const baseSkill = meta?.baseSkill || meta?.skill || null;
@@ -922,6 +936,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 );
                 if (!replacementSkill) break;
                 resolvedSkill = replacementSkill;
+            }
+            const targetOverride = getSkillTargetOverrideFromUnit(unit, resolvedSkill?.id || '');
+            if (targetOverride) {
+                return { ...resolvedSkill, target: targetOverride };
             }
             return resolvedSkill || baseSkill;
         };
@@ -2049,12 +2067,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? `You won a ladder battle against ${opponent}.`
                     : currentMatchMode === 'private'
                         ? `You won a private game against ${opponent}.`
-                        : `You won a quick battle against ${opponent}.`
+                        : currentMatchMode === 'training'
+                            ? `You finished a training dummy battle against ${opponent}.`
+                            : `You won a quick battle against ${opponent}.`
                 : isLadderMatch
                     ? `You lost a ladder battle against ${opponent}.`
                     : currentMatchMode === 'private'
                         ? `You lost a private game against ${opponent}.`
-                        : `You lost a quick battle against ${opponent}.`;
+                        : currentMatchMode === 'training'
+                            ? `You lost a training dummy battle against ${opponent}.`
+                            : `You lost a quick battle against ${opponent}.`;
             const rewardRows = [];
             if (isLadderMatch) {
                 rewardRows.push({
@@ -2358,11 +2380,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const escapeHtml = (value) =>
             String(value ?? '')
+                .replaceAll('#&39;', "'")
+                .replaceAll('&#39;', "'")
+                .replaceAll('&apos;', "'")
                 .replaceAll('&', '&amp;')
                 .replaceAll('<', '&lt;')
                 .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#39;');
+                .replaceAll('"', '&quot;');
 
         const formatGauntletNodeType = (nodeType = '') => {
             const labels = {
@@ -2669,6 +2693,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
                 const splitTooltipTextIntoLines = (text, statusMetadata = {}) => {
                     let normalized = String(text || '').trim();
+                    normalized = normalized
+                        .replace(
+                            /Amaterasu and Tsukuyomi are enhanced but cost more\.?\s+This character have increased cooldowns\./gi,
+                            'Amaterasu and Tsukuyomi are enhanced: double cost and +2 cooldowns.'
+                        )
+                        .replace(
+                            /Amaterasu and Tsukuyomi are enhanced but cost more(?: and have increased cooldowns)?\.?/gi,
+                            'Amaterasu and Tsukuyomi are enhanced: double cost and +2 cooldowns.'
+                        )
+                        .replace(/\bThis character have increased cooldowns\./gi, 'This character has increased cooldowns.');
                     // Several skills write generic tooltip text ("has permanent destructible
                     // defense", "takes additional damage", "has damage reduction") and rely on
                     // the actual point value being injected here at render time from the live
@@ -2774,7 +2808,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     );
                     return normalized
                         .split(/\n+/)
-                        .flatMap((part) => part.split(/(?<=\.)\s+(?=This character|They|Their|All enemies|If |For \d+ turns)/i))
+                        .flatMap((part) =>
+                            part.split(
+                                /(?<=\.)\s+(?=This character|They|Their|All enemies|If |For \d+ turns|[A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+)*\s+(?:is|are|has|have|gains|gain|takes|take|deals|deal|targets?|costs?|will|can|cannot)\b)/i
+                            )
+                        )
+                        .flatMap((part) =>
+                            part.split(
+                                /,\s+and\s+(?=[A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+)*\s+(?:costs?|targets?|deals?|takes?|gains?)\b)/
+                            )
+                        )
                         .flatMap((part) =>
                             part.split(
                                 /\s+and\s+(?=(?:takes|take|deals|deal|loses|lose|has|have|gains|gain|receives|receive|removes|remove|stuns|stun|their skills|skills cost)\b)/i
@@ -2894,6 +2937,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                             text = bonusLines.join(' ');
                         }
                     }
+                    const ongoingClass =
+                        typeof statusMetadata?.ongoingClass === 'string'
+                            ? statusMetadata.ongoingClass.trim().toLowerCase()
+                            : '';
+                    if (
+                        (ongoingClass === 'action' || ongoingClass === 'control') &&
+                        !/\b(ends?|cancel(?:led|s)?|stunned|invulnerable)\b/i.test(text)
+                    ) {
+                        const cancelLine =
+                            ongoingClass === 'control'
+                                ? 'This control effect ends if the user is stunned or the target becomes invulnerable.'
+                                : 'This action effect ends if the user is stunned or the target becomes invulnerable.';
+                        text = `${text}\n${cancelLine}`;
+                    }
                     const byRemaining = status?.metadata?.skillReplacementsByRemainingTurns;
                     if (byRemaining && typeof byRemaining === 'object') {
                         const remaining = Math.max(0, Number(status?.remainingTurns) || 0);
@@ -2922,31 +2979,58 @@ document.addEventListener('DOMContentLoaded', async () => {
                         lines: splitTooltipTextIntoLines(text, statusMetadata),
                     });
                 });
-                const textLinesHtml = textRows
-                    .map((row, idx) => {
-                        const turns = escapeHtml(formatTurnsLabel(row.remaining));
-                        const formatTooltipEffectText = (value) => {
-                            const escaped = escapeHtml(value);
-                            return escaped.replace(
-                                /\b(\d+(?:\s+(?:additional|less|points? of|random|piercing|affliction|physical|chakra|non-affliction|damage|health|turns?|turn))?|Infinite|damage reduction|destructible defense|invulnerable|stunned?|ignores? stun effects?|additional damage|less damage|random chakra|piercing damage|affliction damage)\b/gi,
-                                '<strong class="status-tooltip-emphasis">$1</strong>'
-                            );
-                        };
-                        const line = (Array.isArray(row.lines) && row.lines.length ? row.lines : [row.text])
+                const formatTooltipEffectText = (value) => {
+                    const escaped = escapeHtml(value);
+                    return escaped.replace(
+                        /\b(\+?\d+(?:\s+(?:additional|less|points? of|random|piercing|affliction|physical|chakra|non-affliction|damage|health|turns?|turn|cooldowns?))?|double|Infinite|damage reduction|destructible defense|invulnerable|stunned?|ignores? stun effects?|additional damage|less damage|random chakra|piercing damage|affliction damage)\b/gi,
+                        '<strong class="status-tooltip-emphasis">$1</strong>'
+                    );
+                };
+                const durationGroups = [];
+                const durationGroupByRemaining = new Map();
+                textRows.forEach((row) => {
+                    const remaining = Math.max(0, Number(row.remaining) || 0);
+                    if (!durationGroupByRemaining.has(remaining)) {
+                        const group = { remaining, lines: [] };
+                        durationGroupByRemaining.set(remaining, group);
+                        durationGroups.push(group);
+                    }
+                    const group = durationGroupByRemaining.get(remaining);
+                    const rowLines = Array.isArray(row.lines) && row.lines.length ? row.lines : [row.text];
+                    rowLines.forEach((line) => {
+                        const normalizedLine = String(line || '').trim();
+                        if (
+                            /^This character has increased cooldowns\.$/i.test(normalizedLine) &&
+                            group.lines.some((entry) => /enhanced:.*cooldowns?/i.test(entry))
+                        ) {
+                            return;
+                        }
+                        if (normalizedLine) group.lines.push(normalizedLine);
+                    });
+                });
+                const textLinesHtml = durationGroups
+                    .map((group, idx) => {
+                        const turns = escapeHtml(formatTurnsLabel(group.remaining));
+                        const line = group.lines
                             .map(
                                 (sub) =>
                                     `<div class="status-tooltip-effect">` +
                                         `<span class="status-tooltip-bullet" aria-hidden="true"></span>` +
                                         `<span class="status-tooltip-desc-line">${formatTooltipEffectText(sub)}</span>` +
-                                        `<span class="status-tooltip-turns">${turns}</span>` +
                                     `</div>`
                             )
                             .join('');
                         const divider =
-                            idx < textRows.length - 1
+                            idx < durationGroups.length - 1
                                 ? `<div class="status-tooltip-line-divider"></div>`
                                 : '';
-                        return `${line}${divider}`;
+                        return (
+                            `<div class="status-tooltip-row">` +
+                                line +
+                                `<div class="status-tooltip-row-meta">${turns}</div>` +
+                            `</div>` +
+                            divider
+                        );
                     })
                     .join('');
                 return (
@@ -4163,6 +4247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const quickButton = document.querySelector('.quick-button');
     const ladderButton = document.querySelector('.ladder-button');
     const privateButton = document.querySelector('.private-button');
+    const trainingDummyButton = document.querySelector('.training-dummy-button');
     const searchingBackdrop = document.querySelector('.searching-backdrop');
     const searchingOverlay = document.querySelector('.searchingscroll');
     const searchingMessage = document.querySelector('.searching');
@@ -4181,6 +4266,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let matchmakingPoll = null;
     let isSearching = false;
     let pendingMatchRedirect = null;
+    const isCurrentUserAdmin = () => String(profileCache?.role || '').trim().toLowerCase() === 'admin';
+    if (trainingDummyButton) {
+        trainingDummyButton.hidden = !isCurrentUserAdmin();
+    }
     const handleLogout = async () => {
         try {
             await fetch(`${API_BASE_URL}/api/logout`, {
@@ -4235,9 +4324,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         searchingMessage.textContent =
-            mode === 'private' && activeSearchTargetUsername
-                ? `Searching for ${activeSearchTargetUsername}`
-                : 'Searching for an opponent';
+            mode === 'training'
+                ? 'Preparing training dummy'
+                : mode === 'private' && activeSearchTargetUsername
+                    ? `Searching for ${activeSearchTargetUsername}`
+                    : 'Searching for an opponent';
         if (searchingSpinner) {
             setImageSrcWithFallback(searchingSpinner, REMASTER_ASSETS.sharingan, REMASTER_ASSETS.sharingan);
             searchingSpinner.style.visibility = 'visible';
@@ -4365,6 +4456,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 2000);
     };
 
+    const readApiJson = async (response, fallbackMessage = 'Request failed.') => {
+        const text = await response.text();
+        if (!text) return {};
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            throw new Error(
+                response.status === 404
+                    ? 'This server has not loaded the latest training dummy endpoint yet. Restart the server and try again.'
+                    : fallbackMessage
+            );
+        }
+    };
+
     const joinMatchmaking = async (mode = 'quick', options = {}) => {
         if (isSearching) return;
         isSearching = true;
@@ -4382,7 +4487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     targetUsername: options.targetUsername || '',
                 }),
             });
-            const data = await response.json();
+            const data = await readApiJson(response, 'Could not start matchmaking. Please try again.');
             if (!response.ok || !data?.ok) {
                 throw new Error(data?.error || 'Could not start matchmaking. Please try again.');
             }
@@ -4397,6 +4502,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             activeSearchTargetUsername = '';
             closeSearching();
             alert(error?.message || 'Could not start matchmaking. Please try again.');
+        }
+    };
+
+    const startTrainingDummyMatch = async () => {
+        if (isSearching || !isCurrentUserAdmin()) return;
+        isSearching = true;
+        activeSearchTargetUsername = '';
+        setSearchingState('searching', 'training');
+        openSearching();
+        try {
+            await persistTeamSelection();
+            const response = await fetch(`${API_BASE_URL}/api/admin/training-dummy/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    team: getTeamIndices(),
+                }),
+            });
+            const data = await readApiJson(response, 'Could not start training dummy match.');
+            if (!response.ok || !data?.ok || !data.matchId) {
+                throw new Error(data?.error || 'Could not start training dummy match.');
+            }
+            handleMatchFound(data);
+        } catch (error) {
+            console.error('Failed to start training dummy match:', error);
+            isSearching = false;
+            activeSearchTargetUsername = '';
+            closeSearching();
+            alert(error?.message || 'Could not start training dummy match.');
         }
     };
 
@@ -4438,6 +4573,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         privateButton.addEventListener('click', (event) => {
             event.preventDefault();
             openPrivateMatchDialog();
+        });
+    }
+
+    if (trainingDummyButton) {
+        trainingDummyButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            startTrainingDummyMatch();
         });
     }
 
@@ -4749,7 +4891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    const startableButtons = [quickButton, ladderButton, privateButton];
+    const startableButtons = [quickButton, ladderButton, privateButton, trainingDummyButton];
 
     const updateGameButtons = () => {
         const filled = selectedAssignments.filter(Boolean).length;

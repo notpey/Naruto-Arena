@@ -45,7 +45,7 @@
                                                         "physical",
                                                         "strategic"
                                                 ],
-                                                "tooltipText": "This character physical and strategic skills are stunned."
+                                                "tooltipText": "This character's physical and strategic skills are stunned."
                                         }
                                 }
                         ]
@@ -77,7 +77,7 @@
                         "id": "haruno-sakura-inner-sakura",
                         "name": "Inner Sakura",
                         "skillimage": "https://i.imgur.com/srHzKvO.png",
-                        "skilldescription": "Haruno Sakura gains 5 points of damage reduction and ignores all enemy stun effects permanently. This skill is replaced by 'Inner Sakura Strangle'.",
+                "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently. This skill is replaced by 'Inner Sakura Strangle'.",
                         "energy": [],
                         "target": "self",
                         "damage": 0,
@@ -94,12 +94,10 @@
                                         "scope": "self",
                                         "metadata": {
                                                 "damageReductionFlat": 5,
-                                                "cannotBeStunned": true,
-                                                "stunImmune": true,
-                                                "skillReplacements": {
-                                                        "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
-                                                },
-                                                "tooltipText": "Sakura has 5 damage reduction\nSakura ignores all stun effects\nInner Sakura is replaced by Inner Sakura Strangle."
+                            "skillReplacements": {
+                                "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
+                            },
+                            "tooltipText": "Sakura has 5 damage reduction\nInner Sakura is replaced by Inner Sakura Strangle."
                                         }
                                 }
                         ]

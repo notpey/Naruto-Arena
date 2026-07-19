@@ -543,6 +543,45 @@
     right: auto;
 }
 
+.training-dummy-button {
+    display: none;
+}
+
+.game-remaster .training-dummy-button:not([hidden]) {
+    position: absolute;
+    right: 18px;
+    top: -48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 156px;
+    height: 32px;
+    padding: 0 16px;
+    border: 1px solid rgba(255, 184, 77, 0.55);
+    border-radius: 999px;
+    color: #ffe7af;
+    background: rgba(12, 10, 9, 0.82);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.34);
+    font-family: 'Franklin', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 7;
+}
+
+.game-remaster .training-dummy-button:not([hidden]):hover {
+    color: #ffffff;
+    border-color: rgba(255, 184, 77, 0.8);
+    background: rgba(33, 21, 11, 0.9);
+}
+
+.game-remaster .training-dummy-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
 .game-remaster .ladder-button img {
     content: var(--ladder-button-remaster-image);
 }
@@ -827,7 +866,8 @@
 .selection-hub-ryo:focus-visible,
 .selection-hub-settings:focus-visible,
 .roster-page-button:focus-visible,
-.game-button:focus-visible {
+.game-button:focus-visible,
+.training-dummy-button:focus-visible {
     outline: 2px solid rgba(255, 184, 77, 0.9);
     outline-offset: 3px;
 }
@@ -5152,7 +5192,27 @@ text-transform: uppercase;
 .status-tooltip-desc {
     color: #2d1507;
     display: grid;
+    gap: 4px;
+}
+
+.status-tooltip-row {
+    display: grid;
     gap: 2px;
+}
+
+.status-tooltip-row-meta {
+    justify-self: start;
+    margin: 4px 0 1px 12px;
+    padding: 2px 5px;
+    border: 1px solid #9d170d;
+    background: rgba(157, 23, 13, 0.1);
+    color: #8f1a0f;
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .status-tooltip-effect {
@@ -5262,6 +5322,10 @@ text-transform: uppercase;
 }
 
 .global-status-tooltip .status-tooltip-turns {
+    background: rgba(157, 23, 13, 0.1);
+}
+
+.global-status-tooltip .status-tooltip-row-meta {
     background: rgba(157, 23, 13, 0.1);
 }
 
