@@ -17,7 +17,19 @@ module.exports = function(context) {
         maintenanceModeUpdateSchema,
         newsPostSchema,
         userUpdateSchema,
-        battleGauntletService
+        battleGauntletService,
+        matchesCollection,
+        teamSchema,
+        userToMatch,
+        normalizeUserProfile,
+        assertTeamCanBeUsed,
+        removeQueuedEntry,
+        buildTrainingDummyMatch,
+        buildMatchPayloadForUser,
+        getTurnDurationMsForUser,
+        makeEmptyPendingTurn,
+        TRAINING_DUMMY_DISPLAY_NAME,
+        insertMatchActive
     } = context;
     
     const adminCheck = (req, res, next) => {
@@ -28,6 +40,75 @@ module.exports = function(context) {
     };
     
     router.use(requireSession);
+
+    router.post('/training-dummy/start', requireSession, async (req, res) => {
+        try {
+            const username = req.authUser.username;
+            if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            const { error: validationError, value } = teamSchema.validate(req.body?.team);
+            if (validationError) {
+                return res.status(400).json({ error: 'A valid three-character team is required.' });
+            }
+
+            if (userToMatch && userToMatch.has(username)) {
+                return res.status(409).json({ error: 'You are already in a match.' });
+            }
+            const existingMatch = await matchesCollection.findOne({
+                'players.username': username,
+                status: { $ne: 'ended' },
+            });
+            if (existingMatch) {
+                return res.status(409).json({ error: 'You are already in a match.' });
+            }
+
+            const user = await usersCollection.findOne({ username });
+            if (!user) {
+                return res.status(404).json({ error: 'User not found.' });
+            }
+            if (String(user.role || '').trim().toLowerCase() !== 'admin') {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            const profile = normalizeUserProfile(user);
+            try {
+                await assertTeamCanBeUsed(profile, value, user.role);
+            } catch (error) {
+                return res.status(403).json({ error: error.message || 'Character is locked.' });
+            }
+
+            if (typeof removeQueuedEntry === 'function') removeQueuedEntry(username);
+            const matchDocument = await buildTrainingDummyMatch({
+                username,
+                team: value,
+            });
+            if (typeof insertMatchActive === 'function') {
+                await insertMatchActive(matchDocument);
+            }
+            const safePayload = buildMatchPayloadForUser(matchDocument, username);
+            return res.json({
+                ok: true,
+                matchFound: true,
+                matchId: matchDocument.matchId,
+                mode: 'training',
+                opponent: TRAINING_DUMMY_DISPLAY_NAME,
+                matchStartsAt: matchDocument.matchStartsAt,
+                matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
+                currentTurn: matchDocument.currentTurn || null,
+                turnOrder: matchDocument.turnOrder || null,
+                turnExpiresAt: matchDocument.turnExpiresAt || null,
+                turnDurationMs: getTurnDurationMsForUser(matchDocument, matchDocument?.currentTurn),
+                chakraPools: safePayload?.chakraPools || null,
+                lastChakraGain: safePayload?.lastChakraGain || null,
+                pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
+            });
+        } catch (error) {
+            console.error('Training dummy start error:', error);
+            return res.status(500).json({ error: 'Internal server error.' });
+        }
+    });
+
+
     router.use(adminCheck);
     router.get('/latest-releases', requireSession, async (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {

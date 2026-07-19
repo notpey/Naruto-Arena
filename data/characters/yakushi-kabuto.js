@@ -52,6 +52,7 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
+                        "replaceSkillDamageBonuses": true,
                         "skillDamageBonuses": {
                             "yakushi-kabuto-chakra-scalpel": 10
                         },

@@ -18,6 +18,8 @@ const {
     isSkillIndexBlockedForActor,
 } = require('../battleLogic.js');
 
+const getCharIndex = (id) => characters.findIndex(c => (c && (c.id === id || c.characterId === id)));
+
 const emptyPool = () => ({
     taijutsu: 0,
     ninjutsu: 0,
@@ -857,7 +859,7 @@ test('battleLogic resolves Rock Lee starter kit behavior used by the editor data
 });
 
 test('battleLogic resolves Tenten starter kit behavior used by the editor data', () => {
-    const match = makeMatch([11], [1, 2]);
+    const match = makeMatch([getCharIndex('tenten')], [1, 2]);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -884,7 +886,7 @@ test('battleLogic resolves Tenten starter kit behavior used by the editor data',
     assert.equal(
         resolveEffectiveSkill({
             characters,
-            rosterIndex: 11,
+            rosterIndex: getCharIndex('tenten'),
             skillIndex: 0,
             actorState: match.board.p1[0].state,
         }).id,
@@ -909,7 +911,7 @@ test('battleLogic resolves Tenten starter kit behavior used by the editor data',
 });
 
 test('battleLogic resolves Neji starter kit behavior used by the editor data', () => {
-    const match = makeMatch([10], [1, 2]);
+    const match = makeMatch([getCharIndex('neji-hyuuga')], [1, 2]);
     match.chakraPools.p2.taijutsu = 2;
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
@@ -945,14 +947,14 @@ test('battleLogic resolves Neji starter kit behavior used by the editor data', (
 });
 
 test('battleLogic resolves Gaara starter kit behavior used by the editor data', () => {
-    const match = makeMatch([12], [1]);
+    const match = makeMatch([getCharIndex('gaara-of-the-desert')], [1]);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(
         resolveEffectiveSkill({
             characters,
-            rosterIndex: 12,
+            rosterIndex: getCharIndex('gaara-of-the-desert'),
             skillIndex: 0,
             actorState: match.board.p1[0].state,
         }).id,
@@ -972,7 +974,7 @@ test('battleLogic resolves Gaara starter kit behavior used by the editor data', 
 });
 
 test('battleLogic resolves Kankuro starter kit behavior used by the editor data', () => {
-    const match = makeMatch([14], [1]);
+    const match = makeMatch([getCharIndex('kankuro')], [1]);
 
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -1017,7 +1019,7 @@ test('battleLogic resolves Kankuro starter kit behavior used by the editor data'
 });
 
 test('Kankuro Poison Bomb resolves correctly after Puppet Preparation', () => {
-    const match = makeMatch([14], [1, 2, 3]);
+    const match = makeMatch([getCharIndex('kankuro')], [1, 2, 3]);
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -1208,7 +1210,7 @@ test('Akadou Yoroi Draining Assault description matches its health steal values'
 });
 
 test('battleLogic resolves Temari starter kit behavior used by the editor data', () => {
-    const match = makeMatch([13], [1, 2]);
+    const match = makeMatch([getCharIndex('temari')], [1, 2]);
     const temari = getCharacter('temari');
     temari.skills.forEach((skill) => {
         assert.equal(
@@ -1225,7 +1227,7 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
     assert.equal(
         resolveEffectiveSkill({
             characters,
-            rosterIndex: 13,
+            rosterIndex: getCharIndex('temari'),
             skillIndex: 1,
             actorState: match.board.p1[0].state,
         }).id,
@@ -1233,7 +1235,7 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
     );
     assert.deepEqual(
         computeEffectiveEnergyCost({
-            skill: characters[13].skills[1],
+            skill: characters[getCharIndex('temari')].skills[1],
             actorState: match.board.p1[0].state,
         }),
         {
