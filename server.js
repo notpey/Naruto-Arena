@@ -5295,11 +5295,27 @@ const getStoredCharacters = async () => {
     const newDefaultCharacters = defaultCharacters.filter(
         (entry) => entry && typeof entry.characterId === 'string' && !storedIds.has(entry.characterId)
     );
-    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages) {
+    const defaultOrderMap = new Map(
+        defaultCharacters.map((c, i) => [(c && (c.characterId || c.id)) || '', i])
+    );
+    const sortBySeedOrder = (list) => {
+        return [...list].sort((a, b) => {
+            const idA = (a && (a.characterId || a.id)) || '';
+            const idB = (b && (b.characterId || b.id)) || '';
+            const idxA = defaultOrderMap.has(idA) ? defaultOrderMap.get(idA) : 9999;
+            const idxB = defaultOrderMap.has(idB) ? defaultOrderMap.get(idB) : 9999;
+            return idxA - idxB;
+        });
+    };
+
+    const sortedStoredCharacters = sortBySeedOrder(migratedStoredCharacters);
+    const orderChanged = JSON.stringify(storedState.characters.map(c => c.characterId || c.id)) !== JSON.stringify(sortedStoredCharacters.map(c => c.characterId || c.id));
+
+    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages && !orderChanged) {
         return storedState.characters;
     }
 
-    const mergedCharacters = [...migratedStoredCharacters, ...newDefaultCharacters];
+    const mergedCharacters = sortBySeedOrder([...sortedStoredCharacters, ...newDefaultCharacters]);
     const updates = {
         [CHARACTERS_STATE_KEY]: appStateCollection.updateOne(
             { key: CHARACTERS_STATE_KEY },
