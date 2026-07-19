@@ -27,6 +27,7 @@ module.exports = function(context) {
         next();
     };
     
+    router.use(requireSession);
     router.use(adminCheck);
     router.get('/latest-releases', requireSession, async (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
