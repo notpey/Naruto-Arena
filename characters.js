@@ -466,6 +466,8 @@ const characters = [
                         "metadata": {
                             "damageReductionFlat": 10,
                             "samePreviousTargetDamageBonusFlat": 5,
+                            "samePreviousTargetMarkerStatusId": "uchiha_sasuke_sharingan_previous_target",
+                            "samePreviousTargetMarkerTooltipText": "Sasuke will deal 5 additional damage to this character if he targets them again.",
                             "skillReplacements": {
                                 "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
                             },
@@ -950,6 +952,29 @@ const characters = [
                         "scope": "all-allies",
                         "metadata": {
                             "destructibleDefensePoints": 10,
+                            "onBreakApplyStatusToSource": {
+                                "statusId": "hyuuga_hinata_protective_palms_cost",
+                                "duration": 1,
+                                "metadata": {
+                                    "harmful": true,
+                                    "randomCostIncrease": 1,
+                                    "tooltipText": "This character's skills cost 1 additional random chakra."
+                                }
+                            },
+                            "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "hyuuga_hinata_byakugan"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_protective_palms_defense",
+                        "duration": 2,
+                        "scope": "all-allies",
+                        "metadata": {
+                            "destructibleDefensePoints": 10,
                             "turnEndApplyStatusToSelf": {
                                 "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
                                 "duration": 1,
@@ -970,29 +995,6 @@ const characters = [
                                 }
                             },
                             "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
-                        },
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "hyuuga_hinata_byakugan"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "hyuuga_hinata_protective_palms_defense",
-                        "duration": 2,
-                        "scope": "all-allies",
-                        "metadata": {
-                            "destructibleDefensePoints": 10,
-                            "onBreakApplyStatusToSource": {
-                                "statusId": "hyuuga_hinata_protective_palms_cost",
-                                "duration": 1,
-                                "metadata": {
-                                    "harmful": true,
-                                    "randomCostIncrease": 1,
-                                    "tooltipText": "This character's skills cost 1 additional random chakra."
-                                }
-                            },
-                            "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                         },
                         "condition": {
                             "scope": "self",
@@ -1314,7 +1316,7 @@ const characters = [
                                 "akimichi-chouji-partial-double-size": 20,
                                 "akimichi-chouji-meat-tank": 10
                             },
-                            "tooltipText": "Partial Double Size deals 20 additional damage and Meat Tank deals 10 additional damage."
+                            "tooltipText": "Partial Double Size deals 20 additional damage.\nMeat Tank deals 10 additional damage."
                         }
                     },
                     {
@@ -1431,7 +1433,7 @@ const characters = [
                             "cannotUseSkillClasses": [
                                 "physical"
                             ],
-                            "tooltipText": "This character's physical skills are stunned.",
+                            "tooltipText": "This character's physical skills are stunned. Next turn, their physical and chakra skills will be stunned. After that, they will be fully stunned.",
                             "onExpireEffects": [
                                 {
                                     "type": "apply_status",
@@ -1885,7 +1887,7 @@ const characters = [
                             "ongoingClass": "action",
                             "triggerOnApply": true,
                             "NonAfflictionDamageDebuff": 10,
-                            "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
+                            "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage. Eight Trigrams Sixty-Four Palms will remove 1 additional random chakra."
                         }
                     }
                 ]
@@ -2221,7 +2223,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "consumeOnNextSkillUse": true,
-                            "tooltipText": "Tenten's next harmful skill is improved."
+                            "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons marks will make Twin Rising Dragons Trap deal 20 additional damage. Twin Rising Dragons Trap's damage reduction will last 1 additional turn."
                         }
                     }
                 ]
@@ -2517,7 +2519,7 @@ const characters = [
                                     ]
                                 }
                             },
-                            "tooltipText": "Temari is invulnerable to non-mental skills and Summoning Quick Beheading Dance costs 1 less random chakra."
+                            "tooltipText": "Temari is invulnerable to non-mental skills. Summoning Quick Beheading Dance costs 1 less random chakra."
                         }
                     }
                 ]

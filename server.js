@@ -6812,6 +6812,7 @@ const makeEmptyPendingTurn = () => ({
     queueOrder: [],
     unresolvedRandom: 0,
     randomAssignments: createEmptyChakraCost(),
+    chakraExchanges: [],
     turnStartChoice: null,
 });
 
@@ -6828,6 +6829,22 @@ const clonePendingTurn = (pending = {}) => ({
         ...createEmptyChakraCost(),
         ...(pending && typeof pending.randomAssignments === 'object' ? pending.randomAssignments : {}),
     },
+    chakraExchanges: Array.isArray(pending?.chakraExchanges)
+        ? pending.chakraExchanges
+              .map((exchange) => ({
+                  gainType:
+                      typeof exchange?.gainType === 'string'
+                          ? exchange.gainType.trim().toLowerCase()
+                          : '',
+                  spendAssignments: {
+                      ...createEmptyChakraCost(),
+                      ...(exchange?.spendAssignments && typeof exchange.spendAssignments === 'object'
+                          ? exchange.spendAssignments
+                          : {}),
+                  },
+              }))
+              .filter((exchange) => chakraTypes.includes(exchange.gainType))
+        : [],
     turnStartChoice:
         pending?.turnStartChoice && typeof pending.turnStartChoice === 'object'
             ? {
@@ -8340,6 +8357,9 @@ const adjustRandomAssignment = ({ match, username, chakraType, delta }) => {
     match.pendingTurns[username] = pending;
 };
 
+const hasQueuedSkills = (pending = {}) =>
+    Boolean(pending?.queuedByActorSlot && Object.keys(pending.queuedByActorSlot).length > 0);
+
 const exchangeChakra = ({ match, username, chakraType, cost = 4, spendAssignments = null }) => {
     if (!chakraTypes.includes(chakraType)) {
         throw new Error('Invalid chakra type.');
@@ -8375,8 +8395,10 @@ const exchangeChakra = ({ match, username, chakraType, cost = 4, spendAssignment
         }
     }
 
+    const actualSpendAssignments = createEmptyChakraPool();
     if (normalizedAssignments) {
         chakraTypes.forEach((type) => {
+            actualSpendAssignments[type] = normalizedAssignments[type] || 0;
             pool[type] = Math.max(0, (Number(pool[type]) || 0) - (normalizedAssignments[type] || 0));
         });
     } else {
@@ -8386,6 +8408,7 @@ const exchangeChakra = ({ match, username, chakraType, cost = 4, spendAssignment
             const available = Math.max(0, Number(pool[type]) || 0);
             const toSpend = Math.min(available, remaining);
             pool[type] = available - toSpend;
+            actualSpendAssignments[type] = toSpend;
             remaining -= toSpend;
         });
         if (remaining > 0) {
@@ -8394,6 +8417,39 @@ const exchangeChakra = ({ match, username, chakraType, cost = 4, spendAssignment
     }
     pool[chakraType] = (Number(pool[chakraType]) || 0) + 1;
     match.chakraPools[username] = pool;
+    const pending = getPendingTurn(match, username);
+    pending.chakraExchanges = Array.isArray(pending.chakraExchanges) ? pending.chakraExchanges : [];
+    pending.chakraExchanges.push({
+        gainType: chakraType,
+        spendAssignments: actualSpendAssignments,
+    });
+    match.pendingTurns[username] = pending;
+};
+
+const resetPendingChakraExchanges = ({ match, username }) => {
+    const pool = match?.chakraPools?.[username];
+    const pending = getPendingTurn(match, username);
+    const exchanges = Array.isArray(pending.chakraExchanges) ? pending.chakraExchanges : [];
+    if (!pool || !exchanges.length || hasQueuedSkills(pending)) {
+        return false;
+    }
+    exchanges.slice().reverse().forEach((exchange) => {
+        const gainType = typeof exchange?.gainType === 'string' ? exchange.gainType.trim().toLowerCase() : '';
+        if (chakraTypes.includes(gainType)) {
+            pool[gainType] = Math.max(0, (Number(pool[gainType]) || 0) - 1);
+        }
+        const spendAssignments =
+            exchange?.spendAssignments && typeof exchange.spendAssignments === 'object'
+                ? exchange.spendAssignments
+                : {};
+        chakraTypes.forEach((type) => {
+            pool[type] = (Number(pool[type]) || 0) + (Number(spendAssignments[type]) || 0);
+        });
+    });
+    pending.chakraExchanges = [];
+    match.chakraPools[username] = pool;
+    match.pendingTurns[username] = pending;
+    return true;
 };
 
 const ensureBoardState = async (match) => {
@@ -9612,6 +9668,19 @@ app.get('/api/match/:matchId', requireSession, async (req, res) => {
     if (!playerEntry) {
         return res.status(403).json({ error: 'Not part of this match.' });
     }
+    if (String(req.query?.resetPendingExchange || '') === '1') {
+        const reset = resetPendingChakraExchanges({
+            match: hydrated,
+            username: req.authUser.username,
+        });
+        if (reset) {
+            await persistMatchState(hydrated, {
+                chakraPools: hydrated.chakraPools,
+                pendingTurns: hydrated.pendingTurns,
+            });
+            await broadcastMatchState(hydrated);
+        }
+    }
     scheduleBattleBotTurn(hydrated);
     return res.json(buildMatchPayloadForUser(hydrated, req.authUser.username));
 });
@@ -10055,6 +10124,7 @@ app.post('/api/match/:matchId/chakra/exchange', requireSession, async (req, res)
         });
         await persistMatchState(hydrated, {
             chakraPools: hydrated.chakraPools,
+            pendingTurns: hydrated.pendingTurns,
         });
         await broadcastMatchState(hydrated);
         const safePayload = buildMatchPayloadForUser(hydrated, username);
@@ -10666,12 +10736,34 @@ app.get('/api/characters/catalog', (req, res) => {
     });
 });
 
-app.get('/api/characters', (req, res) => {
+app.get('/api/characters', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
-    return res.json({
-        ok: true,
-        characters: Array.isArray(charactersData) ? charactersData : [],
-    });
+    try {
+        const token = req.cookies?.[SESSION_COOKIE_NAME];
+        const authUser = token ? await getSessionUserFromToken(token) : null;
+        const normalizedRole = String(authUser?.role || '').trim().toLowerCase();
+        const bypassLocks = normalizedRole === 'admin' || normalizedRole === 'moderator';
+        const lockedCharacterIds = authUser && !bypassLocks ? await getMissionLockedCharacterIds() : new Set();
+        const profile = authUser ? normalizeUserProfile(authUser) : null;
+        const characterList = Array.isArray(charactersData) ? charactersData : [];
+        return res.json({
+            ok: true,
+            characters: characterList.map((character) => {
+                const characterId = normalizeCharacterId(character?.characterId);
+                const unlocked =
+                    !authUser ||
+                    bypassLocks ||
+                    profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds);
+                return {
+                    ...character,
+                    unlocked,
+                };
+            }),
+        });
+    } catch (error) {
+        console.error('Character roster load error:', error);
+        return res.status(500).json({ error: 'Unable to load character data.' });
+    }
 });
 
 app.get('/api/admin/characters', requireSession, (req, res) => {

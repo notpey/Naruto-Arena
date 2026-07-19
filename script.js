@@ -834,6 +834,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? pending.randomAssignments
                     : {}),
             },
+            chakraExchanges: Array.isArray(pending?.chakraExchanges)
+                ? pending.chakraExchanges
+                      .map((exchange) => ({
+                          gainType: typeof exchange?.gainType === 'string' ? exchange.gainType : '',
+                          spendAssignments: normalizePool(exchange?.spendAssignments || {}),
+                      }))
+                      .filter((exchange) => chakraTypes.includes(exchange.gainType))
+                : [],
         });
         const normalizeClassChoice = (value) =>
             typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -1609,8 +1617,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 preview.alt = effectiveSkill?.name || `Queued Skill ${skillIdx + 1}`;
                 preview.src = effectiveSkill?.skillimage || '';
                 preview.draggable = true;
+                preview.title = 'Click to move this queued skill first. Drag to reorder.';
                 preview.dataset.actorSlot = String(actorSlot);
                 preview.dataset.skillIndex = String(skillIdx);
+                preview.addEventListener('click', () => {
+                    const currentOrder = getOrderedQueuedEntries().map((entry) =>
+                        Number.parseInt(entry.actorSlot, 10)
+                    );
+                    if (currentOrder.length <= 1 || currentOrder[0] === actorSlot) return;
+                    const nextOrder = [
+                        actorSlot,
+                        ...currentOrder.filter((slot) => slot !== actorSlot),
+                    ];
+                    reorderQueuedSkills(nextOrder).catch((error) =>
+                        console.warn('Queued reorder failed.', error)
+                    );
+                });
                 preview.addEventListener('dragstart', () => {
                     draggingQueueActorSlot = actorSlot;
                     preview.classList.add('dragging');
@@ -1673,6 +1695,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .filter(Boolean);
         };
 
+        const targetIsBlockedByInvulnerability = ({ username, slot, skill, actorSlot }) => {
+            const unit = latestBoardState?.[username]?.[slot];
+            if (!unit || username === currentPlayerUsername) return false;
+            const actorUnit = getActorUnitForSlot(currentPlayerUsername, actorSlot);
+            return (
+                isUnitInvulnerableForSkill(unit, skill) &&
+                !canActorIgnoreTargetInvulnerability({ actorUnit, skill, targetUnit: unit })
+            );
+        };
+
         const mergeHighlightTargets = (baseTargets, extraTargets) => {
             const byKey = new Map();
             [...(baseTargets || []), ...(extraTargets || [])].forEach((target) => {
@@ -1685,6 +1717,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const getEffectPreviewHighlightTargets = (skill) => {
             if (!skill || !latestBoardState || typeof latestBoardState !== 'object') return [];
+            const actorSlot = Number.parseInt(activeCastingSkill?.actorSlot, 10);
             const scopes = new Set(
                 (Array.isArray(skill.effects) ? skill.effects : [])
                     .map((effect) => (typeof effect?.scope === 'string' ? effect.scope.trim().toLowerCase() : ''))
@@ -1706,7 +1739,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     )
                 );
             }
-            return targets;
+            return targets.filter((target) => {
+                const slot = Number.parseInt(target?.slot, 10);
+                if (!target?.username || !Number.isInteger(slot)) return false;
+                return !targetIsBlockedByInvulnerability({
+                    username: target.username,
+                    slot,
+                    skill,
+                    actorSlot,
+                });
+            });
         };
 
         const renderTargetHighlights = (options) => {
@@ -3776,9 +3818,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const matchId = matchIdFromUrl;
             if (!matchId || !Array.isArray(rosterData)) return;
             try {
-                const response = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchId)}`, {
-                    credentials: 'include',
-                });
+                const response = await fetch(
+                    `${API_BASE_URL}/api/match/${encodeURIComponent(matchId)}?resetPendingExchange=1`,
+                    {
+                        credentials: 'include',
+                    }
+                );
                 const data = await response.json();
                 if (!data?.ok) return;
 
@@ -4880,7 +4925,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleSlotDragStart = (event, rosterIndex) => {
         const rosterSlot = rosterSlotElements[rosterIndex];
-        if (rosterSlot && rosterSlot.classList.contains('slot-empty')) return;
+        if (
+            rosterSlot &&
+            (rosterSlot.classList.contains('slot-empty') || rosterSlot.classList.contains('slot-locked'))
+        ) {
+            return;
+        }
         const character = roster[rosterIndex];
         if (!character || !event.dataTransfer) return;
         setDragPayload(event.dataTransfer, { type: 'roster', rosterIndex });
@@ -4892,6 +4942,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const startableButtons = [quickButton, ladderButton, privateButton, trainingDummyButton];
+    const isRosterIndexSelectable = (index) => {
+        const character = roster[index];
+        return Boolean(character) && character.unlocked !== false;
+    };
 
     const updateGameButtons = () => {
         const filled = selectedAssignments.filter(Boolean).length;
@@ -4932,7 +4986,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!slot) return;
         slot.innerHTML = '';
         slot.classList.add('slot-empty');
+        slot.classList.remove('slot-locked');
         slot.draggable = false;
+        slot.title = '';
     };
 
     const buildRosterSlot = (index) => {
@@ -4943,17 +4999,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isSelected = selectedAssignments.some((assignment) => assignment?.rosterIndex === index);
         if (!character || isSelected) {
             slot.classList.add('slot-empty');
+            slot.classList.remove('slot-locked');
             slot.draggable = false;
+            slot.title = '';
             return;
         }
         slot.classList.remove('slot-empty');
-        slot.draggable = true;
+        const locked = character.unlocked === false;
+        slot.classList.toggle('slot-locked', locked);
+        slot.draggable = !locked;
+        slot.title = locked ? `${character.name || 'Character'} is locked.` : '';
         const image = document.createElement('img');
         image.className = 'slot-image';
         attachImageFallback(image, REMASTER_ASSETS.characterFallback);
         setImageSrcWithFallback(image, character.facePicture, REMASTER_ASSETS.characterFallback);
         image.alt = character.name || `Character ${index + 1}`;
         slot.appendChild(image);
+        if (locked) {
+            const lock = document.createElement('span');
+            lock.className = 'slot-lock-label';
+            lock.textContent = 'LOCKED';
+            slot.appendChild(lock);
+        }
         image.addEventListener('dragstart', (event) => handleSlotDragStart(event, index));
         image.addEventListener('dragend', handleSlotDragEnd);
     };
@@ -5016,7 +5083,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        if (payload.type === 'roster' && Number.isInteger(payload.rosterIndex) && roster[payload.rosterIndex]) {
+        if (
+            payload.type === 'roster' &&
+            Number.isInteger(payload.rosterIndex) &&
+            isRosterIndexSelectable(payload.rosterIndex)
+        ) {
             incoming = { characterIndex: payload.rosterIndex, rosterIndex: payload.rosterIndex };
             clearRosterSlot(payload.rosterIndex);
         } else if (
@@ -5089,7 +5160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const addRosterCharacterToSelection = (rosterIndex) => {
-        if (!Number.isInteger(rosterIndex) || !roster[rosterIndex]) return;
+        if (!Number.isInteger(rosterIndex) || !isRosterIndexSelectable(rosterIndex)) return;
         const existingSlotIndex = selectedAssignments.findIndex(
             (assignment) => assignment?.characterIndex === rosterIndex
         );
@@ -5153,7 +5224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             listItem.addEventListener('drop', (event) => handleRosterDrop(event, i));
 
             const handleClick = () => {
-                if (listItem.classList.contains('slot-empty')) return;
+                if (listItem.classList.contains('slot-empty') || listItem.classList.contains('slot-locked')) return;
                 const now = Date.now();
                 const isDoubleTap =
                     lastRosterTapIndex === i && now - lastRosterTapTime < DOUBLE_TAP_THRESHOLD_MS;
@@ -5165,7 +5236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 queueSelectionPreview(() => {
-                    if (listItem.classList.contains('slot-empty')) return;
+                    if (listItem.classList.contains('slot-empty') || listItem.classList.contains('slot-locked')) return;
                     handleCharacterSelect(i);
                 });
             };
@@ -5213,6 +5284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const used = new Set();
         saved.forEach((rosterIdx, slotIdx) => {
             if (!Number.isInteger(rosterIdx) || rosterIdx < 0 || rosterIdx >= roster.length) return;
+            if (!isRosterIndexSelectable(rosterIdx)) return;
             if (used.has(rosterIdx)) return;
             const assignment = { characterIndex: rosterIdx, rosterIndex: rosterIdx };
             clearRosterSlot(rosterIdx);

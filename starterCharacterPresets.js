@@ -417,6 +417,29 @@
                                                 "scope": "all-allies",
                                                 "metadata": {
                                                         "destructibleDefensePoints": 10,
+                                                        "onBreakApplyStatusToSource": {
+                                                                "statusId": "hyuuga_hinata_protective_palms_cost",
+                                                                "duration": 1,
+                                                                "metadata": {
+                                                                        "harmful": true,
+                                                                        "randomCostIncrease": 1,
+                                                                        "tooltipText": "This character's skills cost 1 additional random chakra."
+                                                                }
+                                                        },
+                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                                                },
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "missingStatusId": "hyuuga_hinata_byakugan"
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "hyuuga_hinata_protective_palms_defense",
+                                                "duration": 2,
+                                                "scope": "all-allies",
+                                                "metadata": {
+                                                        "destructibleDefensePoints": 10,
                                                         "turnEndApplyStatusToSelf": {
                                                                 "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
                                                                 "duration": 1,
@@ -437,29 +460,6 @@
                                                                 }
                                                         },
                                                         "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
-                                                },
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "missingStatusId": "hyuuga_hinata_byakugan"
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "hyuuga_hinata_protective_palms_defense",
-                                                "duration": 2,
-                                                "scope": "all-allies",
-                                                "metadata": {
-                                                        "destructibleDefensePoints": 10,
-                                                        "onBreakApplyStatusToSource": {
-                                                                "statusId": "hyuuga_hinata_protective_palms_cost",
-                                                                "duration": 1,
-                                                                "metadata": {
-                                                                        "harmful": true,
-                                                                        "randomCostIncrease": 1,
-                                                                        "tooltipText": "This character's skills cost 1 additional random chakra."
-                                                                }
-                                                        },
-                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -781,7 +781,7 @@
                                                                 "akimichi-chouji-partial-double-size": 20,
                                                                 "akimichi-chouji-meat-tank": 10
                                                         },
-                                                        "tooltipText": "Partial Double Size deals 20 additional damage and Meat Tank deals 10 additional damage."
+                                                        "tooltipText": "Partial Double Size deals 20 additional damage.\nMeat Tank deals 10 additional damage."
                                                 }
                                         },
                                         {
@@ -898,7 +898,7 @@
                                                         "cannotUseSkillClasses": [
                                                                 "physical"
                                                         ],
-                                                        "tooltipText": "This character's physical skills are stunned.",
+                                                        "tooltipText": "This character's physical skills are stunned. Next turn, their physical and chakra skills will be stunned. After that, they will be fully stunned.",
                                                         "onExpireEffects": [
                                                                 {
                                                                         "type": "apply_status",

@@ -512,6 +512,8 @@ test('battleLogic resolves Sasuke starter kit behavior used by the editor data',
                 status.remainingTurns === 99 &&
                 status.metadata.damageReductionFlat === 10 &&
                 status.metadata.samePreviousTargetDamageBonusFlat === 5 &&
+                status.metadata.samePreviousTargetMarkerStatusId ===
+                    'uchiha_sasuke_sharingan_previous_target' &&
                 status.metadata.skillReplacements?.['uchiha-sasuke-sharingan'] ===
                     'uchiha-sasuke-grand-fireball-technique'
         ),
@@ -530,6 +532,16 @@ test('battleLogic resolves Sasuke starter kit behavior used by the editor data',
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 70, 'Lion Combo should deal 30 to the previous Sharingan target');
+    assert.equal(
+        match.board.p2[0].state.statuses.some(
+            (status) =>
+                status.id === 'uchiha_sasuke_sharingan_previous_target' &&
+                status.sourceUsername === 'p1' &&
+                status.metadata.tooltipText.includes('5 additional damage')
+        ),
+        true,
+        'Sasuke previous target marker should be visible on the target'
+    );
 
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -684,6 +696,8 @@ test('battleLogic resolves Hinata starter kit behavior used by the editor data',
             (status) =>
                 status.id === 'hyuuga_hinata_protective_palms_defense' &&
                 status.remainingTurns === 2 &&
+                status.metadata.turnEndApplyStatusToSelf?.statusId ===
+                    'hyuuga_hinata_protective_palms_defense_refresh' &&
                 status.metadata.onBreakApplyStatusToSource?.statusId ===
                     'hyuuga_hinata_protective_palms_cost'
         ),

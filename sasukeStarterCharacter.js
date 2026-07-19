@@ -106,6 +106,8 @@
                                         "metadata": {
                                                 "damageReductionFlat": 10,
                                                 "samePreviousTargetDamageBonusFlat": 5,
+                                                "samePreviousTargetMarkerStatusId": "uchiha_sasuke_sharingan_previous_target",
+                                                "samePreviousTargetMarkerTooltipText": "Sasuke will deal 5 additional damage to this character if he targets them again.",
                                                 "skillReplacements": {
                                                         "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
                                                 },

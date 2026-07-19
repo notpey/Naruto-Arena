@@ -487,7 +487,7 @@
                                                 "scope": "self",
                                                 "metadata": {
                                                         "consumeOnNextSkillUse": true,
-                                                        "tooltipText": "Tenten's next harmful skill is improved."
+                                                        "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons marks will make Twin Rising Dragons Trap deal 20 additional damage. Twin Rising Dragons Trap's damage reduction will last 1 additional turn."
                                                 }
                                         }
                                 ]
@@ -559,7 +559,7 @@
                                                         "ongoingClass": "action",
                                                         "triggerOnApply": true,
                                                         "NonAfflictionDamageDebuff": 10,
-                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
+                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage. Eight Trigrams Sixty-Four Palms will remove 1 additional random chakra."
                                                 }
                                         }
                                 ]
@@ -1121,7 +1121,7 @@
                                                                         ]
                                                                 }
                                                         },
-                                                        "tooltipText": "Temari is invulnerable to non-mental skills and Summoning Quick Beheading Dance costs 1 less random chakra."
+                                                        "tooltipText": "Temari is invulnerable to non-mental skills. Summoning Quick Beheading Dance costs 1 less random chakra."
                                                 }
                                         }
                                 ]

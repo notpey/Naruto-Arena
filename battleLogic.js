@@ -4111,6 +4111,49 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         actorState.snapshots.currentSkillTargetKey = primaryEnemyTarget
             ? `${primaryEnemyTarget.username}:${primaryEnemyTarget.slot}`
             : '';
+        const previousTargetMarkerStatuses = (Array.isArray(actorState.statuses) ? actorState.statuses : []).filter(
+            (status) =>
+                status &&
+                (Number(status.remainingTurns) || 0) > 0 &&
+                typeof status?.metadata?.samePreviousTargetMarkerStatusId === 'string' &&
+                status.metadata.samePreviousTargetMarkerStatusId
+        );
+        previousTargetMarkerStatuses.forEach((status) => {
+            const markerStatusId = status.metadata.samePreviousTargetMarkerStatusId;
+            Object.values(match.board || {}).forEach((units) => {
+                if (!Array.isArray(units)) return;
+                units.forEach((unit) => {
+                    if (!unit) return;
+                    const state = ensureUnitStateShape(unit);
+                    state.statuses = (Array.isArray(state.statuses) ? state.statuses : []).filter(
+                        (entry) =>
+                            !(
+                                entry?.id === markerStatusId &&
+                                entry?.sourceUsername === actingUsername &&
+                                Number(entry?.sourceSlot) === actorSlot
+                            )
+                    );
+                });
+            });
+            if (!primaryEnemyTarget?.unit) return;
+            const markerTooltip =
+                typeof status.metadata.samePreviousTargetMarkerTooltipText === 'string' &&
+                status.metadata.samePreviousTargetMarkerTooltipText
+                    ? status.metadata.samePreviousTargetMarkerTooltipText
+                    : 'Sasuke will deal additional damage to this character if he targets them again.';
+            applyStatus({
+                targetState: ensureUnitStateShape(primaryEnemyTarget.unit),
+                statusId: markerStatusId,
+                duration: 99,
+                sourceSkillId: status.sourceSkillId || skill?.id || null,
+                sourceUsername: actingUsername,
+                sourceSlot: actorSlot,
+                metadata: {
+                    harmful: true,
+                    tooltipText: markerTooltip,
+                },
+            });
+        });
         const personalReflectStatus = (Array.isArray(actorState.statuses) ? actorState.statuses : []).find(
             (status) => {
                 const remaining = Number(status?.remainingTurns) || 0;
