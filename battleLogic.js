@@ -395,11 +395,17 @@ const getSkillCooldownRemaining = (actorState, skillId) => {
     return Math.max(0, Number(cooldowns[skillId]) || 0);
 };
 
-const getSkillUseCount = (actorState, skillId) => {
-    if (!actorState || !skillId) return 0;
+const getSkillUseCount = (actorState, skillId, skill = null) => {
+    if (!actorState || (!skillId && !skill)) return 0;
     const skillUses =
         actorState.skillUses && typeof actorState.skillUses === 'object' ? actorState.skillUses : {};
-    return Math.max(0, Number(skillUses[skillId]) || 0);
+    let total = Math.max(0, Number(skillUses[skillId]) || 0);
+    const altId = skill?.baseSkillId || skill?.trackUsesForSkillId;
+    if (altId && altId !== skillId) {
+        const altCount = Math.max(0, Number(skillUses[altId]) || 0);
+        if (altCount > total) total = altCount;
+    }
+    return total;
 };
 
 const getCharacterCooldownSkillIds = ({ characters, unit }) => {
@@ -558,7 +564,7 @@ const doesUnitSatisfySkillTargetCondition = (unit, skill) => {
 const doesActorSatisfySkillCondition = (actorUnit, actorState, skill) => {
     const condition = skill?.actorCondition;
     const maxUses = Number(skill?.maxUses);
-    if (Number.isFinite(maxUses) && maxUses >= 0 && getSkillUseCount(actorState, skill?.id) >= maxUses) {
+    if (Number.isFinite(maxUses) && maxUses >= 0 && getSkillUseCount(actorState, skill?.id, skill) >= maxUses) {
         return false;
     }
     if (!condition || typeof condition !== 'object') return true;
@@ -3972,6 +3978,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             const skillUses =
                 actorState.skillUses && typeof actorState.skillUses === 'object' ? actorState.skillUses : {};
             skillUses[skill.id] = (Number(skillUses[skill.id]) || 0) + 1;
+            const altId = skill.baseSkillId || skill.trackUsesForSkillId;
+            if (altId && altId !== skill.id) {
+                skillUses[altId] = (Number(skillUses[altId]) || 0) + 1;
+            }
             actorState.skillUses = skillUses;
             actorState.totalSkillUseCount = (Number(actorState.totalSkillUseCount) || 0) + 1;
             const newUseCount = skillUses[skill.id];

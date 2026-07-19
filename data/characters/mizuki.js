@@ -56,6 +56,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "maxUses": 2,
+            "baseSkillId": "mizuki-execution-shuriken",
             "classes": [
                 "Physical",
                 "Instant"
@@ -197,6 +198,8 @@ module.exports = {
             "target": "single-enemy",
             "damage": 0,
             "cooldown": 0,
+            "maxUses": 2,
+            "baseSkillId": "mizuki-execution-shuriken",
             "classes": [
                 "Physical",
                 "Instant"

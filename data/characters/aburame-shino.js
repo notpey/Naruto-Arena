@@ -111,6 +111,7 @@ module.exports = {
                     "duration": 99,
                     "scope": "all-allies",
                     "metadata": {
+                        "helpful": true,
                         "destructibleDefensePoints": 20,
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"

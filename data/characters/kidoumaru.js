@@ -47,8 +47,7 @@ module.exports = {
             "cooldown": 5,
             "classes": [
                 "Physical",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {
@@ -60,6 +59,7 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 10,
                         "turnEndTrigger": "source_turn",
+                        "ongoingClass": "action",
                         "tooltipText": "This character takes 10 damage each turn from Summoning: Kyodaigumo."
                     }
                 },
