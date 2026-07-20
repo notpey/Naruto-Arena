@@ -406,6 +406,9 @@ test('Kabuto: Chakra Scalpel damage bonus is consumed upon use and does not ramp
     assert.equal(targetUnit.hp, 80);
     assert.equal(kabutoUnit.state.statuses.length, 1);
     assert.equal(kabutoUnit.state.statuses[0].id, 'kabuto_chakra_scalpel_bonus');
+    const targetDebuff = targetUnit.state.statuses.find((s) => s.id === 'kabuto_chakra_scalpel_debuff');
+    assert.ok(targetDebuff);
+    assert.equal(targetDebuff.metadata.turnDurationAnchor, 'source_turn');
 
     match.pendingTurns = {
         p1: {

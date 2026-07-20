@@ -37,6 +37,7 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "randomCostIncrease": 1,
                         "damageTakenBonusBySkillClass": {
                             "physical": 5,
