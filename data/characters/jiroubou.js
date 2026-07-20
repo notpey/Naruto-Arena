@@ -38,6 +38,9 @@ module.exports = {
                         "skillDamageBonuses": {
                             "jiroubou-earth-mausoleum-dumpling": 10
                         },
+                        "removeSelfOnSkillUseSkillIds": [
+                            "jiroubou-earth-mausoleum-dumpling"
+                        ],
                         "tooltipText": "Earth Mausoleum Dumpling deals 10 additional damage."
                     }
                 }
@@ -75,6 +78,9 @@ module.exports = {
                         "skillDamageBonuses": {
                             "jiroubou-arhat-fist": 10
                         },
+                        "removeSelfOnSkillUseSkillIds": [
+                            "jiroubou-arhat-fist"
+                        ],
                         "tooltipText": "Arhat Fist deals 10 additional damage."
                     }
                 }
@@ -138,6 +144,7 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "turnEndRemoveRandomChakra": 1,
                         "turnEndTrigger": "source_turn",
                         "tooltipText": "This character loses 1 random chakra each turn while Earth Prison survives."

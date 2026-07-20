@@ -111,6 +111,9 @@ module.exports = {
                         "skillDamageBonuses": {
                             "gekko-hayate-crescent-moon-slash": 15
                         },
+                        "removeSelfOnSkillUseSkillIds": [
+                            "gekko-hayate-crescent-moon-slash"
+                        ],
                         "ignoreInvulnerabilityForSkillIds": [
                             "gekko-hayate-crescent-moon-slash"
                         ],

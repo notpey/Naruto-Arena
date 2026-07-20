@@ -35,6 +35,7 @@ module.exports = {
                     "scope": "all-enemy",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "damageDebuffFlat": 5,
                         "mergeNumericAddKeys": [
                             "damageDebuffFlat"

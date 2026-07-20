@@ -224,6 +224,7 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "cannotUseSkills": true,
                         "tooltipText": "This character is stunned by Flying Kick."
                     }

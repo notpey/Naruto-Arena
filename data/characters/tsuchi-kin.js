@@ -37,6 +37,7 @@ module.exports = {
                     },
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "silenceNonDamageEffects": true,
                         "tooltipText": "Silenced: only damage from this character's skills will work."
                     }
@@ -84,6 +85,7 @@ module.exports = {
                     },
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "NonAfflictionDamageDebuff": 10,
                         "tooltipText": "This character deals 10 less non-affliction damage."
                     }
@@ -178,6 +180,7 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "tooltipText": "This character is disoriented by Unnerving Bells."
                     }
                 },

@@ -32,6 +32,7 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
                         "tooltipText": "This character cannot reduce damage or become invulnerable."

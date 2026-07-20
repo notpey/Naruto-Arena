@@ -434,3 +434,51 @@ test('Kabuto: Chakra Scalpel damage bonus is consumed upon use and does not ramp
     assert.equal(bonusStatus.metadata.skillDamageBonuses['yakushi-kabuto-chakra-scalpel'], 10);
 });
 
+test('Audit Fixes: One-time skill damage bonuses consume themselves upon skill use', () => {
+    const kankuroChar = require('../data/characters/kankuro');
+    const hayateChar = require('../data/characters/gekko-hayate');
+    const jiroubouChar = require('../data/characters/jiroubou');
+
+    const kankuroPrep = kankuroChar.skills.find((s) => s.id === 'kankuro-puppet-preparation');
+    const kankuroBonusStatus = kankuroPrep.effects.find((e) => e.statusId === 'kankuro_puppet_preparation_bonus');
+    assert.deepEqual(kankuroBonusStatus.metadata.removeSelfOnSkillUseSkillIds, [
+        'kankuro-black-secret-machine-one-shot',
+        'kankuro-poison-bomb',
+    ]);
+
+    const hayateMeld = hayateChar.skills.find((s) => s.id === 'gekko-hayate-meld-into-shadows');
+    const hayateMeldStatus = hayateMeld.effects.find((e) => e.statusId === 'gekko_hayate_meld_into_shadows');
+    assert.deepEqual(hayateMeldStatus.metadata.removeSelfOnSkillUseSkillIds, [
+        'gekko-hayate-crescent-moon-slash',
+    ]);
+
+    const jiroubouArhat = jiroubouChar.skills.find((s) => s.id === 'jiroubou-arhat-fist');
+    const jiroubouArhatStatus = jiroubouArhat.effects.find((e) => e.statusId === 'jiroubou_arhat_fist_bonus');
+    assert.deepEqual(jiroubouArhatStatus.metadata.removeSelfOnSkillUseSkillIds, [
+        'jiroubou-earth-mausoleum-dumpling',
+    ]);
+});
+
+test('Audit Fixes: 1-Turn enemy debuffs specify turnDurationAnchor = source_turn', () => {
+    const tentenChar = require('../data/characters/tenten');
+    const asumaChar = require('../data/characters/sarutobi-asuma');
+    const ankoChar = require('../data/characters/mitarashi-anko');
+    const oboroChar = require('../data/characters/oboro');
+
+    const tentenTrap = tentenChar.skills.find((s) => s.id === 'tenten-twin-rising-dragons-trap');
+    const tentenDebuff = tentenTrap.effects.find((e) => e.statusId === 'tenten_twin_rising_dragons_trap_debuff');
+    assert.equal(tentenDebuff.metadata.turnDurationAnchor, 'source_turn');
+
+    const asumaKick = asumaChar.skills.find((s) => s.id === 'sarutobi-asuma-flying-kick');
+    const asumaStun = asumaKick.effects.find((e) => e.statusId === 'asuma_flying_kick_stun');
+    assert.equal(asumaStun.metadata.turnDurationAnchor, 'source_turn');
+
+    const ankoPin = ankoChar.skills.find((s) => s.id === 'mitarashi-anko-dual-pin');
+    const ankoDebuff = ankoPin.effects.find((e) => e.statusId === 'mitarashi_anko_dual_pin_debuff');
+    assert.equal(ankoDebuff.metadata.turnDurationAnchor, 'source_turn');
+
+    const oboroKunai = oboroChar.skills.find((s) => s.id === 'oboro-exploding-kunai');
+    const oboroDebuff = oboroKunai.effects.find((e) => e.statusId === 'oboro_exploding_kunai_debuff');
+    assert.equal(oboroDebuff.metadata.turnDurationAnchor, 'source_turn');
+});
+

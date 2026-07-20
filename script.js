@@ -1598,6 +1598,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pendingTurnState = normalizePendingTurn(data.pendingTurn);
                 applyQueuedSkillVisuals();
                 syncTurnState(data.currentTurn, data.turnExpiresAt);
+
+        const getOrderedQueuedEntries = () => {
+            const pending = normalizePendingTurn(pendingTurnState);
+            const bySlot = pending.queuedByActorSlot || {};
+            const ordered = [];
+            const used = new Set();
+            pending.queueOrder.forEach((slot) => {
+                const key = String(slot);
+                const queued = bySlot[key];
+                if (!queued) return;
+                ordered.push(queued);
+                used.add(key);
+            });
+            Object.entries(bySlot).forEach(([slotKey, queued]) => {
+                if (used.has(slotKey)) return;
+                ordered.push(queued);
+            });
+            return ordered;
+        };
+
+        const reorderQueuedSkills = async (actorSlots = []) => {
+            if (!matchIdFromUrl) return;
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/reorder`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ actorSlots }),
+                    }
+                );
+                const data = await response.json();
+                if (!response.ok || !data?.ok) {
+                    throw new Error(data?.error || 'Unable to reorder queued skills.');
+                }
+                pendingTurnState = normalizePendingTurn(data.pendingTurn);
+                applyQueuedSkillVisuals();
+                syncTurnState(data.currentTurn, data.turnExpiresAt);
             } catch (error) {
                 console.warn('Failed to reorder queued skills.', error);
             }
@@ -1607,6 +1646,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!skillOrderEl) return;
             const queuedEntries = getOrderedQueuedEntries();
             skillOrderEl.innerHTML = '';
+
+            const playerUnits = currentPlayerUsername && latestBoardState?.[currentPlayerUsername];
+            if (Array.isArray(playerUnits)) {
+                playerUnits.forEach((unit, slot) => {
+                    if (!unit || unit.alive === false) return;
+                    const statuses = Array.isArray(unit.state?.statuses) ? unit.state.statuses : [];
+                    statuses.forEach((status) => {
+                        const ongoingClass = String(status?.metadata?.ongoingClass || '').trim().toLowerCase();
+                        if ((ongoingClass === 'action' || ongoingClass === 'control') && (Number(status?.remainingTurns) || 0) > 0) {
+                            const sourceSkillId = status?.sourceSkillId;
+                            const skillObj = sourceSkillId ? findSkillById(sourceSkillId) : null;
+                            const skillName = skillObj?.name || status?.metadata?.sourceSkillName || status.id || 'Ongoing Skill';
+                            const badge = document.createElement('div');
+                            badge.className = 'skillpreview ongoing-badge';
+                            badge.title = `Ongoing ${ongoingClass.toUpperCase()}: ${skillName}`;
+                            if (skillObj?.skillimage) {
+                                badge.style.backgroundImage = `url('${skillObj.skillimage}')`;
+                                badge.style.backgroundSize = 'cover';
+                            } else {
+                                badge.textContent = ongoingClass === 'control' ? 'CTRL' : 'ACT';
+                                badge.style.backgroundColor = ongoingClass === 'control' ? '#9c27b0' : '#2196f3';
+                                badge.style.color = '#fff';
+                                badge.style.fontWeight = 'bold';
+                                badge.style.fontSize = '10px';
+                                badge.style.display = 'flex';
+                                badge.style.alignItems = 'center';
+                                badge.style.justifyContent = 'center';
+                            }
+                            skillOrderEl.appendChild(badge);
+                        }
+                    });
+                });
+            }
+
             queuedEntries.forEach((queued) => {
                 const actorSlot = Number.parseInt(queued.actorSlot, 10);
                 const skillIdx = Number.parseInt(queued.skillIndex, 10);
@@ -1616,6 +1689,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 preview.className = 'skillpreview';
                 preview.alt = effectiveSkill?.name || `Queued Skill ${skillIdx + 1}`;
                 preview.src = effectiveSkill?.skillimage || '';
+                preview.onerror = () => {
+                    preview.style.display = 'none';
+                    const fallback = document.createElement('div');
+                    fallback.className = 'skillpreview skillpreview-text';
+                    fallback.textContent = effectiveSkill?.name ? effectiveSkill.name.slice(0, 3).toUpperCase() : 'SKL';
+                    fallback.title = effectiveSkill?.name || 'Queued Skill';
+                    skillOrderEl.appendChild(fallback);
+                };
                 preview.draggable = true;
                 preview.title = 'Click to move this queued skill first. Drag to reorder.';
                 preview.dataset.actorSlot = String(actorSlot);

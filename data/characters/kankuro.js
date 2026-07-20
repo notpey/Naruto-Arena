@@ -153,6 +153,10 @@ module.exports = {
                             "kankuro-black-secret-machine-one-shot": 10,
                             "kankuro-poison-bomb": 10
                         },
+                        "removeSelfOnSkillUseSkillIds": [
+                            "kankuro-black-secret-machine-one-shot",
+                            "kankuro-poison-bomb"
+                        ],
                         "onOwnerUseSkillIdsAny": [
                             "kankuro-black-secret-machine-one-shot",
                             "kankuro-poison-bomb"
