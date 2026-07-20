@@ -53,6 +53,12 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "replaceSkillDamageBonuses": true,
+                        "removeSelfOnSkillUseCount": [
+                            {
+                                "skillId": "yakushi-kabuto-chakra-scalpel",
+                                "atLeast": 1
+                            }
+                        ],
                         "skillDamageBonuses": {
                             "yakushi-kabuto-chakra-scalpel": 10
                         },

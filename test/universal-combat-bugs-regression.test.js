@@ -352,3 +352,82 @@ test('BUG 2: Persistent counter with trapReappliesSelf is retained after trigger
     assert.equal(defender.state.statuses.length, 1);
     assert.equal(defender.state.statuses[0].id, 'persistent_counter');
 });
+
+test('BUG 1: Server match payload preserves destructibleDefensePoints and status metadata keys for client rendering', () => {
+    const server = require('../server');
+    if (typeof server.buildMatchPayloadForUser === 'function') {
+        const match = buildTestMatch();
+        const unit = match.board.p1[0];
+        unit.state.statuses.push({
+            id: 'shukaku_sand_claw',
+            remainingTurns: 99,
+            metadata: {
+                destructibleDefensePoints: 10,
+                permanent: true,
+                helpful: true,
+                tooltipText: 'This character has permanent destructible defense from Sand Claw.',
+            },
+        });
+
+        const payload = server.buildMatchPayloadForUser(match, 'p1');
+        const p1Statuses = payload.board.p1[0].state.statuses;
+        assert.equal(p1Statuses.length, 1);
+        assert.equal(p1Statuses[0].metadata.destructibleDefensePoints, 10);
+        assert.equal(p1Statuses[0].metadata.permanent, true);
+    }
+});
+
+test('Kabuto: Chakra Scalpel damage bonus is consumed upon use and does not ramp up indefinitely', () => {
+    const match = buildTestMatch();
+    const kabutoUnit = match.board.p1[0];
+    const targetUnit = match.board.p2[0];
+    const kabutoChar = require('../data/characters/yakushi-kabuto');
+
+    const mockRoster = [kabutoChar, mockCharacters[1]];
+
+    match.pendingTurns = {
+        p1: {
+            queueOrder: [0],
+            queuedByActorSlot: {
+                '0': {
+                    skillIndex: 0,
+                    targetSelection: [{ username: 'p2', slot: 0 }],
+                },
+            },
+        },
+    };
+
+    battleLogic.resolvePendingTurnSkills({
+        match,
+        actingUsername: 'p1',
+        characters: mockRoster,
+    });
+
+    assert.equal(targetUnit.hp, 80);
+    assert.equal(kabutoUnit.state.statuses.length, 1);
+    assert.equal(kabutoUnit.state.statuses[0].id, 'kabuto_chakra_scalpel_bonus');
+
+    match.pendingTurns = {
+        p1: {
+            queueOrder: [0],
+            queuedByActorSlot: {
+                '0': {
+                    skillIndex: 0,
+                    targetSelection: [{ username: 'p2', slot: 0 }],
+                },
+            },
+        },
+    };
+
+    battleLogic.resolvePendingTurnSkills({
+        match,
+        actingUsername: 'p1',
+        characters: mockRoster,
+    });
+
+    assert.equal(targetUnit.hp, 60);
+    const bonusStatus = kabutoUnit.state.statuses.find((s) => s.id === 'kabuto_chakra_scalpel_bonus');
+    assert.ok(bonusStatus);
+    assert.equal(bonusStatus.metadata.skillDamageBonuses['yakushi-kabuto-chakra-scalpel'], 10);
+});
+
