@@ -2777,6 +2777,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         /\b(takes|take)\s+additional damage\b/i,
                         (value, match, verb) => `${verb} ${value} additional damage`
                     );
+                    const skillBonusValue =
+                        statusMetadata?.skillDamageBonuses && typeof statusMetadata.skillDamageBonuses === 'object'
+                            ? Math.max(0, ...Object.values(statusMetadata.skillDamageBonuses).map((v) => Number(v) || 0))
+                            : 0;
+                    injectMissingValue(
+                        skillBonusValue,
+                        /\b(deals|deal)\s+additional damage\b/i,
+                        (value, match, verb) => `${verb} ${value} additional damage`
+                    );
                     const nonAfflictionBonusDamage = Math.max(
                         0,
                         Number(statusMetadata?.bonusDamageFromSourceNonAfflictionFlat) || 0

@@ -1278,14 +1278,14 @@ const applyStatus = ({
                 ? metadata.skillDamageBonuses
                 : null;
         if (prevBonuses || incomingBonuses) {
-            const mergedBonuses = { ...(prevBonuses || {}) };
-            if (metadata?.replaceSkillDamageBonuses) {
-                nextMetadata.skillDamageBonuses = { ...(incomingBonuses || {}) };
-            } else {
+            if (metadata?.mergeSkillDamageBonuses && !metadata?.replaceSkillDamageBonuses) {
+                const mergedBonuses = { ...(prevBonuses || {}) };
                 Object.entries(incomingBonuses || {}).forEach(([skillId, value]) => {
                     mergedBonuses[skillId] = (Number(mergedBonuses[skillId]) || 0) + (Number(value) || 0);
                 });
                 nextMetadata.skillDamageBonuses = mergedBonuses;
+            } else {
+                nextMetadata.skillDamageBonuses = { ...(incomingBonuses || {}) };
             }
         }
         const mergeObjectNumericAddKeys = Array.isArray(metadata?.mergeObjectNumericAddKeys)
