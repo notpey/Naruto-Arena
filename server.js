@@ -6486,6 +6486,7 @@ const buildMatchPayloadForUser = (match, username) => {
         board: sanitizeBoardForViewer(match.board, username),
         chakraPools: sanitizeChakraPoolsForViewer(match.chakraPools, username),
         lastChakraGain: sanitizeLastChakraGainForViewer(match.economy?.lastChakraGain, username),
+        combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-15) : [],
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,

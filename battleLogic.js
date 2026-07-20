@@ -2213,6 +2213,84 @@ const maybeTriggerReflectDamage = ({ match, turnMarker, actingUsername, recipien
     });
 };
 
+const applyCounteredAlternativeEffects = ({
+    match,
+    actingUsername,
+    actorSlot,
+    actorUnit,
+    recipient,
+    skill,
+}) => {
+    let count = 0;
+    if (!skill || typeof skill !== 'object') return count;
+
+    const explicitAlt = Array.isArray(skill?.whenCounteredEffects)
+        ? skill.whenCounteredEffects
+        : Array.isArray(skill?.counteredEffects)
+        ? skill.counteredEffects
+        : Array.isArray(skill?.onCounteredEffects)
+        ? skill.onCounteredEffects
+        : [];
+
+    const conditionalAlt = (Array.isArray(skill?.effects) ? skill.effects : []).filter((effect) =>
+        Boolean(
+            effect?.whenCountered ||
+            effect?.ifCountered ||
+            effect?.condition?.countered ||
+            effect?.condition?.counter ||
+            effect?.type === 'countered_alternative'
+        )
+    );
+
+    const allAlt = [...explicitAlt, ...conditionalAlt];
+    if (allAlt.length === 0) return 0;
+
+    allAlt.forEach((rawEffect) => {
+        const effect = materializeEffectWithSkillClassChoice(rawEffect, null);
+        if (!effect || typeof effect !== 'object') return;
+
+        const targetType = String(effect.scope || effect.target || 'target').trim().toLowerCase();
+        let targetList = [recipient];
+        if (targetType === 'self' || targetType === 'actor') {
+            targetList = [{ username: actingUsername, slot: actorSlot, unit: actorUnit }];
+        }
+
+        targetList.forEach((targetEntry) => {
+            if (!targetEntry?.unit || targetEntry.unit.alive === false) return;
+            const targetState = ensureUnitStateShape(targetEntry.unit);
+
+            if (effect.type === 'damage' && Math.max(0, Number(effect.amount) || 0) > 0) {
+                applyDamageToUnit(targetEntry.unit, Number(effect.amount), {
+                    match,
+                    sourceUsername: actingUsername,
+                    sourceSlot: actorSlot,
+                    targetUsername: targetEntry.username,
+                    sourceSkillId: skill.id || null,
+                    damageDebugReason: 'when_countered_alternative',
+                });
+                count += 1;
+            } else if (effect.type === 'apply_status' && effect.statusId) {
+                applyStatus({
+                    targetState,
+                    statusId: effect.statusId,
+                    duration: Math.max(0, Number(effect.duration) || 1),
+                    sourceSkillId: skill.id || null,
+                    sourceUsername: actingUsername,
+                    sourceSlot: actorSlot,
+                    metadata: effect.metadata || {},
+                    fresh: true,
+                });
+                count += 1;
+            } else if (effect.type === 'heal' && Math.max(0, Number(effect.amount) || 0) > 0) {
+                applyHealToUnit(targetEntry.unit, Number(effect.amount));
+                count += 1;
+            }
+        });
+    });
+
+    return count;
+};
+
 const maybeTriggerReactiveDefenses = ({
     match,
     turnMarker,
@@ -2223,6 +2301,8 @@ const maybeTriggerReactiveDefenses = ({
     skillIsHarmful = false,
     sourceSkillId = null,
     allowSelfTrapTrigger = false,
+    skill = null,
+    characters = [],
 }) => {
     if (!recipient?.unit || recipient.unit.alive === false) return false;
     if (!actorUnit || actorUnit.alive === false) return false;
@@ -2470,6 +2550,53 @@ const maybeTriggerReactiveDefenses = ({
             }),
         });
     }
+
+    const alternativeEffectsAppliedCount = applyCounteredAlternativeEffects({
+        match,
+        actingUsername,
+        actorSlot: Number.isInteger(recipient?.slot) ? recipient.slot : 0,
+        actorUnit,
+        recipient,
+        skill,
+    });
+
+    if (match) {
+        if (!Array.isArray(match.combatEvents)) {
+            match.combatEvents = [];
+        }
+        const actorChar = Number.isInteger(actorUnit?.rosterIndex) ? characters?.[actorUnit.rosterIndex] : null;
+        const recipientChar = Number.isInteger(recipient?.unit?.rosterIndex) ? characters?.[recipient.unit.rosterIndex] : null;
+        const trapSourceUnit = trapStatus?.sourceUsername && Number.isInteger(trapStatus?.sourceSlot)
+            ? match.board?.[trapStatus.sourceUsername]?.[Number(trapStatus.sourceSlot)]
+            : recipient.unit;
+        const trapSourceChar = Number.isInteger(trapSourceUnit?.rosterIndex) ? characters?.[trapSourceUnit.rosterIndex] : null;
+
+        const counterSkillName = trapMetadata?.sourceSkillName || trapStatus?.sourceSkillId || 'Counter Skill';
+        const incomingSkillName = skill?.name || sourceSkillId || 'Skill';
+
+        const eventId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const counterEvent = {
+            id: eventId,
+            timestamp: Date.now(),
+            outcome: 'countered',
+            sourceCharacterId: actorChar?.id || actorChar?.characterId || null,
+            targetCharacterId: recipientChar?.id || recipientChar?.characterId || null,
+            skillId: skill?.id || sourceSkillId || null,
+            skillName: incomingSkillName,
+            counterEffectId: trapStatus?.id || null,
+            counterSourceCharacterId: trapSourceChar?.id || trapSourceChar?.characterId || null,
+            counterSourceSkillId: trapStatus?.sourceSkillId || null,
+            counterSourceSkillName: counterSkillName,
+            counterEffectsApplied: true,
+            alternativeEffectsApplied: alternativeEffectsAppliedCount > 0,
+            message: `${counterSkillName} countered ${incomingSkillName}.`,
+        };
+        match.combatEvents.push(counterEvent);
+        if (match.combatEvents.length > 50) {
+            match.combatEvents.shift();
+        }
+    }
+
     const removeStatusGroupIdsOnTrigger = [
         ...(typeof trapMetadata?.removeStatusGroupIdOnTrigger === 'string' && trapMetadata.removeStatusGroupIdOnTrigger
             ? [trapMetadata.removeStatusGroupIdOnTrigger]
@@ -2507,7 +2634,7 @@ const maybeTriggerReactiveDefenses = ({
         statuses.splice(trapIndex, 1);
         targetState.statuses = statuses;
     }
-    return Boolean(trapMetadata?.counterCancelsSkill);
+    return Boolean(trapMetadata?.counterCancelsSkill ?? true);
 };
 
 const applyDamageToUnit = (unit, rawAmount, context = {}) => {
@@ -4655,6 +4782,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 skillIsHarmful,
                 sourceSkillId: skill.id || null,
                 allowSelfTrapTrigger: true,
+                skill,
+                characters,
             })
         ) {
             skillCancelledByEvade = true;
@@ -4692,6 +4821,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     skillClasses: skill.classes || [],
                     skillIsHarmful: skillHasHarmfulEffects(skill),
                     sourceSkillId: skill.id || null,
+                    skill,
+                    characters,
                 })
             ) {
                 skillCancelledByEvade = true;
@@ -4764,7 +4895,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             recipient,
                             actorUnit,
                             skillClasses: skill.classes || [],
+                            skillIsHarmful: skillHasHarmfulEffects(skill),
                             sourceSkillId: skill.id || null,
+                            skill,
+                            characters,
                         });
                         if (counterCancelled) {
                             skillCancelledByEvade = true;
@@ -5680,6 +5814,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             skillClasses: skill.classes || [],
                             skillIsHarmful: skillHasHarmfulEffects(skill),
                             sourceSkillId: skill.id || null,
+                            skill,
+                            characters,
                         });
                         if (counterCancelled) {
                             skillCancelledByEvade = true;
@@ -7838,6 +7974,8 @@ module.exports = {
     applyHealToUnit,
     cleanseHarmfulStatuses,
     reviveUnitToHp,
+    applyDamageToUnit,
+    applyStatus,
     selectTurnStartChoiceTarget,
     queueTurnStartChoicePrompts,
 };
