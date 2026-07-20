@@ -82,9 +82,6 @@ module.exports = function(context) {
                 username,
                 team: value,
             });
-            if (typeof insertMatchActive === 'function') {
-                await insertMatchActive(matchDocument);
-            }
             const safePayload = buildMatchPayloadForUser(matchDocument, username);
             return res.json({
                 ok: true,
