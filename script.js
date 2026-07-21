@@ -1598,45 +1598,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 pendingTurnState = normalizePendingTurn(data.pendingTurn);
                 applyQueuedSkillVisuals();
                 syncTurnState(data.currentTurn, data.turnExpiresAt);
-
-        const getOrderedQueuedEntries = () => {
-            const pending = normalizePendingTurn(pendingTurnState);
-            const bySlot = pending.queuedByActorSlot || {};
-            const ordered = [];
-            const used = new Set();
-            pending.queueOrder.forEach((slot) => {
-                const key = String(slot);
-                const queued = bySlot[key];
-                if (!queued) return;
-                ordered.push(queued);
-                used.add(key);
-            });
-            Object.entries(bySlot).forEach(([slotKey, queued]) => {
-                if (used.has(slotKey)) return;
-                ordered.push(queued);
-            });
-            return ordered;
-        };
-
-        const reorderQueuedSkills = async (actorSlots = []) => {
-            if (!matchIdFromUrl) return;
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/reorder`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ actorSlots }),
-                    }
-                );
-                const data = await response.json();
-                if (!response.ok || !data?.ok) {
-                    throw new Error(data?.error || 'Unable to reorder queued skills.');
-                }
-                pendingTurnState = normalizePendingTurn(data.pendingTurn);
-                applyQueuedSkillVisuals();
-                syncTurnState(data.currentTurn, data.turnExpiresAt);
             } catch (error) {
                 console.warn('Failed to reorder queued skills.', error);
             }

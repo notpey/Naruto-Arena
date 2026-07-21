@@ -155,6 +155,7 @@ module.exports = {
                     },
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
                         "damageDebuffBySkillClass": {
                             "physical": 10,
                             "energy": 10

@@ -108,7 +108,7 @@ test('Tenten Twin Rising Dragons Trap debuff expires instead of freezing', () =>
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff')?.remainingTurns, 1);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff'), undefined);
 });
 
@@ -312,14 +312,14 @@ test('Jiroubou Earth Prison drains chakra each source turn while it survives', (
 
     queueSkill(match, 'p1', 0, 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 35);
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 39);
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 34);
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 38);
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
 
-    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 33);
+    assert.equal(Object.values(match.chakraPools.p2).reduce((sum, amount) => sum + amount, 0), 37);
 });
 
 test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () => {

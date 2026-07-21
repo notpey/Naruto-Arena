@@ -97,6 +97,7 @@ module.exports = {
                     "duration": 99,
                     "scope": "self",
                     "metadata": {
+                        "mergeSkillDamageBonuses": true,
                         "skillDamageBonuses": {
                             "akimichi-chouji-partial-double-size": 20,
                             "akimichi-chouji-meat-tank": 10

@@ -387,6 +387,7 @@
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
+                                                        "turnDurationAnchor": "source_turn",
                                                         "damageDebuffBySkillClass": {
                                                                 "physical": 10,
                                                                 "energy": 10
@@ -413,6 +414,7 @@
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
+                                                        "turnDurationAnchor": "source_turn",
                                                         "damageDebuffBySkillClass": {
                                                                 "physical": 10,
                                                                 "energy": 10
@@ -1023,6 +1025,10 @@
                                                                 "kankuro-poison-bomb": 10
                                                         },
                                                         "onOwnerUseSkillIdsAny": [
+                                                                "kankuro-black-secret-machine-one-shot",
+                                                                "kankuro-poison-bomb"
+                                                        ],
+                                                        "removeSelfOnSkillUseSkillIds": [
                                                                 "kankuro-black-secret-machine-one-shot",
                                                                 "kankuro-poison-bomb"
                                                         ],

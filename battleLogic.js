@@ -6201,6 +6201,17 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 });
             }
         });
+        if (skill?.id) {
+            actorState.statuses = (Array.isArray(actorState.statuses) ? actorState.statuses : []).filter(
+                (existingStatus) => {
+                    const removeSkillIds = existingStatus?.metadata?.removeSelfOnSkillUseSkillIds;
+                    if (Array.isArray(removeSkillIds) && removeSkillIds.includes(skill.id)) {
+                        return false;
+                    }
+                    return true;
+                }
+            );
+        }
 
         const cooldownTurns = Math.max(0, Number(skill.cooldown) || 0);
         if (cooldownSkillId && cooldownTurns > 0) {
