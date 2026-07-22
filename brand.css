@@ -2700,3 +2700,235 @@ body.na-legacy-light {
   border: 1px solid rgba(105, 112, 124, 0.45);
 }
 
+/* ============================================================
+   MASTER UNIFIED WEBSITE REDESIGN SYSTEM
+   Overrides legacy light-parchment sheets across all webpages.
+   Unifies index, missions, story, profile, leaderboards, manual,
+   and admin under a single dark shinobi design language.
+   ============================================================ */
+
+/* Global Dark Body Canvas */
+body,
+body.na-legacy-light {
+    background: 
+        radial-gradient(ellipse at 50% 0%, rgba(232, 128, 26, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 90%, rgba(163, 107, 255, 0.08) 0%, transparent 50%),
+        linear-gradient(160deg, #07090e 0%, #0d121c 50%, #05070a 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Master Dark Sheet Container (Main Content Surface) */
+.na-legacy-light .main,
+.ca-content-sheet,
+.ca-light-card,
+.ca-admin-panel,
+.na-legacy-light .profile-search,
+.na-legacy-light .profile-section,
+.na-legacy-light .clan-profile-panel,
+.na-legacy-light .clan-shell,
+.na-legacy-light .avatar-panel,
+.na-legacy-light .background-panel,
+.na-legacy-light .reset-panel,
+.na-legacy-light .release-panel,
+.na-legacy-light .editor-stage,
+.na-legacy-light .mission-panel,
+.na-legacy-light .mainsection,
+.na-legacy-light .news-editor-card,
+.na-legacy-light .news-list-card,
+.na-legacy-light .character-editor-modal,
+.na-legacy-light .player-account-modal,
+.na-legacy-light .clan-register-modal,
+.na-legacy-light .goal-popup-card {
+    background: linear-gradient(165deg, #121724 0%, #0a0d16 100%) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Master Inner Card Fills */
+.na-legacy-light .clan-card,
+.na-legacy-light .editor-note,
+.na-legacy-light .editor-count,
+.na-legacy-light .character-editor-card,
+.na-legacy-light .character-editor-summary,
+.na-legacy-light .mission-list-item,
+.na-legacy-light .mission-toggle,
+.na-legacy-light .goal-card,
+.na-legacy-light .news-post-entry,
+.na-legacy-light .player-account-entry,
+.na-legacy-light .player-account-summary-card,
+.na-legacy-light .clan-register-section,
+.na-legacy-light .info-row,
+.na-legacy-light .quick-game-row,
+.na-legacy-light .clan-profile-info-row,
+.na-legacy-light .clan-profile-bio,
+.na-legacy-light .clan-profile-member-row,
+.na-legacy-light .reset-confirm {
+    background: linear-gradient(145deg, #18202e 0%, #0d121c 100%) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+}
+
+.na-legacy-light .character-editor-card:hover,
+.na-legacy-light .mission-list-item:hover,
+.na-legacy-light .mission-list-item.active,
+.na-legacy-light .news-post-entry:hover,
+.na-legacy-light .player-account-entry:hover,
+.na-legacy-light .clan-card:hover {
+    border-color: #ffae42 !important;
+    background: linear-gradient(145deg, #1e283a 0%, #101622 100%) !important;
+    box-shadow: 0 8px 24px rgba(255, 174, 66, 0.25) !important;
+}
+
+/* Titles & Headings — Gold Amber Glow */
+.na-legacy-light .release-title,
+.na-legacy-light .mainsection-kicker,
+.na-legacy-light .profile-block-head,
+.na-legacy-light .clan-profile-block-head,
+.na-legacy-light .clan-profile-member-heading,
+.na-legacy-light .mission-panel-title,
+.na-legacy-light .mission-section-heading,
+.na-legacy-light .news-editor-title,
+.na-legacy-light .news-list-title,
+.na-legacy-light .editor-note-title,
+.na-legacy-light .background-panel-title,
+.na-legacy-light .avatar-panel-title,
+.na-legacy-light .reset-panel-title,
+.na-legacy-light .clan-register-head,
+.na-legacy-light .section-title,
+.ca-hero-title,
+h1, h2, h3 {
+    color: #ffae42 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.03em !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Secondary Subtext & Labels — Light Parchment */
+.na-legacy-light .release-copy,
+.na-legacy-light .mainsection-meta,
+.na-legacy-light .mainsection-body,
+.na-legacy-light .mainsection-balances,
+.na-legacy-light .profile-search-status,
+.na-legacy-light .avatar-preview-copy,
+.na-legacy-light .avatar-hint,
+.na-legacy-light .avatar-status,
+.na-legacy-light .background-label,
+.na-legacy-light .background-hint,
+.na-legacy-light .background-status,
+.na-legacy-light .reset-copy,
+.na-legacy-light .reset-status,
+.na-legacy-light .editor-note-copy,
+.na-legacy-light .editor-count-label,
+.na-legacy-light .character-editor-status,
+.na-legacy-light .character-editor-id,
+.na-legacy-light .mission-panel-copy,
+.na-legacy-light .mission-field,
+.na-legacy-light .mission-field-help,
+.na-legacy-light .mission-section-copy,
+.na-legacy-light .mission-list-meta,
+.na-legacy-light .goal-card-meta,
+.na-legacy-light .goal-popup-copy,
+.na-legacy-light .mission-editor-status,
+.na-legacy-light .news-admin-label,
+.na-legacy-light .news-admin-help,
+.na-legacy-light .news-admin-status,
+.na-legacy-light .news-post-entry-meta,
+.na-legacy-light .player-accounts-status,
+.na-legacy-light .player-account-status,
+.na-legacy-light .player-account-entry-meta,
+.na-legacy-light .player-account-summary-label,
+.na-legacy-light .clan-profile-label,
+.na-legacy-light .clan-profile-empty,
+.na-legacy-light .clan-profile-status,
+.na-legacy-light .clan-register-copy,
+.na-legacy-light .clan-register-label,
+.na-legacy-light .clan-register-status,
+p, label, span {
+    color: #d0c8b8 !important;
+}
+
+/* Primary Values & High Contrast White Text */
+.na-legacy-light .info-value,
+.na-legacy-light .clan-profile-value,
+.na-legacy-light .clan-profile-member-cell,
+.na-legacy-light .clan-profile-member-date,
+.na-legacy-light .player-account-summary-value,
+.na-legacy-light .character-editor-card-name,
+.na-legacy-light .mission-list-title,
+.na-legacy-light .goal-card-summary,
+.na-legacy-light .news-post-entry-title,
+.na-legacy-light .clan-summary-copy,
+.na-legacy-light .clan-register-value,
+strong, b {
+    color: #ffffff !important;
+}
+
+/* Form Inputs & Search Fields */
+.ca-form-field,
+.ca-form-textarea,
+.ca-form-select,
+.na-legacy-light .profile-search-input,
+.na-legacy-light .avatar-input,
+.na-legacy-light .background-input,
+.na-legacy-light .character-editor-search,
+.na-legacy-light .mission-search,
+.na-legacy-light .mission-field input,
+.na-legacy-light .mission-field select,
+.na-legacy-light .news-admin-input,
+.na-legacy-light .news-admin-textarea,
+.na-legacy-light .player-accounts-search,
+.na-legacy-light .clan-register-input,
+.na-legacy-light .clan-register-textarea {
+    background: rgba(9, 12, 18, 0.9) !important;
+    border: 1px solid #4a3e2b !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+}
+
+.ca-form-field:focus,
+.ca-form-textarea:focus,
+.ca-form-select:focus,
+.na-legacy-light .profile-search-input:focus,
+.na-legacy-light .avatar-input:focus,
+.na-legacy-light .background-input:focus,
+.na-legacy-light .character-editor-search:focus,
+.na-legacy-light .mission-search:focus {
+    border-color: #ffae42 !important;
+    box-shadow: 0 0 10px rgba(255, 174, 66, 0.35) !important;
+}
+
+/* Buttons — Master Gold Foil Gradient */
+.ca-nav-play,
+.ca-hero-play,
+.na-legacy-light .profile-search-button,
+.na-legacy-light .avatar-save,
+.na-legacy-light .background-save,
+.na-legacy-light .mission-button.primary,
+.na-legacy-light .character-editor-button.primary,
+.na-legacy-light .player-account-button.primary,
+.na-legacy-light .news-admin-button.primary,
+.na-legacy-light .clan-card button,
+.na-legacy-light .clan-register-button.primary,
+.na-legacy-light .reset-button.primary {
+    background: linear-gradient(135deg, #ffae42 0%, #e8801a 100%) !important;
+    border: 1px solid #ffae42 !important;
+    color: #1b0d02 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 14px rgba(232, 128, 26, 0.4) !important;
+    transition: all 0.15s ease !important;
+}
+
+.ca-nav-play:hover,
+.ca-hero-play:hover,
+.na-legacy-light .profile-search-button:hover,
+.na-legacy-light .mission-button.primary:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #e8801a 100%) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 6px 18px rgba(255, 174, 66, 0.5) !important;
+    transform: translateY(-1px) !important;
+}
+
