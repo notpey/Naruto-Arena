@@ -7752,8 +7752,9 @@ body.hub-view-story .selectionpage {
    MOBILE RESPONSIVE & MATCHMAKING MODAL OVERHAUL
    ============================================================ */
 
-/* Center searching opponent backdrop over stage */
-.searching-backdrop {
+/* Stage modal backdrop centering (Search for Opponent & Private Match) */
+.searching-backdrop,
+.private-match-backdrop {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
@@ -7766,11 +7767,13 @@ body.hub-view-story .selectionpage {
     justify-content: center !important;
 }
 
-.searching-backdrop.hidden {
+.searching-backdrop.hidden,
+.private-match-backdrop.hidden {
     display: none !important;
 }
 
-.searchingscroll {
+.searchingscroll,
+.private-match-modal {
     position: relative !important;
     left: auto !important;
     top: auto !important;
@@ -7795,36 +7798,5 @@ button, a, [role="button"], input, select {
     display: none !important;
 }
 
-/* In-Game Top / Mobile Surrender Button */
-.ingame-surrender-top-btn {
-    position: absolute !important;
-    top: 14px !important;
-    right: 120px !important;
-    z-index: 1000 !important;
-    padding: 6px 12px !important;
-    background: linear-gradient(135deg, #c41e3a 0%, #8b1225 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid #ff5252 !important;
-    border-radius: 4px !important;
-    font-family: 'Franklin', sans-serif !important;
-    font-size: 11px !important;
-    font-weight: bold !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
-    transition: all 0.15s ease-in-out !important;
-}
-
-.ingame-surrender-top-btn:hover {
-    background: linear-gradient(135deg, #e11836 0%, #a8172c 100%) !important;
-    box-shadow: 0 3px 10px rgba(225, 24, 54, 0.5) !important;
-    transform: translateY(-1px) !important;
-}
-
-.ingame-surrender-top-btn:active {
-    transform: translateY(0) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-}
 
 
