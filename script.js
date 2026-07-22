@@ -500,6 +500,46 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        const checkActiveMatchOnHubLoad = async () => {
+            const bannerEl = document.getElementById('active-match-reconnect-banner');
+            const resumeBtn = document.getElementById('reconnect-resume-btn');
+            const abandonBtn = document.getElementById('reconnect-abandon-btn');
+            if (!bannerEl || !slotList) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.ok && data.matchFound && data.matchId) {
+                    bannerEl.hidden = false;
+                    if (resumeBtn) {
+                        resumeBtn.onclick = () => {
+                            window.location.href = `ingame.html?matchId=${encodeURIComponent(data.matchId)}`;
+                        };
+                    }
+                    if (abandonBtn) {
+                        abandonBtn.onclick = async () => {
+                            abandonBtn.disabled = true;
+                            try {
+                                await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(data.matchId)}/surrender`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    credentials: 'include',
+                                });
+                            } catch (e) {
+                                // ignore error
+                            } finally {
+                                bannerEl.hidden = true;
+                            }
+                        };
+                    }
+                } else {
+                    bannerEl.hidden = true;
+                }
+            } catch (err) {
+                console.warn('Unable to check active match status:', err);
+            }
+        };
+
         const apiUser = await fetchProfile();
         if (apiUser?.username) {
             applyPlayerIdentity({
@@ -510,6 +550,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             applyCustomBackgrounds(apiUser);
         }
+        checkActiveMatchOnHubLoad();
     };
 
     const fetchPublicProfile = async (username) => {

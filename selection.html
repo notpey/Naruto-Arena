@@ -67,6 +67,13 @@
 </head>
 <body class="selection-client-page game-remaster">
 <div class="background">
+    <div class="active-match-reconnect-banner" id="active-match-reconnect-banner" hidden>
+        <span class="reconnect-text">⚔️ Active Match in Progress</span>
+        <div class="reconnect-actions">
+            <button type="button" class="reconnect-btn" id="reconnect-resume-btn">Resume Battle</button>
+            <button type="button" class="reconnect-surrender-btn" id="reconnect-abandon-btn">Surrender</button>
+        </div>
+    </div>
     <button type="button" class="shop-icon" data-shop-trigger aria-label="Open the Ryo shop" title="Ryo Shop">
         <span class="shop-icon-glyph">両</span>
         <span class="shop-icon-balance" data-shop-balance>0</span>

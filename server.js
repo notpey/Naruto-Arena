@@ -8705,6 +8705,32 @@ const autoAdvanceTurnIfExpired = async (match) => {
     return finalizeTurn(match, match.currentTurn);
 };
 
+async function ensureEarlyAccessNewsPost() {
+    try {
+        if (!newsPostsCollection) return;
+        const count = await newsPostsCollection.countDocuments();
+        if (count === 0) {
+            await newsPostsCollection.insertOne({
+                title: 'Welcome to Naruto-Arena Early Access Weekend!',
+                content: `Welcome Shinobi! Early Access Weekend is officially live.\n\n` +
+                    `### What's New & Ready to Play:\n` +
+                    `- **Quick & Ladder Battles**: Queue against active players or automated battle bots.\n` +
+                    `- **Chunin Exams (PvE Gauntlet)**: Draft relics, manage chakra scrolls, and battle through exam stages.\n` +
+                    `- **Story Missions**: Complete classic saga encounters and unlock mission-exclusive characters.\n` +
+                    `- **Mobile Optimization**: Complete viewport fit, pinch-zoom support, and touch UI polish.\n` +
+                    `- **In-Game Surrender & Active Match Resume**: Never get stranded; resume your active match if disconnected.\n\n` +
+                    `Found a bug or issue? Click **🐛 Report Bug** on any screen!`,
+                author: 'Naruto-Arena Team',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+            console.log('Seeded Early Access Welcome news announcement.');
+        }
+    } catch (err) {
+        console.warn('Failed to seed Early Access news post:', err.message);
+    }
+}
+
 async function initDb() {
     if (!DEFAULT_URI) {
         throw new Error('MONGODB_URI is required. Set it in your environment before starting the server.');
@@ -8727,6 +8753,9 @@ async function initDb() {
         { unique: true, partialFilterExpression: { email: { $type: 'string' } } }
     );
     await matchesCollection.createIndex({ matchId: 1 }, { unique: true });
+    await matchesCollection.createIndex({ status: 1, createdAt: -1 });
+    await matchesCollection.createIndex({ 'players.username': 1, status: 1 });
+    await matchesCollection.createIndex({ mode: 1, createdAt: -1 });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
     await newsPostsCollection.createIndex({ createdAt: -1 });
     await bugsCollection.createIndex({ createdAt: -1 });
@@ -8735,6 +8764,7 @@ async function initDb() {
     characterCatalog = buildCharacterCatalog();
     await getStoredLadderRankTiers();
     await backfillUserProfiles();
+    await ensureEarlyAccessNewsPost();
     console.log('Connected to MongoDB.');
 
     // Initialize routers after DB is ready

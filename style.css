@@ -7798,5 +7798,83 @@ button, a, [role="button"], input, select {
     display: none !important;
 }
 
+/* Active Match Reconnect Banner (Selection Hub) */
+.active-match-reconnect-banner {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(232, 128, 26, 0.95) 0%, rgba(196, 30, 58, 0.95) 100%);
+    border: 2px solid #ffae42;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 174, 66, 0.4);
+    animation: active-banner-pulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes active-banner-pulse {
+    0% { transform: translateX(-50%) scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(255,174,66,0.3); }
+    100% { transform: translateX(-50%) scale(1.02); box-shadow: 0 8px 28px rgba(0,0,0,0.7), 0 0 25px rgba(255,174,66,0.6); }
+}
+
+.reconnect-text {
+    color: #ffffff;
+    font-family: 'Franklin', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.reconnect-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.reconnect-btn {
+    padding: 6px 14px;
+    background: #ffae42;
+    color: #141414;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.reconnect-surrender-btn {
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    color: #fbe9b8;
+    border: 1px solid rgba(251, 233, 184, 0.4);
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+/* Touch hitboxes for mobile fingers */
+.minus-button,
+.plus-button {
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4px 8px !important;
+    touch-action: manipulation !important;
+}
+
+.exchange_chakra_choice {
+    min-height: 40px !important;
+    touch-action: manipulation !important;
+}
+
+
 
 

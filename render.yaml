@@ -25,3 +25,6 @@ services:
         value: 604800000
       - key: CORS_ORIGIN
         sync: false
+      - key: ENABLE_BATTLE_BOTS
+        value: "true"
+
