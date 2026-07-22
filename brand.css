@@ -2393,3 +2393,310 @@ body.na-legacy-light {
 .ca-auth-status[data-state="success"] {
   color: #9ed7aa;
 }
+
+/* ── BUG REPORTER MODAL & TRIGGER ───────────────────────────── */
+.na-bug-trigger {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #1c150c 0%, #3a2008 100%);
+  color: #ffae42;
+  border: 1px solid rgba(215, 149, 58, 0.4);
+  border-radius: 24px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(232, 128, 26, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.na-bug-trigger:hover {
+  transform: translateY(-2px);
+  border-color: #ffae42;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), 0 0 18px rgba(232, 128, 26, 0.45);
+}
+
+.na-bug-trigger-icon {
+  font-size: 15px;
+}
+
+.na-bug-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(5, 7, 14, 0.82);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.na-bug-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.na-bug-modal {
+  background: #faf8f3;
+  color: #1b2330;
+  border: 2px solid #8b7d5c;
+  border-radius: 12px;
+  max-width: 540px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.na-bug-overlay.active .na-bug-modal {
+  transform: scale(1);
+}
+
+.na-bug-modal-header {
+  background: linear-gradient(135deg, #1b2330 0%, #0d121a 100%);
+  color: #f0ede8;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #e8801a;
+}
+
+.na-bug-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffae42;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.na-bug-modal-close {
+  background: none;
+  border: none;
+  color: #a8a095;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.na-bug-modal-close:hover {
+  color: #e11836;
+  background: rgba(225, 24, 54, 0.15);
+}
+
+.na-bug-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.na-bug-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.na-bug-field-group label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4c5562;
+}
+
+.na-bug-input,
+.na-bug-select,
+.na-bug-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(27, 35, 48, 0.2);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1b2330;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.na-bug-input:focus,
+.na-bug-select:focus,
+.na-bug-textarea:focus {
+  outline: none;
+  border-color: #e8801a;
+  box-shadow: 0 0 0 3px rgba(232, 128, 26, 0.15);
+}
+
+.na-bug-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.na-bug-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #1b2330;
+  cursor: pointer;
+}
+
+.na-bug-checkbox-group input[type="checkbox"] {
+  accent-color: #e8801a;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.na-bug-status-msg {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+
+.na-bug-status-msg.error {
+  display: block;
+  background: rgba(225, 24, 54, 0.12);
+  color: #c41e3a;
+  border: 1px solid rgba(225, 24, 54, 0.3);
+}
+
+.na-bug-status-msg.success {
+  display: block;
+  background: rgba(47, 118, 68, 0.12);
+  color: #1f7a3f;
+  border: 1px solid rgba(47, 118, 68, 0.3);
+}
+
+.na-bug-modal-footer {
+  padding: 14px 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.na-bug-btn-secondary {
+  padding: 8px 16px;
+  background: #ebe5d7;
+  color: #4c5562;
+  border: 1px solid rgba(27, 35, 48, 0.2);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.na-bug-btn-primary {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #e8801a 0%, #ffae42 100%);
+  color: #17100a;
+  border: 1px solid rgba(215, 149, 58, 0.5);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(232, 128, 26, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.na-bug-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(232, 128, 26, 0.45);
+}
+
+.na-bug-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── GLOBAL SHINOBI SCROLLBAR STYLING ──────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d121a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a2a19;
+  border: 1px solid rgba(232, 128, 26, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e8801a;
+}
+
+/* ── ADMIN DASHBOARD VISUAL POLISH ─────────────────────────────── */
+.acp-table th {
+  background: #141923 !important;
+  color: #ffae42 !important;
+  border-bottom: 2px solid #e8801a !important;
+  font-family: 'Franklin', Arial, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.acp-table tr:hover td {
+  background: rgba(232, 128, 26, 0.06);
+}
+
+.na-bug-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.na-bug-badge.open {
+  background: rgba(232, 128, 26, 0.18);
+  color: #ffae42;
+  border: 1px solid rgba(232, 128, 26, 0.45);
+}
+
+.na-bug-badge.investigating {
+  background: rgba(44, 156, 219, 0.18);
+  color: #2c9cdb;
+  border: 1px solid rgba(44, 156, 219, 0.45);
+}
+
+.na-bug-badge.resolved {
+  background: rgba(47, 118, 68, 0.18);
+  color: #2f9e53;
+  border: 1px solid rgba(47, 118, 68, 0.45);
+}
+
+.na-bug-badge.dismissed {
+  background: rgba(105, 112, 124, 0.18);
+  color: #8a92a0;
+  border: 1px solid rgba(105, 112, 124, 0.45);
+}
+

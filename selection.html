@@ -2,63 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport-meta" content="width=1100, initial-scale=1">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script>
-        // The game stage is a fixed 1100x800 layout. Set the viewport width
-        // so mobile browsers scale it to fit rather than rendering 1:1 and
-        // clipping. Pinch-zoom still works after this initial scale.
-        document.getElementById("viewport-meta").setAttribute("content", "width=1100, initial-scale=1");
+        (function () {
+            var STAGE_W = 1100;
+            var STAGE_H = 800;
+            var viewportMeta = document.getElementById("viewport-meta");
+
+            function applyMobileFit() {
+                var winW = window.innerWidth;
+                var winH = window.innerHeight;
+
+                if (viewportMeta) {
+                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+                }
+
+                if (winW < STAGE_W || winH < STAGE_H) {
+                    var scaleW = winW / STAGE_W;
+                    var scaleH = winH / STAGE_H;
+                    var scale = Math.min(scaleW, scaleH);
+                    if (scale < 1) {
+                        document.documentElement.style.background = "#06080d";
+                        document.documentElement.style.overflow = "hidden";
+                        document.body.style.overflow = "hidden";
+                        document.body.style.width = STAGE_W + "px";
+                        document.body.style.height = STAGE_H + "px";
+                        document.body.style.position = "absolute";
+                        document.body.style.left = "50%";
+                        document.body.style.top = "50%";
+                        document.body.style.transformOrigin = "center center";
+                        document.body.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
+                        return;
+                    }
+                }
+                
+                document.documentElement.style.background = "";
+                document.documentElement.style.overflow = "";
+                document.body.style.overflow = "";
+                document.body.style.width = "";
+                document.body.style.height = "";
+                document.body.style.position = "";
+                document.body.style.left = "";
+                document.body.style.top = "";
+                document.body.style.transformOrigin = "";
+                document.body.style.transform = "";
+            }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", applyMobileFit);
+            } else {
+                applyMobileFit();
+            }
+            window.addEventListener("resize", applyMobileFit);
+            window.addEventListener("orientationchange", applyMobileFit);
+            window.__applyMobileLandscapeFit = applyMobileFit;
+        })();
     </script>
     <title>Naruto-Arena Selection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Petra&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=27">
-    <link rel="stylesheet" href="shop.css">
+    <link rel="stylesheet" href="style.css?v=34">
+    <link rel="stylesheet" href="shop.css?v=22">
 </head>
 <body class="selection-client-page game-remaster">
-<script>
-    // The remaster (1100x800) is the only supported client mode.
-    // Apply mobile landscape fit: on small landscape screens, scale the
-    // stage to fit the available height instead of letting it overflow.
-    (function () {
-        var STAGE_W = 1100;
-        var STAGE_H = 800;
-        var viewportMeta = document.getElementById("viewport-meta");
-        function applyMobileLandscapeFit() {
-            var isLandscape = window.innerWidth > window.innerHeight;
-            var isPhoneSized = Math.min(window.innerWidth, window.innerHeight) <= 500;
-            if (isLandscape && isPhoneSized) {
-                var scale = Math.min(1, window.innerHeight / STAGE_H);
-                document.documentElement.style.background = "#000";
-                document.documentElement.style.overflow = "hidden";
-                document.body.style.position = "fixed";
-                document.body.style.top = "0";
-                document.body.style.left = "0";
-                document.body.style.transformOrigin = "top left";
-                document.body.style.transform = "scale(" + scale + ")";
-                if (viewportMeta) {
-                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1");
-                }
-            } else {
-                document.documentElement.style.background = "";
-                document.documentElement.style.overflow = "";
-                document.body.style.position = "";
-                document.body.style.top = "";
-                document.body.style.left = "";
-                document.body.style.transformOrigin = "";
-                document.body.style.transform = "";
-                if (viewportMeta) {
-                    viewportMeta.setAttribute("content", "width=" + STAGE_W + ", initial-scale=1");
-                }
-            }
-        }
-        applyMobileLandscapeFit();
-        window.addEventListener("resize", applyMobileLandscapeFit);
-        window.addEventListener("orientationchange", applyMobileLandscapeFit);
-        window.__applyMobileLandscapeFit = applyMobileLandscapeFit;
-    })();
-</script>
 <div class="background">
     <button type="button" class="shop-icon" data-shop-trigger aria-label="Open the Ryo shop" title="Ryo Shop">
         <span class="shop-icon-glyph">両</span>
@@ -89,6 +96,7 @@
                     <span class="selection-hub-setting-label">Sound</span>
                     <input id="sound-volume" class="sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
                 </div>
+                <button type="button" class="selection-hub-bug-btn" id="hub-bug-report-btn">🐛 Report Bug</button>
             </div>
         </div>
     </nav>
@@ -292,12 +300,13 @@
         <img src="privatebutton.png" alt="Start Private Game">
     </button>
     <button type="button" class="training-dummy-button" hidden>Training Dummy</button>
+    <button type="button" class="bug-report-client-button" id="client-bug-report-btn">Report Bug</button>
 </div>
 
     </div>
 </div>
 <script src="characters.js?v=5"></script>
-<script src="script.js?v=19"></script>
+<script src="script.js?v=21"></script>
 <script src="shop.js"></script>
 <script>
     (function () {
@@ -677,21 +686,22 @@
 
             list.forEach(function (mission) {
                 var state = statusOf(mission);
-                var meta = rankMeta[rankOf(mission)] || "Ninja Missions";
                 var card = document.createElement("article");
                 card.className = "selection-hub-mission-card";
 
-                var level = document.createElement("div");
+                var cardHeader = document.createElement("div");
+                cardHeader.className = "selection-hub-mission-card-header";
+
+                var level = document.createElement("span");
                 level.className = "selection-hub-mission-level";
-                level.textContent = "Level " + (getLevelRequirementValue(mission) || 1);
+                level.textContent = "LEVEL " + (getLevelRequirementValue(mission) || 1);
 
-                var name = document.createElement("div");
-                name.className = "selection-hub-mission-name";
-                name.textContent = mission.title;
+                var pill = document.createElement("span");
+                pill.className = "selection-hub-status-pill " + state;
+                pill.textContent = state === "locked" ? "LOCKED" : (state === "completed" ? "COMPLETED" : "AVAILABLE");
 
-                var section = document.createElement("div");
-                section.className = "selection-hub-mission-section";
-                section.textContent = "Section: " + meta;
+                cardHeader.appendChild(level);
+                cardHeader.appendChild(pill);
 
                 var art = document.createElement("div");
                 art.className = "selection-hub-mission-art";
@@ -699,38 +709,16 @@
                 img.loading = "lazy";
                 img.src = mission.image || mission.portrait || "deadcharacter-remaster.png?v=2";
                 img.alt = mission.imageAlt || mission.title;
-
-                var overlay = document.createElement("div");
-                overlay.className = "selection-hub-mission-overlay";
-                var feature = document.createElement("div");
-                feature.className = "selection-hub-mission-feature";
-                feature.textContent = mission.characterName ? "Featuring " + mission.characterName : mission.title;
-
-                var rankline = document.createElement("div");
-                rankline.className = "selection-hub-mission-rankline";
-                var rank = document.createElement("div");
-                rank.className = "selection-hub-mission-rank";
-                rank.textContent = "Rank: At least " + (getLevelRequirementValue(mission) || "Any");
-                var pill = document.createElement("span");
-                pill.className = "selection-hub-status-pill " + state;
-                pill.textContent = state === "locked" ? "Locked" : (state === "completed" ? "Completed" : "Available");
-
-                rankline.appendChild(rank);
-                rankline.appendChild(pill);
-                overlay.appendChild(feature);
-                overlay.appendChild(rankline);
                 art.appendChild(img);
-                art.appendChild(overlay);
 
-                var view = document.createElement("div");
-                view.className = "selection-hub-mission-view";
-                view.textContent = "View this mission >";
+                var name = document.createElement("div");
+                name.className = "selection-hub-mission-name";
+                name.textContent = mission.title;
 
-                card.appendChild(level);
-                card.appendChild(name);
-                card.appendChild(section);
+                card.appendChild(cardHeader);
                 card.appendChild(art);
-                card.appendChild(view);
+                card.appendChild(name);
+
                 card.tabIndex = 0;
                 card.setAttribute("role", "button");
                 card.style.cursor = "pointer";

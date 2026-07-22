@@ -41,56 +41,58 @@
        rank-category card grid. ── */
     .st-chapter-block {
       margin: 34px auto 0; max-width: 980px;
-      background: var(--ca-surface-light); border: 1px solid var(--ca-line-ink);
-      border-radius: 12px; box-shadow: var(--ca-shadow-sheet); overflow: hidden;
+      background: linear-gradient(165deg, #181d28 0%, #0e121a 100%);
+      border: 2px solid #8b7d5c;
+      border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); overflow: hidden;
+      color: #f4efe2;
     }
     .st-chapter-head {
       display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
-      padding: 22px 28px 16px; border-bottom: 1px solid var(--ca-line-ink);
-      background: linear-gradient(180deg, rgba(163, 107, 255, 0.08), transparent);
+      padding: 22px 28px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(163, 107, 255, 0.15), transparent);
     }
-    .st-chapter-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple-ui); margin: 0 0 4px; }
-    .st-chapter-title { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ca-ink); }
-    .st-chapter-progress { font-size: 12px; font-weight: 700; color: var(--ca-ink-faint); white-space: nowrap; }
+    .st-chapter-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #a36bff; margin: 0 0 4px; }
+    .st-chapter-title { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: #fbe9b8; }
+    .st-chapter-progress { font-size: 12px; font-weight: 700; color: #ffae42; white-space: nowrap; }
 
     .st-episode-list { display: flex; flex-direction: column; }
     .st-episode-row {
       display: grid; grid-template-columns: 172px 1fr auto; gap: 22px; align-items: center;
-      padding: 18px 28px; border-bottom: 1px solid var(--ca-line-ink); color: var(--ca-ink);
+      padding: 18px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); color: #f4efe2;
       position: relative;
     }
     .st-episode-row:last-child { border-bottom: 0; }
-    .st-episode-row:hover { background: rgba(163, 107, 255, 0.06); }
+    .st-episode-row:hover { background: rgba(163, 107, 255, 0.1); }
     .st-episode-row::before {
       content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-      background: var(--ca-purple-ui); opacity: 0; transition: opacity var(--t-fast);
+      background: #a36bff; opacity: 0; transition: opacity var(--t-fast);
     }
     .st-episode-row:hover::before { opacity: 1; }
 
-    .st-episode-thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; background: #111; border: 1px solid var(--ca-line-ink); }
+    .st-episode-thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; background: #0b0e14; border: 2px solid #c49a45; }
     .st-episode-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-base); }
     .st-episode-row:hover .st-episode-thumb img { transform: scale(1.05); }
     .st-episode-play {
       position: absolute; inset: 0; display: grid; place-items: center;
-      background: rgba(0, 0, 0, 0.28); opacity: 0; transition: opacity var(--t-fast);
+      background: rgba(0, 0, 0, 0.4); opacity: 0; transition: opacity var(--t-fast);
     }
     .st-episode-row:hover .st-episode-play { opacity: 1; }
     .st-episode-play span {
-      width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, 0.92);
-      display: grid; place-items: center; color: var(--ca-purple-ui); font-size: 13px;
+      width: 34px; height: 34px; border-radius: 50%; background: #fbe9b8;
+      display: grid; place-items: center; color: #141923; font-size: 13px; font-weight: 900;
     }
 
-    .st-episode-num { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-purple-ui); margin: 0 0 4px; }
-    .st-episode-title { font-size: 17px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ca-ink); margin: 0 0 6px; line-height: 1.15; }
-    .st-episode-synopsis { font-size: 13px; line-height: 1.5; color: var(--ca-ink-soft); margin: 0; max-width: 560px; }
-    .st-episode-meta { font-size: 11px; color: var(--ca-ink-faint); margin-top: 8px; }
+    .st-episode-num { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #a36bff; margin: 0 0 4px; }
+    .st-episode-title { font-size: 17px; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; color: #fbe9b8; margin: 0 0 6px; line-height: 1.15; }
+    .st-episode-synopsis { font-size: 13px; line-height: 1.5; color: #b8b09d; margin: 0; max-width: 560px; }
+    .st-episode-meta { font-size: 11px; color: #90a4ae; margin-top: 8px; }
 
     .st-episode-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
     .st-status-pill { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
-    .st-status-pill.available { background: #1f7a3f; color: #cdfbd9; }
-    .st-status-pill.completed { background: rgba(163, 107, 255, 0.18); color: var(--ca-purple-ui); }
-    .st-episode-cta { font-size: 12px; font-style: italic; color: var(--ca-ink-soft); }
-    .st-episode-row:hover .st-episode-cta { color: var(--ca-purple-ui); text-decoration: underline; }
+    .st-status-pill.available { background: #1f7a3f; color: #cdfbd9; box-shadow: 0 0 10px rgba(31,122,63,0.4); }
+    .st-status-pill.completed { background: rgba(163, 107, 255, 0.25); color: #e0b0ff; border: 1px solid rgba(163,107,255,0.4); }
+    .st-episode-cta { font-size: 12px; font-style: italic; color: #ffae42; }
+    .st-episode-row:hover .st-episode-cta { color: #fff; text-decoration: underline; }
 
     @media (max-width: 640px) {
       .st-episode-row { grid-template-columns: 1fr; }
@@ -98,16 +100,16 @@
     }
 
     #st-detail-view {
-      background: var(--ca-surface-light); border: 1px solid var(--ca-line-ink);
-      border-radius: 10px; box-shadow: var(--ca-shadow-sheet);
-      padding: 26px 30px 34px; margin-top: 22px; color: var(--ca-ink);
+      background: linear-gradient(165deg, #181d28 0%, #0e121a 100%); border: 2px solid #8b7d5c;
+      border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      padding: 26px 30px 34px; margin-top: 22px; color: #f4efe2;
     }
-    .st-detail-nav { display: flex; align-items: center; justify-content: space-between; margin: 0 0 26px; padding-bottom: 14px; border-bottom: 1px solid var(--ca-line-ink); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-    .st-detail-nav a:hover { color: var(--ca-violet); }
-    .st-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #1f7a3f; }
-    .st-detail-title { font-size: 30px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ca-ink); margin: 2px 0 22px; }
+    .st-detail-nav { display: flex; align-items: center; justify-content: space-between; margin: 0 0 26px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .st-detail-nav a:hover { color: #ffae42; }
+    .st-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #4caf50; }
+    .st-detail-title { font-size: 30px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: #fbe9b8; margin: 2px 0 22px; }
     .st-detail-grid { display: grid; grid-template-columns: 360px 1fr; gap: 30px; align-items: start; }
-    .st-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #111; border: 1px solid var(--ca-line-ink); }
+    .st-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #0b0e14; border: 2px solid #c49a45; border-radius: 6px; }
 
     /* briefing: preset team preview + begin-battle action */
     .st-briefing-label { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ca-ink-faint); margin: 22px 0 10px; }
@@ -143,7 +145,7 @@
       .st-detail-grid { grid-template-columns: 1fr; }
     }
   </style>
-  <link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="shop.css?v=22">
 </head>
 <body>
 

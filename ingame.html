@@ -1,21 +1,60 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script>
-        // The game stage is a fixed-pixel-width remaster layout (1100px),
-        // not a responsive one. On mobile, telling the
-        // browser the viewport is "device-width" makes it render that fixed
-        // layout at 1:1 scale and clip most of it. Instead, tell the browser
-        // the viewport's true width so it auto-scales the whole stage down
-        // to fit the screen (pinch-zoom still works; this only sets the
-        // starting scale).
         (function () {
-            var meta = document.getElementById("viewport-meta");
-            if (meta) {
-                meta.setAttribute("content", "width=1100, initial-scale=1");
+            var STAGE_W = 1100;
+            var STAGE_H = 800;
+            var viewportMeta = document.getElementById("viewport-meta");
+
+            function applyMobileFit() {
+                var winW = window.innerWidth;
+                var winH = window.innerHeight;
+
+                if (viewportMeta) {
+                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+                }
+
+                if (winW < STAGE_W || winH < STAGE_H) {
+                    var scaleW = winW / STAGE_W;
+                    var scaleH = winH / STAGE_H;
+                    var scale = Math.min(scaleW, scaleH);
+                    if (scale < 1) {
+                        document.documentElement.style.background = "#06080d";
+                        document.documentElement.style.overflow = "hidden";
+                        document.body.style.overflow = "hidden";
+                        document.body.style.width = STAGE_W + "px";
+                        document.body.style.height = STAGE_H + "px";
+                        document.body.style.position = "absolute";
+                        document.body.style.left = "50%";
+                        document.body.style.top = "50%";
+                        document.body.style.transformOrigin = "center center";
+                        document.body.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
+                        return;
+                    }
+                }
+                
+                document.documentElement.style.background = "";
+                document.documentElement.style.overflow = "";
+                document.body.style.overflow = "";
+                document.body.style.width = "";
+                document.body.style.height = "";
+                document.body.style.position = "";
+                document.body.style.left = "";
+                document.body.style.top = "";
+                document.body.style.transformOrigin = "";
+                document.body.style.transform = "";
             }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", applyMobileFit);
+            } else {
+                applyMobileFit();
+            }
+            window.addEventListener("resize", applyMobileFit);
+            window.addEventListener("orientationchange", applyMobileFit);
         })();
     </script>
     <title>Naruto-Arena Game</title>
@@ -85,6 +124,7 @@
     <div class="ingame-sound-controller" aria-label="Sound controller">
         <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
     </div>
+    <button type="button" class="ingame-bug-button" id="ingame-bug-report-btn">Report Bug</button>
 
     <div class="story-dialogue-overlay" id="story-dialogue-overlay">
         <div class="story-dialogue-box">
@@ -507,6 +547,6 @@
 </div>
 
 </div>
-<script src="script.js?v=19"></script>
+<script src="script.js?v=21"></script>
 </body>
 </html>

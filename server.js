@@ -38,6 +38,7 @@ const USERS_COLLECTION = process.env.MONGODB_USERS_COLLECTION || 'users';
 const MATCHES_COLLECTION = process.env.MONGODB_MATCHES_COLLECTION || 'matches';
 const APP_STATE_COLLECTION = process.env.MONGODB_APP_STATE_COLLECTION || 'app_state';
 const NEWS_POSTS_COLLECTION = process.env.MONGODB_NEWS_POSTS_COLLECTION || 'news_posts';
+const BUGS_COLLECTION = process.env.MONGODB_BUGS_COLLECTION || 'bug_reports';
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || 'naruto_session';
@@ -5996,7 +5997,7 @@ app.get('/characters.js', (req, res) => {
 app.use(express.static(path.join(__dirname), {
     setHeaders(res, filePath) {
         if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
-            res.set('Cache-Control', 'no-cache');
+            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         }
     },
 }));
@@ -6233,7 +6234,14 @@ const getSessionUserCached = async (token) => {
         return cached.user;
     }
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await usersCollection.findOne({ username: decoded.username });
+    const rawUsername = String(decoded.username || '').trim();
+    const user = await usersCollection.findOne({
+        $or: [
+            { username: rawUsername },
+            { usernameLower: rawUsername.toLowerCase() },
+            { username: new RegExp(`^${rawUsername.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+        ]
+    });
     const resolved = user ? { ...serializeUserForClient(user) } : null;
     sessionUserCache.set(token, { user: resolved, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
     return resolved;
@@ -8711,6 +8719,7 @@ async function initDb() {
     matchesCollection = db.collection(MATCHES_COLLECTION);
     appStateCollection = db.collection(APP_STATE_COLLECTION);
     newsPostsCollection = db.collection(NEWS_POSTS_COLLECTION);
+    bugsCollection = db.collection(BUGS_COLLECTION);
     await usersCollection.createIndex({ username: 1 }, { unique: true });
     await usersCollection.createIndex({ usernameLower: 1 });
     await usersCollection.createIndex(
@@ -8720,6 +8729,8 @@ async function initDb() {
     await matchesCollection.createIndex({ matchId: 1 }, { unique: true });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
     await newsPostsCollection.createIndex({ createdAt: -1 });
+    await bugsCollection.createIndex({ createdAt: -1 });
+    await bugsCollection.createIndex({ status: 1 });
     charactersData = await getStoredCharacters();
     characterCatalog = buildCharacterCatalog();
     await getStoredLadderRankTiers();
@@ -8743,10 +8754,18 @@ async function initDb() {
         SESSION_COOKIE_NAME
     });
     app.use('/api', authRouter);
+
+    const bugsRouter = require('./routes/bugs.js')({
+        bugsCollection,
+        optionalSession: typeof optionalSession === 'function' ? optionalSession : (req, res, next) => next(),
+    });
+    app.use('/api/bugs', bugsRouter);
+
     const adminRouter = require('./routes/admin.js')({
         requireSession,
         appStateCollection,
         usersCollection,
+        bugsCollection,
         charactersData,
         latestReleasesUpdateSchema,
         maintenanceModeUpdateSchema,

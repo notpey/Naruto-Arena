@@ -204,6 +204,7 @@
     </header>
 
     <main class="acp-main">
+      <div class="acp-error" id="acp-error" hidden style="grid-column: 1 / -1; width: 100%; margin-bottom: 24px;"></div>
       <div class="acp-grid">
         <section class="acp-panel">
           <div class="acp-panel-head">
@@ -240,6 +241,46 @@
             </table>
             <div class="acp-rank-message" id="acp-rank-message"></div>
             <div class="acp-note" id="acp-hokage-note"></div>
+          </div>
+        </section>
+
+        <section class="acp-panel" id="acp-bugs-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">🐛 Bug & Feedback Reports</h2>
+                <p class="acp-panel-copy">Early Access player submissions with attached live battle telemetry logs.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <select id="acp-bug-filter-status" style="padding: 6px 10px; font-size: 11px; font-weight: 700; background: #10131c; color: #fff; border: 1px solid rgba(255,255,255,0.14); border-radius: 4px;">
+                  <option value="">All Statuses</option>
+                  <option value="open">Open</option>
+                  <option value="investigating">Investigating</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="dismissed">Dismissed</option>
+                </select>
+                <button class="acp-button secondary" type="button" id="acp-bug-refresh">Refresh</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-ranks" style="padding: 16px;">
+            <table class="acp-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Submitted By</th>
+                  <th>Summary & Description</th>
+                  <th>Telemetry</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="acp-bugs-table">
+                <tr><td colspan="7" style="text-align: center; color: var(--ca-dust);">Loading bug reports...</td></tr>
+              </tbody>
+            </table>
+            <div class="acp-rank-message" id="acp-bug-message"></div>
           </div>
         </section>
 
@@ -297,7 +338,6 @@
         </section>
       </aside>
     </main>
-    <div class="acp-error" id="acp-error" hidden></div>
   </div>
 
   <script>
@@ -330,16 +370,28 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
       }
-      function showError(message) {
+      function showError(message, status) {
         if (!errorEl) return;
+        var isAuthError = status === 401 || status === 403 || String(message || '').toLowerCase().indexOf('admin access') !== -1;
         errorEl.hidden = false;
-        errorEl.textContent = message || "Unable to load admin control panel.";
+        errorEl.innerHTML =
+          '<div style="background: linear-gradient(135deg, #1b1314 0%, #2f1719 100%); border: 2px solid #e11836; border-radius: 8px; padding: 20px; text-align: center; color: #ffffff; box-shadow: 0 8px 24px rgba(0,0,0,0.6); grid-column: 1 / -1; width: 100%; box-sizing: border-box;">' +
+            '<h3 style="margin: 0 0 8px 0; color: #ffae42; font-size: 18px; font-weight: 700;">' + (isAuthError ? '🔒 Admin Access Required' : '⚠️ Unable to Load Control Panel Data') + '</h3>' +
+            '<p style="margin: 0 0 14px 0; font-size: 14px; color: #f0ede8;">' + escapeHtml(message || "An error occurred while communicating with the server.") + '</p>' +
+            (isAuthError ? '<a href="selection-login.html" class="acp-button" style="display: inline-block; text-decoration: none; padding: 8px 20px;">Log In to Admin Account</a>' : '') +
+          '</div>';
+        if (statusEl) statusEl.textContent = isAuthError ? "Admin login required" : "Error loading status";
+        if (economyEl) economyEl.textContent = isAuthError ? "Admin login required" : "Error loading economy";
       }
       function fetchJson(url, options) {
         return fetch(url, Object.assign({ credentials: "same-origin" }, options || {}))
           .then(function (res) {
             return res.json().catch(function () { return {}; }).then(function (data) {
-              if (!res.ok) throw new Error((data && data.error) || "Request failed.");
+              if (!res.ok) {
+                var err = new Error((data && data.error) || "Request failed.");
+                err.status = res.status;
+                throw err;
+              }
               return data;
             });
           });
@@ -578,10 +630,87 @@
           renderTools(data.tools);
           renderRanks(data.ladderRules);
           loadStoryThumbnails();
+          loadBugReports();
         })
         .catch(function (error) {
-          showError(error && error.message ? error.message : "Unable to load admin control panel.");
+          showError(error && error.message ? error.message : "Unable to load admin control panel.", error && error.status);
         });
+
+      var bugFilterStatus = document.getElementById("acp-bug-filter-status");
+      var bugRefreshBtn = document.getElementById("acp-bug-refresh");
+      var bugTable = document.getElementById("acp-bugs-table");
+      var bugMsg = document.getElementById("acp-bug-message");
+
+      if (bugFilterStatus) bugFilterStatus.addEventListener("change", loadBugReports);
+      if (bugRefreshBtn) bugRefreshBtn.addEventListener("click", loadBugReports);
+
+      function loadBugReports() {
+        if (!bugTable) return;
+        bugTable.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--ca-dust);">Loading bug reports...</td></tr>';
+        var statusFilter = bugFilterStatus ? bugFilterStatus.value : "";
+        var url = "/api/admin/bugs" + (statusFilter ? "?status=" + encodeURIComponent(statusFilter) : "");
+
+        fetchJson(url)
+          .then(function (data) {
+            var reports = data.reports || [];
+            if (reports.length === 0) {
+              bugTable.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--ca-dust);">No bug reports found.</td></tr>';
+              return;
+            }
+
+            var html = "";
+            reports.forEach(function (r) {
+              var dateStr = r.createdAt ? new Date(r.createdAt).toLocaleString() : "N/A";
+              var catBadge = '<span style="padding: 2px 6px; border-radius: 3px; font-size: 10px; text-transform: uppercase; font-weight: 900; background: rgba(232,128,26,0.15); color: #ffae42;">' + escapeHtml(r.category) + '</span>';
+              var userStr = escapeHtml((r.submittedBy && r.submittedBy.username) || "Guest");
+              var titleStr = '<strong>' + escapeHtml(r.title) + '</strong><br><span style="font-weight: 400; font-size: 12px; color: var(--ca-ink-soft);">' + escapeHtml(r.description) + '</span>';
+
+              var meta = r.clientMetadata || {};
+              var hasTelemetry = meta.matchId || meta.turnNumber !== undefined || (meta.battleLogs && meta.battleLogs.length > 0);
+              var telemetryStr = hasTelemetry
+                ? '<details><summary style="cursor:pointer; color:#2c9cdb; font-size:11px; font-weight:700;">View JSON</summary><pre style="font-size:10px; max-width:240px; overflow:auto; background:#10131c; color:#a8a095; padding:6px; border-radius:4px; margin-top:4px;">' + escapeHtml(JSON.stringify(meta, null, 2)) + '</pre></details>'
+                : '<span style="color: var(--ca-dust); font-size: 11px;">None</span>';
+
+              var statusColors = {
+                open: 'color: #ffae42;',
+                investigating: 'color: #2c9cdb;',
+                resolved: 'color: #2f7644;',
+                dismissed: 'color: #69707c;'
+              };
+              var statusStr = '<span style="font-weight: 900; text-transform: uppercase; font-size: 11px; ' + (statusColors[r.status] || '') + '">' + escapeHtml(r.status) + '</span>';
+
+              var actions =
+                '<div style="display: flex; gap: 4px; flex-wrap: wrap;">' +
+                  '<button type="button" class="acp-button" style="padding:2px 6px; font-size:9px;" onclick="window.updateBugStatus(\'' + r.id + '\', \'resolved\')">Resolve</button>' +
+                  '<button type="button" class="acp-button secondary" style="padding:2px 6px; font-size:9px;" onclick="window.updateBugStatus(\'' + r.id + '\', \'dismissed\')">Dismiss</button>' +
+                '</div>';
+
+              html += '<tr>' +
+                '<td style="white-space: nowrap; font-size: 11px; color: var(--ca-ink-soft);">' + escapeHtml(dateStr) + '</td>' +
+                '<td>' + catBadge + '</td>' +
+                '<td>' + userStr + '</td>' +
+                '<td>' + titleStr + '</td>' +
+                '<td>' + telemetryStr + '</td>' +
+                '<td>' + statusStr + '</td>' +
+                '<td>' + actions + '</td>' +
+              '</tr>';
+            });
+            bugTable.innerHTML = html;
+          })
+          .catch(function (err) {
+            bugTable.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #c41e3a;">Failed to load bug reports.</td></tr>';
+          });
+      }
+
+      window.updateBugStatus = function (id, nextStatus) {
+        fetchJson("/api/admin/bugs/" + id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus })
+        })
+          .then(function () { loadBugReports(); })
+          .catch(function (err) { alert(err.message || "Failed to update status."); });
+      };
     })();
   </script>
 </body>

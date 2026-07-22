@@ -1,8 +1,4 @@
-/* Ryo Shop — shared overlay, used on both the public site (ca-* pages) and
-   the game client (selection.html). Deliberately self-contained (no brand.css
-   variable dependency) since selection.html never loads brand.css. Colors
-   mirror the brand.css shinobi palette: surface-light #faf8f3, ink #1b2330,
-   ember #e8801a, amber #ffae42, crimson #d52235. */
+/* Ryo Shop — dark shinobi scroll theme */
 
 .rs-shop-overlay {
     display: none;
@@ -12,7 +8,8 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(5, 7, 14, 0.72);
+    background: rgba(5, 7, 14, 0.88);
+    backdrop-filter: blur(8px);
     font-family: "Outfit", "Libre Franklin", Arial, sans-serif;
 }
 
@@ -26,11 +23,11 @@
     max-height: 86vh;
     display: flex;
     flex-direction: column;
-    background: #faf8f3;
-    color: #1b2330;
-    border-radius: 14px;
-    border: 1px solid rgba(27, 35, 48, 0.12);
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(165deg, #181d28 0%, #0e121a 100%);
+    color: #f4efe2;
+    border-radius: 12px;
+    border: 2px solid #8b7d5c;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 20px rgba(232, 128, 26, 0.15);
     overflow: hidden;
 }
 
@@ -38,19 +35,22 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 18px 22px;
-    background: #1b2330;
-    color: #faf8f3;
-    border-bottom: 3px solid #e8801a;
+    padding: 18px 24px;
+    background: linear-gradient(90deg, #141923 0%, #1f2736 50%, #141923 100%);
+    color: #fbe9b8;
+    border-bottom: 2px solid #c49a45;
 }
 
 .rs-shop-title {
     font-size: 20px;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #ffae42;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .rs-shop-coin {
@@ -61,52 +61,58 @@
     height: 26px;
     border-radius: 50%;
     background: radial-gradient(circle at 32% 28%, #ffe6a8, #ffb84d 55%, #e8801a 100%);
-    color: #4a2a05;
+    color: #3a2008;
     font-size: 14px;
     font-weight: 900;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) inset, 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .rs-shop-balance-pill {
     margin-left: auto;
     font-size: 13px;
-    color: #f0ede8;
-    background: rgba(255, 174, 66, 0.16);
-    border: 1px solid rgba(255, 174, 66, 0.4);
-    padding: 6px 12px;
+    font-weight: 700;
+    color: #fbe9b8;
+    background: rgba(232, 128, 26, 0.18);
+    border: 1px solid rgba(255, 174, 66, 0.45);
+    padding: 6px 14px;
     border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .rs-shop-balance-amount {
     color: #ffb84d;
+    font-weight: 900;
 }
 
 .rs-shop-close {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 1px solid rgba(240, 237, 232, 0.3);
-    background: rgba(240, 237, 232, 0.08);
-    color: #f0ede8;
-    font-size: 14px;
+    border: 1px solid rgba(251, 233, 184, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+    color: #fbe9b8;
+    font-size: 16px;
     line-height: 1;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: all 0.15s ease;
+    display: grid;
+    place-items: center;
 }
 
 .rs-shop-close:hover {
-    background: rgba(213, 34, 53, 0.35);
-    transform: scale(1.06);
+    background: #c41e3a;
+    border-color: #e11836;
+    transform: scale(1.08);
 }
 
 .rs-shop-body {
-    padding: 22px;
+    padding: 24px;
     overflow-y: auto;
 }
 
 .rs-shop-message {
     text-align: center;
-    color: #4c5562;
+    color: #b8b09d;
     font-size: 15px;
     padding: 40px 12px;
     margin: 0;
@@ -114,35 +120,38 @@
 
 .rs-shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(154px, 1fr));
+    gap: 18px;
 }
 
 .rs-shop-card {
-    background: #f4f0e8;
-    border: 1px solid rgba(27, 35, 48, 0.12);
+    background: linear-gradient(145deg, #1a202c 0%, #121620 100%);
+    border: 1px solid #3a3225;
     border-radius: 10px;
-    padding: 14px;
+    padding: 16px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rs-shop-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-    transform: translateY(-2px);
+    border-color: #c49a45;
+    box-shadow: 0 8px 24px rgba(232, 128, 26, 0.25);
+    transform: translateY(-3px);
 }
 
 .rs-shop-card-face {
-    width: 72px;
-    height: 72px;
+    width: 76px;
+    height: 76px;
     border-radius: 50%;
     overflow: hidden;
-    background: #ebe5d7;
-    border: 2px solid #e8801a;
+    background: #0b0e14;
+    border: 2px solid #c49a45;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .rs-shop-card-face img {
@@ -154,15 +163,16 @@
 
 .rs-shop-card-name {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    color: #fbe9b8;
 }
 
 .rs-shop-card-price {
     font-size: 14px;
     font-weight: 800;
-    color: #a5590f;
+    color: #ffb84d;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -176,28 +186,33 @@
 
 .rs-shop-buy {
     width: 100%;
-    border: 0;
-    border-radius: 999px;
+    border: 1px solid #8b7d5c;
+    border-radius: 6px;
     padding: 8px 10px;
     font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #1b2330;
-    background: linear-gradient(135deg, #ffe6a8, #ffb84d);
+    color: #3a2008;
+    background: linear-gradient(135deg, #fbe9b8, #e8c878);
     cursor: pointer;
-    transition: filter 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition: all 0.15s ease;
 }
 
 .rs-shop-buy:hover:not(:disabled) {
-    filter: brightness(1.06);
+    background: linear-gradient(135deg, #ffffff, #fbe9b8);
+    border-color: #c49a45;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 174, 66, 0.3);
 }
 
 .rs-shop-buy:disabled {
     cursor: not-allowed;
-    background: #d8d2c2;
-    color: #7a7466;
+    background: #2a2e38;
+    border-color: #3d4350;
+    color: #6c7585;
+    box-shadow: none;
 }
 
 .rs-shop-card-unlocked {
@@ -207,7 +222,7 @@
 }
 
 .rs-shop-unlocked-banner {
-    color: #1f7a3f;
+    color: #4caf50;
     font-weight: 800;
     font-size: 14px;
     line-height: 1.4;
@@ -217,7 +232,7 @@
     display: block;
     font-size: 11px;
     font-weight: 600;
-    color: #4c5562;
+    color: #90a4ae;
     text-transform: none;
     margin-top: 4px;
 }

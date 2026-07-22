@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    initBugReporter();
     const pageName = window.location.pathname.split('/').pop().toLowerCase();
     const shouldUseCustomCursor = pageName === 'ingame.html' || pageName === 'selection.html';
     const shouldUseGameClickSound = shouldUseCustomCursor;
@@ -5484,4 +5485,181 @@ let wsRequests = new Map();
     persistTeamSelection();
     applySavedTeam();
     resumeMatchIfActive();
+    initBugReporter();
 });
+
+function initBugReporter() {
+    if (document.getElementById('na-bug-overlay')) {
+        bindBugTriggers();
+        return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'na-bug-overlay';
+    overlay.id = 'na-bug-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+
+    overlay.innerHTML = `
+      <div class="na-bug-modal" role="dialog" aria-labelledby="na-bug-modal-title">
+        <div class="na-bug-modal-header">
+          <h3 class="na-bug-modal-title" id="na-bug-modal-title"><span>🐛</span> Early Access Feedback & Bug Report</h3>
+          <button type="button" class="na-bug-modal-close" id="na-bug-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="na-bug-modal-body">
+          <div class="na-bug-field-group">
+            <label for="na-bug-category">Category</label>
+            <select id="na-bug-category" class="na-bug-select">
+              <option value="battle">Battle Glitch / Skill Error</option>
+              <option value="balance">Character Balance</option>
+              <option value="ui">Visual / Layout Issue</option>
+              <option value="other" selected>General Feedback / Other</option>
+            </select>
+          </div>
+          <div class="na-bug-field-group">
+            <label for="na-bug-title">Summary Title</label>
+            <input type="text" id="na-bug-title" class="na-bug-input" placeholder="e.g. Skill cooldown did not refresh after turn 3" maxlength="120" required />
+          </div>
+          <div class="na-bug-field-group">
+            <label for="na-bug-description">Description</label>
+            <textarea id="na-bug-description" class="na-bug-textarea" placeholder="Explain what happened, steps to reproduce, or your feedback..." maxlength="3000" required></textarea>
+          </div>
+          <div class="na-bug-checkbox-group">
+            <input type="checkbox" id="na-bug-attach-telemetry" checked />
+            <label for="na-bug-attach-telemetry">Attach active battle diagnostic state & recent logs</label>
+          </div>
+          <div class="na-bug-status-msg" id="na-bug-status-msg"></div>
+        </div>
+        <div class="na-bug-modal-footer">
+          <button type="button" class="na-bug-btn-secondary" id="na-bug-cancel-btn">Cancel</button>
+          <button type="button" class="na-bug-btn-primary" id="na-bug-submit-btn">Submit Report</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const closeBtn = document.getElementById('na-bug-close-btn');
+    const cancelBtn = document.getElementById('na-bug-cancel-btn');
+    const submitBtn = document.getElementById('na-bug-submit-btn');
+    const categorySelect = document.getElementById('na-bug-category');
+    const titleInput = document.getElementById('na-bug-title');
+    const descTextarea = document.getElementById('na-bug-description');
+    const attachCheckbox = document.getElementById('na-bug-attach-telemetry');
+    const statusMsg = document.getElementById('na-bug-status-msg');
+
+    function openModal() {
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden', 'false');
+        statusMsg.className = 'na-bug-status-msg';
+        statusMsg.textContent = '';
+        statusMsg.style.display = 'none';
+        titleInput.value = '';
+        descTextarea.value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Report';
+
+        if (window.location.pathname.includes('ingame.html')) {
+            categorySelect.value = 'battle';
+        }
+    }
+
+    function closeModal() {
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('#na-bug-report-btn, #client-bug-report-btn, #hub-bug-report-btn, #ingame-bug-report-btn, .bugreportbutton, .bug-report-client-button, .ingame-bug-button');
+        if (trigger) {
+            e.preventDefault();
+            openModal();
+        }
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+
+    submitBtn?.addEventListener('click', async () => {
+        const title = titleInput.value.trim();
+        const description = descTextarea.value.trim();
+        const category = categorySelect.value;
+
+        if (!title || title.length < 3) {
+            statusMsg.className = 'na-bug-status-msg error';
+            statusMsg.textContent = 'Please enter a summary title (at least 3 characters).';
+            statusMsg.style.display = 'block';
+            return;
+        }
+
+        if (!description || description.length < 5) {
+            statusMsg.className = 'na-bug-status-msg error';
+            statusMsg.textContent = 'Please enter a detailed description (at least 5 characters).';
+            statusMsg.style.display = 'block';
+            return;
+        }
+
+        const clientMetadata = {
+            userAgent: navigator.userAgent,
+            viewport: { width: window.innerWidth, height: window.innerHeight },
+        };
+
+        if (attachCheckbox.checked) {
+            if (typeof activeMatchPayload !== 'undefined' && activeMatchPayload) {
+                clientMetadata.matchId = activeMatchPayload.matchId || '';
+                clientMetadata.turnNumber = activeMatchPayload.turnNumber || 0;
+            }
+            if (typeof activeMatchState !== 'undefined' && activeMatchState) {
+                clientMetadata.matchId = clientMetadata.matchId || activeMatchState.matchId || activeMatchState.id || '';
+                clientMetadata.turnNumber = activeMatchState.turnNumber || activeMatchState.turn || 0;
+            }
+
+            const logElem = document.getElementById('battle-log') || document.querySelector('.battle-log') || document.querySelector('.ready-section');
+            if (logElem) {
+                const logLines = Array.from(logElem.querySelectorAll('div, p, span, li'))
+                    .map(el => el.textContent.trim())
+                    .filter(Boolean);
+                clientMetadata.battleLogs = logLines.slice(-15);
+            }
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+            const response = await fetch('/api/bugs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category,
+                    title,
+                    description,
+                    pageUrl: window.location.href,
+                    clientMetadata,
+                }),
+            });
+
+            const data = await response.json();
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Failed to submit report.');
+            }
+
+            statusMsg.className = 'na-bug-status-msg success';
+            statusMsg.textContent = data.message || 'Thank you! Your bug report has been submitted.';
+            statusMsg.style.display = 'block';
+
+            setTimeout(() => {
+                closeModal();
+            }, 1500);
+
+        } catch (err) {
+            statusMsg.className = 'na-bug-status-msg error';
+            statusMsg.textContent = err.message || 'An unexpected error occurred.';
+            statusMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Report';
+        }
+    });
+}

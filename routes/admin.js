@@ -1,4 +1,5 @@
 const express = require('express');
+const { ObjectId } = require('mongodb');
 
 module.exports = function(context) {
     const router = express.Router();
@@ -8,6 +9,7 @@ module.exports = function(context) {
         requireSession,
         appStateCollection,
         usersCollection,
+        bugsCollection,
         newsCollection,
         charactersData,
         ladderRulesCollection,
@@ -32,8 +34,107 @@ module.exports = function(context) {
         insertMatchActive
     } = context;
     
+    const LADDER_WIN_RYO = 50;
+    const LADDER_LOSS_RYO = 10;
+    const QUICK_WIN_RYO = 25;
+    const QUICK_LOSS_RYO = 5;
+
+    const DEFAULT_LADDER_RANK_TIERS = [
+        { minLevel: 1, maxLevel: 5, rank: 'Academy Student', rankHatUrl: 'hats/academy.png' },
+        { minLevel: 6, maxLevel: 10, rank: 'Genin', rankHatUrl: 'hats/genin.png' },
+        { minLevel: 11, maxLevel: 15, rank: 'Chuunin', rankHatUrl: 'hats/chunin.png' },
+        { minLevel: 16, maxLevel: 20, rank: 'Missing-Nin', rankHatUrl: 'hats/missingnin.png' },
+        { minLevel: 21, maxLevel: 25, rank: 'Anbu', rankHatUrl: 'hats/anbu.png' },
+        { minLevel: 26, maxLevel: 30, rank: 'Jounin', rankHatUrl: 'hats/jounin.png' },
+        { minLevel: 31, maxLevel: 35, rank: 'Sannin', rankHatUrl: 'hats/sannin.png' },
+        { minLevel: 36, maxLevel: 40, rank: 'Jinchuuriki', rankHatUrl: 'hats/jinch.png' },
+        { minLevel: 41, maxLevel: 45, rank: 'Akatsuki', rankHatUrl: 'hats/akatsuki.png' },
+        { minLevel: 46, maxLevel: 50, rank: 'Kage', rankHatUrl: 'hats/kage.png' }
+    ];
+
+    const DEFAULT_LADDER_RULES = {
+        maxLevel: 50,
+        maxExperiencePoints: 50000,
+        hokageRequirement: { minLevel: 46 },
+        levels: Array.from({ length: 50 }, (_, i) => ({
+            level: i + 1,
+            cumulativeExperience: Math.round(Math.pow((i + 1) / 50, 1.42) * 50000)
+        })),
+        rankTiers: DEFAULT_LADDER_RANK_TIERS
+    };
+
+    function buildLadderRulesForAdmin(customTiers) {
+        if (Array.isArray(customTiers) && customTiers.length > 0) {
+            return { ...DEFAULT_LADDER_RULES, rankTiers: customTiers };
+        }
+        return DEFAULT_LADDER_RULES;
+    }
+
+    async function saveLadderRankTiers(rankTiers, updatedBy) {
+        if (ladderRulesCollection) {
+            await ladderRulesCollection.updateOne(
+                { key: 'ladder_rules' },
+                { $set: { key: 'ladder_rules', rankTiers, updatedBy, updatedAt: new Date() } },
+                { upsert: true }
+            );
+        }
+    }
+
+    async function resetLadderRankTiers() {
+        if (ladderRulesCollection) {
+            await ladderRulesCollection.deleteOne({ key: 'ladder_rules' });
+        }
+    }
+
+    async function getStoredMissionCatalog() {
+        if (!appStateCollection) return [];
+        try {
+            const doc = await appStateCollection.findOne({ key: 'missions' });
+            return (doc && Array.isArray(doc.missions)) ? doc.missions : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    async function getStoredStoryCatalog() {
+        if (!appStateCollection) return [];
+        try {
+            const doc = await appStateCollection.findOne({ key: 'story' });
+            return (doc && Array.isArray(doc.chapters)) ? doc.chapters : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    async function getMaintenanceModeState() {
+        if (!appStateCollection) return false;
+        try {
+            const doc = await appStateCollection.findOne({ key: 'maintenance' });
+            return Boolean(doc && doc.enabled);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function getLatestCharacterReleases() {
+        if (!appStateCollection) return [];
+        try {
+            const doc = await appStateCollection.findOne({ key: 'latest_releases' });
+            return (doc && Array.isArray(doc.releases)) ? doc.releases : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function normalizeLatestCharacterReleases(releases) {
+        if (!Array.isArray(releases)) return [];
+        return releases.filter(r => r && typeof r.characterId === 'string');
+    }
+
     const adminCheck = (req, res, next) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        const role = String(req.authUser?.role || '').trim().toLowerCase();
+        const username = String(req.authUser?.username || '').trim().toLowerCase();
+        if (role !== 'admin' && username !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
         }
         next();
@@ -325,7 +426,7 @@ module.exports = function(context) {
             return res.json({
                 ok: true,
                 counts: {
-                    characters: Array.isArray(characterCatalog) ? characterCatalog.length : 0,
+                    characters: Array.isArray(charactersData) ? charactersData.length : 0,
                     missions: Array.isArray(missionCatalog) ? missionCatalog.length : 0,
                     players: totalUsers,
                     admins: adminUsers,
@@ -862,12 +963,332 @@ module.exports = function(context) {
                 ok: true,
                 user: serializeAdminUserDocument(updatedUser || { ...existingUser, ...nextUser }),
             });
+const existing = await newsPostsCollection.findOne({ _id: new ObjectId(id) });
+            if (!existing) {
+                return res.status(404).json({ error: 'News post not found.' });
+            }
+            const nextPost = {
+                title,
+                blocks,
+                paragraphs,
+                changes,
+                author: existing.author || req.authUser.username,
+                createdAt: existing.createdAt || new Date(),
+                updatedAt: new Date(),
+            };
+            await newsPostsCollection.updateOne(
+                { _id: existing._id },
+                {
+                    $set: nextPost,
+                }
+            );
+            return res.json({
+                ok: true,
+                post: serializeNewsPost({ ...existing, ...nextPost }),
+            });
+        } catch (error) {
+            console.error('Admin news update error:', error);
+            return res.status(500).json({ error: 'Unable to update news post.' });
+        }
+    });
+    router.delete('/news/:id', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+    
+        const id = typeof req.params?.id === 'string' ? req.params.id.trim() : '';
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid news post id.' });
+        }
+    
+        try {
+            const result = await newsPostsCollection.deleteOne({ _id: new ObjectId(id) });
+            if (!result.deletedCount) {
+                return res.status(404).json({ error: 'News post not found.' });
+            }
+            return res.json({ ok: true });
+        } catch (error) {
+            console.error('Admin news delete error:', error);
+            return res.status(500).json({ error: 'Unable to delete news post.' });
+        }
+    });
+    router.get('/users', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+    
+        try {
+            const users = await usersCollection
+                .find(
+                    {},
+                    {
+                        projection: {
+                            _id: 0,
+                            username: 1,
+                            role: 1,
+                            profile: 1,
+                        },
+                        sort: { username: 1 },
+                    }
+                )
+                .toArray();
+    
+            return res.json({
+                ok: true,
+                users: users.map((user = {}) => {
+                    const profile = normalizeUserProfile(user);
+                    const wins = Number(profile?.ladder?.wins) || 0;
+                    const losses = Number(profile?.ladder?.losses) || 0;
+                    const total = wins + losses;
+                    return {
+                        username: typeof user.username === 'string' ? user.username : '',
+                        role: typeof user.role === 'string' ? user.role : 'player',
+                        ladderRatio: total > 0 ? ((wins / total) * 100).toFixed(2) + '%' : '0.00%',
+                    };
+                }),
+            });
+        } catch (error) {
+            console.error('Admin users list error:', error);
+            return res.status(500).json({ error: 'Unable to load player accounts.' });
+        }
+    });
+    router.get('/users/:username', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+    
+        const username = typeof req.params?.username === 'string' ? req.params.username.trim() : '';
+        if (!username) {
+            return res.status(400).json({ error: 'Username is required.' });
+        }
+    
+        try {
+            const user = await usersCollection.findOne({ username });
+            if (!user) {
+                return res.status(404).json({ error: 'Player not found.' });
+            }
+    
+            const profile = normalizeUserProfile(user);
+            const wins = Number(profile?.ladder?.wins) || 0;
+            const losses = Number(profile?.ladder?.losses) || 0;
+            const total = wins + losses;
+    
+            return res.json({
+                ok: true,
+                username: user.username,
+                role: user.role || 'player',
+                ladderRatio: total > 0 ? ((wins / total) * 100).toFixed(2) + '%' : '0.00%',
+                document: serializeAdminUserDocument(user),
+            });
+        } catch (error) {
+            console.error('Admin user detail error:', error);
+            return res.status(500).json({ error: 'Unable to load player account.' });
+        }
+    });
+    router.put('/users/:username', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+    
+        const originalUsername = typeof req.params?.username === 'string' ? req.params.username.trim() : '';
+        const document = req.body && typeof req.body === 'object' ? req.body : null;
+        if (!originalUsername || !document) {
+            return res.status(400).json({ error: 'A username and document payload are required.' });
+        }
+    
+        const nextUsername = typeof document.username === 'string' ? document.username.trim() : '';
+        if (!nextUsername) {
+            return res.status(400).json({ error: 'Username is required.' });
+        }
+    
+        try {
+            const existingUser = await usersCollection.findOne({ username: originalUsername });
+            if (!existingUser) {
+                return res.status(404).json({ error: 'Player not found.' });
+            }
+    
+            if (nextUsername !== originalUsername) {
+                const conflictingUser = await usersCollection.findOne({ username: nextUsername });
+                if (conflictingUser) {
+                    return res.status(409).json({ error: 'Username is already taken.' });
+                }
+            }
+    
+            const nextEmail = typeof document.email === 'string' ? document.email.trim().toLowerCase() : '';
+            if (nextEmail) {
+                const conflictingEmailUser = await usersCollection.findOne({
+                    email: nextEmail,
+                    username: { $ne: originalUsername },
+                });
+                if (conflictingEmailUser) {
+                    return res.status(409).json({ error: 'Email is already in use.' });
+                }
+            }
+    
+            const nextUser = {
+                username: nextUsername,
+                usernameLower: nextUsername.toLowerCase(),
+                email: nextEmail,
+                passwordHash:
+                    typeof document.passwordHash === 'string' && document.passwordHash.trim()
+                        ? document.passwordHash.trim()
+                        : existingUser.passwordHash,
+                role:
+                    typeof document.role === 'string' && document.role.trim()
+                        ? document.role.trim().toLowerCase()
+                        : existingUser.role || 'player',
+                createdAt: document.createdAt || existingUser.createdAt,
+                savedTeamIndices: Array.isArray(document.savedTeamIndices) ? document.savedTeamIndices : [],
+                profile: normalizeUserProfile({
+                    ...existingUser,
+                    profile: document.profile || existingUser.profile,
+                    createdAt: document.createdAt || existingUser.createdAt,
+                }),
+            };
+    
+            await usersCollection.updateOne(
+                { _id: existingUser._id },
+                {
+                    $set: nextUser,
+                }
+            );
+    
+            const updatedUser = await usersCollection.findOne({ _id: existingUser._id });
+            return res.json({
+                ok: true,
+                user: serializeAdminUserDocument(updatedUser || { ...existingUser, ...nextUser }),
+            });
         } catch (error) {
             if (error?.code === 11000) {
                 return res.status(409).json({ error: 'Username or email is already in use.' });
             }
             console.error('Admin user update error:', error);
             return res.status(500).json({ error: 'Unable to update player account.' });
+        }
+    });
+
+    // --- BUG REPORTS ADMIN ENDPOINTS ---
+    router.get('/bugs', adminCheck, async (req, res) => {
+        try {
+            if (!bugsCollection) {
+                return res.status(503).json({ error: 'Bugs database collection is unavailable.' });
+            }
+            const { status, category, limit = 100 } = req.query;
+            const filter = {};
+            if (status) filter.status = String(status).trim();
+            if (category) filter.category = String(category).trim();
+
+            const reports = await bugsCollection
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .limit(Math.min(Number(limit) || 100, 500))
+                .toArray();
+
+            return res.json({
+                ok: true,
+                reports: reports.map(r => ({
+                    id: String(r._id),
+                    category: r.category || 'other',
+                    title: r.title || '',
+                    description: r.description || '',
+                    pageUrl: r.pageUrl || '',
+                    clientMetadata: r.clientMetadata || {},
+                    status: r.status || 'open',
+                    adminNotes: r.adminNotes || '',
+                    submittedBy: r.submittedBy || { username: 'Guest' },
+                    createdAt: r.createdAt,
+                    updatedAt: r.updatedAt,
+                })),
+            });
+        } catch (error) {
+            console.error('Error fetching bug reports:', error);
+            return res.status(500).json({ error: 'Failed to fetch bug reports.' });
+        }
+    });
+
+    router.patch('/bugs/:id', adminCheck, async (req, res) => {
+        try {
+            if (!bugsCollection) {
+                return res.status(503).json({ error: 'Bugs database collection is unavailable.' });
+            }
+            const reportId = req.params.id;
+            let objectId;
+            try {
+                objectId = new ObjectId(reportId);
+            } catch (e) {
+                return res.status(400).json({ error: 'Invalid bug report ID format.' });
+            }
+
+            const { status, adminNotes } = req.body || {};
+            const updates = { updatedAt: new Date() };
+
+            if (status !== undefined) {
+                const validStatuses = ['open', 'investigating', 'resolved', 'dismissed'];
+                if (!validStatuses.includes(status)) {
+                    return res.status(400).json({ error: 'Invalid status value.' });
+                }
+                updates.status = status;
+            }
+
+            if (adminNotes !== undefined) {
+                updates.adminNotes = String(adminNotes);
+            }
+
+            const result = await bugsCollection.findOneAndUpdate(
+                { _id: objectId },
+                { $set: updates },
+                { returnDocument: 'after' }
+            );
+
+            const doc = (result && (result.value || (result._id && result))) || await bugsCollection.findOne({ _id: objectId });
+            if (!doc) {
+                return res.status(404).json({ error: 'Bug report not found.' });
+            }
+
+            return res.json({
+                ok: true,
+                report: {
+                    id: String(doc._id),
+                    category: doc.category,
+                    title: doc.title,
+                    description: doc.description,
+                    pageUrl: doc.pageUrl,
+                    clientMetadata: doc.clientMetadata || {},
+                    status: doc.status,
+                    adminNotes: doc.adminNotes,
+                    submittedBy: doc.submittedBy,
+                    createdAt: doc.createdAt,
+                    updatedAt: doc.updatedAt,
+                },
+            });
+        } catch (error) {
+            console.error('Error updating bug report:', error);
+            return res.status(500).json({ error: 'Failed to update bug report.' });
+        }
+    });
+
+    router.delete('/bugs/:id', adminCheck, async (req, res) => {
+        try {
+            if (!bugsCollection) {
+                return res.status(503).json({ error: 'Bugs database collection is unavailable.' });
+            }
+            const reportId = req.params.id;
+            let objectId;
+            try {
+                objectId = new ObjectId(reportId);
+            } catch (e) {
+                return res.status(400).json({ error: 'Invalid bug report ID format.' });
+            }
+
+            const result = await bugsCollection.deleteOne({ _id: objectId });
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ error: 'Bug report not found.' });
+            }
+
+            return res.json({ ok: true, message: 'Bug report deleted.' });
+        } catch (error) {
+            console.error('Error deleting bug report:', error);
+            return res.status(500).json({ error: 'Failed to delete bug report.' });
         }
     });
 
