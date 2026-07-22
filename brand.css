@@ -2932,3 +2932,112 @@ strong, b {
     transform: translateY(-1px) !important;
 }
 
+/* ============================================================
+   CHARACTERS & SKILLS + MISSIONS DARK SHINOBI OVERRIDES
+   Fixes white-on-white text contrast and aligns standalone pages
+   ============================================================ */
+.gi-ingame,
+.gi-grid,
+#gi-detail-view {
+    background: linear-gradient(165deg, #121724 0%, #0a0d16 100%) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7) !important;
+}
+
+.gi-skill {
+    background: linear-gradient(145deg, #18202e 0%, #0d121c 100%) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+}
+
+.gi-skill.alt {
+    background: linear-gradient(145deg, #201a34 0%, #0d121c 100%) !important;
+    border: 1px solid #c490ff !important;
+}
+
+.gi-char-name {
+    color: #ffae42 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+}
+
+.gi-skill-name {
+    color: #ffae42 !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+    border-bottom: 1px solid rgba(255, 174, 66, 0.25) !important;
+}
+
+.gi-skill.alt .gi-skill-name {
+    color: #c490ff !important;
+    border-bottom-color: rgba(196, 144, 255, 0.3) !important;
+}
+
+.gi-char-desc,
+.gi-skill-desc,
+.gi-ingame p,
+.gi-intro {
+    color: #d0c8b8 !important;
+}
+
+.gi-char-unlock {
+    background: #090c12 !important;
+    border: 1px solid #ffae42 !important;
+    color: #ffffff !important;
+}
+
+.gi-char-unlock::before {
+    color: #ffae42 !important;
+}
+
+.gi-crumb,
+.gi-crumb a {
+    color: #9ca7b8 !important;
+}
+
+.gi-crumb .cur {
+    color: #ffae42 !important;
+}
+
+.gi-detail-nav a {
+    background: rgba(18, 23, 36, 0.8) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+}
+
+.gi-detail-nav a:hover {
+    border-color: #ffae42 !important;
+    color: #ffae42 !important;
+}
+
+/* Standalone Missions Overview Dark Unification */
+.ms-cat-thumb {
+    border: 2px solid #ffae42 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ms-cat-thumb.t-dc,
+.ms-cat-thumb.t-b,
+.ms-cat-thumb.t-a,
+.ms-cat-thumb.t-s {
+    background: linear-gradient(145deg, #1e2638 0%, #0c1018 100%) !important;
+}
+
+.ms-cat-thumb span {
+    color: #ffae42 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Vibrant Hero Village Banners Across All Subpages */
+.ca-hero-banners {
+    z-index: 1 !important;
+    opacity: 0.85 !important;
+}
+
+.ca-hero::after {
+    z-index: 2 !important;
+    background:
+        radial-gradient(ellipse 60% 80% at 50% -10%, rgba(255, 174, 66, 0.35), transparent),
+        radial-gradient(ellipse 50% 70% at 78% 20%, rgba(163, 107, 255, 0.3), transparent 60%),
+        linear-gradient(180deg, rgba(7, 9, 14, 0.3) 0%, rgba(7, 9, 14, 0.75) 100%) !important;
+}
+
