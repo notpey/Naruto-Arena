@@ -171,7 +171,7 @@ module.exports = {
             "id": "shukaku-gaara-drilling-air-bullet",
             "name": "Drilling Air Bullet",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/1zFEDxZ.png",
             "skilldescription": "Shukaku Gaara deals 60 damage to one enemy.",
             "energy": [
                 "Bloodline",
@@ -196,7 +196,7 @@ module.exports = {
             "id": "shukaku-gaara-true-awakening",
             "name": "True Awakening",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/tNBIXfI.png",
             "skilldescription": "The following turn, 'Sand Claw' and 'Drilling Air Bullet' will deal double damage.",
             "energy": [
                 "Random"

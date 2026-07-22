@@ -187,7 +187,7 @@ module.exports = {
             "id": "rokushou-aoi-lightning-moon-cut",
             "name": "Lightning Moon Cut",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/6QupUQg.png",
             "skilldescription": "Rokushou Aoi deals 25 piercing damage to one enemy. For 3 turns, if they use a new skill, the cooldown of that skill will be increased by 1 turn. This skill stacks.",
             "energy": [
                 "Ninjutsu"
@@ -226,7 +226,7 @@ module.exports = {
             "id": "rokushou-aoi-ring-of-electricity",
             "name": "Ring of Electricity",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/uExBxVs.png",
             "skilldescription": "Rokushou Aoi deals 35 piercing damage to one enemy and then stuns them for 2 turns. For the rest of the game, if they use a new skill, the cooldown of that skill will be increased by 2 turns. This skill stacks.",
             "energy": [
                 "Ninjutsu",

@@ -169,7 +169,7 @@ module.exports = {
             "id": "kurosuki-raiga-lightning-burial-banquet-of-lightning",
             "name": "Lightning Burial: Banquet of Lightning",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/tLaGdI3.png",
             "skilldescription": "Kurosuki Raiga deals 15 piercing damage to the main target and 5 piercing damage to all other enemies. This skill becomes 'Siege of Lightning' permanently after used.",
             "energy": [
                 "Ninjutsu",
@@ -218,7 +218,7 @@ module.exports = {
             "id": "kurosuki-raiga-siege-of-lightning",
             "name": "Siege of Lightning",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/ndeHzMP.png",
             "skilldescription": "Kurosuki Raiga targets all enemies. For 2 turns, every time they use a new skill, they will be dealt 15 piercing damage. This skill becomes 'Lightning Dragon Tornado' permanently after used.",
             "energy": [
                 "Ninjutsu",
@@ -273,7 +273,7 @@ module.exports = {
             "id": "kurosuki-raiga-lightning-dragon-tornado",
             "name": "Lightning Dragon Tornado",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/ndeHzMP.png",
             "skilldescription": "Kurosuki Raiga deals 60 piercing damage to one enemy. This skill becomes 'Lightning Demon' permanently after used.",
             "energy": [
                 "Ninjutsu",
@@ -314,7 +314,7 @@ module.exports = {
             "id": "kurosuki-raiga-lightning-demon",
             "name": "Lightning Demon",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/ndeHzMP.png",
             "maxUses": 1,
             "skilldescription": "For the rest of the game, every time an enemy uses a new skill on Kurosuki Raiga, that enemy will be dealt 100 piercing damage. This skill can only be used once and cannot be removed.",
             "energy": [

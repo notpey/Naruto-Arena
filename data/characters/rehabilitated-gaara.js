@@ -170,7 +170,7 @@ module.exports = {
             "id": "rehabilitated-gaara-desert-imperial-funeral",
             "name": "Desert Imperial Funeral",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/WoNpe2N.png",
             "skilldescription": "Rehabilitated Gaara targets all enemies affected by 'Prison Sand Burial', destroying their destructible defense then dealing 40 piercing damage to them.",
             "energy": [
                 "Bloodline",

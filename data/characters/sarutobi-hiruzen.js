@@ -211,7 +211,7 @@ module.exports = {
             "id": "sarutobi-hiruzen-adamantine-prison-wall",
             "name": "Adamantine Prison Wall",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/O3lc03n.png",
             "skilldescription": "For 1 turn, Sarutobi Hiruzen and his team will gain 20 points of unpierceable damage reduction and they cannot be killed.",
             "energy": [
                 "Taijutsu"

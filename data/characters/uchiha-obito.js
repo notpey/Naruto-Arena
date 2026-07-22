@@ -162,7 +162,7 @@ module.exports = {
             "id": "uchiha-obito-sharingan-enhanced-parry",
             "name": "Sharingan-Enhanced Parry",
             "hiddenFromSelectionViewer": true,
-            "skillimage": "",
+            "skillimage": "https://i.imgur.com/HB5GL7k.png",
             "skilldescription": "Uchiha Obito makes his allies invulnerable for 1 turn.",
             "energy": [
                 "Random",
