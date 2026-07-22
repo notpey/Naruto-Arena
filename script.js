@@ -510,14 +510,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data && data.ok && data.matchFound && data.matchId) {
-                    bannerEl.hidden = false;
+                    bannerEl.removeAttribute('hidden');
+                    bannerEl.style.display = 'flex';
                     if (resumeBtn) {
-                        resumeBtn.onclick = () => {
+                        resumeBtn.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             window.location.href = `ingame.html?matchId=${encodeURIComponent(data.matchId)}`;
                         };
                     }
                     if (abandonBtn) {
-                        abandonBtn.onclick = async () => {
+                        abandonBtn.onclick = async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             abandonBtn.disabled = true;
                             try {
                                 await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(data.matchId)}/surrender`, {
@@ -525,15 +530,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     headers: { 'Content-Type': 'application/json' },
                                     credentials: 'include',
                                 });
-                            } catch (e) {
-                                // ignore error
+                            } catch (err) {
+                                console.warn('Unable to surrender active match:', err);
                             } finally {
                                 bannerEl.hidden = true;
+                                bannerEl.style.display = 'none';
                             }
                         };
                     }
                 } else {
                     bannerEl.hidden = true;
+                    bannerEl.style.display = 'none';
                 }
             } catch (err) {
                 console.warn('Unable to check active match status:', err);

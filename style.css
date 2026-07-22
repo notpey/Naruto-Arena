@@ -7801,61 +7801,73 @@ button, a, [role="button"], input, select {
 /* Active Match Reconnect Banner (Selection Hub) */
 .active-match-reconnect-banner {
     position: absolute;
-    top: 50px;
+    top: 54px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, rgba(232, 128, 26, 0.95) 0%, rgba(196, 30, 58, 0.95) 100%);
-    border: 2px solid #ffae42;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 174, 66, 0.4);
-    animation: active-banner-pulse 2s infinite alternate ease-in-out;
-}
-
-@keyframes active-banner-pulse {
-    0% { transform: translateX(-50%) scale(1); box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 15px rgba(255,174,66,0.3); }
-    100% { transform: translateX(-50%) scale(1.02); box-shadow: 0 8px 28px rgba(0,0,0,0.7), 0 0 25px rgba(255,174,66,0.6); }
+    padding: 8px 18px;
+    background: rgba(10, 14, 20, 0.94);
+    border: 1px solid rgba(232, 128, 26, 0.7);
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
 }
 
 .reconnect-text {
-    color: #ffffff;
-    font-family: 'Franklin', sans-serif;
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    color: #fbe9b8;
+    font-family: 'Petra', 'Libre Franklin', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .reconnect-actions {
     display: flex;
     gap: 8px;
+    pointer-events: auto !important;
 }
 
 .reconnect-btn {
     padding: 6px 14px;
-    background: #ffae42;
-    color: #141414;
-    border: 1px solid #ffffff;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 12px;
+    background: linear-gradient(180deg, #e8801a 0%, #b85e0c 100%);
+    color: #ffffff;
+    border: 1px solid #ffae42;
+    border-radius: 3px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.05em;
     cursor: pointer;
     text-transform: uppercase;
+    pointer-events: auto !important;
+}
+
+.reconnect-btn:hover {
+    background: linear-gradient(180deg, #ffa442 0%, #d46c0e 100%);
 }
 
 .reconnect-surrender-btn {
     padding: 6px 12px;
-    background: rgba(0, 0, 0, 0.4);
-    color: #fbe9b8;
-    border: 1px solid rgba(251, 233, 184, 0.4);
-    border-radius: 4px;
+    background: rgba(40, 10, 10, 0.8);
+    color: #e2a0a0;
+    border: 1px solid rgba(196, 30, 58, 0.6);
+    border-radius: 3px;
+    font-family: 'Libre Franklin', sans-serif;
+    font-weight: 700;
     font-size: 11px;
+    letter-spacing: 0.05em;
     cursor: pointer;
     text-transform: uppercase;
+    pointer-events: auto !important;
+}
+
+.reconnect-surrender-btn:hover {
+    background: rgba(80, 15, 15, 0.9);
+    color: #ffffff;
 }
 
 /* Touch hitboxes for mobile fingers */
