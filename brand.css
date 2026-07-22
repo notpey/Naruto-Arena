@@ -3041,3 +3041,81 @@ strong, b {
         linear-gradient(180deg, rgba(7, 9, 14, 0.3) 0%, rgba(7, 9, 14, 0.75) 100%) !important;
 }
 
+/* ============================================================
+   ANNOUNCEMENTS & NEWS FEED DARK SHINOBI OVERRIDES
+   Fixes white-on-beige text contrast in news posts and releases
+   ============================================================ */
+
+/* News Posts & Main Announcements Cards */
+.news-post,
+.ca-releases,
+.ca-sidebar-section {
+    background: linear-gradient(165deg, #121724 0%, #0a0d16 100%) !important;
+    border: 1px solid #3a3225 !important;
+    border-top: 3px solid #ffae42 !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Post Titles */
+.mainsection-kicker,
+.ca-announce-heading,
+.ca-section-label,
+.news-change-title {
+    color: #ffae42 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.03em !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+.mainsection-kicker::before,
+.mainsection-kicker::after {
+    color: #c490ff !important;
+}
+
+/* Post Metadata & Byline */
+.mainsection-meta {
+    color: #9ca7b8 !important;
+    border-bottom: 1px solid rgba(255, 174, 66, 0.2) !important;
+}
+
+.mainsection-meta .byline {
+    color: #ffae42 !important;
+}
+
+/* Body Text & Subheadings Inside Announcements */
+.mainsection-body,
+.mainsection-body p,
+.mainsection-p,
+.ca-news-content p,
+.news-post p,
+.news-post span,
+.news-change-copy {
+    color: #ffffff !important;
+    font-style: normal !important;
+}
+
+.mainsection-subhead,
+.news-post h2,
+.news-post h3,
+.news-post h4,
+.news-change-character-name {
+    color: #ffae42 !important;
+    font-weight: 800 !important;
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+}
+
+/* Character Release Cards */
+.ca-release-card,
+.news-change-group,
+.news-change-item {
+    background: linear-gradient(145deg, #18202e 0%, #0d121c 100%) !important;
+    border: 1px solid #3a3225 !important;
+    color: #ffffff !important;
+}
+
+.ca-release-label {
+    color: #ffffff !important;
+}
+
