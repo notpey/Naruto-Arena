@@ -1387,6 +1387,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
+        const doesUnitSatisfySkillTargetCondition = (unit, skill) => {
+            if (!unit || !skill) return true;
+            const condition = skill.targetCondition;
+            if (!condition || typeof condition !== 'object') return true;
+            const statuses = Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [];
+            const hasStatusId = (statusId) =>
+                statuses.some(
+                    (status) => status?.id === statusId && Math.max(0, Number(status?.remainingTurns) || 0) > 0
+                );
+
+            if (condition?.statusId && !hasStatusId(condition.statusId)) return false;
+            if (
+                Array.isArray(condition?.statusIdsAny) &&
+                condition.statusIdsAny.length > 0 &&
+                !condition.statusIdsAny.some((statusId) => hasStatusId(statusId))
+            ) {
+                return false;
+            }
+            if (condition?.missingStatusId && hasStatusId(condition.missingStatusId)) return false;
+            return true;
+        };
+
         const filterTargetOptionsForCurrentBoard = (options, castingSkill = activeCastingSkill) => {
             if (!options || !Array.isArray(options.targets)) return options;
             if (!latestBoardState || typeof latestBoardState !== 'object') return options;
@@ -1400,6 +1422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const hp = Number(unit?.hp);
                 const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
                 if (!unit || dead) return false;
+                if (!doesUnitSatisfySkillTargetCondition(unit, skill)) return false;
                 if (
                     enemyTargeting &&
                     target.username !== currentPlayerUsername &&
@@ -1828,6 +1851,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return targets.filter((target) => {
                 const slot = Number.parseInt(target?.slot, 10);
                 if (!target?.username || !Number.isInteger(slot)) return false;
+                const unit = latestBoardState?.[target.username]?.[slot];
+                if (!doesUnitSatisfySkillTargetCondition(unit, skill)) return false;
                 return !targetIsBlockedByInvulnerability({
                     username: target.username,
                     slot,

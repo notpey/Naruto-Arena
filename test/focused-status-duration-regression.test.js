@@ -347,3 +347,21 @@ test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () 
     assert.equal(hpBefore - match.board.p2[0].hp, 30);
     assert.equal(match.board.p1[1].hp, 100);
 });
+
+test('Shikamaru Shadow Imitation and Shadow-Neck Bind target options filter only enemies affected by Meditate', () => {
+    const match = makeMatch([indexById['nara-shikamaru']], [indexById.tenten, indexById['gaara-of-the-desert']]);
+
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    const targetOptions = computeTargetOptions({
+        match,
+        actingUsername: 'p1',
+        actorSlot: 0,
+        skillIndex: 2,
+        characters,
+    });
+
+    assert.equal(targetOptions.targets.length, 1);
+    assert.equal(targetOptions.targets[0].slot, 1);
+});
