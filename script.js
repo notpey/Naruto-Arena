@@ -501,46 +501,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const checkActiveMatchOnHubLoad = async () => {
-            const bannerEl = document.getElementById('active-match-reconnect-banner');
-            const resumeBtn = document.getElementById('reconnect-resume-btn');
-            const abandonBtn = document.getElementById('reconnect-abandon-btn');
-            if (!bannerEl || !slotList) return;
+            if (!slotList) return;
             try {
                 const res = await fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' });
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data && data.ok && data.matchFound && data.matchId) {
-                    bannerEl.removeAttribute('hidden');
-                    bannerEl.style.display = 'flex';
-                    if (resumeBtn) {
-                        resumeBtn.onclick = (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.location.href = `ingame.html?matchId=${encodeURIComponent(data.matchId)}`;
-                        };
-                    }
-                    if (abandonBtn) {
-                        abandonBtn.onclick = async (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            abandonBtn.disabled = true;
-                            try {
-                                await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(data.matchId)}/surrender`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    credentials: 'include',
-                                });
-                            } catch (err) {
-                                console.warn('Unable to surrender active match:', err);
-                            } finally {
-                                bannerEl.hidden = true;
-                                bannerEl.style.display = 'none';
-                            }
-                        };
-                    }
-                } else {
-                    bannerEl.hidden = true;
-                    bannerEl.style.display = 'none';
+                    window.location.replace(`ingame.html?matchId=${encodeURIComponent(data.matchId)}`);
                 }
             } catch (err) {
                 console.warn('Unable to check active match status:', err);
