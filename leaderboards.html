@@ -286,6 +286,18 @@
     .lb-row.r2 .lb-name-pill { background: #d0d0d0; color: #222; }
     .lb-row.r3 .lb-name-pill { background: var(--ca-violet); color: #fff; }
     .lb-verified { width: 14px; height: 14px; flex: 0 0 auto; }
+    .lb-winrate-badge {
+      margin-left: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(232, 128, 26, 0.2);
+      color: #e8801a;
+      border: 1px solid rgba(232, 128, 26, 0.4);
+      display: inline-block;
+      vertical-align: middle;
+    }
 
     .lb-rowtitle {
       margin: 5px 0 7px;
@@ -854,6 +866,16 @@
         pill.className = "lb-name-pill";
         pill.appendChild(profileLink(entry.username));
         pill.insertAdjacentHTML("beforeend", VERIFIED_SVG);
+
+        var w = Number(entry.wins !== undefined ? entry.wins : (metric === "wins" ? entry.value : 0));
+        var l = Number(entry.losses !== undefined ? entry.losses : 0);
+        if (w + l > 0) {
+          var wr = Math.round((w / (w + l)) * 100);
+          var wrPill = document.createElement("span");
+          wrPill.className = "lb-winrate-badge";
+          wrPill.textContent = wr + "% WR";
+          pill.appendChild(wrPill);
+        }
 
         var title = document.createElement("div");
         title.className = "lb-rowtitle";
