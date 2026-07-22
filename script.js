@@ -1520,6 +1520,65 @@ document.addEventListener('DOMContentLoaded', async () => {
             return statuses.some((status) => status?.metadata?.cannotUseSkills);
         };
 
+        const hasValidTargetsForSkill = (meta, actorUnit, effectiveSkill) => {
+            if (!effectiveSkill || !latestBoardState) return true;
+            const targetType = effectiveSkill.target;
+            if (targetType === 'self') return true;
+
+            const opponentUsername = currentOpponentUsername;
+            const opponentUnits = opponentUsername && Array.isArray(latestBoardState[opponentUsername])
+                ? latestBoardState[opponentUsername]
+                : [];
+            const playerUnits = currentPlayerUsername && Array.isArray(latestBoardState[currentPlayerUsername])
+                ? latestBoardState[currentPlayerUsername]
+                : [];
+
+            const actorSlot = meta.actorSlot;
+
+            const isValidUnitTarget = (unit, username, slot, enemyTargeting = false) => {
+                if (!unit) return false;
+                const hp = Number(unit.hp);
+                const dead = unit.alive === false || (Number.isFinite(hp) && hp <= 0);
+                if (dead) return false;
+                if (!doesUnitSatisfySkillTargetCondition(unit, effectiveSkill)) return false;
+                if (
+                    enemyTargeting &&
+                    username !== currentPlayerUsername &&
+                    isUnitInvulnerableForSkill(unit, effectiveSkill) &&
+                    !canActorIgnoreTargetInvulnerability({ actorUnit, skill: effectiveSkill, targetUnit: unit })
+                ) {
+                    return false;
+                }
+                return true;
+            };
+
+            if (targetType === 'single-enemy' || targetType === 'all-enemy') {
+                return opponentUnits.some((unit, slot) => isValidUnitTarget(unit, opponentUsername, slot, true));
+            }
+
+            if (targetType === 'single-ally') {
+                return playerUnits.some(
+                    (unit, slot) => slot !== actorSlot && isValidUnitTarget(unit, currentPlayerUsername, slot, false)
+                );
+            }
+
+            if (targetType === 'self-or-single-ally' || targetType === 'all-allies') {
+                return playerUnits.some((unit, slot) => isValidUnitTarget(unit, currentPlayerUsername, slot, false));
+            }
+
+            if (targetType === 'single-character') {
+                const allyValid = playerUnits.some(
+                    (unit, slot) => slot !== actorSlot && isValidUnitTarget(unit, currentPlayerUsername, slot, false)
+                );
+                const enemyValid = opponentUnits.some((unit, slot) =>
+                    isValidUnitTarget(unit, opponentUsername, slot, true)
+                );
+                return allyValid || enemyValid;
+            }
+
+            return true;
+        };
+
         // Single source of truth for "can this skill button be used right now",
         // shared by the greyed-out rendering pass and the click handler so the two
         // can never disagree (previously the click handler used a looser
@@ -1536,6 +1595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isSkillBlockedByClassLock(actorUnit, effectiveSkill)) return false;
             if (isSkillBlockedByIndexLock(actorUnit, meta.skillIdx)) return false;
             if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) return false;
+            if (!hasValidTargetsForSkill(meta, actorUnit, effectiveSkill)) return false;
             const isPlayersTurn =
                 currentPlayerUsername && currentTurnUsername && currentPlayerUsername === currentTurnUsername;
             if (!isPlayersTurn) return false;
