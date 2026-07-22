@@ -656,6 +656,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const surrenderConfirmEl = document.querySelector('.surrender-confirm');
         const surrenderConfirmOkButton = document.querySelector('.surrender-confirm-ok');
         const surrenderConfirmCancelButton = document.querySelector('.surrender-confirm-cancel');
+        const surrenderTriggerButton = document.querySelector('.surrenderbutton');
+        const surrenderTopButton = document.getElementById('ingame-top-surrender-btn');
         const battleEndOverlayEl = document.querySelector('.battle-end-overlay');
         const battleEndPortraitEl = battleEndOverlayEl?.querySelector('.battle-end-portrait');
         const battleEndTitleEl = battleEndOverlayEl?.querySelector('.battle-end-title');
@@ -2106,6 +2108,58 @@ document.addEventListener('DOMContentLoaded', async () => {
             surrenderConfirmEl.style.visibility = 'hidden';
             setModalBackdropVisible(false);
         };
+
+        if (surrenderTriggerButton) {
+            surrenderTriggerButton.addEventListener('click', openSurrenderConfirm);
+        }
+        if (surrenderTopButton) {
+            surrenderTopButton.addEventListener('click', openSurrenderConfirm);
+        }
+        if (surrenderConfirmCancelButton) {
+            surrenderConfirmCancelButton.addEventListener('click', closeSurrenderConfirm);
+        }
+        if (surrenderConfirmOkButton) {
+            surrenderConfirmOkButton.addEventListener('click', async () => {
+                if (!matchIdFromUrl) {
+                    closeSurrenderConfirm();
+                    window.location.href = 'selection.html';
+                    return;
+                }
+                surrenderConfirmOkButton.disabled = true;
+                surrenderConfirmOkButton.textContent = '...';
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                    });
+                    const data = await response.json();
+                    closeSurrenderConfirm();
+                    if (response.ok && data) {
+                        stopMatchRealtime();
+                        if (data.status === 'ended' || data.surrenderedBy || data.winner) {
+                            showBattleEndOverlay({
+                                outcomeText: data.winner === currentPlayerUsername ? 'YOUR OPPONENT SURRENDERED' : 'YOU SURRENDERED',
+                                didWin: data.winner === currentPlayerUsername,
+                                rewards: data.ladderResult?.rewards || null,
+                                unlocks: data.missionResult?.unlockedCharacters || null,
+                            });
+                        } else {
+                            window.location.href = 'selection.html';
+                        }
+                    } else {
+                        window.location.href = 'selection.html';
+                    }
+                } catch (err) {
+                    console.error('Surrender request failed:', err);
+                    closeSurrenderConfirm();
+                    window.location.href = 'selection.html';
+                } finally {
+                    surrenderConfirmOkButton.disabled = false;
+                    surrenderConfirmOkButton.textContent = 'OK';
+                }
+            });
+        }
 
         const stopMatchRealtime = () => {
             if (matchPoll) {

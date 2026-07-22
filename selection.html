@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes">
     <script>
         (function () {
             var STAGE_W = 1100;
@@ -10,11 +10,11 @@
             var viewportMeta = document.getElementById("viewport-meta");
 
             function applyMobileFit() {
-                var winW = window.innerWidth;
-                var winH = window.innerHeight;
+                var winW = window.innerWidth || document.documentElement.clientWidth;
+                var winH = window.innerHeight || document.documentElement.clientHeight;
 
                 if (viewportMeta) {
-                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes");
                 }
 
                 if (winW < STAGE_W || winH < STAGE_H) {
@@ -27,7 +27,7 @@
                         document.body.style.overflow = "hidden";
                         document.body.style.width = STAGE_W + "px";
                         document.body.style.height = STAGE_H + "px";
-                        document.body.style.position = "absolute";
+                        document.body.style.position = "fixed";
                         document.body.style.left = "50%";
                         document.body.style.top = "50%";
                         document.body.style.transformOrigin = "center center";
