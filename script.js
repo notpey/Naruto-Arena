@@ -1928,8 +1928,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isPlayersTurn = currentPlayerUsername && currentTurnUsername
                 ? currentPlayerUsername === currentTurnUsername
                 : false;
-            if (turnChanged && hasInitializedTurnState && isPlayersTurn) {
-                playIngameSound(startRoundSound);
+            if (turnChanged && isPlayersTurn) {
+                if (hasInitializedTurnState) {
+                    playIngameSound(startRoundSound);
+                }
+                if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                    try {
+                        navigator.vibrate([100, 50, 100]);
+                    } catch (e) {
+                        // ignore vibration error
+                    }
+                }
             }
             if (turnOwner && !hasInitializedTurnState) {
                 hasInitializedTurnState = true;
