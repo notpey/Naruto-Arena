@@ -1978,19 +1978,34 @@
         });
     })();
     (function() {
-        try {
-            var dismissed = localStorage.getItem('naruto_academy_guide_dismissed');
-            if (!dismissed) {
-                var guide = document.getElementById('academy-starter-guide');
-                if (guide) guide.style.display = 'flex';
+        function hideGuide() {
+            var guide = document.getElementById('academy-starter-guide');
+            if (guide) {
+                guide.classList.add('dismissed');
+                guide.setAttribute('hidden', '');
+                guide.style.setProperty('display', 'none', 'important');
             }
-        } catch (e) {}
+            try { localStorage.setItem('naruto_academy_guide_dismissed', 'true'); } catch (e) {}
+        }
+        window.dismissAcademyGuide = hideGuide;
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.querySelector('.academy-guide-dismiss-btn');
+            if (btn) btn.addEventListener('click', hideGuide);
+            try {
+                var dismissed = localStorage.getItem('naruto_academy_guide_dismissed');
+                var guide = document.getElementById('academy-starter-guide');
+                if (dismissed && guide) {
+                    guide.classList.add('dismissed');
+                    guide.setAttribute('hidden', '');
+                    guide.style.setProperty('display', 'none', 'important');
+                } else if (guide) {
+                    guide.classList.remove('dismissed');
+                    guide.removeAttribute('hidden');
+                    guide.style.setProperty('display', 'flex', 'important');
+                }
+            } catch (e) {}
+        });
     })();
-    function dismissAcademyGuide() {
-        var guide = document.getElementById('academy-starter-guide');
-        if (guide) guide.style.display = 'none';
-        try { localStorage.setItem('naruto_academy_guide_dismissed', 'true'); } catch (e) {}
-    }
 </script>
 </body>
 </html>

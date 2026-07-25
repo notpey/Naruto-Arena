@@ -3303,6 +3303,11 @@ strong, b {
     animation: academy-fade-in 0.3s ease-out;
 }
 
+.academy-guide-overlay.dismissed,
+.academy-guide-overlay[hidden] {
+    display: none !important;
+}
+
 .academy-guide-card {
     max-width: 580px;
     width: 100%;

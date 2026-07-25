@@ -7917,7 +7917,7 @@ button, a, [role="button"], input, select {
     width: 100vw !important;
     height: 100vh !important;
     z-index: 999999 !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: center !important;
     padding: 20px !important;
@@ -7925,6 +7925,11 @@ button, a, [role="button"], input, select {
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
     box-sizing: border-box !important;
+}
+
+.academy-guide-overlay.dismissed,
+.academy-guide-overlay[hidden] {
+    display: none !important;
 }
 
 .academy-guide-card {
