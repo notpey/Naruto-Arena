@@ -925,30 +925,34 @@ button {
 }
 
 .ca-hero-banner {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  position: absolute;
+  inset: 0;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
   opacity: 0;
   animation: ca-hero-banner-rotation 24s infinite linear;
+  will-change: opacity;
 }
 
 .ca-hero-banner--cloud {
-  background-image: url("assets/home-banners/cloud.png");
+  animation-delay: 0s;
+  background-image: url("assets/home-banners/cloud.png") !important;
 }
 
 .ca-hero-banner--leaf {
-  animation-delay: 6s;
-  background-image: url("assets/home-banners/leaf.png");
+  animation-delay: -18s;
+  background-image: url("assets/home-banners/leaf.png") !important;
 }
 
 .ca-hero-banner--sound {
-  animation-delay: 12s;
-  background-image: url("assets/home-banners/sound.png");
+  animation-delay: -12s;
+  background-image: url("assets/home-banners/sound.png") !important;
 }
 
 .ca-hero-banner--sand {
-  animation-delay: 18s;
-  background-image: url("assets/home-banners/sand.png");
+  animation-delay: -6s;
+  background-image: url("assets/home-banners/sand.png") !important;
 }
 
 @keyframes ca-hero-banner-rotation {

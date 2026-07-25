@@ -21,6 +21,7 @@ const charactersBrowserScript = `const characters = ${JSON.stringify(charactersD
 
 const app = express();
 app.use(compression());
+app.use(express.static(path.join(__dirname)));
 
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
