@@ -35,30 +35,36 @@ module.exports = function(context) {
     } = context;
     
     const LADDER_WIN_RYO = 50;
-    const LADDER_LOSS_RYO = 10;
+    const LADDER_LOSS_RYO = 15;
     const QUICK_WIN_RYO = 25;
-    const QUICK_LOSS_RYO = 5;
+    const QUICK_LOSS_RYO = 8;
 
     const DEFAULT_LADDER_RANK_TIERS = [
         { minLevel: 1, maxLevel: 5, rank: 'Academy Student', rankHatUrl: 'hats/academy.png' },
         { minLevel: 6, maxLevel: 10, rank: 'Genin', rankHatUrl: 'hats/genin.png' },
         { minLevel: 11, maxLevel: 15, rank: 'Chuunin', rankHatUrl: 'hats/chunin.png' },
-        { minLevel: 16, maxLevel: 20, rank: 'Missing-Nin', rankHatUrl: 'hats/missingnin.png' },
-        { minLevel: 21, maxLevel: 25, rank: 'Anbu', rankHatUrl: 'hats/anbu.png' },
-        { minLevel: 26, maxLevel: 30, rank: 'Jounin', rankHatUrl: 'hats/jounin.png' },
-        { minLevel: 31, maxLevel: 35, rank: 'Sannin', rankHatUrl: 'hats/sannin.png' },
-        { minLevel: 36, maxLevel: 40, rank: 'Jinchuuriki', rankHatUrl: 'hats/jinch.png' },
-        { minLevel: 41, maxLevel: 45, rank: 'Akatsuki', rankHatUrl: 'hats/akatsuki.png' },
-        { minLevel: 46, maxLevel: 50, rank: 'Kage', rankHatUrl: 'hats/kage.png' }
+        { minLevel: 16, maxLevel: 20, rank: 'Jounin', rankHatUrl: 'hats/jounin.png' },
+        { minLevel: 21, maxLevel: 25, rank: 'ANBU', rankHatUrl: 'hats/anbu.png' },
+        { minLevel: 26, maxLevel: 30, rank: 'Missing-nin', rankHatUrl: 'hats/missingnin.png' },
+        { minLevel: 31, maxLevel: 35, rank: 'Akatsuki', rankHatUrl: 'hats/akatsuki.png' },
+        { minLevel: 36, maxLevel: 40, rank: 'Sannin', rankHatUrl: 'hats/sannin.png' },
+        { minLevel: 41, maxLevel: 45, rank: 'Jinchurikki', rankHatUrl: 'hats/jinch.png' },
+        { minLevel: 46, maxLevel: 50, rank: "Susano'o", rankHatUrl: 'hats/jinch.png' },
+        { minLevel: 51, maxLevel: 55, rank: 'Shadow Hokage', rankHatUrl: 'hats/hokage.png' },
+        { minLevel: 56, maxLevel: 60, rank: 'Kage', rankHatUrl: 'hats/kage.png' },
+        { minLevel: 61, maxLevel: 65, rank: 'Edo Tensei', rankHatUrl: 'hats/akatsuki.png' },
+        { minLevel: 66, maxLevel: 70, rank: 'Otsutsuki', rankHatUrl: 'hats/sannin.png' },
+        { minLevel: 71, maxLevel: 75, rank: 'Sage of Six Paths', rankHatUrl: 'hats/hokage.png' },
+        { minLevel: 76, maxLevel: 80, rank: '#1 Shinobi', rankHatUrl: 'hats/hokage.png' }
     ];
 
     const DEFAULT_LADDER_RULES = {
-        maxLevel: 50,
-        maxExperiencePoints: 50000,
-        hokageRequirement: { minLevel: 46 },
-        levels: Array.from({ length: 50 }, (_, i) => ({
+        maxLevel: 80,
+        maxExperiencePoints: 120000,
+        hokageRequirement: { minLevel: 76 },
+        levels: Array.from({ length: 80 }, (_, i) => ({
             level: i + 1,
-            cumulativeExperience: Math.round(Math.pow((i + 1) / 50, 1.42) * 50000)
+            cumulativeExperience: Math.round(Math.pow((i + 1) / 80, 1.38) * 120000)
         })),
         rankTiers: DEFAULT_LADDER_RANK_TIERS
     };

@@ -1908,30 +1908,36 @@ const DEFAULT_CLAN_RANK_NAMES = {
     trial: 'Trial',
 };
 
-const LADDER_MAX_LEVEL = 50;
-const LADDER_MAX_EXPERIENCE_POINTS = 50000;
+const LADDER_MAX_LEVEL = 80;
+const LADDER_MAX_EXPERIENCE_POINTS = 120000;
 const LADDER_WIN_RYO = 50;
-const LADDER_LOSS_RYO = 10;
-const QUICK_WIN_RYO = 20;
-const QUICK_LOSS_RYO = 5;
+const LADDER_LOSS_RYO = 15;
+const QUICK_WIN_RYO = 25;
+const QUICK_LOSS_RYO = 8;
 const DEFAULT_LADDER_RANK_TIERS = [
-    { minLevel: 46, rank: 'Kage', hatUrl: 'hats/kage.png' },
-    { minLevel: 41, rank: 'Akatsuki', hatUrl: 'hats/akatsuki.png' },
-    { minLevel: 36, rank: 'Jinchuuriki', hatUrl: 'hats/jinch.png' },
-    { minLevel: 31, rank: 'Sannin', hatUrl: 'hats/sannin.png' },
-    { minLevel: 26, rank: 'Jounin', hatUrl: 'hats/jounin.png' },
-    { minLevel: 21, rank: 'Anbu', hatUrl: 'hats/anbu.png' },
-    { minLevel: 16, rank: 'Missing-Nin', hatUrl: 'hats/missingnin.png' },
+    { minLevel: 76, rank: '#1 Shinobi', hatUrl: 'hats/hokage.png' },
+    { minLevel: 71, rank: 'Sage of Six Paths', hatUrl: 'hats/hokage.png' },
+    { minLevel: 66, rank: 'Otsutsuki', hatUrl: 'hats/sannin.png' },
+    { minLevel: 61, rank: 'Edo Tensei', hatUrl: 'hats/akatsuki.png' },
+    { minLevel: 56, rank: 'Kage', hatUrl: 'hats/kage.png' },
+    { minLevel: 51, rank: 'Shadow Hokage', hatUrl: 'hats/hokage.png' },
+    { minLevel: 46, rank: "Susano'o", hatUrl: 'hats/jinch.png' },
+    { minLevel: 41, rank: 'Jinchurikki', hatUrl: 'hats/jinch.png' },
+    { minLevel: 36, rank: 'Sannin', hatUrl: 'hats/sannin.png' },
+    { minLevel: 31, rank: 'Akatsuki', hatUrl: 'hats/akatsuki.png' },
+    { minLevel: 26, rank: 'Missing-nin', hatUrl: 'hats/missingnin.png' },
+    { minLevel: 21, rank: 'ANBU', hatUrl: 'hats/anbu.png' },
+    { minLevel: 16, rank: 'Jounin', hatUrl: 'hats/jounin.png' },
     { minLevel: 11, rank: 'Chuunin', hatUrl: 'hats/chunin.png' },
     { minLevel: 6, rank: 'Genin', hatUrl: 'hats/genin.png' },
     { minLevel: 1, rank: 'Academy Student', hatUrl: 'hats/academy.png' },
 ];
 let activeLadderRankTiers = DEFAULT_LADDER_RANK_TIERS.map((tier) => ({ ...tier }));
 const HOKAGE_RANK_INFO = {
-    rank: 'Hokage',
-    hatUrl: 'hats/kage.png',
+    rank: '#1 Shinobi',
+    hatUrl: 'hats/hokage.png',
 };
-const LADDER_EXP_CURVE_POWER = 1.42;
+const LADDER_EXP_CURVE_POWER = 1.38;
 
 const cloneLadderRankTiers = (tiers = activeLadderRankTiers) =>
     (Array.isArray(tiers) ? tiers : []).map((tier) => ({ ...tier }));
@@ -2030,7 +2036,7 @@ const getBaseRankInfoForLevel = (level) => {
 
 const getRankInfoForLevel = (level, isHokage = false) => {
     const normalizedLevel = Math.max(1, Number(level) || 1);
-    if (isHokage && normalizedLevel >= 46) {
+    if (isHokage && normalizedLevel >= 76) {
         return HOKAGE_RANK_INFO;
     }
     return getBaseRankInfoForLevel(normalizedLevel);
