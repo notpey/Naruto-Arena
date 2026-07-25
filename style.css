@@ -469,11 +469,10 @@
     font-size: 13px;
     line-height: 1.4;
     max-height: 60px;
-    text-transform: uppercase;
 }
 
 .game-remaster .skill-detail-meta {
-    font-size: 10px;
+    font-size: 11px;
     margin-top: 5px;
     padding: 6px 10px;
     justify-content: space-evenly;
@@ -488,7 +487,7 @@
 }
 
 .game-remaster .sdm-lbl {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .game-remaster .skill-classes,
@@ -517,7 +516,7 @@
 
 .game-remaster .character-bio,
 .game-remaster .skill-description {
-    text-shadow: 0 0 8px rgba(255, 248, 200, 0.95), 0 0 16px rgba(255, 248, 200, 0.8);
+    text-shadow: none;
     color: #1a0d04;
 }
 
@@ -934,7 +933,7 @@ body.ingame-client-page {
 .game-remaster .selection-hub-nav {
     height: 52px;
     padding: 0 22px;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .selection-hub-brand {
@@ -944,6 +943,7 @@ body.ingame-client-page {
     width: 54px;
     min-width: 54px;
 }
+
 
 .selection-hub-mark {
     width: 32px;
@@ -1521,7 +1521,7 @@ body.hub-view-story .selectionpage {
     height: 27px;
     margin: 5px 0 8px;
     color: #69707c;
-    font-size: 11px;
+    font-size: 12px;
     font-style: italic;
     line-height: 1.2;
     text-transform: none;
@@ -1575,7 +1575,7 @@ body.hub-view-story .selectionpage {
     border-radius: 999px;
     color: #cdfbd9;
     background: #1f7a3f;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1682,7 +1682,7 @@ body.hub-view-story .selectionpage {
 .selection-hub-gauntlet-eyebrow {
     margin: 0 0 4px;
     color: #f8ae42;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 900;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -1799,7 +1799,7 @@ body.hub-view-story .selectionpage {
     border-radius: 7px;
     color: #69707c;
     background: rgba(255, 255, 255, 0.42);
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     line-height: 1.25;
     letter-spacing: 0.04em;
@@ -1868,7 +1868,7 @@ body.hub-view-story .selectionpage {
 .selection-hub-gauntlet-node span {
     display: block;
     color: #69707c;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1886,7 +1886,7 @@ body.hub-view-story .selectionpage {
     display: block;
     margin-top: 4px;
     color: #69707c;
-    font-size: 9px;
+    font-size: 10px;
     font-style: normal;
     font-weight: 700;
     line-height: 1.25;
@@ -1967,7 +1967,7 @@ body.hub-view-story .selectionpage {
 
 .selection-hub-gauntlet-row-label {
     color: #69707c;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2021,7 +2021,7 @@ body.hub-view-story .selectionpage {
     display: block;
     margin-bottom: 2px;
     color: #9b5a07;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
