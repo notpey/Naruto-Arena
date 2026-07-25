@@ -775,24 +775,16 @@
     filter: grayscale(0.18) brightness(0.78) var(--remaster-button-shadow);
 }
 
-body.selection-client-page {
+body.selection-client-page,
+body.ingame-client-page {
     min-width: var(--game-stage-w);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #07090e !important;
-    background-image:
-        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(232, 128, 26, 0.28) 0%, transparent 70%),
-        radial-gradient(circle at 85% 20%, rgba(124, 77, 255, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 15% 80%, rgba(232, 128, 26, 0.14) 0%, transparent 50%),
-        linear-gradient(90deg, rgba(3, 4, 7, 0.5) 0%, transparent 12%, transparent 88%, rgba(3, 4, 7, 0.5) 100%),
-        url("shinobi-seal-pattern.svg?v=2") !important;
-    background-attachment: fixed !important;
-    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat !important;
-    background-position: top center, right 20%, left 80%, center center, top left !important;
-    background-size: auto, auto, auto, auto, 160px 160px !important;
+    background: #000000 !important;
+    background-image: none !important;
 }
 
 .game-remaster .nextpage,
