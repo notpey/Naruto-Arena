@@ -8752,8 +8752,12 @@ async function initDb() {
         { email: 1 },
         { unique: true, partialFilterExpression: { email: { $type: 'string' } } }
     );
+    await usersCollection.createIndex({ 'profile.ladder.ladderRank': 1 });
+    await usersCollection.createIndex({ 'profile.ladder.wins': -1, 'profile.ladder.losses': 1 });
+    await usersCollection.createIndex({ createdAt: -1 });
     await matchesCollection.createIndex({ matchId: 1 }, { unique: true });
     await matchesCollection.createIndex({ status: 1, createdAt: -1 });
+    await matchesCollection.createIndex({ mode: 1, status: 1, createdAt: -1 });
     await matchesCollection.createIndex({ 'players.username': 1, status: 1 });
     await matchesCollection.createIndex({ mode: 1, createdAt: -1 });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
@@ -8817,8 +8821,17 @@ async function initDb() {
     app.use('/api/admin', adminRouter);
 }
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
+app.get(['/health', '/api/health'], (req, res) => {
+    const isDbConnected = Boolean(mongoClient && mongoClient.topology && mongoClient.topology.isConnected());
+    const activeMatchesCount = typeof activeMatches !== 'undefined' && activeMatches instanceof Map ? activeMatches.size : 0;
+    const isHealthy = isDbConnected || process.env.NODE_ENV === 'test';
+    return res.status(isHealthy ? 200 : 503).json({
+        status: isHealthy ? 'ok' : 'degraded',
+        uptime: Math.floor(process.uptime()),
+        dbConnected: isDbConnected,
+        activeMatches: activeMatchesCount,
+        timestamp: new Date().toISOString(),
+    });
 });
 
 app.get('/api/latest-releases', async (req, res) => {
