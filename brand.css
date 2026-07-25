@@ -893,8 +893,8 @@ button {
 .ca-hero {
   position: relative;
   width: 100%;
-  background: #111010;
-  border-bottom: 1px solid rgba(215, 149, 58, 0.28);
+  background: #1a1622;
+  border-bottom: 1px solid rgba(232, 128, 26, 0.35);
   overflow: hidden;
 }
 
@@ -902,12 +902,11 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   background:
-    radial-gradient(ellipse 60% 80% at 50% -10%, rgba(215, 149, 58, 0.26), transparent),
-    radial-gradient(ellipse 50% 70% at 78% 20%, rgba(124, 77, 255, 0.22), transparent 60%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(23, 16, 27, 0.58) 26%, rgba(11, 13, 21, 0.48) 50%, rgba(23, 16, 27, 0.58) 74%, rgba(0, 0, 0, 0.82) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.16) 45%, rgba(0, 0, 0, 0.62) 100%);
+    radial-gradient(ellipse 80% 100% at 50% -20%, rgba(232, 128, 26, 0.22), transparent 75%),
+    linear-gradient(90deg, rgba(5, 7, 14, 0.35) 0%, transparent 25%, transparent 75%, rgba(5, 7, 14, 0.35) 100%),
+    linear-gradient(180deg, rgba(5, 7, 14, 0.15) 0%, transparent 50%, rgba(5, 7, 14, 0.45) 100%);
   pointer-events: none;
 }
 
@@ -918,7 +917,11 @@ button {
 }
 
 .ca-hero-banners {
-  z-index: 0;
+  z-index: 1;
+  background-image: url("assets/home-banners/leaf.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .ca-hero-banner {
@@ -926,7 +929,7 @@ button {
   background-repeat: no-repeat;
   background-size: cover;
   opacity: 0;
-  animation: ca-hero-banner-rotation 24s infinite;
+  animation: ca-hero-banner-rotation 24s infinite linear;
 }
 
 .ca-hero-banner--cloud {
@@ -949,16 +952,18 @@ button {
 }
 
 @keyframes ca-hero-banner-rotation {
-  0%,
-  21% {
+  0% {
     opacity: 1;
   }
-
-  25%,
-  96% {
+  22% {
+    opacity: 1;
+  }
+  27% {
     opacity: 0;
   }
-
+  95% {
+    opacity: 0;
+  }
   100% {
     opacity: 1;
   }
@@ -3036,9 +3041,9 @@ strong, b {
 .ca-hero::after {
     z-index: 2 !important;
     background:
-        radial-gradient(ellipse 70% 90% at 50% 0%, rgba(232, 128, 26, 0.18), transparent 70%),
-        linear-gradient(90deg, rgba(5, 7, 14, 0.6) 0%, rgba(5, 7, 14, 0.2) 30%, rgba(5, 7, 14, 0.2) 70%, rgba(5, 7, 14, 0.6) 100%),
-        linear-gradient(180deg, rgba(5, 7, 14, 0.35) 0%, transparent 40%, rgba(5, 7, 14, 0.75) 100%) !important;
+        radial-gradient(ellipse 80% 100% at 50% -20%, rgba(232, 128, 26, 0.22), transparent 75%),
+        linear-gradient(90deg, rgba(5, 7, 14, 0.35) 0%, transparent 25%, transparent 75%, rgba(5, 7, 14, 0.35) 100%),
+        linear-gradient(180deg, rgba(5, 7, 14, 0.15) 0%, transparent 50%, rgba(5, 7, 14, 0.45) 100%) !important;
     pointer-events: none !important;
 }
 
