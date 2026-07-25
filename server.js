@@ -8828,6 +8828,8 @@ async function initDb() {
     app.use('/api/admin', adminRouter);
 }
 
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.get(['/health', '/api/health'], (req, res) => {
     const isDbConnected = Boolean(mongoClient && mongoClient.topology && mongoClient.topology.isConnected());
     const activeMatchesCount = typeof activeMatches !== 'undefined' && activeMatches instanceof Map ? activeMatches.size : 0;

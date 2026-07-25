@@ -150,9 +150,6 @@
     };
     
     window.rebindNavEvents();
-    });
-
-    });
 
     // Close on outside click / Esc
     document.addEventListener("click", function (e) {
@@ -331,5 +328,6 @@
         burger.setAttribute("aria-expanded", "false");
       }
     });
+  });
   });
 })();
