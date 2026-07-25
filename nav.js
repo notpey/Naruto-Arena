@@ -13,18 +13,16 @@
   }
 
   ready(function () {
-    var nav = document.querySelector(".ca-nav");
-    var navLinks = document.querySelector(".ca-nav-links");
-    if (!nav || !navLinks) { return; }
-
-    // Shared website hero banner rotation across all website pages.
-    // Excludes game client pages (selection.html and ingame.html).
+    // ── Shared website hero banner rotation across all public website pages ──
+    // Excludes game client pages (selection.html, ingame.html).
     var pageName = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
     var isGameClient = pageName === "selection.html" || pageName === "ingame.html" || pageName === "selection-login.html";
 
     if (!isGameClient) {
       var heroList = Array.prototype.slice.call(document.querySelectorAll(".ca-hero"));
-      if (!heroList.length && nav && nav.parentNode) {
+      var navEl = document.querySelector(".ca-nav");
+
+      if (!heroList.length && navEl && navEl.parentNode) {
         var heroHeader = document.createElement("header");
         heroHeader.className = "ca-hero ca-hero--compact";
         heroHeader.setAttribute("aria-label", "Naruto-Arena banner");
@@ -45,7 +43,7 @@
             '</div>' +
             '<div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">&gt;</div>' +
           '</div>';
-        nav.parentNode.insertBefore(heroHeader, nav.nextSibling);
+        navEl.parentNode.insertBefore(heroHeader, navEl.nextSibling);
         heroList = [heroHeader];
       }
 
@@ -65,6 +63,10 @@
         hero.insertBefore(banners, hero.firstChild);
       });
     }
+
+    var nav = document.querySelector(".ca-nav");
+    var navLinks = document.querySelector(".ca-nav-links");
+    if (!nav || !navLinks) { return; }
 
     var menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
 
