@@ -7887,7 +7887,7 @@ button, a, [role="button"], input, select {
 }
 
 /* ============================================================
-   SHINOBI ACADEMY STARTER GUIDE (FTUE OVERLAY)
+   SHINOBI ACADEMY STARTER GUIDE (AUTHENTIC NARUTO-ARENA PARCHMENT)
    ============================================================ */
 .academy-guide-overlay {
     position: fixed !important;
@@ -7902,52 +7902,53 @@ button, a, [role="button"], input, select {
     align-items: center !important;
     justify-content: center !important;
     padding: 20px !important;
-    background: rgba(5, 7, 14, 0.88) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+    background: rgba(0, 0, 0, 0.82) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
     box-sizing: border-box !important;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .academy-guide-card {
-    max-width: 580px !important;
+    max-width: 540px !important;
     width: 100% !important;
-    background: linear-gradient(165deg, #121826 0%, #0a0d16 100%) !important;
-    border: 2px solid rgba(255, 174, 66, 0.6) !important;
-    border-radius: 16px !important;
-    padding: 28px 32px !important;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(232, 128, 26, 0.3) !important;
-    color: #ffffff !important;
+    background: #d8c7a6 !important;
+    border: 3px double #4a341b !important;
+    border-radius: 4px !important;
+    padding: 24px 28px !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.95), inset 0 0 15px rgba(74, 52, 27, 0.25) !important;
+    color: #211a17 !important;
     text-align: center !important;
     box-sizing: border-box !important;
+    font-family: 'Petra', 'Libre Franklin', 'Outfit', sans-serif !important;
 }
 
 .academy-guide-badge {
     display: inline-block !important;
-    padding: 4px 14px !important;
-    border-radius: 999px !important;
-    background: rgba(232, 128, 26, 0.22) !important;
-    border: 1px solid rgba(255, 174, 66, 0.5) !important;
-    color: #ffae42 !important;
+    padding: 3px 12px !important;
+    border-radius: 3px !important;
+    background: #4a341b !important;
+    border: 1px solid #211202 !important;
+    color: #f0bd62 !important;
     font-size: 11px !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     letter-spacing: 0.1em !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 10px !important;
     text-transform: uppercase !important;
 }
 
 .academy-guide-header h2 {
-    margin: 0 0 8px 0 !important;
-    font-size: 24px !important;
+    margin: 0 0 6px 0 !important;
+    font-size: 22px !important;
     font-weight: 900 !important;
-    color: #ffffff !important;
-    letter-spacing: 0.02em !important;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8) !important;
+    color: #3b2308 !important;
+    letter-spacing: 0.04em !important;
+    font-family: 'Petra', 'Libre Franklin', sans-serif !important;
+    text-transform: uppercase !important;
 }
 
 .academy-guide-header p {
-    margin: 0 0 20px 0 !important;
-    color: #a0aec0 !important;
+    margin: 0 0 16px 0 !important;
+    color: #594635 !important;
     font-size: 13px !important;
     line-height: 1.4 !important;
 }
@@ -7955,69 +7956,72 @@ button, a, [role="button"], input, select {
 .academy-guide-steps {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
-    margin-bottom: 24px !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
     text-align: left !important;
 }
 
 .academy-guide-step {
     display: flex !important;
     align-items: flex-start !important;
-    gap: 14px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding: 12px 16px !important;
-    border-radius: 10px !important;
+    gap: 12px !important;
+    background: #cbb998 !important;
+    border: 1px solid #8c7453 !important;
+    padding: 10px 14px !important;
+    border-radius: 4px !important;
 }
 
 .academy-step-num {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 28px !important;
-    height: 28px !important;
+    width: 24px !important;
+    height: 24px !important;
     flex-shrink: 0 !important;
     border-radius: 50% !important;
-    background: linear-gradient(135deg, #e8801a, #ffae42) !important;
-    color: #211202 !important;
+    background: #4a341b !important;
+    color: #f0bd62 !important;
     font-weight: 900 !important;
-    font-size: 14px !important;
-    box-shadow: 0 0 10px rgba(232, 128, 26, 0.5) !important;
+    font-size: 13px !important;
+    border: 1px solid #211202 !important;
 }
 
 .academy-step-text strong {
     display: block !important;
-    color: #ffae42 !important;
-    font-size: 14px !important;
+    color: #4a2800 !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     margin-bottom: 2px !important;
 }
 
 .academy-step-text span {
     display: block !important;
-    color: #cbd5e0 !important;
+    color: #382c20 !important;
     font-size: 12px !important;
     line-height: 1.4 !important;
 }
 
 .academy-guide-dismiss-btn {
     width: 100% !important;
-    padding: 14px 24px !important;
-    border: 0 !important;
-    border-radius: 10px !important;
-    background: linear-gradient(135deg, #e8801a 0%, #ffae42 60%, #e11836 100%) !important;
-    color: #ffffff !important;
-    font-size: 15px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.06em !important;
+    padding: 10px 20px !important;
+    border: 1px solid #000000 !important;
+    border-radius: 3px !important;
+    background: #4a341b !important;
+    color: #f0bd62 !important;
+    font-family: 'Petra', 'Libre Franklin', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
     cursor: pointer !important;
-    box-shadow: 0 4px 20px rgba(232, 128, 26, 0.5) !important;
-    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4) !important;
+    transition: background 0.15s ease, transform 0.15s ease !important;
 }
 
 .academy-guide-dismiss-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 24px rgba(232, 128, 26, 0.7) !important;
+    background: #5c4224 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
 }
 
 
