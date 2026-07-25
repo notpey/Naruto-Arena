@@ -788,10 +788,11 @@ body.selection-client-page {
         radial-gradient(circle at 85% 20%, rgba(124, 77, 255, 0.18) 0%, transparent 45%),
         radial-gradient(circle at 15% 80%, rgba(232, 128, 26, 0.14) 0%, transparent 50%),
         linear-gradient(90deg, rgba(3, 4, 7, 0.5) 0%, transparent 12%, transparent 88%, rgba(3, 4, 7, 0.5) 100%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='rgba(255,174,66,0.18)' stroke-width='1.4'%3E%3Ccircle cx='60' cy='60' r='48'/%3E%3Ccircle cx='60' cy='60' r='32'/%3E%3Ccircle cx='60' cy='60' r='16'/%3E%3Cpath d='M60 12 C75 12 88 25 88 40 C88 55 75 60 60 60 C45 60 32 65 32 80 C32 95 45 108 60 108'/%3E%3Cpath d='M12 60 C12 45 25 32 40 32 C55 32 60 45 60 60 C60 75 65 88 80 88 C95 88 108 75 108 60'/%3E%3C/g%3E%3C/svg%3E") !important;
+        url("shinobi-seal-pattern.svg?v=2") !important;
     background-attachment: fixed !important;
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat !important;
     background-position: top center, right 20%, left 80%, center center, top left !important;
+    background-size: auto, auto, auto, auto, 160px 160px !important;
 }
 
 .game-remaster .nextpage,
