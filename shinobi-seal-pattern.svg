@@ -1,14 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
-  <g fill="none" stroke="#ffae42" stroke-width="1.6" stroke-opacity="0.35">
-    <circle cx="80" cy="80" r="68" stroke-dasharray="4 4" />
-    <circle cx="80" cy="80" r="52" />
-    <circle cx="80" cy="80" r="36" stroke-dasharray="6 3" />
-    <circle cx="80" cy="80" r="20" />
-    <path d="M80 12 C102 12 120 30 120 52 C120 74 102 80 80 80 C58 80 40 86 40 108 C40 130 58 148 80 148" />
-    <path d="M12 80 C12 58 30 40 52 40 C74 40 80 58 80 80 C80 102 86 120 108 120 C130 120 148 102 148 80" />
-    <circle cx="80" cy="28" r="4.5" fill="#ffae42" fill-opacity="0.4" />
-    <circle cx="80" cy="132" r="4.5" fill="#ffae42" fill-opacity="0.4" />
-    <circle cx="28" cy="80" r="4.5" fill="#ffae42" fill-opacity="0.4" />
-    <circle cx="132" cy="80" r="4.5" fill="#ffae42" fill-opacity="0.4" />
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <g fill="none" stroke="#ffae42" stroke-width="0.8" stroke-opacity="0.06">
+    <circle cx="120" cy="120" r="102" stroke-dasharray="6 6" />
+    <circle cx="120" cy="120" r="78" />
+    <circle cx="120" cy="120" r="54" stroke-dasharray="8 4" />
+    <circle cx="120" cy="120" r="30" />
+    <path d="M120 18 C153 18 180 45 180 78 C180 111 153 120 120 120 C87 120 60 129 60 162 C60 195 87 222 120 222" />
+    <path d="M18 120 C18 87 45 60 78 60 C111 60 120 87 120 120 C120 153 129 180 162 180 C195 180 222 153 222 120" />
+    <circle cx="120" cy="42" r="3.5" fill="#ffae42" fill-opacity="0.08" />
+    <circle cx="120" cy="198" r="3.5" fill="#ffae42" fill-opacity="0.08" />
+    <circle cx="42" cy="120" r="3.5" fill="#ffae42" fill-opacity="0.08" />
+    <circle cx="198" cy="120" r="3.5" fill="#ffae42" fill-opacity="0.08" />
   </g>
 </svg>

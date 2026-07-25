@@ -565,15 +565,15 @@ body:not(.selection-client-page):not(.ingame-client-page) {
   min-height: 100vh;
   background-color: #07090e !important;
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(232, 128, 26, 0.28) 0%, transparent 70%),
-    radial-gradient(circle at 85% 20%, rgba(124, 77, 255, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 15% 80%, rgba(232, 128, 26, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(232, 128, 26, 0.12) 0%, transparent 70%),
+    radial-gradient(circle at 85% 20%, rgba(124, 77, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, rgba(232, 128, 26, 0.06) 0%, transparent 50%),
     linear-gradient(90deg, rgba(3, 4, 7, 0.5) 0%, transparent 12%, transparent 88%, rgba(3, 4, 7, 0.5) 100%),
-    url("shinobi-seal-pattern.svg?v=2") !important;
+    url("shinobi-seal-pattern.svg?v=3") !important;
   background-attachment: fixed !important;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat !important;
   background-position: top center, right 20%, left 80%, center center, top left !important;
-  background-size: auto, auto, auto, auto, 160px 160px !important;
+  background-size: auto, auto, auto, auto, 240px 240px !important;
   color: var(--ca-bone);
   font-family: var(--font-ui);
   font-size: var(--fs-base);
