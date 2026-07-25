@@ -3277,3 +3277,132 @@ strong, b {
     box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
 }
 
+/* ============================================================
+   SHINOBI ACADEMY STARTER GUIDE (FTUE OVERLAY)
+   ============================================================ */
+.academy-guide-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(5, 7, 12, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    animation: academy-fade-in 0.3s ease-out;
+}
+
+.academy-guide-card {
+    max-width: 580px;
+    width: 100%;
+    background: linear-gradient(165deg, #121826 0%, #0a0d16 100%);
+    border: 2px solid rgba(255, 174, 66, 0.4);
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(232, 128, 26, 0.25);
+    color: #ffffff;
+    text-align: center;
+}
+
+.academy-guide-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: rgba(232, 128, 26, 0.18);
+    border: 1px solid rgba(255, 174, 66, 0.4);
+    color: #ffae42;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.academy-guide-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.academy-guide-header p {
+    margin: 0 0 20px 0;
+    color: #a0aec0;
+    font-size: 13px;
+}
+
+.academy-guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.academy-guide-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 16px;
+    border-radius: 10px;
+}
+
+.academy-step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8801a, #ffae42);
+    color: #211202;
+    font-weight: 900;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(232, 128, 26, 0.5);
+}
+
+.academy-step-text strong {
+    display: block;
+    color: #ffae42;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.academy-step-text span {
+    display: block;
+    color: #cbd5e0;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.academy-guide-dismiss-btn {
+    width: 100%;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #e8801a 0%, #ffae42 60%, #e11836 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(232, 128, 26, 0.5);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.academy-guide-dismiss-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(232, 128, 26, 0.7);
+}
+
+@keyframes academy-fade-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+

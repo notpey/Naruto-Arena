@@ -130,6 +130,40 @@
             </div>
         </div>
     </nav>
+    <!-- Shinobi Academy Starter Guide (FTUE Overlay for First-Time Players) -->
+    <div id="academy-starter-guide" class="academy-guide-overlay" style="display:none;">
+        <div class="academy-guide-card">
+            <div class="academy-guide-header">
+                <span class="academy-guide-badge">📜 SHINOBI ACADEMY</span>
+                <h2>Welcome to Naruto-Arena!</h2>
+                <p>Follow these 3 simple steps to start your shinobi journey:</p>
+            </div>
+            <div class="academy-guide-steps">
+                <div class="academy-guide-step">
+                    <div class="academy-step-num">1</div>
+                    <div class="academy-step-text">
+                        <strong>Build Your Squad</strong>
+                        <span>Pick 3 ninja characters from your roster to form a balanced team.</span>
+                    </div>
+                </div>
+                <div class="academy-guide-step">
+                    <div class="academy-step-num">2</div>
+                    <div class="academy-step-text">
+                        <strong>Manage Chakra</strong>
+                        <span>Match colored chakra pools (Taijutsu, Ninjutsu, Genjutsu, Bloodline) to skill costs each turn.</span>
+                    </div>
+                </div>
+                <div class="academy-guide-step">
+                    <div class="academy-step-num">3</div>
+                    <div class="academy-step-text">
+                        <strong>Climb Ranks & Earn Ryo</strong>
+                        <span>Win matches to gain XP, unlock higher rank titles, and earn Ryo for shop items!</span>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="academy-guide-dismiss-btn" onclick="dismissAcademyGuide()">Got It, Sensei! ›</button>
+        </div>
+    </div>
     <section class="selection-hub-environment" data-hub-environment hidden>
         <div class="selection-hub-env-panel" data-hub-panel="shop" hidden>
             <div class="selection-hub-env-header">
@@ -1941,6 +1975,20 @@
             setSettingsOpen(false);
         });
     })();
+    (function() {
+        try {
+            var dismissed = localStorage.getItem('naruto_academy_guide_dismissed');
+            if (!dismissed) {
+                var guide = document.getElementById('academy-starter-guide');
+                if (guide) guide.style.display = 'flex';
+            }
+        } catch (e) {}
+    })();
+    function dismissAcademyGuide() {
+        var guide = document.getElementById('academy-starter-guide');
+        if (guide) guide.style.display = 'none';
+        try { localStorage.setItem('naruto_academy_guide_dismissed', 'true'); } catch (e) {}
+    }
 </script>
 </body>
 </html>

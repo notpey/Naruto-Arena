@@ -3483,7 +3483,7 @@ const buildDefaultUserProfile = (user = {}) => {
             ingameUrl: '',
         },
         posts: 0,
-        ryo: 0,
+        ryo: 50,
         clan: null,
         clanInvitations: [],
         recentQuickGames: [],
@@ -8884,7 +8884,7 @@ const registerSchema = Joi.object({
     username: Joi.string().trim().min(3).max(64).required(),
     password: Joi.string().min(8).max(128).required(),
     confirmPassword: Joi.string().required(),
-    email: Joi.string().trim().lowercase().email().max(254).required(),
+    email: Joi.string().trim().lowercase().email({ tlds: { allow: false } }).max(254).required(),
 });
 
 const teamSchema = Joi.array()
