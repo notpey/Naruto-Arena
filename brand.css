@@ -78,6 +78,14 @@
   --accent-lit:     var(--ca-purple-lit);
   --accent-dim:     var(--ca-purple-dim);
   --accent-glow:    rgba(215, 149, 58, 0.22);
+
+  /* --- Glassmorphism & High-Contrast Gaming Tokens --- */
+  --ca-glass-bg:        rgba(14, 18, 28, 0.78);
+  --ca-glass-bg-hover:  rgba(20, 26, 40, 0.88);
+  --ca-glass-border:    rgba(232, 128, 26, 0.22);
+  --ca-glass-border-hover: rgba(255, 174, 66, 0.45);
+  --ca-glass-blur:      blur(14px);
+  --ca-shadow-glow:     0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(232, 128, 26, 0.12);
   --danger:         var(--ca-danger);
   --info:           var(--ca-blue);
 
@@ -576,10 +584,12 @@ button {
 .ca-nav {
   position: sticky;
   top: 0;
-  z-index: var(--z-overlay);
-  background: #0d0c0d;
-  border-bottom: 1px solid rgba(215, 149, 58, 0.22);
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  background: rgba(13, 16, 26, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(232, 128, 26, 0.28);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 12px rgba(232, 128, 26, 0.08);
 }
 
 .ca-nav-inner {
@@ -702,19 +712,21 @@ button {
   top: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%) translateY(-6px);
-  min-width: 196px;
+  min-width: 200px;
   margin: 0;
-  padding: 6px;
+  padding: 8px;
   list-style: none;
-  background: #111010;
-  border: 1px solid rgba(215, 149, 58, 0.3);
-  border-radius: 8px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  background: rgba(15, 20, 32, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(232, 128, 26, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8), 0 0 16px rgba(232, 128, 26, 0.12);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--t-fast), transform var(--t-fast), visibility var(--t-fast);
-  z-index: var(--z-overlay);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  z-index: 1010;
 }
 /* a small hover bridge so the menu doesn't close in the gap */
 .ca-nav-menu::before {
@@ -3153,5 +3165,115 @@ strong, b {
 
 .ca-release-label {
     color: #ffffff !important;
+}
+
+/* ============================================================
+   PROFESSIONAL GAMING UI/UX & MICRO-INTERACTION POLISH
+   ============================================================ */
+
+/* Glassmorphic Cards & Elevated Surfaces */
+.news-post,
+.ca-releases,
+.ca-sidebar-section,
+#gi-detail-view,
+.gi-ingame,
+.gi-grid {
+    background: rgba(14, 18, 28, 0.82) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(232, 128, 26, 0.28) !important;
+    border-top: 3px solid #ffae42 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 14px rgba(232, 128, 26, 0.08) !important;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+
+.news-post:hover,
+.ca-releases:hover,
+.ca-sidebar-section:hover {
+    border-color: rgba(255, 174, 66, 0.45) !important;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85), 0 0 20px rgba(232, 128, 26, 0.15) !important;
+}
+
+/* Character Cards Lift & Face Zoom Micro-Animations */
+.gi-tile,
+.ca-release-card {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: rgba(10, 14, 22, 0.95) !important;
+    border: 1px solid rgba(232, 128, 26, 0.25) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+.gi-tile:hover,
+.ca-release-card:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    border-color: #ffae42 !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(255, 174, 66, 0.35) !important;
+}
+
+.gi-tile img,
+.ca-release-face {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.gi-tile:hover img,
+.ca-release-card:hover .ca-release-face {
+    transform: scale(1.08) !important;
+}
+
+/* Category Filter Bar Polish */
+.gi-catbar {
+    background: rgba(10, 14, 24, 0.92) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(232, 128, 26, 0.25) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.gi-search input:focus {
+    border-bottom-color: #ffae42 !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 0 0 3px rgba(232, 128, 26, 0.25) !important;
+}
+
+/* Button & Form Focus Effects */
+.ca-auth-btn,
+.auth-button,
+.ca-news-btn {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+}
+
+.ca-auth-btn:hover,
+.auth-button:hover,
+.ca-news-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(232, 128, 26, 0.4) !important;
+}
+
+.ca-auth-input:focus,
+.auth-input:focus {
+    border-color: #ffae42 !important;
+    box-shadow: 0 0 0 3px rgba(232, 128, 26, 0.22) !important;
+    outline: none !important;
+}
+
+/* Top Leaderboards Metallic Rank Badges */
+.lb-clan-row.r1 .lb-clan-rank {
+    background: linear-gradient(135deg, #ffe6a8, #e7b85a) !important;
+    color: #3d2402 !important;
+    box-shadow: 0 0 12px rgba(231, 184, 90, 0.6) !important;
+}
+.lb-clan-row.r2 .lb-clan-rank {
+    background: linear-gradient(135deg, #ffffff, #b0b8c4) !important;
+    color: #1a222d !important;
+    box-shadow: 0 0 10px rgba(176, 184, 196, 0.5) !important;
+}
+.lb-clan-row.r3 .lb-clan-rank {
+    background: linear-gradient(135deg, #f0aa7d, #cd7f32) !important;
+    color: #2e1503 !important;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.5) !important;
 }
 
