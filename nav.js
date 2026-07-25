@@ -214,6 +214,10 @@
     var gameLink = navLinks.querySelector("[data-game-window]");
     if (gameLink) {
       gameLink.addEventListener("click", function (e) {
+        var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+        if (isMobile) {
+          return; // Let standard direct navigation proceed on mobile
+        }
         var url = gameLink.getAttribute("href") || "selection.html";
         var targetWidth = 1100;
         var targetHeight = 800;

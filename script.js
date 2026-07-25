@@ -85,9 +85,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             ) {
                 return;
             }
-            soundManager.play(clickSound);
         });
     }
+
+    // Mobile touch tooltip inspector handler for skill tooltips and status icons
+    document.addEventListener('touchend', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const tooltipContainer = event.target.closest('.skilltooltips');
+        if (tooltipContainer) {
+            const wasActive = tooltipContainer.classList.contains('touch-active');
+            document.querySelectorAll('.skilltooltips.touch-active').forEach((el) => el.classList.remove('touch-active'));
+            if (!wasActive) {
+                tooltipContainer.classList.add('touch-active');
+            }
+        } else if (!event.target.closest('.status-tooltip-content, .global-status-tooltip')) {
+            document.querySelectorAll('.skilltooltips.touch-active').forEach((el) => el.classList.remove('touch-active'));
+        }
+    });
 
     const API_BASE_URL =
         window.NARUTO_API_BASE_URL ||
@@ -169,9 +183,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return fallbackRoster;
         }
     };
-    const pageCharacterRoster = shouldUseCustomCursor ? await loadCharacterRoster() : getStaticCharacterRoster();
+    let pageCharacterRoster = getStaticCharacterRoster();
     if (shouldUseCustomCursor) {
         attachGameImageFallbacks();
+        loadCharacterRoster().then((liveRoster) => {
+            if (Array.isArray(liveRoster) && liveRoster.length > 0) {
+                pageCharacterRoster = liveRoster;
+            }
+        }).catch((err) => {
+            console.warn('Background character roster update failed:', err);
+        });
     }
     const loginForm = document.querySelector('.login-form');
     const loginButton = document.querySelector('.ok-button');

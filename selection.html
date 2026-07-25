@@ -2,19 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script>
         (function () {
             var STAGE_W = 1100;
             var STAGE_H = 800;
             var viewportMeta = document.getElementById("viewport-meta");
+            var resizeTimer = null;
 
             function applyMobileFit() {
                 var winW = window.innerWidth || document.documentElement.clientWidth;
                 var winH = window.innerHeight || document.documentElement.clientHeight;
 
                 if (viewportMeta) {
-                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes");
+                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover");
+                }
+
+                var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || winW < 768;
+                var isPortrait = winH > winW;
+                var overlay = document.getElementById("mobile-orientation-overlay");
+
+                if (overlay && !overlay.classList.contains("dismissed")) {
+                    if (isMobile && isPortrait) {
+                        overlay.style.display = "flex";
+                    } else {
+                        overlay.style.display = "none";
+                    }
                 }
 
                 if (winW < STAGE_W || winH < STAGE_H) {
@@ -48,13 +61,20 @@
                 document.body.style.transform = "";
             }
 
+            function debouncedFit() {
+                if (resizeTimer) clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(applyMobileFit, 50);
+            }
+
             if (document.readyState === "loading") {
                 document.addEventListener("DOMContentLoaded", applyMobileFit);
             } else {
                 applyMobileFit();
             }
-            window.addEventListener("resize", applyMobileFit);
-            window.addEventListener("orientationchange", applyMobileFit);
+            window.addEventListener("resize", debouncedFit);
+            window.addEventListener("orientationchange", function() {
+                setTimeout(applyMobileFit, 100);
+            });
             window.__applyMobileLandscapeFit = applyMobileFit;
         })();
     </script>
@@ -68,6 +88,14 @@
     <link rel="stylesheet" href="shop.css?v=22">
 </head>
 <body class="selection-client-page game-remaster">
+<div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
+    <div class="mobile-orientation-card">
+        <div class="mobile-rotate-icon">📱 ↪️ 🔄</div>
+        <h3>Please Rotate Your Device</h3>
+        <p>Naruto-Arena is optimized for landscape mode. Rotate your phone for the best battle experience!</p>
+        <button type="button" class="mobile-dismiss-btn" onclick="document.getElementById('mobile-orientation-overlay').classList.add('dismissed'); document.getElementById('mobile-orientation-overlay').style.display='none';">Play Anyway</button>
+    </div>
+</div>
 <div class="background">
     <button type="button" class="shop-icon" data-shop-trigger aria-label="Open the Ryo shop" title="Ryo Shop">
         <span class="shop-icon-glyph">両</span>
