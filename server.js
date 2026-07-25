@@ -8828,7 +8828,7 @@ async function initDb() {
     app.use('/api/admin', adminRouter);
 }
 
-app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
 
 app.get(['/health', '/api/health'], (req, res) => {
     const isDbConnected = Boolean(mongoClient && mongoClient.topology && mongoClient.topology.isConnected());
