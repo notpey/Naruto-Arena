@@ -17,23 +17,54 @@
     var navLinks = document.querySelector(".ca-nav-links");
     if (!nav || !navLinks) { return; }
 
-    // Shared website hero banner rotation. Index has static markup for this;
-    // subpages get the same layer injected here so the game client stays untouched.
-    document.querySelectorAll(".ca-hero").forEach(function (hero) {
-      if (hero.querySelector(".ca-hero-banners")) { return; }
+    // Shared website hero banner rotation across all website pages.
+    // Excludes game client pages (selection.html and ingame.html).
+    var pageName = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+    var isGameClient = pageName === "selection.html" || pageName === "ingame.html" || pageName === "selection-login.html";
 
-      var banners = document.createElement("div");
-      banners.className = "ca-hero-banners";
-      banners.setAttribute("aria-hidden", "true");
+    if (!isGameClient) {
+      var heroList = Array.prototype.slice.call(document.querySelectorAll(".ca-hero"));
+      if (!heroList.length && nav && nav.parentNode) {
+        var heroHeader = document.createElement("header");
+        heroHeader.className = "ca-hero ca-hero--compact";
+        heroHeader.setAttribute("aria-label", "Naruto-Arena banner");
+        heroHeader.innerHTML =
+          '<div class="ca-hero-inner">' +
+            '<div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">&lt;</div>' +
+            '<div class="ca-hero-center">' +
+              '<a class="ca-hero-play" href="selection.html" data-game-window>&gt; START PLAYING</a>' +
+              '<div class="ca-hero-wordmark" aria-label="Naruto-Arena">' +
+                '<span class="ca-hero-word">NARUTO</span>' +
+                '<svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">' +
+                  '<polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.1)"/>' +
+                  '<text x="20" y="29" text-anchor="middle" fill="#e8801a" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N&#183;A</text>' +
+                '</svg>' +
+                '<span class="ca-hero-word">ARENA</span>' +
+              '</div>' +
+              '<p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>' +
+            '</div>' +
+            '<div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">&gt;</div>' +
+          '</div>';
+        nav.parentNode.insertBefore(heroHeader, nav.nextSibling);
+        heroList = [heroHeader];
+      }
 
-      ["cloud", "leaf", "sound", "sand"].forEach(function (name) {
-        var banner = document.createElement("span");
-        banner.className = "ca-hero-banner ca-hero-banner--" + name;
-        banners.appendChild(banner);
+      heroList.forEach(function (hero) {
+        if (hero.querySelector(".ca-hero-banners")) { return; }
+
+        var banners = document.createElement("div");
+        banners.className = "ca-hero-banners";
+        banners.setAttribute("aria-hidden", "true");
+
+        ["cloud", "leaf", "sound", "sand"].forEach(function (name) {
+          var banner = document.createElement("span");
+          banner.className = "ca-hero-banner ca-hero-banner--" + name;
+          banners.appendChild(banner);
+        });
+
+        hero.insertBefore(banners, hero.firstChild);
       });
-
-      hero.insertBefore(banners, hero.firstChild);
-    });
+    }
 
     var menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
 

@@ -3027,18 +3027,45 @@ strong, b {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
-/* Vibrant Hero Village Banners Across All Subpages */
+/* Vibrant Hero Village Banners Across All Subpages & Hero Text Stacking Fix */
 .ca-hero-banners {
     z-index: 1 !important;
-    opacity: 0.85 !important;
+    opacity: 1 !important;
 }
 
 .ca-hero::after {
     z-index: 2 !important;
     background:
-        radial-gradient(ellipse 60% 80% at 50% -10%, rgba(255, 174, 66, 0.35), transparent),
-        radial-gradient(ellipse 50% 70% at 78% 20%, rgba(163, 107, 255, 0.3), transparent 60%),
-        linear-gradient(180deg, rgba(7, 9, 14, 0.3) 0%, rgba(7, 9, 14, 0.75) 100%) !important;
+        radial-gradient(ellipse 70% 90% at 50% 0%, rgba(232, 128, 26, 0.18), transparent 70%),
+        linear-gradient(90deg, rgba(5, 7, 14, 0.6) 0%, rgba(5, 7, 14, 0.2) 30%, rgba(5, 7, 14, 0.2) 70%, rgba(5, 7, 14, 0.6) 100%),
+        linear-gradient(180deg, rgba(5, 7, 14, 0.35) 0%, transparent 40%, rgba(5, 7, 14, 0.75) 100%) !important;
+    pointer-events: none !important;
+}
+
+.ca-hero-inner {
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.ca-hero-play {
+    position: relative !important;
+    z-index: 15 !important;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #e8801a 0%, #ffae42 60%, #e11836 100%) !important;
+    box-shadow: 0 4px 24px rgba(232, 128, 26, 0.6), 0 0 14px rgba(255, 174, 66, 0.4) !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+.ca-hero-word {
+    color: #ffffff !important;
+    text-shadow: 0 3px 16px rgba(0, 0, 0, 0.95), 0 0 24px rgba(232, 128, 26, 0.4) !important;
+}
+
+.ca-hero-tagline {
+    color: #e8c89b !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
 /* ============================================================
