@@ -10482,6 +10482,54 @@ app.post('/api/profile/avatar', requireSession, async (req, res) => {
     }
 });
 
+// Upload endpoint: accepts a base64-encoded data URI produced by the client-side
+// Canvas resize. The Canvas always outputs a 100x100 image so no remote fetch is
+// needed. We validate the data URI format, strip the header to check raw byte size
+// (≤ 300 KB), and accept only PNG / JPEG / WebP / GIF.
+const AVATAR_UPLOAD_MAX_BYTES = 300 * 1024; // 300 KB — plenty for a 100x100 image
+const AVATAR_UPLOAD_ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+
+app.post('/api/profile/avatar/upload', requireSession, async (req, res) => {
+    try {
+        const { dataUrl } = req.body || {};
+        if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+            return res.status(400).json({ error: 'A valid image data URL is required.' });
+        }
+        // Parse "data:<mime>;base64,<data>"
+        const matchHeader = dataUrl.match(/^data:([^;]+);base64,/);
+        if (!matchHeader) {
+            return res.status(400).json({ error: 'Unsupported data URL format.' });
+        }
+        const mime = matchHeader[1].toLowerCase();
+        if (!AVATAR_UPLOAD_ALLOWED_MIME.has(mime)) {
+            return res.status(400).json({ error: 'Unsupported image format. Use PNG, JPEG, WebP, or GIF.' });
+        }
+        const base64Data = dataUrl.slice(matchHeader[0].length);
+        const byteLength = Math.ceil((base64Data.length * 3) / 4);
+        if (byteLength > AVATAR_UPLOAD_MAX_BYTES) {
+            return res.status(400).json({ error: 'Image exceeds the 300 KB size limit after resizing.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        const profile = normalizeUserProfile(user);
+        profile.avatarUrl = dataUrl;
+        await usersCollection.updateOne(
+            { _id: user._id },
+            { $set: { profile } }
+        );
+        const updatedUser = { ...user, profile };
+        return res.json({
+            ok: true,
+            user: serializeUserForClient(updatedUser),
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Unable to upload avatar.' });
+    }
+});
+
+
 app.post('/api/profile/matchmaking', requireSession, async (req, res) => {
     try {
         const { error: validationError, value } = matchmakingSettingsSchema.validate(req.body || {});

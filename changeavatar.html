@@ -330,7 +330,7 @@
 
     .avatar-panel {
       display: grid;
-      gap: 18px;
+      gap: 16px;
       padding: 26px 24px;
       border: var(--border-slash);
       background: var(--ca-ash);
@@ -416,6 +416,169 @@
       color: var(--ca-dust);
       font-size: 13px;
       line-height: 1.5;
+    }
+
+    /* Upload / URL mode tabs */
+    .avatar-mode-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid rgba(215, 149, 58, 0.25);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+    }
+    .avatar-mode-tab {
+      flex: 1;
+      height: 36px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ca-dust);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background var(--t-fast), color var(--t-fast);
+    }
+    .avatar-mode-tab + .avatar-mode-tab {
+      border-left: 1px solid rgba(215, 149, 58, 0.2);
+    }
+    .avatar-mode-tab.active {
+      background: rgba(215, 149, 58, 0.14);
+      color: var(--ca-purple-lit);
+    }
+
+    /* File drop zone */
+    .avatar-drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 120px;
+      padding: 20px;
+      border: 2px dashed rgba(215, 149, 58, 0.3);
+      border-radius: var(--r-sm);
+      background: rgba(215, 149, 58, 0.04);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color var(--t-fast), background var(--t-fast);
+    }
+    .avatar-drop-zone:hover,
+    .avatar-drop-zone.dragover {
+      border-color: rgba(215, 149, 58, 0.65);
+      background: rgba(215, 149, 58, 0.09);
+    }
+    .avatar-drop-zone-icon {
+      font-size: 28px;
+      line-height: 1;
+      opacity: 0.6;
+    }
+    .avatar-drop-zone-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ca-parchment);
+    }
+    .avatar-drop-zone-sub {
+      font-size: 11px;
+      color: var(--ca-dust);
+      line-height: 1.5;
+    }
+    #avatar-file-input {
+      display: none;
+    }
+
+    /* Resize preview strip */
+    .avatar-resize-preview {
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(215, 149, 58, 0.2);
+      border-radius: var(--r-sm);
+    }
+    .avatar-resize-preview.visible {
+      display: flex;
+    }
+    .avatar-resize-canvas-wrap {
+      flex: 0 0 auto;
+    }
+    #avatar-resize-canvas {
+      width: 100px;
+      height: 100px;
+      display: block;
+      border: 1px solid rgba(215, 149, 58, 0.35);
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+    .avatar-resize-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .avatar-resize-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ca-bone);
+      margin-bottom: 4px;
+    }
+    .avatar-resize-meta {
+      font-size: 12px;
+      color: var(--ca-parchment);
+      line-height: 1.55;
+    }
+    .avatar-resize-meta em {
+      color: var(--ca-purple-lit);
+      font-style: normal;
+    }
+    .avatar-resize-discard {
+      flex: 0 0 auto;
+      border: 1px solid rgba(209, 90, 93, 0.35);
+      background: transparent;
+      color: var(--ca-red);
+      border-radius: var(--r-sm);
+      padding: 4px 10px;
+      font: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background var(--t-fast);
+    }
+    .avatar-resize-discard:hover {
+      background: rgba(209, 90, 93, 0.12);
+    }
+
+    /* Constraint info strip */
+    .avatar-constraints {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .avatar-constraint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--r-sm);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .avatar-constraint-icon {
+      font-size: 15px;
+      flex: 0 0 auto;
+      opacity: 0.7;
+    }
+    .avatar-constraint-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ca-dust);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .avatar-constraint-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ca-parchment);
     }
 
     .avatar-status {
@@ -853,20 +1016,82 @@
             <strong>Current User Avatar</strong>
           </div>
         </div>
-        <form class="avatar-form" id="change-avatar-form">
+
+        <!-- Mode tabs -->
+        <div class="avatar-mode-tabs">
+          <button class="avatar-mode-tab active" type="button" id="avatar-tab-upload">⬆ Upload File</button>
+          <button class="avatar-mode-tab" type="button" id="avatar-tab-url">🔗 URL</button>
+        </div>
+
+        <!-- FILE UPLOAD panel -->
+        <div id="avatar-upload-panel">
+          <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/gif,image/webp" />
+          <div class="avatar-drop-zone" id="avatar-drop-zone" role="button" tabindex="0" aria-label="Click or drag a file to upload an avatar">
+            <span class="avatar-drop-zone-icon" aria-hidden="true">🖼️</span>
+            <span class="avatar-drop-zone-label">Click or drag & drop an image</span>
+            <span class="avatar-drop-zone-sub">PNG · JPEG · GIF · WebP · Max 2 MB<br>Will be auto-resized to 100×100 px</span>
+          </div>
+          <!-- Live resize preview -->
+          <div class="avatar-resize-preview" id="avatar-resize-preview">
+            <div class="avatar-resize-canvas-wrap">
+              <canvas id="avatar-resize-canvas" width="100" height="100"></canvas>
+            </div>
+            <div class="avatar-resize-info">
+              <div class="avatar-resize-title">Resized Preview</div>
+              <div class="avatar-resize-meta" id="avatar-resize-meta"></div>
+            </div>
+            <button class="avatar-resize-discard" type="button" id="avatar-resize-discard">✕ Discard</button>
+          </div>
+          <button class="avatar-save" type="button" id="avatar-upload-submit" disabled>Save Avatar</button>
+        </div>
+
+        <!-- URL panel -->
+        <form class="avatar-form" id="change-avatar-form" style="display:none;">
           <input
             class="avatar-input"
             id="change-avatar-url"
             type="url"
             inputmode="url"
             autocomplete="off"
-            placeholder="Direct image URL only"
+            placeholder="Direct image URL (must be 100×100)"
             required
           />
           <button class="avatar-save" type="submit" id="change-avatar-submit">Save Avatar</button>
-          <p class="avatar-hint">Avatars are to be 100x100 only.</p>
-          <p class="avatar-status" id="change-avatar-status" aria-live="polite"></p>
         </form>
+
+        <!-- Constraint info -->
+        <div class="avatar-constraints">
+          <div class="avatar-constraint">
+            <span class="avatar-constraint-icon">📐</span>
+            <div>
+              <div class="avatar-constraint-label">Output Size</div>
+              <div class="avatar-constraint-value">100 × 100 px</div>
+            </div>
+          </div>
+          <div class="avatar-constraint">
+            <span class="avatar-constraint-icon">📦</span>
+            <div>
+              <div class="avatar-constraint-label">Max File Size</div>
+              <div class="avatar-constraint-value">2 MB</div>
+            </div>
+          </div>
+          <div class="avatar-constraint">
+            <span class="avatar-constraint-icon">🎨</span>
+            <div>
+              <div class="avatar-constraint-label">Formats</div>
+              <div class="avatar-constraint-value">PNG, JPEG, GIF, WebP</div>
+            </div>
+          </div>
+          <div class="avatar-constraint">
+            <span class="avatar-constraint-icon">✂️</span>
+            <div>
+              <div class="avatar-constraint-label">Resize</div>
+              <div class="avatar-constraint-value">Auto-cropped to fit</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="avatar-status" id="change-avatar-status" aria-live="polite"></p>
       </section>
 
       <div aria-hidden="true" style="display:none;">
@@ -1093,6 +1318,164 @@
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
   <script src="./shop.js" defer></script>
+
+  <!-- Avatar upload + Canvas resize logic -->
+  <script>
+  (function () {
+    var MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB input guard
+    var CANVAS_SIZE = 100;
+
+    var tabUpload = document.getElementById('avatar-tab-upload');
+    var tabUrl    = document.getElementById('avatar-tab-url');
+    var uploadPanel = document.getElementById('avatar-upload-panel');
+    var urlPanel    = document.getElementById('change-avatar-form');
+    var fileInput   = document.getElementById('avatar-file-input');
+    var dropZone    = document.getElementById('avatar-drop-zone');
+    var resizePreview = document.getElementById('avatar-resize-preview');
+    var resizeMeta    = document.getElementById('avatar-resize-meta');
+    var resizeCanvas  = document.getElementById('avatar-resize-canvas');
+    var discardBtn    = document.getElementById('avatar-resize-discard');
+    var uploadSubmit  = document.getElementById('avatar-upload-submit');
+    var statusEl      = document.getElementById('change-avatar-status');
+    var currentImg    = document.getElementById('change-avatar-current-image');
+
+    var pendingDataUrl = null;
+
+    function setStatus(msg, state) {
+      if (!statusEl) return;
+      statusEl.textContent = msg || '';
+      if (state) { statusEl.dataset.state = state; }
+      else { delete statusEl.dataset.state; }
+    }
+
+    // ── Tab switching ──────────────────────────────────────────
+    function switchTab(mode) {
+      if (mode === 'upload') {
+        tabUpload.classList.add('active');
+        tabUrl.classList.remove('active');
+        uploadPanel.style.display = '';
+        urlPanel.style.display = 'none';
+      } else {
+        tabUrl.classList.add('active');
+        tabUpload.classList.remove('active');
+        urlPanel.style.display = '';
+        uploadPanel.style.display = 'none';
+      }
+      setStatus('');
+    }
+    if (tabUpload) tabUpload.addEventListener('click', function () { switchTab('upload'); });
+    if (tabUrl)    tabUrl.addEventListener('click', function () { switchTab('url'); });
+
+    // ── Drop zone click / keyboard ─────────────────────────────
+    if (dropZone) {
+      dropZone.addEventListener('click', function () { fileInput && fileInput.click(); });
+      dropZone.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput && fileInput.click(); }
+      });
+      dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('dragover'); });
+      dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) processFile(file);
+      });
+    }
+    if (fileInput) fileInput.addEventListener('change', function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (file) processFile(file);
+      fileInput.value = '';
+    });
+
+    // ── Canvas resize ──────────────────────────────────────────
+    function processFile(file) {
+      setStatus('');
+      var allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+      if (!allowed.includes(file.type)) {
+        setStatus('Unsupported format. Use PNG, JPEG, GIF, or WebP.', 'error');
+        return;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        setStatus('File is too large (max 2 MB).', 'error');
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var ctx = resizeCanvas.getContext('2d');
+          // Cover-crop: maintain aspect ratio, center-crop to 100x100
+          var srcW = img.naturalWidth, srcH = img.naturalHeight;
+          var scale = Math.max(CANVAS_SIZE / srcW, CANVAS_SIZE / srcH);
+          var dw = srcW * scale, dh = srcH * scale;
+          var ox = (CANVAS_SIZE - dw) / 2, oy = (CANVAS_SIZE - dh) / 2;
+          ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          ctx.drawImage(img, ox, oy, dw, dh);
+          // Export as PNG for lossless quality at 100x100
+          pendingDataUrl = resizeCanvas.toDataURL('image/png');
+          // Show preview strip
+          resizePreview.classList.add('visible');
+          dropZone.style.display = 'none';
+          if (resizeMeta) {
+            var approxKb = Math.round((pendingDataUrl.length * 3 / 4) / 1024);
+            resizeMeta.innerHTML =
+              '<em>' + srcW + ' &times; ' + srcH + ' px</em> &rarr; <em>100 &times; 100 px</em><br>' +
+              'Format: PNG &nbsp;&bull;&nbsp; ~' + approxKb + ' KB';
+          }
+          if (uploadSubmit) uploadSubmit.disabled = false;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Discard ────────────────────────────────────────────────
+    if (discardBtn) discardBtn.addEventListener('click', function () {
+      pendingDataUrl = null;
+      resizePreview.classList.remove('visible');
+      dropZone.style.display = '';
+      if (uploadSubmit) uploadSubmit.disabled = true;
+      setStatus('');
+    });
+
+    // ── Submit upload ──────────────────────────────────────────
+    if (uploadSubmit) uploadSubmit.addEventListener('click', async function () {
+      if (!pendingDataUrl) { setStatus('No image selected.', 'error'); return; }
+      setStatus('Uploading avatar...', '');
+      uploadSubmit.disabled = true;
+      try {
+        var resp = await fetch('/api/profile/avatar/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ dataUrl: pendingDataUrl })
+        });
+        var data = await resp.json().catch(function () { return {}; });
+        if (!resp.ok) {
+          setStatus(data && data.error ? data.error : 'Upload failed.', 'error');
+          uploadSubmit.disabled = false;
+          return;
+        }
+        // Update current avatar preview
+        if (currentImg) currentImg.src = pendingDataUrl;
+        // Sync into index.js session if available
+        if (typeof setCurrentSessionUser === 'function' && data.user) {
+          setCurrentSessionUser(data.user);
+          if (typeof cacheSessionUser === 'function') cacheSessionUser(data.user);
+          if (typeof populateProfile === 'function') populateProfile(data.user);
+        }
+        pendingDataUrl = null;
+        resizePreview.classList.remove('visible');
+        dropZone.style.display = '';
+        uploadSubmit.disabled = true;
+        setStatus('Avatar updated successfully.', 'success');
+      } catch (err) {
+        setStatus('Unable to reach the server.', 'error');
+        uploadSubmit.disabled = false;
+      }
+    });
+  })();
+  </script>
 
   
   <!-- Shinobi-Arena nav account sync (injected): mirrors #account-panel into the nav + dropdown toggle -->
