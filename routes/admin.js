@@ -12,6 +12,8 @@ module.exports = function(context) {
         bugsCollection,
         newsCollection,
         charactersData,
+        saveCharacters,
+        serializeCharactersDataFile,
         ladderRulesCollection,
         charactersCollection,
         recalculatePlayerLadderStandings,
@@ -582,7 +584,7 @@ module.exports = function(context) {
     
         return res.json({
             ok: true,
-            characters: characterCatalog,
+            characters: Array.isArray(charactersData) ? charactersData : [],
         });
     });
     router.get('/characters/export', requireSession, (req, res) => {

@@ -8834,6 +8834,8 @@ async function initDb() {
         usersCollection,
         bugsCollection,
         charactersData,
+        saveCharacters,
+        serializeCharactersDataFile,
         latestReleasesUpdateSchema,
         maintenanceModeUpdateSchema,
         matchesCollection,
