@@ -24,7 +24,7 @@
 
       if (!heroList.length && navEl && navEl.parentNode) {
         var heroHeader = document.createElement("header");
-        heroHeader.className = "ca-hero ca-hero--compact";
+        heroHeader.className = "ca-hero";
         heroHeader.setAttribute("aria-label", "Naruto-Arena banner");
         heroHeader.innerHTML =
           '<div class="ca-hero-inner">' +
@@ -48,6 +48,8 @@
       }
 
       heroList.forEach(function (hero) {
+        hero.classList.remove("ca-hero--compact");
+
         if (hero.querySelector(".ca-hero-banners")) { return; }
 
         var banners = document.createElement("div");
