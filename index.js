@@ -1632,8 +1632,21 @@
         usedPreset: false
       };
     }
+    var preset = cloneCharacterEditorPreset(getCharacterEditorPreset(character));
+    if (character && preset) {
+      if (character.facePicture) {
+        preset.facePicture = character.facePicture;
+      }
+      if (Array.isArray(character.skills) && Array.isArray(preset.skills)) {
+        preset.skills.forEach(function (skill, idx) {
+          if (skill && character.skills[idx] && character.skills[idx].skillimage) {
+            skill.skillimage = character.skills[idx].skillimage;
+          }
+        });
+      }
+    }
     return {
-      character: cloneCharacterEditorPreset(getCharacterEditorPreset(character)),
+      character: preset,
       usedPreset: true
     };
   }

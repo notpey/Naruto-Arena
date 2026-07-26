@@ -5202,13 +5202,26 @@ const saveCharacters = async (nextCharacters) => {
     if (!appStateCollection) {
         throw new Error('Database not connected.');
     }
+    const now = new Date();
     await appStateCollection.updateOne(
         { key: CHARACTERS_STATE_KEY },
         {
             $set: {
                 key: CHARACTERS_STATE_KEY,
                 characters: nextCharacters,
-                updatedAt: new Date(),
+                updatedAt: now,
+            },
+        },
+        { upsert: true }
+    );
+    await appStateCollection.updateOne(
+        { key: CHARACTER_MIGRATIONS_STATE_KEY },
+        {
+            $set: {
+                key: CHARACTER_MIGRATIONS_STATE_KEY,
+                [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
+                [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                updatedAt: now,
             },
         },
         { upsert: true }
