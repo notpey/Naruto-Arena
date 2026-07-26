@@ -3515,32 +3515,103 @@ strong, b {
 }
 
 /* Ensure all text on light parchment content cards is dark and highly readable */
+.mn-sheet,
+.gi-sheet,
+.ms-sheet,
+.st-sheet,
+.lb-sheet,
 .ca-content-sheet,
 .ca-light-card,
 .ca-admin-panel,
-.na-legacy-light .main,
-.na-legacy-light .profile-section,
-.na-legacy-light .clan-profile-panel,
-.na-legacy-light .avatar-panel,
-.na-legacy-light .background-panel,
-.na-legacy-light .reset-panel,
-.na-legacy-light .release-panel,
-.na-legacy-light .editor-stage,
-.na-legacy-light .mission-panel,
-.na-legacy-light .mainsection,
-.na-legacy-light .news-editor-card,
-.na-legacy-light .news-list-card,
 .ca-releases,
-.news-post {
-  color: #211a17;
+.news-post,
+.news-editor-card,
+.news-list-card,
+.profile-section,
+.profile-search,
+.avatar-panel,
+.background-panel,
+.reset-panel,
+.clan-profile-panel,
+.clan-shell,
+.clan-card,
+.character-editor-card,
+.character-editor-modal,
+.player-account-modal,
+.mainsection,
+.na-legacy-light .main,
+.na-legacy-light .profile-section {
+  color: #1a1512 !important; /* Extremely sharp dark ink text */
 }
 
+/* Headings on light parchment sheets */
+.mn-sheet h1, .mn-sheet h2, .mn-sheet h3, .mn-sheet h4,
+.gi-sheet h1, .gi-sheet h2, .gi-sheet h3, .gi-sheet h4,
+.ms-sheet h1, .ms-sheet h2, .ms-sheet h3, .ms-sheet h4,
+.st-sheet h1, .st-sheet h2, .st-sheet h3, .st-sheet h4,
+.lb-sheet h1, .lb-sheet h2, .lb-sheet h3, .lb-sheet h4,
+.ca-content-sheet h1, .ca-content-sheet h2, .ca-content-sheet h3,
+.na-legacy-light h1, .na-legacy-light h2, .na-legacy-light h3, .na-legacy-light h4 {
+  color: #110d0a !important; /* Deep black-ink headers */
+  font-weight: 800 !important;
+}
+
+/* Paragraphs & Description Text on light parchment sheets */
+.mn-sheet p,
+.gi-sheet p,
+.ms-sheet p,
+.st-sheet p,
+.lb-sheet p,
+.ca-content-sheet p,
 .na-legacy-light p,
-.na-legacy-light span,
-.na-legacy-light td,
-.na-legacy-light th,
-.na-legacy-light label {
-  color: inherit;
+.st-episode-synopsis,
+.ms-cat-intro,
+.ms-cat p {
+  color: #2c221c !important; /* Rich readable dark text */
+  font-weight: 500 !important;
+}
+
+/* Strong / Bold highlights on light parchment sheets */
+.mn-sheet strong,
+.mn-sheet p strong,
+.mn-list li strong,
+.gi-sheet strong,
+.ms-sheet strong,
+.st-sheet strong,
+.lb-sheet strong,
+.ca-content-sheet strong,
+.na-legacy-light strong,
+.st-col-line strong,
+.ms-col-line strong {
+  color: #0d0a08 !important; /* Solid black-ink bold text */
+  font-weight: 800 !important;
+}
+
+/* List Items on light parchment sheets */
+.mn-list li,
+.ms-list li,
+.st-list li,
+.gi-list li,
+.ca-content-sheet li,
+.na-legacy-light li {
+  color: #2c221c !important;
+  font-weight: 500 !important;
+}
+
+.mn-list li::before,
+.ms-list li::before,
+.st-list li::before {
+  color: #d7953a !important; /* High contrast amber bullet arrow */
+  font-weight: 900 !important;
+}
+
+/* Chapter / Kicker Labels on light parchment sheets */
+.mn-kicker,
+.ms-kicker,
+.st-kicker,
+.ca-section-label {
+  color: #8a4f00 !important; /* Dark burnt-amber kicker label */
+  font-weight: 800 !important;
 }
 
 /* Ensure text on dark headers, navs, and footers is bright bone white */
