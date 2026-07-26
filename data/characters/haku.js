@@ -58,7 +58,8 @@ module.exports = {
                         "cannotUseSkills": true,
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable."
+                        "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -180,7 +181,8 @@ module.exports = {
                         "cannotUseSkills": true,
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable."
+                        "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

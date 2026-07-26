@@ -48,7 +48,8 @@ module.exports = {
                         "triggerOnEnemyHarmfulSkill": true,
                         "counterDamage": 15,
                         "counterDamageIgnoresDestructibleDefense": true,
-                        "tooltipText": "This character takes 15 piercing damage that ignores invulnerability at the end of their turn. If they use a new skill, they take another 15 damage."
+                        "tooltipText": "This character takes 15 piercing damage that ignores invulnerability at the end of their turn. If they use a new skill, they take another 15 damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

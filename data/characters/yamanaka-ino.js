@@ -32,7 +32,8 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "strategic"
+                            "strategic",
+                            "ninjutsu"
                         ],
                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                     }
@@ -105,7 +106,8 @@ module.exports = {
                                 }
                             }
                         ],
-                        "ongoingClass": "control"
+                        "ongoingClass": "control",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -133,7 +135,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -167,7 +169,8 @@ module.exports = {
                                 }
                             }
                         ],
-                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned."
+                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

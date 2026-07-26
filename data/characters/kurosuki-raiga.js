@@ -18,7 +18,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -92,7 +92,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -116,7 +116,8 @@ module.exports = {
                             "physical": 1,
                             "energy": 1,
                             "mental": 1,
-                            "affliction": 1
+                            "affliction": 1,
+                            "ninjutsu": 1
                         },
                         "tooltipText": "This character's non-strategic skills cost 1 additional random chakra."
                     }
@@ -179,7 +180,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -228,7 +229,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -283,7 +284,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -325,7 +326,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [

@@ -153,7 +153,7 @@
                         "damage": 0,
                         "cooldown": 1,
                         "classes": [
-                                "Energy",
+                                "Ninjutsu",
                                 "Instant"
                         ],
                         "effects": [
@@ -172,9 +172,11 @@
                                                 "cannotUseSkillClasses": [
                                                         "physical",
                                                         "energy",
-                                                        "mental"
+                                                        "mental",
+                                                        "ninjutsu"
                                                 ],
-                                                "tooltipText": "This character's non-strategic skills are stunned."
+                                                "tooltipText": "This character's non-strategic skills are stunned.",
+                                                "turnDurationAnchor": "source_turn"
                                         }
                                 }
                         ]

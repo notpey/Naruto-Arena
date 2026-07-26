@@ -106,7 +106,8 @@ module.exports = {
                                 "scope": "self"
                             }
                         ],
-                        "tooltipText": "If this character uses a new harmful skill, they will take 30 damage."
+                        "tooltipText": "If this character uses a new harmful skill, they will take 30 damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

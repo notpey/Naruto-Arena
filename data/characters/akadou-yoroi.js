@@ -19,7 +19,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -76,7 +76,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 3,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Action",
                 "Instant"
             ],

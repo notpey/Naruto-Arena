@@ -32,7 +32,8 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "strategic"
+                            "strategic",
+                            "ninjutsu"
                         ],
                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
                         "ongoingClass": "control"
@@ -48,7 +49,8 @@ module.exports = {
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
                         "tooltipText": "This character cannot reduce damage or become invulnerable.",
-                        "ongoingClass": "control"
+                        "ongoingClass": "control",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

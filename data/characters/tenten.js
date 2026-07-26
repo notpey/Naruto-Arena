@@ -176,9 +176,11 @@ module.exports = {
                         "harmful": true,
                         "cannotUseSkillClasses": [
                             "physical",
-                            "energy"
+                            "energy",
+                            "ninjutsu"
                         ],
-                        "tooltipText": "This character's physical and chakra skills are stunned."
+                        "tooltipText": "This character's physical and chakra skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

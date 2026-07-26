@@ -110,7 +110,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseNonMentalSkills": true,
-                        "tooltipText": "This character's non-mental skills are stunned."
+                        "tooltipText": "This character's non-mental skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

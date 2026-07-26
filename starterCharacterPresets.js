@@ -355,7 +355,8 @@
                                                 "metadata": {
                                                         "harmful": true,
                                                         "randomCostIncrease": 1,
-                                                        "tooltipText": "This character's skills cost 1 additional random chakra."
+                                                        "tooltipText": "This character's skills cost 1 additional random chakra.",
+                                                        "turnDurationAnchor": "source_turn"
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -581,7 +582,7 @@
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [
-                                        "Energy",
+                                        "Ninjutsu",
                                         "Action",
                                         "Instant"
                                 ],
@@ -635,7 +636,8 @@
                                                         "cannotUseSkillClasses": [
                                                                 "physical",
                                                                 "energy",
-                                                                "strategic"
+                                                                "strategic",
+                                                                "ninjutsu"
                                                         ],
                                                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
                                                         "ongoingClass": "control"
@@ -860,7 +862,8 @@
                                                         "cannotUseSkillClasses": [
                                                                 "physical",
                                                                 "energy",
-                                                                "strategic"
+                                                                "strategic",
+                                                                "ninjutsu"
                                                         ],
                                                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
                                                 }
@@ -933,7 +936,8 @@
                                                                         }
                                                                 }
                                                         ],
-                                                        "ongoingClass": "control"
+                                                        "ongoingClass": "control",
+                                                        "turnDurationAnchor": "source_turn"
                                                 }
                                         },
                                         {
@@ -961,7 +965,7 @@
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [
-                                        "Energy",
+                                        "Ninjutsu",
                                         "Instant"
                                 ],
                                 "effects": [
@@ -995,7 +999,8 @@
                                                                         }
                                                                 }
                                                         ],
-                                                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned."
+                                                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
+                                                        "turnDurationAnchor": "source_turn"
                                                 }
                                         }
                                 ]

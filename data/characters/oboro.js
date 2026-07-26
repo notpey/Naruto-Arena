@@ -77,9 +77,11 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "affliction"
+                            "affliction",
+                            "ninjutsu"
                         ],
-                        "tooltipText": "This character's physical, chakra and affliction skills are stunned."
+                        "tooltipText": "This character's physical, chakra and affliction skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -183,7 +185,8 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "damageDebuffFlat"
                         ],
-                        "tooltipText": "This character deals 5 less damage from Exploding Kunai."
+                        "tooltipText": "This character deals 5 less damage from Exploding Kunai.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -220,9 +223,11 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "affliction"
+                            "affliction",
+                            "ninjutsu"
                         ],
-                        "tooltipText": "This character's physical, chakra and affliction skills are stunned."
+                        "tooltipText": "This character's physical, chakra and affliction skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -233,7 +238,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "damageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less damage."
+                        "tooltipText": "This character deals 5 less damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

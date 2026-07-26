@@ -37,7 +37,8 @@ module.exports = {
                             "physical",
                             "strategic"
                         ],
-                        "tooltipText": "This character's physical and strategic skills are stunned."
+                        "tooltipText": "This character's physical and strategic skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -179,7 +180,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "damageDebuffFlat": 10,
-                        "tooltipText": "This character's next damaging skill deals 10 less damage."
+                        "tooltipText": "This character's next damaging skill deals 10 less damage.",
+                        "turnDurationAnchor": "source_turn"
                     },
                     "condition": {
                         "scope": "target",

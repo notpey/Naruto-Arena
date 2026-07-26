@@ -30,7 +30,7 @@
                                 "cooldown": 0,
                                 "classes": [
                                         "Physical",
-                                        "Melee",
+                                        "Taijutsu",
                                         "Instant",
                                         "Affliction"
                                 ],
@@ -78,7 +78,7 @@
                                 "cooldown": 1,
                                 "classes": [
                                         "Physical",
-                                        "Melee",
+                                        "Taijutsu",
                                         "Instant"
                                 ],
                                 "effects": [
@@ -190,7 +190,7 @@
                                 "cooldown": 0,
                                 "classes": [
                                         "Physical",
-                                        "Melee",
+                                        "Taijutsu",
                                         "Instant",
                                         "Affliction"
                                 ],
@@ -435,9 +435,11 @@
                                                         "harmful": true,
                                                         "cannotUseSkillClasses": [
                                                                 "physical",
-                                                                "energy"
+                                                                "energy",
+                                                                "ninjutsu"
                                                         ],
-                                                        "tooltipText": "This character's physical and chakra skills are stunned."
+                                                        "tooltipText": "This character's physical and chakra skills are stunned.",
+                                                        "turnDurationAnchor": "source_turn"
                                                 }
                                         },
                                         {
@@ -578,7 +580,7 @@
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [
-                                        "Energy",
+                                        "Ninjutsu",
                                         "Instant"
                                 ],
                                 "effects": [
@@ -701,7 +703,8 @@
                                                         "cannotUseSkillClasses": [
                                                                 "physical",
                                                                 "energy",
-                                                                "strategic"
+                                                                "strategic",
+                                                                "ninjutsu"
                                                         ],
                                                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
                                                         "ongoingClass": "control"
@@ -717,7 +720,8 @@
                                                         "cannotReduceDamage": true,
                                                         "cannotBecomeInvulnerable": true,
                                                         "tooltipText": "This character cannot reduce damage or become invulnerable.",
-                                                        "ongoingClass": "control"
+                                                        "ongoingClass": "control",
+                                                        "turnDurationAnchor": "source_turn"
                                                 }
                                         },
                                         {
@@ -1209,7 +1213,8 @@
                                                 "metadata": {
                                                         "harmful": true,
                                                         "NonAfflictionDamageDebuff": 20,
-                                                        "tooltipText": "This character deals 20 less non-affliction damage."
+                                                        "tooltipText": "This character deals 20 less non-affliction damage.",
+                                                        "turnDurationAnchor": "source_turn"
                                                 }
                                         },
                                         {

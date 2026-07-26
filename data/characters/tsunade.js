@@ -40,7 +40,8 @@ module.exports = {
                             "mental",
                             "strategic"
                         ],
-                        "tooltipText": "This character's physical, mental, and strategic skills are stunned."
+                        "tooltipText": "This character's physical, mental, and strategic skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

@@ -1716,10 +1716,12 @@ const getTargetClassScopedDamageModifiers = (targetState, skillClasses = []) => 
             metadata?.damageTakenBonusBySkillClass && typeof metadata.damageTakenBonusBySkillClass === 'object'
                 ? metadata.damageTakenBonusBySkillClass
                 : {};
+        let statusBonus = 0;
         Object.entries(classBonusMap).forEach(([className, amount]) => {
             if (!hasSkillClass(skillClasses, className)) return;
-            totals.damageTakenBonusFlat += Number(amount) || 0;
+            statusBonus = Math.max(statusBonus, Number(amount) || 0);
         });
+        totals.damageTakenBonusFlat += statusBonus;
     });
     return totals;
 };

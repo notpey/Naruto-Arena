@@ -181,7 +181,8 @@ module.exports = {
                             }
                         ],
                         "tooltipText": "This character is stunned by Constrict and Bite and will take 30 damage when it ends.",
-                        "ongoingClass": "control"
+                        "ongoingClass": "control",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

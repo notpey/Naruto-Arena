@@ -18,7 +18,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -41,7 +41,8 @@ module.exports = {
                         "randomCostIncrease": 1,
                         "damageTakenBonusBySkillClass": {
                             "physical": 5,
-                            "energy": 5
+                            "energy": 5,
+                            "ninjutsu": 5
                         },
                         "tooltipText": "This character's skills cost 1 additional random chakra and they take 5 additional damage from physical and chakra skills."
                     }
@@ -172,7 +173,8 @@ module.exports = {
                                 }
                             }
                         ],
-                        "tooltipText": "If this character skips using a new skill, they are stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns."
+                        "tooltipText": "If this character skips using a new skill, they are stunned for 1 turn and take 5 additional damage from physical and chakra skills for 2 turns.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

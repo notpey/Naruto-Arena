@@ -77,9 +77,11 @@ module.exports = {
                         "harmful": true,
                         "cannotUseSkillClasses": [
                             "physical",
-                            "energy"
+                            "energy",
+                            "ninjutsu"
                         ],
-                        "tooltipText": "This character's physical and energy skills are stunned by Tree Strangulation."
+                        "tooltipText": "This character's physical and energy skills are stunned by Tree Strangulation.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -94,7 +96,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Tree Strangulation."
+                        "tooltipText": "This character is stunned by Tree Strangulation.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -146,7 +149,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by A World of Trees."
+                        "tooltipText": "This character is stunned by A World of Trees.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -163,7 +167,8 @@ module.exports = {
                         "randomCostIncreaseForSkillClasses": {
                             "physical": 1,
                             "energy": 1,
-                            "strategic": 1
+                            "strategic": 1,
+                            "ninjutsu": 1
                         },
                         "tooltipText": "This character's physical, energy, and strategic skills cost 1 additional random chakra."
                     }

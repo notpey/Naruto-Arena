@@ -44,7 +44,8 @@ module.exports = {
                         "bonusDamageAppliesToSkillIds": [
                             "shizune-poison-mist"
                         ],
-                        "tooltipText": "This character will take 10 additional damage from Poison Mist."
+                        "tooltipText": "This character will take 10 additional damage from Poison Mist.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

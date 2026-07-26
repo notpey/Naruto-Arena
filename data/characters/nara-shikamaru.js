@@ -51,7 +51,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Action",
                 "Instant"
             ],
@@ -105,7 +105,8 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "strategic"
+                            "strategic",
+                            "ninjutsu"
                         ],
                         "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
                         "ongoingClass": "control"

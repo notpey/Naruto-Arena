@@ -52,7 +52,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "randomCostIncrease": 1,
-                        "tooltipText": "This character's skills cost 1 additional random chakra."
+                        "tooltipText": "This character's skills cost 1 additional random chakra.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -135,7 +136,8 @@ module.exports = {
                         "harmful": true,
                         "cannotUseSkills": true,
                         "tooltipText": "This character is stunned by Giant Snake Bind.",
-                        "ongoingClass": "action"
+                        "ongoingClass": "action",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

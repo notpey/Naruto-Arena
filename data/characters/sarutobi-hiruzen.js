@@ -47,7 +47,8 @@ module.exports = {
                                     "afflictionDamage": true
                                 }
                             }
-                        ]
+                        ],
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

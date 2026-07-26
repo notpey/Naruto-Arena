@@ -46,7 +46,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 2,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -66,7 +66,8 @@ module.exports = {
                             "physical",
                             "strategic"
                         ],
-                        "tooltipText": "This character's physical and strategic skills are stunned."
+                        "tooltipText": "This character's physical and strategic skills are stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -97,7 +98,8 @@ module.exports = {
                         "harmful": true,
                         "randomCostIncreaseForSkillClasses": {
                             "physical": 1,
-                            "energy": 1
+                            "energy": 1,
+                            "ninjutsu": 1
                         },
                         "tooltipText": "This character's physical and chakra skills cost 1 additional random chakra from Hidden Mist."
                     }

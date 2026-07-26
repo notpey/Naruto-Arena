@@ -73,7 +73,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Dance of the Clematis."
+                        "tooltipText": "This character is stunned by Dance of the Clematis.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -124,7 +125,8 @@ module.exports = {
                             "physical": 20,
                             "energy": 20
                         },
-                        "tooltipText": "This character deals 20 less physical and chakra damage."
+                        "tooltipText": "This character deals 20 less physical and chakra damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

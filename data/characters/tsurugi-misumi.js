@@ -169,7 +169,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Tighten Joints."
+                        "tooltipText": "This character is stunned by Tighten Joints.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

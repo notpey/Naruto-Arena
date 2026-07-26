@@ -38,7 +38,8 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "energy",
                             "mental",
-                            "strategic"
+                            "strategic",
+                            "ninjutsu"
                         ],
                         "tooltipText": "This character's energy, mental, and strategic skills are stunned."
                     }
@@ -92,7 +93,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [

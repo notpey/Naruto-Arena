@@ -19,7 +19,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant",
                 "Affliction"
             ],
@@ -37,7 +37,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned."
+                        "tooltipText": "This character is stunned.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -66,7 +67,7 @@ module.exports = {
                 "missingStatusId": "kyuubi_naruto_chakra_buff"
             },
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Action",
                 "Instant"
             ],

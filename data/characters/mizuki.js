@@ -180,7 +180,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "NonAfflictionDamageDebuff": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage."
+                        "tooltipText": "This character deals 5 less non-affliction damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

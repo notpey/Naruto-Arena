@@ -91,7 +91,8 @@ module.exports = {
                         "harmful": true,
                         "nonAfflictionDamageTakenBonusFlat": 5,
                         "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills."
+                        "tooltipText": "This character takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

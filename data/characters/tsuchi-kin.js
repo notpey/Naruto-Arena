@@ -18,7 +18,7 @@ module.exports = {
             "cooldown": 0,
             "classes": [
                 "Mental",
-                "Ranged",
+                "Physical",
                 "Instant"
             ],
             "effects": [
@@ -105,7 +105,7 @@ module.exports = {
             "cooldown": 3,
             "classes": [
                 "Physical",
-                "Ranged",
+                "Physical",
                 "Instant"
             ],
             "effects": [
@@ -129,7 +129,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned and cannot use skills."
+                        "tooltipText": "This character is stunned and cannot use skills.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -164,7 +165,7 @@ module.exports = {
             "cooldown": 2,
             "classes": [
                 "Mental",
-                "Ranged",
+                "Physical",
                 "Instant"
             ],
             "effects": [

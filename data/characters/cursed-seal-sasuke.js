@@ -19,7 +19,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -55,7 +55,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 5,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -85,7 +85,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "invulnerableToHarmfulEffects": true,
-                        "tooltipText": "This character is invulnerable to harmful skills."
+                        "tooltipText": "This character is invulnerable to harmful skills.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

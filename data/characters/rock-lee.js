@@ -21,7 +21,7 @@ module.exports = {
             "cooldown": 0,
             "classes": [
                 "Physical",
-                "Melee",
+                "Taijutsu",
                 "Instant",
                 "Affliction"
             ],
@@ -69,7 +69,7 @@ module.exports = {
             "cooldown": 1,
             "classes": [
                 "Physical",
-                "Melee",
+                "Taijutsu",
                 "Instant"
             ],
             "effects": [
@@ -181,7 +181,7 @@ module.exports = {
             "cooldown": 0,
             "classes": [
                 "Physical",
-                "Melee",
+                "Taijutsu",
                 "Instant",
                 "Affliction"
             ],

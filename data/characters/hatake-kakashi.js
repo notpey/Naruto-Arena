@@ -73,7 +73,8 @@ module.exports = {
                         "cannotUseSkillClasses": [
                             "physical",
                             "energy",
-                            "strategic"
+                            "strategic",
+                            "ninjutsu"
                         ],
                         "tooltipText": "This character is stunned and takes 10 additional non-affliction damage.",
                         "bonusDamageFromSourceNonAfflictionFlat": 10,
@@ -113,7 +114,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [

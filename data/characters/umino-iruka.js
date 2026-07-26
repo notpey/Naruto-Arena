@@ -74,7 +74,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -100,7 +100,8 @@ module.exports = {
                             },
                             "tooltipText": "This character takes 25 additional damage from physical and chakra skills from Sealed Bomb Square Release."
                         },
-                        "tooltipText": "If this character uses a new harmful skill, they will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills."
+                        "tooltipText": "If this character uses a new harmful skill, they will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]

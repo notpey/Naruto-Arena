@@ -37,7 +37,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage."
+                        "tooltipText": "This character deals 5 less non-affliction damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -65,7 +66,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -85,7 +86,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage."
+                        "tooltipText": "This character deals 5 less non-affliction damage.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {

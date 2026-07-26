@@ -19,7 +19,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Instant"
             ],
             "effects": [
@@ -31,7 +31,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "invulnerableToHelpfulSkills": true,
-                        "tooltipText": "This character ignores all helpful effects except energy cost changes."
+                        "tooltipText": "This character ignores all helpful effects except energy cost changes.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
@@ -54,7 +55,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 3,
             "classes": [
-                "Energy",
+                "Ninjutsu",
                 "Action",
                 "Instant"
             ],

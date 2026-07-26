@@ -34,7 +34,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "randomCostIncrease": 1,
-                        "tooltipText": "This character's skills cost 1 additional random chakra."
+                        "tooltipText": "This character's skills cost 1 additional random chakra.",
+                        "turnDurationAnchor": "source_turn"
                     },
                     "condition": {
                         "scope": "self",

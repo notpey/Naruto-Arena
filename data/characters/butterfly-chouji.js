@@ -116,7 +116,8 @@ module.exports = {
                         "harmful": true,
                         "cannotUseSkills": true,
                         "tooltipText": "This character is stunned.",
-                        "ongoingClass": "control"
+                        "ongoingClass": "control",
+                        "turnDurationAnchor": "source_turn"
                     }
                 },
                 {
