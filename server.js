@@ -16,6 +16,7 @@ const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
 const gauntlet = require('./gauntlet');
+const { sortCharactersByRosterOrder } = require('./data/rosterOrder');
 let charactersData = require('./data/characters/index.js');
 const charactersBrowserScript = `const characters = ${JSON.stringify(charactersData)};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
@@ -5226,7 +5227,8 @@ const saveCharacters = async (nextCharacters) => {
         },
         { upsert: true }
     );
-    charactersData = nextCharacters;
+    const sortedCharacters = sortCharactersByRosterOrder(nextCharacters);
+    charactersData = sortedCharacters;
     characterCatalog = buildCharacterCatalog();
 };
 

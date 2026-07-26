@@ -1,4 +1,6 @@
-module.exports = [
+const { sortCharactersByRosterOrder } = require('../rosterOrder');
+
+const rawCharacters = [
     require('./uzumaki-naruto'),
     require('./haruno-sakura'),
     require('./uchiha-sasuke'),
@@ -70,3 +72,5 @@ module.exports = [
     require('./young-konan'),
     require('./young-nagato')
 ];
+
+module.exports = sortCharactersByRosterOrder(rawCharacters);
