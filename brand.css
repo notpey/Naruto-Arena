@@ -3559,7 +3559,10 @@ strong, b {
 .ms-sheet h1, .ms-sheet h2, .ms-sheet h3, .ms-sheet h4,
 .st-sheet h1, .st-sheet h2, .st-sheet h3, .st-sheet h4,
 .ca-content-sheet h1, .ca-content-sheet h2, .ca-content-sheet h3,
-.na-legacy-light h1, .na-legacy-light h2, .na-legacy-light h3, .na-legacy-light h4,
+.na-legacy-light h1:not(.aside *):not(.sidebar *):not(.stats-title):not(.ladder-title),
+.na-legacy-light h2:not(.aside *):not(.sidebar *):not(.stats-title):not(.ladder-title),
+.na-legacy-light h3:not(.aside *):not(.sidebar *):not(.stats-title):not(.ladder-title),
+.na-legacy-light h4:not(.aside *):not(.sidebar *):not(.stats-title):not(.ladder-title),
 .mainsection h1, .mainsection h2, .mainsection h3,
 .lb-faq dt, .mn-faq dt {
   color: #110d0a !important; /* Deep black-ink headers */
@@ -3641,11 +3644,20 @@ strong, b {
 }
 
 /* Sidebar Top 10 High-Contrast Readability */
+.aside .ladder-title,
+.aside .stats-title,
+.sidebar .ladder-title,
+.sidebar .stats-title,
+.na-legacy-light .aside h3,
+.na-legacy-light .sidebar h3,
+.na-legacy-light .stats-title,
+.na-legacy-light .ladder-title,
 .ladder-title,
 .stats-title {
   color: #ffae42 !important;
   border-bottom-color: rgba(232, 128, 26, 0.35) !important;
   font-weight: 800 !important;
+  opacity: 1 !important;
 }
 
 .ladder-rank {
