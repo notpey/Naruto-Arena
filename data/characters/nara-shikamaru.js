@@ -12,9 +12,7 @@ module.exports = {
             "cannotBeReflected": true,
             "skillimage": "https://i.imgur.com/s3o4f1D.png",
             "skilldescription": "Nara Shikamaru targets one enemy permanently. During this time 'Shadow-Neck Bind' and 'Shadow Imitation' can be used on them. This skill ignores invulnerability and cannot be countered or reflected.",
-            "energy": [
-                "none"
-            ],
+            "energy": [],
             "target": "single-enemy",
             "targetCondition": {
                 "missingStatusId": "nara_shikamaru_meditate"

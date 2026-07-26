@@ -745,9 +745,7 @@
                                 "name": "Sand Clone",
                                 "skillimage": "https://i.imgur.com/SCRKMIU.png",
                                 "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
-                                "energy": [
-                                        "none"
-                                ],
+                                "energy": [],
                                 "target": "self",
                                 "targetCondition": {
                                         "missingStatusId": "gaara_sand_clone"

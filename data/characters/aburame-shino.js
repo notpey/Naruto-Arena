@@ -56,9 +56,7 @@ module.exports = {
             "name": "Female Bug",
             "skillimage": "https://i.imgur.com/QMWOMRt.png",
             "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
-            "energy": [
-                "none"
-            ],
+            "energy": [],
             "target": "single-enemy",
             "targetCondition": {
                 "missingStatusId": "aburame_shino_female_bug"

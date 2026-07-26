@@ -92,9 +92,7 @@ module.exports = {
             "name": "Dynamic Marking",
             "skillimage": "https://i.imgur.com/kiVGr2x.png",
             "skilldescription": "Inuzuka Kiba targets one enemy, making them unable to reduce damage or become invulnerable for 2 turns. During this time, 'Garouga' and 'Double Headed Wolf' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
-            "energy": [
-                "none"
-            ],
+            "energy": [],
             "target": "single-enemy",
             "targetCondition": {
                 "missingStatusId": "inuzuka_kiba_dynamic_marking"

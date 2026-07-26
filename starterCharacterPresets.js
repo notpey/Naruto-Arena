@@ -101,9 +101,7 @@
                                 "name": "Dynamic Marking",
                                 "skillimage": "https://i.imgur.com/kiVGr2x.png",
                                 "skilldescription": "Inuzuka Kiba targets one enemy, making them unable to reduce damage or become invulnerable for 2 turns. During this time, 'Garouga' and 'Double Headed Wolf' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
-                                "energy": [
-                                        "none"
-                                ],
+                                "energy": [],
                                 "target": "single-enemy",
                                 "targetCondition": {
                                         "missingStatusId": "inuzuka_kiba_dynamic_marking"
@@ -223,9 +221,7 @@
                                 "name": "Female Bug",
                                 "skillimage": "https://i.imgur.com/QMWOMRt.png",
                                 "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
-                                "energy": [
-                                        "none"
-                                ],
+                                "energy": [],
                                 "target": "single-enemy",
                                 "targetCondition": {
                                         "missingStatusId": "aburame_shino_female_bug"
@@ -542,9 +538,7 @@
                                 "cannotBeReflected": true,
                                 "skillimage": "https://i.imgur.com/s3o4f1D.png",
                                 "skilldescription": "Nara Shikamaru targets one enemy permanently. During this time 'Shadow-Neck Bind' and 'Shadow Imitation' can be used on them. This skill ignores invulnerability and cannot be countered or reflected.",
-                                "energy": [
-                                        "none"
-                                ],
+                                "energy": [],
                                 "target": "single-enemy",
                                 "targetCondition": {
                                         "missingStatusId": "nara_shikamaru_meditate"
