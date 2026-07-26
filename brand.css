@@ -3640,5 +3640,52 @@ strong, b {
   color: var(--ca-bone);
 }
 
+/* Sidebar Top 10 High-Contrast Readability */
+.ladder-title,
+.stats-title {
+  color: #ffae42 !important;
+  border-bottom-color: rgba(232, 128, 26, 0.35) !important;
+  font-weight: 800 !important;
+}
+
+.ladder-rank {
+  color: #ffae42 !important;
+  background: rgba(232, 128, 26, 0.2) !important;
+  border-color: rgba(255, 174, 66, 0.45) !important;
+}
+
+.ladder-name,
+.ladder-name a {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.ladder-bar {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ladder-fill {
+  background: linear-gradient(90deg, #d7953a 0%, #f0bd62 60%, #ffae42 100%) !important;
+}
+
+.ladder-score {
+  color: #110d0a !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+}
+
+.stats-list li {
+  color: #f2ede4 !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(232, 128, 26, 0.22) !important;
+  font-weight: 600 !important;
+}
+
+.stats-list li strong {
+  color: #ffae42 !important;
+  font-weight: 800 !important;
+}
+
 
 
