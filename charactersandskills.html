@@ -449,7 +449,8 @@
           a.href = "charactersandskills.html?character=" + encodeURIComponent(charId(c));
           var img = document.createElement("img");
           img.loading = "lazy";
-          img.src = c && c.facePicture ? String(c.facePicture) : "";
+          img.src = c && c.facePicture ? String(c.facePicture) : "deadcharacter-remaster.png?v=2";
+          img.onerror = function () { this.src = "deadcharacter-remaster.png?v=2"; };
           img.alt = c && c.name ? String(c.name) : "Character";
           var name = document.createElement("div");
           name.className = "gi-tile-name";
@@ -511,7 +512,8 @@
         head.className = "gi-char-head";
         var face = document.createElement("img");
         face.className = "gi-char-face";
-        face.src = c.facePicture ? String(c.facePicture) : "";
+        face.src = c.facePicture ? String(c.facePicture) : "deadcharacter-remaster.png?v=2";
+        face.onerror = function () { this.src = "deadcharacter-remaster.png?v=2"; };
         face.alt = c.name ? String(c.name) : "";
         var info = document.createElement("div");
         var titlerow = document.createElement("div");
@@ -578,7 +580,8 @@
             hd.className = "gi-skill-head";
             var img = document.createElement("img");
             img.className = "gi-skill-img";
-            img.src = sk.skillimage ? String(sk.skillimage) : "";
+            img.src = sk.skillimage ? String(sk.skillimage) : "deadcharacter-remaster.png?v=2";
+            img.onerror = function () { this.src = "deadcharacter-remaster.png?v=2"; };
             img.alt = sk.name ? String(sk.name) : "Skill";
             var col = document.createElement("div");
             var labelrow = document.createElement("div");
@@ -679,6 +682,21 @@
       if (searchInput) searchInput.addEventListener("input", function () { renderGrid(searchInput.value); });
 
       route();
+
+      fetch("/api/characters", { credentials: "same-origin" })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.ok && Array.isArray(data.characters) && data.characters.length) {
+            roster = data.characters;
+            if (narutoCount) narutoCount.textContent = String(roster.length).padStart(2, "0");
+            if (detailView && !detailView.hidden) {
+              route();
+            } else {
+              renderGrid(searchInput ? searchInput.value : "");
+            }
+          }
+        })
+        .catch(function () {});
 
       fetch("/api/missions", { credentials: "same-origin" })
         .then(function (res) { return res.json(); })

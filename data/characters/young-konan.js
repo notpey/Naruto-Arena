@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-konan",
     "characterId": "young-konan",
     "name": "Young Konan",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Konan is a sweet girl who is always caring about her teammates more than about herself. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-konan-paper-shuriken-preparation",
             "name": "Paper Shuriken Preparation",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Until 'Winding Paper Shuriken' is used, Young Konan will deal 10 piercing damage instantly to any enemy who uses a new skill on her and during this time, everytime an enemy does so, 'Winding Paper Shuriken' will deal 10 additional damage the next time it's used. This effect stacks. This skill does not stack and will re-apply itself.",
             "energy": [],
             "target": "self",
@@ -39,7 +39,7 @@ module.exports = {
         {
             "id": "young-konan-winding-paper-shuriken",
             "name": "Winding Paper Shuriken",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Konan deals 20 piercing damage to one enemy and makes them ignore healing effects for 1 turn.",
             "energy": [
                 "Bloodline"
@@ -79,7 +79,7 @@ module.exports = {
         {
             "id": "young-konan-origami-rose",
             "name": "Origami Rose",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Konan grants one ally 35 points of permanent destructible defense that stacks. If this skill is already active on them, they will also be unable to be killed for 2 turns.",
             "energy": [
                 "Bloodline"
@@ -112,7 +112,7 @@ module.exports = {
         {
             "id": "young-konan-in-the-shadows",
             "name": "In the Shadows",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Konan invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -140,7 +140,7 @@ module.exports = {
         {
             "id": "young-konan-the-rain-orphans",
             "name": "The Rain Orphans",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
             "energy": [],
             "target": "self",

@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-minato",
     "characterId": "young-minato",
     "name": "Young Minato",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "Minato is a prodigy kid from the Hidden Leaf Village who is capable of fighting other shinobi in higher ranks by having faster and stronger taijutsu skills. He entered the Hidden Leaf's Academy with the dream of earning the villagers' respect and recognition by becoming Hokage. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-minato-speedy-flanker",
             "name": "Speedy Flanker",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Minato deals 25 damage to one enemy. If Young Minato's health is at 40 or below, this skill will also stun the enemy for 1 turn. This skill cannot be countered.",
             "energy": [
                 "Taijutsu"
@@ -49,7 +49,7 @@ module.exports = {
         {
             "id": "young-minato-night-saviour",
             "name": "Night Saviour",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Minato removes all harmful skills from one ally and makes them invulnerable for 1 turn. If 'Highground Watcher' was used the previous turn, this invulnerability will last 2 turns instead.",
             "energy": [
                 "Random"
@@ -84,7 +84,7 @@ module.exports = {
         {
             "id": "young-minato-night-crawler",
             "name": "Night Crawler",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "One random enemy will have 'Speedy Flanker' applied on them. One random ally will have 'Night Saviour' applied on them. These skills' conditional effects won't trigger this way. This skill cannot be countered or reflected.",
             "energy": [
                 "Taijutsu"
@@ -126,7 +126,7 @@ module.exports = {
         {
             "id": "young-minato-highground-watcher",
             "name": "Highground Watcher",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Minato invulnerable for 1 turn.",
             "energy": [
                 "Random"

@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-nagato",
     "characterId": "young-nagato",
     "name": "Young Nagato",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Nagato is a quiet boy who is not only afraid of the world, but also afraid of himself. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-nagato-wind-release-gale-palm",
             "name": "Wind Release: Gale Palm",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill can be used on an enemy or on an ally. If used on an enemy, they will take 20 damage and then the invulnerability effects of their new skills will last 1 less turn for 2 turns. If used on an ally, that character will deal 10 additional damage with physical and energy skills for 2 turns.",
             "energy": [
                 "Ninjutsu"
@@ -44,7 +44,7 @@ module.exports = {
         {
             "id": "young-nagato-rinnegan-domination",
             "name": "Rinnegan Domination",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Nagato deals 20 piercing damage to one enemy. This skill ignores invulnerability and cannot be countered or reflected.",
             "energy": [
                 "Random"
@@ -75,7 +75,7 @@ module.exports = {
         {
             "id": "young-nagato-minor-almighty-push",
             "name": "Minor Almighty Push",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Nagato grants his team 10 points of unpierceable damage reduction for 1 turn. This effect is applied again for every 20 health Young Nagato has lost.",
             "energy": [
                 "Genjutsu"
@@ -107,7 +107,7 @@ module.exports = {
         {
             "id": "young-nagato-in-the-shadows",
             "name": "In the Shadows",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Nagato invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -135,7 +135,7 @@ module.exports = {
         {
             "id": "young-nagato-the-rain-orphans",
             "name": "The Rain Orphans",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
             "energy": [],
             "target": "self",

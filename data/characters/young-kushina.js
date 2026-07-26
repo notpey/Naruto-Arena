@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-kushina",
     "characterId": "young-kushina",
     "name": "Young Kushina",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "Kushina is a kunoichi from the Hidden Leaf Village originated from the Hidden Eddy Village's Uzumaki Clan. Due to her special origins, Kushina has a red colored hair that constantly puts her into trouble. ORIGINAL DESIGN: TheDarkLegend",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-kushina-red-hot-habanero-rage",
             "name": "Red-Hot Habanero Rage",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Kushina gains 1 random energy. For 4 turns, Young Kushina gains 20 points of destructible defense and ignores enemy stun effects.",
             "energy": [
                 "Random"
@@ -45,7 +45,7 @@ module.exports = {
         {
             "id": "young-kushina-fierce-punch",
             "name": "Fierce Punch",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Kushina destroys all of one enemy's destructible defense and then deals 20 damage to them. The following turn, 'Dropping Kick' will deal 20 additional damage and will first destroy its target's destructible defense.",
             "energy": [
                 "Taijutsu"
@@ -81,7 +81,7 @@ module.exports = {
         {
             "id": "young-kushina-dropping-kick",
             "name": "Dropping Kick",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Kushina deals 10 damage to one enemy and stuns their non-strategic skills for 1 turn. The following turn, 'Fierce Punch' will deal 10 additional damage and will stun its target's non-strategic skills for 1 turn.",
             "energy": [
                 "Taijutsu"
@@ -132,7 +132,7 @@ module.exports = {
         {
             "id": "young-kushina-skilled-landing",
             "name": "Skilled Landing",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Kushina invulnerable for 1 turn.",
             "energy": [
                 "Random"

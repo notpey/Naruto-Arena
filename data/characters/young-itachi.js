@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-itachi",
     "characterId": "young-itachi",
     "name": "Young Itachi",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "The first child born to Uchiha Mikoto and Fugaku, Itachi's childhood was marked with violence. The death and destruction he experienced at such a young age traumatised Itachi and made him a pacifist, leading to him training non-stop to achieve his dream of becoming a ninja among ninja in order to erase fighting from the world. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-itachi-summoning-crow",
             "name": "Summoning: Crow",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Itachi becomes unable to be killed for 1 turn and grants 1 crow stack to all enemies. For the rest of the game, everytime they use a new harmful skill, they will gain 1 crow stack. This skill can be used while active to make Young Itachi unable to be killed for 1 turn. This skill cannot be removed.",
             "energy": [],
             "target": "self",
@@ -48,7 +48,7 @@ module.exports = {
         {
             "id": "young-itachi-demonic-illusion-mirage-crow",
             "name": "Demonic Illusion: Mirage Crow",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "For 1 turn, Young Itachi reduces all enemies' non-affliction damage by 0, increased by 5 for each crow stack they have.",
             "energy": [
                 "Genjutsu"
@@ -78,7 +78,7 @@ module.exports = {
         {
             "id": "young-itachi-illusion-walking-unseen-step",
             "name": "Illusion Walking: Unseen Step",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Itachi deals 0 piercing damage to one enemy, increased by 10 for each crow stack they have.",
             "energy": [
                 "Taijutsu"
@@ -107,7 +107,7 @@ module.exports = {
         {
             "id": "young-itachi-expert-retreat",
             "name": "Expert Retreat",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Itachi invulnerable for 1 turn.",
             "energy": [
                 "Random"

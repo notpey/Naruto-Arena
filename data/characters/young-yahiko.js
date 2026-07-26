@@ -2,14 +2,14 @@ module.exports = {
     "id": "young-yahiko",
     "characterId": "young-yahiko",
     "name": "Young Yahiko",
-    "facePicture": "https://i.imgur.com/8vJ128J.png",
+    "facePicture": "deadcharacter-remaster.png?v=2",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Yahiko is a stoic boy who leads his team in the fight for the survival during the war. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [
         {
             "id": "young-yahiko-water-release-wild-water-wave",
             "name": "Water Release: Wild Water Wave",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Yahiko deals 5 damage to one enemy for 3 turns. During this time, if 'Lateral Kick' or 'Descending Fist' are used on this enemy, they will deal 5 additional damage and will also make this enemy deal 5 less non-affliction damage for 3 turns. This effect stacks.",
             "energy": [
                 "Ninjutsu"
@@ -41,7 +41,7 @@ module.exports = {
         {
             "id": "young-yahiko-lateral-kick",
             "name": "Lateral Kick",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Yahiko deals 20 damage to one enemy. For 1 turn, if this enemy uses a new physical or strategic skill, they will take 15 damage.",
             "energy": [
                 "Taijutsu"
@@ -77,7 +77,7 @@ module.exports = {
         {
             "id": "young-yahiko-descending-fist",
             "name": "Descending Fist",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Young Yahiko deals 25 damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
             "energy": [
                 "Taijutsu"
@@ -111,7 +111,7 @@ module.exports = {
         {
             "id": "young-yahiko-in-the-shadows",
             "name": "In the Shadows",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "This skill makes Young Yahiko invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -139,7 +139,7 @@ module.exports = {
         {
             "id": "young-yahiko-the-rain-orphans",
             "name": "The Rain Orphans",
-            "skillimage": "https://i.imgur.com/8vJ128J.png",
+            "skillimage": "deadcharacter-remaster.png?v=2",
             "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
             "energy": [],
             "target": "self",

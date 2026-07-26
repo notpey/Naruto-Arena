@@ -5230,6 +5230,11 @@ const saveCharacters = async (nextCharacters) => {
     const sortedCharacters = sortCharactersByRosterOrder(nextCharacters);
     charactersData = sortedCharacters;
     characterCatalog = buildCharacterCatalog();
+    try {
+        fs.writeFileSync(path.join(__dirname, 'characters.js'), serializeCharactersDataFile(sortedCharacters), 'utf-8');
+    } catch (diskErr) {
+        console.warn('Could not write updated characters.js to disk:', diskErr);
+    }
 };
 
 // Admin edits made through the Character Editor (including images) are stored in

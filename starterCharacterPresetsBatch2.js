@@ -1267,14 +1267,14 @@
                 "id": "teuchi",
                 "characterId": "teuchi",
                 "name": "Teuchi",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "Teuchi is a citizen of the Hidden Leaf Village and the owner of Ramen Ichiraku. As a teenager, Teuchi devoted his life to making ramen, what undoubtedly makes him the most important character from the Naruto franchise. ORIGINAL DESIGN: Alexandre",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "teuchi-stick-throw",
                                 "name": "Stick Throw",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Teuchi deals 20 damage to one enemy.",
                                 "energy": [
                                         "Random"
@@ -1297,7 +1297,7 @@
                         {
                                 "id": "teuchi-ramen",
                                 "name": "Ramen",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Teuchi heals his allies for 15 health and gains 20 points of destructible defense for 1 turn.",
                                 "energy": [
                                         "Random",
@@ -1332,7 +1332,7 @@
                         {
                                 "id": "teuchi-ramen-ichiraku-open",
                                 "name": "Ramen Ichiraku: Open",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Teuchi targets all his allies. For the rest of the game, everytime an ally uses a new skill, 'Ramen' will heal 5 additional health permanently. This skill stacks and ends if Teuchi dies.",
                                 "energy": [],
                                 "target": "all-allies",
@@ -1360,7 +1360,7 @@
                         {
                                 "id": "teuchi-ramen-ichiraku-closed",
                                 "name": "Ramen Ichiraku: Closed",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Teuchi invulnerable for 1 turn, heals him for 35 health and ends 'Ramen Ichiraku: Open' on his team.",
                                 "energy": [
                                         "Random"
@@ -1401,14 +1401,14 @@
                 "id": "young-minato",
                 "characterId": "young-minato",
                 "name": "Young Minato",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "Minato is a prodigy kid from the Hidden Leaf Village who is capable of fighting other shinobi in higher ranks by having faster and stronger taijutsu skills. He entered the Hidden Leaf's Academy with the dream of earning the villagers' respect and recognition by becoming Hokage. ORIGINAL DESIGN: Liann",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-minato-speedy-flanker",
                                 "name": "Speedy Flanker",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Minato deals 25 damage to one enemy. If Young Minato's health is at 40 or below, this skill will also stun the enemy for 1 turn. This skill cannot be countered.",
                                 "energy": [
                                         "Taijutsu"
@@ -1448,7 +1448,7 @@
                         {
                                 "id": "young-minato-night-saviour",
                                 "name": "Night Saviour",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Minato removes all harmful skills from one ally and makes them invulnerable for 1 turn. If 'Highground Watcher' was used the previous turn, this invulnerability will last 2 turns instead.",
                                 "energy": [
                                         "Random"
@@ -1483,7 +1483,7 @@
                         {
                                 "id": "young-minato-night-crawler",
                                 "name": "Night Crawler",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "One random enemy will have 'Speedy Flanker' applied on them. One random ally will have 'Night Saviour' applied on them. These skills' conditional effects won't trigger this way. This skill cannot be countered or reflected.",
                                 "energy": [
                                         "Taijutsu"
@@ -1525,7 +1525,7 @@
                         {
                                 "id": "young-minato-highground-watcher",
                                 "name": "Highground Watcher",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Minato invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -1566,14 +1566,14 @@
                 "id": "young-kushina",
                 "characterId": "young-kushina",
                 "name": "Young Kushina",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "Kushina is a kunoichi from the Hidden Leaf Village originated from the Hidden Eddy Village's Uzumaki Clan. Due to her special origins, Kushina has a red colored hair that constantly puts her into trouble. ORIGINAL DESIGN: TheDarkLegend",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-kushina-red-hot-habanero-rage",
                                 "name": "Red-Hot Habanero Rage",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Kushina gains 1 random energy. For 4 turns, Young Kushina gains 20 points of destructible defense and ignores enemy stun effects.",
                                 "energy": [
                                         "Random"
@@ -1609,7 +1609,7 @@
                         {
                                 "id": "young-kushina-fierce-punch",
                                 "name": "Fierce Punch",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Kushina destroys all of one enemy's destructible defense and then deals 20 damage to them. The following turn, 'Dropping Kick' will deal 20 additional damage and will first destroy its target's destructible defense.",
                                 "energy": [
                                         "Taijutsu"
@@ -1645,7 +1645,7 @@
                         {
                                 "id": "young-kushina-dropping-kick",
                                 "name": "Dropping Kick",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Kushina deals 10 damage to one enemy and stuns their non-strategic skills for 1 turn. The following turn, 'Fierce Punch' will deal 10 additional damage and will stun its target's non-strategic skills for 1 turn.",
                                 "energy": [
                                         "Taijutsu"
@@ -1696,7 +1696,7 @@
                         {
                                 "id": "young-kushina-skilled-landing",
                                 "name": "Skilled Landing",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Kushina invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -1727,14 +1727,14 @@
                 "id": "young-itachi",
                 "characterId": "young-itachi",
                 "name": "Young Itachi",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "The first child born to Uchiha Mikoto and Fugaku, Itachi's childhood was marked with violence. The death and destruction he experienced at such a young age traumatised Itachi and made him a pacifist, leading to him training non-stop to achieve his dream of becoming a ninja among ninja in order to erase fighting from the world. ORIGINAL DESIGN: Liann",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-itachi-summoning-crow",
                                 "name": "Summoning: Crow",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Itachi becomes unable to be killed for 1 turn and grants 1 crow stack to all enemies. For the rest of the game, everytime they use a new harmful skill, they will gain 1 crow stack. This skill can be used while active to make Young Itachi unable to be killed for 1 turn. This skill cannot be removed.",
                                 "energy": [],
                                 "target": "self",
@@ -1773,7 +1773,7 @@
                         {
                                 "id": "young-itachi-demonic-illusion-mirage-crow",
                                 "name": "Demonic Illusion: Mirage Crow",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "For 1 turn, Young Itachi reduces all enemies' non-affliction damage by 0, increased by 5 for each crow stack they have.",
                                 "energy": [
                                         "Genjutsu"
@@ -1803,7 +1803,7 @@
                         {
                                 "id": "young-itachi-illusion-walking-unseen-step",
                                 "name": "Illusion Walking: Unseen Step",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Itachi deals 0 piercing damage to one enemy, increased by 10 for each crow stack they have.",
                                 "energy": [
                                         "Taijutsu"
@@ -1832,7 +1832,7 @@
                         {
                                 "id": "young-itachi-expert-retreat",
                                 "name": "Expert Retreat",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Itachi invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -1863,14 +1863,14 @@
                 "id": "young-yahiko",
                 "characterId": "young-yahiko",
                 "name": "Young Yahiko",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Yahiko is a stoic boy who leads his team in the fight for the survival during the war. ORIGINAL DESIGN: Liann",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-yahiko-water-release-wild-water-wave",
                                 "name": "Water Release: Wild Water Wave",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Yahiko deals 5 damage to one enemy for 3 turns. During this time, if 'Lateral Kick' or 'Descending Fist' are used on this enemy, they will deal 5 additional damage and will also make this enemy deal 5 less non-affliction damage for 3 turns. This effect stacks.",
                                 "energy": [
                                         "Ninjutsu"
@@ -1902,7 +1902,7 @@
                         {
                                 "id": "young-yahiko-lateral-kick",
                                 "name": "Lateral Kick",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Yahiko deals 20 damage to one enemy. For 1 turn, if this enemy uses a new physical or strategic skill, they will take 15 damage.",
                                 "energy": [
                                         "Taijutsu"
@@ -1938,7 +1938,7 @@
                         {
                                 "id": "young-yahiko-descending-fist",
                                 "name": "Descending Fist",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Yahiko deals 25 damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
                                 "energy": [
                                         "Taijutsu"
@@ -1972,7 +1972,7 @@
                         {
                                 "id": "young-yahiko-in-the-shadows",
                                 "name": "In the Shadows",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Yahiko invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -2000,7 +2000,7 @@
                         {
                                 "id": "young-yahiko-the-rain-orphans",
                                 "name": "The Rain Orphans",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
                                 "energy": [],
                                 "target": "self",
@@ -2030,14 +2030,14 @@
                 "id": "young-konan",
                 "characterId": "young-konan",
                 "name": "Young Konan",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Konan is a sweet girl who is always caring about her teammates more than about herself. ORIGINAL DESIGN: Liann",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-konan-paper-shuriken-preparation",
                                 "name": "Paper Shuriken Preparation",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Until 'Winding Paper Shuriken' is used, Young Konan will deal 10 piercing damage instantly to any enemy who uses a new skill on her and during this time, everytime an enemy does so, 'Winding Paper Shuriken' will deal 10 additional damage the next time it's used. This effect stacks. This skill does not stack and will re-apply itself.",
                                 "energy": [],
                                 "target": "self",
@@ -2067,7 +2067,7 @@
                         {
                                 "id": "young-konan-winding-paper-shuriken",
                                 "name": "Winding Paper Shuriken",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Konan deals 20 piercing damage to one enemy and makes them ignore healing effects for 1 turn.",
                                 "energy": [
                                         "Bloodline"
@@ -2107,7 +2107,7 @@
                         {
                                 "id": "young-konan-origami-rose",
                                 "name": "Origami Rose",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Konan grants one ally 35 points of permanent destructible defense that stacks. If this skill is already active on them, they will also be unable to be killed for 2 turns.",
                                 "energy": [
                                         "Bloodline"
@@ -2140,7 +2140,7 @@
                         {
                                 "id": "young-konan-in-the-shadows",
                                 "name": "In the Shadows",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Konan invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -2168,7 +2168,7 @@
                         {
                                 "id": "young-konan-the-rain-orphans",
                                 "name": "The Rain Orphans",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
                                 "energy": [],
                                 "target": "self",
@@ -2198,14 +2198,14 @@
                 "id": "young-nagato",
                 "characterId": "young-nagato",
                 "name": "Young Nagato",
-                "facePicture": "https://i.imgur.com/8vJ128J.png",
+                "facePicture": "deadcharacter-remaster.png?v=2",
                 "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Nagato is a quiet boy who is not only afraid of the world, but also afraid of himself. ORIGINAL DESIGN: Liann",
                 "requiredMissionId": null,
                 "skills": [
                         {
                                 "id": "young-nagato-wind-release-gale-palm",
                                 "name": "Wind Release: Gale Palm",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill can be used on an enemy or on an ally. If used on an enemy, they will take 20 damage and then the invulnerability effects of their new skills will last 1 less turn for 2 turns. If used on an ally, that character will deal 10 additional damage with physical and energy skills for 2 turns.",
                                 "energy": [
                                         "Ninjutsu"
@@ -2240,7 +2240,7 @@
                         {
                                 "id": "young-nagato-rinnegan-domination",
                                 "name": "Rinnegan Domination",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Nagato deals 20 piercing damage to one enemy. This skill ignores invulnerability and cannot be countered or reflected.",
                                 "energy": [
                                         "Random"
@@ -2271,7 +2271,7 @@
                         {
                                 "id": "young-nagato-minor-almighty-push",
                                 "name": "Minor Almighty Push",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Young Nagato grants his team 10 points of unpierceable damage reduction for 1 turn. This effect is applied again for every 20 health Young Nagato has lost.",
                                 "energy": [
                                         "Genjutsu"
@@ -2303,7 +2303,7 @@
                         {
                                 "id": "young-nagato-in-the-shadows",
                                 "name": "In the Shadows",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "This skill makes Young Nagato invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
@@ -2331,7 +2331,7 @@
                         {
                                 "id": "young-nagato-the-rain-orphans",
                                 "name": "The Rain Orphans",
-                                "skillimage": "https://i.imgur.com/8vJ128J.png",
+                                "skillimage": "deadcharacter-remaster.png?v=2",
                                 "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
                                 "energy": [],
                                 "target": "self",
