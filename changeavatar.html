@@ -398,7 +398,7 @@
 
     .avatar-save {
       width: fit-content;
-      min-width: 132px;
+      min-width: 140px;
       height: 40px;
       border: 0;
       clip-path: var(--clip-slash-sm);
@@ -407,8 +407,10 @@
       font: inherit;
       font-weight: 700;
       cursor: pointer;
-      padding: 0 18px;
+      padding: 0 20px;
       box-shadow: 0 4px 14px rgba(232, 128, 26, 0.25);
+      margin: 12px auto 0;
+      display: block;
     }
 
     .avatar-hint {
@@ -1019,15 +1021,14 @@
 
         <!-- Mode tabs -->
         <div class="avatar-mode-tabs">
-          <button class="avatar-mode-tab active" type="button" id="avatar-tab-upload">⬆ Upload File</button>
-          <button class="avatar-mode-tab" type="button" id="avatar-tab-url">🔗 URL</button>
+          <button class="avatar-mode-tab active" type="button" id="avatar-tab-upload">Upload File</button>
+          <button class="avatar-mode-tab" type="button" id="avatar-tab-url">URL</button>
         </div>
 
         <!-- FILE UPLOAD panel -->
         <div id="avatar-upload-panel">
           <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/gif,image/webp" />
           <div class="avatar-drop-zone" id="avatar-drop-zone" role="button" tabindex="0" aria-label="Click or drag a file to upload an avatar">
-            <span class="avatar-drop-zone-icon" aria-hidden="true">🖼️</span>
             <span class="avatar-drop-zone-label">Click or drag & drop an image</span>
             <span class="avatar-drop-zone-sub">PNG · JPEG · GIF · WebP · Max 2 MB<br>Will be auto-resized to 100×100 px</span>
           </div>
@@ -1040,7 +1041,7 @@
               <div class="avatar-resize-title">Resized Preview</div>
               <div class="avatar-resize-meta" id="avatar-resize-meta"></div>
             </div>
-            <button class="avatar-resize-discard" type="button" id="avatar-resize-discard">✕ Discard</button>
+            <button class="avatar-resize-discard" type="button" id="avatar-resize-discard">Discard</button>
           </div>
           <button class="avatar-save" type="button" id="avatar-upload-submit" disabled>Save Avatar</button>
         </div>
@@ -1062,28 +1063,24 @@
         <!-- Constraint info -->
         <div class="avatar-constraints">
           <div class="avatar-constraint">
-            <span class="avatar-constraint-icon">📐</span>
             <div>
               <div class="avatar-constraint-label">Output Size</div>
               <div class="avatar-constraint-value">100 × 100 px</div>
             </div>
           </div>
           <div class="avatar-constraint">
-            <span class="avatar-constraint-icon">📦</span>
             <div>
               <div class="avatar-constraint-label">Max File Size</div>
               <div class="avatar-constraint-value">2 MB</div>
             </div>
           </div>
           <div class="avatar-constraint">
-            <span class="avatar-constraint-icon">🎨</span>
             <div>
               <div class="avatar-constraint-label">Formats</div>
               <div class="avatar-constraint-value">PNG, JPEG, GIF, WebP</div>
             </div>
           </div>
           <div class="avatar-constraint">
-            <span class="avatar-constraint-icon">✂️</span>
             <div>
               <div class="avatar-constraint-label">Resize</div>
               <div class="avatar-constraint-value">Auto-cropped to fit</div>
