@@ -80,7 +80,8 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 15 damage each turn from Kyuubi Rage."
+                        "tooltipText": "This character takes 15 damage each turn from Kyuubi Rage.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -93,7 +94,8 @@ module.exports = {
                         "skillDamageBonuses": {
                             "kyuubi-naruto-kyuubi-rasengan": 10
                         },
-                        "tooltipText": "Kyuubi Rasengan deals 10 additional damage. Kyuubi Chakra cannot be used."
+                        "tooltipText": "Kyuubi Rasengan deals 10 additional damage. Kyuubi Chakra cannot be used.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

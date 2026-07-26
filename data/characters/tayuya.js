@@ -33,7 +33,8 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 15 damage each turn from Summoning: Doki."
+                        "tooltipText": "This character takes 15 damage each turn from Summoning: Doki.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -44,7 +45,8 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "damageReductionFlat": 15,
-                        "tooltipText": "Tayuya has 15 damage reduction and Demonic Flute: Phantom Wave will also remove 1 random chakra."
+                        "tooltipText": "Tayuya has 15 damage reduction and Demonic Flute: Phantom Wave will also remove 1 random chakra.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

@@ -82,7 +82,8 @@ module.exports = {
                         "tooltipText": "Kiba has 15 damage reduction, Garouga deals 10 additional damage, and Garouga costs 1 Taijutsu and 1 random chakra.",
                         "skillDamageBonuses": {
                             "inuzuka-kiba-garouga": 10
-                        }
+                        },
+                        "ongoingClass": "action"
                     }
                 }
             ]

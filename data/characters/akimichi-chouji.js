@@ -68,7 +68,8 @@ module.exports = {
                     "metadata": {
                         "invulnerable": true,
                         "tooltipText": "Chouji is invulnerable and ignores healing effects.",
-                        "healReceivedMultiplier": 0
+                        "healReceivedMultiplier": 0,
+                        "ongoingClass": "action"
                     }
                 }
             ]

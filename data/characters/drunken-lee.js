@@ -105,7 +105,8 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 15 damage each turn from Drunken Fist."
+                        "tooltipText": "This character takes 15 damage each turn from Drunken Fist.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -119,7 +120,8 @@ module.exports = {
                         "skillDamageBonuses": {
                             "drunken-lee-unpredictable-assault": 5
                         },
-                        "tooltipText": "This character ignores enemy stun effects. Unpredictable Assault deals 5 additional damage."
+                        "tooltipText": "This character ignores enemy stun effects. Unpredictable Assault deals 5 additional damage.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

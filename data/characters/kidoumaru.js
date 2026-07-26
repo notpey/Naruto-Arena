@@ -72,7 +72,8 @@ module.exports = {
                         "helpful": true,
                         "damageReductionFlat": 10,
                         "usedSkillCooldownPenalty": 1,
-                        "tooltipText": "This character has 10 points of damage reduction. All enemies who use a new skill will have the cooldown of that skill increased by 1."
+                        "tooltipText": "This character has 10 points of damage reduction. All enemies who use a new skill will have the cooldown of that skill increased by 1.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

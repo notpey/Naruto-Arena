@@ -134,7 +134,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Giant Snake Bind."
+                        "tooltipText": "This character is stunned by Giant Snake Bind.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -162,7 +163,8 @@ module.exports = {
                                 "energy": []
                             }
                         },
-                        "tooltipText": "Giant Snake Bind may be used for no cost to deal 25 damage."
+                        "tooltipText": "Giant Snake Bind may be used for no cost to deal 25 damage.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

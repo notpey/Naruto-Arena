@@ -128,7 +128,8 @@ module.exports = {
                         "harmful": true,
                         "cannotUseSkills": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "This character is stunned by Demonic Illusion: Tree Binding Death."
+                        "tooltipText": "This character is stunned by Demonic Illusion: Tree Binding Death.",
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -141,7 +142,8 @@ module.exports = {
                         "skillReplacements": {
                             "yuhi-kurenai-demonic-illusion-tree-binding-death": "yuhi-kurenai-tree-binding-death-attack"
                         },
-                        "tooltipText": "Demonic Illusion: Tree Binding Death is replaced by Tree Binding Death Attack."
+                        "tooltipText": "Demonic Illusion: Tree Binding Death is replaced by Tree Binding Death Attack.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

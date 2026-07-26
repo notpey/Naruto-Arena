@@ -76,7 +76,8 @@ module.exports = {
                             "strategic"
                         ],
                         "tooltipText": "This character is stunned and takes 10 additional non-affliction damage.",
-                        "bonusDamageFromSourceNonAfflictionFlat": 10
+                        "bonusDamageFromSourceNonAfflictionFlat": 10,
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -93,7 +94,8 @@ module.exports = {
                                 ]
                             }
                         },
-                        "tooltipText": "Raikiri costs 1 Ninjutsu this turn."
+                        "tooltipText": "Raikiri costs 1 Ninjutsu this turn.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

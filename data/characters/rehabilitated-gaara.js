@@ -50,7 +50,8 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "destructibleDefensePoints": 35,
-                        "tooltipText": "Rehabilitated Gaara has 35 points of permanent destructible defense from Sand Mastery."
+                        "tooltipText": "Rehabilitated Gaara has 35 points of permanent destructible defense from Sand Mastery.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

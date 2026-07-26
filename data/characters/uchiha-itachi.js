@@ -192,7 +192,8 @@ module.exports = {
                         "harmful": true,
                         "turnDurationAnchor": "source_turn",
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Tsukuyomi."
+                        "tooltipText": "This character is stunned by Tsukuyomi.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

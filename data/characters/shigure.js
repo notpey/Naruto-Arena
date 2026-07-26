@@ -104,7 +104,8 @@ module.exports = {
                         "turnEndDamage": 10,
                         "turnEndTrigger": "source_turn",
                         "ignoreTargetDamageReduction": true,
-                        "tooltipText": "This character takes 10 piercing damage each turn from Sprinkling Needles and can be targeted by Needle Barrage."
+                        "tooltipText": "This character takes 10 piercing damage each turn from Sprinkling Needles and can be targeted by Needle Barrage.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -114,7 +115,8 @@ module.exports = {
                     "scope": "all-enemy",
                     "metadata": {
                         "harmful": true,
-                        "tooltipText": "This character is caught in Needle Field."
+                        "tooltipText": "This character is caught in Needle Field.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

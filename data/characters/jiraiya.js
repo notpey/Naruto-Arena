@@ -201,7 +201,8 @@ module.exports = {
                         "afflictionDamage": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 15 affliction damage each turn from Toad Oil Flame Bullet."
+                        "tooltipText": "This character takes 15 affliction damage each turn from Toad Oil Flame Bullet.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

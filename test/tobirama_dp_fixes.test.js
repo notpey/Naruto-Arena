@@ -118,3 +118,36 @@ test('Edo Tensei Tobirama Water Colliding Wave expires and deals no damage after
     );
     assert.strictEqual(remainingStatuses.length, 0, 'Water Colliding Wave status should be cleaned up on dead source');
 });
+
+test('All Action and Control skills across character roster specify ongoingClass metadata for multi-turn statuses', () => {
+    const missingOngoingClass = [];
+
+    characters.forEach((char) => {
+        if (!char || !Array.isArray(char.skills)) return;
+        char.skills.forEach((skill) => {
+            const classes = (Array.isArray(skill.classes) ? skill.classes : []).map((c) => String(c).trim().toLowerCase());
+            const isAction = classes.includes('action');
+            const isControl = classes.includes('control');
+            if (!isAction && !isControl) return;
+
+            const expectedClass = isAction ? 'action' : 'control';
+            (Array.isArray(skill.effects) ? skill.effects : []).forEach((effect) => {
+                if (effect.type === 'apply_status' && effect.metadata) {
+                    const duration = Number(effect.duration) || 0;
+                    const isInfinite = Boolean(effect.metadata.infiniteDuration);
+                    if ((duration >= 1 || isInfinite) && effect.metadata.ongoingClass !== expectedClass) {
+                        missingOngoingClass.push(
+                            `${char.id}:${skill.id}:${effect.statusId} (Expected ongoingClass: "${expectedClass}", got "${effect.metadata.ongoingClass}")`
+                        );
+                    }
+                }
+            });
+        });
+    });
+
+    assert.deepEqual(
+        missingOngoingClass,
+        [],
+        `Found ${missingOngoingClass.length} Action/Control skill statuses missing valid ongoingClass metadata: \n${missingOngoingClass.join('\n')}`
+    );
+});

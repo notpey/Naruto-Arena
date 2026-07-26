@@ -90,7 +90,8 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character loses 15 health each turn to Draining Assault."
+                        "tooltipText": "This character loses 15 health each turn to Draining Assault.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -101,7 +102,8 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "turnEndHealFlat": 15,
-                        "tooltipText": "Akadou Yoroi heals 15 health each turn from Draining Assault."
+                        "tooltipText": "Akadou Yoroi heals 15 health each turn from Draining Assault.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -112,7 +114,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage."
+                        "tooltipText": "This character deals 5 less non-affliction damage.",
+                        "ongoingClass": "action"
                     }
                 },
                 {
@@ -123,7 +126,8 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "damageBonusFlat": 5,
-                        "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills."
+                        "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills.",
+                        "ongoingClass": "action"
                     }
                 },
                 {

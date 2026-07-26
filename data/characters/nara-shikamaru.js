@@ -107,7 +107,8 @@ module.exports = {
                             "energy",
                             "strategic"
                         ],
-                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
+                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
+                        "ongoingClass": "control"
                     }
                 },
                 {

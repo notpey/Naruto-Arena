@@ -104,7 +104,8 @@ module.exports = {
                                     ]
                                 }
                             }
-                        ]
+                        ],
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -116,7 +117,8 @@ module.exports = {
                         "skillReplacements": {
                             "yamanaka-ino-mind-body-switch": "yamanaka-ino-art-of-the-valentine"
                         },
-                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine."
+                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

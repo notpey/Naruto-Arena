@@ -91,7 +91,8 @@
                                                         "tooltipText": "Kiba has 15 damage reduction, Garouga deals 10 additional damage, and Garouga costs 1 Taijutsu and 1 random chakra.",
                                                         "skillDamageBonuses": {
                                                                 "inuzuka-kiba-garouga": 10
-                                                        }
+                                                        },
+                                                        "ongoingClass": "action"
                                                 }
                                         }
                                 ]
@@ -611,7 +612,7 @@
                                 "id": "nara-shikamaru-shadow-imitation",
                                 "name": "Shadow Imitation",
                                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
-                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
+                                "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
                                 "energy": [
                                         "Random",
                                         "Random"
@@ -636,7 +637,8 @@
                                                                 "energy",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
+                                                        "ongoingClass": "control"
                                                 }
                                         },
                                         {
@@ -749,7 +751,8 @@
                                                 "metadata": {
                                                         "invulnerable": true,
                                                         "tooltipText": "Chouji is invulnerable and ignores healing effects.",
-                                                        "healReceivedMultiplier": 0
+                                                        "healReceivedMultiplier": 0,
+                                                        "ongoingClass": "action"
                                                 }
                                         }
                                 ]
@@ -929,7 +932,8 @@
                                                                                 ]
                                                                         }
                                                                 }
-                                                        ]
+                                                        ],
+                                                        "ongoingClass": "control"
                                                 }
                                         },
                                         {
@@ -941,7 +945,8 @@
                                                         "skillReplacements": {
                                                                 "yamanaka-ino-mind-body-switch": "yamanaka-ino-art-of-the-valentine"
                                                         },
-                                                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine."
+                                                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine.",
+                                                        "ongoingClass": "control"
                                                 }
                                         }
                                 ]

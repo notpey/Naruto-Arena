@@ -34,7 +34,8 @@ module.exports = {
                             "energy",
                             "strategic"
                         ],
-                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
+                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -46,7 +47,8 @@ module.exports = {
                         "harmful": true,
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable."
+                        "tooltipText": "This character cannot reduce damage or become invulnerable.",
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -59,7 +61,8 @@ module.exports = {
                             "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
                         },
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Sand Coffin is replaced by Sand Burial."
+                        "tooltipText": "Sand Coffin is replaced by Sand Burial.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

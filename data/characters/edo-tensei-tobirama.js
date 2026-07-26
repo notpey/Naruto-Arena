@@ -85,7 +85,8 @@ module.exports = {
                         "skillDamageBonuses": {
                             "edo-tensei-tobirama-water-assault": 15
                         },
-                        "tooltipText": "Water Assault deals 15 additional damage."
+                        "tooltipText": "Water Assault deals 15 additional damage.",
+                        "ongoingClass": "action"
                     }
                 }
             ]

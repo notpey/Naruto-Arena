@@ -115,7 +115,8 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned."
+                        "tooltipText": "This character is stunned.",
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -126,7 +127,8 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "stunImmune": true,
-                        "tooltipText": "This character ignores stun effects."
+                        "tooltipText": "This character ignores stun effects.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

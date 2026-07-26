@@ -99,7 +99,8 @@ module.exports = {
                         "copyTargetSlotToKeys": [
                             "reflectTargetSlot"
                         ],
-                        "tooltipText": "New harmful skills used on this character will be reflected onto the enemy affected by Soft Physique Modification."
+                        "tooltipText": "New harmful skills used on this character will be reflected onto the enemy affected by Soft Physique Modification.",
+                        "ongoingClass": "control"
                     }
                 },
                 {
@@ -111,7 +112,8 @@ module.exports = {
                         "harmful": true,
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable."
+                        "tooltipText": "This character cannot reduce damage or become invulnerable.",
+                        "ongoingClass": "control"
                     }
                 }
             ]

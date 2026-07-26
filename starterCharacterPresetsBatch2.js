@@ -678,7 +678,7 @@
                                 "id": "gaara-of-the-desert-sand-coffin",
                                 "name": "Sand Coffin",
                                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Random"
@@ -703,7 +703,8 @@
                                                                 "energy",
                                                                 "strategic"
                                                         ],
-                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
+                                                        "ongoingClass": "control"
                                                 }
                                         },
                                         {
@@ -715,7 +716,8 @@
                                                         "harmful": true,
                                                         "cannotReduceDamage": true,
                                                         "cannotBecomeInvulnerable": true,
-                                                        "tooltipText": "This character cannot reduce damage or become invulnerable."
+                                                        "tooltipText": "This character cannot reduce damage or become invulnerable.",
+                                                        "ongoingClass": "control"
                                                 }
                                         },
                                         {
@@ -728,7 +730,8 @@
                                                                 "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
                                                         },
                                                         "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Sand Coffin is replaced by Sand Burial."
+                                                        "tooltipText": "Sand Coffin is replaced by Sand Burial.",
+                                                        "ongoingClass": "control"
                                                 }
                                         }
                                 ]
