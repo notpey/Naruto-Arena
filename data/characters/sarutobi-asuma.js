@@ -167,8 +167,7 @@ module.exports = {
             "cannotBeReflected": true,
             "classes": [
                 "Physical",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {

@@ -54,8 +54,7 @@
                                 "cooldown": 3,
                                 "classes": [
                                         "Physical",
-                                        "Action",
-                                        "Instant"
+                                        "Action"
                                 ],
                                 "effects": [
                                         {
@@ -583,8 +582,7 @@
                                 "cooldown": 1,
                                 "classes": [
                                         "Ninjutsu",
-                                        "Action",
-                                        "Instant"
+                                        "Action"
                                 ],
                                 "effects": [
                                         {
@@ -726,8 +724,7 @@
                                 "cooldown": 2,
                                 "classes": [
                                         "Physical",
-                                        "Action",
-                                        "Instant"
+                                        "Action"
                                 ],
                                 "effects": [
                                         {
@@ -965,6 +962,7 @@
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [
+                                        "Strategic",
                                         "Ninjutsu",
                                         "Instant"
                                 ],

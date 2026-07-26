@@ -174,8 +174,7 @@ module.exports = {
             "cooldown": 1,
             "classes": [
                 "Mental",
-                "Control",
-                "Instant"
+                "Control"
             ],
             "effects": [
                 {

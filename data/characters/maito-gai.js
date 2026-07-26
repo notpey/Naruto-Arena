@@ -85,6 +85,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 2,
             "classes": [
+                "Strategic",
                 "Physical",
                 "Instant"
             ],
@@ -182,6 +183,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
+                "Strategic",
                 "Physical",
                 "Instant"
             ],

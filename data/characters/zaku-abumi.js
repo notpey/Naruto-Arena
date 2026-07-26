@@ -90,6 +90,7 @@ module.exports = {
                 "statusId": "zaku_abumi_decapitating_airwaves_unlock"
             },
             "classes": [
+                "Strategic",
                 "Physical",
                 "Instant"
             ],

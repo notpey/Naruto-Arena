@@ -52,8 +52,7 @@ module.exports = {
             "cooldown": 1,
             "classes": [
                 "Ninjutsu",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {

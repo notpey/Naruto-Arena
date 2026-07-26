@@ -98,7 +98,6 @@ module.exports = {
             },
             "classes": [
                 "Physical",
-                "Instant",
                 "Control"
             ],
             "effects": [

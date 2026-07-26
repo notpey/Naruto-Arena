@@ -68,8 +68,7 @@ module.exports = {
             },
             "classes": [
                 "Ninjutsu",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {

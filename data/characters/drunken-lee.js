@@ -92,8 +92,7 @@ module.exports = {
             "cooldown": 3,
             "classes": [
                 "Strategic",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {

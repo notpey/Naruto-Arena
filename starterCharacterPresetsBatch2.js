@@ -1187,6 +1187,7 @@
                                 "damage": 0,
                                 "cooldown": 4,
                                 "classes": [
+                                        "Strategic",
                                         "Physical",
                                         "Instant"
                                 ],

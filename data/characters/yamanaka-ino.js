@@ -135,6 +135,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
+                "Strategic",
                 "Ninjutsu",
                 "Instant"
             ],

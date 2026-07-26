@@ -229,6 +229,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
+                "Strategic",
                 "Ninjutsu",
                 "Instant"
             ],
@@ -326,6 +327,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
+                "Strategic",
                 "Ninjutsu",
                 "Instant"
             ],

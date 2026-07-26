@@ -45,8 +45,7 @@ module.exports = {
             "cooldown": 3,
             "classes": [
                 "Physical",
-                "Action",
-                "Instant"
+                "Action"
             ],
             "effects": [
                 {
