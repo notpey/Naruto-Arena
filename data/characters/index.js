@@ -61,5 +61,12 @@ module.exports = [
     require('./hoshigaki-kisame'),
     require('./uchiha-itachi'),
     require('./rokushou-aoi'),
-    require('./kurosuki-raiga')
+    require('./kurosuki-raiga'),
+    require('./teuchi'),
+    require('./young-minato'),
+    require('./young-kushina'),
+    require('./young-itachi'),
+    require('./young-yahiko'),
+    require('./young-konan'),
+    require('./young-nagato')
 ];

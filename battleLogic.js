@@ -351,11 +351,39 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         if (metadata.cannotUseSkills) {
             totals.cannotUseSkills = true;
         }
-        if (metadata.stunImmune) {
+        if (metadata.cannotUseNonStrategicSkills) {
+            totals.cannotUseNonStrategicSkills = true;
+        }
+        if (metadata.addCrowStackOnHarmfulSkillUse) {
+            totals.addCrowStackOnHarmfulSkillUse = true;
+        }
+        if (Number.isFinite(metadata.damageDebuffFlatPerCrowStack)) {
+            const crowStacks = Math.max(0, Number(status?.stacks) || 1);
+            totals.nonAfflictionDamageDebuffFlat += Math.max(
+                0,
+                Number(metadata.damageDebuffFlatPerCrowStack) * crowStacks
+            );
+        }
+        if (metadata.stunImmune || metadata.cannotBeStunned) {
             totals.stunImmune = true;
         }
         if (metadata.invulnerable) {
             totals.invulnerable = true;
+        }
+        if (metadata.rainOrphansPassive) {
+            totals.rainOrphansPassive = true;
+        }
+        if (Number.isFinite(metadata.invulnerabilityDurationReduction)) {
+            totals.invulnerabilityDurationReduction = (totals.invulnerabilityDurationReduction || 0) + Number(metadata.invulnerabilityDurationReduction);
+        }
+        if (metadata.counterOnEnemySkillTargetingSelf) {
+            totals.counterOnEnemySkillTargetingSelf = true;
+        }
+        if (Number.isFinite(metadata.counterDamagePiercing)) {
+            totals.counterDamagePiercing = Number(metadata.counterDamagePiercing);
+        }
+        if (Number.isFinite(metadata.incrementShurikenDamagePerHit)) {
+            totals.incrementShurikenDamagePerHit = Number(metadata.incrementShurikenDamagePerHit);
         }
     });
     return totals;
@@ -1598,6 +1626,11 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
             resolvedAmount +=
                 Math.floor(targetMissingHp / unconditionalTargetMissingHpDivisor) * unconditionalTargetMissingHpStep;
         }
+        if (Number.isFinite(effect?.metadata?.amountPerCrowStackOnTarget)) {
+            const crowStatus = (targetState?.statuses || []).find(s => s.id === 'young_itachi_crow_stack' || s.metadata?.addCrowStackOnHarmfulSkillUse);
+            const crowStacks = Math.max(0, Number(crowStatus?.stacks) || (crowStatus ? 1 : 0));
+            resolvedAmount += Math.max(0, Number(effect.metadata.amountPerCrowStackOnTarget) * crowStacks);
+        }
         const outgoingCap = getOutgoingDamageCap(actorState, actorUnit);
         return outgoingCap === null ? resolvedAmount : Math.min(resolvedAmount, outgoingCap);
     }
@@ -2346,6 +2379,8 @@ const maybeTriggerReactiveDefenses = ({
             (Boolean(status?.metadata?.triggerOnEnemyHarmfulNonMental) ||
                 Boolean(status?.metadata?.triggerOnEnemyHarmfulSkill) ||
                 Boolean(status?.metadata?.triggerOnEnemyHarmfulNonStrategic) ||
+                Boolean(status?.metadata?.triggerOnEnemyPhysicalOrStrategicSkill) ||
+                Boolean(status?.metadata?.counterOnEnemySkillTargetingSelf) ||
                 (Array.isArray(status?.metadata?.triggerOnEnemyHarmfulSkillClassesAny) &&
                     status.metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0))
         );
@@ -2354,6 +2389,9 @@ const maybeTriggerReactiveDefenses = ({
 
     const trapStatus = statuses[trapIndex];
     const trapMetadata = trapStatus?.metadata || {};
+    if (trapMetadata?.triggerOnEnemyPhysicalOrStrategicSkill && !hasSkillClass(skillClasses, 'physical') && !hasSkillClass(skillClasses, 'strategic')) {
+        return false;
+    }
     if (trapMetadata?.triggerOnEnemyHarmfulNonMental && hasSkillClass(skillClasses, 'mental')) {
         return false;
     }
@@ -2665,6 +2703,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         return 0;
     }
     const skillIsMental = hasSkillClass(context?.skillClasses || [], 'mental');
+    const isPhysical = hasSkillClass(context?.skillClasses || [], 'physical');
     const ignoreEnemyPhysicalDamage =
         hasStatusMetadataFlag(targetState, 'ignoreEnemyPhysicalDamage') &&
         context?.sourceUsername &&
@@ -2706,6 +2745,14 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     if (incoming <= 0 && !ignoreEnemyNonMentalDamage) return 0;
 
     // Destructible defense absorbs incoming damage first; overflow continues to HP.
+    const clearDestructibleDefenseFirst = Boolean(context?.clearDestructibleDefenseFirst);
+    if (clearDestructibleDefenseFirst) {
+        (targetState?.statuses || []).forEach((status) => {
+            if (status?.metadata && typeof status.metadata.destructibleDefensePoints === 'number') {
+                status.metadata.destructibleDefensePoints = 0;
+            }
+        });
+    }
     const ignoreDestructibleDefense = Boolean(context?.ignoreDestructibleDefense);
     if (!ignoreDestructibleDefense) {
         for (let i = 0; i < targetState.statuses.length && incoming > 0; i += 1) {
@@ -2823,7 +2870,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         Math.max(0, Number(context?.minimumHp) || 0),
         getContextualMinimumHp(targetState, unit, context)
     );
-    const isPhysical = skillClasses.some(
+    const isPhysicalDamage = isPhysical || skillClasses.some(
         (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'physical'
     );
     const ignoreDamageReduction = Boolean(context?.ignoreDamageReduction);
@@ -5680,7 +5727,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             if (sourceRelation === 'enemy' && !fromEnemy) return true;
                             if (sourceRelation === 'ally' && !fromAlly) return true;
                             if (exactStatusIds.length > 0 && !exactStatusIds.includes(status?.id)) return true;
-                            if (Boolean(effect?.harmfulOnly) && !Boolean(status?.metadata?.harmful)) return true;
+                            if (Boolean(effect?.harmfulOnly || effect?.metadata?.cleanseHarmfulOnly) && !Boolean(status?.metadata?.harmful)) return true;
                             if (metadataAny.length > 0) {
                                 const metadata = status?.metadata || {};
                                 const hasAny = metadataAny.some((key) => Boolean(metadata?.[key]));
