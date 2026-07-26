@@ -617,7 +617,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const matchIdFromUrl = new URLSearchParams(window.location.search).get('matchId');
 
     if (!slotList) {
-        const rosterData = pageCharacterRoster;
+        const getRosterData = () => {
+            if (Array.isArray(pageCharacterRoster) && pageCharacterRoster.length > 0) {
+                return pageCharacterRoster;
+            }
+            if (Array.isArray(window.characters) && window.characters.length > 0) {
+                return window.characters;
+            }
+            if (typeof characters !== 'undefined' && Array.isArray(characters) && characters.length > 0) {
+                return characters;
+            }
+            return [];
+        };
         let matchPoll = null;
         let matchPollInFlight = false;
         let currentPlayerUsername = null;
@@ -972,7 +983,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unit = getActorUnitForSlot(currentPlayerUsername, actorSlot);
             const replacementMap = getSkillReplacementMapFromUnit(unit);
             const rosterIndex = Number.isInteger(unit?.rosterIndex) ? unit.rosterIndex : null;
-            const character = Number.isInteger(rosterIndex) ? rosterData?.[rosterIndex] : null;
+            const character = Number.isInteger(rosterIndex) ? getRosterData()?.[rosterIndex] : null;
             let resolvedSkill = baseSkill;
             const visited = new Set();
             while (resolvedSkill?.id && replacementMap[resolvedSkill.id] && !visited.has(resolvedSkill.id)) {
@@ -1352,8 +1363,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return true;
             }
             const actorCharacter =
-                Number.isInteger(actorUnit?.rosterIndex) && Array.isArray(rosterData)
-                    ? rosterData[actorUnit.rosterIndex]
+                Number.isInteger(actorUnit?.rosterIndex) && Array.isArray(getRosterData())
+                    ? getRosterData()[actorUnit.rosterIndex]
                     : null;
             const actorCharacterId = actorCharacter?.id || actorCharacter?.characterId || null;
             return getLiveStatuses(targetUnit).some((status) => {
@@ -2620,8 +2631,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const findSkillById = (skillId) => {
-            if (!skillId || !Array.isArray(rosterData)) return null;
-            for (const character of rosterData) {
+            if (!skillId || !Array.isArray(getRosterData())) return null;
+            for (const character of getRosterData()) {
                 const skills = Array.isArray(character?.skills) ? character.skills : [];
                 const match = skills.find((skill) => skill?.id === skillId);
                 if (match) return match;
@@ -2630,8 +2641,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const findTooltipTextByStatusId = (statusId) => {
-            if (!statusId || !Array.isArray(rosterData)) return null;
-            for (const character of rosterData) {
+            if (!statusId || !Array.isArray(getRosterData())) return null;
+            for (const character of getRosterData()) {
                 const skills = Array.isArray(character?.skills) ? character.skills : [];
                 for (const skill of skills) {
                     const effects = Array.isArray(skill?.effects) ? skill.effects : [];
@@ -3507,7 +3518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const getTeamNames = (teamIndices = []) =>
             (Array.isArray(teamIndices) ? teamIndices : [])
-                .map((rosterIndex) => rosterData?.[rosterIndex]?.name || '')
+                .map((rosterIndex) => getRosterData()?.[rosterIndex]?.name || '')
                 .filter(Boolean);
 
         const renderPlayerProfileInfo = async (side = 'player') => {
@@ -4020,7 +4031,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // player's own skills.
                 if (username && username === currentOpponentUsername && Number.isInteger(slot)) {
                     const rosterIndex = currentOpponentTeamIndices?.[slot];
-                    const character = Number.isInteger(rosterIndex) ? rosterData?.[rosterIndex] : null;
+                    const character = Number.isInteger(rosterIndex) ? getRosterData()?.[rosterIndex] : null;
                     if (character) startEnemySkillBrowse(character);
                 }
                 return;
@@ -4084,7 +4095,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const loadMatchForIngame = async () => {
             const matchId = matchIdFromUrl;
-            if (!matchId || !Array.isArray(rosterData)) return;
+            if (!matchId || !Array.isArray(getRosterData()) || getRosterData().length === 0) return;
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchId)}?resetPendingExchange=1`,
@@ -4130,7 +4141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 const populateCard = (card, rosterIndex, isPlayer, slotIndex) => {
-                    const character = rosterData[rosterIndex];
+                    const character = getRosterData()[rosterIndex];
                     if (!character) {
                         card.style.visibility = 'hidden';
                         return;
@@ -4245,7 +4256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 attachCardTargetHandlers(playerCards, data.player?.username || '');
 
                 if (Array.isArray(team) && team.length > 0) {
-                    const firstChar = rosterData[team[0]];
+                    const firstChar = getRosterData()[team[0]];
                     const firstSkill = firstChar?.skills?.[0];
                     if (firstSkill) {
                         renderSkillInfo(firstChar, firstSkill, 0, 0);
