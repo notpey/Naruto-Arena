@@ -62,6 +62,35 @@
 
         hero.insertBefore(banners, hero.firstChild);
       });
+
+      // ── Shared website footer component across all public website pages ──
+      var existingFooter = document.querySelector(".ca-site-footer");
+      if (!existingFooter) {
+        var oldFooter = document.querySelector(".gi-footer, .mn-footer, .ms-footer, .st-footer, footer");
+        var footerEl = document.createElement("footer");
+        footerEl.className = "ca-site-footer";
+        footerEl.innerHTML =
+          '<div class="ca-site-footer-inner">' +
+            '<div class="ca-site-footer-social">' +
+              '<span class="ca-site-footer-badge">NA</span>' +
+            '</div>' +
+            '<nav class="ca-site-footer-links" aria-label="Footer Navigation">' +
+              '<a href="manual.html">Game Manual</a>' +
+              '<a href="charactersandskills.html">Characters &amp; Skills</a>' +
+              '<a href="missions.html">Ninja Missions</a>' +
+              '<a href="leaderboards.html">Ladder &amp; Ranks</a>' +
+              '<a href="winrates.html">Winrates</a>' +
+              '<a href="clanprofile.html">Clans</a>' +
+              '<a href="index.html">News</a>' +
+            '</nav>' +
+            '<p class="ca-site-footer-copy">Naruto-Arena 2026. &nbsp; All Rights Reserved.</p>' +
+          '</div>';
+        if (oldFooter && oldFooter.parentNode) {
+          oldFooter.parentNode.replaceChild(footerEl, oldFooter);
+        } else {
+          document.body.appendChild(footerEl);
+        }
+      }
     }
 
     var nav = document.querySelector(".ca-nav");

@@ -3422,3 +3422,137 @@ strong, b {
     to { opacity: 1; transform: scale(1); }
 }
 
+/* ============================================================
+   UNIFIED PUBLIC WEBSITE FOOTER & SUBPAGE CONTAINER STYLES
+   ============================================================ */
+.ca-subpage-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.ca-site-footer {
+  width: 100%;
+  background: rgba(10, 12, 18, 0.95);
+  border-top: 1px solid rgba(232, 128, 26, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 40px 24px 30px;
+  text-align: center;
+  margin-top: 60px;
+  position: relative;
+  z-index: 10;
+}
+
+.ca-site-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.ca-site-footer-social {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.ca-site-footer-badge {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-orange), var(--ca-amber));
+  color: #110d0a;
+  font-weight: 900;
+  font-size: 15px;
+  box-shadow: 0 0 16px rgba(232, 128, 26, 0.35);
+}
+
+.ca-site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ca-parchment);
+}
+
+.ca-site-footer-links a:hover {
+  color: var(--ca-amber);
+}
+
+.ca-site-footer-copy {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ca-orange);
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ============================================================
+   UNIFORM CONTAINER SIZING & READABILITY CONTRAST RULES
+   ============================================================ */
+.main,
+.mn-page,
+.gi-page,
+.ms-page,
+.st-page,
+.ca-subpage-container {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Ensure all text on light parchment content cards is dark and highly readable */
+.ca-content-sheet,
+.ca-light-card,
+.ca-admin-panel,
+.na-legacy-light .main,
+.na-legacy-light .profile-section,
+.na-legacy-light .clan-profile-panel,
+.na-legacy-light .avatar-panel,
+.na-legacy-light .background-panel,
+.na-legacy-light .reset-panel,
+.na-legacy-light .release-panel,
+.na-legacy-light .editor-stage,
+.na-legacy-light .mission-panel,
+.na-legacy-light .mainsection,
+.na-legacy-light .news-editor-card,
+.na-legacy-light .news-list-card,
+.ca-releases,
+.news-post {
+  color: #211a17;
+}
+
+.na-legacy-light p,
+.na-legacy-light span,
+.na-legacy-light td,
+.na-legacy-light th,
+.na-legacy-light label {
+  color: inherit;
+}
+
+/* Ensure text on dark headers, navs, and footers is bright bone white */
+.ca-nav,
+.ca-hero,
+.ca-site-footer,
+.st-footer,
+.ms-footer,
+.mn-footer,
+.gi-footer {
+  color: var(--ca-bone);
+}
+
+
+
