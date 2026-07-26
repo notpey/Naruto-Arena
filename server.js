@@ -8847,6 +8847,7 @@ async function initDb() {
         usersCollection,
         bugsCollection,
         charactersData,
+        getCharactersData: () => charactersData,
         saveCharacters,
         serializeCharactersDataFile,
         latestReleasesUpdateSchema,

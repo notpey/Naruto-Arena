@@ -12,6 +12,7 @@ module.exports = function(context) {
         bugsCollection,
         newsCollection,
         charactersData,
+        getCharactersData,
         saveCharacters,
         serializeCharactersDataFile,
         ladderRulesCollection,
@@ -35,7 +36,14 @@ module.exports = function(context) {
         TRAINING_DUMMY_DISPLAY_NAME,
         insertMatchActive
     } = context;
-    
+
+    const getCharactersList = () =>
+        typeof getCharactersData === 'function'
+            ? getCharactersData()
+            : Array.isArray(charactersData)
+            ? charactersData
+            : [];
+
     const LADDER_WIN_RYO = 50;
     const LADDER_LOSS_RYO = 15;
     const QUICK_WIN_RYO = 25;
@@ -298,7 +306,7 @@ module.exports = function(context) {
                 winratesState && winratesState.resetAt
                     ? new Date(winratesState.resetAt)
                     : null;
-            const characters = charactersData.map((character = {}, index) => ({
+            const characters = getCharactersList().map((character = {}, index) => ({
                 characterIndex: index,
                 characterId: typeof character.characterId === 'string' ? character.characterId : '',
                 name: typeof character.name === 'string' ? character.name : `Character ${index + 1}`,
@@ -434,7 +442,7 @@ module.exports = function(context) {
             return res.json({
                 ok: true,
                 counts: {
-                    characters: Array.isArray(charactersData) ? charactersData.length : 0,
+                    characters: getCharactersList().length,
                     missions: Array.isArray(missionCatalog) ? missionCatalog.length : 0,
                     players: totalUsers,
                     admins: adminUsers,
@@ -584,7 +592,7 @@ module.exports = function(context) {
     
         return res.json({
             ok: true,
-            characters: Array.isArray(charactersData) ? charactersData : [],
+            characters: getCharactersList(),
         });
     });
     router.get('/characters/export', requireSession, (req, res) => {
@@ -592,7 +600,7 @@ module.exports = function(context) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
-        const serialized = serializeCharactersDataFile(Array.isArray(charactersData) ? charactersData : []);
+        const serialized = serializeCharactersDataFile(getCharactersList());
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="characters.js"');
         return res.send(serialized);
@@ -603,7 +611,7 @@ module.exports = function(context) {
         }
     
         const characterId = typeof req.params?.characterId === 'string' ? req.params.characterId.trim() : '';
-        const character = (Array.isArray(charactersData) ? charactersData : []).find(
+        const character = getCharactersList().find(
             (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
         );
         if (!character) {
@@ -626,7 +634,7 @@ module.exports = function(context) {
             return res.status(400).json({ error: 'A valid character payload is required.' });
         }
     
-        const currentCharacters = Array.isArray(charactersData) ? charactersData : [];
+        const currentCharacters = getCharactersList();
         const characterIndex = currentCharacters.findIndex(
             (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
         );
@@ -665,7 +673,7 @@ module.exports = function(context) {
         if (!newCharacter || typeof newCharacter.characterId !== 'string' || !newCharacter.characterId.trim()) {
             return res.status(400).json({ error: 'A valid character payload with a characterId is required.' });
         }
-        const currentCharacters = Array.isArray(charactersData) ? charactersData : [];
+        const currentCharacters = getCharactersList();
         const duplicate = currentCharacters.find(
             (entry) => typeof entry?.characterId === 'string' && entry.characterId === newCharacter.characterId.trim()
         );
@@ -689,7 +697,7 @@ module.exports = function(context) {
         if (!characterId) {
             return res.status(400).json({ error: 'A character id is required.' });
         }
-        const currentCharacters = Array.isArray(charactersData) ? charactersData : [];
+        const currentCharacters = getCharactersList();
         const characterIndex = currentCharacters.findIndex(
             (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
         );
