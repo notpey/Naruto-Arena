@@ -3514,11 +3514,20 @@ strong, b {
 }
 
 /* Ensure all text on light parchment content cards is dark and highly readable */
+.lb-hub,
+.lb-clanboard,
+.lb-clan-row,
+.lb-clan-empty,
+.lb-hof-coming,
 .mn-sheet,
 .gi-sheet,
+.gi-empty,
 .ms-sheet,
+.ms-cat,
+.ms-empty,
 .st-sheet,
-.lb-sheet,
+.st-episode,
+.st-empty,
 .ca-content-sheet,
 .ca-light-card,
 .ca-admin-panel,
@@ -3544,55 +3553,59 @@ strong, b {
 }
 
 /* Headings on light parchment sheets */
+.lb-hub h1, .lb-hub h2, .lb-hub h3, .lb-hub h4,
 .mn-sheet h1, .mn-sheet h2, .mn-sheet h3, .mn-sheet h4,
 .gi-sheet h1, .gi-sheet h2, .gi-sheet h3, .gi-sheet h4,
 .ms-sheet h1, .ms-sheet h2, .ms-sheet h3, .ms-sheet h4,
 .st-sheet h1, .st-sheet h2, .st-sheet h3, .st-sheet h4,
-.lb-sheet h1, .lb-sheet h2, .lb-sheet h3, .lb-sheet h4,
 .ca-content-sheet h1, .ca-content-sheet h2, .ca-content-sheet h3,
-.na-legacy-light h1, .na-legacy-light h2, .na-legacy-light h3, .na-legacy-light h4 {
+.na-legacy-light h1, .na-legacy-light h2, .na-legacy-light h3, .na-legacy-light h4,
+.mainsection h1, .mainsection h2, .mainsection h3,
+.lb-faq dt, .mn-faq dt {
   color: #110d0a !important; /* Deep black-ink headers */
   font-weight: 800 !important;
 }
 
 /* Paragraphs & Description Text on light parchment sheets */
+.lb-hub p,
 .mn-sheet p,
 .gi-sheet p,
 .ms-sheet p,
 .st-sheet p,
-.lb-sheet p,
 .ca-content-sheet p,
 .na-legacy-light p,
+.mainsection p,
+.lb-faq dd,
+.mn-faq dd,
+.lb-hub-note,
 .st-episode-synopsis,
 .ms-cat-intro,
-.ms-cat p {
+.ms-cat p,
+.editor-note-copy,
+.release-copy {
   color: #2c221c !important; /* Rich readable dark text */
   font-weight: 500 !important;
 }
 
 /* Strong / Bold highlights on light parchment sheets */
-.mn-sheet strong,
-.mn-sheet p strong,
-.mn-list li strong,
-.gi-sheet strong,
-.ms-sheet strong,
-.st-sheet strong,
-.lb-sheet strong,
-.ca-content-sheet strong,
-.na-legacy-light strong,
-.st-col-line strong,
-.ms-col-line strong {
+.lb-hub strong, .lb-hub p strong,
+.mn-sheet strong, .mn-sheet p strong, .mn-list li strong,
+.gi-sheet strong, .ms-sheet strong, .st-sheet strong,
+.ca-content-sheet strong, .mainsection strong,
+.na-legacy-light strong, .st-col-line strong, .ms-col-line strong {
   color: #0d0a08 !important; /* Solid black-ink bold text */
   font-weight: 800 !important;
 }
 
 /* List Items on light parchment sheets */
+.lb-hub li,
 .mn-list li,
 .ms-list li,
 .st-list li,
 .gi-list li,
 .ca-content-sheet li,
-.na-legacy-light li {
+.na-legacy-light li,
+.mainsection li {
   color: #2c221c !important;
   font-weight: 500 !important;
 }
@@ -3605,10 +3618,12 @@ strong, b {
 }
 
 /* Chapter / Kicker Labels on light parchment sheets */
+.lb-hub-kicker,
 .mn-kicker,
 .ms-kicker,
 .st-kicker,
-.ca-section-label {
+.ca-section-label,
+.mainsection-kicker {
   color: #8a4f00 !important; /* Dark burnt-amber kicker label */
   font-weight: 800 !important;
 }
@@ -3620,7 +3635,8 @@ strong, b {
 .st-footer,
 .ms-footer,
 .mn-footer,
-.gi-footer {
+.gi-footer,
+.lb-footer {
   color: var(--ca-bone);
 }
 
