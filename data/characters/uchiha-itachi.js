@@ -99,24 +99,17 @@ module.exports = {
                     "type": "damage",
                     "amount": 15,
                     "scope": "target",
-                    "condition": {
-                        "scope": "self",
-                        "missingStatusId": "uchiha_itachi_mangekyou_sharingan"
-                    },
                     "metadata": {
                         "afflictionDamage": true,
-                        "ignoreDamageReduction": true
+                        "ignoreDamageReduction": true,
+                        "ignoreDestructibleDefense": true
                     }
                 },
                 {
                     "type": "apply_status",
                     "statusId": "uchiha_itachi_amaterasu_dot",
-                    "duration": 99,
+                    "duration": 3,
                     "scope": "target",
-                    "condition": {
-                        "scope": "self",
-                        "missingStatusId": "uchiha_itachi_mangekyou_sharingan"
-                    },
                     "metadata": {
                         "harmful": true,
                         "turnEndDamage": 5,
@@ -125,38 +118,6 @@ module.exports = {
                         "turnDurationAnchor": "source_turn",
                         "ongoingClass": "action",
                         "tooltipText": "This character takes 5 affliction damage each turn from Amaterasu."
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 30,
-                    "scope": "all-enemy",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "uchiha_itachi_mangekyou_sharingan"
-                    },
-                    "metadata": {
-                        "afflictionDamage": true,
-                        "ignoreDamageReduction": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "uchiha_itachi_amaterasu_dot",
-                    "duration": 99,
-                    "scope": "all-enemy",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "uchiha_itachi_mangekyou_sharingan"
-                    },
-                    "metadata": {
-                        "harmful": true,
-                        "turnEndDamage": 10,
-                        "afflictionDamage": true,
-                        "turnEndTrigger": "source_turn",
-                        "turnDurationAnchor": "source_turn",
-                        "ongoingClass": "action",
-                        "tooltipText": "This character takes 10 affliction damage each turn from Amaterasu."
                     }
                 }
             ]

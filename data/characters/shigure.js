@@ -24,7 +24,7 @@ module.exports = {
             "effects": [
                 {
                     "type": "apply_status",
-                    "statusId": "shigure_umbrella_toss_prepared",
+                    "statusId": "shigure_umbrella_toss_active",
                     "duration": 4,
                     "scope": "self",
                     "metadata": {
@@ -57,8 +57,17 @@ module.exports = {
             "effects": [
                 {
                     "type": "damage",
-                    "amount": 35,
+                    "amount": 25,
                     "scope": "target"
+                },
+                {
+                    "type": "damage",
+                    "amount": 10,
+                    "scope": "target",
+                    "condition": {
+                        "scope": "target",
+                        "statusId": "shigure_needle_field"
+                    }
                 },
                 {
                     "type": "cleanse_statuses",
@@ -66,13 +75,8 @@ module.exports = {
                     "statusId": "shigure_needle_field",
                     "condition": {
                         "scope": "self",
-                        "missingStatusId": "shigure_umbrella_toss_prepared"
+                        "missingStatusId": "shigure_umbrella_toss_active"
                     }
-                },
-                {
-                    "type": "cleanse_statuses",
-                    "scope": "self",
-                    "statusId": "shigure_umbrella_toss_prepared"
                 }
             ]
         },
