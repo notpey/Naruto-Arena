@@ -3873,6 +3873,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
     });
     const turnMarker = `${actingUsername}:${Number(match?.economy?.turnCounts?.[actingUsername]) || 0}`;
 
+    const turnUnpierceableBudgetByRecipient = new Map();
+    const turnStandardMitigationBudgetByRecipient = new Map();
+    const turnPercentMitigationStateByRecipient = new Map();
+
     for (let queueIndex = 0; queueIndex < queuedActions.length; queueIndex += 1) {
         const queued = queuedActions[queueIndex];
         const actorSlot = Number.parseInt(queued?.actorSlot, 10);
@@ -6145,9 +6149,6 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             }
         });
 
-        const unpierceableBudgetByRecipient = new Map();
-        const standardMitigationBudgetByRecipient = new Map();
-        const percentMitigationStateByRecipient = new Map();
         pendingDamage.forEach((entry) => {
             if (!entry?.recipient?.unit || entry.recipient.unit.alive === false) return;
             const mitigationBudgetKey = `${entry.recipient.username || ''}:${
@@ -6166,11 +6167,11 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         ignoreDamageReduction:
                             Boolean(entry.ignoreDamageReduction) || Boolean(entry.healthStealDamage),
                         ignoreDestructibleDefense: entry.ignoreDestructibleDefense,
-                        unpierceableBudgetMap: unpierceableBudgetByRecipient,
+                        unpierceableBudgetMap: turnUnpierceableBudgetByRecipient,
                         unpierceableBudgetKey: mitigationBudgetKey,
-                        standardMitigationBudgetMap: standardMitigationBudgetByRecipient,
+                        standardMitigationBudgetMap: turnStandardMitigationBudgetByRecipient,
                         standardMitigationBudgetKey: mitigationBudgetKey,
-                        percentMitigationStateMap: percentMitigationStateByRecipient,
+                        percentMitigationStateMap: turnPercentMitigationStateByRecipient,
                         percentMitigationStateKey: mitigationBudgetKey,
                     });
                     if (dealt > 0 && entry.healthStealDamage) {
@@ -6425,6 +6426,16 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 }
                 const triggerAnchor =
                     status?.metadata?.turnEndTrigger === 'source_turn' ? 'source_turn' : 'owner_turn';
+                if (
+                    sourceDead &&
+                    triggerAnchor === 'source_turn' &&
+                    !Boolean(status?.metadata?.afflictionDamage)
+                ) {
+                    if (status?.id) {
+                        endedOngoingStatuses.add(status.id);
+                    }
+                    return;
+                }
                 const shouldTrigger =
                     triggerAnchor === 'source_turn'
                         ? status?.sourceUsername === endingUsername

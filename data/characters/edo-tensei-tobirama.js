@@ -68,6 +68,7 @@ module.exports = {
                         "harmful": true,
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
+                        "ongoingClass": "action",
                         "cannotUseSkillClasses": [
                             "affliction"
                         ],
