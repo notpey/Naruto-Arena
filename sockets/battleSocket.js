@@ -30,7 +30,9 @@ module.exports = function(context) {
                     return;
                 }
                 const cookies = parseCookieHeader(req.headers.cookie || '');
-                const token = cookies[SESSION_COOKIE_NAME];
+                const authHeader = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '').trim();
+                const queryToken = (requestUrl.searchParams.get('token') || '').trim();
+                const token = cookies[SESSION_COOKIE_NAME] || authHeader || queryToken;
                 const authUser = await getSessionUserFromToken(token);
                 if (!authUser?.username) {
                     socket.destroy();

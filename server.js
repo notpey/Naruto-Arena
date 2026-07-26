@@ -20,6 +20,8 @@ let charactersData = require('./data/characters/index.js');
 const charactersBrowserScript = `const characters = ${JSON.stringify(charactersData)};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
 const app = express();
+const wsServer = new WebSocketServer({ noServer: true });
+const wsConnections = new Set();
 app.use(compression());
 app.use(express.static(path.join(__dirname)));
 
@@ -48,6 +50,8 @@ const SESSION_MAX_AGE_MS =
 const ALLOW_INSECURE_HTTP = process.env.ALLOW_INSECURE_HTTP === 'true';
 const HTTPS_KEY_PATH = process.env.HTTPS_KEY_PATH;
 const HTTPS_CERT_PATH = process.env.HTTPS_CERT_PATH;
+
+
 const LATEST_CHARACTER_RELEASES = [
     { label: 'Rock Lee', characterId: 'rock-lee' },
     { label: 'Aburame Shino', characterId: 'aburame-shino' },
@@ -1914,8 +1918,6 @@ function insertMatchActive(matchObj) {
     return matchesCollection.insertOne(matchObj);
 }
 
-const wsConnections = new Set();
-const wsServer = new WebSocketServer({ noServer: true });
 let turnSweepTimer = null;
 let sessionCacheSweepTimer = null;
 const activeBattleBotTurns = new Set();
@@ -6655,7 +6657,7 @@ const { attachWebSocketSupport } = require('./sockets/battleSocket.js')({
     parseCookieHeader,
     SESSION_COOKIE_NAME,
     getSessionUserFromToken,
-    matchesCollection,
+    get matchesCollection() { return matchesCollection; },
     getMatchRoom,
     wsConnections,
     removeSocketFromRoom,
