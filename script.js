@@ -339,7 +339,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             normalized.endsWith('/kage.png') ||
             normalized.endsWith('hats/kage.png') ||
             normalized.endsWith('/hokage.png') ||
-            normalized.endsWith('hats/hokage.png')
+            normalized.endsWith('hats/hokage.png') ||
+            normalized.endsWith('/chunin.png') ||
+            normalized.endsWith('hats/chunin.png') ||
+            normalized.endsWith('/jounin.png') ||
+            normalized.endsWith('hats/jounin.png')
         );
     };
 
