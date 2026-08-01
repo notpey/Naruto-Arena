@@ -5755,47 +5755,47 @@ text-transform: uppercase;
     transform: none;
 }
 
-/* --- Right Team (Enemy) Rank Hats - Mirrored and placed top-right --- */
+/* --- Right Team (Enemy) Rank Hats - Flipped horizontally via container scaleX(-1) --- */
 .enemy-characters .rank-hat {
-    left: auto;
-    right: -22px;
-    transform: scaleX(-1);
+    left: -22px;
+    right: auto;
+    transform: none;
 }
 
 .enemy-characters .rank-hat-academy,
 .enemy-characters .rank-hat[data-hat="academy"] {
     top: -35px;
-    left: auto;
-    right: -32px;
+    left: -32px;
+    right: auto;
     z-index: 10;
-    transform: scaleX(-1);
+    transform: none;
 }
 
 .enemy-characters .rank-hat-genin,
 .enemy-characters .rank-hat[data-hat="genin"] {
     top: -30px;
-    left: auto;
-    right: -30px;
+    left: -30px;
+    right: auto;
     z-index: 10;
-    transform: scaleX(-1);
+    transform: none;
 }
 
 .enemy-characters .rank-hat-chunin,
 .enemy-characters .rank-hat[data-hat="chunin"] {
     top: -45px;
-    left: auto;
-    right: -65px;
+    left: -65px;
+    right: auto;
     z-index: 1; /* BEHIND character face */
-    transform: scaleX(-1);
+    transform: none;
 }
 
 .enemy-characters .rank-hat-jounin,
 .enemy-characters .rank-hat[data-hat="jounin"] {
     top: -35px;
-    left: auto;
-    right: -45px;
+    left: -45px;
+    right: auto;
     z-index: 1; /* BEHIND character face */
-    transform: scaleX(-1);
+    transform: none;
 }
 
 .roster-page-button {
