@@ -4502,7 +4502,7 @@ text-transform: uppercase;
     background-color: #ffffff;
     border: 1px solid #000;
     box-sizing: content-box;
-    z-index: 15;
+    z-index: 100;
 }
 
 @keyframes health-drop-flash-anim {
@@ -5723,7 +5723,6 @@ text-transform: uppercase;
 
 .rank-hat.rank-hat-offset-left {
     left: -33px;
-    z-index: 99999;
 }
 
 /* --- Left Team (Player) Rank Hats --- */
@@ -5737,7 +5736,7 @@ text-transform: uppercase;
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -38px;
+    top: -26px;
     left: -16px;
     z-index: 10;
     transform: none;
