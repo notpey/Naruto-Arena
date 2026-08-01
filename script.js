@@ -473,15 +473,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyRankHatPresentation(opponentHatEls, ladder);
     };
 
+    const SELECTION_BACKGROUND_POOL = [
+        'selectionbg_1.jpg',
+        'selectionbg_2.jpg',
+    ];
+
     const applyCustomBackgrounds = (user) => {
         const selectionBackground = document.querySelector('.background');
         const ingameBackground = document.querySelector('.backgroundingame');
         const selectionUrl = user?.profile?.backgrounds?.selectionUrl || '';
         const ingameUrl = user?.profile?.backgrounds?.ingameUrl || '';
         if (selectionBackground) {
-            selectionBackground.style.backgroundImage = selectionUrl
-                ? `url("${selectionUrl}")`
-                : '';
+            if (selectionUrl) {
+                selectionBackground.style.backgroundImage = `url("${selectionUrl}")`;
+            } else {
+                if (!selectionBackground.dataset.poolBg) {
+                    const randomBg = SELECTION_BACKGROUND_POOL[Math.floor(Math.random() * SELECTION_BACKGROUND_POOL.length)];
+                    selectionBackground.dataset.poolBg = randomBg;
+                }
+                selectionBackground.style.backgroundImage = `url("${selectionBackground.dataset.poolBg}")`;
+            }
         }
         if (ingameBackground) {
             ingameBackground.style.backgroundImage = ingameUrl
@@ -512,6 +523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const hydratePlayerIdentity = async () => {
         const cachedUser = readCachedUser();
+        applyCustomBackgrounds(cachedUser);
         if (cachedUser?.username) {
             applyPlayerIdentity({
                 name: cachedUser.username,
