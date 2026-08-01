@@ -4499,6 +4499,7 @@ text-transform: uppercase;
     background-color: #ffffff;
     border: 1px solid #000;
     box-sizing: content-box;
+    z-index: 15;
 }
 
 @keyframes health-drop-flash-anim {
@@ -5725,47 +5726,47 @@ text-transform: uppercase;
 /* --- Left Team (Player) Rank Hats --- */
 .player-characters .rank-hat-academy,
 .rank-hat[data-hat="academy"] {
-    top: -45px;
-    left: -45px;
+    top: -32px;
+    left: -20px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -40px;
-    left: -40px;
+    top: -30px;
+    left: -18px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-chunin,
 .rank-hat[data-hat="chunin"] {
-    top: -40px;
-    left: -75px;
+    top: -30px;
+    left: -38px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
 .player-characters .rank-hat-jounin,
 .rank-hat[data-hat="jounin"] {
-    top: -45px;
-    left: -50px;
+    top: -30px;
+    left: -28px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
 /* --- Right Team (Enemy) Rank Hats - Flipped horizontally via container scaleX(-1) --- */
 .enemy-characters .rank-hat {
-    left: -22px;
+    left: -18px;
     right: auto;
     transform: none;
 }
 
 .enemy-characters .rank-hat-academy,
 .enemy-characters .rank-hat[data-hat="academy"] {
-    top: -45px;
-    left: -45px;
+    top: -32px;
+    left: -20px;
     right: auto;
     z-index: 10;
     transform: none;
@@ -5773,8 +5774,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-genin,
 .enemy-characters .rank-hat[data-hat="genin"] {
-    top: -40px;
-    left: -40px;
+    top: -30px;
+    left: -18px;
     right: auto;
     z-index: 10;
     transform: none;
@@ -5782,8 +5783,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-chunin,
 .enemy-characters .rank-hat[data-hat="chunin"] {
-    top: -40px;
-    left: -75px;
+    top: -30px;
+    left: -38px;
     right: auto;
     z-index: 1; /* BEHIND character face */
     transform: none;
@@ -5791,8 +5792,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-jounin,
 .enemy-characters .rank-hat[data-hat="jounin"] {
-    top: -45px;
-    left: -50px;
+    top: -30px;
+    left: -28px;
     right: auto;
     z-index: 1; /* BEHIND character face */
     transform: none;
