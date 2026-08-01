@@ -5726,47 +5726,47 @@ text-transform: uppercase;
 /* --- Left Team (Player) Rank Hats --- */
 .player-characters .rank-hat-academy,
 .rank-hat[data-hat="academy"] {
-    top: -32px;
-    left: -20px;
+    top: -48px;
+    left: -34px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -30px;
-    left: -18px;
+    top: -45px;
+    left: -32px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-chunin,
 .rank-hat[data-hat="chunin"] {
-    top: -30px;
-    left: -38px;
+    top: -48px;
+    left: -65px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
 .player-characters .rank-hat-jounin,
 .rank-hat[data-hat="jounin"] {
-    top: -30px;
-    left: -28px;
+    top: -45px;
+    left: -45px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
 /* --- Right Team (Enemy) Rank Hats - Flipped horizontally via container scaleX(-1) --- */
 .enemy-characters .rank-hat {
-    left: -18px;
+    left: -32px;
     right: auto;
     transform: none;
 }
 
 .enemy-characters .rank-hat-academy,
 .enemy-characters .rank-hat[data-hat="academy"] {
-    top: -32px;
-    left: -20px;
+    top: -48px;
+    left: -34px;
     right: auto;
     z-index: 10;
     transform: none;
@@ -5774,8 +5774,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-genin,
 .enemy-characters .rank-hat[data-hat="genin"] {
-    top: -30px;
-    left: -18px;
+    top: -45px;
+    left: -32px;
     right: auto;
     z-index: 10;
     transform: none;
@@ -5783,8 +5783,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-chunin,
 .enemy-characters .rank-hat[data-hat="chunin"] {
-    top: -30px;
-    left: -38px;
+    top: -48px;
+    left: -65px;
     right: auto;
     z-index: 1; /* BEHIND character face */
     transform: none;
@@ -5792,8 +5792,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-jounin,
 .enemy-characters .rank-hat[data-hat="jounin"] {
-    top: -30px;
-    left: -28px;
+    top: -45px;
+    left: -45px;
     right: auto;
     z-index: 1; /* BEHIND character face */
     transform: none;
