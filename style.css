@@ -5282,28 +5282,100 @@ text-transform: uppercase;
 }
 
 .skillorder {
-    top: 180px;
-    left: 85px;
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: 6px;
-    min-height: 36px;
+    gap: 16px;
+    min-height: 48px;
     align-items: center;
+    justify-content: center;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-
-.skillpreview {
-    width: 34px;
-    height: 34px;
-    border: 1px solid black;
+.skillorder-item {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: 2px solid #5d4833;
+    background: #1e1b18;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     cursor: grab;
-    background: #fff;
+    transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
 }
 
-.skillpreview.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
+.skillorder-item:hover,
+.skillorder-item:active {
+    transform: translateY(-2px) scale(1.06);
+    border-color: #ffae42;
+    box-shadow: 0 6px 14px rgba(255, 174, 66, 0.4);
+}
+
+.skillorder-item.is-dragging-origin {
+    opacity: 0.35;
+    transform: scale(0.92);
+    border-style: dashed;
+}
+
+.skillorder-item.drop-target-over {
+    transform: scale(1.12);
+    border-color: #4caf50 !important;
+    box-shadow: 0 0 16px rgba(76, 175, 80, 0.8) !important;
+}
+
+.skillorder-item .skillpreview {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+.skillorder-seq-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f1bf14, #d4950b);
+    color: #111;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 20px;
+    text-align: center;
+    border: 1px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.skillorder-drag-ghost {
+    position: fixed;
+    z-index: 100000;
+    pointer-events: none;
+    border-radius: 8px;
+    border: 2px solid #ffae42;
+    background: #1e1b18;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65), 0 0 15px rgba(255, 174, 66, 0.6);
+    transform-origin: center center;
+    opacity: 0.92;
+    touch-action: none;
+}
+
+.skillorder-drag-ghost .skillpreview {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
 }
 
 .surrender-confirm {
@@ -6600,30 +6672,13 @@ body.ingame-client-page .backgroundingame {
     width: 282px;
     min-height: 58px;
     justify-content: center;
-    gap: 24px;
+    gap: 20px;
     z-index: 2;
 }
 
-.game-remaster .ChakraChooseEndTurn .skillorder::before {
-    content: "ADJUST SKILL ORDER";
-    position: absolute;
-    top: -32px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-shadow: 0 1px 2px rgba(255, 248, 210, 0.95), 0 2px 4px rgba(45, 21, 7, 0.18);
-    pointer-events: none;
-}
-
-.game-remaster .ChakraChooseEndTurn .skillpreview {
-    width: 50px;
-    height: 50px;
-    background: #a7a7a7;
-    border: 1px solid #222222;
-    object-fit: cover;
+.game-remaster .ChakraChooseEndTurn .skillorder-item {
+    width: 52px;
+    height: 52px;
 }
 
 .game-remaster .ok-buttonendturn,

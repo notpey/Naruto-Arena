@@ -1806,11 +1806,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            queuedEntries.forEach((queued) => {
+            let activePointerDrag = null;
+
+            queuedEntries.forEach((queued, qIdx) => {
                 const actorSlot = Number.parseInt(queued.actorSlot, 10);
                 const skillIdx = Number.parseInt(queued.skillIndex, 10);
                 const meta = playerSkillMetaByKey.get(`${actorSlot}:${skillIdx}`);
                 const effectiveSkill = getEffectiveSkillForActorSlot(actorSlot, skillIdx) || meta?.skill;
+
+                const itemWrapper = document.createElement('div');
+                itemWrapper.className = 'skillorder-item';
+                itemWrapper.dataset.actorSlot = String(actorSlot);
+                itemWrapper.dataset.skillIndex = String(skillIdx);
+                itemWrapper.dataset.queueIndex = String(qIdx);
+                itemWrapper.title = `${qIdx + 1}. ${effectiveSkill?.name || 'Queued Skill'} (Tap to swap position, or drag to reorder)`;
+
+                const orderBadge = document.createElement('span');
+                orderBadge.className = 'skillorder-seq-badge';
+                orderBadge.textContent = String(qIdx + 1);
+                itemWrapper.appendChild(orderBadge);
+
                 const preview = document.createElement('img');
                 preview.className = 'skillpreview';
                 preview.alt = effectiveSkill?.name || `Queued Skill ${skillIdx + 1}`;
@@ -1821,55 +1836,127 @@ document.addEventListener('DOMContentLoaded', async () => {
                     fallback.className = 'skillpreview skillpreview-text';
                     fallback.textContent = effectiveSkill?.name ? effectiveSkill.name.slice(0, 3).toUpperCase() : 'SKL';
                     fallback.title = effectiveSkill?.name || 'Queued Skill';
-                    skillOrderEl.appendChild(fallback);
+                    itemWrapper.appendChild(fallback);
                 };
-                preview.draggable = true;
-                preview.title = 'Click to move this queued skill first. Drag to reorder.';
-                preview.dataset.actorSlot = String(actorSlot);
-                preview.dataset.skillIndex = String(skillIdx);
-                preview.addEventListener('click', () => {
-                    const currentOrder = getOrderedQueuedEntries().map((entry) =>
-                        Number.parseInt(entry.actorSlot, 10)
-                    );
-                    if (currentOrder.length <= 1 || currentOrder[0] === actorSlot) return;
-                    const nextOrder = [
+                itemWrapper.appendChild(preview);
+
+                let dragMoved = false;
+
+                itemWrapper.addEventListener('pointerdown', (e) => {
+                    if (queuedEntries.length <= 1) return;
+                    dragMoved = false;
+                    try {
+                        itemWrapper.setPointerCapture(e.pointerId);
+                    } catch (_) {}
+
+                    const rect = itemWrapper.getBoundingClientRect();
+                    const ghost = itemWrapper.cloneNode(true);
+                    ghost.className = 'skillorder-drag-ghost';
+                    ghost.style.left = `${rect.left}px`;
+                    ghost.style.top = `${rect.top}px`;
+                    ghost.style.width = `${rect.width}px`;
+                    ghost.style.height = `${rect.height}px`;
+                    document.body.appendChild(ghost);
+
+                    itemWrapper.classList.add('is-dragging-origin');
+
+                    activePointerDrag = {
+                        pointerId: e.pointerId,
                         actorSlot,
-                        ...currentOrder.filter((slot) => slot !== actorSlot),
-                    ];
-                    reorderQueuedSkills(nextOrder).catch((error) =>
-                        console.warn('Queued reorder failed.', error)
-                    );
+                        ghost,
+                        startX: e.clientX,
+                        startY: e.clientY,
+                    };
                 });
-                preview.addEventListener('dragstart', () => {
-                    draggingQueueActorSlot = actorSlot;
-                    preview.classList.add('dragging');
+
+                itemWrapper.addEventListener('pointermove', (e) => {
+                    if (!activePointerDrag || activePointerDrag.pointerId !== e.pointerId) return;
+                    const dx = e.clientX - activePointerDrag.startX;
+                    const dy = e.clientY - activePointerDrag.startY;
+                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                        dragMoved = true;
+                    }
+                    if (activePointerDrag.ghost) {
+                        activePointerDrag.ghost.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(1.12)`;
+                    }
+
+                    document.querySelectorAll('.skillorder-item').forEach((el) => {
+                        const r = el.getBoundingClientRect();
+                        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+                            if (Number.parseInt(el.dataset.actorSlot, 10) !== actorSlot) {
+                                el.classList.add('drop-target-over');
+                            } else {
+                                el.classList.remove('drop-target-over');
+                            }
+                        } else {
+                            el.classList.remove('drop-target-over');
+                        }
+                    });
                 });
-                preview.addEventListener('dragend', () => {
-                    draggingQueueActorSlot = null;
-                    preview.classList.remove('dragging');
-                });
-                preview.addEventListener('dragover', (event) => {
-                    event.preventDefault();
-                });
-                preview.addEventListener('drop', (event) => {
-                    event.preventDefault();
-                    if (!Number.isInteger(draggingQueueActorSlot)) return;
-                    const targetSlot = Number.parseInt(preview.dataset.actorSlot, 10);
-                    if (!Number.isInteger(targetSlot) || targetSlot === draggingQueueActorSlot) return;
-                    const currentOrder = getOrderedQueuedEntries().map((entry) =>
-                        Number.parseInt(entry.actorSlot, 10)
-                    );
-                    const fromIdx = currentOrder.indexOf(draggingQueueActorSlot);
-                    const toIdx = currentOrder.indexOf(targetSlot);
-                    if (fromIdx < 0 || toIdx < 0) return;
-                    const nextOrder = currentOrder.slice();
-                    const [moved] = nextOrder.splice(fromIdx, 1);
-                    nextOrder.splice(toIdx, 0, moved);
-                    reorderQueuedSkills(nextOrder).catch((error) =>
-                        console.warn('Queued reorder failed.', error)
-                    );
-                });
-                skillOrderEl.appendChild(preview);
+
+                const endDrag = (e) => {
+                    if (!activePointerDrag || activePointerDrag.pointerId !== e.pointerId) return;
+                    try {
+                        itemWrapper.releasePointerCapture(e.pointerId);
+                    } catch (_) {}
+
+                    if (activePointerDrag.ghost) {
+                        activePointerDrag.ghost.remove();
+                    }
+                    itemWrapper.classList.remove('is-dragging-origin');
+
+                    let dropTargetSlot = null;
+                    document.querySelectorAll('.skillorder-item').forEach((el) => {
+                        const r = el.getBoundingClientRect();
+                        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+                            dropTargetSlot = Number.parseInt(el.dataset.actorSlot, 10);
+                        }
+                        el.classList.remove('drop-target-over');
+                    });
+
+                    activePointerDrag = null;
+
+                    if (dragMoved && Number.isInteger(dropTargetSlot) && dropTargetSlot !== actorSlot) {
+                        const currentOrder = getOrderedQueuedEntries().map((entry) =>
+                            Number.parseInt(entry.actorSlot, 10)
+                        );
+                        const fromIdx = currentOrder.indexOf(actorSlot);
+                        const toIdx = currentOrder.indexOf(dropTargetSlot);
+                        if (fromIdx >= 0 && toIdx >= 0) {
+                            const nextOrder = currentOrder.slice();
+                            const [moved] = nextOrder.splice(fromIdx, 1);
+                            nextOrder.splice(toIdx, 0, moved);
+                            reorderQueuedSkills(nextOrder).catch((err) =>
+                                console.warn('Queued reorder failed.', err)
+                            );
+                        }
+                    } else if (!dragMoved) {
+                        const currentOrder = getOrderedQueuedEntries().map((entry) =>
+                            Number.parseInt(entry.actorSlot, 10)
+                        );
+                        if (currentOrder.length === 2) {
+                            const nextOrder = [currentOrder[1], currentOrder[0]];
+                            reorderQueuedSkills(nextOrder).catch((err) =>
+                                console.warn('Queued reorder failed.', err)
+                            );
+                        } else if (currentOrder.length > 2) {
+                            const fromIdx = currentOrder.indexOf(actorSlot);
+                            if (fromIdx >= 0) {
+                                const nextOrder = currentOrder.slice();
+                                const [moved] = nextOrder.splice(fromIdx, 1);
+                                nextOrder.unshift(moved);
+                                reorderQueuedSkills(nextOrder).catch((err) =>
+                                    console.warn('Queued reorder failed.', err)
+                                );
+                            }
+                        }
+                    }
+                };
+
+                itemWrapper.addEventListener('pointerup', endDrag);
+                itemWrapper.addEventListener('pointercancel', endDrag);
+
+                skillOrderEl.appendChild(itemWrapper);
             });
         };
 
