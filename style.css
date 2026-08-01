@@ -4401,8 +4401,11 @@ text-transform: uppercase;
     width: 75px;
     position: relative;
     z-index: 1;
-
 }
+
+.character-card:nth-child(1) { z-index: 30; }
+.character-card:nth-child(2) { z-index: 20; }
+.character-card:nth-child(3) { z-index: 10; }
 
 .character-face {
     width: 75px;
@@ -5726,32 +5729,32 @@ text-transform: uppercase;
 /* --- Left Team (Player) Rank Hats --- */
 .player-characters .rank-hat-academy,
 .rank-hat[data-hat="academy"] {
-    top: -48px;
-    left: -34px;
+    top: -40px;
+    left: -16px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -45px;
-    left: -32px;
+    top: -38px;
+    left: -16px;
     z-index: 10;
     transform: none;
 }
 
 .player-characters .rank-hat-chunin,
 .rank-hat[data-hat="chunin"] {
-    top: -48px;
-    left: -65px;
+    top: -38px;
+    left: -45px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
 .player-characters .rank-hat-jounin,
 .rank-hat[data-hat="jounin"] {
-    top: -45px;
-    left: -45px;
+    top: -38px;
+    left: -32px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
