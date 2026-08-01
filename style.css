@@ -5739,8 +5739,8 @@ text-transform: uppercase;
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -34px;
-    left: -23px;
+    top: -36px;
+    left: -26px;
     z-index: 10;
     transform: none;
 }
