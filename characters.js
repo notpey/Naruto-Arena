@@ -10961,6 +10961,22 @@ const characters = [
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    },
+                    {
                         "type": "apply_status",
                         "statusId": "sarutobi_hiruzen_dead_demon_seal_enemy",
                         "duration": 99,
@@ -10969,7 +10985,6 @@ const characters = [
                             "harmful": true,
                             "ongoingClass": "action",
                             "ignoreOngoingSourceStun": true,
-                            "triggerOnApply": true,
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotReduceDamage": true,
@@ -10989,7 +11004,6 @@ const characters = [
                             "harmful": true,
                             "ongoingClass": "action",
                             "ignoreOngoingSourceStun": true,
-                            "triggerOnApply": true,
                             "afflictionDamage": true,
                             "cannotUseSkills": true,
                             "cannotBeCleansed": true,
