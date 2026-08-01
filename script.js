@@ -349,12 +349,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const applyRankHatPresentation = (elements, ladder) => {
         const hatUrl = ladder?.rankHatUrl || defaultLadderRankHat;
+        const hatName = (hatUrl.split('/').pop() || 'academy.png').replace(/\.png$/i, '').toLowerCase();
         const useWideOffset = shouldUseWideRankHatOffset(hatUrl);
         elements.forEach((element) => {
             if (!element) return;
             element.src = hatUrl;
             element.alt = `${ladder?.rank || 'Academy Student'} rank hat`;
-            element.classList.toggle('rank-hat-offset-left', useWideOffset);
+            element.setAttribute('data-hat', hatName);
+            element.className = `rank-hat rank-hat-${hatName}${useWideOffset ? ' rank-hat-offset-left' : ''}`;
         });
     };
 
