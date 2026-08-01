@@ -482,18 +482,20 @@ test('Audit Fixes: 1-Turn enemy debuffs specify turnDurationAnchor = source_turn
     assert.equal(oboroDebuff.metadata.turnDurationAnchor, 'source_turn');
 });
 
-test('Hiruzen Sarutobi: Fire Dragon Flame Bullet timing and Major Summoning Enma affliction damage', () => {
+test('Hiruzen Sarutobi: Fire Dragon Flame Bullet timing and Dead Demon Consuming Seal instant turn end trigger', () => {
     const hiruzenChar = require('../data/characters/sarutobi-hiruzen');
     const fireDragonSkill = hiruzenChar.skills.find((s) => s.id === 'sarutobi-hiruzen-fire-dragon-flame-bullet');
     const fireDragonStatusEffect = fireDragonSkill.effects.find((e) => e.statusId === 'sarutobi_hiruzen_fire_dragon_dot');
     assert.equal(fireDragonStatusEffect.duration, 1);
     assert.equal(fireDragonStatusEffect.metadata.turnDurationAnchor, 'source_turn');
 
-    const enmaSkill = hiruzenChar.skills.find((s) => s.id === 'sarutobi-hiruzen-major-summoning-enma');
-    const enmaDotEffect = enmaSkill.effects.find((e) => e.statusId === 'sarutobi_hiruzen_enma_dot');
-    assert.equal(enmaDotEffect.metadata.afflictionDamage, true);
-    assert.equal(enmaDotEffect.metadata.turnEndDamage, 5);
-    assert.equal(enmaDotEffect.metadata.turnEndTrigger, 'source_turn');
+    const sealSkill = hiruzenChar.skills.find((s) => s.id === 'sarutobi-hiruzen-dead-demon-consuming-seal');
+    const sealEnemyEffect = sealSkill.effects.find((e) => e.statusId === 'sarutobi_hiruzen_dead_demon_seal_enemy');
+    const sealSelfEffect = sealSkill.effects.find((e) => e.statusId === 'sarutobi_hiruzen_dead_demon_seal_self');
+    assert.equal(sealEnemyEffect.metadata.triggerOnApply, true);
+    assert.equal(sealEnemyEffect.metadata.turnEndDamage, 40);
+    assert.equal(sealSelfEffect.metadata.triggerOnApply, true);
+    assert.equal(sealSelfEffect.metadata.turnEndDamage, 20);
 });
 
 
