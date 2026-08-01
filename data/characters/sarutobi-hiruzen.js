@@ -146,9 +146,10 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "ongoingClass": "action",
+                        "afflictionDamage": true,
                         "turnEndDamage": 5,
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 5 damage each turn from Major Summoning: Enma."
+                        "tooltipText": "This character takes 5 affliction damage each turn from Major Summoning: Enma."
                     }
                 },
                 {
