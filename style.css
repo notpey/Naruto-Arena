@@ -5761,6 +5761,14 @@ text-transform: uppercase;
     transform: none;
 }
 
+.player-characters .rank-hat-anbu,
+.rank-hat[data-hat="anbu"] {
+    top: -42px;
+    left: -32px;
+    z-index: 10;
+    transform: none;
+}
+
 /* --- Right Team (Enemy) Rank Hats - Flipped horizontally via container scaleX(-1) --- */
 .enemy-characters .rank-hat {
     left: -32px;
@@ -5801,6 +5809,15 @@ text-transform: uppercase;
     left: -45px;
     right: auto;
     z-index: 1; /* BEHIND character face */
+    transform: none;
+}
+
+.enemy-characters .rank-hat-anbu,
+.enemy-characters .rank-hat[data-hat="anbu"] {
+    top: -42px;
+    left: -32px;
+    right: auto;
+    z-index: 10;
     transform: none;
 }
 
