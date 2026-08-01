@@ -478,6 +478,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         'selectionbg_2.jpg',
     ];
 
+    const INGAME_BACKGROUND_POOL = [
+        'ingamebg_1.jpg',
+        'ingamebg_2.jpg',
+        'ingamebg_3.jpg',
+        'ingamebg_4.jpg',
+        'ingamebg_5.jpg',
+    ];
+
     const applyCustomBackgrounds = (user) => {
         const selectionBackground = document.querySelector('.background');
         const ingameBackground = document.querySelector('.backgroundingame');
@@ -495,9 +503,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         if (ingameBackground) {
-            ingameBackground.style.backgroundImage = ingameUrl
-                ? `url("${ingameUrl}")`
-                : '';
+            if (ingameUrl) {
+                ingameBackground.style.backgroundImage = `url("${ingameUrl}")`;
+            } else {
+                if (!ingameBackground.dataset.poolBg) {
+                    const randomBg = INGAME_BACKGROUND_POOL[Math.floor(Math.random() * INGAME_BACKGROUND_POOL.length)];
+                    ingameBackground.dataset.poolBg = randomBg;
+                }
+                ingameBackground.style.backgroundImage = `url("${ingameBackground.dataset.poolBg}")`;
+            }
         }
     };
 
