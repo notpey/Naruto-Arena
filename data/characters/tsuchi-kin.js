@@ -3,13 +3,13 @@ module.exports = {
     "characterId": "tsuchi-kin",
     "name": "Tsuchi Kin",
     "facePicture": "https://i.imgur.com/hOoNOfj.png",
-    "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
+    "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision.",
     "skills": [
         {
             "id": "tsuchi-kin-illusion-bell-needles",
             "name": "Illusion Bell Needles",
             "skillimage": "https://i.imgur.com/wFHxiW6.png",
-            "skilldescription": "One enemy takes 25 damage. If used after 'Needle and Bell Trap', the target has all their skills silenced for 1 turn. If used after 'Unnerving Bells', the target has all their skills delayed for 1 turn. If used on a disoriented enemy, they will deal 10 less non-affliction damage for 1 turn.",
+            "skilldescription": "Tsuchi Kin deals 20 damage to one enemy.",
             "energy": [
                 "Genjutsu"
             ],
@@ -18,77 +18,13 @@ module.exports = {
             "cooldown": 0,
             "classes": [
                 "Mental",
-                "Physical",
                 "Instant"
             ],
             "effects": [
                 {
                     "type": "damage",
-                    "amount": 25
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_illusion_bell_silence",
-                    "duration": 1,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap"
-                    },
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "silenceNonDamageEffects": true,
-                        "tooltipText": "Silenced: only damage from this character's skills will work."
-                    }
-                },
-                {
-                    "type": "modify_cooldowns",
-                    "amount": 1,
-                    "includeAllCharacterSkills": true,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells"
-                    },
-                    "metadata": {
-                        "harmful": true,
-                        "tooltipText": "This character's skill cooldowns were delayed by 1 turn."
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 5,
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap",
-                        "consumeOnMatch": true
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 5,
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
-                        "consumeOnMatch": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_disoriented_damage_debuff",
-                    "duration": 1,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "tsuchi_kin_disoriented"
-                    },
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "NonAfflictionDamageDebuff": 10,
-                        "tooltipText": "This character deals 10 less non-affliction damage."
-                    }
+                    "amount": 20,
+                    "scope": "target"
                 }
             ]
         },
@@ -96,31 +32,22 @@ module.exports = {
             "id": "tsuchi-kin-needle-and-bell-trap",
             "name": "Needle and Bell Trap",
             "skillimage": "https://i.imgur.com/spMHiJJ.png",
-            "skilldescription": "One enemy cannot reduce damage or become invulnerable for 2 turns and has their skills stunned for 1 turn. 'Illusion Bell Needles' deals 5 damage next turn.",
+            "skilldescription": "Tsuchi Kin deals 15 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
             "energy": [
                 "Random"
             ],
             "target": "single-enemy",
             "damage": 0,
-            "cooldown": 3,
+            "cooldown": 1,
             "classes": [
                 "Strategic",
-                "Physical",
-                "Physical",
                 "Instant"
             ],
             "effects": [
                 {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_needle_and_bell_trap_debuff",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable."
-                    }
+                    "type": "damage",
+                    "amount": 15,
+                    "scope": "target"
                 },
                 {
                     "type": "apply_status",
@@ -129,26 +56,12 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
-                        "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned and cannot use skills.",
+                        "cannotUseSkillClasses": [
+                            "physical",
+                            "strategic"
+                        ],
+                        "tooltipText": "This character's physical and strategic skills are stunned.",
                         "turnDurationAnchor": "source_turn"
-                    }
-                },
-                {
-                    "type": "cleanse_statuses",
-                    "scope": "self",
-                    "metadataAny": [
-                        "tsuchiKinIllusionBellPrep"
-                    ]
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "tsuchiKinIllusionBellPrep": true,
-                        "tooltipText": "Illusion Bell Needles is empowered by Needle and Bell Trap."
                     }
                 }
             ]
@@ -157,52 +70,27 @@ module.exports = {
             "id": "tsuchi-kin-unnerving-bells",
             "name": "Unnerving Bells",
             "skillimage": "https://i.imgur.com/BU6EHyR.png",
-            "skilldescription": "One enemy loses 1 random chakra and becomes disoriented for 1 turn. 'Illusion Bell Needles' deals 5 additional damage next turn.",
+            "skilldescription": "Tsuchi Kin deals 10 damage to one enemy and removes 1 random chakra from them.",
             "energy": [
                 "Random"
             ],
             "target": "single-enemy",
             "damage": 0,
-            "cooldown": 2,
+            "cooldown": 1,
             "classes": [
                 "Strategic",
-                "Mental",
-                "Physical",
                 "Instant"
             ],
             "effects": [
                 {
-                    "type": "remove_random_chakra",
-                    "amount": 1,
+                    "type": "damage",
+                    "amount": 10,
                     "scope": "target"
                 },
                 {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_disoriented",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "This character is disoriented by Unnerving Bells."
-                    }
-                },
-                {
-                    "type": "cleanse_statuses",
-                    "scope": "self",
-                    "metadataAny": [
-                        "tsuchiKinIllusionBellPrep"
-                    ]
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "tsuchiKinIllusionBellPrep": true,
-                        "tooltipText": "Illusion Bell Needles is empowered by Unnerving Bells."
-                    }
+                    "type": "remove_random_chakra",
+                    "amount": 1,
+                    "scope": "target"
                 }
             ]
         },

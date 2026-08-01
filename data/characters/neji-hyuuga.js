@@ -35,7 +35,7 @@ module.exports = {
                         "ongoingClass": "action",
                         "triggerOnApply": true,
                         "NonAfflictionDamageDebuff": 10,
-                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage. Eight Trigrams Sixty-Four Palms will remove 1 additional random chakra."
+                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
                     }
                 }
             ]
@@ -77,7 +77,7 @@ module.exports = {
             "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
             "name": "Eight Trigrams Sixty-Four Palms",
             "skillimage": "https://i.imgur.com/HsyJQsX.png",
-            "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them. If this enemy is affected by 'Gentle Fist', 1 additional random chakra will be removed.",
+            "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them.",
             "energy": [
                 "Taijutsu",
                 "Bloodline"
@@ -99,15 +99,6 @@ module.exports = {
                     "type": "remove_random_chakra",
                     "amount": 1,
                     "scope": "target"
-                },
-                {
-                    "type": "remove_random_chakra",
-                    "amount": 1,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "neji_hyuuga_neji_gentle_fist"
-                    }
                 }
             ]
         },

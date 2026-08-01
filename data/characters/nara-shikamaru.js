@@ -18,7 +18,7 @@ module.exports = {
                 "missingStatusId": "nara_shikamaru_meditate"
             },
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Strategic",
                 "Instant"
@@ -50,7 +50,7 @@ module.exports = {
             "cooldown": 1,
             "classes": [
                 "Ninjutsu",
-                "Action"
+                "Control"
             ],
             "effects": [
                 {
@@ -65,7 +65,7 @@ module.exports = {
                         "turnEndDamage": 15,
                         "turnEndTrigger": "source_turn",
                         "turnDurationAnchor": "source_turn",
-                        "ongoingClass": "action",
+                        "ongoingClass": "control",
                         "triggerOnApply": true,
                         "tooltipText": "This character cannot reduce damage or become invulnerable and takes 15 damage."
                     }
@@ -81,7 +81,7 @@ module.exports = {
             "skillimage": "https://i.imgur.com/Hip2U8C.png",
             "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
             "energy": [
-                "Random",
+                "Genjutsu",
                 "Random"
             ],
             "target": "all-enemy",

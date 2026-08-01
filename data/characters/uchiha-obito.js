@@ -9,7 +9,7 @@ module.exports = {
             "id": "uchiha-obito-piercing-stab",
             "name": "Piercing Stab",
             "skillimage": "https://i.imgur.com/YjvbfdY.png",
-            "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage.",
+            "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage and ignore invulnerability.",
             "energy": [
                 "Random"
             ],
@@ -111,7 +111,10 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "damageReductionFlat": 15,
-                        "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan."
+                        "ignoreInvulnerabilityForSkillIds": [
+                            "uchiha-obito-piercing-stab"
+                        ],
+                        "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan and Piercing Stab ignores invulnerability."
                     }
                 },
                 {

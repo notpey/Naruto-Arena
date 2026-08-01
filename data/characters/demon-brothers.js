@@ -186,7 +186,7 @@ module.exports = {
             "name": "Chain Shred",
             "hiddenFromSelectionViewer": true,
             "skillimage": "https://i.imgur.com/TZmKHyi.png",
-            "skilldescription": "Demon Brothers target one enemy affected by 'Chain Wrap', dealing 45 piercing damage to them and re-applying 'Chain Wrap' on them.",
+            "skilldescription": "Demon Brothers target one enemy affected by 'Chain Wrap', dealing 40 piercing damage to them and re-applying 'Chain Wrap' on them.",
             "energy": [
                 "Taijutsu"
             ],
@@ -203,7 +203,7 @@ module.exports = {
             "effects": [
                 {
                     "type": "damage",
-                    "amount": 45,
+                    "amount": 40,
                     "scope": "target",
                     "metadata": {
                         "ignoreDestructibleDefense": true

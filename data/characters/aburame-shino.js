@@ -11,8 +11,7 @@ module.exports = {
             "skillimage": "https://i.imgur.com/F9DLM31.png",
             "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random chakra from them. This skill deals 5 additional damage with each use.",
             "energy": [
-                "Bloodline",
-                "Random"
+                "Bloodline"
             ],
             "target": "single-enemy",
             "damage": 0,

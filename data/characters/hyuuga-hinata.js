@@ -154,10 +154,8 @@ module.exports = {
             "id": "hyuuga-hinata-byakugan",
             "name": "Byakugan",
             "skillimage": "https://i.imgur.com/TcjSSGB.png",
-            "skilldescription": "Hyuuga Hinata gains 15 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
-            "energy": [
-                "Random"
-            ],
+            "skilldescription": "Hyuuga Hinata costs no chakra and gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
+            "energy": [],
             "target": "self",
             "damage": 0,
             "cooldown": 3,
@@ -172,8 +170,8 @@ module.exports = {
                     "duration": 3,
                     "scope": "self",
                     "metadata": {
-                        "damageReductionFlat": 15,
-                        "tooltipText": "Hinata has 15 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
+                        "damageReductionFlat": 10,
+                        "tooltipText": "Hinata has 10 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
                     }
                 }
             ]

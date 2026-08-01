@@ -98,7 +98,7 @@ module.exports = {
             ],
             "target": "all-enemy",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 2,
             "classes": [
                 "Physical",
                 "Instant"

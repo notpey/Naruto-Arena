@@ -70,11 +70,11 @@ module.exports = {
             "id": "haruno-sakura-inner-sakura",
             "name": "Inner Sakura",
             "skillimage": "https://i.imgur.com/srHzKvO.png",
-            "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently. This skill is replaced by 'Inner Sakura Strangle'.",
+            "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently and ignores stun effects for 1 turn. This skill is replaced by 'Inner Sakura Strangle'.",
             "energy": [],
             "target": "self",
             "damage": 0,
-            "cooldown": 4,
+            "cooldown": 0,
             "classes": [
                 "Strategic",
                 "Instant"
@@ -91,6 +91,17 @@ module.exports = {
                             "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
                         },
                         "tooltipText": "Sakura has 5 damage reduction\nInner Sakura is replaced by Inner Sakura Strangle."
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "haruno_sakura_inner_sakura_stun_immunity",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "cannotBeStunned": true,
+                        "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
+                        "turnDurationAnchor": "source_turn"
                     }
                 }
             ]
@@ -128,7 +139,7 @@ module.exports = {
             "name": "Inner Sakura Strangle",
             "hiddenFromSelectionViewer": true,
             "skillimage": "https://i.imgur.com/srHzKvO.png",
-            "skilldescription": "Haruno Sakura targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
+            "skilldescription": "Haruno Sakura ignores stun effects for 1 turn and targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
             "energy": [
                 "Genjutsu"
             ],
@@ -140,6 +151,17 @@ module.exports = {
                 "Instant"
             ],
             "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "haruno_sakura_inner_sakura_stun_immunity",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "cannotBeStunned": true,
+                        "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
+                        "turnDurationAnchor": "source_turn"
+                    }
+                },
                 {
                     "type": "HealthLoss",
                     "amount": 5,

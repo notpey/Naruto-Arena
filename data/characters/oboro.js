@@ -10,14 +10,13 @@ module.exports = {
             "id": "oboro-exploding-kunai",
             "name": "Exploding Kunai",
             "skillimage": "https://i.imgur.com/fo853Ic.png",
-            "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill will cost 1 less random chakra and will deal 5 additional damage.",
+            "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill has no cooldown.",
             "energy": [
-                "Random",
                 "Random"
             ],
             "target": "all-enemy",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Physical",
                 "Instant"
@@ -90,7 +89,7 @@ module.exports = {
             "id": "oboro-haze-clone",
             "name": "Haze Clone",
             "skillimage": "https://i.imgur.com/6zjMsdw.png",
-            "skilldescription": "For 2 turns, 'Exploding Kunai' will cost 1 less random chakra and will deal 5 additional damage and 'Earth Swim' will target all enemies and will cost 1 less random chakra. During this time, Oboro will become invulnerable to non-strategic skills.",
+            "skilldescription": "Oboro gains 25 points of destructible defense for 2 turns. During this time, 'Exploding Kunai' has no cooldown and 'Earth Swim' will target all enemies.",
             "energy": [
                 "Random"
             ],
@@ -109,17 +108,12 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
-                        "invulnerableToSkillClasses": [
-                            "physical",
-                            "energy",
-                            "affliction",
-                            "mental"
-                        ],
+                        "destructibleDefensePoints": 25,
                         "skillReplacements": {
                             "oboro-exploding-kunai": "oboro-exploding-kunai-empowered",
                             "oboro-earth-swim": "oboro-earth-swim-empowered"
                         },
-                        "tooltipText": "Oboro is invulnerable to non-strategic skills. 'Exploding Kunai' and 'Earth Swim' are improved."
+                        "tooltipText": "Oboro has 25 destructible defense. 'Exploding Kunai' has no cooldown and 'Earth Swim' is improved."
                     }
                 }
             ]

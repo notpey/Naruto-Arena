@@ -101,7 +101,7 @@ module.exports = {
             "id": "temari-dust-wind",
             "name": "Dust Wind",
             "skillimage": "https://i.imgur.com/oBQQWNM.png",
-            "skilldescription": "Temari kicks up dust, making her team invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
+            "skilldescription": "Temari kicks up dust, making herself invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
             "energy": [
                 "Ninjutsu",
                 "Random"
@@ -119,7 +119,7 @@ module.exports = {
                     "type": "apply_status",
                     "statusId": "temari_dust_wind_invulnerable",
                     "duration": 1,
-                    "scope": "all-allies",
+                    "scope": "self",
                     "metadata": {
                         "invulnerable": true,
                         "tooltipText": "This character is invulnerable."

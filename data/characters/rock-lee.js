@@ -9,7 +9,7 @@ module.exports = {
             "id": "rock-lee-high-speed-taijutsu",
             "name": "High Speed Taijutsu",
             "skillimage": "https://i.imgur.com/f59XWBW.png",
-            "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him. This skill requires 'Fifth Gate Opening'.",
+            "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. This skill requires 'Fifth Gate Opening'.",
             "energy": [
                 "Taijutsu"
             ],
@@ -22,8 +22,7 @@ module.exports = {
             "classes": [
                 "Physical",
                 "Taijutsu",
-                "Instant",
-                "Affliction"
+                "Instant"
             ],
             "effects": [
                 {
@@ -33,22 +32,6 @@ module.exports = {
                     "metadata": {
                         "ignoreDamageReduction": true
                     }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "rock_lee_high_speed_taijutsu_minimum_hp",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "minimumHp": 1,
-                        "hideTooltip": true,
-                        "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
-                    }
-                },
-                {
-                    "type": "HealthLoss",
-                    "amount": 5,
-                    "scope": "self"
                 }
             ]
         },
@@ -171,7 +154,7 @@ module.exports = {
             "hiddenFromSelectionViewer": true,
             "useBaseSkillCooldown": true,
             "skillimage": "https://i.imgur.com/h658CGb.png",
-            "skilldescription": "Rock Lee expends all his chakra and deals 50 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage. This skill cannot be countered.",
+            "skilldescription": "Rock Lee deals 50 piercing damage to one enemy. This skill cannot be countered.",
             "energy": [
                 "Taijutsu",
                 "Taijutsu"
@@ -182,8 +165,7 @@ module.exports = {
             "classes": [
                 "Physical",
                 "Taijutsu",
-                "Instant",
-                "Affliction"
+                "Instant"
             ],
             "effects": [
                 {
@@ -193,21 +175,6 @@ module.exports = {
                     "metadata": {
                         "ignoreDamageReduction": true
                     }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "rock_lee_final_lotus_minimum_hp",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "minimumHp": 1,
-                        "tooltipText": "Final Lotus cannot kill Rock Lee."
-                    }
-                },
-                {
-                    "type": "HealthLoss",
-                    "amount": 5,
-                    "scope": "self"
                 }
             ],
             "cannotBeCountered": true

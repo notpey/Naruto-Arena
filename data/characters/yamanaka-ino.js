@@ -126,88 +126,8 @@ module.exports = {
             ]
         },
         {
-            "id": "yamanaka-ino-chakra-hair-strand-trap",
-            "name": "Chakra Hair Strand Trap",
-            "skillimage": "https://i.imgur.com/CH2jrFU.png",
-            "skilldescription": "Yamanaka Ino targets one enemy. For 1 turn, if they use a skill, they receive 10 damage, have their strategic skills stunned for 1 turn, and become unable to ignore stun effects for 1 turn. This skill is invisible.",
-            "energy": [],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Strategic",
-                "Ninjutsu",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "yamanaka_ino_chakra_hair_strand_trap",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "hideTooltipFromUnitOwner": true,
-                        "onOwnerUseSkillTrigger": true,
-                        "onOwnerUseSkillEffects": [
-                            {
-                                "type": "damage",
-                                "amount": 10,
-                                "scope": "self"
-                            },
-                            {
-                                "type": "apply_status",
-                                "statusId": "yamanaka_ino_chakra_hair_strand_trap_strategic_stun",
-                                "duration": 1,
-                                "scope": "self",
-                                "metadata": {
-                                    "harmful": true,
-                                    "cannotUseSkillClasses": [
-                                        "strategic"
-                                    ],
-                                    "cannotIgnoreStuns": true,
-                                    "tooltipText": "This character's strategic skills are stunned and they cannot ignore stun effects."
-                                }
-                            }
-                        ],
-                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
-        },
-        {
-            "id": "yamanaka-ino-ino-block",
-            "name": "Ino Block",
-            "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
-            "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        },
-        {
             "id": "yamanaka-ino-art-of-the-valentine",
             "name": "Art of the Valentine",
-            "hiddenFromSelectionViewer": true,
             "skillimage": "https://i.imgur.com/p25BBXs.png",
             "skilldescription": "Yamanaka Ino deals 15 damage to one enemy. If the target is affected by a stun effect, this skill deals 10 additional damage.",
             "energy": [
@@ -242,6 +162,34 @@ module.exports = {
                             "haruno_sakura_ko_punch_stun",
                             "uzumaki_naruto_rasengan_stun"
                         ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "yamanaka-ino-ino-block",
+            "name": "Ino Block",
+            "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
+            "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "invulnerable",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "invulnerable": true,
+                        "tooltipText": "This character is invulnerable."
                     }
                 }
             ]

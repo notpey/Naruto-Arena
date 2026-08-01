@@ -9,7 +9,7 @@ module.exports = {
             "id": "gaara-of-the-desert-sand-coffin",
             "name": "Sand Coffin",
             "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-            "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+            "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable.",
             "energy": [
                 "Ninjutsu",
                 "Random"
@@ -52,50 +52,61 @@ module.exports = {
                         "ongoingClass": "control",
                         "turnDurationAnchor": "source_turn"
                     }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_coffin_ready",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "skillReplacements": {
-                            "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
-                        },
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Sand Coffin is replaced by Sand Burial.",
-                        "ongoingClass": "control"
-                    }
                 }
             ]
         },
         {
-            "id": "gaara-of-the-desert-sand-clone",
-            "name": "Sand Clone",
-            "skillimage": "https://i.imgur.com/SCRKMIU.png",
-            "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
-            "energy": [],
-            "target": "self",
-            "targetCondition": {
-                "missingStatusId": "gaara_sand_clone"
-            },
+            "id": "gaara-of-the-desert-sand-burial",
+            "name": "Sand Burial",
+            "cannotBeCountered": true,
+            "cannotBeReflected": true,
+            "skillimage": "https://i.imgur.com/ljX9izT.png",
+            "skilldescription": "Gaara deals 30 piercing damage to one enemy and ignores helpful effects for 1 turn. If used 1 turn after 'Sand Coffin', this skill costs 1 ninjutsu and 1 bloodline chakra and deals 50 piercing damage instead.",
+            "energy": [
+                "Ninjutsu"
+            ],
+            "target": "single-enemy",
             "damage": 0,
-            "cooldown": 1,
+            "cooldown": 0,
             "classes": [
-                "Strategic",
+                "Physical",
                 "Instant"
             ],
             "effects": [
                 {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_clone",
-                    "duration": 99,
-                    "scope": "self",
+                    "type": "damage",
+                    "amount": 30,
+                    "scope": "target",
+                    "condition": {
+                        "scope": "target",
+                        "missingStatusId": "gaara_sand_coffin_crush"
+                    },
                     "metadata": {
-                        "cannotBeStunned": true,
-                        "stunImmune": true,
-                        "triggerOnEnemyHarmfulNonMental": true,
-                        "tooltipText": "Gaara ignores stuns until an enemy next uses a harmful non-mental skill on him."
+                        "ignoreDamageReduction": true
+                    }
+                },
+                {
+                    "type": "damage",
+                    "amount": 50,
+                    "scope": "target",
+                    "condition": {
+                        "scope": "target",
+                        "statusId": "gaara_sand_coffin_crush"
+                    },
+                    "metadata": {
+                        "ignoreDamageReduction": true
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "gaara_sand_burial_ignore_helpful",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "ignoreHelpfulEffects": true,
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "This character ignores helpful effects for 1 turn."
                     }
                 }
             ]
@@ -104,7 +115,7 @@ module.exports = {
             "id": "gaara-of-the-desert-armor-of-sand",
             "name": "Armor of Sand",
             "skillimage": "https://i.imgur.com/qfrA8gB.png",
-            "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot be used again while it is still active.",
+            "skilldescription": "Gaara gains 25 points of permanent destructible defense. This skill cannot be used again while it is still active.",
             "energy": [
                 "Random"
             ],
@@ -125,8 +136,8 @@ module.exports = {
                     "duration": 99,
                     "scope": "self",
                     "metadata": {
-                        "destructibleDefensePoints": 40,
-                        "tooltipText": "Gaara has 40 points of permanent destructible defense from Armor of Sand."
+                        "destructibleDefensePoints": 25,
+                        "tooltipText": "Gaara has 25 points of permanent destructible defense from Armor of Sand."
                     }
                 }
             ]
@@ -156,48 +167,6 @@ module.exports = {
                         "invulnerable": true,
                         "tooltipText": "This character is invulnerable."
                     }
-                }
-            ]
-        },
-        {
-            "id": "gaara-of-the-desert-sand-burial",
-            "name": "Sand Burial",
-            "hiddenFromSelectionViewer": true,
-            "cannotBeCountered": true,
-            "cannotBeReflected": true,
-            "skillimage": "https://i.imgur.com/ljX9izT.png",
-            "skilldescription": "Gaara destroys all destructible defense on one enemy, deals 50 piercing damage to them, and removes 1 random chakra. This skill requires 'Sand Coffin' to be active on this enemy. This skill cannot be countered or reflected.",
-            "energy": [
-                "Ninjutsu",
-                "Ninjutsu"
-            ],
-            "target": "single-enemy",
-            "targetCondition": {
-                "statusId": "gaara_sand_coffin_crush"
-            },
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "destroy_destructible_defense",
-                    "scope": "target"
-                },
-                {
-                    "type": "damage",
-                    "amount": 50,
-                    "scope": "target",
-                    "metadata": {
-                        "ignoreDamageReduction": true
-                    }
-                },
-                {
-                    "type": "remove_random_chakra",
-                    "amount": 1,
-                    "scope": "target"
                 }
             ]
         }

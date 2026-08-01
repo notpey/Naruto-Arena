@@ -9,7 +9,7 @@ module.exports = {
             "id": "dosu-kinuta-resonating-echo-drill",
             "name": "Resonating Echo Drill",
             "skillimage": "https://i.imgur.com/arSzsOV.png",
-            "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
+            "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 1 turn. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
             "energy": [
                 "Taijutsu"
             ],
@@ -29,7 +29,7 @@ module.exports = {
                 {
                     "type": "apply_status",
                     "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                    "duration": 2,
+                    "duration": 1,
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
