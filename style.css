@@ -5755,8 +5755,8 @@ text-transform: uppercase;
 
 .player-characters .rank-hat-jounin,
 .rank-hat[data-hat="jounin"] {
-    top: -38px;
-    left: -32px;
+    top: -40px;
+    left: -48px;
     z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
@@ -5805,8 +5805,8 @@ text-transform: uppercase;
 
 .enemy-characters .rank-hat-jounin,
 .enemy-characters .rank-hat[data-hat="jounin"] {
-    top: -45px;
-    left: -45px;
+    top: -40px;
+    left: -48px;
     right: auto;
     z-index: 1; /* BEHIND character face */
     transform: none;
@@ -6131,6 +6131,7 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .player-characters {
     gap: 80px;
     margin-top: 15px;
+    margin-left: 48px;
 }
 
 .game-remaster .enemy-characters {
