@@ -4403,9 +4403,12 @@ text-transform: uppercase;
     z-index: 1;
 }
 
-.character-card:nth-child(1) { z-index: 30; }
-.character-card:nth-child(2) { z-index: 20; }
-.character-card:nth-child(3) { z-index: 10; }
+.character-card:nth-child(1),
+.game-remaster .character-card:nth-child(1) { z-index: 30; }
+.character-card:nth-child(2),
+.game-remaster .character-card:nth-child(2) { z-index: 20; }
+.character-card:nth-child(3),
+.game-remaster .character-card:nth-child(3) { z-index: 10; }
 
 .character-face {
     width: 75px;
@@ -5736,7 +5739,7 @@ text-transform: uppercase;
 
 .player-characters .rank-hat-genin,
 .rank-hat[data-hat="genin"] {
-    top: -26px;
+    top: -32px;
     left: -16px;
     z-index: 10;
     transform: none;
