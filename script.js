@@ -3807,11 +3807,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
-        const renderSkillInfo = (character, skill, actorSlot = null, skillIdx = null) => {
+        const renderSkillInfo = (character, skill, actorSlot = null, skillIdx = null, isBrowseNavCall = false) => {
             if (!skill || !character) return;
-            // Viewing one of the player's own skills (actorSlot set) always exits
-            // the enemy skill-browse mode so its prev/next controls don't linger.
-            if (actorSlot !== null && enemySkillBrowseState) {
+            if (!isBrowseNavCall && enemySkillBrowseState) {
                 enemySkillBrowseState = null;
                 if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
             }
@@ -3830,7 +3828,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillInfo.nameEl.textContent = skill.name || 'Skill';
             }
             if (skillInfo.descEl) {
-                skillInfo.descEl.textContent = skill.skilldescription || '';
+                let rawDesc = escapeHtml(skill.skilldescription || '');
+                let formattedDesc = rawDesc
+                    .replace(/\b((?:deals?|dealing|inflicts?|inflicting)\s+(?:\d+)\s+(?:damage|affliction damage|piercing damage))\b/gi,
+                        '<strong class="desc-highlight-damage">$1</strong>')
+                    .replace(/\b((?:heals?|healing|restores?|restoring)\s+(?:\d+)\s+(?:health|hp))\b/gi,
+                        '<strong class="desc-highlight-heal">$1</strong>');
+                skillInfo.descEl.innerHTML = formattedDesc;
             }
             if (skillInfo.cooldownEl) {
                 skillInfo.cooldownEl.textContent = skill.cooldown ?? '-';
@@ -3913,53 +3917,109 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        let enemySkillBrowseState = null; // { character, skillIdx }
+        let enemySkillBrowseState = null; // { side: 'opponent' | 'player', charSlot: 0..2, skillIdx: 0..3 }
 
-        const updateSkillBrowseNav = () => {
-            if (!skillInfo.browseNavEl) return;
-            if (!enemySkillBrowseState) {
-                skillInfo.browseNavEl.style.display = 'none';
-                return;
-            }
-            const { character, skillIdx } = enemySkillBrowseState;
-            const total = Array.isArray(character?.skills) ? character.skills.length : 0;
-            skillInfo.browseNavEl.style.display = total > 1 ? 'flex' : 'none';
-            if (skillInfo.browseLabelEl) {
-                skillInfo.browseLabelEl.textContent = `${character?.name || 'Enemy'} — ${skillIdx + 1} / ${total}`;
-            }
+        const getCharacterBySideAndSlot = (side, slot) => {
+            if (!Number.isInteger(slot) || slot < 0) return null;
+            const teamIndices = side === 'player' ? currentPlayerTeamIndices : currentOpponentTeamIndices;
+            const rosterIndex = teamIndices?.[slot];
+            if (!Number.isInteger(rosterIndex)) return null;
+            return getRosterData()?.[rosterIndex] || null;
         };
 
         const renderEnemySkillBrowse = () => {
-            if (!enemySkillBrowseState) return;
-            const { character, skillIdx } = enemySkillBrowseState;
-            const skill = character?.skills?.[skillIdx];
+            if (!enemySkillBrowseState) {
+                if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
+                return;
+            }
+            const { side, charSlot, skillIdx } = enemySkillBrowseState;
+            const character = getCharacterBySideAndSlot(side, charSlot);
+            if (!character || !Array.isArray(character.skills) || !character.skills.length) {
+                if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
+                return;
+            }
+            const safeSkillIdx = Math.max(0, Math.min(character.skills.length - 1, skillIdx));
+            enemySkillBrowseState.skillIdx = safeSkillIdx;
+            const skill = character.skills[safeSkillIdx];
             if (!skill) return;
-            renderSkillInfo(character, skill, null, null);
-            updateSkillBrowseNav();
+
+            renderSkillInfo(character, skill, null, null, true);
+
+            if (skillInfo.browseNavEl) {
+                skillInfo.browseNavEl.style.display = 'flex';
+                skillInfo.browseNavEl.innerHTML = `
+                    <div class="skill-browse-char-nav">
+                        <button type="button" class="skill-browse-prev" aria-label="Previous character">&lsaquo;</button>
+                        <span class="skill-browse-label">${escapeHtml(character.name || 'Character')}</span>
+                        <button type="button" class="skill-browse-next" aria-label="Next character">&rsaquo;</button>
+                    </div>
+                    <div class="skill-browse-skills-row">
+                        ${character.skills.map((s, idx) => `
+                            <div class="skill-browse-icon-box ${idx === safeSkillIdx ? 'active' : ''}" data-skill-idx="${idx}" title="${escapeHtml(s.name || 'Skill')}">
+                                <img class="skill-browse-icon-img" src="${escapeHtml(s.skillimage || '')}" alt="${escapeHtml(s.name || 'Skill')}">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                const prevBtn = skillInfo.browseNavEl.querySelector('.skill-browse-prev');
+                const nextBtn = skillInfo.browseNavEl.querySelector('.skill-browse-next');
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const teamIndices = side === 'player' ? currentPlayerTeamIndices : currentOpponentTeamIndices;
+                        const totalSlots = teamIndices?.length || 3;
+                        let nextSlot = (charSlot - 1 + totalSlots) % totalSlots;
+                        for (let i = 0; i < totalSlots; i++) {
+                            if (getCharacterBySideAndSlot(side, nextSlot)) break;
+                            nextSlot = (nextSlot - 1 + totalSlots) % totalSlots;
+                        }
+                        enemySkillBrowseState = { side, charSlot: nextSlot, skillIdx: 0 };
+                        renderEnemySkillBrowse();
+                    });
+                }
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const teamIndices = side === 'player' ? currentPlayerTeamIndices : currentOpponentTeamIndices;
+                        const totalSlots = teamIndices?.length || 3;
+                        let nextSlot = (charSlot + 1) % totalSlots;
+                        for (let i = 0; i < totalSlots; i++) {
+                            if (getCharacterBySideAndSlot(side, nextSlot)) break;
+                            nextSlot = (nextSlot + 1) % totalSlots;
+                        }
+                        enemySkillBrowseState = { side, charSlot: nextSlot, skillIdx: 0 };
+                        renderEnemySkillBrowse();
+                    });
+                }
+                skillInfo.browseNavEl.querySelectorAll('.skill-browse-icon-box').forEach((box) => {
+                    box.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const sIdx = Number.parseInt(box.dataset.skillIdx, 10);
+                        if (Number.isInteger(sIdx)) {
+                            enemySkillBrowseState.skillIdx = sIdx;
+                            renderEnemySkillBrowse();
+                        }
+                    });
+                });
+            }
         };
 
-        const startEnemySkillBrowse = (character) => {
-            if (!character || !Array.isArray(character.skills) || !character.skills.length) return;
-            enemySkillBrowseState = { character, skillIdx: 0 };
+        const startEnemySkillBrowse = (charArg, sideArg = 'opponent') => {
+            let slot = 0;
+            let side = sideArg;
+            if (Number.isInteger(charArg)) {
+                slot = charArg;
+            } else if (typeof charArg === 'object' && charArg) {
+                const teamIndices = side === 'player' ? currentPlayerTeamIndices : currentOpponentTeamIndices;
+                const foundSlot = (teamIndices || []).findIndex(
+                    (rIdx) => getRosterData()?.[rIdx]?.id === charArg.id || getRosterData()?.[rIdx]?.name === charArg.name
+                );
+                slot = foundSlot >= 0 ? foundSlot : 0;
+            }
+            enemySkillBrowseState = { side, charSlot: slot, skillIdx: 0 };
             renderEnemySkillBrowse();
         };
-
-        if (skillInfo.browsePrevEl) {
-            skillInfo.browsePrevEl.addEventListener('click', () => {
-                if (!enemySkillBrowseState) return;
-                const total = enemySkillBrowseState.character.skills.length;
-                enemySkillBrowseState.skillIdx = (enemySkillBrowseState.skillIdx - 1 + total) % total;
-                renderEnemySkillBrowse();
-            });
-        }
-        if (skillInfo.browseNextEl) {
-            skillInfo.browseNextEl.addEventListener('click', () => {
-                if (!enemySkillBrowseState) return;
-                const total = enemySkillBrowseState.character.skills.length;
-                enemySkillBrowseState.skillIdx = (enemySkillBrowseState.skillIdx + 1) % total;
-                renderEnemySkillBrowse();
-            });
-        }
 
         const bindProfileInfoTrigger = (selector, side) => {
             Array.from(document.querySelectorAll(selector)).forEach((element) => {
