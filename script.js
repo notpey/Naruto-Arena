@@ -1205,6 +1205,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (exchangeLabel) {
                 exchangeLabel.style.visibility = isPlayersTurn ? 'visible' : 'hidden';
             }
+            const battlefieldRenderContainer = document.getElementById('battlefield-render-container');
+            if (battlefieldRenderContainer) {
+                battlefieldRenderContainer.classList.toggle('hidden-turn', !isPlayersTurn);
+            }
             if (!isPlayersTurn) {
                 closeExchangeModal();
             }
@@ -3670,39 +3674,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             const avatarEl = document.querySelector(
                 isOpponent ? '.player-avatar-right' : '.player-avatar-left'
             );
-            const teamNames = getTeamNames(isOpponent ? currentOpponentTeamIndices : currentPlayerTeamIndices);
-            const clanLabel = clan?.abbreviation || clan?.name || 'None';
-            const record = `${ladder.wins} - ${ladder.losses}`;
-            const teamText = teamNames.length ? teamNames.join(', ') : 'Unknown team';
-            if (skillInfo.imgEl) {
-                skillInfo.imgEl.src = avatarEl?.src || profile.avatarUrl || defaultProfileAvatar;
-                skillInfo.imgEl.alt = `${displayUsername} avatar`;
+            const avatarSrc = avatarEl?.src || profile.avatarUrl || defaultProfileAvatar;
+            const clanLabel = clan?.abbreviation || clan?.name || 'NONE';
+            const ratioStr = `${ladder.wins} - ${ladder.losses} (${formatSignedNumber(ladder.streak)})`;
+            const rankLabel = String(ladder.rank || 'GENIN').toUpperCase();
+            const levelVal = String(ladder.level || 1);
+            const ladderRankVal = ladder.ladderRank ? String(ladder.ladderRank) : formatSignedNumber(ladder.streak);
+            const ladderRankLabel = ladder.ladderRank ? `LADDERRANK: ${ladderRankVal}` : `STREAK: ${ladderRankVal}`;
+
+            const cardSet = isOpponent ? enemyCards : playerCards;
+            const teamFaces = (Array.isArray(cardSet) ? cardSet : []).map((card) => {
+                const img = card?.querySelector('.character-face');
+                return img?.src || '';
+            });
+
+            const skillInfoContainer = document.querySelector('.skillinformation');
+            if (skillInfoContainer) {
+                skillInfoContainer.classList.add('profile-summary');
+                let profileLayout = skillInfoContainer.querySelector('.profile-summary-layout');
+                if (!profileLayout) {
+                    profileLayout = document.createElement('div');
+                    profileLayout.className = 'profile-summary-layout';
+                    skillInfoContainer.appendChild(profileLayout);
+                }
+                profileLayout.innerHTML = `
+                    <div class="profile-avatar-box">
+                        <img class="profile-avatar-img" src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(displayUsername)} avatar">
+                    </div>
+                    <div class="profile-details-column">
+                        <div class="profile-username">${escapeHtml(displayUsername)}</div>
+                        <div class="profile-rank-badge">${escapeHtml(rankLabel)}</div>
+                        <div class="profile-stats-grid">
+                            <div class="profile-stat-item"><span class="profile-lbl">CLAN:</span><span class="profile-val">${escapeHtml(clanLabel)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">LEVEL:</span><span class="profile-val">${escapeHtml(levelVal)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">${ladder.ladderRank ? 'LADDERRANK:' : 'STREAK:'}</span><span class="profile-val">${escapeHtml(ladderRankVal)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">RATIO:</span><span class="profile-val">${escapeHtml(ratioStr)}</span></div>
+                        </div>
+                    </div>
+                    <div class="profile-team-section">
+                        <div class="profile-team-header">BATTLE TEAM</div>
+                        <div class="profile-team-row">
+                            ${teamFaces.map((faceSrc) => `
+                                <div class="profile-team-face-box">
+                                    <img class="profile-team-face-img" src="${escapeHtml(faceSrc)}" alt="Team character face">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                profileLayout.style.display = 'flex';
             }
-            if (skillInfo.nameEl) {
-                skillInfo.nameEl.textContent = displayUsername;
-            }
-            if (skillInfo.descEl) {
-                skillInfo.descEl.textContent = [
-                    `Rank: ${ladder.rank}`,
-                    `Streak: ${formatSignedNumber(ladder.streak)} | Highest streak: ${formatSignedNumber(ladder.highestStreak || 0)}`,
-                    `Team: ${teamText}`,
-                ].join('  ');
-            }
-            setSkillInfoMetaLabels(['/ RECORD', '/ CLAN', '/ LEVEL']);
-            if (skillInfo.energyEl) {
-                skillInfo.energyEl.textContent = record;
-            }
-            if (skillInfo.classesEl) {
-                skillInfo.classesEl.textContent = clanLabel;
-            }
-            if (skillInfo.cooldownEl) {
-                skillInfo.cooldownEl.textContent = String(ladder.level);
-            }
-            if (skillInfo.classPickerWrapEl && skillInfo.classPickerEl) {
-                skillInfo.classPickerWrapEl.style.display = 'none';
-                skillInfo.classPickerEl.innerHTML = '';
-            }
-            document.querySelector('.skillinformation')?.classList.add('profile-summary');
+
             activeCastingSkill = null;
             clearTargetHighlights();
         };
@@ -3793,7 +3815,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 enemySkillBrowseState = null;
                 if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
             }
-            document.querySelector('.skillinformation')?.classList.remove('profile-summary');
+            const skillInfoContainer = document.querySelector('.skillinformation');
+            if (skillInfoContainer) {
+                skillInfoContainer.classList.remove('profile-summary');
+                const profileLayout = skillInfoContainer.querySelector('.profile-summary-layout');
+                if (profileLayout) profileLayout.style.display = 'none';
+            }
             setSkillInfoMetaLabels();
             if (skillInfo.imgEl) {
                 skillInfo.imgEl.src = skill.skillimage || '';
@@ -4764,6 +4791,39 @@ let wsRequests = new Map();
         }
         if (surrenderConfirmCancelButton) {
             surrenderConfirmCancelButton.addEventListener('click', closeSurrenderConfirm);
+        }
+
+        const battlefieldRenderContainer = document.getElementById('battlefield-render-container');
+        const battlefieldRenderImg = document.getElementById('battlefield-render-img');
+        if (battlefieldRenderContainer && battlefieldRenderImg) {
+            const renders = [
+                { src: 'itachi-render.png', alt: 'Itachi Uchiha Render', class: 'battlefield-render-itachi' },
+                { src: 'konan-render.png', alt: 'Konan Render', class: 'battlefield-render-konan' },
+                { src: 'deidara-render.png', alt: 'Deidara Render', class: 'battlefield-render-deidara' },
+                { src: 'pain-render.png', alt: 'Pain Deva Path Render', class: 'battlefield-render-pain' }
+            ];
+            let currentRenderIdx = Math.floor(Math.random() * renders.length);
+            const applyRender = (idx) => {
+                const item = renders[idx];
+                battlefieldRenderImg.style.opacity = '0';
+                setTimeout(() => {
+                    battlefieldRenderImg.src = item.src;
+                    battlefieldRenderImg.alt = item.alt;
+                    battlefieldRenderImg.className = `battlefield-render ${item.class}`;
+                    battlefieldRenderImg.style.opacity = '1';
+                }, 150);
+            };
+            applyRender(currentRenderIdx);
+            battlefieldRenderContainer.addEventListener('click', () => {
+                currentRenderIdx = (currentRenderIdx + 1) % renders.length;
+                applyRender(currentRenderIdx);
+            });
+            window.addEventListener('keydown', (e) => {
+                if ((e.key === 'r' || e.key === 'R') && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+                    currentRenderIdx = (currentRenderIdx + 1) % renders.length;
+                    applyRender(currentRenderIdx);
+                }
+            });
         }
 
         return;

@@ -527,6 +527,8 @@
     right: auto;
     top: -102px;
     width: var(--selection-panel-remaster-w);
+    padding: 0 30px;
+    box-sizing: border-box;
     gap: 0;
     justify-content: space-between;
     z-index: 5;
@@ -4666,6 +4668,7 @@ text-transform: uppercase;
     position: absolute;
     transform: scaleX(-1);
     left: 661px;
+    z-index: 10;
 }
 
 
@@ -4761,6 +4764,158 @@ text-transform: uppercase;
 /* ── Battle skill info meta rail ────────────────────────────── */
 
 .skillinformation .skill-info-kicker { display: none; }
+
+/* ── In-Game Profile View (Professional UI/UX Refinement) ── */
+.skillinformation.profile-summary {
+    padding: 22px 16px 12px 18px;
+}
+
+.skillinformation.profile-summary .skill-info-head,
+.skillinformation.profile-summary .skill-info-meta,
+.skillinformation.profile-summary .skill-browse-nav {
+    display: none !important;
+}
+
+.profile-summary-layout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Avatar Box */
+.profile-avatar-box {
+    width: 82px;
+    height: 82px;
+    flex: 0 0 82px;
+    border: 2px solid #2b1f14;
+    border-radius: 4px;
+    background: #111;
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Details Column */
+.profile-details-column {
+    flex: 1;
+    min-width: 0;
+    margin-left: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: 'Franklin', 'Libre Franklin', Arial, sans-serif;
+}
+
+.profile-username {
+    font-size: 18px;
+    font-weight: 900;
+    color: #b71c1c;
+    text-transform: uppercase;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.profile-rank-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #3b2a1d;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.1;
+    margin-top: 1px;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(122, 98, 73, 0.25);
+    width: fit-content;
+}
+
+.profile-stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.25;
+}
+
+.profile-lbl {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #7a6249;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.profile-val {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #1a140e;
+    text-transform: uppercase;
+}
+
+/* Battle Team Section */
+.profile-team-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: 16px;
+    flex-shrink: 0;
+}
+
+.profile-team-header {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: #7a6249;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.profile-team-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-team-face-box {
+    width: 64px;
+    height: 64px;
+    border: 2px solid #2b1f14;
+    border-radius: 4px;
+    background: #111;
+    box-sizing: border-box;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.profile-team-face-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.profile-team-face-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
 .skill-info-meta {
     display: flex;
@@ -6203,13 +6358,15 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .player-characters {
     gap: 80px;
     margin-top: 15px;
-    margin-left: 48px;
+    margin-left: 0;
+    z-index: 10;
 }
 
 .game-remaster .enemy-characters {
     top: 146px;
     left: 944px;
     gap: 76px;
+    z-index: 10;
 }
 
 /* --- Skill holder, scroll frame, and icons ---
@@ -6432,6 +6589,87 @@ body.ingame-client-page .backgroundingame {
 .game-remaster .render {
     content: var(--render-remaster-image);
     width: 219px;
+}
+
+/* --- Battlefield Background Character Render (Budokai-Arena style) --- */
+.battlefield-render-container {
+    position: absolute;
+    left: 450px;
+    top: 60px;
+    width: 280px;
+    height: 347px;
+    z-index: 1; /* Second layer, right above battle background */
+    pointer-events: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: visible; /* NO box cropping -- natural PNG transparency */
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.battlefield-render-container.hidden-turn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.battlefield-render {
+    width: 100%;
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.battlefield-render-konan,
+.battlefield-render-deidara {
+    transform: translate(0px, 0px);
+}
+
+.battlefield-render-pain {
+    transform: translate(35px, 0px);
+}
+
+.battlefield-render-itachi {
+    transform: translate(60px, 0px);
+}
+
+/* Remaster Stage (1100x800) -- Stops at Y=587px (19px clean padding above skillinformation at Y=606px) */
+.game-remaster .battlefield-render-container {
+    left: 622px;
+    top: 90px;
+    right: auto;
+    width: 401px;
+    height: 497px;
+    z-index: 1;
+    overflow: visible;
+}
+
+.game-remaster .battlefield-render-konan {
+    width: 401px;
+    height: 497px;
+    transform: translate(0px, 0px) scale(1.1);
+}
+
+.game-remaster .battlefield-render-deidara {
+    width: 401px;
+    height: 497px;
+    transform: translate(0px, 0px) scale(0.98);
+}
+
+.game-remaster .battlefield-render-pain {
+    width: 401px;
+    height: 497px;
+    transform: translate(50px, 0px) scale(0.9);
+}
+
+.game-remaster .battlefield-render-itachi {
+    width: 401px;
+    height: 497px;
+    transform: translate(75px, 0px) scale(1.22);
 }
 
 /* --- Battle-end overlay and panel ---
