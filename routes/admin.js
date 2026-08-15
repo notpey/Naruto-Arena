@@ -34,7 +34,12 @@ module.exports = function(context) {
         getTurnDurationMsForUser,
         makeEmptyPendingTurn,
         TRAINING_DUMMY_DISPLAY_NAME,
-        insertMatchActive
+        insertMatchActive,
+        getStoredMissionCatalog,
+        saveMissionCatalog,
+        getStoredStoryCatalog,
+        saveStoryCatalog,
+        cosmeticsService,
     } = context;
 
     const getCharactersList = () =>
@@ -102,7 +107,7 @@ module.exports = function(context) {
         }
     }
 
-    async function getStoredMissionCatalog() {
+    async function fallbackGetStoredMissionCatalog() {
         if (!appStateCollection) return [];
         try {
             const doc = await appStateCollection.findOne({ key: 'missions' });
@@ -112,7 +117,7 @@ module.exports = function(context) {
         }
     }
 
-    async function getStoredStoryCatalog() {
+    async function fallbackGetStoredStoryCatalog() {
         if (!appStateCollection) return [];
         try {
             const doc = await appStateCollection.findOne({ key: 'story' });
@@ -121,6 +126,48 @@ module.exports = function(context) {
             return [];
         }
     }
+
+    const fetchMissions = typeof getStoredMissionCatalog === 'function' ? getStoredMissionCatalog : fallbackGetStoredMissionCatalog;
+    const fetchStory = typeof getStoredStoryCatalog === 'function' ? getStoredStoryCatalog : fallbackGetStoredStoryCatalog;
+
+    async function fallbackSaveMissionCatalog(missions, updatedBy) {
+        if (appStateCollection) {
+            await appStateCollection.updateOne(
+                { key: 'missions' },
+                {
+                    $set: {
+                        key: 'missions',
+                        missions,
+                        updatedAt: new Date(),
+                        updatedBy: updatedBy || '',
+                    },
+                },
+                { upsert: true }
+            );
+        }
+        return missions;
+    }
+
+    async function fallbackSaveStoryCatalog(chapters, updatedBy) {
+        if (appStateCollection) {
+            await appStateCollection.updateOne(
+                { key: 'story' },
+                {
+                    $set: {
+                        key: 'story',
+                        chapters,
+                        updatedAt: new Date(),
+                        updatedBy: updatedBy || '',
+                    },
+                },
+                { upsert: true }
+            );
+        }
+        return chapters;
+    }
+
+    const persistMissions = typeof saveMissionCatalog === 'function' ? saveMissionCatalog : fallbackSaveMissionCatalog;
+    const persistStory = typeof saveStoryCatalog === 'function' ? saveStoryCatalog : fallbackSaveStoryCatalog;
 
     async function getMaintenanceModeState() {
         if (!appStateCollection) return false;
@@ -147,10 +194,14 @@ module.exports = function(context) {
         return releases.filter(r => r && typeof r.characterId === 'string');
     }
 
-    const adminCheck = (req, res, next) => {
+    function isAdminUser(req) {
         const role = String(req.authUser?.role || '').trim().toLowerCase();
         const username = String(req.authUser?.username || '').trim().toLowerCase();
-        if (role !== 'admin' && username !== 'admin') {
+        return role === 'admin' || username === 'admin';
+    }
+
+    const adminCheck = (req, res, next) => {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
         next();
@@ -201,20 +252,9 @@ module.exports = function(context) {
             });
             const safePayload = buildMatchPayloadForUser(matchDocument, username);
             return res.json({
-                ok: true,
-                matchFound: true,
-                matchId: matchDocument.matchId,
+                ...safePayload,
                 mode: 'training',
-                opponent: TRAINING_DUMMY_DISPLAY_NAME,
-                matchStartsAt: matchDocument.matchStartsAt,
-                matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
-                currentTurn: matchDocument.currentTurn || null,
-                turnOrder: matchDocument.turnOrder || null,
-                turnExpiresAt: matchDocument.turnExpiresAt || null,
-                turnDurationMs: getTurnDurationMsForUser(matchDocument, matchDocument?.currentTurn),
-                chakraPools: safePayload?.chakraPools || null,
-                lastChakraGain: safePayload?.lastChakraGain || null,
-                pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
+                matchFound: true,
             });
         } catch (error) {
             console.error('Training dummy start error:', error);
@@ -396,12 +436,12 @@ module.exports = function(context) {
         }
     });
     router.get('/missions', requireSession, async (req, res) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
         try {
-            const missions = await getStoredMissionCatalog();
+            const missions = await fetchMissions();
             return res.json({
                 ok: true,
                 missions,
@@ -412,12 +452,12 @@ module.exports = function(context) {
         }
     });
     router.get('/story', requireSession, async (req, res) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
         try {
-            const chapters = await getStoredStoryCatalog();
+            const chapters = await fetchStory();
             return res.json({
                 ok: true,
                 chapters,
@@ -428,7 +468,7 @@ module.exports = function(context) {
         }
     });
     router.get('/control-panel', requireSession, async (req, res) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
@@ -544,7 +584,7 @@ module.exports = function(context) {
         }
     });
     router.put('/missions', requireSession, async (req, res) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
@@ -554,7 +594,7 @@ module.exports = function(context) {
         }
     
         try {
-            const savedMissions = await saveMissionCatalog(missions, req.authUser.username);
+            const savedMissions = await persistMissions(missions, req.authUser.username);
             return res.json({
                 ok: true,
                 missions: savedMissions,
@@ -565,7 +605,7 @@ module.exports = function(context) {
         }
     });
     router.put('/story', requireSession, async (req, res) => {
-        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+        if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
     
@@ -575,7 +615,7 @@ module.exports = function(context) {
         }
     
         try {
-            const savedChapters = await saveStoryCatalog(chapters, req.authUser.username);
+            const savedChapters = await persistStory(chapters, req.authUser.username);
             return res.json({
                 ok: true,
                 chapters: savedChapters,
@@ -1307,6 +1347,366 @@ const existing = await newsPostsCollection.findOne({ _id: new ObjectId(id) });
             return res.status(500).json({ error: 'Failed to delete bug report.' });
         }
     });
+
+    // ── GACHA BANNER CONFIG ──────────────────────────────────────
+    const { getStoredGachaConfig, saveStoredGachaConfig } = context;
+
+    if (typeof getStoredGachaConfig === 'function') {
+        router.get('/gacha-banners', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const config = await getStoredGachaConfig();
+                return res.json({ ok: true, config });
+            } catch (e) {
+                console.error('Admin get gacha config error:', e);
+                return res.status(500).json({ error: 'Unable to load gacha config.' });
+            }
+        });
+    }
+
+    if (typeof saveStoredGachaConfig === 'function') {
+        router.put('/gacha-banners', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const updated = await saveStoredGachaConfig(req.body);
+                return res.json({ ok: true, config: updated });
+            } catch (e) {
+                console.error('Admin save gacha config error:', e);
+                return res.status(500).json({ error: 'Unable to save gacha config.' });
+            }
+        });
+
+        router.post('/gacha-banners', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const updated = await saveStoredGachaConfig(req.body);
+                return res.json({ ok: true, config: updated });
+            } catch (e) {
+                console.error('Admin save gacha config error:', e);
+                return res.status(500).json({ error: 'Unable to save gacha config.' });
+            }
+        });
+
+        router.post('/gacha-banners/upload', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const { dataUrl } = req.body || {};
+                if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+                    return res.status(400).json({ error: 'A valid image data URL is required.' });
+                }
+                const matchHeader = dataUrl.match(/^data:image\/([^;]+);base64,/);
+                if (!matchHeader) {
+                    return res.status(400).json({ error: 'Unsupported image data URL format.' });
+                }
+                const base64Data = dataUrl.slice(matchHeader[0].length);
+                const byteLength = Math.ceil((base64Data.length * 3) / 4);
+                const GACHA_BANNER_MAX_BYTES = 3.5 * 1024 * 1024; // 3.5 MB
+                if (byteLength > GACHA_BANNER_MAX_BYTES) {
+                    return res.status(400).json({ error: 'Banner image exceeds the 3.5 MB size limit.' });
+                }
+                return res.json({ ok: true, bannerImage: dataUrl });
+            } catch (e) {
+                console.error('Admin banner image upload error:', e);
+                return res.status(500).json({ error: 'Unable to upload banner artwork.' });
+            }
+        });
+    }
+
+    router.get('/promo-codes', requireSession, async (req, res) => {
+        if (!isAdminUser(req)) {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        try {
+            let codes = [];
+            if (promoCodesCollection) {
+                codes = await promoCodesCollection.find({}).sort({ createdAt: -1 }).toArray();
+            } else {
+                codes = [
+                    { _id: 'welcome2026', code: 'WELCOME2026', rewards: { ryo: 500, summonScrolls: 2, chakraShards: 50 }, active: true, timesRedeemed: 12, maxRedemptions: 1000 },
+                    { _id: 'shinobi777', code: 'SHINOBI777', rewards: { ryo: 777, summonScrolls: 3, chakraShards: 77 }, active: true, timesRedeemed: 45, maxRedemptions: 500 }
+                ];
+            }
+            return res.json({ ok: true, promoCodes: codes });
+        } catch (e) {
+            console.error('Admin load promo codes error:', e);
+            return res.status(500).json({ error: 'Unable to load promo codes.' });
+        }
+    });
+
+    router.post('/promo-codes', requireSession, async (req, res) => {
+        if (!isAdminUser(req)) {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        try {
+            const { code, ryo = 0, summonScrolls = 0, chakraShards = 0, maxRedemptions = 100, active = true, expiresAt } = req.body || {};
+            const normalizedCode = String(code || '').trim().toUpperCase();
+            if (!normalizedCode) {
+                return res.status(400).json({ error: 'A valid promo code string is required.' });
+            }
+
+            const promoDoc = {
+                code: normalizedCode,
+                rewards: {
+                    ryo: Math.max(0, Number(ryo) || 0),
+                    summonScrolls: Math.max(0, Number(summonScrolls) || 0),
+                    chakraShards: Math.max(0, Number(chakraShards) || 0)
+                },
+                maxRedemptions: Math.max(1, Number(maxRedemptions) || 100),
+                timesRedeemed: 0,
+                active: active !== false,
+                expiresAt: expiresAt ? new Date(expiresAt) : null,
+                createdAt: new Date()
+            };
+
+            if (promoCodesCollection) {
+                await promoCodesCollection.updateOne(
+                    { code: normalizedCode },
+                    { $set: promoDoc },
+                    { upsert: true }
+                );
+            }
+
+            return res.json({ ok: true, promoCode: promoDoc });
+        } catch (e) {
+            console.error('Admin create promo code error:', e);
+            return res.status(500).json({ error: 'Unable to create promo code.' });
+        }
+    });
+
+    router.delete('/promo-codes/:codeId', requireSession, async (req, res) => {
+        if (!isAdminUser(req)) {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        try {
+            const { codeId } = req.params;
+            if (promoCodesCollection) {
+                try {
+                    await promoCodesCollection.deleteOne({ _id: new ObjectId(codeId) });
+                } catch (err) {
+                    await promoCodesCollection.deleteOne({ code: codeId.toUpperCase() });
+                }
+            }
+            return res.json({ ok: true, message: 'Promo code deleted.' });
+        } catch (e) {
+            console.error('Admin delete promo code error:', e);
+            return res.status(500).json({ error: 'Unable to delete promo code.' });
+        }
+    });
+
+    // Cosmetics Management Endpoints
+    router.get('/cosmetics', requireSession, async (req, res) => {
+        if (!isAdminUser(req)) {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        try {
+            const cs = cosmeticsService || context.cosmeticsService;
+            const catalog = cs
+                ? (typeof cs.loadCatalog === 'function' ? await cs.loadCatalog() : cs.getCatalogSync())
+                : { avatars: [], titles: [], borders: [] };
+            return res.json({ ok: true, catalog });
+        } catch (e) {
+            console.error('Admin get cosmetics error:', e);
+            return res.status(500).json({ error: 'Unable to load cosmetics catalog.' });
+        }
+    });
+
+        router.post('/cosmetics/add', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const { id, name, description, category, price, rarity, imageUrl } = req.body || {};
+                const cleanCategory = String(category || '').trim().toLowerCase();
+                const cleanName = String(name || '').trim();
+                const cleanId = String(id || '').trim() || `${cleanCategory}_${Date.now()}`;
+
+                if (!cleanName || !['avatars', 'titles', 'borders'].includes(cleanCategory)) {
+                    return res.status(400).json({ error: 'Valid name and category (avatars, titles, borders) are required.' });
+                }
+
+                const item = {
+                    id: cleanId,
+                    name: cleanName,
+                    description: String(description || '').trim(),
+                    category: cleanCategory,
+                    price: Math.max(0, Number(price) || 0),
+                    rarity: String(rarity || 'common').toLowerCase(),
+                    imageUrl: (cleanCategory === 'avatars' || cleanCategory === 'borders') ? String(imageUrl || '').trim() : undefined,
+                    updatedAt: new Date()
+                };
+
+                const cs = cosmeticsService || context.cosmeticsService;
+                if (cs && typeof cs.addCosmeticItem === 'function') {
+                    await cs.addCosmeticItem(item);
+                }
+
+                return res.json({ ok: true, message: `Saved cosmetic item: ${cleanName}`, item });
+            } catch (e) {
+                console.error('Admin save cosmetic error:', e);
+                return res.status(500).json({ error: 'Unable to save cosmetic item.' });
+            }
+        });
+
+        router.post('/cosmetics/upload-avatar', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const { dataUrl, name, description, price, rarity, filename } = req.body || {};
+                if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('avatars/'))) {
+                    return res.status(400).json({ error: 'A valid image data URL or image web URL is required.' });
+                }
+
+                const cs = cosmeticsService || context.cosmeticsService;
+                let finalImageUrl = dataUrl;
+                if (dataUrl.startsWith('data:') && cs && typeof cs.saveAvatarFile === 'function') {
+                    finalImageUrl = cs.saveAvatarFile(dataUrl, filename);
+                }
+
+                const cleanName = String(name || filename || 'Custom Avatar').trim();
+                const cleanId = `avatar_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                const item = {
+                    id: cleanId,
+                    name: cleanName,
+                    description: String(description || 'Shop avatar').trim(),
+                    category: 'avatars',
+                    price: Math.max(0, Number(price) || 200),
+                    rarity: String(rarity || 'rare').toLowerCase(),
+                    imageUrl: finalImageUrl,
+                    createdAt: new Date()
+                };
+
+                if (cs && typeof cs.addCosmeticItem === 'function') {
+                    await cs.addCosmeticItem(item);
+                }
+
+                return res.json({ ok: true, message: `Uploaded and added avatar: ${cleanName}`, item });
+            } catch (e) {
+                console.error('Admin upload avatar error:', e);
+                return res.status(500).json({ error: 'Unable to upload avatar.' });
+            }
+        });
+
+        router.post('/cosmetics/upload-avatars-bulk', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const itemsPayload = Array.isArray(req.body?.items) ? req.body.items : (req.body?.avatars || []);
+                if (!itemsPayload.length) {
+                    return res.status(400).json({ error: 'No avatar items provided for bulk upload.' });
+                }
+
+                const cs = cosmeticsService || context.cosmeticsService;
+                const savedItems = [];
+                for (let i = 0; i < itemsPayload.length; i++) {
+                    const entry = itemsPayload[i];
+                    const dataUrl = entry.dataUrl || entry.imageUrl;
+                    if (!dataUrl) continue;
+
+                    let finalImageUrl = dataUrl;
+                    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:') && cs && typeof cs.saveAvatarFile === 'function') {
+                        finalImageUrl = cs.saveAvatarFile(dataUrl, entry.filename);
+                    }
+
+                    const cleanName = String(entry.name || entry.filename || `Avatar ${i + 1}`).trim();
+                    const cleanId = `avatar_${Date.now()}_${i}_${Math.floor(Math.random() * 1000)}`;
+                    savedItems.push({
+                        id: cleanId,
+                        name: cleanName,
+                        description: String(entry.description || 'Shop avatar').trim(),
+                        category: 'avatars',
+                        price: Math.max(0, Number(entry.price) || 250),
+                        rarity: String(entry.rarity || 'rare').toLowerCase(),
+                        imageUrl: finalImageUrl,
+                        createdAt: new Date()
+                    });
+                }
+
+                if (cs && typeof cs.addCosmeticItems === 'function') {
+                    await cs.addCosmeticItems(savedItems);
+                } else if (cs && typeof cs.addCosmeticItem === 'function') {
+                    for (const item of savedItems) {
+                        await cs.addCosmeticItem(item);
+                    }
+                }
+
+                return res.json({
+                    ok: true,
+                    count: savedItems.length,
+                    message: `Successfully uploaded and added ${savedItems.length} avatars to the shop catalog!`,
+                    items: savedItems
+                });
+            } catch (e) {
+                console.error('Admin bulk upload avatars error:', e);
+                return res.status(500).json({ error: 'Unable to process bulk avatar upload.' });
+            }
+        });
+
+        router.post('/cosmetics/upload-border', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const { dataUrl, name, description, price, rarity, filename } = req.body || {};
+                if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('borders/'))) {
+                    return res.status(400).json({ error: 'A valid image data URL or border asset URL is required.' });
+                }
+
+                const cs = cosmeticsService || context.cosmeticsService;
+                let finalImageUrl = dataUrl;
+                if (dataUrl.startsWith('data:') && cs && typeof cs.saveBorderFile === 'function') {
+                    finalImageUrl = cs.saveBorderFile(dataUrl, filename);
+                }
+
+                const cleanName = String(name || filename || 'Custom Border Frame').trim();
+                const cleanId = `border_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                const item = {
+                    id: cleanId,
+                    name: cleanName,
+                    description: String(description || 'Custom avatar frame').trim(),
+                    category: 'borders',
+                    price: Math.max(0, Number(price) || 300),
+                    rarity: String(rarity || 'rare').toLowerCase(),
+                    imageUrl: finalImageUrl,
+                    createdAt: new Date()
+                };
+
+                if (cs && typeof cs.addCosmeticItem === 'function') {
+                    await cs.addCosmeticItem(item);
+                }
+
+                return res.json({ ok: true, message: `Saved custom border frame asset: ${cleanName}`, item });
+            } catch (e) {
+                console.error('Admin upload border error:', e);
+                return res.status(500).json({ error: 'Unable to upload border frame asset.' });
+            }
+        });
+
+        router.delete('/cosmetics/:itemId', requireSession, async (req, res) => {
+            if (!isAdminUser(req)) {
+                return res.status(403).json({ error: 'Admin access required.' });
+            }
+            try {
+                const { itemId } = req.params;
+                const cs = cosmeticsService || context.cosmeticsService;
+                if (cs && typeof cs.deleteCosmeticItem === 'function') {
+                    await cs.deleteCosmeticItem(itemId);
+                }
+                return res.json({ ok: true, message: 'Cosmetic item removed from catalog.' });
+            } catch (e) {
+                console.error('Admin delete cosmetic error:', e);
+                return res.status(500).json({ error: 'Unable to delete cosmetic item.' });
+            }
+        });
 
     return router;
 };

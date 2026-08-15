@@ -4,7 +4,6 @@ module.exports = function(context) {
         parseCookieHeader,
         SESSION_COOKIE_NAME,
         getSessionUserFromToken,
-        matchesCollection,
         getMatchRoom,
         wsConnections,
         removeSocketFromRoom,
@@ -15,9 +14,12 @@ module.exports = function(context) {
         getCharactersData
     } = context;
 
+    const getMatchesCollection = () => context.matchesCollection;
+
     const attachWebSocketSupport = (server) => {
         if (!server || typeof server.on !== 'function') return;
         server.on('upgrade', async (req, socket, head) => {
+            console.log('UPGRADE REQUEST RECEIVED:', req.url);
             try {
                 const requestUrl = new URL(req.url || '', `http://${req.headers.host || 'localhost'}`);
                 if (requestUrl.pathname !== '/ws') {
@@ -33,18 +35,25 @@ module.exports = function(context) {
                 const authHeader = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '').trim();
                 const queryToken = (requestUrl.searchParams.get('token') || '').trim();
                 const token = cookies[SESSION_COOKIE_NAME] || authHeader || queryToken;
-                const authUser = await getSessionUserFromToken(token);
-                if (!authUser?.username) {
+                const matchesColl = getMatchesCollection();
+                if (!matchesColl) {
                     socket.destroy();
                     return;
                 }
-                const match = await matchesCollection.findOne({ matchId });
+                const match = await matchesColl.findOne({ matchId });
                 if (!match || !Array.isArray(match.players)) {
+                    socket.destroy();
+                    return;
+                }
+                const authUser = await getSessionUserFromToken(token);
+                if (!authUser?.username) {
+                    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
                     return;
                 }
                 const playerEntry = match.players.find((player) => player?.username === authUser.username);
                 if (!playerEntry) {
+                    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
                     socket.destroy();
                     return;
                 }
@@ -66,80 +75,87 @@ module.exports = function(context) {
                     wsServer.emit('connection', ws, req);
                 });
             } catch (error) {
+                console.error('WS upgrade error:', error);
                 socket.destroy();
             }
         });
     };
 
-    const heartbeatInterval = setInterval(() => {
+    const heartbeatInterval = (wsServer && wsServer.clients) ? setInterval(() => {
+        if (!wsServer.clients) return;
         wsServer.clients.forEach((ws) => {
             if (ws.isAlive === false) return ws.terminate();
             ws.isAlive = false;
             ws.ping();
         });
-    }, 30000);
+    }, 30000) : null;
+    if (heartbeatInterval && typeof heartbeatInterval.unref === 'function') {
+        heartbeatInterval.unref();
+    }
 
-    wsServer.on('close', () => {
-        clearInterval(heartbeatInterval);
-    });
+    if (wsServer && typeof wsServer.on === 'function') {
+        wsServer.on('close', () => {
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+        });
 
-    wsServer.on('connection', async (ws) => {
-        ws.isAlive = true;
-        ws.on('pong', () => { ws.isAlive = true; });
-        if (!ws?.matchId || !ws?.username) {
-            try {
-                ws.close();
-            } catch (error) {
-                // Ignore close failures.
-            }
-            return;
-        }
-        try {
-            const hydrated = await hydrateMatchForBroadcast(ws.matchId);
-            if (!hydrated) {
-                ws.close();
+        wsServer.on('connection', async (ws) => {
+            ws.isAlive = true;
+            ws.on('pong', () => { ws.isAlive = true; });
+            if (!ws?.matchId || !ws?.username) {
+                try {
+                    ws.close();
+                } catch (error) {
+                    // Ignore close failures.
+                }
                 return;
             }
-            const payload = buildMatchPayloadForUser(hydrated, ws.username);
-            if (payload) {
-                sendJsonToSocket(ws, { type: 'match_state', payload });
-            }
-            
-            ws.on('message', async (message) => {
-                try {
-                    const data = JSON.parse(message);
-                    if (data.type === 'skill_targets') {
-                        // Look up match in active DB or cache
-                        const match = await matchesCollection.findOne({ matchId: data.matchId });
-                        if (!match || match.status === 'ended') return;
-                        
-                        const options = battleLogic.computeTargetOptions({
-                            match,
-                            actingUsername: data.actingUsername,
-                            actorSlot: data.actorSlot,
-                            skillIndex: data.skillIndex,
-                            characters: getCharactersData()
-                        });
-                        
-                        sendJsonToSocket(ws, {
-                            type: 'skill_targets_response',
-                            reqId: data.reqId,
-                            payload: options
-                        });
-                    }
-                } catch(e) {
-                    // ignore bad messages
-                }
-            });
-            
-        } catch (error) {
             try {
-                ws.close();
-            } catch (closeError) {
-                // Ignore close failures.
+                const hydrated = await hydrateMatchForBroadcast(ws.matchId);
+                if (!hydrated) {
+                    ws.close();
+                    return;
+                }
+                const payload = buildMatchPayloadForUser(hydrated, ws.username);
+                if (payload) {
+                    sendJsonToSocket(ws, { type: 'match_state', payload });
+                }
+                
+                ws.on('message', async (message) => {
+                    try {
+                        const data = JSON.parse(message);
+                        if (data.type === 'skill_targets') {
+                            const matchesColl = getMatchesCollection();
+                            if (!matchesColl) return;
+                            const match = await matchesColl.findOne({ matchId: data.matchId });
+                            if (!match || match.status === 'ended') return;
+                            
+                            const options = battleLogic.computeTargetOptions({
+                                match,
+                                actingUsername: data.actingUsername,
+                                actorSlot: data.actorSlot,
+                                skillIndex: data.skillIndex,
+                                characters: getCharactersData()
+                            });
+                            
+                            sendJsonToSocket(ws, {
+                                type: 'skill_targets_response',
+                                reqId: data.reqId,
+                                payload: options
+                            });
+                        }
+                    } catch(e) {
+                        // ignore bad messages
+                    }
+                });
+            } catch (error) {
+                try {
+                    ws.close();
+                } catch (closeError) {
+                    // Ignore close failures.
+                }
             }
-        }
-    });
+        });
+    }
 
     return { attachWebSocketSupport };
 };

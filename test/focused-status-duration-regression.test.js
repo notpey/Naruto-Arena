@@ -302,7 +302,7 @@ test('Hiruzen Dead Demon Consuming Seal ticks while Hiruzen is self-stunned', ()
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
 
     assert.equal(match.board.p2[0].hp, 60);
     assert.equal(match.board.p1[0].hp, 80);

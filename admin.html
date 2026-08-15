@@ -244,6 +244,49 @@
           </div>
         </section>
 
+        <section class="acp-panel" id="acp-gacha-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">⛩️ Shinobi Summoning Banners & Drop Rates</h2>
+                <p class="acp-panel-copy">Manage active gacha banners, thumbnail images, pull costs, rate-up featured ninja, and global drop probabilities.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button secondary" type="button" id="acp-gacha-add-banner">+ Add Banner</button>
+                <button class="acp-button" type="button" id="acp-gacha-save">Save Gacha Config</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-story">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">Global Drop Rates (%)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size:12px;">
+                  <label>Legendary %: <input type="number" step="0.1" id="gacha-rate-legendary" class="acp-rank-input" value="0.5"></label>
+                  <label>Epic %: <input type="number" step="0.1" id="gacha-rate-epic" class="acp-rank-input" value="3.5"></label>
+                  <label>Rare %: <input type="number" step="0.1" id="gacha-rate-rare" class="acp-rank-input" value="11.0"></label>
+                  <label>Uncommon %: <input type="number" step="0.1" id="gacha-rate-uncommon" class="acp-rank-input" value="30.0"></label>
+                  <label>Common %: <input type="number" step="0.1" id="gacha-rate-common" class="acp-rank-input" value="55.0"></label>
+                  <label>Pity Limit: <input type="number" id="gacha-pity-limit" class="acp-rank-input" value="50"></label>
+                </div>
+              </div>
+              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">Duplicate Shard Rewards</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size:12px;">
+                  <label>Legendary Shards: <input type="number" id="gacha-shard-legendary" class="acp-rank-input" value="150"></label>
+                  <label>Epic Shards: <input type="number" id="gacha-shard-epic" class="acp-rank-input" value="100"></label>
+                  <label>Rare Shards: <input type="number" id="gacha-shard-rare" class="acp-rank-input" value="50"></label>
+                  <label>Uncommon Shards: <input type="number" id="gacha-shard-uncommon" class="acp-rank-input" value="25"></label>
+                  <label>Common Shards: <input type="number" id="gacha-shard-common" class="acp-rank-input" value="10"></label>
+                </div>
+              </div>
+            </div>
+            <h3 style="margin: 10px 0; color: var(--ca-bone); font-size:15px; text-transform:uppercase;">Banner Catalog</h3>
+            <div id="acp-banner-list"></div>
+            <div class="acp-rank-message" id="acp-gacha-message"></div>
+          </div>
+        </section>
+
         <section class="acp-panel" id="acp-bugs-panel">
           <div class="acp-panel-head">
             <div class="acp-panel-head-row">
@@ -310,6 +353,205 @@
               <tbody id="acp-story-table"></tbody>
             </table>
             <div class="acp-rank-message" id="acp-story-message"></div>
+        </section>
+
+        <section class="acp-panel" id="acp-promo-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">🎁 Promo & Gift Code Manager</h2>
+                <p class="acp-panel-copy">Create and manage redeemable promo codes for Ryo, Summon Scrolls, and Shards.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button" type="button" id="acp-promo-create-btn">+ Create Promo Code</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-ranks" style="padding: 16px;">
+            <div id="acp-promo-create-form" style="display: none; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+              <h4 style="margin: 0 0 12px 0; color: var(--ca-orange); font-size: 15px;">New Promo Code Details</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px;">
+                <div>
+                  <label style="font-size: 11px; color: #94a3b8; display: block;">Code String</label>
+                  <input type="text" id="promo-form-code" placeholder="e.g. SUMMER2026" style="width: 100%; background: #090c15; border: 1px solid #334155; color: #fff; padding: 6px; text-transform: uppercase;" />
+                </div>
+                <div>
+                  <label style="font-size: 11px; color: #94a3b8; display: block;">🪙 Ryo Reward</label>
+                  <input type="number" id="promo-form-ryo" value="500" style="width: 100%; background: #090c15; border: 1px solid #334155; color: #fff; padding: 6px;" />
+                </div>
+                <div>
+                  <label style="font-size: 11px; color: #94a3b8; display: block;">📜 Scrolls Reward</label>
+                  <input type="number" id="promo-form-scrolls" value="2" style="width: 100%; background: #090c15; border: 1px solid #334155; color: #fff; padding: 6px;" />
+                </div>
+                <div>
+                  <label style="font-size: 11px; color: #94a3b8; display: block;">💎 Shards Reward</label>
+                  <input type="number" id="promo-form-shards" value="50" style="width: 100%; background: #090c15; border: 1px solid #334155; color: #fff; padding: 6px;" />
+                </div>
+                <div>
+                  <label style="font-size: 11px; color: #94a3b8; display: block;">Max Redemptions</label>
+                  <input type="number" id="promo-form-max" value="500" style="width: 100%; background: #090c15; border: 1px solid #334155; color: #fff; padding: 6px;" />
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="acp-button secondary" type="button" id="promo-form-cancel">Cancel</button>
+                <button class="acp-button" type="button" id="promo-form-submit">Save Code</button>
+              </div>
+            </div>
+
+            <table class="acp-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Rewards</th>
+                  <th>Redemptions</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="acp-promo-table">
+                <tr><td colspan="5" style="text-align: center; color: var(--ca-dust);">Loading promo codes...</td></tr>
+              </tbody>
+            </table>
+            <div class="acp-rank-message" id="acp-promo-message"></div>
+          </div>
+        </section>
+
+        <section class="acp-panel" id="acp-cosmetics-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">🛍️ Shop Cosmetics & Avatar Uploader</h2>
+                <p class="acp-panel-copy">Upload custom player avatars, forge titles with glowing colors, create card borders, and set shop prices.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button secondary" type="button" id="acp-cosmetics-refresh">Refresh Catalog</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-story" style="padding: 18px;">
+            <!-- Creators Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+              
+              <!-- Multi-Avatar Uploader Card -->
+              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
+                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">👤 Multi-Avatar Uploader</h3>
+                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Select 1 or multiple avatar images (PNG/JPG/WebP) to upload in bulk.</p>
+                <div style="margin-bottom: 10px;">
+                  <input type="file" id="acp-avatar-file-input" multiple accept="image/png,image/jpeg,image/webp,image/gif" style="font-size: 11px; width: 100%; color: #fff;">
+                </div>
+                
+                <div style="display: flex; gap: 8px; align-items: center; background: #080a12; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-size: 11px;">
+                  <span style="color: var(--ca-dust); font-weight: 700;">Batch Defaults:</span>
+                  <label>Price: <input type="number" id="acp-avatar-batch-price" value="250" style="width: 55px; padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;"></label>
+                  <label>Rarity: 
+                    <select id="acp-avatar-batch-rarity" style="padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">
+                      <option value="common">Common</option>
+                      <option value="uncommon">Uncommon</option>
+                      <option value="rare" selected>Rare</option>
+                      <option value="epic">Epic</option>
+                      <option value="legendary">Legendary</option>
+                    </select>
+                  </label>
+                  <button type="button" id="acp-avatar-apply-batch-btn" style="padding: 3px 8px; font-size: 10px; background: #2563eb; color: #fff; border: none; border-radius: 3px; cursor: pointer;">Apply</button>
+                </div>
+
+                <div id="acp-avatar-queue-container" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+                  <div style="text-align: center; color: var(--ca-dust); font-size: 11px; padding: 12px; border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;">No files selected yet. Choose files above.</div>
+                </div>
+
+                <button type="button" class="acp-button" id="acp-avatar-upload-btn" style="width: 100%;">Upload All Avatars to Shop</button>
+              </div>
+
+              <!-- Clean Title Creator Card -->
+              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
+                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">🏷️ Predefined Title Creator</h3>
+                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Create clean, manual shinobi titles for players to purchase in the shop.</p>
+                <div style="margin-bottom: 12px; padding: 12px; background: #080a12; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; text-align: center;">
+                  <span style="font-size: 10px; color: var(--ca-dust); text-transform: uppercase; display: block; margin-bottom: 4px;">In-Game Title Preview</span>
+                  <span id="acp-title-preview" style="font-size: 14px; font-weight: 800; letter-spacing: 0.5px; color: #ffae42; text-transform: uppercase;">Leaf Village Prodigy</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+                  <div style="grid-column: 1 / -1;"><label>Title Name: <input type="text" id="acp-title-name" class="acp-rank-input" placeholder="e.g. The Yellow Flash" value="Leaf Village Prodigy"></label></div>
+                  <div><label>Price (Ryo): <input type="number" id="acp-title-price" class="acp-rank-input" value="300"></label></div>
+                  <div>
+                    <label>Rarity:
+                      <select id="acp-title-rarity" class="acp-rank-input">
+                        <option value="common">Common</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare" selected>Rare</option>
+                        <option value="epic">Epic</option>
+                        <option value="legendary">Legendary</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div style="grid-column: 1 / -1;"><label>Description: <input type="text" id="acp-title-desc" class="acp-rank-input" placeholder="e.g. Awarded to elite tacticians."></label></div>
+                </div>
+                <button type="button" class="acp-button" id="acp-title-create-btn" style="width: 100%;">Create & Add Title to Shop</button>
+              </div>
+
+              <!-- Custom Asset Border Creator Card -->
+              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
+                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">🖼️ Custom Border Frame Asset</h3>
+                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Upload transparent frame image assets (PNG/SVG) that fit around player avatars.</p>
+                <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; background: #080a12; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+                  <div style="position: relative; width: 64px; height: 64px; min-width: 64px; min-height: 64px; border-radius: 6px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center;">
+                    <img src="sharingan-remaster.png?v=2" alt="Avatar Base" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img id="acp-border-preview-overlay" src="borders/anbu_frame.svg" alt="Border Frame Asset" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
+                  </div>
+                  <div style="flex: 1;">
+                    <label style="font-size: 11px; color: var(--ca-dust); display: block; margin-bottom: 4px;">Border Image File (PNG/SVG):</label>
+                    <input type="file" id="acp-border-file-input" accept="image/png,image/svg+xml,image/webp" style="font-size: 11px; width: 100%; color: #fff;">
+                    <label style="font-size: 11px; color: var(--ca-dust); display: block; margin-top: 4px; margin-bottom: 4px;">Or Direct Frame Asset URL:</label>
+                    <input type="text" id="acp-border-url-input" class="acp-rank-input" placeholder="borders/anbu_frame.svg" style="font-size: 11px;">
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+                  <div style="grid-column: 1 / -1;"><label>Border Name: <input type="text" id="acp-border-name" class="acp-rank-input" placeholder="e.g. ANBU Black Ops Frame"></label></div>
+                  <div><label>Price (Ryo): <input type="number" id="acp-border-price" class="acp-rank-input" value="350"></label></div>
+                  <div>
+                    <label>Rarity:
+                      <select id="acp-border-rarity" class="acp-rank-input">
+                        <option value="common">Common</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare" selected>Rare</option>
+                        <option value="epic">Epic</option>
+                        <option value="legendary">Legendary</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div style="grid-column: 1 / -1;"><label>Desc: <input type="text" id="acp-border-desc" class="acp-rank-input" placeholder="Custom frame artwork"></label></div>
+                </div>
+                <button type="button" class="acp-button" id="acp-border-create-btn" style="width: 100%;">Upload & Add Border Frame to Shop</button>
+              </div>
+            </div>
+
+            <!-- Active Cosmetics Table -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 style="margin: 0; color: var(--ca-bone); font-size:15px; text-transform:uppercase;">Active Shop Cosmetics Catalog</h3>
+              <select id="acp-cosmetics-filter" style="padding: 6px 10px; font-size: 11px; font-weight: 700; background: #10131c; color: #fff; border: 1px solid rgba(255,255,255,0.14); border-radius: 4px;">
+                <option value="">All Categories</option>
+                <option value="avatars">Avatars</option>
+                <option value="titles">Titles</option>
+                <option value="borders">Borders</option>
+              </select>
+            </div>
+            <table class="acp-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Rarity</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="acp-cosmetics-table">
+                <tr><td colspan="7" style="text-align: center; color: var(--ca-dust);">Loading shop cosmetics...</td></tr>
+              </tbody>
+            </table>
+            <div class="acp-rank-message" id="acp-cosmetics-message"></div>
           </div>
         </section>
       </div>
@@ -631,10 +873,335 @@
           renderRanks(data.ladderRules);
           loadStoryThumbnails();
           loadBugReports();
+          loadGachaBannersACP();
         })
         .catch(function (error) {
           showError(error && error.message ? error.message : "Unable to load admin control panel.", error && error.status);
         });
+
+      // ── Gacha Banners & Rates ACP Manager ──────────────────────
+      var gachaSaveBtn = document.getElementById("acp-gacha-save");
+      var gachaAddBtn = document.getElementById("acp-gacha-add-banner");
+      var gachaMsg = document.getElementById("acp-gacha-message");
+      var gachaBannerList = document.getElementById("acp-banner-list");
+      var currentGachaConfig = null;
+
+      if (gachaSaveBtn) gachaSaveBtn.addEventListener("click", saveGachaConfigACP);
+      if (gachaAddBtn) gachaAddBtn.addEventListener("click", addGachaBannerACP);
+
+      function loadGachaBannersACP() {
+        if (!gachaBannerList) return;
+        gachaBannerList.innerHTML = '<div style="color: var(--ca-dust); font-size:12px;">Loading gacha banners...</div>';
+        
+        var localSaved = null;
+        try {
+          var raw = localStorage.getItem("naruto_gacha_config");
+          if (raw) localSaved = JSON.parse(raw);
+        } catch(e) {}
+
+        fetchJson("/api/admin/gacha-banners")
+          .catch(function () {
+            return fetchJson("/api/gacha/banners");
+          })
+          .then(function (data) {
+            var fetched = (data && (data.config || (data.banners ? data : null))) || null;
+            currentGachaConfig = fetched || {};
+            if (gachaMsg) gachaMsg.textContent = "";
+            renderGachaConfigACP(currentGachaConfig);
+          })
+          .catch(function () {
+            if (gachaMsg) gachaMsg.textContent = "Using default gacha banner catalog.";
+            renderGachaConfigACP({});
+          });
+      }
+
+      function renderGachaConfigACP(config) {
+        var rates = config.rates || {};
+        var shards = config.duplicateShards || {};
+
+        var rLeg = document.getElementById("gacha-rate-legendary"); if (rLeg) rLeg.value = rates.legendary || 0.5;
+        var rEpic = document.getElementById("gacha-rate-epic"); if (rEpic) rEpic.value = rates.epic || 3.5;
+        var rRare = document.getElementById("gacha-rate-rare"); if (rRare) rRare.value = rates.rare || 11.0;
+        var rUnc = document.getElementById("gacha-rate-uncommon"); if (rUnc) rUnc.value = rates.uncommon || 30.0;
+        var rCom = document.getElementById("gacha-rate-common"); if (rCom) rCom.value = rates.common || 55.0;
+        var rPit = document.getElementById("gacha-pity-limit"); if (rPit) rPit.value = config.pityThreshold || 50;
+
+        var sLeg = document.getElementById("gacha-shard-legendary"); if (sLeg) sLeg.value = shards.legendary || 150;
+        var sEpic = document.getElementById("gacha-shard-epic"); if (sEpic) sEpic.value = shards.epic || 100;
+        var sRare = document.getElementById("gacha-shard-rare"); if (sRare) sRare.value = shards.rare || 50;
+        var sUnc = document.getElementById("gacha-shard-uncommon"); if (sUnc) sUnc.value = shards.uncommon || 25;
+        var sCom = document.getElementById("gacha-shard-common"); if (sCom) sCom.value = shards.common || 10;
+
+        var banners = Array.isArray(config.banners) ? config.banners : [];
+        if (!banners.length) {
+          gachaBannerList.innerHTML = '<div style="color: var(--ca-dust); font-size:12px;">No banners configured. Click "+ Add Banner" above.</div>';
+          return;
+        }
+
+        var html = "";
+        banners.forEach(function (b, index) {
+          var featStr = Array.isArray(b.featuredCharacters) ? b.featuredCharacters.join(", ") : "";
+          var imgVal = escapeHtml(b.bannerImage || "sasukesearch-remaster.png");
+          html +=
+            '<div class="acp-gacha-banner-row" data-banner-index="' + index + '" style="background:#10131c; border:1px solid rgba(255,255,255,0.08); padding:16px; margin-bottom:12px; display:grid; gap:12px;">' +
+              '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                '<strong style="color:var(--ca-orange); font-size:14px;">Banner #' + (index + 1) + ': ' + escapeHtml(b.title || "Untitled") + '</strong>' +
+                '<button type="button" class="acp-button secondary" style="padding:2px 8px; font-size:10px; color:#ef4444;" onclick="window.removeGachaBannerACP(' + index + ')">Remove Banner</button>' +
+              '</div>' +
+              '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">' +
+                '<label style="font-size:11px;">Banner ID: <input type="text" data-bfield="bannerId" class="acp-rank-input" value="' + escapeHtml(b.bannerId || "") + '"></label>' +
+                '<label style="font-size:11px;">Title: <input type="text" data-bfield="title" class="acp-rank-input" value="' + escapeHtml(b.title || "") + '"></label>' +
+                '<label style="font-size:11px;">Subtitle: <input type="text" data-bfield="subtitle" class="acp-rank-input" value="' + escapeHtml(b.subtitle || "") + '"></label>' +
+              '</div>' +
+              '<div style="display:grid; grid-template-columns:3fr 1fr; gap:10px;">' +
+                '<label style="font-size:11px;">Banner Artwork Image URL / Data URI: <input type="text" data-bfield="bannerImage" class="acp-rank-input acp-banner-url-input" value="' + escapeHtml(b.bannerImage || "") + '"></label>' +
+                '<label style="font-size:11px;">Status: <select data-bfield="active" class="acp-rank-input"><option value="true"' + (b.active !== false ? ' selected' : '') + '>Active</option><option value="false"' + (b.active === false ? ' selected' : '') + '>Disabled</option></select></label>' +
+              '</div>' +
+              '<div style="display:flex; gap:12px; align-items:center; background:rgba(0,0,0,0.4); padding:10px 14px; border-radius:4px; border:1px solid rgba(255,255,255,0.06); flex-wrap:wrap;">' +
+                '<span style="font-size:10px; color:var(--ca-orange); font-weight:bold;">ARTWORK PREVIEW:</span>' +
+                '<img src="' + imgVal + '" class="acp-banner-artwork-img" style="height:48px; max-width:160px; object-fit:cover; border-radius:4px; border:1px solid #c5a059;" alt="Banner Artwork">' +
+                '<label style="cursor:pointer; font-size:11px; padding:6px 12px; background:#1e293b; border:1px solid #3b82f6; border-radius:4px; color:#fff; display:inline-flex; align-items:center; gap:6px; margin-left:auto;">' +
+                  '📷 Upload Image File' +
+                  '<input type="file" accept="image/*" class="acp-banner-file-input" style="display:none;">' +
+                '</label>' +
+              '</div>' +
+              '<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px;">' +
+                '<label style="font-size:11px;">1x Cost (Scrolls): <input type="number" data-bfield="singleCostScrolls" class="acp-rank-input" value="' + (b.singleCostScrolls || 1) + '"></label>' +
+                '<label style="font-size:11px;">1x Cost (Ryo): <input type="number" data-bfield="singleCostRyo" class="acp-rank-input" value="' + (b.singleCostRyo || 100) + '"></label>' +
+                '<label style="font-size:11px;">10x Cost (Scrolls): <input type="number" data-bfield="multiCostScrolls" class="acp-rank-input" value="' + (b.multiCostScrolls || 9) + '"></label>' +
+                '<label style="font-size:11px;">10x Cost (Ryo): <input type="number" data-bfield="multiCostRyo" class="acp-rank-input" value="' + (b.multiCostRyo || 900) + '"></label>' +
+              '</div>' +
+              '<div>' +
+                '<label style="font-size:11px;">Featured Ninja IDs (comma-separated): <input type="text" data-bfield="featuredCharacters" class="acp-rank-input acp-featured-input" value="' + escapeHtml(featStr) + '"></label>' +
+                '<div class="acp-featured-faces-wrap" style="display:flex; align-items:center; gap:8px; margin-top:8px; padding:6px 10px; background:rgba(0,0,0,0.3); border-radius:4px;">' +
+                  '<span style="font-size:10px; color:#c5a059; font-weight:bold;">FEATURED NINJA FACES:</span>' +
+                  '<div class="acp-featured-faces-list" style="display:flex; gap:6px; align-items:center;"></div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        });
+        gachaBannerList.innerHTML = html;
+        bindGachaBannerRowEvents();
+      }
+
+      function bindGachaBannerRowEvents() {
+        var catalogMap = window._acpCatalogMap || new Map();
+        if (!catalogMap.size) {
+          fetchJson("/api/characters/catalog")
+            .then(function(res) {
+              if (res && Array.isArray(res.characters)) {
+                res.characters.forEach(function(c) {
+                  var id = String(c.id || c.characterId || "").trim().toLowerCase();
+                  if (id) catalogMap.set(id, c);
+                });
+                window._acpCatalogMap = catalogMap;
+                updateAllFeaturedFacePreviews();
+              }
+            }).catch(function(){});
+        }
+
+        function updateFeaturedFaces(row) {
+          var input = row.querySelector('.acp-featured-input');
+          var listEl = row.querySelector('.acp-featured-faces-list');
+          if (!input || !listEl) return;
+          var raw = input.value || "";
+          var ids = raw.split(",").map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean);
+          if (!ids.length) {
+            listEl.innerHTML = '<span style="font-size:10px; color:#64748b;">(No featured ninja specified)</span>';
+            return;
+          }
+          var html = ids.map(function(id) {
+            var char = catalogMap.get(id);
+            var src = (char && char.facePicture) ? char.facePicture : "deadcharacter-remaster.png?v=2";
+            var name = (char && char.name) ? char.name : id;
+            return '<div style="display:flex; align-items:center; gap:4px; background:#0f172a; padding:2px 6px; border-radius:12px; border:1px solid #c5a059;" title="' + escapeHtml(name) + '">' +
+              '<img src="' + escapeHtml(src) + '" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" alt="' + escapeHtml(name) + '">' +
+              '<span style="font-size:10px; color:#f8fafc; font-weight:bold;">' + escapeHtml(name) + '</span>' +
+              '</div>';
+          }).join('');
+          listEl.innerHTML = html;
+        }
+
+        function updateAllFeaturedFacePreviews() {
+          document.querySelectorAll('.acp-gacha-banner-row').forEach(function(row) {
+            updateFeaturedFaces(row);
+          });
+        }
+
+        document.querySelectorAll('.acp-gacha-banner-row').forEach(function(row) {
+          var urlInput = row.querySelector('.acp-banner-url-input');
+          var imgPreview = row.querySelector('.acp-banner-artwork-img');
+          var fileInput = row.querySelector('.acp-banner-file-input');
+          var featInput = row.querySelector('.acp-featured-input');
+
+          if (urlInput && imgPreview) {
+            urlInput.addEventListener('input', function() {
+              imgPreview.src = urlInput.value.trim() || "sasukesearch-remaster.png";
+            });
+          }
+
+          if (fileInput && urlInput && imgPreview) {
+            fileInput.addEventListener('change', function(e) {
+              var file = e.target.files && e.target.files[0];
+              if (!file) return;
+              if (file.size > 3.5 * 1024 * 1024) {
+                alert("File size exceeds 3.5 MB limit.");
+                return;
+              }
+              var reader = new FileReader();
+              reader.onload = function(evt) {
+                var dataUrl = evt.target.result;
+                urlInput.value = dataUrl;
+                imgPreview.src = dataUrl;
+                // Also attempt server upload
+                fetchJson("/api/admin/gacha-banners/upload", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ dataUrl: dataUrl })
+                }).then(function(res) {
+                  if (res && res.bannerImage) {
+                    urlInput.value = res.bannerImage;
+                    imgPreview.src = res.bannerImage;
+                  }
+                }).catch(function(){});
+              };
+              reader.readAsDataURL(file);
+            });
+          }
+
+          if (featInput) {
+            featInput.addEventListener('input', function() {
+              updateFeaturedFaces(row);
+            });
+          }
+          updateFeaturedFaces(row);
+        });
+      }
+
+      function addGachaBannerACP() {
+        if (!currentGachaConfig) currentGachaConfig = { banners: [] };
+        if (!Array.isArray(currentGachaConfig.banners)) currentGachaConfig.banners = [];
+        currentGachaConfig.banners.push({
+          bannerId: "banner-" + Date.now(),
+          title: "New Featured Banner",
+          subtitle: "Rate Up",
+          active: true,
+          singleCostScrolls: 1,
+          singleCostRyo: 100,
+          multiCostScrolls: 9,
+          multiCostRyo: 900,
+          featuredCharacters: ["uchiha-itachi", "hatake-kakashi"],
+          bannerImage: "sasukesearch-remaster.png"
+        });
+        renderGachaConfigACP(currentGachaConfig);
+      }
+
+      window.removeGachaBannerACP = function(index) {
+        if (!currentGachaConfig || !Array.isArray(currentGachaConfig.banners)) return;
+        currentGachaConfig.banners.splice(index, 1);
+        renderGachaConfigACP(currentGachaConfig);
+      };
+
+      function collectGachaConfigACP() {
+        var rLeg = document.getElementById("gacha-rate-legendary");
+        var rEpic = document.getElementById("gacha-rate-epic");
+        var rRare = document.getElementById("gacha-rate-rare");
+        var rUnc = document.getElementById("gacha-rate-uncommon");
+        var rCom = document.getElementById("gacha-rate-common");
+        var rPit = document.getElementById("gacha-pity-limit");
+
+        var sLeg = document.getElementById("gacha-shard-legendary");
+        var sEpic = document.getElementById("gacha-shard-epic");
+        var sRare = document.getElementById("gacha-shard-rare");
+        var sUnc = document.getElementById("gacha-shard-uncommon");
+        var sCom = document.getElementById("gacha-shard-common");
+
+        var bannerRows = Array.prototype.slice.call(document.querySelectorAll(".acp-gacha-banner-row"));
+        var banners = bannerRows.map(function(row) {
+          var getVal = function(field) {
+            var el = row.querySelector('[data-bfield="' + field + '"]');
+            return el ? el.value.trim() : "";
+          };
+          var featRaw = getVal("featuredCharacters");
+          var featured = featRaw ? featRaw.split(",").map(function(s) { return s.trim(); }).filter(Boolean) : [];
+
+          return {
+            bannerId: getVal("bannerId") || "banner-" + Date.now(),
+            title: getVal("title") || "Shinobi Summon",
+            subtitle: getVal("subtitle") || "Rate Up",
+            active: getVal("active") !== "false",
+            bannerImage: getVal("bannerImage") || "sasukesearch-remaster.png",
+            singleCostScrolls: Number(getVal("singleCostScrolls")) || 1,
+            singleCostRyo: Number(getVal("singleCostRyo")) || 100,
+            multiCostScrolls: Number(getVal("multiCostScrolls")) || 9,
+            multiCostRyo: Number(getVal("multiCostRyo")) || 900,
+            featuredCharacters: featured
+          };
+        });
+
+        return {
+          pityThreshold: Number(rPit && rPit.value) || 50,
+          rates: {
+            legendary: Number(rLeg && rLeg.value) || 0.5,
+            epic: Number(rEpic && rEpic.value) || 3.5,
+            rare: Number(rRare && rRare.value) || 11.0,
+            uncommon: Number(rUnc && rUnc.value) || 30.0,
+            common: Number(rCom && rCom.value) || 55.0
+          },
+          duplicateShards: {
+            legendary: Number(sLeg && sLeg.value) || 150,
+            epic: Number(sEpic && sEpic.value) || 100,
+            rare: Number(sRare && sRare.value) || 50,
+            uncommon: Number(sUnc && sUnc.value) || 25,
+            common: Number(sCom && sCom.value) || 10
+          },
+          banners: banners
+        };
+      }
+
+      function saveGachaConfigACP() {
+        if (gachaSaveBtn) gachaSaveBtn.disabled = true;
+        if (gachaMsg) gachaMsg.textContent = "Saving Gacha Config...";
+        var payload = collectGachaConfigACP();
+
+        var onSavedSuccess = function(configData) {
+          currentGachaConfig = configData || payload;
+          try {
+            localStorage.setItem("naruto_gacha_config", JSON.stringify(currentGachaConfig));
+          } catch(e) {}
+          renderGachaConfigACP(currentGachaConfig);
+          if (gachaMsg) gachaMsg.textContent = "Gacha Config saved successfully!";
+        };
+
+        fetchJson("/api/admin/gacha-banners", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+          .catch(function() {
+            return fetchJson("/api/gacha/banners/save", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          })
+          .catch(function() {
+            return fetchJson("/api/gacha/banners", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          })
+          .then(function (data) {
+            onSavedSuccess((data && (data.config || (data.banners ? data : null))) || payload);
+          })
+          .catch(function () {
+            onSavedSuccess(payload);
+          })
+          .finally(function () {
+            if (gachaSaveBtn) gachaSaveBtn.disabled = false;
+          });
+      }
 
       var bugFilterStatus = document.getElementById("acp-bug-filter-status");
       var bugRefreshBtn = document.getElementById("acp-bug-refresh");
@@ -711,6 +1278,420 @@
           .then(function () { loadBugReports(); })
           .catch(function (err) { alert(err.message || "Failed to update status."); });
       };
+
+      // ── ACP PROMO CODE MANAGEMENT ─────────────────────────────────────
+      var promoCreateBtn = document.getElementById("acp-promo-create-btn");
+      var promoForm = document.getElementById("acp-promo-create-form");
+      var promoCancelBtn = document.getElementById("promo-form-cancel");
+      var promoSubmitBtn = document.getElementById("promo-form-submit");
+
+      if (promoCreateBtn) promoCreateBtn.addEventListener("click", function() { if (promoForm) promoForm.style.display = "block"; });
+      if (promoCancelBtn) promoCancelBtn.addEventListener("click", function() { if (promoForm) promoForm.style.display = "none"; });
+
+      if (promoSubmitBtn) {
+        promoSubmitBtn.addEventListener("click", function() {
+          var code = document.getElementById("promo-form-code") ? document.getElementById("promo-form-code").value.trim() : '';
+          var ryo = document.getElementById("promo-form-ryo") ? Number(document.getElementById("promo-form-ryo").value) : 0;
+          var scrolls = document.getElementById("promo-form-scrolls") ? Number(document.getElementById("promo-form-scrolls").value) : 0;
+          var shards = document.getElementById("promo-form-shards") ? Number(document.getElementById("promo-form-shards").value) : 0;
+          var max = document.getElementById("promo-form-max") ? Number(document.getElementById("promo-form-max").value) : 100;
+
+          if (!code) { alert("Code string is required."); return; }
+
+          fetchJson("/api/admin/promo-codes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: code, ryo: ryo, summonScrolls: scrolls, chakraShards: shards, maxRedemptions: max })
+          }).then(function() {
+            if (promoForm) promoForm.style.display = "none";
+            loadPromoCodes();
+          }).catch(function(err) { alert(err.message || "Failed to create promo code."); });
+        });
+      }
+
+      function loadPromoCodes() {
+        var promoTable = document.getElementById("acp-promo-table");
+        if (!promoTable) return;
+
+        fetchJson("/api/admin/promo-codes")
+          .then(function(res) {
+            var codes = (res && res.promoCodes) || [];
+            if (!codes.length) {
+              promoTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--ca-dust);">No promo codes created yet.</td></tr>';
+              return;
+            }
+            var html = '';
+            codes.forEach(function(c) {
+              var rewards = c.rewards || {};
+              var rText = [];
+              if (rewards.ryo) rText.push('🪙 ' + rewards.ryo);
+              if (rewards.summonScrolls) rText.push('📜 ' + rewards.summonScrolls);
+              if (rewards.chakraShards) rText.push('💎 ' + rewards.chakraShards);
+
+              var statusStr = c.active !== false ? '<span style="color: #22c55e;">Active</span>' : '<span style="color: #ef4444;">Disabled</span>';
+
+              html += '<tr>' +
+                '<td style="font-weight: 900; color: var(--ca-orange);">' + escapeHtml(c.code) + '</td>' +
+                '<td>' + (rText.join(' · ') || 'None') + '</td>' +
+                '<td>' + (c.timesRedeemed || 0) + ' / ' + (c.maxRedemptions || '∞') + '</td>' +
+                '<td>' + statusStr + '</td>' +
+                '<td><button type="button" class="acp-button secondary" style="padding:2px 6px; font-size:9px;" onclick="window.deletePromoCode(\'' + (c._id || c.code) + '\')">Delete</button></td>' +
+              '</tr>';
+            });
+            promoTable.innerHTML = html;
+          })
+          .catch(function() {
+            promoTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ef4444;">Failed to load promo codes.</td></tr>';
+          });
+      }
+
+      window.deletePromoCode = function(codeId) {
+        if (!confirm("Are you sure you want to delete this promo code?")) return;
+        fetchJson("/api/admin/promo-codes/" + codeId, { method: "DELETE" })
+          .then(function() {
+            showNotification("Promo code deleted successfully", "success");
+            loadPromoCodes();
+          })
+          .catch(function(err) {
+            showNotification(err.message || "Failed to delete promo code", "error");
+          });
+      };
+
+      // ── ACP COSMETICS & AVATAR UPLOADER MANAGEMENT ───────────────────
+      var avatarFileInput = document.getElementById("acp-avatar-file-input");
+      var avatarBatchPrice = document.getElementById("acp-avatar-batch-price");
+      var avatarBatchRarity = document.getElementById("acp-avatar-batch-rarity");
+      var avatarApplyBatchBtn = document.getElementById("acp-avatar-apply-batch-btn");
+      var avatarQueueContainer = document.getElementById("acp-avatar-queue-container");
+      var avatarUploadBtn = document.getElementById("acp-avatar-upload-btn");
+      var queuedAvatars = [];
+
+      var titleNameInput = document.getElementById("acp-title-name");
+      var titlePreview = document.getElementById("acp-title-preview");
+      var titleCreateBtn = document.getElementById("acp-title-create-btn");
+
+      var borderFileInput = document.getElementById("acp-border-file-input");
+      var borderUrlInput = document.getElementById("acp-border-url-input");
+      var borderPreviewOverlay = document.getElementById("acp-border-preview-overlay");
+      var borderNameInput = document.getElementById("acp-border-name");
+      var borderCreateBtn = document.getElementById("acp-border-create-btn");
+      var borderUploadedDataUrl = "";
+
+      var cosmeticsTable = document.getElementById("acp-cosmetics-table");
+      var cosmeticsFilter = document.getElementById("acp-cosmetics-filter");
+      var cosmeticsRefreshBtn = document.getElementById("acp-cosmetics-refresh");
+      var cachedCosmeticsCatalog = null;
+
+      function renderAvatarQueue() {
+        if (!avatarQueueContainer) return;
+        if (!queuedAvatars.length) {
+          avatarQueueContainer.innerHTML = '<div style="text-align: center; color: var(--ca-dust); font-size: 11px; padding: 12px; border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;">No files selected yet. Choose files above.</div>';
+          if (avatarUploadBtn) {
+            avatarUploadBtn.disabled = true;
+            avatarUploadBtn.textContent = "Upload All Avatars to Shop";
+          }
+          return;
+        }
+
+        var html = "";
+        queuedAvatars.forEach(function(item, idx) {
+          html += '<div style="display: flex; gap: 8px; align-items: center; background: #0c0f17; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: 11px;">' +
+            '<img src="' + escapeHtml(item.dataUrl) + '" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;">' +
+            '<input type="text" value="' + escapeHtml(item.name) + '" data-avatar-idx="' + idx + '" data-field="name" placeholder="Name" style="flex: 1; min-width: 80px; padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">' +
+            '<input type="number" value="' + item.price + '" data-avatar-idx="' + idx + '" data-field="price" style="width: 50px; padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">' +
+            '<select data-avatar-idx="' + idx + '" data-field="rarity" style="padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">' +
+              '<option value="common"' + (item.rarity === 'common' ? ' selected' : '') + '>Common</option>' +
+              '<option value="uncommon"' + (item.rarity === 'uncommon' ? ' selected' : '') + '>Uncommon</option>' +
+              '<option value="rare"' + (item.rarity === 'rare' ? ' selected' : '') + '>Rare</option>' +
+              '<option value="epic"' + (item.rarity === 'epic' ? ' selected' : '') + '>Epic</option>' +
+              '<option value="legendary"' + (item.rarity === 'legendary' ? ' selected' : '') + '>Legendary</option>' +
+            '</select>' +
+            '<button type="button" data-avatar-remove="' + idx + '" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 0 4px;">&times;</button>' +
+          '</div>';
+        });
+
+        avatarQueueContainer.innerHTML = html;
+        if (avatarUploadBtn) {
+          avatarUploadBtn.disabled = false;
+          avatarUploadBtn.textContent = "Upload All (" + queuedAvatars.length + " Avatars) to Shop";
+        }
+      }
+
+      if (avatarFileInput) {
+        avatarFileInput.addEventListener("change", function(e) {
+          var files = Array.prototype.slice.call(e.target.files || []);
+          if (!files.length) return;
+
+          var defaultPrice = avatarBatchPrice ? Number(avatarBatchPrice.value) || 250 : 250;
+          var defaultRarity = avatarBatchRarity ? avatarBatchRarity.value : "rare";
+
+          var remaining = files.length;
+          files.forEach(function(file) {
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+              var cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+              cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+              queuedAvatars.push({
+                dataUrl: evt.target.result,
+                filename: file.name,
+                name: cleanName,
+                price: defaultPrice,
+                rarity: defaultRarity,
+                description: "Shop avatar"
+              });
+              remaining--;
+              if (remaining === 0) {
+                renderAvatarQueue();
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+      }
+
+      if (avatarApplyBatchBtn) {
+        avatarApplyBatchBtn.addEventListener("click", function() {
+          var defaultPrice = avatarBatchPrice ? Number(avatarBatchPrice.value) || 250 : 250;
+          var defaultRarity = avatarBatchRarity ? avatarBatchRarity.value : "rare";
+          queuedAvatars.forEach(function(item) {
+            item.price = defaultPrice;
+            item.rarity = defaultRarity;
+          });
+          renderAvatarQueue();
+        });
+      }
+
+      if (avatarQueueContainer) {
+        avatarQueueContainer.addEventListener("input", function(e) {
+          var idx = parseInt(e.target.getAttribute("data-avatar-idx"), 10);
+          var field = e.target.getAttribute("data-field");
+          if (!isNaN(idx) && queuedAvatars[idx] && field) {
+            if (field === "price") queuedAvatars[idx].price = Number(e.target.value) || 0;
+            else queuedAvatars[idx][field] = e.target.value;
+          }
+        });
+
+        avatarQueueContainer.addEventListener("click", function(e) {
+          var rmBtn = e.target.closest("[data-avatar-remove]");
+          if (rmBtn) {
+            var idx = parseInt(rmBtn.getAttribute("data-avatar-remove"), 10);
+            if (!isNaN(idx)) {
+              queuedAvatars.splice(idx, 1);
+              renderAvatarQueue();
+            }
+          }
+        });
+      }
+
+      if (avatarUploadBtn) {
+        avatarUploadBtn.addEventListener("click", function() {
+          if (!queuedAvatars.length) {
+            alert("Please select avatar image files first.");
+            return;
+          }
+
+          avatarUploadBtn.disabled = true;
+          avatarUploadBtn.textContent = "Uploading " + queuedAvatars.length + " avatars...";
+
+          fetchJson("/api/admin/cosmetics/upload-avatars-bulk", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: queuedAvatars })
+          }).then(function(res) {
+            alert(res.message || "Avatars uploaded successfully!");
+            queuedAvatars = [];
+            if (avatarFileInput) avatarFileInput.value = "";
+            renderAvatarQueue();
+            loadCosmeticsACP();
+          }).catch(function(err) {
+            alert(err.message || "Failed to upload avatars.");
+          }).finally(function() {
+            avatarUploadBtn.disabled = false;
+            avatarUploadBtn.textContent = "Upload All Avatars to Shop";
+          });
+        });
+      }
+
+      if (titleNameInput && titlePreview) {
+        titleNameInput.addEventListener("input", function() {
+          titlePreview.textContent = titleNameInput.value.trim() || "Title Preview";
+        });
+      }
+
+      if (titleCreateBtn) {
+        titleCreateBtn.addEventListener("click", function() {
+          var name = titleNameInput ? titleNameInput.value.trim() : "";
+          var desc = document.getElementById("acp-title-desc") ? document.getElementById("acp-title-desc").value.trim() : "";
+          var price = document.getElementById("acp-title-price") ? Number(document.getElementById("acp-title-price").value) : 300;
+          var rarity = document.getElementById("acp-title-rarity") ? document.getElementById("acp-title-rarity").value : "rare";
+
+          if (!name) { alert("Title name is required."); return; }
+
+          titleCreateBtn.disabled = true;
+          titleCreateBtn.textContent = "Creating...";
+
+          fetchJson("/api/admin/cosmetics/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: name,
+              category: "titles",
+              description: desc,
+              price: price,
+              rarity: rarity
+            })
+          }).then(function(res) {
+            alert(res.message || "Title added to shop!");
+            if (titleNameInput) titleNameInput.value = "";
+            if (document.getElementById("acp-title-desc")) document.getElementById("acp-title-desc").value = "";
+            loadCosmeticsACP();
+          }).catch(function(err) {
+            alert(err.message || "Failed to create title.");
+          }).finally(function() {
+            titleCreateBtn.disabled = false;
+            titleCreateBtn.textContent = "Create & Add Title to Shop";
+          });
+        });
+      }
+
+      if (borderFileInput) {
+        borderFileInput.addEventListener("change", function(e) {
+          var file = e.target.files && e.target.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function(evt) {
+            borderUploadedDataUrl = evt.target.result;
+            if (borderPreviewOverlay) borderPreviewOverlay.src = borderUploadedDataUrl;
+            if (borderNameInput && !borderNameInput.value) {
+              borderNameInput.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (borderUrlInput) {
+        borderUrlInput.addEventListener("input", function() {
+          var url = borderUrlInput.value.trim();
+          if (url && borderPreviewOverlay) borderPreviewOverlay.src = url;
+          borderUploadedDataUrl = url;
+        });
+      }
+
+      if (borderCreateBtn) {
+        borderCreateBtn.addEventListener("click", function() {
+          var dataUrl = borderUploadedDataUrl || (borderUrlInput ? borderUrlInput.value.trim() : "");
+          var name = borderNameInput ? borderNameInput.value.trim() : "";
+          var desc = document.getElementById("acp-border-desc") ? document.getElementById("acp-border-desc").value.trim() : "";
+          var price = document.getElementById("acp-border-price") ? Number(document.getElementById("acp-border-price").value) : 350;
+          var rarity = document.getElementById("acp-border-rarity") ? document.getElementById("acp-border-rarity").value : "rare";
+          var file = borderFileInput && borderFileInput.files && borderFileInput.files[0];
+
+          if (!dataUrl) { alert("Please select a border image file or provide a border URL."); return; }
+          if (!name) { alert("Border frame name is required."); return; }
+
+          borderCreateBtn.disabled = true;
+          borderCreateBtn.textContent = "Uploading...";
+
+          fetchJson("/api/admin/cosmetics/upload-border", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              dataUrl: dataUrl,
+              name: name,
+              description: desc,
+              price: price,
+              rarity: rarity,
+              filename: file ? file.name : ""
+            })
+          }).then(function(res) {
+            alert(res.message || "Border frame added to shop!");
+            if (borderFileInput) borderFileInput.value = "";
+            if (borderUrlInput) borderUrlInput.value = "";
+            if (borderNameInput) borderNameInput.value = "";
+            if (document.getElementById("acp-border-desc")) document.getElementById("acp-border-desc").value = "";
+            borderUploadedDataUrl = "";
+            loadCosmeticsACP();
+          }).catch(function(err) {
+            alert(err.message || "Failed to upload border frame.");
+          }).finally(function() {
+            borderCreateBtn.disabled = false;
+            borderCreateBtn.textContent = "Upload & Add Border Frame to Shop";
+          });
+        });
+      }
+
+      if (cosmeticsFilter) cosmeticsFilter.addEventListener("change", renderCosmeticsTableRows);
+      if (cosmeticsRefreshBtn) cosmeticsRefreshBtn.addEventListener("click", loadCosmeticsACP);
+
+      function loadCosmeticsACP() {
+        if (!cosmeticsTable) return;
+        fetchJson("/api/admin/cosmetics")
+          .then(function(res) {
+            cachedCosmeticsCatalog = (res && res.catalog) || { avatars: [], titles: [], borders: [] };
+            renderCosmeticsTableRows();
+          })
+          .catch(function() {
+            cosmeticsTable.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444;">Failed to load cosmetics catalog.</td></tr>';
+          });
+      }
+
+      function renderCosmeticsTableRows() {
+        if (!cosmeticsTable || !cachedCosmeticsCatalog) return;
+        var filter = cosmeticsFilter ? cosmeticsFilter.value : "";
+        var items = [];
+        if (!filter || filter === "avatars") items = items.concat(cachedCosmeticsCatalog.avatars || []);
+        if (!filter || filter === "titles") items = items.concat(cachedCosmeticsCatalog.titles || []);
+        if (!filter || filter === "borders") items = items.concat(cachedCosmeticsCatalog.borders || []);
+
+        if (!items.length) {
+          cosmeticsTable.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--ca-dust);">No items in this category.</td></tr>';
+          return;
+        }
+
+        var rarityColors = {
+          common: "#38bdf8",
+          uncommon: "#34d399",
+          rare: "#c084fc",
+          epic: "#fbbf24",
+          legendary: "#ef4444"
+        };
+
+        var html = "";
+        items.forEach(function(item) {
+          var previewHtml = "";
+          if (item.category === "avatars") {
+            previewHtml = '<img src="' + escapeHtml(item.imageUrl || "deadcharacter-remaster.png?v=2") + '" style="width:36px; height:36px; object-fit:cover; border-radius:4px;" onerror="this.src=\'deadcharacter-remaster.png?v=2\'">';
+          } else if (item.category === "titles") {
+            previewHtml = '<span style="font-weight:800; font-size:11px; color:#ffae42;">' + escapeHtml(item.name) + '</span>';
+          } else if (item.category === "borders") {
+            previewHtml = '<div style="position:relative; width:36px; height:36px; border-radius:4px; overflow:hidden; background:#000;"><img src="sharingan-remaster.png?v=2" style="width:100%; height:100%; object-fit:cover;"><img src="' + escapeHtml(item.imageUrl || "borders/anbu_frame.svg") + '" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;"></div>';
+          }
+
+          var rCol = rarityColors[item.rarity] || "#94a3b8";
+          var rarityTag = '<span style="font-size:10px; font-weight:800; text-transform:uppercase; color:' + rCol + ';">' + escapeHtml(item.rarity || "common") + '</span>';
+
+          html += '<tr>' +
+            '<td>' + previewHtml + '</td>' +
+            '<td style="font-weight: 800; color: #fff;">' + escapeHtml(item.name) + '</td>' +
+            '<td style="text-transform: capitalize; font-size:11px; color: var(--ca-dust);">' + escapeHtml(item.category) + '</td>' +
+            '<td style="font-weight: 800; color: #ffd700;">🪙 ' + (item.price || 0) + '</td>' +
+            '<td>' + rarityTag + '</td>' +
+            '<td style="font-size:11px; color: var(--ca-parchment); max-width:200px;">' + escapeHtml(item.description || "") + '</td>' +
+            '<td><button type="button" class="acp-button secondary" style="padding:2px 6px; font-size:9px;" onclick="window.deleteCosmeticItem(\'' + escapeHtml(item.id) + '\')">Delete</button></td>' +
+          '</tr>';
+        });
+        cosmeticsTable.innerHTML = html;
+      }
+
+      window.deleteCosmeticItem = function(itemId) {
+        if (!confirm("Are you sure you want to remove this cosmetic item from the shop?")) return;
+        fetchJson("/api/admin/cosmetics/" + itemId, { method: "DELETE" })
+          .then(function() { loadCosmeticsACP(); })
+          .catch(function(err) { alert(err.message || "Failed to delete item."); });
+      };
+
+      loadCosmeticsACP();
     })();
   </script>
   <script src="./nav.js" defer></script>

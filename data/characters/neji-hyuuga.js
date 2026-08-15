@@ -99,6 +99,15 @@ module.exports = {
                     "type": "remove_random_chakra",
                     "amount": 1,
                     "scope": "target"
+                },
+                {
+                    "type": "remove_random_chakra",
+                    "amount": 1,
+                    "scope": "target",
+                    "condition": {
+                        "scope": "target",
+                        "statusId": "neji_hyuuga_neji_gentle_fist"
+                    }
                 }
             ]
         },

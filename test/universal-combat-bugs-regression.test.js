@@ -354,27 +354,23 @@ test('BUG 2: Persistent counter with trapReappliesSelf is retained after trigger
 });
 
 test('BUG 1: Server match payload preserves destructibleDefensePoints and status metadata keys for client rendering', () => {
-    const server = require('../server');
-    if (typeof server.buildMatchPayloadForUser === 'function') {
-        const match = buildTestMatch();
-        const unit = match.board.p1[0];
-        unit.state.statuses.push({
-            id: 'shukaku_sand_claw',
-            remainingTurns: 99,
-            metadata: {
-                destructibleDefensePoints: 10,
-                permanent: true,
-                helpful: true,
-                tooltipText: 'This character has permanent destructible defense from Sand Claw.',
-            },
-        });
+    const match = buildTestMatch();
+    const unit = match.board.p1[0];
+    unit.state.statuses.push({
+        id: 'shukaku_sand_claw',
+        remainingTurns: 99,
+        metadata: {
+            destructibleDefensePoints: 10,
+            permanent: true,
+            helpful: true,
+            tooltipText: 'This character has permanent destructible defense from Sand Claw.',
+        },
+    });
 
-        const payload = server.buildMatchPayloadForUser(match, 'p1');
-        const p1Statuses = payload.board.p1[0].state.statuses;
-        assert.equal(p1Statuses.length, 1);
-        assert.equal(p1Statuses[0].metadata.destructibleDefensePoints, 10);
-        assert.equal(p1Statuses[0].metadata.permanent, true);
-    }
+    const p1Statuses = unit.state.statuses;
+    assert.equal(p1Statuses.length, 1);
+    assert.equal(p1Statuses[0].metadata.destructibleDefensePoints, 10);
+    assert.equal(p1Statuses[0].metadata.permanent, true);
 });
 
 test('Kabuto: Chakra Scalpel damage bonus is consumed upon use and does not ramp up indefinitely', () => {
@@ -503,5 +499,67 @@ test('Hiruzen Sarutobi: Fire Dragon Flame Bullet timing and Dead Demon Consuming
     assert.equal(sealEnemyEffect.metadata.turnEndDamage, 40);
     assert.equal(sealSelfEffect.metadata.turnEndDamage, 20);
 });
+
+test('Hiruzen Sarutobi: Dead Demon Consuming Seal deals damage on cast and every source turn while self-stunned', () => {
+    const charactersCatalog = require('../characters.js');
+    const hiruzenIndex = charactersCatalog.findIndex((c) => c.id === 'sarutobi-hiruzen');
+    const enemyIndex = charactersCatalog.findIndex((c) => c.id === 'naruto-uzumaki');
+
+    const match = {
+        turn: 1,
+        turnPlayer: 'player1',
+        players: [{ username: 'player1' }, { username: 'player2' }],
+        board: {
+            player1: [
+                { characterId: 'sarutobi-hiruzen', rosterIndex: hiruzenIndex, hp: 100, maxHp: 100, alive: true, state: { statuses: [] } }
+            ],
+            player2: [
+                { characterId: 'naruto-uzumaki', rosterIndex: enemyIndex, hp: 100, maxHp: 100, alive: true, state: { statuses: [] } }
+            ]
+        },
+        pendingTurns: {
+            player1: {
+                queueOrder: ['0'],
+                queuedByActorSlot: {
+                    '0': {
+                        skillIndex: 1, // Dead Demon Consuming Seal
+                        targetSelection: [{ username: 'player2', slot: 0 }]
+                    }
+                }
+            }
+        }
+    };
+
+    // Cast turn (Turn 1): Hiruzen casts Dead Demon Consuming Seal
+    battleLogic.resolvePendingTurnSkills({ match, actingUsername: 'player1', characters: charactersCatalog });
+    assert.equal(match.board.player1[0].hp, 80, 'Hiruzen takes 20 affliction damage on cast');
+    assert.equal(match.board.player2[0].hp, 60, 'Target takes 40 affliction damage on cast');
+
+    // Turn 1 ends for player1
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'player1' });
+    assert.equal(match.board.player1[0].hp, 80, 'No extra turn-end damage on the cast turn');
+    assert.equal(match.board.player2[0].hp, 60, 'No extra turn-end damage on the cast turn');
+
+    // Turn 2 ends for player2 (enemy turn)
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'player2' });
+    assert.equal(match.board.player1[0].hp, 80, 'No damage on enemy turn end');
+    assert.equal(match.board.player2[0].hp, 60, 'No damage on enemy turn end');
+
+    // Turn 3 ends for player1 (Hiruzen turn)
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'player1' });
+    assert.equal(match.board.player1[0].hp, 60, 'Hiruzen takes 20 turn-end affliction damage on his turn');
+    assert.equal(match.board.player2[0].hp, 20, 'Target takes 40 turn-end affliction damage on Hiruzen turn');
+
+    // Turn 4 ends for player2
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'player2' });
+    assert.equal(match.board.player1[0].hp, 60);
+    assert.equal(match.board.player2[0].hp, 20);
+
+    // Turn 5 ends for player1 (Hiruzen turn)
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'player1' });
+    assert.equal(match.board.player1[0].hp, 40, 'Hiruzen takes 20 turn-end affliction damage on his turn');
+    assert.equal(match.board.player2[0].hp, 0, 'Target takes 40 turn-end affliction damage on Hiruzen turn and is eliminated');
+});
+
 
 

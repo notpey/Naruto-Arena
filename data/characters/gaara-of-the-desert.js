@@ -52,6 +52,20 @@ module.exports = {
                         "ongoingClass": "control",
                         "turnDurationAnchor": "source_turn"
                     }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "gaara_sand_coffin_ready",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "skillReplacements": {
+                            "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
+                        },
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "Sand Coffin is replaced by Sand Burial.",
+                        "ongoingClass": "control"
+                    }
                 }
             ]
         },
@@ -104,7 +118,6 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
-                        "ignoreHelpfulEffects": true,
                         "turnDurationAnchor": "source_turn",
                         "tooltipText": "This character ignores helpful effects for 1 turn."
                     }

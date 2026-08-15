@@ -97,22 +97,13 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "damageReductionFlat": 10,
-                        "onOwnerDamagedByBaseDamageAtLeastApplyStatusToAttacker": {
-                            "threshold": 1,
-                            "enemyOnly": true,
-                            "duration": 99,
-                            "statusId": "uchiha_sasuke_attacker_mark",
-                            "metadata": {
-                                "harmful": true,
-                                "bonusDamageFromSourceSkillsFlat": 5,
-                                "bonusDamageFromSourceCharacterId": "uchiha-sasuke",
-                                "tooltipText": "This character takes 5 additional damage from Sasuke's skills."
-                            }
-                        },
+                        "samePreviousTargetDamageBonusFlat": 5,
+                        "samePreviousTargetMarkerStatusId": "uchiha_sasuke_sharingan_previous_target",
+                        "samePreviousTargetMarkerTooltipText": "Sasuke will deal 5 additional damage to this character if he targets them again.",
                         "skillReplacements": {
                             "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
                         },
-                        "tooltipText": "Sasuke has 10 damage reduction\nEnemies that use a skill on Sasuke permanently take 5 additional damage from Sasuke's skills\nSharingan is replaced by Grand Fireball Jutsu."
+                        "tooltipText": "Sasuke has 10 damage reduction\nIf he targets the same enemy again, his skills deal 5 additional damage\nSharingan is replaced by Grand Fireball Jutsu."
                     }
                 }
             ]

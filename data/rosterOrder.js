@@ -72,6 +72,33 @@ const CANONICAL_ROSTER_ORDER = [
     'uchiha-itachi',            // 67: Itachi
     'rokushou-aoi',             // 68: Aoi
     'kurosuki-raiga',           // 69: Raiga
+    'uzumaki-naruto-s',         // 70: Uzumaki Naruto (S)
+    'haruno-sakura-s',          // 71: Haruno Sakura (S)
+    'sai',                      // 72: Sai
+    'inuzuka-kiba-s',           // 73: Inuzuka Kiba (S)
+    'aburame-shino-s',          // 74: Aburame Shino (S)
+    'hyuuga-hinata-s',          // 75: Hyuuga Hinata (S)
+    'nara-shikamaru-s',         // 76: Nara Shikamaru (S)
+    'akimichi-chouji-s',        // 77: Akimichi Chouji (S)
+    'yamanaka-ino-s',           // 78: Yamanaka Ino (S)
+    'rock-lee-s',               // 79: Rock Lee (S)
+    'tenten-s',                 // 80: Tenten (S)
+    'hyuuga-neji-s',            // 81: Hyuuga Neji (S)
+    'hatake-kakashi-s',         // 82: Hatake Kakashi (S)
+    'yamato',                   // 83: Yamato
+    'maito-gai-s',              // 84: Maito Gai (S)
+    'kankuro-s',                // 85: Kankuro (S)
+    'temari-s',                 // 86: Temari (S)
+    'kazekage-gaara',           // 87: Kazekage Gaara
+    'yakushi-kabuto-s',         // 88: Yakushi Kabuto (S)
+    'orochimaru-s',             // 89: Orochimaru (S)
+    'four-tails-kyuubi-naruto', // 90: Four Tails Kyuubi Naruto
+    'kisame-body-double',       // 91: Kisame Body Double
+    'itachi-body-double',       // 92: Itachi Body Double
+    'deidara',                  // 93: Deidara
+    'hiruko-sasori',            // 94: Hiruko Sasori
+    'sasori-of-the-red-sand',   // 95: Sasori of the Red Sand
+    'puppet-sasori',            // 96: Puppet Sasori
 ];
 
 const ORDER_MAP = new Map(

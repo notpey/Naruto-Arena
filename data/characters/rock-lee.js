@@ -32,6 +32,11 @@ module.exports = {
                     "metadata": {
                         "ignoreDamageReduction": true
                     }
+                },
+                {
+                    "type": "HealthLoss",
+                    "amount": 5,
+                    "scope": "self"
                 }
             ]
         },

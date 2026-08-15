@@ -61,14 +61,15 @@ const LATEST_CHARACTER_RELEASES = [
 const LATEST_CHARACTER_RELEASES_STATE_KEY = 'latest_character_releases';
 const MAINTENANCE_MODE_STATE_KEY = 'maintenance_mode';
 const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
-const DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/3JqVcPXm/default.png';
-const LEGACY_DEFAULT_PROFILE_AVATAR = 'https://i.postimg.cc/zG3W1w6K/itachi.png';
+const DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
+const LEGACY_DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
 let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
 const STARTER_REBALANCE_MIGRATION_ID = 'starter-rebalance-2026-07-16';
 const EXAMS_REBALANCE_MIGRATION_ID = 'exams-rebalance-2026-07-16-v4';
+const AUDIT_REBALANCE_MIGRATION_ID = 'audit-rebalance-2026-08-15-v3';
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
@@ -116,6 +117,26 @@ const EXAMS_REBALANCE_CHARACTER_IDS = new Set([
     'maito-gai',
     'baki',
     'yakushi-kabuto',
+]);
+const AUDIT_REBALANCE_CHARACTER_IDS = new Set([
+    'sarutobi-hiruzen',
+    'uchiha-itachi',
+    'hoshigaki-kisame',
+    'orochimaru',
+    'jiraiya',
+    'tsunade',
+    'hatake-kakashi',
+    'sarutobi-asuma',
+    'yuhi-kurenai',
+    'maito-gai',
+    'yakushi-kabuto',
+    'young-minato',
+    'young-kushina',
+    'young-itachi',
+    'young-yahiko',
+    'young-konan',
+    'young-nagato',
+    'teuchi',
 ]);
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
@@ -1886,6 +1907,7 @@ let usersCollection;
 let matchesCollection;
 let appStateCollection;
 let newsPostsCollection;
+let cosmeticsService = require('./services/cosmeticsService.js')({});
 const matchSocketRooms = new Map();
 
 const activeMatchesMap = new Map();
@@ -3104,45 +3126,15 @@ const getStoredMissionCatalog = async () => {
     }
 
     const storedState = await appStateCollection.findOne({ key: MISSION_CATALOG_STATE_KEY });
-    const hasStoredDoc = Boolean(storedState);
-    const storedCatalog = normalizeMissionCatalog(
-        storedState && Array.isArray(storedState.missions) ? storedState.missions : []
-    );
+    const hasStoredDoc = Boolean(storedState && Array.isArray(storedState.missions));
     if (!hasStoredDoc) {
         missionCatalogCache = defaultCatalog;
         return defaultCatalog;
     }
 
-    // The stored catalog is the source of truth for admin edits (including deletions).
-    // Merge in any missions newly added to DEFAULT_MISSION_CATALOG in code (e.g. unlock
-    // missions shipped with new characters) that the admin has never seen/saved before,
-    // without resurrecting anything the admin has deliberately deleted by missionId.
-    const storedIds = new Set(storedCatalog.map((mission) => mission.missionId));
-    const newDefaultMissions = defaultCatalog.filter((mission) => !storedIds.has(mission.missionId));
-    if (!newDefaultMissions.length) {
-        missionCatalogCache = storedCatalog;
-        return storedCatalog;
-    }
-
-    const mergedCatalog = normalizeMissionCatalog([...storedCatalog, ...newDefaultMissions]);
-    try {
-        await appStateCollection.updateOne(
-            { key: MISSION_CATALOG_STATE_KEY },
-            {
-                $set: {
-                    key: MISSION_CATALOG_STATE_KEY,
-                    missions: mergedCatalog,
-                    updatedAt: new Date(),
-                    updatedBy: 'system:merge-new-default-missions',
-                },
-            },
-            { upsert: true }
-        );
-    } catch (error) {
-        console.error('Mission catalog merge persist error:', error);
-    }
-    missionCatalogCache = mergedCatalog;
-    return mergedCatalog;
+    const storedCatalog = normalizeMissionCatalog(storedState.missions);
+    missionCatalogCache = storedCatalog;
+    return storedCatalog;
 };
 
 const saveMissionCatalog = async (missions, updatedBy) => {
@@ -3151,18 +3143,20 @@ const saveMissionCatalog = async (missions, updatedBy) => {
         throw new Error('At least one mission is required.');
     }
 
-    await appStateCollection.updateOne(
-        { key: MISSION_CATALOG_STATE_KEY },
-        {
-            $set: {
-                key: MISSION_CATALOG_STATE_KEY,
-                missions: normalizedCatalog,
-                updatedAt: new Date(),
-                updatedBy: updatedBy || '',
+    if (appStateCollection) {
+        await appStateCollection.updateOne(
+            { key: MISSION_CATALOG_STATE_KEY },
+            {
+                $set: {
+                    key: MISSION_CATALOG_STATE_KEY,
+                    missions: normalizedCatalog,
+                    updatedAt: new Date(),
+                    updatedBy: updatedBy || '',
+                },
             },
-        },
-        { upsert: true }
-    );
+            { upsert: true }
+        );
+    }
 
     missionCatalogCache = normalizedCatalog;
     return normalizedCatalog;
@@ -3337,14 +3331,15 @@ const getStoredStoryCatalog = async () => {
     }
     try {
         const storedState = await appStateCollection.findOne({ key: STORY_CATALOG_STATE_KEY });
-        const storedCatalog = normalizeStoryCatalog(
-            storedState && Array.isArray(storedState.chapters) ? storedState.chapters : []
-        );
-        const nextCatalog = mergeStoredStoryCatalogWithDefaults(storedCatalog, defaultCatalog);
-        storyCatalogCache = nextCatalog;
-        return nextCatalog;
+        if (!storedState || !Array.isArray(storedState.chapters)) {
+            storyCatalogCache = defaultCatalog;
+            return defaultCatalog;
+        }
+        const storedCatalog = normalizeStoryCatalog(storedState.chapters);
+        storyCatalogCache = storedCatalog;
+        return storedCatalog;
     } catch (error) {
-        console.error('Stored story catalog is invalid; falling back to default story catalog:', error);
+        console.error('Stored story catalog error:', error);
         storyCatalogCache = defaultCatalog;
         return defaultCatalog;
     }
@@ -3511,6 +3506,20 @@ const buildDefaultUserProfile = (user = {}) => {
         },
         posts: 0,
         ryo: 50,
+        summonScrolls: 5,
+        chakraShards: 0,
+        inventory: {
+            avatars: [],
+            titles: [],
+            borders: [],
+            customTitles: [],
+        },
+        equippedTitle: '',
+        equippedBorder: '',
+        gachaStats: {
+            totalPulls: 0,
+            pityCounter: 0,
+        },
         clan: null,
         clanInvitations: [],
         recentQuickGames: [],
@@ -3733,6 +3742,115 @@ const normalizeRecentLadderGames = (entries = []) => {
         .slice(0, 25);
 };
 
+const DEFAULT_QUEST_DEFINITIONS = [
+    { questId: 'daily_win_3', type: 'daily', title: 'Shinobi Victory', description: 'Win 3 battles in any mode.', target: 3, metric: 'battlesWon', rewards: { ryo: 200, summonScrolls: 0, chakraShards: 15 } },
+    { questId: 'daily_chakra_50', type: 'daily', title: 'Chakra Control', description: 'Spend 50 total Chakra in battles.', target: 50, metric: 'chakraSpent', rewards: { ryo: 150, summonScrolls: 0, chakraShards: 10 } },
+    { questId: 'daily_skills_15', type: 'daily', title: 'Jutsu Mastery', description: 'Perform 15 skills in battles.', target: 15, metric: 'skillsUsed', rewards: { ryo: 150, summonScrolls: 0, chakraShards: 10 } },
+    { questId: 'weekly_ranked_10', type: 'weekly', title: 'Ranked Gladiator', description: 'Win 10 Ranked games.', target: 10, metric: 'rankedWins', rewards: { ryo: 600, summonScrolls: 2, chakraShards: 50 } },
+    { questId: 'weekly_kills_25', type: 'weekly', title: 'Bounty Hunter', description: 'Defeat 25 enemy shinobi.', target: 25, metric: 'charactersKilled', rewards: { ryo: 500, summonScrolls: 1, chakraShards: 40 } },
+    { questId: 'event_summons_5', type: 'event', title: 'Altar Enthusiast', description: 'Perform 5 summons at the Altar.', target: 5, metric: 'gachaPulls', rewards: { ryo: 1000, summonScrolls: 2, chakraShards: 100 } }
+];
+
+const DEFAULT_ACHIEVEMENT_DEFINITIONS = [
+    {
+        id: 'ranked_wins',
+        title: 'Ranked Master',
+        description: 'Win ranked games to prove your shinobi skill.',
+        metric: 'rankedWins',
+        tiers: [
+            { tier: 1, target: 5, rewards: { ryo: 250, summonScrolls: 1, chakraShards: 20 } },
+            { tier: 2, target: 25, rewards: { ryo: 1000, summonScrolls: 3, chakraShards: 50 } },
+            { tier: 3, target: 100, rewards: { ryo: 3000, summonScrolls: 10, chakraShards: 200 } }
+        ]
+    },
+    {
+        id: 'win_streak',
+        title: 'Unstoppable Shinobi',
+        description: 'Win consecutive ranked games.',
+        metric: 'highestStreak',
+        tiers: [
+            { tier: 1, target: 3, rewards: { ryo: 300, summonScrolls: 1, chakraShards: 25 } },
+            { tier: 2, target: 5, rewards: { ryo: 800, summonScrolls: 2, chakraShards: 50 } },
+            { tier: 3, target: 10, rewards: { ryo: 2500, summonScrolls: 5, chakraShards: 150 } }
+        ]
+    },
+    {
+        id: 'level_milestones',
+        title: 'Academy Graduate',
+        description: 'Reach higher account level ranks.',
+        metric: 'level',
+        tiers: [
+            { tier: 1, target: 5, rewards: { ryo: 500, summonScrolls: 1, chakraShards: 30 } },
+            { tier: 2, target: 15, rewards: { ryo: 1500, summonScrolls: 3, chakraShards: 75 } },
+            { tier: 3, target: 30, rewards: { ryo: 5000, summonScrolls: 8, chakraShards: 250 } }
+        ]
+    },
+    {
+        id: 'roster_collector',
+        title: 'Ninja Squad Assembly',
+        description: 'Unlock unique shinobi characters.',
+        metric: 'unlockedCount',
+        tiers: [
+            { tier: 1, target: 10, rewards: { ryo: 400, summonScrolls: 1, chakraShards: 30 } },
+            { tier: 2, target: 25, rewards: { ryo: 1200, summonScrolls: 3, chakraShards: 80 } },
+            { tier: 3, target: 50, rewards: { ryo: 4000, summonScrolls: 7, chakraShards: 200 } }
+        ]
+    },
+    {
+        id: 'gacha_pulls',
+        title: 'Summoning Connoisseur',
+        description: 'Summon shinobi at the Gacha Altar.',
+        metric: 'gachaPulls',
+        tiers: [
+            { tier: 1, target: 10, rewards: { ryo: 500, summonScrolls: 1, chakraShards: 40 } },
+            { tier: 2, target: 50, rewards: { ryo: 2000, summonScrolls: 5, chakraShards: 100 } },
+            { tier: 3, target: 200, rewards: { ryo: 8000, summonScrolls: 15, chakraShards: 300 } }
+        ]
+    }
+];
+
+const DAILY_LOGIN_CALENDAR_REWARDS = [
+    { day: 1, ryo: 100, summonScrolls: 0, chakraShards: 10 },
+    { day: 2, ryo: 150, summonScrolls: 0, chakraShards: 20 },
+    { day: 3, ryo: 250, summonScrolls: 1, chakraShards: 25 },
+    { day: 4, ryo: 350, summonScrolls: 1, chakraShards: 35 },
+    { day: 5, ryo: 500, summonScrolls: 2, chakraShards: 50 },
+    { day: 6, ryo: 750, summonScrolls: 2, chakraShards: 75 },
+    { day: 7, ryo: 1500, summonScrolls: 5, chakraShards: 150 }
+];
+
+function normalizeQuestsState(questsObj = {}) {
+    const progress = questsObj.progress && typeof questsObj.progress === 'object' ? questsObj.progress : {};
+    const claimedIds = Array.isArray(questsObj.claimedIds) ? questsObj.claimedIds.map(String) : [];
+    return {
+        progress: {
+            battlesWon: Math.max(0, Number(progress.battlesWon) || 0),
+            chakraSpent: Math.max(0, Number(progress.chakraSpent) || 0),
+            rankedWins: Math.max(0, Number(progress.rankedWins) || 0),
+            skillsUsed: Math.max(0, Number(progress.skillsUsed) || 0),
+            charactersKilled: Math.max(0, Number(progress.charactersKilled) || 0),
+            hpHealed: Math.max(0, Number(progress.hpHealed) || 0),
+            gachaPulls: Math.max(0, Number(progress.gachaPulls) || 0),
+        },
+        claimedIds
+    };
+}
+
+function normalizeAchievementsState(achObj = {}) {
+    const claimedTiers = achObj.claimedTiers && typeof achObj.claimedTiers === 'object' ? achObj.claimedTiers : {};
+    return {
+        claimedTiers
+    };
+}
+
+function normalizeLoginRewardsState(loginObj = {}) {
+    return {
+        streakCount: Math.max(0, Number(loginObj.streakCount) || 0),
+        lastClaimDate: typeof loginObj.lastClaimDate === 'string' ? loginObj.lastClaimDate : null,
+        totalClaims: Math.max(0, Number(loginObj.totalClaims) || 0),
+    };
+}
+
 const normalizeUserProfile = (user = {}) => {
     const defaults = buildDefaultUserProfile(user);
     const source = user.profile && typeof user.profile === 'object' ? user.profile : {};
@@ -3803,6 +3921,16 @@ const normalizeUserProfile = (user = {}) => {
         ryo: Number.isFinite(Number(source.ryo))
             ? Math.max(0, Math.round(Number(source.ryo)))
             : defaults.ryo,
+        summonScrolls: Number.isFinite(Number(source.summonScrolls))
+            ? Math.max(0, Math.round(Number(source.summonScrolls)))
+            : defaults.summonScrolls,
+        chakraShards: Number.isFinite(Number(source.chakraShards))
+            ? Math.max(0, Math.round(Number(source.chakraShards)))
+            : defaults.chakraShards,
+        gachaStats: {
+            totalPulls: Math.max(0, Number(source.gachaStats?.totalPulls) || 0),
+            pityCounter: Math.max(0, Number(source.gachaStats?.pityCounter) || 0),
+        },
         clan,
         clanInvitations: normalizeClanInvitations(source.clanInvitations),
         recentQuickGames: normalizeRecentQuickGames(source.recentQuickGames),
@@ -3854,6 +3982,18 @@ const normalizeUserProfile = (user = {}) => {
             lastOnlineAt: activity.lastOnlineAt || defaults.activity.lastOnlineAt,
             currentPage: typeof activity.currentPage === 'string' ? activity.currentPage.trim().slice(0, 120) : '',
         },
+        quests: normalizeQuestsState(source.quests),
+        achievements: normalizeAchievementsState(source.achievements),
+        loginRewards: normalizeLoginRewardsState(source.loginRewards),
+        redeemedCodes: Array.isArray(source.redeemedCodes) ? source.redeemedCodes.map(String) : [],
+        inventory: {
+            avatars: Array.isArray(source.inventory?.avatars) ? source.inventory.avatars.map(String) : [],
+            titles: Array.isArray(source.inventory?.titles) ? source.inventory.titles.map(String) : [],
+            borders: Array.isArray(source.inventory?.borders) ? source.inventory.borders.map(String) : [],
+            customTitles: Array.isArray(source.inventory?.customTitles) ? source.inventory.customTitles : [],
+        },
+        equippedTitle: typeof source.equippedTitle === 'string' ? source.equippedTitle : '',
+        equippedBorder: typeof source.equippedBorder === 'string' ? source.equippedBorder : '',
     };
 };
 
@@ -4246,6 +4386,8 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     nextProgress.unlockedAt = nextProgress.completedAt;
                     if (!alreadyCompleted) {
                         completedMissionIds.push(mission.missionId);
+                        profile.summonScrolls = Math.max(0, (Number(profile.summonScrolls) || 0) + 2);
+                        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) + 250);
                     }
                     if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
                         unlockedIds.add(rewardCharacterId);
@@ -5279,9 +5421,11 @@ const getStoredCharacters = async () => {
             : {};
     const shouldApplyStarterRebalance = !completedMigrations[STARTER_REBALANCE_MIGRATION_ID];
     const shouldApplyExamsRebalance = !completedMigrations[EXAMS_REBALANCE_MIGRATION_ID];
+    const shouldApplyAuditRebalance = !completedMigrations[AUDIT_REBALANCE_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
+        ...(shouldApplyAuditRebalance ? Array.from(AUDIT_REBALANCE_CHARACTER_IDS) : []),
     ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
@@ -5341,8 +5485,13 @@ const getStoredCharacters = async () => {
     );
     const migratedStoredCharacters = storedState.characters.map((entry) => {
         const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
-        if (characterIdsToRefresh.has(characterId) && defaultByCharacterId.has(characterId)) {
-            return defaultByCharacterId.get(characterId);
+        const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
+        if (seedEntry) {
+            return {
+                ...seedEntry,
+                facePicture: (typeof entry.facePicture === 'string' && entry.facePicture.trim()) || seedEntry.facePicture,
+                characterdeescription: (typeof entry.characterdeescription === 'string' && entry.characterdeescription.trim()) || seedEntry.characterdeescription,
+            };
         }
         return withSeedImageFallback(entry);
     });
@@ -5377,7 +5526,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -5385,6 +5534,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyExamsRebalance) {
             completedMigrationUpdates[`completed.${EXAMS_REBALANCE_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyAuditRebalance) {
+            completedMigrationUpdates[`completed.${AUDIT_REBALANCE_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
@@ -6073,7 +6225,8 @@ app.use(
         },
     })
 );
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 app.use(
     morgan('combined', {
@@ -6376,11 +6529,17 @@ const cloneSerializable = (value) => {
 
 const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     '_destructibleDefenseRestoreTurnsLeft',
+    'afflictionDamage',
     'banished',
     'bloodlineCostIncrease',
     'bloodlineCostReduction',
     'bonusDamageFromSourceNonAfflictionFlat',
     'bonusDamageFromSourceSkillsFlat',
+    'cannotBeCleansed',
+    'cannotBecomeInvulnerable',
+    'cannotBeStunned',
+    'cannotIgnoreStuns',
+    'cannotReduceDamage',
     'cannotUseHarmfulSkills',
     'cannotUseNonMentalSkills',
     'cannotUseSkillClasses',
@@ -6401,11 +6560,13 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'genjutsuCostReduction',
     'harmful',
     'helpful',
+    'ignoreOngoingSourceStun',
     'NonAfflictionDamageDebuff',
     'ninjutsuCostIncrease',
     'ninjutsuCostReduction',
     'nonAfflictionDamageTakenBonusFlat',
     'nonMentalRandomCostIncrease',
+    'ongoingClass',
     'overrideAllSkillsToAllRandom',
     'overrideAllSkillsToAllRandomSkillIdsAny',
     'permanent',
@@ -6425,6 +6586,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'tooltipText',
     'tooltipTextTemplate',
     'turnEndDamage',
+    'turnEndTrigger',
 ]);
 
 const extractTooltipPlaceholderKeys = (template) => {
@@ -8573,6 +8735,55 @@ const ensureBoardState = async (match) => {
             changed = true;
         }
     });
+
+    const alivePlayers = (match.players || []).filter(
+        (player) => (Number(player?.aliveCount) || 0) > 0
+    );
+    if (players.length >= 2 && alivePlayers.length <= 1 && match.status !== 'ended') {
+        const winner = alivePlayers.length === 1 ? alivePlayers[0].username : null;
+        match.status = 'ended';
+        match.winner = winner;
+        match.surrenderedBy = null;
+        match.endReason = 'elimination';
+        match.endedAt = new Date();
+        match.currentTurn = null;
+        match.turnStartedAt = null;
+        match.turnExpiresAt = null;
+        match.ladderResults = await applyMatchCompletionRewards(
+            match,
+            winner,
+            match.endedAt
+        );
+        matchSocketRooms.delete(match.matchId);
+        await updateMatchActive(
+            match.matchId,
+            {
+                $set: {
+                    status: 'ended',
+                    winner: match.winner,
+                    surrenderedBy: match.surrenderedBy,
+                    endReason: match.endReason,
+                    endedAt: match.endedAt,
+                    currentTurn: null,
+                    turnStartedAt: null,
+                    turnExpiresAt: null,
+                    board: match.board,
+                    players: match.players,
+                    chakraPools: match.chakraPools,
+                    economy: match.economy,
+                    pendingTurns: match.pendingTurns,
+                    ladderResults: match.ladderResults || null,
+                    missionResults: match.missionResults || null,
+                    storyResults: match.storyResults || null,
+                    gauntletResults: match.gauntletResults || null,
+                },
+            }
+        );
+        quickMatches.delete(match.matchId);
+        (match.players || []).forEach((player) => userToMatch.delete(player.username));
+        return match;
+    }
+
     if (changed) {
         await updateMatchActive(match.matchId,
             { $set: { board: match.board, players } }
@@ -8799,6 +9010,7 @@ async function initDb() {
     appStateCollection = db.collection(APP_STATE_COLLECTION);
     newsPostsCollection = db.collection(NEWS_POSTS_COLLECTION);
     bugsCollection = db.collection(BUGS_COLLECTION);
+    promoCodesCollection = db.collection('promoCodes');
     await usersCollection.createIndex({ username: 1 }, { unique: true });
     await usersCollection.createIndex({ usernameLower: 1 });
     await usersCollection.createIndex(
@@ -8848,11 +9060,411 @@ async function initDb() {
     });
     app.use('/api/bugs', bugsRouter);
 
+    const gachaRouter = require('./routes/gacha.js')({
+        usersCollection,
+        appStateCollection,
+        normalizeUserProfile,
+        requireSession,
+        getCharactersData: () => (typeof getCharactersData === 'function' ? getCharactersData() : charactersData),
+        rootDir: __dirname,
+        SESSION_COOKIE_NAME,
+        getSessionUserCached
+    });
+    app.use('/api', gachaRouter);
+    async function getSessionUserFromAuth(req) {
+        if (!usersCollection || !req.authUser) return null;
+        let user = null;
+        if (req.authUser._id && ObjectId.isValid(req.authUser._id)) {
+            try { user = await usersCollection.findOne({ _id: new ObjectId(req.authUser._id) }); } catch (e) {}
+        }
+        if (!user && req.authUser.id && ObjectId.isValid(req.authUser.id)) {
+            try { user = await usersCollection.findOne({ _id: new ObjectId(req.authUser.id) }); } catch (e) {}
+        }
+        if (!user && req.authUser.username) {
+            try {
+                const rawUsername = String(req.authUser.username).trim();
+                user = await usersCollection.findOne({
+                    $or: [
+                        { username: rawUsername },
+                        { usernameLower: rawUsername.toLowerCase() }
+                    ]
+                });
+            } catch (e) {}
+        }
+        return user;
+    }
+    const getGachaSessionUser = getSessionUserFromAuth;
+
+    // ── QUESTS API ENDPOINTS ──────────────────────────────────────────────
+    app.get('/api/quests', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const progress = profile.quests.progress;
+            const claimedSet = new Set(profile.quests.claimedIds);
+
+            const quests = DEFAULT_QUEST_DEFINITIONS.map((q) => {
+                const currentVal = Number(progress[q.metric]) || 0;
+                const isCompleted = currentVal >= q.target;
+                const isClaimed = claimedSet.has(q.questId);
+                return {
+                    ...q,
+                    currentProgress: Math.min(currentVal, q.target),
+                    isCompleted,
+                    isClaimed,
+                    canClaim: isCompleted && !isClaimed
+                };
+            });
+
+            return res.json({ ok: true, quests });
+        } catch (err) {
+            console.error('Quests error:', err);
+            return res.status(500).json({ error: 'Failed to load quests.' });
+        }
+    });
+
+    app.post('/api/quests/claim', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const { questId } = req.body;
+            const questDef = DEFAULT_QUEST_DEFINITIONS.find((q) => q.questId === questId);
+            if (!questDef) return res.status(404).json({ error: 'Quest not found.' });
+
+            const progress = profile.quests.progress;
+            const claimedSet = new Set(profile.quests.claimedIds);
+
+            if (claimedSet.has(questId)) {
+                return res.status(400).json({ error: 'Quest reward already claimed.' });
+            }
+
+            const currentVal = Number(progress[questDef.metric]) || 0;
+            if (currentVal < questDef.target) {
+                return res.status(400).json({ error: 'Quest objective not completed yet.' });
+            }
+
+            claimedSet.add(questId);
+            profile.quests.claimedIds = Array.from(claimedSet);
+
+            const rewards = questDef.rewards || {};
+            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
+            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
+            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
+
+            await usersCollection.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        'profile.quests.claimedIds': profile.quests.claimedIds,
+                        'profile.ryo': profile.ryo,
+                        'profile.summonScrolls': profile.summonScrolls,
+                        'profile.chakraShards': profile.chakraShards,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+
+            return res.json({
+                ok: true,
+                message: `Claimed ${questDef.title} reward!`,
+                rewards: questDef.rewards,
+                ryo: profile.ryo,
+                summonScrolls: profile.summonScrolls,
+                chakraShards: profile.chakraShards
+            });
+        } catch (err) {
+            console.error('Quest claim error:', err);
+            return res.status(500).json({ error: 'Failed to claim quest.' });
+        }
+    });
+
+    // ── ACHIEVEMENTS API ENDPOINTS ───────────────────────────────────────
+    app.get('/api/achievements', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const claimedMap = profile.achievements.claimedTiers || {};
+
+            const achievements = DEFAULT_ACHIEVEMENT_DEFINITIONS.map((ach) => {
+                let metricVal = 0;
+                if (ach.metric === 'rankedWins') metricVal = profile.ladder.wins || 0;
+                else if (ach.metric === 'highestStreak') metricVal = profile.ladder.highestStreak || profile.ladder.streak || 0;
+                else if (ach.metric === 'level') metricVal = profile.ladder.level || 1;
+                else if (ach.metric === 'unlockedCount') metricVal = (Array.isArray(profile.missions.unlockedCharacterIds) ? profile.missions.unlockedCharacterIds.length : 0);
+                else if (ach.metric === 'gachaPulls') metricVal = profile.gachaStats.totalPulls || 0;
+
+                const claimedSet = new Set(Array.isArray(claimedMap[ach.id]) ? claimedMap[ach.id] : []);
+
+                const tiers = ach.tiers.map((t) => {
+                    const isCompleted = metricVal >= t.target;
+                    const isClaimed = claimedSet.has(t.tier);
+                    return {
+                        ...t,
+                        currentProgress: Math.min(metricVal, t.target),
+                        isCompleted,
+                        isClaimed,
+                        canClaim: isCompleted && !isClaimed
+                    };
+                });
+
+                return {
+                    ...ach,
+                    currentValue: metricVal,
+                    tiers
+                };
+            });
+
+            return res.json({ ok: true, achievements });
+        } catch (err) {
+            console.error('Achievements error:', err);
+            return res.status(500).json({ error: 'Failed to load achievements.' });
+        }
+    });
+
+    app.post('/api/achievements/claim', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const { achievementId, tier } = req.body;
+            const achDef = DEFAULT_ACHIEVEMENT_DEFINITIONS.find((a) => a.id === achievementId);
+            if (!achDef) return res.status(404).json({ error: 'Achievement not found.' });
+
+            const tierDef = achDef.tiers.find((t) => t.tier === Number(tier));
+            if (!tierDef) return res.status(404).json({ error: 'Achievement tier not found.' });
+
+            const claimedMap = profile.achievements.claimedTiers || {};
+            const claimedSet = new Set(Array.isArray(claimedMap[achievementId]) ? claimedMap[achievementId] : []);
+
+            if (claimedSet.has(tierDef.tier)) {
+                return res.status(400).json({ error: 'Tier reward already claimed.' });
+            }
+
+            let metricVal = 0;
+            if (achDef.metric === 'rankedWins') metricVal = profile.ladder.wins || 0;
+            else if (achDef.metric === 'highestStreak') metricVal = profile.ladder.highestStreak || profile.ladder.streak || 0;
+            else if (achDef.metric === 'level') metricVal = profile.ladder.level || 1;
+            else if (achDef.metric === 'unlockedCount') metricVal = (Array.isArray(profile.missions.unlockedCharacterIds) ? profile.missions.unlockedCharacterIds.length : 0);
+            else if (achDef.metric === 'gachaPulls') metricVal = profile.gachaStats.totalPulls || 0;
+
+            if (metricVal < tierDef.target) {
+                return res.status(400).json({ error: 'Achievement tier objective not completed.' });
+            }
+
+            claimedSet.add(tierDef.tier);
+            claimedMap[achievementId] = Array.from(claimedSet);
+            profile.achievements.claimedTiers = claimedMap;
+
+            const rewards = tierDef.rewards || {};
+            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
+            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
+            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
+
+            await usersCollection.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        'profile.achievements.claimedTiers': profile.achievements.claimedTiers,
+                        'profile.ryo': profile.ryo,
+                        'profile.summonScrolls': profile.summonScrolls,
+                        'profile.chakraShards': profile.chakraShards,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+
+            return res.json({
+                ok: true,
+                message: `Claimed ${achDef.title} (Tier ${tierDef.tier}) reward!`,
+                rewards: tierDef.rewards,
+                ryo: profile.ryo,
+                summonScrolls: profile.summonScrolls,
+                chakraShards: profile.chakraShards
+            });
+        } catch (err) {
+            console.error('Achievement claim error:', err);
+            return res.status(500).json({ error: 'Failed to claim achievement.' });
+        }
+    });
+
+    // ── DAILY LOGIN REWARDS API ENDPOINTS ────────────────────────────────
+    app.get('/api/login-rewards', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const loginState = profile.loginRewards;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const canClaimToday = loginState.lastClaimDate !== todayStr;
+            const currentDayIndex = (loginState.streakCount % 7) + 1;
+
+            return res.json({
+                ok: true,
+                calendar: DAILY_LOGIN_CALENDAR_REWARDS,
+                streakCount: loginState.streakCount,
+                currentDayIndex,
+                lastClaimDate: loginState.lastClaimDate,
+                canClaimToday
+            });
+        } catch (err) {
+            console.error('Login rewards error:', err);
+            return res.status(500).json({ error: 'Failed to load login rewards.' });
+        }
+    });
+
+    app.post('/api/login-rewards/claim', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+            if (profile.loginRewards.lastClaimDate === todayStr) {
+                return res.status(400).json({ error: 'Daily reward already claimed today. Check back tomorrow!' });
+            }
+
+            const currentDay = (profile.loginRewards.streakCount % 7) + 1;
+            const rewardConfig = DAILY_LOGIN_CALENDAR_REWARDS[currentDay - 1] || DAILY_LOGIN_CALENDAR_REWARDS[0];
+
+            profile.loginRewards.streakCount += 1;
+            profile.loginRewards.totalClaims += 1;
+            profile.loginRewards.lastClaimDate = todayStr;
+
+            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewardConfig.ryo) || 0);
+            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewardConfig.summonScrolls) || 0);
+            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewardConfig.chakraShards) || 0);
+
+            await usersCollection.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        'profile.loginRewards': profile.loginRewards,
+                        'profile.ryo': profile.ryo,
+                        'profile.summonScrolls': profile.summonScrolls,
+                        'profile.chakraShards': profile.chakraShards,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+
+            return res.json({
+                ok: true,
+                message: `Day ${currentDay} Login Reward Claimed!`,
+                claimedDay: currentDay,
+                rewards: rewardConfig,
+                ryo: profile.ryo,
+                summonScrolls: profile.summonScrolls,
+                chakraShards: profile.chakraShards
+            });
+        } catch (err) {
+            console.error('Login reward claim error:', err);
+            return res.status(500).json({ error: 'Failed to claim login reward.' });
+        }
+    });
+
+    // ── PROMO CODE REDEMPTION API ENDPOINT ────────────────────────────────
+    app.post('/api/promo-codes/redeem', requireSession, async (req, res) => {
+        try {
+            const user = await getGachaSessionUser(req);
+            if (!user) return res.status(401).json({ error: 'Unauthorized.' });
+            const profile = normalizeUserProfile(user);
+
+            const inputCode = String(req.body?.code || '').trim().toUpperCase();
+            if (!inputCode) return res.status(400).json({ error: 'Please enter a promo code.' });
+
+            const redeemedSet = new Set((profile.redeemedCodes || []).map((c) => String(c).toUpperCase()));
+            if (redeemedSet.has(inputCode)) {
+                return res.status(400).json({ error: 'You have already redeemed this code.' });
+            }
+
+            let promoDoc = null;
+            if (promoCodesCollection) {
+                promoDoc = await promoCodesCollection.findOne({ code: inputCode });
+            }
+
+            if (!promoDoc) {
+                const DEFAULT_CODES = {
+                    'WELCOME2026': { ryo: 500, summonScrolls: 2, chakraShards: 50, active: true },
+                    'SHINOBI777': { ryo: 777, summonScrolls: 3, chakraShards: 77, active: true }
+                };
+                if (DEFAULT_CODES[inputCode]) {
+                    promoDoc = { code: inputCode, ...DEFAULT_CODES[inputCode] };
+                }
+            }
+
+            if (!promoDoc || promoDoc.active === false) {
+                return res.status(404).json({ error: 'Invalid or expired promo code.' });
+            }
+
+            if (promoDoc.expiresAt && new Date(promoDoc.expiresAt) < new Date()) {
+                return res.status(400).json({ error: 'This promo code has expired.' });
+            }
+
+            if (promoDoc.maxRedemptions && Number(promoDoc.timesRedeemed || 0) >= Number(promoDoc.maxRedemptions)) {
+                return res.status(400).json({ error: 'This promo code has reached maximum redemption limit.' });
+            }
+
+            const rewards = promoDoc.rewards || { ryo: promoDoc.ryo || 0, summonScrolls: promoDoc.summonScrolls || 0, chakraShards: promoDoc.chakraShards || 0 };
+
+            redeemedSet.add(inputCode);
+            profile.redeemedCodes = Array.from(redeemedSet);
+
+            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
+            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
+            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
+
+            if (promoCodesCollection && promoDoc._id) {
+                await promoCodesCollection.updateOne(
+                    { _id: promoDoc._id },
+                    { $inc: { timesRedeemed: 1 } }
+                );
+            }
+
+            await usersCollection.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        'profile.redeemedCodes': profile.redeemedCodes,
+                        'profile.ryo': profile.ryo,
+                        'profile.summonScrolls': profile.summonScrolls,
+                        'profile.chakraShards': profile.chakraShards,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+
+            return res.json({
+                ok: true,
+                message: `Code ${inputCode} redeemed successfully!`,
+                rewards,
+                ryo: profile.ryo,
+                summonScrolls: profile.summonScrolls,
+                chakraShards: profile.chakraShards
+            });
+        } catch (err) {
+            console.error('Promo code redeem error:', err);
+            return res.status(500).json({ error: 'Failed to redeem promo code.' });
+        }
+    });
+
+    cosmeticsService = require('./services/cosmeticsService.js')({
+        appStateCollection
+    });
+
     const adminRouter = require('./routes/admin.js')({
         requireSession,
         appStateCollection,
         usersCollection,
         bugsCollection,
+        promoCodesCollection,
         charactersData,
         getCharactersData: () => charactersData,
         saveCharacters,
@@ -8872,11 +9484,54 @@ async function initDb() {
         buildMatchPayloadForUser,
         getTurnDurationMsForUser,
         makeEmptyPendingTurn,
-        TRAINING_DUMMY_DISPLAY_NAME
+        TRAINING_DUMMY_DISPLAY_NAME,
+        cosmeticsService,
+        getStoredMissionCatalog,
+        saveMissionCatalog,
+        getStoredStoryCatalog,
+        saveStoryCatalog,
     });
     app.use('/api/admin', adminRouter);
+
+    const characterService = {
+        getCharacters: () => (typeof getCharactersData === 'function' ? getCharactersData() : charactersData),
+        getCharacterCatalog: () => (typeof buildCharacterCatalog === 'function' ? buildCharacterCatalog() : [])
+    };
+
+    const shopRouter = require('./routes/shop.js')({
+        usersCollection,
+        normalizeUserProfile,
+        getMissionLockedCharacterIds,
+        getStoredMissionCatalog,
+        characterService,
+        cosmeticsService,
+        profileHasUnlockedCharacter,
+        getShopPriceForMissionId,
+        normalizeCharacterId,
+        normalizeMissionState,
+        normalizeMissionProgressEntry,
+        requireSession,
+    });
+    app.use(shopRouter);
+
+    const profileRouter = require('./routes/profile.js')({
+        usersCollection,
+        requireSession,
+        normalizeUserProfile,
+        serializeUserForClient,
+        serializePublicUserProfile,
+        avatarUpdateSchema,
+        validateAvatarUrl,
+        validateBackgroundUrl,
+        getExperienceRequiredForNextLevel,
+        recalculatePlayerLadderStandings,
+        cosmeticsService
+    });
+    app.use(profileRouter);
 }
 
+app.use('/avatars', express.static(path.join(__dirname, 'avatars')));
+app.use('/borders', express.static(path.join(__dirname, 'borders')));
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
 
 app.get(['/health', '/api/health'], (req, res) => {
@@ -10263,14 +10918,95 @@ app.get('/api/shop', requireSession, async (req, res) => {
                 shopPrice,
             };
         });
+
+        const cs = cosmeticsService;
+        let cosmeticsCatalog = { avatars: [], titles: [], borders: [] };
+        if (cs && typeof cs.loadCatalog === 'function') {
+            cosmeticsCatalog = await cs.loadCatalog();
+        } else if (cs && typeof cs.getCatalogSync === 'function') {
+            cosmeticsCatalog = cs.getCatalogSync();
+        }
+
         return res.json({
             ok: true,
             ryo: profile.ryo,
+            inventory: profile.inventory || { avatars: [], titles: [], borders: [], customTitles: [] },
+            equippedTitle: profile.equippedTitle || '',
+            equippedBorder: profile.equippedBorder || '',
+            avatarUrl: profile.avatarUrl || '',
             characters,
+            cosmetics: cosmeticsCatalog,
         });
     } catch (error) {
         console.error('Shop catalog load error:', error);
         return res.status(500).json({ error: 'Unable to load shop.' });
+    }
+});
+
+app.post('/api/shop/purchase-cosmetic', requireSession, async (req, res) => {
+    try {
+        const { itemId, category } = req.body || {};
+        const cleanCategory = String(category || '').trim().toLowerCase();
+        const cleanItemId = String(itemId || '').trim();
+
+        if (!cleanItemId || !['avatars', 'titles', 'borders'].includes(cleanCategory)) {
+            return res.status(400).json({ error: 'Valid cosmetic itemId and category are required.' });
+        }
+
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const rawProfile = normalizeUserProfile(user);
+        const profile = rawProfile.profile || rawProfile;
+        const inventory = profile.inventory || { avatars: [], titles: [], borders: [], customTitles: [] };
+        const ownedList = inventory[cleanCategory] || [];
+
+        if (ownedList.includes(cleanItemId)) {
+            return res.status(400).json({ error: 'You already own this item.' });
+        }
+
+        const cs = cosmeticsService;
+        let cosmeticsCatalog = { avatars: [], titles: [], borders: [] };
+        if (cs && typeof cs.loadCatalog === 'function') {
+            cosmeticsCatalog = await cs.loadCatalog();
+        } else if (cs && typeof cs.getCatalogSync === 'function') {
+            cosmeticsCatalog = cs.getCatalogSync();
+        }
+
+        const categoryList = cosmeticsCatalog[cleanCategory] || [];
+        const item = categoryList.find(c => c.id === cleanItemId);
+        if (!item) {
+            return res.status(404).json({ error: 'Cosmetic item not found in shop catalog.' });
+        }
+
+        const price = Math.max(0, Number(item.price) || 0);
+        if ((Number(profile.ryo) || 0) < price) {
+            return res.status(400).json({ error: `Not enough Ryo. Required: ${price} Ryo.` });
+        }
+
+        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - price);
+        inventory[cleanCategory] = Array.from(new Set([...ownedList, cleanItemId]));
+        profile.inventory = inventory;
+
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        const savedProfile = normalizedProfile.profile || normalizedProfile;
+        await usersCollection.updateOne(
+            { _id: user._id },
+            { $set: { profile: savedProfile, updatedAt: new Date() } }
+        );
+
+        return res.json({
+            ok: true,
+            message: `Purchased ${item.name}!`,
+            ryo: savedProfile.ryo,
+            inventory: savedProfile.inventory,
+            item
+        });
+    } catch (error) {
+        console.error('Cosmetic purchase error:', error);
+        return res.status(500).json({ error: 'Unable to complete cosmetic purchase.' });
     }
 });
 
@@ -10345,11 +11081,83 @@ app.post('/api/shop/purchase', requireSession, async (req, res) => {
     }
 });
 
+app.post('/api/characters/buy-direct', requireSession, async (req, res) => {
+    try {
+        const characterId = normalizeCharacterId(req.body?.characterId);
+        if (!characterId) {
+            return res.status(400).json({ error: 'Character ID is required.' });
+        }
+        const user = await usersCollection.findOne({ username: req.authUser.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
 
+        const characterEntry = (Array.isArray(charactersData) ? charactersData : []).find(
+            (entry) => normalizeCharacterId(entry && entry.characterId) === characterId
+        );
+        if (!characterEntry) {
+            return res.status(400).json({ error: 'Character not found.' });
+        }
 
+        const requiredMissionId =
+            typeof characterEntry.requiredMissionId === 'string'
+                ? characterEntry.requiredMissionId.trim()
+                : '';
+        const missionCatalog = await getStoredMissionCatalog();
+        const price = requiredMissionId
+            ? getShopPriceForMissionId(requiredMissionId, missionCatalog)
+            : 1000;
 
+        const profile = normalizeUserProfile(user);
+        const lockedCharacterIds = await getMissionLockedCharacterIds();
+        if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+            return res.status(400).json({ error: 'Character already unlocked.' });
+        }
+        if ((Number(profile.ryo) || 0) < price) {
+            return res.status(400).json({ error: `Not enough Ryo. Required: ${price} Ryo.` });
+        }
 
+        const missionState = normalizeMissionState(profile.missions);
+        const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
+        unlockedIds.add(characterId);
+        const progressByMissionId = { ...(missionState.progressByMissionId || {}) };
+        if (requiredMissionId) {
+            const existingProgress = normalizeMissionProgressEntry(
+                progressByMissionId[requiredMissionId] || {}
+            );
+            progressByMissionId[requiredMissionId] = normalizeMissionProgressEntry({
+                ...existingProgress,
+                completedAt: existingProgress.completedAt || new Date(),
+            });
+        }
 
+        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - price);
+        profile.missions = {
+            ...profile.missions,
+            progressByMissionId,
+            progress: progressByMissionId,
+            unlockedCharacterIds: Array.from(unlockedIds),
+        };
+
+        const normalizedProfile = normalizeUserProfile({ ...user, profile });
+        await usersCollection.updateOne(
+            { _id: user._id },
+            { $set: { profile: normalizedProfile } }
+        );
+
+        return res.json({
+            ok: true,
+            characterId,
+            price,
+            ryo: normalizedProfile.ryo,
+            unlockedCharacterIds: normalizedProfile.missions.unlockedCharacterIds,
+            missionProgressByMissionId: normalizedProfile.missions.progressByMissionId,
+        });
+    } catch (error) {
+        console.error('Direct character buy error:', error);
+        return res.status(500).json({ error: 'Unable to purchase character.' });
+    }
+});
 
 
 
@@ -12485,7 +13293,16 @@ const startServer = async () => {
     });
 };
 
-startServer().catch((error) => {
-    console.error('Failed to initialize the server:', error);
-    process.exit(1);
-});
+if (require.main === module) {
+    startServer().catch((error) => {
+        console.error('Failed to initialize the server:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = {
+    buildMatchPayloadForUser,
+    app,
+};
+
+

@@ -91,6 +91,17 @@ module.exports = {
                     "type": "remove_random_chakra",
                     "amount": 1,
                     "scope": "target"
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "tooltipText": "Unnerving Bells trigger active.",
+                        "turnDurationAnchor": "source_turn",
+                        "ongoingClass": "control"
+                    }
                 }
             ]
         },

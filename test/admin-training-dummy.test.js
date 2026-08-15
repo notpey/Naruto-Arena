@@ -20,8 +20,24 @@ test('training matches do not grant normal match rewards', () => {
     assert.match(serverSource, /if \(match\.mode === 'training'\) \{\s*return null;\s*\}/);
 });
 
-test('selection screen exposes training dummy only through the admin client control', () => {
-    assert.match(selectionSource, /class="training-dummy-button" hidden/);
-    assert.match(scriptSource, /trainingDummyButton\.hidden = !isCurrentUserAdmin\(\)/);
-    assert.match(scriptSource, /\/api\/admin\/training-dummy\/start/);
+test('selection screen exposes training dummy modal control', () => {
+    assert.match(selectionSource, /id="modal-training-dummy-btn"/);
+    assert.match(adminSource, /\/training-dummy\/start/);
 });
+
+test('Admin mission and story catalog methods are properly injected into admin router', () => {
+    assert.match(serverSource, /saveMissionCatalog,/);
+    assert.match(serverSource, /getStoredMissionCatalog,/);
+    assert.match(serverSource, /saveStoryCatalog,/);
+    assert.match(serverSource, /getStoredStoryCatalog,/);
+    assert.match(adminSource, /saveMissionCatalog/);
+    assert.match(adminSource, /saveStoryCatalog/);
+});
+
+test('Admin cosmetics bulk upload and single upload routes require session and handle items', () => {
+    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-avatars-bulk',\s*requireSession/);
+    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-avatar',\s*requireSession/);
+    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-border',\s*requireSession/);
+});
+
+

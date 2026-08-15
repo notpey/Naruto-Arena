@@ -145,11 +145,38 @@ const buildSkillReplacementMap = (actorState) => {
             replacementsFromRemaining && typeof replacementsFromRemaining === 'object'
                 ? replacementsFromRemaining
                 : status?.metadata?.skillReplacements;
-        if (!replacements || typeof replacements !== 'object') return;
-        Object.entries(replacements).forEach(([fromId, toId]) => {
-            if (!fromId || !toId) return;
-            map[fromId] = toId;
-        });
+        if (replacements && typeof replacements === 'object') {
+            Object.entries(replacements).forEach(([fromId, toId]) => {
+                if (!fromId || !toId) return;
+                map[fromId] = toId;
+            });
+        }
+        if (status?.metadata?.tentenWeaponUpgradeCycle) {
+            const stacks = Math.max(1, Number(status.stacks) || 1);
+            const cycle = stacks % 3;
+            if (cycle === 1) {
+                map['tenten-s-kunai-grenade'] = 'tenten-s-heavenly-chain-disaster';
+                map['tenten-s-chain-spin'] = 'tenten-s-iron-protection-wall';
+            } else if (cycle === 2) {
+                map['tenten-s-kunai-grenade'] = 'tenten-s-bashousen-coil-of-wind';
+                map['tenten-s-chain-spin'] = 'tenten-s-bashousen-coil-of-fire';
+            }
+        }
+        if (status?.metadata?.gaiGateProgression) {
+            const stacks = Math.max(1, Number(status.stacks) || 1);
+            if (stacks >= 7) {
+                map['maito-gai-s-fiery-kick'] = 'maito-gai-s-daytime-tiger';
+            } else if (stacks >= 6) {
+                map['maito-gai-s-fiery-kick'] = 'maito-gai-s-morning-peacock';
+            }
+        }
+        if (status?.metadata?.deidaraClayMoldToggle) {
+            const stacks = Math.max(1, Number(status.stacks) || 1);
+            if (stacks % 2 === 1) {
+                map['deidara-c1-birds'] = 'deidara-c2-dragon';
+                map['deidara-c1-centipede'] = 'deidara-c3-statue';
+            }
+        }
     });
     return map;
 };
@@ -477,7 +504,8 @@ const isUnitInvulnerableForSkill = (unit, skillClasses = []) => {
         const remaining = Number(status?.remainingTurns) || 0;
         if (remaining <= 0) continue;
         const metadata = status?.metadata || {};
-        if (metadata.invulnerable) return true;
+        if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
+        if (metadata.invulnerable && !afflictionSkill) return true;
         if (metadata.invulnerableToNonAffliction && !afflictionSkill) return true;
         if (
             Array.isArray(metadata.invulnerableToSkillClasses) &&
@@ -485,6 +513,19 @@ const isUnitInvulnerableForSkill = (unit, skillClasses = []) => {
         ) {
             return true;
         }
+    }
+    return false;
+};
+
+const doesSkillIgnoreInvulnerability = (skill) => {
+    if (!skill) return false;
+    if (Boolean(skill.ignoreInvulnerability)) return true;
+    if (Array.isArray(skill.effects)) {
+        return skill.effects.some(
+            (effect) =>
+                Boolean(effect?.ignoreInvulnerability) ||
+                Boolean(effect?.metadata?.ignoreInvulnerability)
+        );
     }
     return false;
 };
@@ -654,7 +695,7 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
     }
     const bypassEnemyInvulnerability =
         canActorIgnoreEnemyInvulnerability(actorUnit, effectiveSkill?.id || null) ||
-        Boolean(effectiveSkill?.ignoreInvulnerability);
+        doesSkillIgnoreInvulnerability(effectiveSkill);
     const targetType = effectiveSkill?.target || null;
     result.targetType = targetType;
 
@@ -734,6 +775,7 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
             result.targets = mapTargets(actingUsername, actorBoard, { helpfulTargeting: true });
             break;
         }
+        case 'all-ally':
         case 'all-allies': {
             result.mode = 'all';
             result.targets = mapTargets(actingUsername, actorBoard, { helpfulTargeting: true });
@@ -754,6 +796,18 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
             ];
             break;
         }
+        case 'single-target': {
+            result.mode = 'single';
+            result.targets = [
+                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }),
+                ...mapTargets(opponentUsername, opponentBoard, {
+                    enemyTargeting: true,
+                    skillClasses: effectiveSkill?.classes || [],
+                }),
+            ];
+            break;
+        }
+        case 'all-target':
         case 'all-characters': {
             result.mode = 'all';
             result.targets = [
@@ -1276,7 +1330,14 @@ const applyStatus = ({
         existing.sourceSkillId = sourceSkillId || existing.sourceSkillId;
         existing.sourceUsername = sourceUsername || existing.sourceUsername || null;
         existing.sourceSlot = Number.isInteger(sourceSlot) ? sourceSlot : existing.sourceSlot ?? null;
+        if (Boolean(metadata?.stackable) || Boolean(existing?.metadata?.stackable)) {
+            const maxStacks = Math.max(1, Number(metadata?.maxStacks || existing?.metadata?.maxStacks) || 99);
+            existing.stacks = Math.min(maxStacks, (Number(existing.stacks) || 1) + 1);
+        }
         let nextMetadata = { ...(existing.metadata || {}), ...(metadata || {}) };
+        if (existing.stacks) {
+            nextMetadata.stacks = existing.stacks;
+        }
         const mergeNumericAddKeys = Array.isArray(metadata?.mergeNumericAddKeys)
             ? metadata.mergeNumericAddKeys.filter((key) => typeof key === 'string' && key)
             : [];
@@ -2753,7 +2814,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             }
         });
     }
-    const ignoreDestructibleDefense = Boolean(context?.ignoreDestructibleDefense);
+    const ignoreDestructibleDefense = Boolean(context?.ignoreDestructibleDefense) || afflictionDamage;
     if (!ignoreDestructibleDefense) {
         for (let i = 0; i < targetState.statuses.length && incoming > 0; i += 1) {
             const status = targetState.statuses[i];
@@ -2873,7 +2934,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     const isPhysicalDamage = isPhysical || skillClasses.some(
         (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'physical'
     );
-    const ignoreDamageReduction = Boolean(context?.ignoreDamageReduction);
+    const ignoreDamageReduction = Boolean(context?.ignoreDamageReduction) || afflictionDamage;
     const damageTakenBonusFlat = Math.max(0, Number(totals.damageTakenBonusFlat) || 0);
     if (damageTakenBonusFlat > 0) {
         incoming += damageTakenBonusFlat;
@@ -2891,7 +2952,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         const classScopedTargetTotals = getTargetClassScopedDamageModifiers(targetState, skillClasses);
         incoming += Math.max(0, Number(classScopedTargetTotals.damageTakenBonusFlat) || 0);
     }
-    const standardPercentReduction = ignoreDamageReduction
+    const standardPercentReduction = ignoreDamageReduction || afflictionDamage
         ? 0
         : cannotReduceDamage
         ? 0
@@ -2925,7 +2986,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         state.percent = stablePercent;
         percentMitigationStateMap.set(`standard:${percentMitigationStateKey}`, state);
     }
-    const unpierceablePercentReduction = cannotReduceDamage
+    const unpierceablePercentReduction = cannotReduceDamage || afflictionDamage
         ? 0
         : Math.min(100, Math.max(0, Number(totals.unpierceableDamageReductionPercent) || 0));
     let afterPercent = afterStandardPercent * (1 - unpierceablePercentReduction / 100);
@@ -2956,11 +3017,11 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         percentMitigationStateMap.set(`unpierceable:${percentMitigationStateKey}`, state);
     }
     const baseGeneralMitigation =
-        ignoreDamageReduction || cannotReduceDamage
+        ignoreDamageReduction || cannotReduceDamage || afflictionDamage
             ? 0
             : Math.max(0, Number(totals.damageReductionFlat) || 0);
     const basePhysicalMitigation =
-        ignoreDamageReduction || cannotReduceDamage || !isPhysical
+        ignoreDamageReduction || cannotReduceDamage || afflictionDamage || !isPhysical
             ? 0
             : Math.max(0, Number(totals.physicalDamageReductionFlat) || 0);
     let appliedGeneralMitigation = baseGeneralMitigation;
@@ -3437,6 +3498,48 @@ const triggerTeamMemberDeathHooks = ({ match, deadUsername, deadSlot = null }) =
     });
 };
 
+const purgeTetheredStatusesOnSourceDeath = ({ match, sourceUsername, sourceSlot }) => {
+    if (!match || !sourceUsername || !Number.isInteger(sourceSlot)) return;
+    const players = Array.isArray(match.players) ? match.players : [];
+    players.forEach((player) => {
+        const username = player?.username;
+        if (!username) return;
+        const units = Array.isArray(match.board?.[username]) ? match.board[username] : [];
+        units.forEach((unit) => {
+            if (!unit) return;
+            const unitState = ensureUnitStateShape(unit);
+            const initialCount = unitState.statuses.length;
+            unitState.statuses = unitState.statuses.filter((status) => {
+                if (!status) return false;
+                const isFromSource =
+                    status.sourceUsername === sourceUsername &&
+                    Number.isInteger(status.sourceSlot) &&
+                    status.sourceSlot === sourceSlot;
+                if (!isFromSource) return true;
+                const metadata = status.metadata || {};
+                const ongoingClass =
+                    typeof metadata.ongoingClass === 'string'
+                        ? metadata.ongoingClass.trim().toLowerCase()
+                        : '';
+                const isTethered =
+                    ongoingClass === 'action' ||
+                    ongoingClass === 'control' ||
+                    Boolean(metadata.removeOnSourceDeath) ||
+                    Boolean(metadata.endsOnSourceDeath) ||
+                    Boolean(metadata.sourceDeathPurge) ||
+                    Boolean(metadata.removeWhenSourceDies);
+                if (isTethered) {
+                    return false;
+                }
+                return true;
+            });
+            if (unitState.statuses.length !== initialCount) {
+                refreshDerivedStatusTooltips(unitState);
+            }
+        });
+    });
+};
+
 const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
     if (!unit || !match || !username || !Number.isInteger(slot)) return;
     const targetState = ensureUnitStateShape(unit);
@@ -3465,6 +3568,9 @@ const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
         });
         changed = true;
     });
+    if (unit.alive === false) {
+        purgeTetheredStatusesOnSourceDeath({ match, sourceUsername: username, sourceSlot: slot });
+    }
     if (changed) {
         refreshDerivedStatusTooltips(targetState);
     }
@@ -4197,7 +4303,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         );
         const selection = normalizeTargetSelection(queued.targetSelection);
         const bypassEnemyInvulnerability =
-            canActorIgnoreEnemyInvulnerability(actorUnit, skill?.id || null) || Boolean(skill?.ignoreInvulnerability);
+            canActorIgnoreEnemyInvulnerability(actorUnit, skill?.id || null) ||
+            doesSkillIgnoreInvulnerability(skill);
         const opponentEntry = (match.players || []).find((p) => p.username !== actingUsername);
         const opponentUsername = opponentEntry?.username;
         const actorAllies = (match.board?.[actingUsername] || [])
@@ -6196,6 +6303,224 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     match.chakraPools[actingUsername] = sourcePool;
                 });
             }
+
+            if (effectType === 'heal_missing_health_percent') {
+                const recipients = resolveRecipients(effect);
+                const percent = Math.max(0, Number(effect?.percent) || 0);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.unit || recipient.unit.alive === false) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    if (
+                        doesTargetIgnoreSkillByClass({
+                            targetState,
+                            skillClasses: skill.classes || [],
+                            isEnemySkill: recipient.username !== actingUsername,
+                        })
+                    ) return;
+                    const currentHp = Math.max(0, Number(recipient.unit.hp) || 0);
+                    const missingHp = Math.max(0, DEFAULT_HP - currentHp);
+                    const healAmount = Math.round(missingHp * (percent / 100));
+                    if (healAmount > 0) {
+                        applyHealToUnit(recipient.unit, healAmount);
+                    }
+                });
+                return;
+            }
+
+            if (effectType === 'set_health') {
+                const recipients = resolveRecipients(effect);
+                const targetHp = Math.max(0, Number(effect?.amount) || 0);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.unit || recipient.unit.alive === false) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    if (effect?.isHealingEffect && hasStatusMetadataFlag(targetState, 'ignoreHealing')) {
+                        return;
+                    }
+                    recipient.unit.hp = Math.min(DEFAULT_HP, targetHp);
+                });
+                return;
+            }
+
+            if (effectType === 'instant_kill') {
+                const recipients = resolveRecipients(effect);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.unit) return;
+                    recipient.unit.hp = 0;
+                    recipient.unit.alive = false;
+                    triggerTeamMemberDeathHooks({
+                        match,
+                        deadUsername: recipient.username,
+                        deadSlot: recipient.slot,
+                    });
+                    triggerOwnerDeathHooks({
+                        unit: recipient.unit,
+                        match,
+                        username: recipient.username,
+                        slot: recipient.slot,
+                    });
+                });
+                return;
+            }
+
+            if (effectType === 'execute_threshold') {
+                const recipients = resolveRecipients(effect);
+                const thresholdHp = Math.max(0, Number(effect?.thresholdHp ?? effect?.threshold) || 0);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.unit || recipient.unit.alive === false) return;
+                    const hp = Math.max(0, Number(recipient.unit.hp) || 0);
+                    if (hp <= thresholdHp) {
+                        recipient.unit.hp = 0;
+                        recipient.unit.alive = false;
+                        triggerTeamMemberDeathHooks({
+                            match,
+                            deadUsername: recipient.username,
+                            deadSlot: recipient.slot,
+                        });
+                        triggerOwnerDeathHooks({
+                            unit: recipient.unit,
+                            match,
+                            username: recipient.username,
+                            slot: recipient.slot,
+                        });
+                    }
+                });
+                return;
+            }
+
+            if (effectType === 'steal_chakra') {
+                const recipients = resolveRecipients(effect);
+                const amount = Math.max(0, Number(effect?.amount) || 1);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.username || recipient.username === actingUsername) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    const condition = effect?.condition;
+                    if (condition && !doesEffectConditionMatch({
+                        condition,
+                        actorState,
+                        targetState,
+                        actorUnit,
+                        actorUsername: actingUsername,
+                        targetUnit: recipient.unit,
+                        targetUsername: recipient.username,
+                    })) return;
+                    match.chakraPools = match.chakraPools || {};
+                    const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
+                    const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
+                    for (let i = 0; i < amount; i += 1) {
+                        const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
+                        if (!available.length) break;
+                        const picked = available[Math.floor(Math.random() * available.length)];
+                        targetPool[picked] = Math.max(0, (Number(targetPool[picked]) || 0) - 1);
+                        sourcePool[picked] = (Number(sourcePool[picked]) || 0) + 1;
+                    }
+                    match.chakraPools[recipient.username] = targetPool;
+                    match.chakraPools[actingUsername] = sourcePool;
+                });
+                return;
+            }
+
+            if (effectType === 'remove_chakra') {
+                const recipients = resolveRecipients(effect);
+                const amount = Math.max(0, Number(effect?.amount) || 1);
+                const chakraType = typeof effect?.chakraType === 'string' ? effect.chakraType.trim().toLowerCase() : 'random';
+                recipients.forEach((recipient) => {
+                    if (!recipient?.username) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    const condition = effect?.condition;
+                    if (condition && !doesEffectConditionMatch({
+                        condition,
+                        actorState,
+                        targetState,
+                        actorUnit,
+                        actorUsername: actingUsername,
+                        targetUnit: recipient.unit,
+                        targetUsername: recipient.username,
+                    })) return;
+                    if (chakraType === 'random') {
+                        removeRandomChakraFromMatch({ match, username: recipient.username, amount });
+                    } else {
+                        removeChakraFromMatch({ match, username: recipient.username, chakraType, amount });
+                    }
+                });
+                return;
+            }
+
+            if (effectType === 'remove_status') {
+                const recipients = resolveRecipients(effect);
+                const targetStatusId = effect?.statusId;
+                const afflictionOnly = Boolean(effect?.metadata?.afflictionOnly);
+                const harmfulOnly = Boolean(effect?.metadata?.harmfulOnly);
+                recipients.forEach((recipient) => {
+                    if (!recipient?.unit) return;
+                    const targetState = ensureUnitStateShape(recipient.unit);
+                    const condition = effect?.condition;
+                    if (condition && !doesEffectConditionMatch({
+                        condition,
+                        actorState,
+                        targetState,
+                        actorUnit,
+                        actorUsername: actingUsername,
+                        targetUnit: recipient.unit,
+                        targetUsername: recipient.username,
+                    })) return;
+                    targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter((status) => {
+                        if (!status) return false;
+                        if (targetStatusId && status.id === targetStatusId) return false;
+                        if (afflictionOnly && (Boolean(status?.metadata?.afflictionDamage) || status?.metadata?.action)) {
+                            if (!harmfulOnly || Boolean(status?.metadata?.harmful)) return false;
+                        }
+                        if (harmfulOnly && !afflictionOnly && !targetStatusId && Boolean(status?.metadata?.harmful)) return false;
+                        return true;
+                    });
+                });
+                return;
+            }
+
+            if (effectType === 'damage_per_dead_ally') {
+                const amountPer = Math.max(0, Number(effect?.amountPerDeadAlly) || 0);
+                const allies = match.board?.[actingUsername] || [];
+                const deadCount = allies.reduce((sum, u) => sum + (u && u.alive === false ? 1 : 0), 0);
+                const totalAmount = amountPer * deadCount;
+                if (totalAmount > 0) {
+                    const recipients = resolveRecipients(effect);
+                    recipients.forEach((recipient) => {
+                        if (!recipient?.unit || recipient.unit.alive === false) return;
+                        queueDamage(recipient, totalAmount, effect);
+                    });
+                }
+                return;
+            }
+
+            if (effectType === 'damage_per_lost_health_threshold') {
+                const threshold = Math.max(1, Number(effect?.threshold) || 30);
+                const amountPer = Math.max(0, Number(effect?.amountPerThreshold) || 0);
+                const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
+                const lostHp = Math.max(0, DEFAULT_HP - currentHp);
+                const steps = Math.floor(lostHp / threshold);
+                const totalAmount = steps * amountPer;
+                if (totalAmount > 0) {
+                    const recipients = resolveRecipients(effect);
+                    recipients.forEach((recipient) => {
+                        if (!recipient?.unit || recipient.unit.alive === false) return;
+                        queueDamage(recipient, totalAmount, effect);
+                    });
+                }
+                return;
+            }
+
+            if (effectType === 'damage_stacking_consecutive') {
+                const stackAmount = Math.max(0, Number(effect?.stackAmount) || 5);
+                const consecutiveUses = Math.max(0, (Number(actorState?.skillUses?.[skill.id]) || 1) - 1);
+                const totalAmount = stackAmount * consecutiveUses;
+                if (totalAmount > 0) {
+                    const recipients = resolveRecipients(effect);
+                    recipients.forEach((recipient) => {
+                        if (!recipient?.unit || recipient.unit.alive === false) return;
+                        queueDamage(recipient, totalAmount, effect);
+                    });
+                }
+                return;
+            }
         });
 
         pendingDamage.forEach((entry) => {
@@ -6250,6 +6575,31 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     sourceSlot: actorSlot,
                 });
             }
+        });
+
+        const executeThresholdEffects = effects.filter((e) => e.type === 'execute_threshold');
+        executeThresholdEffects.forEach((execEffect) => {
+            const thresholdHp = Math.max(0, Number(execEffect?.thresholdHp ?? execEffect?.threshold) || 0);
+            const recipients = resolveRecipients(execEffect);
+            recipients.forEach((recipient) => {
+                if (!recipient?.unit || recipient.unit.alive === false) return;
+                const hp = Math.max(0, Number(recipient.unit.hp) || 0);
+                if (hp <= thresholdHp) {
+                    recipient.unit.hp = 0;
+                    recipient.unit.alive = false;
+                    triggerTeamMemberDeathHooks({
+                        match,
+                        deadUsername: recipient.username,
+                        deadSlot: recipient.slot,
+                    });
+                    triggerOwnerDeathHooks({
+                        unit: recipient.unit,
+                        match,
+                        username: recipient.username,
+                        slot: recipient.slot,
+                    });
+                }
+            });
         });
         if (skill?.id) {
             actorState.statuses = (Array.isArray(actorState.statuses) ? actorState.statuses : []).filter(
@@ -6459,7 +6809,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     : 0;
                 const targetInvulnerable = isUnitInvulnerable(unit);
                 if (
-                    (ongoingClass === 'control' || ongoingClass === 'action') &&
+                    (ongoingClass === 'control' || ongoingClass === 'action' || Boolean(status?.metadata?.removeOnSourceDeath) || Boolean(status?.metadata?.endsOnSourceDeath)) &&
                     sourceDead &&
                     status?.id
                 ) {
@@ -6477,8 +6827,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     status?.metadata?.turnEndTrigger === 'source_turn' ? 'source_turn' : 'owner_turn';
                 if (
                     sourceDead &&
-                    triggerAnchor === 'source_turn' &&
-                    !Boolean(status?.metadata?.afflictionDamage)
+                    triggerAnchor === 'source_turn'
                 ) {
                     if (status?.id) {
                         endedOngoingStatuses.add(status.id);
@@ -8027,6 +8376,58 @@ const tickCooldownsForTurnEnd = ({ match, endingUsername }) => {
     });
 };
 
+const METADATA_REGISTRY = {
+    adaptivePaintingActive: true,
+    afflictionDamagePerTurn: true,
+    cannotBeIgnored: true,
+    cannotBeKilled: true,
+    cannotBeRemoved: true,
+    clayMoldExtraDefense: true,
+    consumeChargeStatusId: true,
+    consumeStackOnSkillUseExceptInvul: true,
+    cooldownIncrease: true,
+    cooldownReduction: true,
+    damageDealtFlatModifier: true,
+    damageOnHarmfulSkillUsePiercing: true,
+    damageOnSkillUseAffliction: true,
+    damageOnSkillUsePiercing: true,
+    damagePerTurn: true,
+    damageReductionUnpierceableFlat: true,
+    damageTakenFromSkillClassModifiers: true,
+    damageToTargetingEnemiesPiercing: true,
+    destructibleDefensePermanent: true,
+    destructibleDefensePointsPerTurn: true,
+    durationPerChargeBonus: true,
+    enemySkillCooldownIncreaseOnUse: true,
+    energyCostIncrease: true,
+    energyDrainResistance: true,
+    ignoreCounters: true,
+    ignoreHarmfulNonDamageEffects: true,
+    ignoreHelpfulNonEnergyEffects: true,
+    ignoreReflects: true,
+    immuneToEnergyDrain: true,
+    immuneToNonConditionalAfflictionDamage: true,
+    immuneToStun: true,
+    invulnerableToAfflictionSkills: true,
+    invulnerableToEnemyDamage: true,
+    invulnerableToEnergySkills: true,
+    invulnerableToFriendlySkills: true,
+    invulnerableToHarmfulSkills: true,
+    invulnerableToMentalSkills: true,
+    invulnerableToNonStrategicSkills: true,
+    invulnerableToPhysicalSkills: true,
+    maxStacks: true,
+    onApplyGainChakra: true,
+    onExpireIfUnusedEffects: true,
+    reflectOnEnemyHarmfulNonMental: true,
+    retaliateOnIncomingHarmfulPhysicalDamage: true,
+    revealInvisibleSkills: true,
+    skillClassDamageDealtModifiers: true,
+    skillCooldownOverridesBySkillId: true,
+    stackable: true,
+    stunDurationReduction: true,
+};
+
 module.exports = {
     DEFAULT_HP,
     buildInitialBoard,
@@ -8041,12 +8442,15 @@ module.exports = {
     getSkillCooldownRemaining,
     isSkillIndexBlockedForActor,
     isActorUnableToUseSkills,
+    isUnitInvulnerableForSkill,
+    doesSkillIgnoreInvulnerability,
     getUnitState,
     applyHealToUnit,
     cleanseHarmfulStatuses,
     reviveUnitToHp,
     applyDamageToUnit,
     applyStatus,
+    purgeTetheredStatusesOnSourceDeath,
     selectTurnStartChoiceTarget,
     queueTurnStartChoicePrompts,
 };

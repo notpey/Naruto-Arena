@@ -248,11 +248,11 @@ const characters = [
                 "id": "haruno-sakura-inner-sakura",
                 "name": "Inner Sakura",
                 "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently. This skill is replaced by 'Inner Sakura Strangle'.",
+                "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently and ignores stun effects for 1 turn. This skill is replaced by 'Inner Sakura Strangle'.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 0,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -269,6 +269,17 @@ const characters = [
                                 "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
                             },
                             "tooltipText": "Sakura has 5 damage reduction\nInner Sakura is replaced by Inner Sakura Strangle."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_inner_sakura_stun_immunity",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "cannotBeStunned": true,
+                            "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
+                            "turnDurationAnchor": "source_turn"
                         }
                     }
                 ]
@@ -306,7 +317,7 @@ const characters = [
                 "name": "Inner Sakura Strangle",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "Haruno Sakura targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
+                "skilldescription": "Haruno Sakura ignores stun effects for 1 turn and targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -318,6 +329,17 @@ const characters = [
                     "Instant"
                 ],
                 "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_inner_sakura_stun_immunity",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "cannotBeStunned": true,
+                            "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
+                            "turnDurationAnchor": "source_turn"
+                        }
+                    },
                     {
                         "type": "HealthLoss",
                         "amount": 5,
@@ -452,7 +474,7 @@ const characters = [
                 "id": "uchiha-sasuke-sharingan",
                 "name": "Sharingan",
                 "skillimage": "https://i.imgur.com/IkTLWta.png",
-                "skilldescription": "Uchiha Sasuke gains 10 damage reduction permanently. If he uses a skill on an enemy he used a skill on the previous turn, it deals 5 additional damage. This skill is replaced by 'Grand Fireball Technique'.",
+                "skilldescription": "Uchiha Sasuke gains 10 damage reduction permanently. Whenever an enemy uses a skill on Sasuke, they will take 5 additional damage from Sasuke's skills permanently. This skill is replaced by 'Grand Fireball Technique'.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
@@ -475,7 +497,7 @@ const characters = [
                             "skillReplacements": {
                                 "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
                             },
-                            "tooltipText": "Sasuke has 10 damage reduction\nSasuke deals 5 additional damage to any enemy he targeted last turn\nSharingan is replaced by Grand Fireball Jutsu."
+                            "tooltipText": "Sasuke has 10 damage reduction\nIf he targets the same enemy again, his skills deal 5 additional damage\nSharingan is replaced by Grand Fireball Jutsu."
                         }
                     }
                 ]
@@ -715,8 +737,7 @@ const characters = [
                 "skillimage": "https://i.imgur.com/F9DLM31.png",
                 "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random chakra from them. This skill deals 5 additional damage with each use.",
                 "energy": [
-                    "Bloodline",
-                    "Random"
+                    "Bloodline"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -1009,10 +1030,8 @@ const characters = [
                 "id": "hyuuga-hinata-byakugan",
                 "name": "Byakugan",
                 "skillimage": "https://i.imgur.com/TcjSSGB.png",
-                "skilldescription": "Hyuuga Hinata gains 15 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
-                "energy": [
-                    "Random"
-                ],
+                "skilldescription": "Hyuuga Hinata costs no chakra and gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
+                "energy": [],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 3,
@@ -1027,8 +1046,8 @@ const characters = [
                         "duration": 3,
                         "scope": "self",
                         "metadata": {
-                            "damageReductionFlat": 15,
-                            "tooltipText": "Hinata has 15 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
+                            "damageReductionFlat": 10,
+                            "tooltipText": "Hinata has 10 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
                         }
                     }
                 ]
@@ -1083,7 +1102,7 @@ const characters = [
                     "missingStatusId": "nara_shikamaru_meditate"
                 },
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -1115,7 +1134,7 @@ const characters = [
                 "cooldown": 1,
                 "classes": [
                     "Ninjutsu",
-                    "Action"
+                    "Control"
                 ],
                 "effects": [
                     {
@@ -1130,7 +1149,7 @@ const characters = [
                             "turnEndDamage": 15,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
+                            "ongoingClass": "control",
                             "triggerOnApply": true,
                             "tooltipText": "This character cannot reduce damage or become invulnerable and takes 15 damage."
                         }
@@ -1146,7 +1165,7 @@ const characters = [
                 "skillimage": "https://i.imgur.com/Hip2U8C.png",
                 "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
                 "energy": [
-                    "Random",
+                    "Genjutsu",
                     "Random"
                 ],
                 "target": "all-enemy",
@@ -1619,7 +1638,7 @@ const characters = [
                 "id": "rock-lee-high-speed-taijutsu",
                 "name": "High Speed Taijutsu",
                 "skillimage": "https://i.imgur.com/f59XWBW.png",
-                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him. This skill requires 'Fifth Gate Opening'.",
+                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. This skill requires 'Fifth Gate Opening'.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -1632,8 +1651,7 @@ const characters = [
                 "classes": [
                     "Physical",
                     "Taijutsu",
-                    "Instant",
-                    "Affliction"
+                    "Instant"
                 ],
                 "effects": [
                     {
@@ -1642,17 +1660,6 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "rock_lee_high_speed_taijutsu_minimum_hp",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "minimumHp": 1,
-                            "hideTooltip": true,
-                            "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
                         }
                     },
                     {
@@ -1781,7 +1788,7 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "useBaseSkillCooldown": true,
                 "skillimage": "https://i.imgur.com/h658CGb.png",
-                "skilldescription": "Rock Lee expends all his chakra and deals 50 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage. This skill cannot be countered.",
+                "skilldescription": "Rock Lee deals 50 piercing damage to one enemy. This skill cannot be countered.",
                 "energy": [
                     "Taijutsu",
                     "Taijutsu"
@@ -1792,8 +1799,7 @@ const characters = [
                 "classes": [
                     "Physical",
                     "Taijutsu",
-                    "Instant",
-                    "Affliction"
+                    "Instant"
                 ],
                 "effects": [
                     {
@@ -1803,21 +1809,6 @@ const characters = [
                         "metadata": {
                             "ignoreDamageReduction": true
                         }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "rock_lee_final_lotus_minimum_hp",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "minimumHp": 1,
-                            "tooltipText": "Final Lotus cannot kill Rock Lee."
-                        }
-                    },
-                    {
-                        "type": "HealthLoss",
-                        "amount": 5,
-                        "scope": "self"
                     }
                 ],
                 "cannotBeCountered": true
@@ -1958,7 +1949,7 @@ const characters = [
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 2,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -2164,7 +2155,7 @@ const characters = [
                             "ongoingClass": "action",
                             "triggerOnApply": true,
                             "NonAfflictionDamageDebuff": 10,
-                            "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage. Eight Trigrams Sixty-Four Palms will remove 1 additional random chakra."
+                            "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
                         }
                     }
                 ]
@@ -2206,7 +2197,7 @@ const characters = [
                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                 "name": "Eight Trigrams Sixty-Four Palms",
                 "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them. If this enemy is affected by 'Gentle Fist', 1 additional random chakra will be removed.",
+                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them.",
                 "energy": [
                     "Taijutsu",
                     "Bloodline"
@@ -2281,7 +2272,7 @@ const characters = [
                 "id": "gaara-of-the-desert-sand-coffin",
                 "name": "Sand Coffin",
                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -2342,32 +2333,56 @@ const characters = [
                 ]
             },
             {
-                "id": "gaara-of-the-desert-sand-clone",
-                "name": "Sand Clone",
-                "skillimage": "https://i.imgur.com/SCRKMIU.png",
-                "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
-                "energy": [],
-                "target": "self",
-                "targetCondition": {
-                    "missingStatusId": "gaara_sand_clone"
-                },
+                "id": "gaara-of-the-desert-sand-burial",
+                "name": "Sand Burial",
+                "cannotBeCountered": true,
+                "cannotBeReflected": true,
+                "skillimage": "https://i.imgur.com/ljX9izT.png",
+                "skilldescription": "Gaara deals 30 piercing damage to one enemy and ignores helpful effects for 1 turn. If used 1 turn after 'Sand Coffin', this skill costs 1 ninjutsu and 1 bloodline chakra and deals 50 piercing damage instead.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 0,
                 "classes": [
-                    "Strategic",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "gaara_sand_clone",
-                        "duration": 99,
-                        "scope": "self",
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "missingStatusId": "gaara_sand_coffin_crush"
+                        },
                         "metadata": {
-                            "cannotBeStunned": true,
-                            "stunImmune": true,
-                            "triggerOnEnemyHarmfulNonMental": true,
-                            "tooltipText": "Gaara ignores stuns until an enemy next uses a harmful non-mental skill on him."
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 50,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "gaara_sand_coffin_crush"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "gaara_sand_burial_ignore_helpful",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character ignores helpful effects for 1 turn."
                         }
                     }
                 ]
@@ -2376,7 +2391,7 @@ const characters = [
                 "id": "gaara-of-the-desert-armor-of-sand",
                 "name": "Armor of Sand",
                 "skillimage": "https://i.imgur.com/qfrA8gB.png",
-                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot be used again while it is still active.",
+                "skilldescription": "Gaara gains 25 points of permanent destructible defense. This skill cannot be used again while it is still active.",
                 "energy": [
                     "Random"
                 ],
@@ -2397,8 +2412,8 @@ const characters = [
                         "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "destructibleDefensePoints": 40,
-                            "tooltipText": "Gaara has 40 points of permanent destructible defense from Armor of Sand."
+                            "destructibleDefensePoints": 25,
+                            "tooltipText": "Gaara has 25 points of permanent destructible defense from Armor of Sand."
                         }
                     }
                 ]
@@ -2428,48 +2443,6 @@ const characters = [
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
-                    }
-                ]
-            },
-            {
-                "id": "gaara-of-the-desert-sand-burial",
-                "name": "Sand Burial",
-                "hiddenFromSelectionViewer": true,
-                "cannotBeCountered": true,
-                "cannotBeReflected": true,
-                "skillimage": "https://i.imgur.com/ljX9izT.png",
-                "skilldescription": "Gaara destroys all destructible defense on one enemy, deals 50 piercing damage to them, and removes 1 random chakra. This skill requires 'Sand Coffin' to be active on this enemy. This skill cannot be countered or reflected.",
-                "energy": [
-                    "Ninjutsu",
-                    "Ninjutsu"
-                ],
-                "target": "single-enemy",
-                "targetCondition": {
-                    "statusId": "gaara_sand_coffin_crush"
-                },
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "destroy_destructible_defense",
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 50,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "remove_random_chakra",
-                        "amount": 1,
-                        "scope": "target"
                     }
                 ]
             }
@@ -2777,7 +2750,7 @@ const characters = [
                 "id": "temari-dust-wind",
                 "name": "Dust Wind",
                 "skillimage": "https://i.imgur.com/oBQQWNM.png",
-                "skilldescription": "Temari kicks up dust, making her team invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
+                "skilldescription": "Temari kicks up dust, making herself invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -2795,7 +2768,7 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "temari_dust_wind_invulnerable",
                         "duration": 1,
-                        "scope": "all-allies",
+                        "scope": "self",
                         "metadata": {
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
@@ -2875,7 +2848,7 @@ const characters = [
                 "id": "dosu-kinuta-resonating-echo-drill",
                 "name": "Resonating Echo Drill",
                 "skillimage": "https://i.imgur.com/arSzsOV.png",
-                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
+                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 1 turn. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -2895,7 +2868,7 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                        "duration": 2,
+                        "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
@@ -3127,13 +3100,13 @@ const characters = [
         "characterId": "tsuchi-kin",
         "name": "Tsuchi Kin",
         "facePicture": "https://i.imgur.com/hOoNOfj.png",
-        "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
+        "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision.",
         "skills": [
             {
                 "id": "tsuchi-kin-illusion-bell-needles",
                 "name": "Illusion Bell Needles",
                 "skillimage": "https://i.imgur.com/wFHxiW6.png",
-                "skilldescription": "One enemy takes 25 damage. If used after 'Needle and Bell Trap', the target has all their skills silenced for 1 turn. If used after 'Unnerving Bells', the target has all their skills delayed for 1 turn. If used on a disoriented enemy, they will deal 10 less non-affliction damage for 1 turn.",
+                "skilldescription": "Tsuchi Kin deals 20 damage to one enemy.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -3142,77 +3115,13 @@ const characters = [
                 "cooldown": 0,
                 "classes": [
                     "Mental",
-                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_illusion_bell_silence",
-                        "duration": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "silenceNonDamageEffects": true,
-                            "tooltipText": "Silenced: only damage from this character's skills will work."
-                        }
-                    },
-                    {
-                        "type": "modify_cooldowns",
-                        "amount": 1,
-                        "includeAllCharacterSkills": true,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "tooltipText": "This character's skill cooldowns were delayed by 1 turn."
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 5,
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap",
-                            "consumeOnMatch": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 5,
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
-                            "consumeOnMatch": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_disoriented_damage_debuff",
-                        "duration": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "tsuchi_kin_disoriented"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "NonAfflictionDamageDebuff": 10,
-                            "tooltipText": "This character deals 10 less non-affliction damage."
-                        }
+                        "amount": 20,
+                        "scope": "target"
                     }
                 ]
             },
@@ -3220,31 +3129,22 @@ const characters = [
                 "id": "tsuchi-kin-needle-and-bell-trap",
                 "name": "Needle and Bell Trap",
                 "skillimage": "https://i.imgur.com/spMHiJJ.png",
-                "skilldescription": "One enemy cannot reduce damage or become invulnerable for 2 turns and has their skills stunned for 1 turn. 'Illusion Bell Needles' deals 5 damage next turn.",
+                "skilldescription": "Tsuchi Kin deals 15 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 3,
+                "cooldown": 1,
                 "classes": [
                     "Strategic",
-                    "Physical",
-                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_needle_and_bell_trap_debuff",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character cannot reduce damage or become invulnerable."
-                        }
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target"
                     },
                     {
                         "type": "apply_status",
@@ -3253,26 +3153,12 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "tooltipText": "This character is stunned and cannot use skills.",
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "strategic"
+                            ],
+                            "tooltipText": "This character's physical and strategic skills are stunned.",
                             "turnDurationAnchor": "source_turn"
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "self",
-                        "metadataAny": [
-                            "tsuchiKinIllusionBellPrep"
-                        ]
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_needle_and_bell_trap",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "tsuchiKinIllusionBellPrep": true,
-                            "tooltipText": "Illusion Bell Needles is empowered by Needle and Bell Trap."
                         }
                     }
                 ]
@@ -3281,20 +3167,23 @@ const characters = [
                 "id": "tsuchi-kin-unnerving-bells",
                 "name": "Unnerving Bells",
                 "skillimage": "https://i.imgur.com/BU6EHyR.png",
-                "skilldescription": "One enemy loses 1 random chakra and becomes disoriented for 1 turn. 'Illusion Bell Needles' deals 5 additional damage next turn.",
+                "skilldescription": "Tsuchi Kin deals 10 damage to one enemy and removes 1 random chakra from them.",
                 "energy": [
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 1,
                 "classes": [
                     "Strategic",
-                    "Mental",
-                    "Physical",
                     "Instant"
                 ],
                 "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target"
+                    },
                     {
                         "type": "remove_random_chakra",
                         "amount": 1,
@@ -3302,30 +3191,13 @@ const characters = [
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "tsuchi_kin_disoriented",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character is disoriented by Unnerving Bells."
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "self",
-                        "metadataAny": [
-                            "tsuchiKinIllusionBellPrep"
-                        ]
-                    },
-                    {
-                        "type": "apply_status",
                         "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "tsuchiKinIllusionBellPrep": true,
-                            "tooltipText": "Illusion Bell Needles is empowered by Unnerving Bells."
+                            "tooltipText": "Unnerving Bells trigger active.",
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "control"
                         }
                     }
                 ]
@@ -3698,7 +3570,7 @@ const characters = [
                 "id": "uchiha-obito-piercing-stab",
                 "name": "Piercing Stab",
                 "skillimage": "https://i.imgur.com/YjvbfdY.png",
-                "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage.",
+                "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage and ignore invulnerability.",
                 "energy": [
                     "Random"
                 ],
@@ -3800,7 +3672,10 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "damageReductionFlat": 15,
-                            "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan."
+                            "ignoreInvulnerabilityForSkillIds": [
+                                "uchiha-obito-piercing-stab"
+                            ],
+                            "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan and Piercing Stab ignores invulnerability."
                         }
                     },
                     {
@@ -5850,7 +5725,7 @@ const characters = [
                 "name": "Chain Shred",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/TZmKHyi.png",
-                "skilldescription": "Demon Brothers target one enemy affected by 'Chain Wrap', dealing 45 piercing damage to them and re-applying 'Chain Wrap' on them.",
+                "skilldescription": "Demon Brothers target one enemy affected by 'Chain Wrap', dealing 40 piercing damage to them and re-applying 'Chain Wrap' on them.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -5867,7 +5742,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 45,
+                        "amount": 40,
                         "scope": "target",
                         "metadata": {
                             "ignoreDestructibleDefense": true
@@ -6311,14 +6186,13 @@ const characters = [
                 "id": "oboro-exploding-kunai",
                 "name": "Exploding Kunai",
                 "skillimage": "https://i.imgur.com/fo853Ic.png",
-                "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill will cost 1 less random chakra and will deal 5 additional damage.",
+                "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill has no cooldown.",
                 "energy": [
-                    "Random",
                     "Random"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -6391,7 +6265,7 @@ const characters = [
                 "id": "oboro-haze-clone",
                 "name": "Haze Clone",
                 "skillimage": "https://i.imgur.com/6zjMsdw.png",
-                "skilldescription": "For 2 turns, 'Exploding Kunai' will cost 1 less random chakra and will deal 5 additional damage and 'Earth Swim' will target all enemies and will cost 1 less random chakra. During this time, Oboro will become invulnerable to non-strategic skills.",
+                "skilldescription": "Oboro gains 25 points of destructible defense for 2 turns. During this time, 'Exploding Kunai' has no cooldown and 'Earth Swim' will target all enemies.",
                 "energy": [
                     "Random"
                 ],
@@ -6410,17 +6284,12 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "invulnerableToSkillClasses": [
-                                "physical",
-                                "energy",
-                                "affliction",
-                                "mental"
-                            ],
+                            "destructibleDefensePoints": 25,
                             "skillReplacements": {
                                 "oboro-exploding-kunai": "oboro-exploding-kunai-empowered",
                                 "oboro-earth-swim": "oboro-earth-swim-empowered"
                             },
-                            "tooltipText": "Oboro is invulnerable to non-strategic skills. 'Exploding Kunai' and 'Earth Swim' are improved."
+                            "tooltipText": "Oboro has 25 destructible defense. 'Exploding Kunai' has no cooldown and 'Earth Swim' is improved."
                         }
                     }
                 ]
@@ -13449,6 +13318,5518 @@ const characters = [
                             "trapReappliesSelf": true,
                             "tooltipText": "Any enemy who uses a new skill on this character takes 100 piercing damage."
                         }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "uzumaki-naruto-s",
+        "characterId": "uzumaki-naruto-s",
+        "name": "Uzumaki Naruto (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Having trained with Jiraya for almost three years, Naruto has grown, both mentally and physically. With his training behind him, Naruto is able to utilize his clones even more, granting him strong defense while augmenting his already powerful rasengan.",
+        "requiredMissionId": "the-prodigal-son-returns",
+        "skills": [
+            {
+                "id": "uzumaki-naruto-s-oodama-rasengan",
+                "name": "Oodama Rasengan",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Uzumaki Naruto (S) deals 40 damage to one enemy. This skill ignores invulnerability.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreInvulnerability": true
+                        }
+                    }
+                ],
+                "ignoreInvulnerability": true
+            },
+            {
+                "id": "uzumaki-naruto-s-mass-shadow-clones",
+                "name": "Mass Shadow Clones",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "The following turn, Uzumaki Naruto (S) will counter the first new harmful skill used on him and 'Oodama Rasengan' will be replaced by 'Rasenshuriken'. This skill is invisible.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uzumaki_naruto_s_mass_shadow_clones_trap",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterStatusId": "uzumaki_naruto_s_countered_by_mass_shadow_clones",
+                            "counterStatusDuration": 2,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "tooltipText": "Countered by Mass Shadow Clones. Takes 50 additional damage from Rasenshuriken."
+                            },
+                            "counterApplyStatusToSourceOwner": {
+                                "statusId": "uzumaki_naruto_s_rasenshuriken_active",
+                                "duration": 1,
+                                "metadata": {
+                                    "helpful": true,
+                                    "skillReplacements": {
+                                        "uzumaki-naruto-s-oodama-rasengan": "uzumaki-naruto-s-rasenshuriken"
+                                    },
+                                    "tooltipText": "Oodama Rasengan is replaced by Rasenshuriken."
+                                }
+                            },
+                            "tooltipText": "Naruto will counter the first harmful skill used on him next turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uzumaki-naruto-s-chakra-boost",
+                "name": "Chakra Boost",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Uzumaki Naruto (S) removes all harmful skills on him then gains 2 random energies. The following turn, Uzumaki Naruto (S) will gain 10 points of damage reduction and 'Oodama Rasengan' will cost 2 random energies.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "remove_status",
+                        "scope": "self",
+                        "metadata": {
+                            "harmfulOnly": true
+                        }
+                    },
+                    {
+                        "type": "gain_chakra",
+                        "chakraType": "random",
+                        "amount": 2,
+                        "scope": "self"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uzumaki_naruto_s_chakra_boost_buff",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "skillCostOverridesBySkillId": {
+                                "uzumaki-naruto-s-oodama-rasengan": {
+                                    "energy": [
+                                        "Random",
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Naruto has 10 damage reduction and Oodama Rasengan costs 2 random energy."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uzumaki-naruto-s-shadow-clone-save",
+                "name": "Shadow Clone Save",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Uzumaki Naruto (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "uzumaki_naruto_s_shadow_clone_save_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "uzumaki-naruto-s-rasenshuriken",
+                "name": "Rasenshuriken",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Uzumaki Naruto (S) deals 50 piercing damage to one enemy. This skill deals 50 additional damage to an enemy countered by 'Mass Shadow Clones'. This skill ignores invulnerability.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 50,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "ignoreInvulnerability": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 50,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "uzumaki_naruto_s_countered_by_mass_shadow_clones"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "ignoreInvulnerability": true
+                        }
+                    }
+                ],
+                "ignoreInvulnerability": true
+            }
+        ]
+    },
+    {
+        "id": "haruno-sakura-s",
+        "characterId": "haruno-sakura-s",
+        "name": "Haruno Sakura (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "With her extensive training under Tsunade for the last two and a half years, Sakura has gained a greater understanding of healing and the human body. While Sakura's physical strength and healing prowess have both increased, her greatest ability is a powerful chakra storing seal taught to her by Tsunade.",
+        "requiredMissionId": "a-girl-grown-up",
+        "skills": [
+            {
+                "id": "haruno-sakura-s-chakra-enhanced-punch",
+                "name": "Chakra Enhanced Punch",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Haruno Sakura (S) deals 25 damage to one enemy. While 'Chakra Gathering' is active, this skill will deal 35 damage to one enemy, and 10 damage to all other enemies.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "haruno_sakura_s_chakra_gathering_seals"
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "haruno_sakura_s_chakra_gathering_seals"
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "other-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "haruno_sakura_s_chakra_gathering_seals"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haruno-sakura-s-superior-healing",
+                "name": "Superior Healing",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Haruno Sakura (S) heals half of one ally's missing health, rounded, and removes all enemy affliction skills from them. While 'Chakra Gathering' is active, this skill will cost 1 random energy and have no cooldown.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "heal_missing_health_percent",
+                        "percent": 50,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_status",
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionOnly": true,
+                            "harmfulOnly": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haruno-sakura-s-chakra-gathering",
+                "name": "Chakra Gathering",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Haruno Sakura (S) gains 3 seals. During this time, each skill that Haruno Sakura (S) uses other than her invulnerability will use up 1 Seal. While 'Chakra Gathering' is active, Haruno Sakura (S) can use this skill again for no cost to heal herself for 15 health and remove all harmful effects on her.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_s_chakra_gathering_seals",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stacks": 3,
+                            "consumeStackOnSkillUseExceptInvul": true,
+                            "skillReplacements": {
+                                "haruno-sakura-s-chakra-gathering": "haruno-sakura-s-chakra-heal-release"
+                            },
+                            "skillCostOverridesBySkillId": {
+                                "haruno-sakura-s-superior-healing": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "skillCooldownOverridesBySkillId": {
+                                "haruno-sakura-s-superior-healing": 0
+                            },
+                            "tooltipText": "Sakura has 3 Chakra Gathering seals active."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haruno-sakura-s-insightful-dodge",
+                "name": "Insightful Dodge",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Haruno Sakura (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_s_insightful_dodge_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haruno-sakura-s-chakra-heal-release",
+                "name": "Chakra Gathering: Heal",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Haruno Sakura (S) heals herself for 15 health and removes all harmful effects on her.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "heal",
+                        "amount": 15,
+                        "scope": "self"
+                    },
+                    {
+                        "type": "remove_status",
+                        "scope": "self",
+                        "metadata": {
+                            "harmfulOnly": true
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "sai",
+        "characterId": "sai",
+        "name": "Sai",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "A current member of the Elite ANBU Root, Sai is a quiet, but expressive individual with a mysterious past. Sai uses a set of brushes with a special ink to give life to his art, from tigers to lions to bears, that allow him to compete with his enemies.",
+        "requiredMissionId": "a-blank-slate",
+        "skills": [
+            {
+                "id": "sai-super-beast-imitating-drawing-lions",
+                "name": "Super Beast Imitating Drawing: Lions",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sai deals 30 damage to one enemy. For 1 turn, Sai will gain 20 points of destructible defense.",
+                "energy": [
+                    "Genjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sai_lions_destructible_defense",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 20,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Sai has 20 points of destructible defense."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sai-super-beast-imitating-drawing-snake",
+                "name": "Super Beast Imitating Drawing: Snake",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sai stuns one enemy's physical, energy and strategic skills for 1 turn. During this time, that enemy will be unable to reduce damage or become invulnerable. This skill ignores invulnerability. During 'Adaptive Painting', this skill will be replaced.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sai_snake_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "strategic"
+                            ],
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "ignoreInvulnerability": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's physical, energy and strategic skills are stunned and they cannot reduce damage or become invulnerable."
+                        }
+                    }
+                ],
+                "ignoreInvulnerability": true
+            },
+            {
+                "id": "sai-adaptive-painting",
+                "name": "Adaptive Painting",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 3 turns, any ally that is targeted by a new direct stun skill will become invulnerable for 1 turn; any ally that has energy removed/stolen will gain 1 random energy, and any ally that successfully receives new non-affliction damage by an enemy will increase Sai's damage by 10 for 1 turn.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sai_adaptive_painting_active",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "adaptivePaintingActive": true,
+                            "skillReplacements": {
+                                "sai-super-beast-imitating-drawing-snake": "sai-super-beast-imitating-drawing-bird"
+                            },
+                            "tooltipText": "Adaptive Painting is active: allies counter stuns and energy drain, taking damage buffs Sai."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sai-ink-clone",
+                "name": "Ink Clone",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Sai invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sai_ink_clone_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sai-super-beast-imitating-drawing-bird",
+                "name": "Super Beast Imitating Drawing: Bird",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sai deals 25 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sai_bird_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "strategic"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's physical, energy and strategic skills are stunned for 1 turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "inuzuka-kiba-s",
+        "characterId": "inuzuka-kiba-s",
+        "name": "Inuzuka Kiba (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Over the last several years. Kiba, and his dog, Akamaru have grown considerably, not wanting to be left last in their group. Having improved their team work, and provided they are given enough time, Kiba and Akamaru can become unstoppable rampaging beasts.",
+        "requiredMissionId": "a-boy-and-his-dog",
+        "skills": [
+            {
+                "id": "inuzuka-kiba-s-three-headed-wolf",
+                "name": "Three-Headed Wolf",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Inuzuka Kiba (S) gains 30 points of damage reduction and ignores enemy stun effects and energy drain or removal effects for 3 turns. The following 3 turns, this skill will be replaced by 'Tail Chasing Rotating Fang'.",
+                "energy": [
+                    "Bloodline",
+                    "Bloodline"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 5,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "inuzuka_kiba_s_three_headed_wolf_active",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 30,
+                            "immuneToStun": true,
+                            "immuneToEnergyDrain": true,
+                            "skillReplacements": {
+                                "inuzuka-kiba-s-three-headed-wolf": "inuzuka-kiba-s-tail-chasing-rotating-fang"
+                            },
+                            "tooltipText": "Kiba has 30 damage reduction, ignores enemy stuns and energy drain/removal, and has transformed."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "inuzuka-kiba-s-rotating-fang",
+                "name": "Rotating Fang",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Inuzuka Kiba (S) deals 30 damage to one enemy and 20 damage to another random enemy. During 'Three-Headed Wolf', this skill will instead deal 20 damage to all other enemies.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "random-other-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "inuzuka_kiba_s_three_headed_wolf_active"
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "other-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "inuzuka_kiba_s_three_headed_wolf_active"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "inuzuka-kiba-s-fang-over-fang",
+                "name": "Fang Over Fang",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Inuzuka Kiba (S) deals 35 damage and 10 affliction damage* to one enemy and then reduces their non-affliction damage by 10 permanently. During 'Three-Headed Wolf', this skill will deal 5 additional damage.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "inuzuka_kiba_s_three_headed_wolf_active"
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "inuzuka_kiba_s_fang_over_fang_weaken",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -10,
+                            "tooltipText": "This character deals 10 less non-affliction damage permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "inuzuka-kiba-s-hide-in-the-shade",
+                "name": "Hide in the Shade",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Inuzuka Kiba (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "inuzuka_kiba_s_hide_in_the_shade_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "inuzuka-kiba-s-tail-chasing-rotating-fang",
+                "name": "Tail Chasing Rotating Fang",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Inuzuka Kiba (S) deals 40 damage to all enemies and stuns them for 1 turn.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "inuzuka_kiba_s_tail_chasing_stun",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "stun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for 1 turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "aburame-shino-s",
+        "characterId": "aburame-shino-s",
+        "name": "Aburame Shino (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Still as mysterious and secretive as ever, Shino has improved greatly over the years, learning and practicing with his loyal bugs. With his new found mastery, Shino can disable enemies even harder while slowly waiting for his bugs to erupt from their bodies and destroy them.",
+        "requiredMissionId": "the-konoha-man-of-mystery",
+        "skills": [
+            {
+                "id": "aburame-shino-s-insect-swarm",
+                "name": "Insect Swarm",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Aburame Shino (S) deals 15 affliction damage to one enemy for 3 turns. The following 3 turns, that enemy will be invulnerable to all friendly skills. During this time, this skill will be replaced by 'Insect Consumption'.",
+                "energy": [
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Affliction",
+                    "Action"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_insect_swarm_dot",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "action": true,
+                            "ongoingClass": "action",
+                            "damagePerTurn": 15,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "invulnerableToFriendlySkills": true,
+                            "tooltipText": "Taking 15 affliction damage each turn and invulnerable to friendly skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_insect_swarm_stance",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "skillReplacements": {
+                                "aburame-shino-s-insect-swarm": "aburame-shino-s-insect-consumption"
+                            },
+                            "tooltipText": "Insect Swarm is active: replaced by Insect Consumption."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "aburame-shino-s-insect-barricade",
+                "name": "Insect Barricade",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "The following turn, the first new harmful skill used on one ally or Aburame Shino (S) will be countered, 'Parasitic Giant Beetle Infestation' will be placed on the countered enemy and then activated. If this skill does not counter an enemy skill, Aburame Shino (S) will gain 1 red energy. This skill is invisible.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_insect_barricade_trap",
+                        "duration": 1,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterStatusId": "aburame_shino_s_parasitic_beetle_active_trigger",
+                            "counterStatusDuration": 1,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "damageInstantPiercing": 25,
+                                "tooltipText": "Infested with Parasitic Giant Beetles for 25 damage."
+                            },
+                            "onExpireIfUnusedEffects": [
+                                {
+                                    "type": "gain_chakra",
+                                    "chakraType": "taijutsu",
+                                    "amount": 1,
+                                    "scope": "self"
+                                }
+                            ],
+                            "tooltipText": "The first harmful skill targeting this ally next turn will be countered for 25 damage, or Shino gains 1 energy."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "aburame-shino-s-parasitic-giant-beetle-infestation",
+                "name": "Parasitic Giant Beetle Infestation",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Aburame Shino (S) targets one enemy. After 3 turns, they will take 25 affliction damage and all other copies of this skill on them will be activated. This skill is invisible.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_parasitic_beetle_pending",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invisible": true,
+                            "turnDurationAnchor": "any_turn",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 25,
+                                    "scope": "target",
+                                    "metadata": {
+                                        "afflictionDamage": true,
+                                        "ignoreDamageReduction": true,
+                                        "ignoreDestructibleDefense": true
+                                    }
+                                }
+                            ],
+                            "tooltipText": "Parasitic Giant Beetles will erupt after 3 turns for 25 affliction damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "aburame-shino-s-insect-cocoon",
+                "name": "Insect Cocoon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Aburame Shino (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_insect_cocoon_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "aburame-shino-s-insect-consumption",
+                "name": "Insect Consumption",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Aburame Shino (S) steals 1 random energy from one enemy affected by 'Insect Swarm' and increases the damage that enemy receives from 'Insect Swarm' by 5 that turn.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "steal_chakra",
+                        "chakraType": "random",
+                        "amount": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "aburame_shino_s_insect_swarm_dot"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "aburame_shino_s_insect_consumption_amp",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageAppliesToSkillIds": [
+                                "aburame-shino-s-insect-swarm"
+                            ],
+                            "tooltipText": "Takes 5 additional damage from Insect Swarm this turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hyuuga-hinata-s",
+        "characterId": "hyuuga-hinata-s",
+        "name": "Hyuuga Hinata (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "With the Chuunin Exam behind her, and with Naruto's words deep in her heart, Hinata has grown and become stronger and a woman. With her mastery of the Hyuuga clan tactics, Hinata can give life to powerful chakra lions while hindering her enemies' chakra paths.",
+        "requiredMissionId": "a-lovestruck-girl",
+        "skills": [
+            {
+                "id": "hyuuga-hinata-s-pressure-point-closure",
+                "name": "Pressure Point Closure",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hyuuga Hinata (S) targets one enemy, dealing 10 damage to them, increasing the cost of their skills by 1 random energy for 1 turn, and removing all stacks of 'Hinata - Eight Trigrams Field' from them (including the skill itself). During 'Hinata - Eight Trigrams Field', this skill will deal 10 additional damage.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "hyuuga_hinata_s_eight_trigrams_field_stance"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_s_pressure_point_closure_debuff",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "energyCostIncrease": {
+                                "random": 1
+                            },
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Skills cost 1 additional random energy."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hinata-s-gentle-step-twin-lion-fists",
+                "name": "Gentle Step Twin Lion Fists",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill deals 30 damage to one enemy and removes 1 random energy from them. This skill will deal 5 additional damage for each 'Pressure Point Closure' stack. Once used, this skill removes all stacks of 'Pressure Point Closure' from the targeted enemy.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_chakra",
+                        "chakraType": "random",
+                        "amount": 1,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_status",
+                        "statusId": "hyuuga_hinata_s_pressure_point_closure_debuff",
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hinata-s-eight-trigrams-field",
+                "name": "Hinata - Eight Trigrams Field",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 4 turns, if an enemy uses a new harmful skill, the energy cost increase of 'Pressure Point Closure' will last 1 additional turn on them permanently.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_s_eight_trigrams_field_stance",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Eight Trigrams Field is active: Pressure Point Closure deals 10 additional damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-hinata-s-byakugan-sight",
+                "name": "Byakugan Sight",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Hyuuga Hinata (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_hinata_s_byakugan_sight_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "nara-shikamaru-s",
+        "characterId": "nara-shikamaru-s",
+        "name": "Nara Shikamaru (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Once known to be one of the laziest ninja, Shikamaru has worked tireless to become not only stronger, but a leader too. More than ever before, Shikamaru excels at coming up with long winded and convoluted plans meant to defeat any enemies in his path.",
+        "requiredMissionId": "where-the-shadows-lie",
+        "skills": [
+            {
+                "id": "nara-shikamaru-s-shadow-sewing",
+                "name": "Shadow Sewing",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Nara Shikamaru (S) deals 35 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn. If this skill is used on an enemy affected by 'Long-Range Tactics', it will deal 10 additional damage.",
+                "energy": [
+                    "Genjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "nara_shikamaru_s_long_range_tactics_stun"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nara_shikamaru_s_shadow_sewing_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "strategic"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's physical, energy and strategic skills are stunned for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nara-shikamaru-s-long-range-tactics",
+                "name": "Long-Range Tactics",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Nara Shikamaru (S) targets one enemy. That enemy has their non-strategic skills stunned 2 turns and Nara Shikamaru (S) will be invulnerable during this time.",
+                "energy": [
+                    "Ninjutsu",
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nara_shikamaru_s_long_range_tactics_stun",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "mental",
+                                "ninjutsu"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's non-strategic skills are stunned for 2 turns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nara_shikamaru_s_long_range_tactics_invul",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Shikamaru is invulnerable during Long-Range Tactics."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nara-shikamaru-s-expert-analysis",
+                "name": "Expert Analysis",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 3 turns, any time that one target enemy uses a new skill, that enemy will be unable to reduce damage or become invulnerable and all helpful counters and reflect skills on them will be ignored for 1 turn. This skill is invisible.",
+                "energy": [],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nara_shikamaru_s_expert_analysis_mark",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invisible": true,
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "ignoreCounters": true,
+                            "ignoreReflects": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character cannot reduce damage, become invulnerable, or benefit from counters/reflects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "nara-shikamaru-s-panicked-dodge",
+                "name": "Panicked Dodge",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Nara Shikamaru (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "nara_shikamaru_s_panicked_dodge_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "akimichi-chouji-s",
+        "characterId": "akimichi-chouji-s",
+        "name": "Akimichi Chouji (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "After nearly three years, Chouji has developed in both strength and size, mastering the Akimichi clan techniques. No longer does Chouji need the Akimichi pills to tap into his true strength, instead, he merely needs to control his chakra and become a force to reckon with.",
+        "requiredMissionId": "a-portly-but-steadfast-ninja",
+        "skills": [
+            {
+                "id": "akimichi-chouji-s-expansion-technique",
+                "name": "Expansion Technique",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 4 turns, Akimichi Chouji (S) gains 25 points of destructible defense, 'Spiked Meat Tank' will do its alternate effects and have 1 less turn of cooldown, and 'Mega Palm Thrust' will be improved.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "akimichi_chouji_s_expansion_technique_active",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 25,
+                            "skillReplacements": {
+                                "akimichi-chouji-s-spiked-meat-tank": "akimichi-chouji-s-spiked-meat-tank-alt"
+                            },
+                            "tooltipText": "Expansion Technique is active with 25 destructible defense: Spiked Meat Tank and Mega Palm Thrust are empowered."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "akimichi-chouji-s-spiked-meat-tank",
+                "name": "Spiked Meat Tank",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Akimichi Chouji (S) targets one ally or himself and will counter all enemy non-mental skills used on the target for 1 turn. The countered enemies will take 25 damage. This skill is invisible. Alternate: Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "akimichi_chouji_s_spiked_meat_tank_counter",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulNonMental": true,
+                            "counterDamage": 25,
+                            "tooltipText": "Counters enemy non-mental skills and deals 25 damage to the attacker."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "akimichi-chouji-s-spiked-meat-tank-alt",
+                "name": "Spiked Meat Tank (Alternate)",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "akimichi_chouji_s_spiked_meat_tank_alt_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "akimichi-chouji-s-mega-palm-thrust",
+                "name": "Mega Palm Thrust",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Akimichi Chouji (S) deals 25 piercing damage to one enemy. During 'Expansion Technique', this damage is improved to 40, the targeted enemy has their non-strategic skills stunned for 1 turn, and this skill has an 1 turn cooldown.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "missingStatusId": "akimichi_chouji_s_expansion_technique_active"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "akimichi_chouji_s_expansion_technique_active"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "akimichi_chouji_s_mega_palm_thrust_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "akimichi_chouji_s_expansion_technique_active"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "mental",
+                                "ninjutsu"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's non-strategic skills are stunned for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "akimichi-chouji-s-effortful-block",
+                "name": "Effortful Block",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Akimichi Chouji (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "akimichi_chouji_s_effortful_block_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "yamanaka-ino-s",
+        "characterId": "yamanaka-ino-s",
+        "name": "Yamanaka Ino (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Not one to be left behind, Ino has trained non-stop to improve her abilities and teamwork. With her improved techniques, Ino can not only control her enemies, but her allies too all while seeing everything on the battlefield.",
+        "requiredMissionId": "blondes-have-all-the-fun",
+        "skills": [
+            {
+                "id": "yamanaka-ino-s-mind-body-switch",
+                "name": "Mind Body Switch",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yamanaka Ino (S) targets one enemy. After 1 turn, that enemy will take 15 damage and if that enemy uses a new harmful skill during this time, they will be countered and this skill will be replaced by the skill they used for 1 turn. This skill cannot be reflected and is invisible.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamanaka_ino_s_mind_body_switch_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invisible": true,
+                            "cannotBeReflected": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterCopySkillReplacementFor": "yamanaka-ino-s-mind-body-switch",
+                            "counterCopySkillReplacementDuration": 1,
+                            "turnDurationAnchor": "any_turn",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 15,
+                                    "scope": "target"
+                                }
+                            ],
+                            "tooltipText": "Subject to Mind Body Switch: will take 15 damage and have their next harmful skill countered and copied."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yamanaka-ino-s-proxy-surveillance",
+                "name": "Proxy Surveillance",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yamanaka Ino (S) targets all enemies. For 3 turns, everytime they use a new skill, they will take 5 piercing damage. During this time, all new invisible skills they use will become visible. This skill cannot be countered or reflected.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamanaka_ino_s_proxy_surveillance_debuff",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true,
+                            "damageOnSkillUsePiercing": 5,
+                            "revealInvisibleSkills": true,
+                            "tooltipText": "Takes 5 piercing damage on skill use and invisible skills are revealed."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yamanaka-ino-s-mind-clone-switch",
+                "name": "Mind Clone Switch",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 2 turns, both of Yamanaka Ino (S)'s allies will ignore all harmful effects other than damage and energy cost changes. This skill is invisible and will end if Yamanaka Ino (S) dies.",
+                "energy": [
+                    "Genjutsu",
+                    "Random"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamanaka_ino_s_mind_clone_switch_guard",
+                        "duration": 2,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "invisible": true,
+                            "ignoreHarmfulNonDamageEffects": true,
+                            "tooltipText": "Ignores all harmful non-damage and non-energy effects."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yamanaka-ino-s-hide",
+                "name": "Hide",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Yamanaka Ino (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamanaka_ino_s_hide_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "rock-lee-s",
+        "characterId": "rock-lee-s",
+        "name": "Rock Lee (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Now a chuunin, Lee has trained endlessly with Gai, and not only learned new abilities, but has learned what it truly means to fight. In battle, Lee now fights for his friends and allies, growing stronger as they fall around him.",
+        "requiredMissionId": "a-genius-of-hard-work",
+        "skills": [
+            {
+                "id": "rock-lee-s-leaf-rising-wind",
+                "name": "Leaf Rising Wind",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Rock Lee (S) targets one enemy, dealing 15 damage to them and lowering their non-affliction damage by 10 for 2 turns. This skill will deal 10 additional damage, and the damage reduction effect will last 1 additional turn for each ally that is dead.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage_per_dead_ally",
+                        "amountPerDeadAlly": 10,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rock_lee_s_leaf_rising_wind_weaken",
+                        "duration": 2,
+                        "durationPerDeadAllyBonus": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -10,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 10 less non-affliction damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rock-lee-s-leaf-great-whirlwind",
+                "name": "Leaf Great Whirlwind",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to one enemy and gaining 10 points of damage reduction for 1 turn. The following turn, this skill will deal 10 additional damage and grant 10 additional damage reduction. This skill will deal 5 additional damage for every ally that has been killed.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "rock_lee_s_leaf_great_whirlwind_momentum"
+                        }
+                    },
+                    {
+                        "type": "damage_per_dead_ally",
+                        "amountPerDeadAlly": 5,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rock_lee_s_leaf_great_whirlwind_defense",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "tooltipText": "Lee has 10 damage reduction."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "rock_lee_s_leaf_great_whirlwind_momentum",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "damageReductionFlat": 10,
+                            "tooltipText": "Empowers Leaf Great Whirlwind for the following turn with 10 damage reduction."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rock-lee-s-maximum-force-blast",
+                "name": "Maximum Force Blast",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to them. This skill will deal 15 additional damage for each ally that is dead and 15 additional damage for every 30 health that Rock Lee (S) has lost.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage_per_dead_ally",
+                        "amountPerDeadAlly": 15,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage_per_lost_health_threshold",
+                        "threshold": 30,
+                        "amountPerThreshold": 15,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "rock-lee-s-jumping-dodge",
+                "name": "Jumping Dodge",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Rock Lee (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "rock_lee_s_jumping_dodge_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "tenten-s",
+        "characterId": "tenten-s",
+        "name": "Tenten (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Now a chuunin, Tenten has added a myriad of powerful and potent weapons in her arsenal, even procuring the legendary fan of the sage of the six paths. Having an arsenal of weapons at her side, Tenten can chose to fight at different levels, upgrading her weapons until she finds something suitable for her battle.",
+        "requiredMissionId": "a-genius-of-ranged-combat",
+        "skills": [
+            {
+                "id": "tenten-s-kunai-grenade",
+                "name": "Kunai Grenade",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) deals 20 damage to one enemy and 10 damage to all other enemies. This skill cannot be countered or reflected.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "other-enemy",
+                        "metadata": {
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-chain-spin",
+                "name": "Chain Spin",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) makes her team invulnerable to non-strategic skills for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_chain_spin_invul",
+                        "duration": 1,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "invulnerableToNonStrategicSkills": true,
+                            "tooltipText": "Invulnerable to non-strategic skills for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-weapon-upgrade",
+                "name": "Weapon Upgrade",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) gains 5 points of destructible defense. The first time this skill is used, it will replace 'Kunai Grenade' and 'Chain Spin'. The second time it is used, they will be replaced again. The third time this skill is used, it will reset, and her skills will revert back to the original ones.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_weapon_upgrade_tier",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 5,
+                            "destructibleDefensePermanent": true,
+                            "tentenWeaponUpgradeCycle": true,
+                            "tooltipText": "Tenten has upgraded her weapons with 5 destructible defense."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-leaping-dodge",
+                "name": "Leaping Dodge",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Tenten (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_leaping_dodge_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-heavenly-chain-disaster",
+                "name": "Heavenly Chain Disaster",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) deals 25 piercing damage to all enemies.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-iron-protection-wall",
+                "name": "Iron Protection Wall",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) makes her team invulnerable to physical skills for 1 turn and grants them 20 points of permanent destructible defense. This effect stacks.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_iron_protection_wall_invul",
+                        "duration": 1,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "invulnerableToPhysicalSkills": true,
+                            "destructibleDefensePoints": 20,
+                            "destructibleDefensePermanent": true,
+                            "tooltipText": "Invulnerable to physical skills for 1 turn and gained 20 permanent destructible defense."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-bashousen-coil-of-wind",
+                "name": "Bashousen: Coil of Wind",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "The following turn, any new non-mental skill used on Tenten (S) or her team will be reflected onto the character who used it. This skill is invisible.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-allies",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_coil_of_wind_reflect",
+                        "duration": 1,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "invisible": true,
+                            "reflectOnEnemyHarmfulNonMental": true,
+                            "tooltipText": "Reflects enemy non-mental skills next turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tenten-s-bashousen-coil-of-fire",
+                "name": "Bashousen: Coil of Fire",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Tenten (S) targets all enemies, dealing 10 damage and 10 affliction damage* to them. They will then receive 5 affliction damage* for the following 3 turns.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "tenten_s_coil_of_fire_burn",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "damagePerTurn": 5,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "Taking 5 affliction damage per turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hyuuga-neji-s",
+        "characterId": "hyuuga-neji-s",
+        "name": "Hyuuga Neji (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "The only of the original genins to become a Jounin, Neji has only increased his already powerful set of abilities and skills during the near three years of time. While still being able to rely on his pressure point attacks, Neji is now also able to unleash giant waves of chakra for brutish damage as well.",
+        "requiredMissionId": "pride-of-the-hyuuga",
+        "skills": [
+            {
+                "id": "hyuuga-neji-s-eight-trigrams-vacuum-palm",
+                "name": "Eight Trigrams Vacuum Palm",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hyuuga Neji (S) deals 20 damage to one enemy and removes 1 random energy from them.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_chakra",
+                        "chakraType": "random",
+                        "amount": 1,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-neji-s-eight-trigrams-mountain-crusher",
+                "name": "Eight Trigrams Mountain Crusher",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hyuuga Neji (S) targets one enemy, destroying any destructible defense they have and dealing 45 damage to them.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "destroy_destructible_defense",
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-neji-s-byakugan-eight-trigrams-field",
+                "name": "Byakugan - Eight Trigrams Field",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 2 turns, all enemies will be unable to reduce damage or become invulnerable. For 1 turn, any enemy that uses a new harmful skill on Hyuuga Neji (S) will be countered and this skill will be replaced by 'Pressure Point Strike'. This skill is invisible.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_neji_s_eight_trigrams_enemy_debuff",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "tooltipText": "Cannot reduce damage or become invulnerable for 2 turns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_neji_s_field_counter_trap",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterStatusId": "hyuuga_neji_s_countered_by_field",
+                            "counterStatusDuration": 2,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "tooltipText": "Countered by Byakugan Field."
+                            },
+                            "counterApplyStatusToSourceOwner": {
+                                "statusId": "hyuuga_neji_s_pressure_point_strike_active",
+                                "duration": 1,
+                                "metadata": {
+                                    "helpful": true,
+                                    "skillReplacements": {
+                                        "hyuuga-neji-s-byakugan-eight-trigrams-field": "hyuuga-neji-s-pressure-point-strike"
+                                    },
+                                    "tooltipText": "Byakugan Field is replaced by Pressure Point Strike."
+                                }
+                            },
+                            "tooltipText": "Neji will counter the first harmful skill used on him this turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-neji-s-byakugan-defense",
+                "name": "Byakugan Defense",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Hyuuga Neji (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_neji_s_byakugan_defense_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hyuuga-neji-s-pressure-point-strike",
+                "name": "Pressure Point Strike",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hyuuga Neji (S) attacks one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage_stacking_consecutive",
+                        "stackAmount": 5,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_chakra",
+                        "chakraType": "random",
+                        "amount": 1,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hyuuga_neji_s_pressure_point_strike_chain",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "hyuuga-neji-s-byakugan-eight-trigrams-field": "hyuuga-neji-s-pressure-point-strike"
+                            },
+                            "tooltipText": "Pressure Point Strike chain active: deals +5 additional damage next turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hatake-kakashi-s",
+        "characterId": "hatake-kakashi-s",
+        "name": "Hatake Kakashi (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Kakashi has not let the years pass by idle, and has trained as hard as any other, improving his sharingan and his own unique jutsu. While Kakashi's raikiri is still a potent finisher, he is now also able to rely on his kamui, aiming it at his enemies or even rescuing his allies.",
+        "requiredMissionId": "from-teacher-to-partner",
+        "skills": [
+            {
+                "id": "hatake-kakashi-s-lightning-beast-fang",
+                "name": "Lightning Beast Fang",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hatake Kakashi (S) deals 25 piercing damage to one enemy and stuns them for 1 turn. The following turn, this skill will be replaced by 'Finishing Raikiri'.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_lightning_beast_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "stun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_lightning_beast_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Marked by Lightning Beast Fang."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_finishing_raikiri_active",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "skillReplacements": {
+                                "hatake-kakashi-s-lightning-beast-fang": "hatake-kakashi-s-finishing-raikiri"
+                            },
+                            "tooltipText": "Lightning Beast Fang is replaced by Finishing Raikiri."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hatake-kakashi-s-kakashi-kamui",
+                "name": "Kakashi Kamui",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "If used on an enemy, they will receive 40 piercing damage, and for 1 turn their cooldowns will be increased by 1 and their skills will cost 1 additional random energy. If used on an ally or himself, all harmful effects on them will be removed and they will become invulnerable for 1 turn. This skill ignores invulnerability.",
+                "energy": [
+                    "Bloodline",
+                    "Genjutsu"
+                ],
+                "target": "single-target",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 40,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isEnemy": true
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "ignoreInvulnerability": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_kamui_enemy_debuff",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isEnemy": true
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "energyCostIncrease": {
+                                "random": 1
+                            },
+                            "cooldownIncrease": 1,
+                            "ignoreInvulnerability": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Cooldowns increased by 1 and skills cost 1 additional random energy."
+                        }
+                    },
+                    {
+                        "type": "remove_status",
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isAlly": true
+                        },
+                        "metadata": {
+                            "harmfulOnly": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_kamui_ally_invul",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isAlly": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ],
+                "ignoreInvulnerability": true
+            },
+            {
+                "id": "hatake-kakashi-s-team-tactics",
+                "name": "Team Tactics",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 3 turns, Hatake Kakashi (S)'s allies will have the cooldown of their skills reduced by 1. The following 3 turns, the first new harmful skill used by one enemy will be copied and will replace this skill for 1 turn. This skill cannot be reflected.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_team_tactics_buff",
+                        "duration": 3,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeReflected": true,
+                            "cooldownReduction": 1,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterCopySkillReplacementFor": "hatake-kakashi-s-team-tactics",
+                            "counterCopySkillReplacementDuration": 1,
+                            "tooltipText": "Allies cooldowns reduced by 1."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hatake-kakashi-s-bunshin-stand-in",
+                "name": "Bunshin Stand-in",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Hatake Kakashi (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hatake_kakashi_s_bunshin_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hatake-kakashi-s-finishing-raikiri",
+                "name": "Finishing Raikiri",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hatake Kakashi (S) targets one enemy, dealing 30 piercing damage to them. This skill will deal 10 additional damage to that enemy if they are stunned or if 'Lightning Beast Fang' was used on them the previous turn.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasAnyStatusId": [
+                                "hatake_kakashi_s_lightning_beast_stun",
+                                "hatake_kakashi_s_lightning_beast_mark"
+                            ]
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "yamato",
+        "characterId": "yamato",
+        "name": "Yamato",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "A member of the secretive ANBU organization and a man who was once injected with the cells of Hashirama, the 1st Hokage. Due to the cells that live inside of him, Yamato is capable of small scale wood element abilities, from trapping enemies to protecting his comrades.",
+        "requiredMissionId": "a-new-team-leader",
+        "skills": [
+            {
+                "id": "yamato-bliss-bringing-hands",
+                "name": "Bliss-Bringing Hands",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yamato targets one enemy, dealing 30 damage to them and making them ignore all helpful effects except energy cost changes for 1 turn.",
+                "energy": [
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamato_bliss_bringing_hands_nullify",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ignoreHelpfulNonEnergyEffects": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yamato-wood-release-wood-clone",
+                "name": "Wood Release: Wood Clone",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yamato targets one ally or himself for 1 turn, countering the first physical, energy or strategic skill used against them, dealing 20 damage to the enemy and granting that ally 20 points of destructible defense. This skill is invisible.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamato_wood_clone_counter_trap",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyPhysicalOrStrategicSkill": true,
+                            "counterDamage": 20,
+                            "counterApplyStatusToRecipient": {
+                                "statusId": "yamato_wood_clone_destructible_defense",
+                                "duration": 99,
+                                "metadata": {
+                                    "helpful": true,
+                                    "destructibleDefensePoints": 20,
+                                    "destructibleDefensePermanent": true,
+                                    "tooltipText": "Protected by Wood Clone (20 Destructible Defense)."
+                                }
+                            },
+                            "tooltipText": "Counters the next physical, energy, or strategic skill, dealing 20 damage and granting 20 destructible defense."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yamato-wood-release-four-pillar-prison",
+                "name": "Wood Release: Four-Pillar Prison",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill can be used on one enemy or one ally. If used on an enemy, that enemy will have their physical, energy and strategic skills stunned for 2 turns. If used on an ally, that ally will gain 40 points of permanent destructible defense. This skill ignores invulnerability.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "single-target",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamato_four_pillar_prison_enemy_stun",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isEnemy": true
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "strategic"
+                            ],
+                            "ignoreInvulnerability": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's physical, energy and strategic skills are stunned for 2 turns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamato_four_pillar_prison_ally_defense",
+                        "duration": 99,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "isAlly": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 40,
+                            "destructibleDefensePermanent": true,
+                            "tooltipText": "Gained 40 permanent destructible defense."
+                        }
+                    }
+                ],
+                "ignoreInvulnerability": true
+            },
+            {
+                "id": "yamato-wood-release-wood-shelter",
+                "name": "Wood Release: Wood Shelter",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Yamato invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yamato_wood_shelter_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "maito-gai-s",
+        "characterId": "maito-gai-s",
+        "name": "Maito Gai (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Still the leader of Team Gai, Gai is not one to let himself fall behind in terms of training and strength. Gai no longer feels the need to go straight into the highest level of gates that he can, instead taking his time, until the time requires the green beast of Konoha to go all out.",
+        "requiredMissionId": "the-green-beast",
+        "skills": [
+            {
+                "id": "maito-gai-s-nunchaku-taijutsu",
+                "name": "Nunchaku Taijutsu",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Maito Gai (S) deals 10 damage to one enemy for 3 turns. During this time, if an enemy uses a new harmful physical skill on Maito Gai (S), he will deal 10 damage to them.*",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Action",
+                    "Instant*"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_nunchaku_action_dot",
+                        "duration": 3,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "action": true,
+                            "ongoingClass": "action",
+                            "damagePerTurn": 10,
+                            "tooltipText": "Taking 10 physical damage per turn from Nunchaku Taijutsu."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_nunchaku_retaliation_stance",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "retaliateOnIncomingHarmfulPhysicalDamage": 10,
+                            "tooltipText": "Deals 10 damage back when hit by an enemy physical skill."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maito-gai-s-fiery-kick",
+                "name": "Fiery Kick",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Maito Gai (S) targets one enemy, dealing 35 damage to them and reducing all non-affliction damage they deal by 20 for 1 turn.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_fiery_kick_weaken",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -20,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 20 less non-affliction damage for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maito-gai-s-single-gate-release",
+                "name": "Single Gate Release",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Maito Gai (S) receives 5 affliction damage*, but permanently gains 5 points of damage reduction and increases the damage of 'Nunchaku Taijutsu' and 'Fiery Kick' by 5. At 6 usages of this skill, 'Fiery Kick' will be replaced by 'Morning Peacock', and at 7 usages of this skill, it will be replaced by 'Daytime Tiger'. This skill can only be used 7 times.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "maxUsagesPerMatch": 7,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 5,
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_gate_stack",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "maxStacks": 7,
+                            "damageReductionFlat": 5,
+                            "skillDamageBonuses": {
+                                "maito-gai-s-nunchaku-taijutsu": 5,
+                                "maito-gai-s-fiery-kick": 5
+                            },
+                            "gaiGateProgression": true,
+                            "tooltipText": "Gai has opened an Eight Gate granting 5 damage reduction, 5 skill damage, up to 7 gates."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maito-gai-s-muscle-block",
+                "name": "Muscle Block",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Maito Gai (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_muscle_block_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maito-gai-s-morning-peacock",
+                "name": "Morning Peacock",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Maito Gai (S) deals 60 damage to one enemy and stuns them for 1 turn.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 60,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "maito_gai_s_morning_peacock_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "stun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "maito-gai-s-daytime-tiger",
+                "name": "Daytime Tiger",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Maito Gai (S) deals 300 damage to one enemy.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 300,
+                        "scope": "target"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "kankuro-s",
+        "characterId": "kankuro-s",
+        "name": "Kankuro (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "In the last couple years Kankuro has become a Jounin and has created a new puppet. He is now able to harness three puppets at once and is a more versatile combatant. ORIGINAL DESIGN: Yaseen16",
+        "requiredMissionId": "the-aspiring-puppet-master",
+        "skills": [
+            {
+                "id": "kankuro-s-kuroari-trap",
+                "name": "Kuroari Trap",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kankuro (S) targets one enemy, countering any harmful skill they use for 1 turn. If countered, that enemy will take 100% more damage from 'Karasu Knives' the following turn. This skill is invisible until triggered.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_kuroari_trap_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterStatusId": "kankuro_s_kuroari_trap_triggered",
+                            "counterStatusDuration": 1,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "bonusDamageFromSourceSkillsPercent": 100,
+                                "bonusDamageAppliesToSkillIds": [
+                                    "kankuro-s-karasu-knives"
+                                ],
+                                "tooltipText": "Takes 100% more damage from Karasu Knives."
+                            },
+                            "tooltipText": "Subject to Kuroari Trap: next harmful skill will be countered, increasing Karasu Knives damage by 100%."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kankuro-s-karasu-knives",
+                "name": "Karasu Knives",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kankuro (S) targets an enemy, dealing 20 damage to them. The following turn, that enemy will take 10 affliction damage.*",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_karasu_knives_poison",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 10,
+                                    "scope": "target",
+                                    "metadata": {
+                                        "afflictionDamage": true,
+                                        "ignoreDamageReduction": true,
+                                        "ignoreDestructibleDefense": true
+                                    }
+                                }
+                            ],
+                            "tooltipText": "Will take 10 affliction damage next turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kankuro-s-sanshouo-shield",
+                "name": "Sanshouo Shield",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 3 turns, Kankuro (S) and his allies will have 10 points of damage reduction and will ignore harmful non-conditional affliction damage. This skill becomes 'Defensive Puppet Control' for 3 turns after used.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_sanshouo_shield_buff",
+                        "duration": 3,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "immuneToNonConditionalAfflictionDamage": true,
+                            "tooltipText": "Has 10 damage reduction and ignores non-conditional affliction damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_sanshouo_shield_stance",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "kankuro-s-sanshouo-shield": "kankuro-s-defensive-puppet-control"
+                            },
+                            "tooltipText": "Sanshouo Shield is active: replaced by Defensive Puppet Control."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kankuro-s-puppet-distraction",
+                "name": "Puppet Distraction",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Kankuro (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_puppet_distraction_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kankuro-s-defensive-puppet-control",
+                "name": "Defensive Puppet Control",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kankuro (S) targets one ally or himself, granting them 20 points of damage reduction for 1 turn.",
+                "energy": [],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kankuro_s_defensive_puppet_control_dr",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 20,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character has 20 damage reduction for 1 turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "temari-s",
+        "characterId": "temari-s",
+        "name": "Temari (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Temari has grown over the years. She is now a Jounin as well as the sister of Kankuro and Gaara. Temari is also the Hidden Sand Village's ambassador to the Hidden Leaf Village.",
+        "requiredMissionId": "the-third-sand-sibling",
+        "skills": [
+            {
+                "id": "temari-s-first-moon",
+                "name": "First Moon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "'Wind Scythe' will deal 5 additional damage permanently. Temari (S) gains 15 points of damage reduction permanently and this skill becomes 'Second Moon' permanently when used.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "temari_s_first_moon_active",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 15,
+                            "skillDamageBonuses": {
+                                "temari-s-wind-scythe": 5
+                            },
+                            "skillReplacements": {
+                                "temari-s-first-moon": "temari-s-second-moon"
+                            },
+                            "tooltipText": "First Moon active: 15 damage reduction, Wind Scythe deals +5 damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "temari-s-ally-protection",
+                "name": "Ally Protection",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Temari (S) targets one ally. For 1 turn, that ally will gain 20 points of damage reduction and they cannot be killed.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "temari_s_ally_protection_buff",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 20,
+                            "cannotBeKilled": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character has 20 damage reduction and cannot be killed for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "temari-s-wind-scythe",
+                "name": "Wind Scythe",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Temari (S) deals 25 damage to one enemy.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "temari-s-fan-offensive-defense",
+                "name": "Fan Offensive Defense",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Temari (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "temari_s_fan_offensive_defense_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "temari-s-second-moon",
+                "name": "Second Moon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Temari (S) ends 'First Moon'. Temari (S) gains 5 points of damage reduction and 10 points of unpierceable damage reduction permanently and 'Wind Scythe' will deal 10 additional damage permanently. This skill becomes 'Third Moon' permanently when used.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "remove_status",
+                        "statusId": "temari_s_first_moon_active",
+                        "scope": "self"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "temari_s_second_moon_active",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 5,
+                            "damageReductionUnpierceableFlat": 10,
+                            "skillDamageBonuses": {
+                                "temari-s-wind-scythe": 10
+                            },
+                            "skillReplacements": {
+                                "temari-s-first-moon": "temari-s-third-moon",
+                                "temari-s-second-moon": "temari-s-third-moon"
+                            },
+                            "tooltipText": "Second Moon active: 5 DR, 10 unpierceable DR, Wind Scythe deals +10 damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "temari-s-third-moon",
+                "name": "Third Moon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Temari (S) deals 20 damage to all enemies and makes them deal 5 less damage for 1 turn.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "temari_s_third_moon_weaken",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -5,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Deals 5 less damage for 1 turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "kazekage-gaara",
+        "characterId": "kazekage-gaara",
+        "name": "Kazekage Gaara",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "After a few short years and much soul-searching, Gaara has risen to be his village's Kazekage. Rather than destroying others he now protects those he cares about to prove his existence. ORIGINAL DESIGN: Liann",
+        "requiredMissionId": "finding-his-purpose",
+        "skills": [
+            {
+                "id": "kazekage-gaara-desert-missile",
+                "name": "Desert Missile",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kazekage Gaara deals 15 piercing damage to one enemy and reduces their non-affliction damage by 10 for 1 turn. This effect lasts 1 additional turn for each Desert Charge Kazekage Gaara has and then removes all Desert Charges on him.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_desert_missile_weaken",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -10,
+                            "consumeChargeStatusId": "kazekage_gaara_desert_charge",
+                            "durationPerChargeBonus": 1,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 10 less non-affliction damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kazekage-gaara-desert-prison",
+                "name": "Desert Prison",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kazekage Gaara deals 25 damage to one enemy and stuns them for 1 turn. This skill grants Kazekage Gaara 1 Desert Charge.",
+                "energy": [
+                    "Bloodline",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_desert_prison_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "stun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_desert_charge",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "tooltipText": "Desert Charge active."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kazekage-gaara-sand-summoning",
+                "name": "Sand Summoning",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kazekage Gaara gains 5 points of permanent damage reduction and 1 Desert Charge. His allies gain 10 points of permanent destructible defense. 'Desert Missile' and 'Desert Prison' will deal 5 additional damage permanently. This skill stacks.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_sand_summoning_buff",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "damageReductionFlat": 5,
+                            "skillDamageBonuses": {
+                                "kazekage-gaara-desert-missile": 5,
+                                "kazekage-gaara-desert-prison": 5
+                            },
+                            "tooltipText": "Gaara gains 5 damage reduction and +5 skill damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_desert_charge",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "tooltipText": "Desert Charge active."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_ally_destructible_defense",
+                        "duration": 99,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 10,
+                            "destructibleDefensePermanent": true,
+                            "tooltipText": "Protected by Sand Summoning (10 permanent Destructible Defense)."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kazekage-gaara-sand-sphere",
+                "name": "Sand Sphere",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Kazekage Gaara invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kazekage_gaara_sand_sphere_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "yakushi-kabuto-s",
+        "characterId": "yakushi-kabuto-s",
+        "name": "Yakushi Kabuto (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Kabuto is the loyal servant of Orochimaru and is a very dangerous missing-nin. He is a calculating individual who is both accomplished at combat and healing.",
+        "requiredMissionId": "a-double-agent",
+        "skills": [
+            {
+                "id": "yakushi-kabuto-s-charging-mystical-palm",
+                "name": "Charging Mystical Palm",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yakushi Kabuto (S) deals 20 damage to one enemy. For 1 turn, that enemy will ignore all helpful effects except energy cost changes.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "yakushi_kabuto_s_charging_palm_nullify",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ignoreHelpfulNonEnergyEffects": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yakushi-kabuto-s-dead-soul-technique",
+                "name": "Dead Soul Technique",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yakushi Kabuto (S) targets one enemy, dealing 30 piercing damage to them. For the rest of the game, that enemy will ignore healing effects.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "yakushi_kabuto_s_dead_soul_curse",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ignoreHealing": true,
+                            "tooltipText": "This character cannot be healed for the rest of the game."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yakushi-kabuto-s-medical-ninjutsu",
+                "name": "Medical Ninjutsu",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Yakushi Kabuto (S) heals one ally or himself for 25 health and removes all enemy affliction skills from them.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "heal",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "remove_status",
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionOnly": true,
+                            "harmfulOnly": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "yakushi-kabuto-s-precise-evasion",
+                "name": "Precise Evasion",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Yakushi Kabuto (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "yakushi_kabuto_s_precise_evasion_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "orochimaru-s",
+        "characterId": "orochimaru-s",
+        "name": "Orochimaru (S)",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Orochimaru returns, strong as ever and with some new tricks up his sleeve, but his body seems to be on borrowed time.",
+        "requiredMissionId": "return-of-the-snake",
+        "skills": [
+            {
+                "id": "orochimaru-s-second-skin",
+                "name": "Second Skin",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Orochimaru (S) sets his health to 100 (this is a healing effect). This skill will be replaced by 'Triple Rashoumon' permanently.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "set_health",
+                        "amount": 100,
+                        "isHealingEffect": true,
+                        "scope": "self"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_triple_rashoumon_permanent_replacement",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillReplacements": {
+                                "orochimaru-s-second-skin": "orochimaru-s-triple-rashoumon"
+                            },
+                            "tooltipText": "Second Skin replaced by Triple Rashoumon."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "orochimaru-s-sword-snake-horde",
+                "name": "Sword Snake Horde",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Orochimaru (S) deals 20 affliction damage to one enemy. For 1 turn, the stun effects of their skills will last 1 turn less.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_sword_snake_horde_stun_reduction",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "stunDurationReduction": 1,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Stun effects of skills last 1 turn less for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "orochimaru-s-extended-kusanagi",
+                "name": "Extended Kusanagi",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Orochimaru (S) targets one enemy. That enemy has their non-mental skills stunned for 2 turns. During this time, this enemy takes 20 piercing damage each turn.",
+                "energy": [
+                    "Taijutsu",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Physical",
+                    "Control"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_extended_kusanagi_control",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "control": true,
+                            "ongoingClass": "control",
+                            "damagePerTurn": 20,
+                            "ignoreDamageReduction": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "strategic",
+                                "ninjutsu"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for non-mental skills and takes 20 piercing damage per turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "orochimaru-s-ground-mobility",
+                "name": "Ground Mobility",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Orochimaru (S) invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_ground_mobility_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "orochimaru-s-triple-rashoumon",
+                "name": "Triple Rashoumon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Orochimaru (S) targets both teams. For 2 turns, Orochimaru (S)'s team will be invulnerable to harmful skills. For 1 turn, the enemy team will be invulnerable to harmful skills. This skill cannot be countered or reflected.",
+                "energy": [
+                    "Ninjutsu",
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-characters",
+                "damage": 0,
+                "cooldown": 5,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_triple_rashoumon_team_invul",
+                        "duration": 2,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true,
+                            "invulnerableToHarmfulSkills": true,
+                            "tooltipText": "Invulnerable to harmful skills for 2 turns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "orochimaru_s_triple_rashoumon_enemy_invul",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true,
+                            "invulnerableToHarmfulSkills": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Invulnerable to harmful skills for 1 turn."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "four-tails-kyuubi-naruto",
+        "characterId": "four-tails-kyuubi-naruto",
+        "name": "Four Tails Kyuubi Naruto",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Naruto, after giving into his rage and manifesting a fourth tail, ceases to be himself. In this state, Naruto becomes a mindless being of rage and destruction - but the price is his own life.",
+        "requiredMissionId": "what-lies-beneath",
+        "skills": [
+            {
+                "id": "four-tails-kyuubi-naruto-transformation",
+                "name": "Four Tails Transformation",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Four Tails Kyuubi Naruto gains 15 points of unpierceable damage reduction and 15 points of destructible defense permanently. He takes 5 affliction damage* each turn. He ignores healing effects and enemy stun effects. Four Tails Kyuubi Naruto can use 'Shockwave Smash' and 'Compressed Chakra Blast' while this skill is active. This skill becomes 'Enrage' permanently. This skill cannot be removed.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "four_tails_kyuubi_transformation_stance",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionUnpierceableFlat": 15,
+                            "destructibleDefensePoints": 15,
+                            "destructibleDefensePermanent": true,
+                            "damagePerTurn": 5,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "ignoreHealing": true,
+                            "immuneToStun": true,
+                            "cannotBeRemoved": true,
+                            "skillReplacements": {
+                                "four-tails-kyuubi-naruto-transformation": "four-tails-kyuubi-naruto-enrage"
+                            },
+                            "tooltipText": "Four Tails Transformation is active: 15 unpierceable DR, takes 5 affliction damage per turn, immune to healing and stuns."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "four-tails-kyuubi-naruto-shockwave-smash",
+                "name": "Shockwave Smash",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Four Tails Kyuubi Naruto deals 20 damage to all enemies. This skill may only be used during 'Four Tails Transformation' and cannot be reflected.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "four_tails_kyuubi_transformation_stance"
+                        },
+                        "metadata": {
+                            "cannotBeReflected": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "four-tails-kyuubi-naruto-compressed-chakra-blast",
+                "name": "Compressed Chakra Blast",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Four Tails Kyuubi Naruto deals 50 piercing damage to one enemy. This skill may only be used during 'Four Tails Transformation' and cannot be reflected.",
+                "energy": [
+                    "Random",
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 50,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "self",
+                            "hasStatusId": "four_tails_kyuubi_transformation_stance"
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "cannotBeReflected": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "four-tails-kyuubi-naruto-skin-of-chakra",
+                "name": "Skin of Chakra",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Four Tails Kyuubi Naruto invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "four_tails_kyuubi_skin_of_chakra_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "four-tails-kyuubi-naruto-enrage",
+                "name": "Enrage",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Four Tails Kyuubi Naruto takes 10 affliction damage*. For 2 turns, 'Shockwave Smash' will deal 5 additional damage and 'Compressed Chakra Blast' will cost 1 random energy less.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "four_tails_kyuubi_enrage_buff",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "four-tails-kyuubi-naruto-shockwave-smash": 5
+                            },
+                            "skillCostOverridesBySkillId": {
+                                "four-tails-kyuubi-naruto-compressed-chakra-blast": {
+                                    "energy": [
+                                        "Random",
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Shockwave Smash deals +5 damage and Compressed Chakra Blast costs 1 less energy."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "kisame-body-double",
+        "characterId": "kisame-body-double",
+        "name": "Kisame Body Double",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Kisame. The body double is controlled by Kisame but only has a third of his chakra.",
+        "requiredMissionId": "return-of-a-rival",
+        "skills": [
+            {
+                "id": "kisame-body-double-explosive-water-shock-wave",
+                "name": "Explosive Water Shock Wave",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 4 turns, Kisame Body Double and his allies will lose 1 less energy if a energy removal or stealing skill is used on them. For 4 turns, all enemies who use a new skill will have the cooldown of that skill increased by 2 turns. During this time, 'Water Prison Technique' and 'Five Man-Eating Sharks' will be improved and this skill will be replaced by 'Sentient Water Disabling'.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_shock_wave_stance",
+                        "duration": 4,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "energyDrainResistance": 1,
+                            "enemySkillCooldownIncreaseOnUse": 2,
+                            "skillReplacements": {
+                                "kisame-body-double-explosive-water-shock-wave": "kisame-body-double-sentient-water-disabling"
+                            },
+                            "skillCostOverridesBySkillId": {
+                                "kisame-body-double-water-prison-technique": {
+                                    "energy": [
+                                        "Random"
+                                    ]
+                                },
+                                "kisame-body-double-five-man-eating-sharks": {
+                                    "energy": [
+                                        "Genjutsu"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Explosive Water Shock Wave active: enemies suffer +2 CD on skills, energy drain reduced by 1."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_drain_resistance_team",
+                        "duration": 4,
+                        "scope": "all-ally",
+                        "metadata": {
+                            "helpful": true,
+                            "energyDrainResistance": 1,
+                            "tooltipText": "Loses 1 less energy when energy is removed or stolen."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kisame-body-double-water-prison-technique",
+                "name": "Water Prison Technique",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kisame Body Double deals 15 piercing damage to one enemy, stuns their non-strategic skills for 1 turn and makes them invulnerable to friendly skills also for 1 turn. During this time, Kisame Body Double gains 15 points of damage reduction. During 'Explosive Water Shock Wave', this skill costs 1 random energy instead.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_water_prison_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "energy",
+                                "mental",
+                                "ninjutsu"
+                            ],
+                            "invulnerableToFriendlySkills": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Non-strategic skills are stunned and invulnerable to friendly skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_water_prison_dr",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 15,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Gained 15 damage reduction."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kisame-body-double-five-man-eating-sharks",
+                "name": "Five Man-Eating Sharks",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kisame Body Double deals 25 damage to one enemy for 2 turns. During 'Explosive Water Shock Wave', this skill costs 1 random energy less.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Action"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_sharks_action_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "action": true,
+                            "ongoingClass": "action",
+                            "damagePerTurn": 25,
+                            "tooltipText": "Taking 25 energy damage per turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kisame-body-double-samehada-block",
+                "name": "Samehada Block",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Kisame Body Double invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_samehada_block_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "kisame-body-double-sentient-water-disabling",
+                "name": "Sentient Water Disabling",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Kisame Body Double targets himself or an ally. For 1 turn, the first harmful non-mental skill used on the target will be countered and the countered enemy will have 'Water Prison Technique' applied on them. This skill is invisible.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-ally",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "kisame_body_double_sentient_water_trap",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulNonMental": true,
+                            "counterStatusId": "kisame_body_double_water_prison_stun",
+                            "counterStatusDuration": 1,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "cannotUseSkillClasses": [
+                                    "physical",
+                                    "energy",
+                                    "mental",
+                                    "ninjutsu"
+                                ],
+                                "invulnerableToFriendlySkills": true,
+                                "tooltipText": "Non-strategic skills stunned and invulnerable to friendly skills."
+                            },
+                            "tooltipText": "Counters the next harmful non-mental skill."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "itachi-body-double",
+        "characterId": "itachi-body-double",
+        "name": "Itachi Body Double",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Itachi. The body double is controlled by Itachi but only has a third of his chakra.",
+        "requiredMissionId": "the-real-itachi",
+        "skills": [
+            {
+                "id": "itachi-body-double-finger-genjutsu",
+                "name": "Finger Genjutsu",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Itachi Body Double targets one enemy. If the affected enemy uses a new harmful skill, that skill will be countered, that enemy will take 10 damage, and Itachi Body Double will gain 1 genjutsu energy. The target of this skill is invisible.",
+                "energy": [
+                    "Genjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Mental",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "itachi_body_double_finger_genjutsu_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "invisible": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterDamage": 10,
+                            "counterApplyStatusToSourceOwner": {
+                                "statusId": "itachi_body_double_finger_gain_chakra",
+                                "duration": 1,
+                                "metadata": {
+                                    "onApplyGainChakra": {
+                                        "chakraType": "genjutsu",
+                                        "amount": 1
+                                    }
+                                }
+                            },
+                            "tooltipText": "Under Finger Genjutsu: next harmful skill will be countered for 10 damage and 1 genjutsu chakra."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "itachi-body-double-genjutsu-reversal",
+                "name": "Genjutsu Reversal",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 2 turns, if any enemy uses a non-mental skill on Itachi Body Double, he will reflect that skill onto the enemy who used it. This skill is invisible.",
+                "energy": [
+                    "Bloodline",
+                    "Genjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "itachi_body_double_genjutsu_reversal_reflect",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "invisible": true,
+                            "reflectOnEnemyHarmfulNonMental": true,
+                            "tooltipText": "Reflects non-mental skills back to the attacker for 2 turns."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "itachi-body-double-fire-release-fireball",
+                "name": "Fire Release: Fireball",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Itachi Body Double attacks, dealing 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "itachi_body_double_fireball_burn",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 10,
+                                    "scope": "target",
+                                    "metadata": {
+                                        "afflictionDamage": true,
+                                        "ignoreDamageReduction": true,
+                                        "ignoreDestructibleDefense": true
+                                    }
+                                }
+                            ],
+                            "tooltipText": "All enemies will take 10 affliction damage next turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "itachi-body-double-illusionary-raven-bunshin",
+                "name": "Illusionary Raven Bunshin",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Itachi Body Double invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "itachi_body_double_raven_bunshin_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "deidara",
+        "characterId": "deidara",
+        "name": "Deidara",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "A former ninja of the Earth Village and now a junior Akatsuki member, Deidara is able to fuse clay and chakra to create devastating explosives. ORIGINAL DESIGN: Liann",
+        "requiredMissionId": "a-true-artist",
+        "skills": [
+            {
+                "id": "deidara-c1-birds",
+                "name": "C1: Birds",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Deidara deals 10 piercing damage to one enemy for 2 turns. During this skill Deidara will be invulnerable to mental skills and this enemy's energy skills will deal 10 less damage*. 'Art is a Bang!' will deal 5 additional damage permanently*. This effect stacks.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Energy",
+                    "Action",
+                    "Instant*"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c1_birds_action_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "action": true,
+                            "ongoingClass": "action",
+                            "damagePerTurn": 10,
+                            "ignoreDamageReduction": true,
+                            "skillClassDamageDealtModifiers": {
+                                "energy": -10
+                            },
+                            "tooltipText": "Taking 10 piercing damage per turn and energy skills deal 10 less damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c1_birds_mental_invul",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "invulnerableToMentalSkills": true,
+                            "tooltipText": "Invulnerable to mental skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_art_is_a_bang_boost",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "stackable": true,
+                            "skillDamageBonuses": {
+                                "deidara-art-is-a-bang": 5
+                            },
+                            "tooltipText": "Art is a Bang! deals +5 additional damage permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "deidara-c1-centipede",
+                "name": "C1: Centipede",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Deidara deals 25 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to energy skills and this enemy's physical skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c1_centipede_energy_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToEnergySkills": true,
+                            "tooltipText": "Invulnerable to energy skills for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c1_centipede_physical_weaken",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "skillClassDamageDealtModifiers": {
+                                "physical": -10
+                            },
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Physical skills deal 10 less damage for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_art_is_a_bang_boost",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "skillDamageBonuses": {
+                                "deidara-art-is-a-bang": 5
+                            },
+                            "tooltipText": "Art is a Bang! deals +5 additional damage permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "deidara-art-is-a-bang",
+                "name": "Art is a Bang!",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Deidara deals 25 piercing damage to all enemies. Deidara will instantly die after this skill is used. This skill cannot be countered or reflected and its self-death effect cannot be ignored.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true
+                        }
+                    },
+                    {
+                        "type": "instant_kill",
+                        "scope": "self",
+                        "metadata": {
+                            "cannotBeIgnored": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "deidara-clay-mold",
+                "name": "Clay Mold",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Deidara gains 5 points of permanent destructible defense. This effect stacks. The first time this skill is used, it replaces 'C1: Birds' and 'C1: Centipede' with their alternative versions. The second time this skill is used Deidara's skills will revert back to their original versions.",
+                "energy": [],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_clay_mold_stance",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 5,
+                            "destructibleDefensePermanent": true,
+                            "deidaraClayMoldToggle": true,
+                            "tooltipText": "Deidara has molded clay granting 5 destructible defense: alternate skills toggled."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "deidara-c3-statue",
+                "name": "C3: Statue",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Deidara deals 35 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to physical skills and this enemy's mental skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c3_statue_physical_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToPhysicalSkills": true,
+                            "tooltipText": "Invulnerable to physical skills for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c3_statue_mental_weaken",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "skillClassDamageDealtModifiers": {
+                                "mental": -10
+                            },
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Mental skills deal 10 less damage for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_art_is_a_bang_boost",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "stackable": true,
+                            "skillDamageBonuses": {
+                                "deidara-art-is-a-bang": 5
+                            },
+                            "tooltipText": "Art is a Bang! deals +5 additional damage permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "deidara-c2-dragon",
+                "name": "C2: Dragon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 2 turns, all enemies will take 10 piercing damage if they use a new skill. During this time they will take 5 additional damage from energy skills and 'Clay Mold' will grant 10 additional destructible defense.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c2_dragon_field",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "damageOnSkillUsePiercing": 10,
+                            "damageTakenFromSkillClassModifiers": {
+                                "energy": 5
+                            },
+                            "tooltipText": "Takes 10 piercing damage when using a skill and +5 damage from energy skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "deidara_c2_dragon_clay_mold_amp",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "clayMoldExtraDefense": 10,
+                            "tooltipText": "Clay Mold grants 10 additional destructible defense."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "hiruko-sasori",
+        "characterId": "hiruko-sasori",
+        "name": "Hiruko Sasori",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Hiruko is a puppet used by the Akatsuki shinobi, Sasori. Serving as a \"puppet armor\", it allowed Sasori to hide inside of it. Hiruko is a human puppet made from the corpse of a renowned shinobi - this puppet is also Sasori's favorite. ORIGINAL DESIGN: Liann",
+        "requiredMissionId": "covering-puppet",
+        "skills": [
+            {
+                "id": "hiruko-sasori-poisonous-tail-stab",
+                "name": "Poisonous Tail Stab",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hiruko Sasori deals 10 affliction damage to one enemy, who will take 5 affliction damage each following turn permanently. This skill stacks.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_poisonous_tail_poison",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "stackable": true,
+                            "damagePerTurn": 5,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "Taking 5 affliction damage each turn permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hiruko-sasori-sand-clone-trap",
+                "name": "Sand Clone Trap",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 1 turn, Hiruko Sasori will ignore all enemy damage dealt. Every enemy that use a new non-strategic skill on him during this time will take 10 affliction damage instantly and then take 10 affliction damage permanently. This skill stacks and ends when Hiruko Sasori dies. This skill is invisible.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_sand_clone_trap_active",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invisible": true,
+                            "invulnerableToEnemyDamage": true,
+                            "triggerOnEnemyHarmfulNonStrategic": true,
+                            "counterDamage": 10,
+                            "counterDamageIgnoresReduction": true,
+                            "counterDamageIgnoresDestructibleDefense": true,
+                            "counterStatusId": "hiruko_sasori_sand_clone_poison_perm",
+                            "counterStatusDuration": 99,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "stackable": true,
+                                "damagePerTurn": 10,
+                                "afflictionDamage": true,
+                                "ignoreDamageReduction": true,
+                                "ignoreDestructibleDefense": true,
+                                "tooltipText": "Taking 10 permanent affliction damage per turn."
+                            },
+                            "tooltipText": "Ignores enemy damage for 1 turn and poisons attackers for 10 instant damage and 10 permanent damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hiruko-sasori-puppet-reveal",
+                "name": "Puppet Reveal",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hiruko Sasori removes all enemy affliction skills on him then becomes invulnerable to energy and affliction skills for 3 turns. During this time, 'Poisonous Tail Stab' will be replaced by 'Eight Waves of Needles' and 'Sand Clone Trap' will be replaced by 'Prosthetic Arm Senbon'.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 5,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "remove_status",
+                        "scope": "self",
+                        "metadata": {
+                            "afflictionOnly": true,
+                            "harmfulOnly": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_puppet_reveal_active",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToEnergySkills": true,
+                            "invulnerableToAfflictionSkills": true,
+                            "skillReplacements": {
+                                "hiruko-sasori-poisonous-tail-stab": "hiruko-sasori-eight-waves-of-needles",
+                                "hiruko-sasori-sand-clone-trap": "hiruko-sasori-prosthetic-arm-senbon"
+                            },
+                            "tooltipText": "Puppet Reveal active: Invulnerable to energy and affliction skills."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hiruko-sasori-tail-deflection",
+                "name": "Tail Deflection",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Hiruko Sasori invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_tail_deflection_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hiruko-sasori-eight-waves-of-needles",
+                "name": "Eight Waves of Needles",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 affliction damage to all enemies each turn permanently. This skill stacks.",
+                "energy": [
+                    "Taijutsu",
+                    "Ninjutsu"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "remove_status",
+                        "scope": "all-ally",
+                        "metadata": {
+                            "afflictionOnly": true,
+                            "harmfulOnly": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_eight_waves_dot",
+                        "duration": 99,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "stackable": true,
+                            "damagePerTurn": 5,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "Taking 5 affliction damage each turn permanently."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hiruko-sasori-prosthetic-arm-senbon",
+                "name": "Prosthetic Arm Senbon",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 piercing damage and 5 affliction damage* to all enemies for 3 turns. When this skill ends, Hiruko Sasori will become invulnerable for 1 turn. This skill ends if Hiruko Sasori dies.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Physical",
+                    "Instant",
+                    "Affliction*"
+                ],
+                "effects": [
+                    {
+                        "type": "remove_status",
+                        "scope": "all-ally",
+                        "metadata": {
+                            "afflictionOnly": true,
+                            "harmfulOnly": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "hiruko_sasori_prosthetic_arm_dot",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "damagePerTurn": 5,
+                            "ignoreDamageReduction": true,
+                            "afflictionDamagePerTurn": 5,
+                            "onExpireEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "hiruko_sasori_prosthetic_arm_end_invul",
+                                    "duration": 1,
+                                    "scope": "source",
+                                    "metadata": {
+                                        "helpful": true,
+                                        "invulnerable": true,
+                                        "tooltipText": "Invulnerable for 1 turn."
+                                    }
+                                }
+                            ],
+                            "tooltipText": "Taking 5 piercing damage and 5 affliction damage per turn for 3 turns."
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "sasori-of-the-red-sand",
+        "characterId": "sasori-of-the-red-sand",
+        "name": "Sasori of the Red Sand",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Sasori is a senior Akatsuki member and a legendary puppet master. He is even rumored to have defeated an entire nation with puppets alone. ORIGINAL DESIGN: Pavera",
+        "requiredMissionId": "master-of-puppets",
+        "skills": [
+            {
+                "id": "sasori-of-the-red-sand-thousand-hands",
+                "name": "Thousand Hands",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sasori of the Red Sand deals 10 damage to one enemy for 2 turns and gains 5 points of permanent destructible defense each turn. If 'Poison Gas' is used on the target in the following turn, it will last 1 additional turn on them*. The target of this skill will take 5 additional damage from 'Poison Gas' for 1 turn*.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Action",
+                    "Instant*"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_thousand_hands_dot",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "action": true,
+                            "ongoingClass": "action",
+                            "damagePerTurn": 10,
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageAppliesToSkillIds": [
+                                "sasori-of-the-red-sand-poison-gas"
+                            ],
+                            "tooltipText": "Taking 10 physical damage per turn and takes +5 damage from Poison Gas."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_thousand_hands_dd",
+                        "duration": 2,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "destructibleDefensePointsPerTurn": 5,
+                            "destructibleDefensePermanent": true,
+                            "tooltipText": "Gaining 5 permanent destructible defense per turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sasori-of-the-red-sand-poison-gas",
+                "name": "Poison Gas",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sasori of the Red Sand deals 10 affliction damage to one enemy for 4 turns and gains 10 points of permanent destructible defense. During this time, if that enemy uses a new skill, they will be dealt 5 affliction damage. This skill lasts 1 additional turn if the enemy is affected by 'Thousand Hands'. This skill stacks.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_poison_gas_dot",
+                        "duration": 4,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "missingStatusId": "sasori_red_sand_thousand_hands_dot"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "stackable": true,
+                            "damagePerTurn": 10,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "damageOnSkillUseAffliction": 5,
+                            "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_poison_gas_dot",
+                        "duration": 5,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "sasori_red_sand_thousand_hands_dot"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "stackable": true,
+                            "damagePerTurn": 10,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "damageOnSkillUseAffliction": 5,
+                            "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_poison_gas_dd",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 10,
+                            "destructibleDefensePermanent": true,
+                            "tooltipText": "Gained 10 permanent destructible defense."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sasori-of-the-red-sand-iron-sand",
+                "name": "Iron Sand",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sasori of the Red Sand will gain 5 points of permanent destructible defense each turn for 3 turns. During this time, every enemy who uses a new skill on Sasori of the Red Sand will be dealt 5 piercing damage. For 3 turns, this skill will be replaced by 'Iron Sand World Method' and 'Thousand Hands' will be replaced by 'Iron Sand Gathering Assault'.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_iron_sand_stance",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePointsPerTurn": 5,
+                            "destructibleDefensePermanent": true,
+                            "damageToTargetingEnemiesPiercing": 5,
+                            "skillReplacements": {
+                                "sasori-of-the-red-sand-iron-sand": "sasori-of-the-red-sand-iron-sand-world-method",
+                                "sasori-of-the-red-sand-thousand-hands": "sasori-of-the-red-sand-iron-sand-gathering-assault"
+                            },
+                            "tooltipText": "Iron Sand active: gaining permanent defense, retaliates with 5 piercing damage, skills replaced."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sasori-of-the-red-sand-puppet-protection",
+                "name": "Puppet Protection",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Sasori of the Red Sand invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_puppet_protection_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sasori-of-the-red-sand-iron-sand-gathering-assault",
+                "name": "Iron Sand Gathering Assault",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sasori of the Red Sand deals 30 piercing damage to one enemy and makes that enemy unable to reduce damage or become invulnerable for 1 turn. Sasori of the Red Sand also gains 15 points of destructible defense for 1 turn.",
+                "energy": [
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 30,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_gathering_assault_debuff",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotReduceDamage": true,
+                            "cannotBecomeInvulnerable": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Cannot reduce damage or become invulnerable for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "sasori_red_sand_gathering_assault_dd",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 15,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Has 15 destructible defense for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "sasori-of-the-red-sand-iron-sand-world-method",
+                "name": "Iron Sand World Method",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Sasori of the Red Sand deals 25 piercing damage to all enemies. Any enemy whose health drops to 10 or below will be instantly killed. This skill cannot be countered or reflected.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "ignoreDamageReduction": true,
+                            "cannotBeCountered": true,
+                            "cannotBeReflected": true
+                        }
+                    },
+                    {
+                        "type": "execute_threshold",
+                        "thresholdHp": 10,
+                        "scope": "all-enemy"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "puppet-sasori",
+        "characterId": "puppet-sasori",
+        "name": "Puppet Sasori",
+        "facePicture": "deadcharacter.png",
+        "characterdeescription": "Sasori's true form is a puppet body with a living core attached to it. In this form, he can use weapons like a flamethrower and water jets, while still controling a hundred puppets. ORIGINAL DESIGN: AnteMito",
+        "requiredMissionId": "a-perfect-body",
+        "skills": [
+            {
+                "id": "puppet-sasori-flamethrower",
+                "name": "Flamethrower",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Puppet Sasori deals 20 affliction damage to one enemy. If 'Water Stream Shooters' was used on this enemy the previous turn, they will have their non-affliction damage reduced by 10 for 1 turn.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_flamethrower_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Marked by Flamethrower."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_flamethrower_weaken",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "puppet_sasori_water_stream_mark"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "damageDealtFlatModifier": -10,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 10 less non-affliction damage for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "puppet-sasori-water-stream-shooters",
+                "name": "Water Stream Shooters",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Puppet Sasori deals 20 piercing damage to one enemy. If 'Flamethrower' was used on this enemy the previous turn, they will be stunned for 1 turn.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Energy",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_water_stream_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Marked by Water Stream Shooters."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_water_stream_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "hasStatusId": "puppet_sasori_flamethrower_mark"
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "stun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is stunned for 1 turn."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "puppet-sasori-performance-of-a-hundred-puppets",
+                "name": "Performance of a Hundred Puppets",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "For 3 turns, 'Flamethrower' and 'Water Stream Shooters' will deal 10 additional damage. During this time, Puppet Sasori targets all enemies and everytime they use a new harmful skill, they will take 5 piercing damage. The following 3 turns, this skill will be replaced by 'Puppet Attack'.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_hundred_puppets_self_buff",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "puppet-sasori-flamethrower": 10,
+                                "puppet-sasori-water-stream-shooters": 10
+                            },
+                            "skillReplacements": {
+                                "puppet-sasori-performance-of-a-hundred-puppets": "puppet-sasori-puppet-attack"
+                            },
+                            "tooltipText": "Flamethrower and Water Stream Shooters deal 10 additional damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_hundred_puppets_retaliation_mark",
+                        "duration": 3,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "damageOnHarmfulSkillUsePiercing": 5,
+                            "tooltipText": "Takes 5 piercing damage when using a harmful skill."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "puppet-sasori-living-core",
+                "name": "Living Core",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "This skill makes Puppet Sasori invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "puppet_sasori_living_core_invul",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "invulnerable": true,
+                            "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "puppet-sasori-puppet-attack",
+                "name": "Puppet Attack",
+                "skillimage": "deadcharacter.png",
+                "skilldescription": "Puppet Sasori deals 25 damage to all enemies.",
+                "energy": [
+                    "Random",
+                    "Random"
+                ],
+                "target": "all-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "all-enemy"
                     }
                 ]
             }

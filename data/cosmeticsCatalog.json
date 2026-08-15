@@ -1,0 +1,297 @@
+{
+  "avatars": [
+    {
+      "id": "avatar_anbu_mask",
+      "name": "ANBU Black Ops Mask",
+      "description": "Stealth mask worn by elite Leaf covert operatives.",
+      "category": "avatars",
+      "rarity": "rare",
+      "price": 250,
+      "imageUrl": "sharingan-remaster.png?v=2"
+    },
+    {
+      "id": "avatar_toad_sage",
+      "name": "Mount Myoboku Sage",
+      "description": "Portrait of a shinobi who has mastered Senjutsu chakra.",
+      "category": "avatars",
+      "rarity": "epic",
+      "price": 600,
+      "imageUrl": "chakra-senjutsu.png"
+    },
+    {
+      "id": "avatar_curse_mark",
+      "name": "Heaven Cursed Seal",
+      "description": "Corrupted chakra pattern granting forbidden strength.",
+      "category": "avatars",
+      "rarity": "epic",
+      "price": 500,
+      "imageUrl": "deadcharacter-remaster.png?v=2"
+    },
+    {
+      "id": "avatar_1786821448603_0_971",
+      "name": "NA27",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448603_NA27.png",
+      "createdAt": "2026-08-15T19:17:28.603Z"
+    },
+    {
+      "id": "avatar_1786821448604_1_691",
+      "name": "NA26",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448604_NA26.png",
+      "createdAt": "2026-08-15T19:17:28.604Z"
+    },
+    {
+      "id": "avatar_1786821448610_2_650",
+      "name": "NA25",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448604_NA25.png",
+      "createdAt": "2026-08-15T19:17:28.610Z"
+    },
+    {
+      "id": "avatar_1786821448611_3_337",
+      "name": "NA24",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448610_NA24.png",
+      "createdAt": "2026-08-15T19:17:28.611Z"
+    },
+    {
+      "id": "avatar_1786821448612_4_698",
+      "name": "NA23",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448611_NA23.png",
+      "createdAt": "2026-08-15T19:17:28.612Z"
+    },
+    {
+      "id": "avatar_1786821448612_5_446",
+      "name": "NA21",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448612_NA21.png",
+      "createdAt": "2026-08-15T19:17:28.612Z"
+    },
+    {
+      "id": "avatar_1786821448613_6_455",
+      "name": "NA22",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448613_NA22.png",
+      "createdAt": "2026-08-15T19:17:28.613Z"
+    },
+    {
+      "id": "avatar_1786821448614_7_766",
+      "name": "NA20",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448613_NA20.png",
+      "createdAt": "2026-08-15T19:17:28.614Z"
+    },
+    {
+      "id": "avatar_1786821448615_8_974",
+      "name": "NA19",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448614_NA19.png",
+      "createdAt": "2026-08-15T19:17:28.615Z"
+    },
+    {
+      "id": "avatar_1786821448615_9_127",
+      "name": "NA18",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448615_NA18.png",
+      "createdAt": "2026-08-15T19:17:28.615Z"
+    },
+    {
+      "id": "avatar_1786821448616_10_397",
+      "name": "NA17",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448615_NA17.png",
+      "createdAt": "2026-08-15T19:17:28.616Z"
+    },
+    {
+      "id": "avatar_1786821448616_11_244",
+      "name": "NA16",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448616_NA16.png",
+      "createdAt": "2026-08-15T19:17:28.616Z"
+    },
+    {
+      "id": "avatar_1786821448617_12_201",
+      "name": "NA15",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448616_NA15.png",
+      "createdAt": "2026-08-15T19:17:28.617Z"
+    },
+    {
+      "id": "avatar_1786821448618_13_783",
+      "name": "NA14",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448617_NA14.png",
+      "createdAt": "2026-08-15T19:17:28.618Z"
+    },
+    {
+      "id": "avatar_1786821448618_14_657",
+      "name": "NA13",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448618_NA13.png",
+      "createdAt": "2026-08-15T19:17:28.618Z"
+    },
+    {
+      "id": "avatar_1786821448619_15_984",
+      "name": "NA12",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448618_NA12.png",
+      "createdAt": "2026-08-15T19:17:28.619Z"
+    },
+    {
+      "id": "avatar_1786821448620_16_931",
+      "name": "NA11",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448619_NA11.png",
+      "createdAt": "2026-08-15T19:17:28.620Z"
+    },
+    {
+      "id": "avatar_1786821448620_17_688",
+      "name": "NA10",
+      "description": "Shop avatar",
+      "category": "avatars",
+      "price": 100,
+      "rarity": "common",
+      "imageUrl": "avatars/avatar_1786821448620_NA10.png",
+      "createdAt": "2026-08-15T19:17:28.620Z"
+    },
+    {
+      "id": "avatar_bulk_2",
+      "name": "Bulk Avatar 2",
+      "category": "avatars",
+      "price": 300,
+      "rarity": "epic",
+      "imageUrl": "avatars/bulk_2.png"
+    }
+  ],
+  "titles": [
+    {
+      "id": "title_leaf_prodigy",
+      "name": "Leaf Village Prodigy",
+      "description": "Awarded to rising ninja of exceptional tactical talent.",
+      "category": "titles",
+      "rarity": "uncommon",
+      "price": 150
+    },
+    {
+      "id": "title_yellow_flash",
+      "name": "The Yellow Flash",
+      "description": "Speed unmatched across the Five Great Shinobi Nations.",
+      "category": "titles",
+      "rarity": "legendary",
+      "price": 1000
+    },
+    {
+      "id": "title_shadow_operative",
+      "name": "Shadow Operative",
+      "description": "Moves in darkness to protect the village from the shadows.",
+      "category": "titles",
+      "rarity": "rare",
+      "price": 350
+    },
+    {
+      "id": "title_copy_ninja",
+      "name": "The Copy Ninja",
+      "description": "Renowned for mastering over a thousand jutsu.",
+      "category": "titles",
+      "rarity": "epic",
+      "price": 650
+    },
+    {
+      "id": "title_toad_sage",
+      "name": "Sage of Mount Myoboku",
+      "description": "Honored master of nature energy and toad arts.",
+      "category": "titles",
+      "rarity": "legendary",
+      "price": 1200
+    },
+    {
+      "id": "title_test_flash",
+      "name": "The Golden Flash",
+      "category": "titles",
+      "price": 500,
+      "rarity": "legendary"
+    }
+  ],
+  "borders": [
+    {
+      "id": "border_anbu_crest",
+      "name": "ANBU Black Ops Frame",
+      "description": "Custom metallic frame etched with covert ops insignia.",
+      "category": "borders",
+      "rarity": "rare",
+      "price": 300,
+      "imageUrl": "borders/anbu_frame.svg"
+    },
+    {
+      "id": "border_hokage_flame",
+      "name": "Hokage Flame Frame",
+      "description": "Golden border radiating the Will of Fire.",
+      "category": "borders",
+      "rarity": "legendary",
+      "price": 900,
+      "imageUrl": "borders/hokage_frame.svg"
+    },
+    {
+      "id": "border_curse_seal",
+      "name": "Cursed Seal Frame",
+      "description": "Dark corrupted border wrapped in forbidden seal marks.",
+      "category": "borders",
+      "rarity": "epic",
+      "price": 550,
+      "imageUrl": "borders/curse_frame.svg"
+    }
+  ]
+}

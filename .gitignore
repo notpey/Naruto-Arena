@@ -17,3 +17,8 @@ tmp-ui-qa-screenshots/
 
 # Ad hoc scratch images used during asset work
 scratch_*.png
+scratch/
+*.orig
+endscroll
+surrenderscroll
+

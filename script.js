@@ -76,17 +76,191 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
         };
     })();
+    const escapeHtml = (str) => {
+        if (typeof str !== 'string') return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
+    window.escapeHtml = escapeHtml;
+
+    // Global Toast Notification System
+    let toastContainer = null;
+    const showGameToast = (message, type = 'info', duration = 3200) => {
+        if (!message) return;
+        if (!toastContainer) {
+            toastContainer = document.querySelector('.game-toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'game-toast-container';
+                document.body.appendChild(toastContainer);
+            }
+        }
+        const icons = {
+            error: '❌',
+            warning: '⚡',
+            success: '🍃',
+            info: '📜',
+        };
+        const toast = document.createElement('div');
+        toast.className = `game-toast ${type}`;
+        toast.innerHTML = `<span class="game-toast-icon">${icons[type] || '📜'}</span><span class="game-toast-msg">${escapeHtml(String(message))}</span>`;
+        toastContainer.appendChild(toast);
+
+        // Enforce maximum 3 toasts concurrent
+        while (toastContainer.children.length > 3) {
+            toastContainer.removeChild(toastContainer.firstChild);
+        }
+
+        setTimeout(() => {
+            toast.classList.add('removing');
+            setTimeout(() => {
+                if (toast.parentElement) toast.remove();
+            }, 200);
+        }, duration);
+    };
+    window.showGameToast = showGameToast;
+
+    // Audio SFX & Modals
+    const scrollOpenSound = new Audio('sounds/scroll_open.mp3');
+    const scrollCloseSound = new Audio('sounds/scroll_close.mp3');
+    const playModalOpenSound = () => soundManager.play(scrollOpenSound);
+    const playModalCloseSound = () => soundManager.play(scrollCloseSound);
+    window.playModalOpenSound = playModalOpenSound;
+    window.playModalCloseSound = playModalCloseSound;
+
     if (shouldUseGameClickSound) {
         const clickSound = new Audio('sounds/click.mp3');
         document.addEventListener('click', (event) => {
-            if (
-                event.target instanceof Element &&
-                event.target.closest('.sound-controller, .ingame-sound-controller')
-            ) {
+            if (!(event.target instanceof Element)) return;
+            if (event.target.closest('.sound-controller, .ingame-sound-controller, .settings-slider')) {
                 return;
+            }
+            if (event.target.closest('button, a, .slot-item, .selected-character-slot, .skill-image, .character-card, .tab, .selection-hub-tab, .gacha-summon-btn, .settings-hub-card-btn, [data-hub-view], [data-gacha-trigger], [data-shop-trigger], [data-settings-trigger]')) {
+                soundManager.play(clickSound);
             }
         });
     }
+
+    // Global Keyboard Navigation & Accessibility
+    document.addEventListener('keydown', (event) => {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+            if (event.key === 'Escape') {
+                document.activeElement.blur();
+            }
+            return;
+        }
+
+        // 1. Escape key: dismiss topmost active overlay or cancel skill targeting
+        if (event.key === 'Escape') {
+            const naBugOverlay = document.getElementById('na-bug-overlay');
+            if (naBugOverlay && naBugOverlay.classList.contains('active')) {
+                naBugOverlay.classList.remove('active');
+                return;
+            }
+            const unlockModal = document.getElementById('character-unlock-modal');
+            if (unlockModal && !unlockModal.classList.contains('hidden')) {
+                unlockModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const settingsModal = document.getElementById('settings-modal');
+            if (settingsModal && !settingsModal.classList.contains('hidden')) {
+                settingsModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const promoModal = document.getElementById('promo-code-modal');
+            if (promoModal && !promoModal.classList.contains('hidden')) {
+                promoModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const gachaModal = document.getElementById('gacha-modal');
+            if (gachaModal && !gachaModal.classList.contains('hidden')) {
+                gachaModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const questsModal = document.getElementById('quests-modal');
+            if (questsModal && !questsModal.classList.contains('hidden')) {
+                questsModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const achievementsModal = document.getElementById('achievements-modal');
+            if (achievementsModal && !achievementsModal.classList.contains('hidden')) {
+                achievementsModal.classList.add('hidden');
+                playModalCloseSound();
+                return;
+            }
+            const privateBackdrop = document.querySelector('.private-match-backdrop');
+            if (privateBackdrop && !privateBackdrop.classList.contains('hidden')) {
+                privateBackdrop.classList.add('hidden');
+                return;
+            }
+            const surrenderConfirm = document.querySelector('.surrender-confirm');
+            if (surrenderConfirm && surrenderConfirm.style.visibility === 'visible') {
+                surrenderConfirm.style.visibility = 'hidden';
+                return;
+            }
+            const endTurnModal = document.querySelector('.ChakraChooseEndTurn');
+            if (endTurnModal && endTurnModal.style.visibility === 'visible') {
+                endTurnModal.style.visibility = 'hidden';
+                const backdrop = document.querySelector('.game-modal-backdrop');
+                if (backdrop) backdrop.classList.remove('visible');
+                return;
+            }
+            const exchangeModal = document.querySelector('.exchange_chakra');
+            if (exchangeModal && exchangeModal.style.visibility === 'visible') {
+                exchangeModal.style.visibility = 'hidden';
+                const backdrop = document.querySelector('.game-modal-backdrop');
+                if (backdrop) backdrop.classList.remove('visible');
+                return;
+            }
+            // Cancel targeting if active
+            const targetingSkills = document.querySelectorAll('.skillimage.targeting-skill');
+            if (targetingSkills.length > 0) {
+                targetingSkills.forEach((el) => el.classList.remove('targeting-skill'));
+                document.querySelectorAll('.target-overlay').forEach((el) => el.remove());
+            }
+        }
+
+        // 2. Space / Enter in battle: End Turn
+        if (event.key === 'Enter' || event.key === ' ') {
+            const endTurnModal = document.querySelector('.ChakraChooseEndTurn');
+            if (endTurnModal && endTurnModal.style.visibility === 'visible') {
+                const okBtn = document.querySelector('.ok-buttonendturn');
+                if (okBtn && !okBtn.disabled) {
+                    event.preventDefault();
+                    okBtn.click();
+                }
+                return;
+            }
+            const readySection = document.querySelector('.ready-section');
+            if (readySection && readySection.style.visibility !== 'hidden' && readySection.offsetParent !== null) {
+                event.preventDefault();
+                readySection.click();
+            }
+        }
+
+        // 3. Hotkeys 1-4 for skill selection on hovered or first shinobi
+        if (['1', '2', '3', '4'].includes(event.key)) {
+            const skillIdx = Number.parseInt(event.key, 10) - 1;
+            const hoveredCard =
+                document.querySelector('.player-characters .character-card:hover') ||
+                document.querySelector('.player-characters .character-card');
+            if (hoveredCard) {
+                const skillImgs = hoveredCard.querySelectorAll('.skillscrollingame .skillimage');
+                if (skillImgs[skillIdx]) {
+                    skillImgs[skillIdx].click();
+                }
+            }
+        }
+    });
 
     // Mobile touch tooltip inspector handler for skill tooltips and status icons
     document.addEventListener('touchend', (event) => {
@@ -273,7 +447,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rosterSlotElements = [];
     const selectedAssignments = selectedSlots.map(() => null);
     const teamStorageKey = 'narutoSelectedTeam';
-    const defaultProfileAvatar = 'https://i.postimg.cc/3JqVcPXm/default.png';
+    const defaultProfileAvatar = 'found-remaster.png';
     const defaultLadderRankHat = 'hats/academy.png';
     let profileCache = null;
     const publicProfileCacheByUsername = new Map();
@@ -686,8 +860,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const playerSkillScrolls = Array.from(
             document.querySelectorAll('.player-characters .skillscrollingame')
         );
-        let playerCards = [];
-        let enemyCards = [];
+        let playerCards = Array.from(document.querySelectorAll('.player-characters .character-card'));
+        let enemyCards = Array.from(document.querySelectorAll('.enemy-characters .character-card'));
         let activeTargetOptions = null;
         const chakraDisplay = document.querySelector('.chakra-display');
         const exchangeLabel = document.querySelector('.exchange-label');
@@ -711,9 +885,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             gameModalBackdropEl.classList.toggle('visible', Boolean(visible));
         };
-        const showGameActionMessage = (message) => {
+        const showGameActionMessage = (message, type = 'warning') => {
             const text = String(message || '').trim();
             if (!text) return;
+            showGameToast(text, type);
             if (!gameActionMessageEl) {
                 gameActionMessageEl = document.createElement('div');
                 gameActionMessageEl.className = 'game-action-message';
@@ -1382,8 +1557,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const hasLiveStatusMetadataFlag = (unit, flagName) =>
             getLiveStatuses(unit).some((status) => Boolean(status?.metadata?.[flagName]));
 
+        const doesSkillIgnoreInvulnerability = (skill) => {
+            if (!skill) return false;
+            if (Boolean(skill.ignoreInvulnerability)) return true;
+            if (Array.isArray(skill.effects)) {
+                return skill.effects.some(
+                    (effect) =>
+                        Boolean(effect?.ignoreInvulnerability) ||
+                        Boolean(effect?.metadata?.ignoreInvulnerability)
+                );
+            }
+            return false;
+        };
+
         const canActorIgnoreTargetInvulnerability = ({ actorUnit, skill, targetUnit }) => {
-            if (skill?.ignoreInvulnerability || hasLiveStatusMetadataFlag(actorUnit, 'ignoreEnemyInvulnerability')) {
+            if (doesSkillIgnoreInvulnerability(skill) || hasLiveStatusMetadataFlag(actorUnit, 'ignoreEnemyInvulnerability')) {
                 return true;
             }
             const skillId = typeof skill?.id === 'string' ? skill.id.trim() : '';
@@ -1418,9 +1606,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isUnitInvulnerableForSkill = (unit, skill) => {
             const skillClasses = getNormalizedSkillClasses(skill);
             const isAffliction = skillClasses.includes('affliction');
+            if (getLiveStatuses(unit).some((s) => Boolean(s?.metadata?.cannotBecomeInvulnerable))) {
+                return false;
+            }
             return getLiveStatuses(unit).some((status) => {
                 const metadata = status?.metadata || {};
-                if (metadata.invulnerable) return true;
+                if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
+                if (metadata.invulnerable && !isAffliction) return true;
                 if (metadata.invulnerableToNonAffliction && !isAffliction) return true;
                 const blockedClasses = Array.isArray(metadata.invulnerableToSkillClasses)
                     ? metadata.invulnerableToSkillClasses
@@ -1465,9 +1657,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
                 if (!unit || dead) return false;
                 if (!doesUnitSatisfySkillTargetCondition(unit, skill)) return false;
+                const isEnemyTarget = target.username !== currentPlayerUsername;
                 if (
-                    enemyTargeting &&
-                    target.username !== currentPlayerUsername &&
+                    isEnemyTarget &&
                     isUnitInvulnerableForSkill(unit, skill) &&
                     !canActorIgnoreTargetInvulnerability({ actorUnit, skill, targetUnit: unit })
                 ) {
@@ -1597,13 +1789,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 );
             }
 
-            if (targetType === 'self-or-single-ally' || targetType === 'all-allies') {
+            if (targetType === 'self-or-single-ally' || targetType === 'all-allies' || targetType === 'all-ally') {
                 return playerUnits.some((unit, slot) => isValidUnitTarget(unit, currentPlayerUsername, slot, false));
             }
 
             if (targetType === 'single-character') {
                 const allyValid = playerUnits.some(
                     (unit, slot) => slot !== actorSlot && isValidUnitTarget(unit, currentPlayerUsername, slot, false)
+                );
+                const enemyValid = opponentUnits.some((unit, slot) =>
+                    isValidUnitTarget(unit, opponentUsername, slot, true)
+                );
+                return allyValid || enemyValid;
+            }
+
+            if (targetType === 'single-target' || targetType === 'all-characters' || targetType === 'all-target') {
+                const allyValid = playerUnits.some((unit, slot) =>
+                    isValidUnitTarget(unit, currentPlayerUsername, slot, false)
                 );
                 const enemyValid = opponentUnits.some((unit, slot) =>
                     isValidUnitTarget(unit, opponentUsername, slot, true)
@@ -2022,13 +2224,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .filter(Boolean)
             );
             let targets = [];
-            if (scopes.has('all-allies')) {
+            if (scopes.has('all-allies') || scopes.has('all-ally')) {
                 targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentPlayerUsername));
             }
             if (scopes.has('all-enemy') || scopes.has('all-other-enemy') || scopes.has('other-enemies')) {
                 targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentOpponentUsername));
             }
-            if (scopes.has('all-characters')) {
+            if (scopes.has('all-characters') || scopes.has('all-target')) {
                 targets = mergeHighlightTargets(
                     targets,
                     mergeHighlightTargets(
@@ -2097,6 +2299,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ratio = remaining / TURN_DURATION_MS;
             const widthPx = Math.max(0, Math.round(TIMER_MAX_WIDTH * ratio));
             timerBar.style.width = `${widthPx}px`;
+            if (remaining > 0 && remaining <= 10000) {
+                timerBar.classList.add('timer-low-time');
+            } else {
+                timerBar.classList.remove('timer-low-time');
+            }
             if (
                 remaining <= 0 &&
                 currentPlayerUsername &&
@@ -2146,7 +2353,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (hasInitializedTurnState) {
                     playIngameSound(startRoundSound);
                 }
-                if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                if (
+                    typeof navigator !== 'undefined' &&
+                    typeof navigator.vibrate === 'function' &&
+                    (!navigator.userActivation || navigator.userActivation.hasBeenActive)
+                ) {
                     try {
                         navigator.vibrate([100, 50, 100]);
                     } catch (e) {
@@ -2422,6 +2633,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     surrenderConfirmOkButton.disabled = false;
                     surrenderConfirmOkButton.textContent = 'OK';
                 }
+            });
+        }
+
+        if (battleEndContinueButton) {
+            battleEndContinueButton.addEventListener('click', () => {
+                stopMatchRealtime();
+                if (matchIdFromUrl) {
+                    try {
+                        fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                        }).catch(() => {});
+                    } catch (_) {}
+                }
+                if (currentMatchMode === 'gauntlet') {
+                    window.location.href = 'selection.html?view=gauntlet';
+                    return;
+                }
+                if (currentMatchMode === 'story') {
+                    window.location.href = 'selection.html?view=story';
+                    return;
+                }
+                window.location.href = 'selection.html';
             });
         }
 
@@ -3536,15 +3771,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentMatchMode = data.mode.trim().toLowerCase();
             }
             renderGauntletBattleIndicator(data.gauntletMatch || null);
-            if (data.opponent?.username) {
-                const nextOpponentUsername = data.opponent.username;
-                currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
-                latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
-                const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
-                currentOpponentUsername = nextOpponentUsername;
-                if (opponentChanged || isGameBotUsername(nextOpponentUsername)) {
-                    hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
+            if (data.opponent) {
+                if (typeof data.opponent === 'string') {
+                    currentOpponentDisplayName = data.opponent;
+                } else if (data.opponent?.username) {
+                    const nextOpponentUsername = data.opponent.username;
+                    currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
+                    latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
+                    const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
+                    currentOpponentUsername = nextOpponentUsername;
+                    if (opponentChanged || isGameBotUsername(nextOpponentUsername)) {
+                        hydrateOpponentIdentity(nextOpponentUsername, currentOpponentDisplayName).catch(() => {});
+                    }
                 }
+            }
+            if (!currentOpponentUsername && data.board && typeof data.board === 'object') {
+                const otherKey = Object.keys(data.board).find((k) => k !== currentPlayerUsername);
+                if (otherKey) currentOpponentUsername = otherKey;
             }
             if (
                 data.mode === 'story' &&
@@ -3596,22 +3839,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     clanExpDelta: data.ladderResult?.clanExpDelta,
                     ryoDelta: data.ladderResult?.ryoDelta,
                     missionResult: data.ladderResult?.missionResult || data.missionResult,
-                });
-                return;
-            }
-            const playerAlive = getAliveCountFromUnits(data.board?.[currentPlayerUsername] || []);
-            const opponentAlive = getAliveCountFromUnits(data.board?.[currentOpponentUsername] || []);
-            if (
-                currentPlayerUsername &&
-                currentOpponentUsername &&
-                (playerAlive <= 0 || opponentAlive <= 0)
-            ) {
-                if (currentMatchMode === 'ladder' || currentMatchMode === 'story') {
-                    return;
-                }
-                showBattleEndOverlay({
-                    didWin: playerAlive > opponentAlive,
-                    opponentUsername: currentOpponentDisplayName || currentOpponentUsername,
                 });
                 return;
             }
@@ -4108,8 +4335,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     throw new Error('Unable to fetch targets.');
                 }
 
-                pendingTurnState = normalizePendingTurn(data.pendingTurn);
-                applyQueuedSkillVisuals();
+                if (data.pendingTurn && typeof data.pendingTurn === 'object') {
+                    pendingTurnState = normalizePendingTurn(data.pendingTurn);
+                    applyQueuedSkillVisuals();
+                }
                 activeTargetOptions = data;
                 const classChoiceOptions = getClassChoiceOptions(skill);
                 const key = getClassChoiceKey(actorSlot, skillIdx);
@@ -4441,6 +4670,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     // skill that looks disabled can never still be clicked (and vice versa),
                                     // including the "another skill is already queued for this actor" case.
                                     if (!isSkillUsable({ actorSlot: slotIndex, skillIdx }, actorUnit)) {
+                                        const actorHp = Number(actorUnit?.hp);
+                                        const actorDead = actorUnit?.alive === false || (Number.isFinite(actorHp) && actorHp <= 0);
+                                        if (actorDead) {
+                                            showGameToast(`${character.name || 'Shinobi'} is defeated.`, 'error');
+                                        } else if (isActorStunned(actorUnit)) {
+                                            showGameToast(`${character.name || 'Shinobi'} is stunned and cannot act!`, 'error');
+                                            card.classList.remove('action-invalid-shake');
+                                            void card.offsetWidth;
+                                            card.classList.add('action-invalid-shake');
+                                        } else {
+                                            const cd = getCooldownRemainingForMeta({ actorSlot: slotIndex, skillIdx }, actorUnit);
+                                            if (cd > 0) {
+                                                showGameToast(`${effectiveSkill?.name || 'Skill'} is on cooldown (${cd} turn${cd === 1 ? '' : 's'} remaining).`, 'warning');
+                                                imgEl.classList.remove('action-invalid-shake');
+                                                void imgEl.offsetWidth;
+                                                imgEl.classList.add('action-invalid-shake');
+                                            } else if (!canAffordSkillWithPendingReservations(effectiveSkill?.energy, slotIndex, effectiveSkill)) {
+                                                showGameToast(`Not enough chakra for ${effectiveSkill?.name || 'skill'}!`, 'warning');
+                                                const chakraEl = document.querySelector('.chakra-display');
+                                                if (chakraEl) {
+                                                    chakraEl.classList.remove('action-invalid-shake');
+                                                    void chakraEl.offsetWidth;
+                                                    chakraEl.classList.add('action-invalid-shake');
+                                                }
+                                            }
+                                        }
                                         return;
                                     }
                                     fetchTargetOptions(slotIndex, skillIdx, effectiveSkill).catch(() =>
@@ -4489,87 +4744,99 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         
         let wsConnection = null;
-
-let wsRequests = new Map();
-
+        const wsRequests = new Map();
         let wsReconnectTimer = null;
         let wsHeartbeatTimer = null;
-        
+        let connectionBannerEl = null;
+
+        const setConnectionBannerVisible = (visible, message = '⚡ Reconnecting to battle server...') => {
+            if (!connectionBannerEl) {
+                connectionBannerEl = document.querySelector('.battle-connection-banner');
+                if (!connectionBannerEl) {
+                    connectionBannerEl = document.createElement('div');
+                    connectionBannerEl.className = 'battle-connection-banner hidden';
+                    connectionBannerEl.textContent = message;
+                    document.body.appendChild(connectionBannerEl);
+                }
+            }
+            connectionBannerEl.textContent = message;
+            connectionBannerEl.classList.toggle('hidden', !visible);
+        };
+
         const connectBattleWebSocket = () => {
-            if (wsConnection || !matchIdFromUrl || battleEndShown) return;
-            
+            if (wsConnection || !matchIdFromUrl || battleEndShown || typeof WebSocket === 'undefined') return;
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.host;
             const wsUrl = `${protocol}//${host}/ws?matchId=${encodeURIComponent(matchIdFromUrl)}`;
-            
-            const ws = new WebSocket(wsUrl);
-            
-            ws.onopen = () => {
-                console.log('Battle WebSocket connected.');
-                if (matchPoll) {
-                    clearInterval(matchPoll);
-                    matchPoll = null;
-                }
-                if (wsReconnectTimer) {
-                    clearTimeout(wsReconnectTimer);
-                    wsReconnectTimer = null;
-                }
-                
-                wsHeartbeatTimer = setInterval(() => {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ type: 'ping' }));
+            try {
+                const ws = new WebSocket(wsUrl);
+                ws.onopen = () => {
+                    setConnectionBannerVisible(false);
+                    if (matchPoll) {
+                        clearInterval(matchPoll);
+                        matchPoll = null;
                     }
-                }, 25000);
-            };
-            
-            
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data?.type === 'skill_targets_response' && data.reqId) {
-                        if (wsRequests.has(data.reqId)) {
-                            wsRequests.get(data.reqId).resolve(data.payload);
+                    if (wsReconnectTimer) {
+                        clearTimeout(wsReconnectTimer);
+                        wsReconnectTimer = null;
+                    }
+                    wsHeartbeatTimer = setInterval(() => {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({ type: 'ping' }));
+                        }
+                    }, 25000);
+                };
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data?.type === 'skill_targets_response' && data.reqId) {
+                            if (wsRequests.has(data.reqId)) {
+                                wsRequests.get(data.reqId).resolve(data.payload);
+                                wsRequests.delete(data.reqId);
+                            }
+                            return;
+                        }
+                        if (data?.reqId && wsRequests.has(data.reqId)) {
+                            wsRequests.get(data.reqId).resolve(data);
                             wsRequests.delete(data.reqId);
+                            return;
                         }
-                        return;
-                    }
-                    
-                    if (data?.type === 'match_state' && data.payload) {
-
-                        if (data.payload.player?.username) {
-                            currentPlayerUsername = data.payload.player.username;
+                        if (data?.type === 'match_state' && data.payload) {
+                            if (data.payload.player?.username) {
+                                currentPlayerUsername = data.payload.player.username;
+                            }
+                            applyMatchState(data.payload);
+                        } else if (data?.type === 'match_update' && data.data) {
+                            applyMatchState(data.data);
+                        } else if (data?.ok && data?.board) {
+                            applyMatchState(data);
                         }
-                        applyMatchState(data.payload);
+                    } catch (e) {
+                        console.error('WebSocket message parsing error', e);
                     }
-                } catch (e) {
-                    console.error('WebSocket message parsing error', e);
-                }
-            };
-            
-            ws.onclose = () => {
-                wsConnection = null;
-                if (wsHeartbeatTimer) {
-                    clearInterval(wsHeartbeatTimer);
-                    wsHeartbeatTimer = null;
-                }
-                
-                if (!battleEndShown && !document.hidden) {
-                    console.warn('Battle WebSocket closed. Attempting reconnect in 2s...');
-                    wsReconnectTimer = setTimeout(() => {
-                        connectBattleWebSocket();
-                    }, 2000);
-                    
-                    startMatchPoll();
-                }
-            };
-            
-            ws.onerror = (err) => {
-                console.error('Battle WebSocket error:', err);
-                ws.close();
-            };
-            
-            wsConnection = ws;
+                };
+                ws.onclose = () => {
+                    wsConnection = null;
+                    if (wsHeartbeatTimer) {
+                        clearInterval(wsHeartbeatTimer);
+                        wsHeartbeatTimer = null;
+                    }
+                    if (!battleEndShown && !document.hidden) {
+                        wsReconnectTimer = setTimeout(() => {
+                            connectBattleWebSocket();
+                        }, 5000);
+                        startMatchPoll();
+                    }
+                };
+                ws.onerror = () => {
+                    try {
+                        ws.close();
+                    } catch (_) {}
+                };
+                wsConnection = ws;
+            } catch (err) {
+                startMatchPoll();
+            }
         };
 
         const startMatchPoll = () => {
@@ -4593,6 +4860,7 @@ let wsRequests = new Map();
                     if (data.player?.username) {
                         currentPlayerUsername = data.player.username;
                     }
+                    setConnectionBannerVisible(false);
                     applyMatchState(data);
                 } catch (error) {
                     clearInterval(matchPoll);
@@ -4602,6 +4870,7 @@ let wsRequests = new Map();
                 }
             }, 1500);
         };
+
         startMatchPoll();
         connectBattleWebSocket();
         const surrenderButton = document.querySelector('.surrenderbutton');
@@ -5120,6 +5389,17 @@ let wsRequests = new Map();
 
     const joinMatchmaking = async (mode = 'quick', options = {}) => {
         if (isSearching) return;
+        const team = getTeamIndices();
+        if (team.length !== 3) {
+            showGameToast('Select 3 characters to form your team before entering battle!', 'warning');
+            const slotsContainer = document.querySelector('.selected-characters') || document.querySelector('.selection-slots');
+            if (slotsContainer) {
+                slotsContainer.classList.remove('action-invalid-shake');
+                void slotsContainer.offsetWidth;
+                slotsContainer.classList.add('action-invalid-shake');
+            }
+            return;
+        }
         isSearching = true;
         activeSearchTargetUsername = mode === 'private' ? (options.targetUsername || '').trim() : '';
         setSearchingState('searching', mode);
@@ -5130,7 +5410,7 @@ let wsRequests = new Map();
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    team: getTeamIndices(),
+                    team,
                     mode,
                     targetUsername: options.targetUsername || '',
                 }),
@@ -5149,12 +5429,17 @@ let wsRequests = new Map();
             isSearching = false;
             activeSearchTargetUsername = '';
             closeSearching();
-            alert(error?.message || 'Could not start matchmaking. Please try again.');
+            showGameToast(error?.message || 'Could not start matchmaking. Please try again.', 'error');
         }
     };
 
     const startTrainingDummyMatch = async () => {
         if (isSearching || !isCurrentUserAdmin()) return;
+        const team = getTeamIndices();
+        if (team.length !== 3) {
+            showGameToast('Select 3 characters to form your team before starting training dummy battle!', 'warning');
+            return;
+        }
         isSearching = true;
         activeSearchTargetUsername = '';
         setSearchingState('searching', 'training');
@@ -5166,7 +5451,7 @@ let wsRequests = new Map();
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    team: getTeamIndices(),
+                    team,
                 }),
             });
             const data = await readApiJson(response, 'Could not start training dummy match.');
@@ -5179,7 +5464,7 @@ let wsRequests = new Map();
             isSearching = false;
             activeSearchTargetUsername = '';
             closeSearching();
-            alert(error?.message || 'Could not start training dummy match.');
+            showGameToast(error?.message || 'Could not start training dummy match.', 'error');
         }
     };
 
@@ -5827,7 +6112,11 @@ let wsRequests = new Map();
             listItem.addEventListener('drop', (event) => handleRosterDrop(event, i));
 
             const handleClick = () => {
-                if (listItem.classList.contains('slot-empty') || listItem.classList.contains('slot-locked')) return;
+                if (listItem.classList.contains('slot-empty')) return;
+                if (listItem.classList.contains('slot-locked')) {
+                    openCharacterUnlockModal(roster[i]);
+                    return;
+                }
                 const now = Date.now();
                 const isDoubleTap =
                     lastRosterTapIndex === i && now - lastRosterTapTime < DOUBLE_TAP_THRESHOLD_MS;
@@ -5914,6 +6203,74 @@ let wsRequests = new Map();
         });
     }
 
+    const openCharacterUnlockModal = (character = {}) => {
+        const unlockModalEl = document.getElementById('character-unlock-modal');
+        if (!unlockModalEl || !character) return;
+
+        const avatarEl = document.getElementById('unlock-modal-avatar');
+        const titleEl = document.getElementById('unlock-modal-title');
+        const rankEl = document.getElementById('unlock-modal-rank');
+        const descEl = document.getElementById('unlock-modal-desc');
+        const priceEl = document.getElementById('unlock-modal-price');
+        const buyBtn = document.getElementById('unlock-modal-buy-btn');
+        const missionBtn = document.getElementById('unlock-modal-mission-btn');
+        const closeBtn = document.getElementById('unlock-modal-close');
+        const errorEl = document.getElementById('unlock-modal-error');
+
+        if (avatarEl) setImageSrcWithFallback(avatarEl, character.facePicture, REMASTER_ASSETS.characterFallback);
+        if (titleEl) titleEl.textContent = character.name || character.id || 'Ninja';
+        if (rankEl) rankEl.textContent = `Required Mission: ${character.requiredMissionId || 'Chunins & Above'}`;
+        if (descEl) descEl.textContent = character.characterdeescription || 'Master shinobi with unique battle skills.';
+        if (errorEl) errorEl.textContent = '';
+
+        const price = character.shopPrice || 1000;
+        if (priceEl) priceEl.textContent = price.toLocaleString();
+
+        if (missionBtn) {
+            if (character.requiredMissionId) {
+                missionBtn.href = `missions.html?missionId=${encodeURIComponent(character.requiredMissionId)}`;
+                missionBtn.style.display = 'inline-flex';
+            } else {
+                missionBtn.style.display = 'none';
+            }
+        }
+
+        if (closeBtn) closeBtn.onclick = () => unlockModalEl.classList.add('hidden');
+
+        if (buyBtn) {
+            buyBtn.onclick = async () => {
+                buyBtn.disabled = true;
+                if (errorEl) errorEl.textContent = 'Unlocking character...';
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ characterId: character.characterId || character.id })
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data?.ok) {
+                        throw new Error(data?.error || 'Could not complete purchase.');
+                    }
+                    unlockModalEl.classList.add('hidden');
+                    character.unlocked = true;
+                    if (Array.isArray(window.characters)) {
+                        const charObj = window.characters.find((c) => (c.characterId || c.id) === (character.characterId || character.id));
+                        if (charObj) charObj.unlocked = true;
+                    }
+                    renderRosterPage();
+                    soundManager.play(new Audio('sounds/start-round.mp3'));
+                } catch (err) {
+                    if (errorEl) errorEl.textContent = err.message || 'Purchase failed.';
+                } finally {
+                    buyBtn.disabled = false;
+                }
+            };
+        }
+
+        unlockModalEl.classList.remove('hidden');
+    };
+
     renderRosterPage();
     updateGameButtons();
     persistTeamSelection();
@@ -5924,7 +6281,6 @@ let wsRequests = new Map();
 
 function initBugReporter() {
     if (document.getElementById('na-bug-overlay')) {
-        bindBugTriggers();
         return;
     }
 

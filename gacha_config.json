@@ -1,0 +1,53 @@
+{
+  "pityThreshold": 50,
+  "rates": {
+    "legendary": 0.5,
+    "epic": 3.5,
+    "rare": 11,
+    "uncommon": 30,
+    "common": 55
+  },
+  "duplicateShards": {
+    "legendary": 150,
+    "epic": 100,
+    "rare": 50,
+    "uncommon": 25,
+    "common": 10
+  },
+  "banners": [
+    {
+      "bannerId": "standard",
+      "title": "Scroll of the Five Nations",
+      "subtitle": "Standard Shinobi Summon",
+      "active": true,
+      "singleCostRyo": 100,
+      "singleCostScrolls": 1,
+      "multiCostRyo": 900,
+      "multiCostScrolls": 9,
+      "featuredCharacters": [
+        "hatake-kakashi",
+        "maito-gai",
+        "sarutobi-asuma"
+      ],
+      "bannerImage": "selectionbg_1.jpg",
+      "description": "Summon brave shinobi across all five hidden villages with guaranteed drop protection!"
+    },
+    {
+      "bannerId": "akatsuki",
+      "title": "Akatsuki Unsealed",
+      "subtitle": "Featured Rate-Up Summon",
+      "active": true,
+      "singleCostRyo": 100,
+      "singleCostScrolls": 1,
+      "multiCostRyo": 900,
+      "multiCostScrolls": 9,
+      "featuredCharacters": [
+        "uchiha-itachi",
+        "hoshigaki-kisame",
+        "momochi-zabuza"
+      ],
+      "bannerImage": "selectionbg_2.jpg",
+      "description": "Featured 50% rate up on legendary Akatsuki rogues and mist assassins!"
+    }
+  ]
+}

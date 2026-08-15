@@ -7,6 +7,256 @@
     }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
     return {
+        "yamanaka-ino": {
+                "id": "yamanaka-ino",
+                "characterId": "yamanaka-ino",
+                "name": "Yamanaka Ino",
+                "facePicture": "https://i.imgur.com/qqaI3xv.png",
+                "characterdeescription": "A Genin from Team 10, Ino is a member of the Yamanaka clan, and a very confident and vain girl. Ino is able to use a variety of abilities to take over and control her enemies, making it difficult to tell friend from foe.",
+                "skills": [
+                        {
+                                "id": "yamanaka-ino-mind-body-disturbance",
+                                "name": "Mind Body Disturbance",
+                                "ignoreInvulnerability": false,
+                                "skillimage": "https://i.imgur.com/3g2XWzn.png",
+                                "skilldescription": "Yamanaka Ino targets one random enemy, stunning their physical, chakra, and strategic skills for 1 turn. Another random enemy takes 25 piercing damage.",
+                                "energy": [
+                                        "Genjutsu"
+                                ],
+                                "target": "self",
+                                "damage": 0,
+                                "cooldown": 1,
+                                "classes": [
+                                        "Mental",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "yamanaka_ino_mind_body_disturbance_control",
+                                                "duration": 1,
+                                                "scope": "random-enemy",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "cannotUseSkillClasses": [
+                                                                "physical",
+                                                                "energy",
+                                                                "strategic",
+                                                                "ninjutsu"
+                                                        ],
+                                                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
+                                                }
+                                        },
+                                        {
+                                                "type": "damage",
+                                                "amount": 25,
+                                                "scope": "random-enemy",
+                                                "metadata": {
+                                                        "ignoreDamageReduction": true,
+                                                        "ignoreDestructibleDefense": true
+                                                }
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "yamanaka-ino-mind-body-switch",
+                                "name": "Mind Body Switch",
+                                "skillimage": "https://i.imgur.com/dHM9uYL.png",
+                                "skilldescription": "Yamanaka Ino targets one enemy for 3 turns. On the first turn, their physical skills are stunned. On the second turn, their physical and chakra skills are stunned. On the third turn, they are fully stunned for 1 turn. During this time, this skill becomes 'Art of the Valentine'.",
+                                "energy": [
+                                        "Random",
+                                        "Random"
+                                ],
+                                "target": "single-enemy",
+                                "damage": 0,
+                                "cooldown": 4,
+                                "classes": [
+                                        "Strategic",
+                                        "Control"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "yamanaka_ino_mind_body_switch_stage_1",
+                                                "duration": 1,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "cannotUseSkillClasses": [
+                                                                "physical"
+                                                        ],
+                                                        "tooltipText": "This character's physical skills are stunned. Next turn, their physical and chakra skills will be stunned. After that, they will be fully stunned.",
+                                                        "onExpireEffects": [
+                                                                {
+                                                                        "type": "apply_status",
+                                                                        "statusId": "yamanaka_ino_mind_body_switch_stage_2",
+                                                                        "duration": 1,
+                                                                        "scope": "self",
+                                                                        "metadata": {
+                                                                                "harmful": true,
+                                                                                "cannotUseSkillClasses": [
+                                                                                        "physical",
+                                                                                        "energy"
+                                                                                ],
+                                                                                "tooltipText": "This character's physical and chakra skills are stunned.",
+                                                                                "onExpireEffects": [
+                                                                                        {
+                                                                                                "type": "apply_status",
+                                                                                                "statusId": "yamanaka_ino_mind_body_switch_stage_3",
+                                                                                                "duration": 1,
+                                                                                                "scope": "self",
+                                                                                                "metadata": {
+                                                                                                        "harmful": true,
+                                                                                                        "cannotUseSkills": true,
+                                                                                                        "tooltipText": "This character is stunned and cannot use skills."
+                                                                                                }
+                                                                                        }
+                                                                                ]
+                                                                        }
+                                                                }
+                                                        ],
+                                                        "ongoingClass": "control",
+                                                        "turnDurationAnchor": "source_turn"
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "yamanaka_ino_mind_body_switch_active",
+                                                "duration": 3,
+                                                "scope": "self",
+                                                "metadata": {
+                                                        "skillReplacements": {
+                                                                "yamanaka-ino-mind-body-switch": "yamanaka-ino-art-of-the-valentine"
+                                                        },
+                                                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine.",
+                                                        "ongoingClass": "control"
+                                                }
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "yamanaka-ino-chakra-hair-strand-trap",
+                                "name": "Chakra Hair Strand Trap",
+                                "skillimage": "https://i.imgur.com/CH2jrFU.png",
+                                "skilldescription": "Yamanaka Ino targets one enemy. For 1 turn, if they use a skill, they receive 10 damage, have their strategic skills stunned for 1 turn, and become unable to ignore stun effects for 1 turn. This skill is invisible.",
+                                "energy": [],
+                                "target": "single-enemy",
+                                "damage": 0,
+                                "cooldown": 1,
+                                "classes": [
+                                        "Strategic",
+                                        "Ninjutsu",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "yamanaka_ino_chakra_hair_strand_trap",
+                                                "duration": 1,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "hideTooltipFromUnitOwner": true,
+                                                        "onOwnerUseSkillTrigger": true,
+                                                        "onOwnerUseSkillEffects": [
+                                                                {
+                                                                        "type": "damage",
+                                                                        "amount": 10,
+                                                                        "scope": "self"
+                                                                },
+                                                                {
+                                                                        "type": "apply_status",
+                                                                        "statusId": "yamanaka_ino_chakra_hair_strand_trap_strategic_stun",
+                                                                        "duration": 1,
+                                                                        "scope": "self",
+                                                                        "metadata": {
+                                                                                "harmful": true,
+                                                                                "cannotUseSkillClasses": [
+                                                                                        "strategic"
+                                                                                ],
+                                                                                "cannotIgnoreStuns": true,
+                                                                                "tooltipText": "This character's strategic skills are stunned and they cannot ignore stun effects."
+                                                                        }
+                                                                }
+                                                        ],
+                                                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
+                                                        "turnDurationAnchor": "source_turn"
+                                                }
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "yamanaka-ino-ino-block",
+                                "name": "Ino Block",
+                                "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
+                                "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
+                                "energy": [
+                                        "Random"
+                                ],
+                                "target": "self",
+                                "damage": 0,
+                                "cooldown": 4,
+                                "classes": [
+                                        "Strategic",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "invulnerable",
+                                                "duration": 1,
+                                                "scope": "self",
+                                                "metadata": {
+                                                        "invulnerable": true,
+                                                        "tooltipText": "This character is invulnerable."
+                                                }
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "yamanaka-ino-art-of-the-valentine",
+                                "name": "Art of the Valentine",
+                                "hiddenFromSelectionViewer": true,
+                                "skillimage": "https://i.imgur.com/p25BBXs.png",
+                                "skilldescription": "Yamanaka Ino deals 15 damage to one enemy. If the target is affected by a stun effect, this skill deals 10 additional damage.",
+                                "energy": [
+                                        "Random"
+                                ],
+                                "target": "single-enemy",
+                                "damage": 0,
+                                "cooldown": 0,
+                                "classes": [
+                                        "Mental",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "damage",
+                                                "amount": 15,
+                                                "scope": "target"
+                                        },
+                                        {
+                                                "type": "damage",
+                                                "amount": 10,
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusIdsAny": [
+                                                                "stunned",
+                                                                "yamanaka_ino_mind_body_disturbance_control",
+                                                                "yamanaka_ino_mind_body_switch_stage_1",
+                                                                "yamanaka_ino_mind_body_switch_stage_2",
+                                                                "yamanaka_ino_mind_body_switch_stage_3",
+                                                                "nara_shikamaru_shadow_imitation",
+                                                                "haruno_sakura_ko_punch_stun",
+                                                                "uzumaki_naruto_rasengan_stun"
+                                                        ]
+                                                }
+                                        }
+                                ]
+                        }
+                ]
+        },
         "rock-lee": {
                 "id": "rock-lee",
                 "characterId": "rock-lee",
@@ -18,7 +268,7 @@
                                 "id": "rock-lee-high-speed-taijutsu",
                                 "name": "High Speed Taijutsu",
                                 "skillimage": "https://i.imgur.com/f59XWBW.png",
-                                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage which cannot kill him. This skill requires 'Fifth Gate Opening'.",
+                                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. This skill requires 'Fifth Gate Opening'.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -31,8 +281,7 @@
                                 "classes": [
                                         "Physical",
                                         "Taijutsu",
-                                        "Instant",
-                                        "Affliction"
+                                        "Instant"
                                 ],
                                 "effects": [
                                         {
@@ -41,17 +290,6 @@
                                                 "scope": "target",
                                                 "metadata": {
                                                         "ignoreDamageReduction": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "rock_lee_high_speed_taijutsu_minimum_hp",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "minimumHp": 1,
-                                                        "hideTooltip": true,
-                                                        "tooltipText": "High Speed Taijutsu cannot kill Rock Lee."
                                                 }
                                         },
                                         {
@@ -180,7 +418,7 @@
                                 "hiddenFromSelectionViewer": true,
                                 "useBaseSkillCooldown": true,
                                 "skillimage": "https://i.imgur.com/h658CGb.png",
-                                "skilldescription": "Rock Lee expends all his chakra and deals 50 piercing damage to one enemy. Afterwards, Lee takes 5 affliction damage. This skill cannot be countered.",
+                                "skilldescription": "Rock Lee deals 50 piercing damage to one enemy. This skill cannot be countered.",
                                 "energy": [
                                         "Taijutsu",
                                         "Taijutsu"
@@ -191,8 +429,7 @@
                                 "classes": [
                                         "Physical",
                                         "Taijutsu",
-                                        "Instant",
-                                        "Affliction"
+                                        "Instant"
                                 ],
                                 "effects": [
                                         {
@@ -202,21 +439,6 @@
                                                 "metadata": {
                                                         "ignoreDamageReduction": true
                                                 }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "rock_lee_final_lotus_minimum_hp",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "minimumHp": 1,
-                                                        "tooltipText": "Final Lotus cannot kill Rock Lee."
-                                                }
-                                        },
-                                        {
-                                                "type": "HealthLoss",
-                                                "amount": 5,
-                                                "scope": "self"
                                         }
                                 ],
                                 "cannotBeCountered": true
@@ -357,7 +579,7 @@
                                 ],
                                 "target": "all-enemy",
                                 "damage": 0,
-                                "cooldown": 0,
+                                "cooldown": 2,
                                 "classes": [
                                         "Physical",
                                         "Instant"
@@ -563,7 +785,7 @@
                                                         "ongoingClass": "action",
                                                         "triggerOnApply": true,
                                                         "NonAfflictionDamageDebuff": 10,
-                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage. Eight Trigrams Sixty-Four Palms will remove 1 additional random chakra."
+                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
                                                 }
                                         }
                                 ]
@@ -605,7 +827,7 @@
                                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                                 "name": "Eight Trigrams Sixty-Four Palms",
                                 "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them. If this enemy is affected by 'Gentle Fist', 1 additional random chakra will be removed.",
+                                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them.",
                                 "energy": [
                                         "Taijutsu",
                                         "Bloodline"
@@ -680,7 +902,7 @@
                                 "id": "gaara-of-the-desert-sand-coffin",
                                 "name": "Sand Coffin",
                                 "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable. During this time, this skill will be replaced by 'Sand Burial'.",
+                                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Random"
@@ -741,32 +963,56 @@
                                 ]
                         },
                         {
-                                "id": "gaara-of-the-desert-sand-clone",
-                                "name": "Sand Clone",
-                                "skillimage": "https://i.imgur.com/SCRKMIU.png",
-                                "skilldescription": "Until the next time an enemy uses a harmful non-mental skill on him, Gaara will ignore all enemy stun effects. This skill cannot be used while active.",
-                                "energy": [],
-                                "target": "self",
-                                "targetCondition": {
-                                        "missingStatusId": "gaara_sand_clone"
-                                },
+                                "id": "gaara-of-the-desert-sand-burial",
+                                "name": "Sand Burial",
+                                "cannotBeCountered": true,
+                                "cannotBeReflected": true,
+                                "skillimage": "https://i.imgur.com/ljX9izT.png",
+                                "skilldescription": "Gaara deals 30 piercing damage to one enemy and ignores helpful effects for 1 turn. If used 1 turn after 'Sand Coffin', this skill costs 1 ninjutsu and 1 bloodline chakra and deals 50 piercing damage instead.",
+                                "energy": [
+                                        "Ninjutsu"
+                                ],
+                                "target": "single-enemy",
                                 "damage": 0,
-                                "cooldown": 1,
+                                "cooldown": 0,
                                 "classes": [
-                                        "Strategic",
+                                        "Physical",
                                         "Instant"
                                 ],
                                 "effects": [
                                         {
-                                                "type": "apply_status",
-                                                "statusId": "gaara_sand_clone",
-                                                "duration": 99,
-                                                "scope": "self",
+                                                "type": "damage",
+                                                "amount": 30,
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "missingStatusId": "gaara_sand_coffin_crush"
+                                                },
                                                 "metadata": {
-                                                        "cannotBeStunned": true,
-                                                        "stunImmune": true,
-                                                        "triggerOnEnemyHarmfulNonMental": true,
-                                                        "tooltipText": "Gaara ignores stuns until an enemy next uses a harmful non-mental skill on him."
+                                                        "ignoreDamageReduction": true
+                                                }
+                                        },
+                                        {
+                                                "type": "damage",
+                                                "amount": 50,
+                                                "scope": "target",
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusId": "gaara_sand_coffin_crush"
+                                                },
+                                                "metadata": {
+                                                        "ignoreDamageReduction": true
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "gaara_sand_burial_ignore_helpful",
+                                                "duration": 1,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "tooltipText": "This character ignores helpful effects for 1 turn."
                                                 }
                                         }
                                 ]
@@ -775,7 +1021,7 @@
                                 "id": "gaara-of-the-desert-armor-of-sand",
                                 "name": "Armor of Sand",
                                 "skillimage": "https://i.imgur.com/qfrA8gB.png",
-                                "skilldescription": "Gaara gains 40 points of permanent destructible defense. This skill cannot be used again while it is still active.",
+                                "skilldescription": "Gaara gains 25 points of permanent destructible defense. This skill cannot be used again while it is still active.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -796,8 +1042,8 @@
                                                 "duration": 99,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "destructibleDefensePoints": 40,
-                                                        "tooltipText": "Gaara has 40 points of permanent destructible defense from Armor of Sand."
+                                                        "destructibleDefensePoints": 25,
+                                                        "tooltipText": "Gaara has 25 points of permanent destructible defense from Armor of Sand."
                                                 }
                                         }
                                 ]
@@ -827,48 +1073,6 @@
                                                         "invulnerable": true,
                                                         "tooltipText": "This character is invulnerable."
                                                 }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "gaara-of-the-desert-sand-burial",
-                                "name": "Sand Burial",
-                                "hiddenFromSelectionViewer": true,
-                                "cannotBeCountered": true,
-                                "cannotBeReflected": true,
-                                "skillimage": "https://i.imgur.com/ljX9izT.png",
-                                "skilldescription": "Gaara destroys all destructible defense on one enemy, deals 50 piercing damage to them, and removes 1 random chakra. This skill requires 'Sand Coffin' to be active on this enemy. This skill cannot be countered or reflected.",
-                                "energy": [
-                                        "Ninjutsu",
-                                        "Ninjutsu"
-                                ],
-                                "target": "single-enemy",
-                                "targetCondition": {
-                                        "statusId": "gaara_sand_coffin_crush"
-                                },
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "destroy_destructible_defense",
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "damage",
-                                                "amount": 50,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "ignoreDamageReduction": true
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_random_chakra",
-                                                "amount": 1,
-                                                "scope": "target"
                                         }
                                 ]
                         }
@@ -1029,11 +1233,11 @@
                                                                 "kankuro-black-secret-machine-one-shot": 10,
                                                                 "kankuro-poison-bomb": 10
                                                         },
-                                                        "onOwnerUseSkillIdsAny": [
+                                                        "removeSelfOnSkillUseSkillIds": [
                                                                 "kankuro-black-secret-machine-one-shot",
                                                                 "kankuro-poison-bomb"
                                                         ],
-                                                        "removeSelfOnSkillUseSkillIds": [
+                                                        "onOwnerUseSkillIdsAny": [
                                                                 "kankuro-black-secret-machine-one-shot",
                                                                 "kankuro-poison-bomb"
                                                         ],
@@ -1176,7 +1380,7 @@
                                 "id": "temari-dust-wind",
                                 "name": "Dust Wind",
                                 "skillimage": "https://i.imgur.com/oBQQWNM.png",
-                                "skilldescription": "Temari kicks up dust, making her team invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
+                                "skilldescription": "Temari kicks up dust, making herself invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Random"
@@ -1194,7 +1398,7 @@
                                                 "type": "apply_status",
                                                 "statusId": "temari_dust_wind_invulnerable",
                                                 "duration": 1,
-                                                "scope": "all-allies",
+                                                "scope": "self",
                                                 "metadata": {
                                                         "invulnerable": true,
                                                         "tooltipText": "This character is invulnerable."
@@ -1257,1100 +1461,6 @@
                                                 "metadata": {
                                                         "invulnerable": true,
                                                         "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "teuchi": {
-                "id": "teuchi",
-                "characterId": "teuchi",
-                "name": "Teuchi",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "Teuchi is a citizen of the Hidden Leaf Village and the owner of Ramen Ichiraku. As a teenager, Teuchi devoted his life to making ramen, what undoubtedly makes him the most important character from the Naruto franchise. ORIGINAL DESIGN: Alexandre",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "teuchi-stick-throw",
-                                "name": "Stick Throw",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Teuchi deals 20 damage to one enemy.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target"
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "teuchi-ramen",
-                                "name": "Ramen",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Teuchi heals his allies for 15 health and gains 20 points of destructible defense for 1 turn.",
-                                "energy": [
-                                        "Random",
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "heal",
-                                                "amount": 15,
-                                                "scope": "all-allies"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "teuchi_ramen_defense",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "destructibleDefensePoints": 20,
-                                                        "tooltipText": "Teuchi has 20 points of destructible defense."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "teuchi-ramen-ichiraku-open",
-                                "name": "Ramen Ichiraku: Open",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Teuchi targets all his allies. For the rest of the game, everytime an ally uses a new skill, 'Ramen' will heal 5 additional health permanently. This skill stacks and ends if Teuchi dies.",
-                                "energy": [],
-                                "target": "all-allies",
-                                "damage": 0,
-                                "cooldown": 2,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "teuchi_ramen_open",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "ongoingClass": "action",
-                                                        "tooltipText": "Everytime an ally uses a new skill, Ramen will heal 5 additional health permanently."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "teuchi-ramen-ichiraku-closed",
-                                "name": "Ramen Ichiraku: Closed",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Teuchi invulnerable for 1 turn, heals him for 35 health and ends 'Ramen Ichiraku: Open' on his team.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        },
-                                        {
-                                                "type": "heal",
-                                                "amount": 35,
-                                                "scope": "self"
-                                        },
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "self",
-                                                "statusId": "teuchi_ramen_open"
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-minato": {
-                "id": "young-minato",
-                "characterId": "young-minato",
-                "name": "Young Minato",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "Minato is a prodigy kid from the Hidden Leaf Village who is capable of fighting other shinobi in higher ranks by having faster and stronger taijutsu skills. He entered the Hidden Leaf's Academy with the dream of earning the villagers' respect and recognition by becoming Hokage. ORIGINAL DESIGN: Liann",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-minato-speedy-flanker",
-                                "name": "Speedy Flanker",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Minato deals 25 damage to one enemy. If Young Minato's health is at 40 or below, this skill will also stun the enemy for 1 turn. This skill cannot be countered.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "cannotBeCountered": true,
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 25,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_minato_speedy_flanker_stun",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "sourceCurrentHpAtMost": 40
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "cannotUseSkills": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character is stunned for 1 turn by Speedy Flanker if Young Minato is at 40 HP or below."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-minato-night-saviour",
-                                "name": "Night Saviour",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Minato removes all harmful skills from one ally and makes them invulnerable for 1 turn. If 'Highground Watcher' was used the previous turn, this invulnerability will last 2 turns instead.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "single-ally",
-                                "damage": 0,
-                                "cooldown": 2,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "cleanseHarmfulOnly": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-minato-night-crawler",
-                                "name": "Night Crawler",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "One random enemy will have 'Speedy Flanker' applied on them. One random ally will have 'Night Saviour' applied on them. These skills' conditional effects won't trigger this way. This skill cannot be countered or reflected.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "self",
-                                "cannotBeCountered": true,
-                                "cannotBeReflected": true,
-                                "damage": 0,
-                                "cooldown": 3,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 25,
-                                                "scope": "random-enemy"
-                                        },
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "random-ally",
-                                                "metadata": {
-                                                        "cleanseHarmfulOnly": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "random-ally",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-minato-highground-watcher",
-                                "name": "Highground Watcher",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Minato invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_minato_highground_watcher_primed",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "turnDurationAnchor": "source_turn"
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-kushina": {
-                "id": "young-kushina",
-                "characterId": "young-kushina",
-                "name": "Young Kushina",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "Kushina is a kunoichi from the Hidden Leaf Village originated from the Hidden Eddy Village's Uzumaki Clan. Due to her special origins, Kushina has a red colored hair that constantly puts her into trouble. ORIGINAL DESIGN: TheDarkLegend",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-kushina-red-hot-habanero-rage",
-                                "name": "Red-Hot Habanero Rage",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Kushina gains 1 random energy. For 4 turns, Young Kushina gains 20 points of destructible defense and ignores enemy stun effects.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "gain_chakra",
-                                                "amount": 1,
-                                                "scope": "self"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_kushina_habanero_rage",
-                                                "duration": 4,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "destructibleDefensePoints": 20,
-                                                        "stunImmune": true,
-                                                        "cannotBeStunned": true,
-                                                        "tooltipText": "Young Kushina has 20 points of destructible defense and ignores enemy stun effects for 4 turns."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-kushina-fierce-punch",
-                                "name": "Fierce Punch",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Kushina destroys all of one enemy's destructible defense and then deals 20 damage to them. The following turn, 'Dropping Kick' will deal 20 additional damage and will first destroy its target's destructible defense.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "clearDestructibleDefenseFirst": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_kushina_fierce_punch_buff",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "turnDurationAnchor": "source_turn"
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-kushina-dropping-kick",
-                                "name": "Dropping Kick",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Kushina deals 10 damage to one enemy and stuns their non-strategic skills for 1 turn. The following turn, 'Fierce Punch' will deal 10 additional damage and will stun its target's non-strategic skills for 1 turn.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 10,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_kushina_dropping_kick_stun",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "cannotUseNonStrategicSkills": true,
-                                                        "cannotUseSkillClasses": [
-                                                                "physical",
-                                                                "ninjutsu",
-                                                                "mental",
-                                                                "affliction"
-                                                        ],
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character's non-strategic skills are stunned for 1 turn."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_kushina_dropping_kick_buff",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "turnDurationAnchor": "source_turn"
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-kushina-skilled-landing",
-                                "name": "Skilled Landing",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Kushina invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-itachi": {
-                "id": "young-itachi",
-                "characterId": "young-itachi",
-                "name": "Young Itachi",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "The first child born to Uchiha Mikoto and Fugaku, Itachi's childhood was marked with violence. The death and destruction he experienced at such a young age traumatised Itachi and made him a pacifist, leading to him training non-stop to achieve his dream of becoming a ninja among ninja in order to erase fighting from the world. ORIGINAL DESIGN: Liann",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-itachi-summoning-crow",
-                                "name": "Summoning: Crow",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Itachi becomes unable to be killed for 1 turn and grants 1 crow stack to all enemies. For the rest of the game, everytime they use a new harmful skill, they will gain 1 crow stack. This skill can be used while active to make Young Itachi unable to be killed for 1 turn. This skill cannot be removed.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 2,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_itachi_crow_unreachable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "minimumHp": 1,
-                                                        "tooltipText": "Young Itachi cannot be killed."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_itachi_crow_stack",
-                                                "duration": 99,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "permanent": true,
-                                                        "addCrowStackOnHarmfulSkillUse": true,
-                                                        "tooltipText": "This character has Crow Stacks."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-itachi-demonic-illusion-mirage-crow",
-                                "name": "Demonic Illusion: Mirage Crow",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "For 1 turn, Young Itachi reduces all enemies' non-affliction damage by 0, increased by 5 for each crow stack they have.",
-                                "energy": [
-                                        "Genjutsu"
-                                ],
-                                "target": "all-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_itachi_mirage_crow_debuff",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "damageDebuffFlatPerCrowStack": 5,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character's non-affliction damage is reduced by 5 for each Crow Stack."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-itachi-illusion-walking-unseen-step",
-                                "name": "Illusion Walking: Unseen Step",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Itachi deals 0 piercing damage to one enemy, increased by 10 for each crow stack they have.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Mental",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 0,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "amountPerCrowStackOnTarget": 10,
-                                                        "afflictionDamage": true,
-                                                        "ignoreDamageReduction": true,
-                                                        "ignoreDestructibleDefense": true
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-itachi-expert-retreat",
-                                "name": "Expert Retreat",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Itachi invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-yahiko": {
-                "id": "young-yahiko",
-                "characterId": "young-yahiko",
-                "name": "Young Yahiko",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Yahiko is a stoic boy who leads his team in the fight for the survival during the war. ORIGINAL DESIGN: Liann",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-yahiko-water-release-wild-water-wave",
-                                "name": "Water Release: Wild Water Wave",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Yahiko deals 5 damage to one enemy for 3 turns. During this time, if 'Lateral Kick' or 'Descending Fist' are used on this enemy, they will deal 5 additional damage and will also make this enemy deal 5 less non-affliction damage for 3 turns. This effect stacks.",
-                                "energy": [
-                                        "Ninjutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 3,
-                                "classes": [
-                                        "Ninjutsu",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_yahiko_wild_water_wave",
-                                                "duration": 3,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnEndDamage": 5,
-                                                        "turnEndTrigger": "source_turn",
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "ongoingClass": "action",
-                                                        "tooltipText": "This character takes 5 damage each turn from Wild Water Wave for 3 turns."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-yahiko-lateral-kick",
-                                "name": "Lateral Kick",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Yahiko deals 20 damage to one enemy. For 1 turn, if this enemy uses a new physical or strategic skill, they will take 15 damage.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_yahiko_lateral_kick_trap",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "triggerOnEnemyPhysicalOrStrategicSkill": true,
-                                                        "counterDamage": 15,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "If this character uses a new physical or strategic skill, they will take 15 damage."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-yahiko-descending-fist",
-                                "name": "Descending Fist",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Yahiko deals 25 damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 25,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_yahiko_physical_immunity",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "ignoreEnemyPhysicalDamage": true,
-                                                        "tooltipText": "Young Yahiko is invulnerable to physical skills for 1 turn."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-yahiko-in-the-shadows",
-                                "name": "In the Shadows",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Yahiko invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-yahiko-the-rain-orphans",
-                                "name": "The Rain Orphans",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Passive"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "the_rain_orphans_passive",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "rainOrphansPassive": true,
-                                                        "tooltipText": "Everytime a character uses Lateral Kick, Winding Paper Shuriken, or Rinnegan Domination while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target."
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-konan": {
-                "id": "young-konan",
-                "characterId": "young-konan",
-                "name": "Young Konan",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Konan is a sweet girl who is always caring about her teammates more than about herself. ORIGINAL DESIGN: Liann",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-konan-paper-shuriken-preparation",
-                                "name": "Paper Shuriken Preparation",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Until 'Winding Paper Shuriken' is used, Young Konan will deal 10 piercing damage instantly to any enemy who uses a new skill on her and during this time, everytime an enemy does so, 'Winding Paper Shuriken' will deal 10 additional damage the next time it's used. This effect stacks. This skill does not stack and will re-apply itself.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_konan_paper_shuriken_preparation",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "counterOnEnemySkillTargetingSelf": true,
-                                                        "counterDamagePiercing": 10,
-                                                        "incrementShurikenDamagePerHit": 10,
-                                                        "tooltipText": "Until Winding Paper Shuriken is used, deals 10 piercing damage instantly to any enemy using a skill on Konan."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-konan-winding-paper-shuriken",
-                                "name": "Winding Paper Shuriken",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Konan deals 20 piercing damage to one enemy and makes them ignore healing effects for 1 turn.",
-                                "energy": [
-                                        "Bloodline"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "afflictionDamage": true,
-                                                        "ignoreDamageReduction": true,
-                                                        "ignoreDestructibleDefense": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_konan_ignore_healing",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "healReceivedMultiplier": 0,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character ignores healing effects for 1 turn."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-konan-origami-rose",
-                                "name": "Origami Rose",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Konan grants one ally 35 points of permanent destructible defense that stacks. If this skill is already active on them, they will also be unable to be killed for 2 turns.",
-                                "energy": [
-                                        "Bloodline"
-                                ],
-                                "target": "single-ally",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_konan_origami_rose",
-                                                "duration": 99,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "destructibleDefensePoints": 35,
-                                                        "mergeNumericAddKeys": [
-                                                                "destructibleDefensePoints"
-                                                        ],
-                                                        "tooltipText": "This character has 35 points of permanent destructible defense."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-konan-in-the-shadows",
-                                "name": "In the Shadows",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Konan invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-konan-the-rain-orphans",
-                                "name": "The Rain Orphans",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Passive"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "the_rain_orphans_passive",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "rainOrphansPassive": true,
-                                                        "tooltipText": "Everytime a character uses Lateral Kick, Winding Paper Shuriken, or Rinnegan Domination while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target."
-                                                }
-                                        }
-                                ]
-                        }
-                ]
-        },
-        "young-nagato": {
-                "id": "young-nagato",
-                "characterId": "young-nagato",
-                "name": "Young Nagato",
-                "facePicture": "deadcharacter-remaster.png?v=2",
-                "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Nagato is a quiet boy who is not only afraid of the world, but also afraid of himself. ORIGINAL DESIGN: Liann",
-                "requiredMissionId": null,
-                "skills": [
-                        {
-                                "id": "young-nagato-wind-release-gale-palm",
-                                "name": "Wind Release: Gale Palm",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill can be used on an enemy or on an ally. If used on an enemy, they will take 20 damage and then the invulnerability effects of their new skills will last 1 less turn for 2 turns. If used on an ally, that character will deal 10 additional damage with physical and energy skills for 2 turns.",
-                                "energy": [
-                                        "Ninjutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Ninjutsu",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_nagato_gale_palm_debuff",
-                                                "duration": 2,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "invulnerabilityDurationReduction": 1,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "The invulnerability effects of this character's new skills will last 1 less turn for 2 turns."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-nagato-rinnegan-domination",
-                                "name": "Rinnegan Domination",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Nagato deals 20 piercing damage to one enemy. This skill ignores invulnerability and cannot be countered or reflected.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "single-enemy",
-                                "cannotBeCountered": true,
-                                "cannotBeReflected": true,
-                                "ignoreInvulnerability": true,
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "afflictionDamage": true,
-                                                        "ignoreDamageReduction": true,
-                                                        "ignoreDestructibleDefense": true
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-nagato-minor-almighty-push",
-                                "name": "Minor Almighty Push",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Young Nagato grants his team 10 points of unpierceable damage reduction for 1 turn. This effect is applied again for every 20 health Young Nagato has lost.",
-                                "energy": [
-                                        "Genjutsu"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "young_nagato_minor_almighty_push",
-                                                "duration": 1,
-                                                "scope": "all-allies",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "unpierceableDamageReductionFlat": 10,
-                                                        "amountFromSourceMissingHpStep": 10,
-                                                        "amountFromSourceMissingHpDivisor": 20,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character has 10 points of unpierceable damage reduction for 1 turn (increased by 10 for every 20 health Nagato has lost)."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-nagato-in-the-shadows",
-                                "name": "In the Shadows",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "This skill makes Young Nagato invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "young-nagato-the-rain-orphans",
-                                "name": "The Rain Orphans",
-                                "skillimage": "deadcharacter-remaster.png?v=2",
-                                "skilldescription": "Everytime a character uses 'Lateral Kick', 'Winding Paper Shuriken' or 'Rinnegan Domination' while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Passive"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "the_rain_orphans_passive",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "permanent": true,
-                                                        "rainOrphansPassive": true,
-                                                        "tooltipText": "Everytime a character uses Lateral Kick, Winding Paper Shuriken, or Rinnegan Domination while having 15 or less health, the other 2 mentioned skills will also be applied on the enemy target."
                                                 }
                                         }
                                 ]
