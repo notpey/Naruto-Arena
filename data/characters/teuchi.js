@@ -2,7 +2,7 @@ module.exports = {
     "id": "teuchi",
     "characterId": "teuchi",
     "name": "Teuchi",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/za8CSxN.png",
     "characterdeescription": "Teuchi is a citizen of the Hidden Leaf Village and the owner of Ramen Ichiraku. As a teenager, Teuchi devoted his life to making ramen, what undoubtedly makes him the most important character from the Naruto franchise. ORIGINAL DESIGN: Alexandre",
     "requiredMissionId": null,
     "skills": [

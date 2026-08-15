@@ -2,14 +2,14 @@ module.exports = {
     "id": "yamato",
     "characterId": "yamato",
     "name": "Yamato",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/bqEBFnr.png",
     "characterdeescription": "A member of the secretive ANBU organization and a man who was once injected with the cells of Hashirama, the 1st Hokage. Due to the cells that live inside of him, Yamato is capable of small scale wood element abilities, from trapping enemies to protecting his comrades.",
     "requiredMissionId": "a-new-team-leader",
     "skills": [
         {
             "id": "yamato-bliss-bringing-hands",
             "name": "Bliss-Bringing Hands",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/fa2R9Pp.png",
             "skilldescription": "Yamato targets one enemy, dealing 30 damage to them and making them ignore all helpful effects except energy cost changes for 1 turn.",
             "energy": [
                 "Bloodline",
@@ -45,7 +45,7 @@ module.exports = {
         {
             "id": "yamato-wood-release-wood-clone",
             "name": "Wood Release: Wood Clone",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/V0n6c3b.png",
             "skilldescription": "Yamato targets one ally or himself for 1 turn, countering the first physical, energy or strategic skill used against them, dealing 20 damage to the enemy and granting that ally 20 points of destructible defense. This skill is invisible.",
             "energy": [
                 "Bloodline"
@@ -85,7 +85,7 @@ module.exports = {
         {
             "id": "yamato-wood-release-four-pillar-prison",
             "name": "Wood Release: Four-Pillar Prison",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/pMDbi3L.png",
             "skilldescription": "This skill can be used on one enemy or one ally. If used on an enemy, that enemy will have their physical, energy and strategic skills stunned for 2 turns. If used on an ally, that ally will gain 40 points of permanent destructible defense. This skill ignores invulnerability.",
             "energy": [
                 "Bloodline",
@@ -142,7 +142,7 @@ module.exports = {
         {
             "id": "yamato-wood-release-wood-shelter",
             "name": "Wood Release: Wood Shelter",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/UudEEcp.png",
             "skilldescription": "This skill makes Yamato invulnerable for 1 turn.",
             "energy": [
                 "Random"

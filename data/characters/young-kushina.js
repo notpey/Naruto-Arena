@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-kushina",
     "characterId": "young-kushina",
     "name": "Young Kushina",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/DyZ6C5C.png",
     "characterdeescription": "Kushina is a kunoichi from the Hidden Leaf Village originated from the Hidden Eddy Village's Uzumaki Clan. Due to her special origins, Kushina has a red colored hair that constantly puts her into trouble. ORIGINAL DESIGN: TheDarkLegend",
     "requiredMissionId": null,
     "skills": [

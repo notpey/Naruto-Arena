@@ -2,14 +2,14 @@ module.exports = {
     "id": "sasori-of-the-red-sand",
     "characterId": "sasori-of-the-red-sand",
     "name": "Sasori of the Red Sand",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/EJRSPPq.png",
     "characterdeescription": "Sasori is a senior Akatsuki member and a legendary puppet master. He is even rumored to have defeated an entire nation with puppets alone. ORIGINAL DESIGN: Pavera",
     "requiredMissionId": "master-of-puppets",
     "skills": [
         {
             "id": "sasori-of-the-red-sand-thousand-hands",
             "name": "Thousand Hands",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/0YTQQqA.png",
             "skilldescription": "Sasori of the Red Sand deals 10 damage to one enemy for 2 turns and gains 5 points of permanent destructible defense each turn. If 'Poison Gas' is used on the target in the following turn, it will last 1 additional turn on them*. The target of this skill will take 5 additional damage from 'Poison Gas' for 1 turn*.",
             "energy": [
                 "Random"
@@ -58,7 +58,7 @@ module.exports = {
         {
             "id": "sasori-of-the-red-sand-poison-gas",
             "name": "Poison Gas",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ct8Y9cl.png",
             "skilldescription": "Sasori of the Red Sand deals 10 affliction damage to one enemy for 4 turns and gains 10 points of permanent destructible defense. During this time, if that enemy uses a new skill, they will be dealt 5 affliction damage. This skill lasts 1 additional turn if the enemy is affected by 'Thousand Hands'. This skill stacks.",
             "energy": [
                 "Random",
@@ -129,7 +129,7 @@ module.exports = {
         {
             "id": "sasori-of-the-red-sand-iron-sand",
             "name": "Iron Sand",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Dnv7UG4.png",
             "skilldescription": "Sasori of the Red Sand will gain 5 points of permanent destructible defense each turn for 3 turns. During this time, every enemy who uses a new skill on Sasori of the Red Sand will be dealt 5 piercing damage. For 3 turns, this skill will be replaced by 'Iron Sand World Method' and 'Thousand Hands' will be replaced by 'Iron Sand Gathering Assault'.",
             "energy": [
                 "Bloodline"
@@ -164,7 +164,7 @@ module.exports = {
         {
             "id": "sasori-of-the-red-sand-puppet-protection",
             "name": "Puppet Protection",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/067sl2R.png",
             "skilldescription": "This skill makes Sasori of the Red Sand invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -192,7 +192,7 @@ module.exports = {
         {
             "id": "sasori-of-the-red-sand-iron-sand-gathering-assault",
             "name": "Iron Sand Gathering Assault",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Ul782SR.png",
             "skilldescription": "Sasori of the Red Sand deals 30 piercing damage to one enemy and makes that enemy unable to reduce damage or become invulnerable for 1 turn. Sasori of the Red Sand also gains 15 points of destructible defense for 1 turn.",
             "energy": [
                 "Ninjutsu",
@@ -244,7 +244,7 @@ module.exports = {
         {
             "id": "sasori-of-the-red-sand-iron-sand-world-method",
             "name": "Iron Sand World Method",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/V8SqtNC.png",
             "skilldescription": "Sasori of the Red Sand deals 25 piercing damage to all enemies. Any enemy whose health drops to 10 or below will be instantly killed. This skill cannot be countered or reflected.",
             "energy": [
                 "Bloodline",

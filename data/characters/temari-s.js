@@ -2,14 +2,14 @@ module.exports = {
     "id": "temari-s",
     "characterId": "temari-s",
     "name": "Temari (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/hTu7W3f.png",
     "characterdeescription": "Temari has grown over the years. She is now a Jounin as well as the sister of Kankuro and Gaara. Temari is also the Hidden Sand Village's ambassador to the Hidden Leaf Village.",
     "requiredMissionId": "the-third-sand-sibling",
     "skills": [
         {
             "id": "temari-s-first-moon",
             "name": "First Moon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/7z5yOKa.png",
             "skilldescription": "'Wind Scythe' will deal 5 additional damage permanently. Temari (S) gains 15 points of damage reduction permanently and this skill becomes 'Second Moon' permanently when used.",
             "energy": [],
             "target": "self",
@@ -42,7 +42,7 @@ module.exports = {
         {
             "id": "temari-s-ally-protection",
             "name": "Ally Protection",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/iQYMkJx.png",
             "skilldescription": "Temari (S) targets one ally. For 1 turn, that ally will gain 20 points of damage reduction and they cannot be killed.",
             "energy": [
                 "Random"
@@ -73,7 +73,7 @@ module.exports = {
         {
             "id": "temari-s-wind-scythe",
             "name": "Wind Scythe",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/t5cDkdF.png",
             "skilldescription": "Temari (S) deals 25 damage to one enemy.",
             "energy": [
                 "Ninjutsu"
@@ -96,7 +96,7 @@ module.exports = {
         {
             "id": "temari-s-fan-offensive-defense",
             "name": "Fan Offensive Defense",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/zAC9lgX.png",
             "skilldescription": "This skill makes Temari (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -124,7 +124,7 @@ module.exports = {
         {
             "id": "temari-s-second-moon",
             "name": "Second Moon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/yim1I1h.png",
             "skilldescription": "Temari (S) ends 'First Moon'. Temari (S) gains 5 points of damage reduction and 10 points of unpierceable damage reduction permanently and 'Wind Scythe' will deal 10 additional damage permanently. This skill becomes 'Third Moon' permanently when used.",
             "energy": [],
             "target": "self",
@@ -164,7 +164,7 @@ module.exports = {
         {
             "id": "temari-s-third-moon",
             "name": "Third Moon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/IJVBvYr.png",
             "skilldescription": "Temari (S) deals 20 damage to all enemies and makes them deal 5 less damage for 1 turn.",
             "energy": [
                 "Ninjutsu",

@@ -3,7 +3,7 @@ module.exports = {
     "characterId": "tsuchi-kin",
     "name": "Tsuchi Kin",
     "facePicture": "https://i.imgur.com/hOoNOfj.png",
-    "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision.",
+    "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
     "skills": [
         {
             "id": "tsuchi-kin-illusion-bell-needles",

@@ -2,14 +2,14 @@ module.exports = {
     "id": "orochimaru-s",
     "characterId": "orochimaru-s",
     "name": "Orochimaru (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/I8WePdy.png",
     "characterdeescription": "Orochimaru returns, strong as ever and with some new tricks up his sleeve, but his body seems to be on borrowed time.",
     "requiredMissionId": "return-of-the-snake",
     "skills": [
         {
             "id": "orochimaru-s-second-skin",
             "name": "Second Skin",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/LW8QXSc.png",
             "skilldescription": "Orochimaru (S) sets his health to 100 (this is a healing effect). This skill will be replaced by 'Triple Rashoumon' permanently.",
             "energy": [
                 "Ninjutsu"
@@ -46,7 +46,7 @@ module.exports = {
         {
             "id": "orochimaru-s-sword-snake-horde",
             "name": "Sword Snake Horde",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/AtllSnq.png",
             "skilldescription": "Orochimaru (S) deals 20 affliction damage to one enemy. For 1 turn, the stun effects of their skills will last 1 turn less.",
             "energy": [
                 "Bloodline"
@@ -86,7 +86,7 @@ module.exports = {
         {
             "id": "orochimaru-s-extended-kusanagi",
             "name": "Extended Kusanagi",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/H9vu4aA.png",
             "skilldescription": "Orochimaru (S) targets one enemy. That enemy has their non-mental skills stunned for 2 turns. During this time, this enemy takes 20 piercing damage each turn.",
             "energy": [
                 "Taijutsu",
@@ -126,7 +126,7 @@ module.exports = {
         {
             "id": "orochimaru-s-ground-mobility",
             "name": "Ground Mobility",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/RWYh63j.png",
             "skilldescription": "This skill makes Orochimaru (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -154,7 +154,7 @@ module.exports = {
         {
             "id": "orochimaru-s-triple-rashoumon",
             "name": "Triple Rashoumon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/cNLf2Mq.png",
             "skilldescription": "Orochimaru (S) targets both teams. For 2 turns, Orochimaru (S)'s team will be invulnerable to harmful skills. For 1 turn, the enemy team will be invulnerable to harmful skills. This skill cannot be countered or reflected.",
             "energy": [
                 "Ninjutsu",

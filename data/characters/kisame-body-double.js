@@ -2,14 +2,14 @@ module.exports = {
     "id": "kisame-body-double",
     "characterId": "kisame-body-double",
     "name": "Kisame Body Double",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/iNA5D02.png",
     "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Kisame. The body double is controlled by Kisame but only has a third of his chakra.",
     "requiredMissionId": "return-of-a-rival",
     "skills": [
         {
             "id": "kisame-body-double-explosive-water-shock-wave",
             "name": "Explosive Water Shock Wave",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/QKfBldd.png",
             "skilldescription": "For 4 turns, Kisame Body Double and his allies will lose 1 less energy if a energy removal or stealing skill is used on them. For 4 turns, all enemies who use a new skill will have the cooldown of that skill increased by 2 turns. During this time, 'Water Prison Technique' and 'Five Man-Eating Sharks' will be improved and this skill will be replaced by 'Sentient Water Disabling'.",
             "energy": [
                 "Bloodline",
@@ -66,7 +66,7 @@ module.exports = {
         {
             "id": "kisame-body-double-water-prison-technique",
             "name": "Water Prison Technique",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/U1Q3tsi.png",
             "skilldescription": "Kisame Body Double deals 15 piercing damage to one enemy, stuns their non-strategic skills for 1 turn and makes them invulnerable to friendly skills also for 1 turn. During this time, Kisame Body Double gains 15 points of damage reduction. During 'Explosive Water Shock Wave', this skill costs 1 random energy instead.",
             "energy": [
                 "Bloodline"
@@ -122,7 +122,7 @@ module.exports = {
         {
             "id": "kisame-body-double-five-man-eating-sharks",
             "name": "Five Man-Eating Sharks",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ZYiHeHQ.png",
             "skilldescription": "Kisame Body Double deals 25 damage to one enemy for 2 turns. During 'Explosive Water Shock Wave', this skill costs 1 random energy less.",
             "energy": [
                 "Ninjutsu",
@@ -154,7 +154,7 @@ module.exports = {
         {
             "id": "kisame-body-double-samehada-block",
             "name": "Samehada Block",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Yu8K5hE.png",
             "skilldescription": "This skill makes Kisame Body Double invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -182,7 +182,7 @@ module.exports = {
         {
             "id": "kisame-body-double-sentient-water-disabling",
             "name": "Sentient Water Disabling",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/IsLCn9B.png",
             "skilldescription": "Kisame Body Double targets himself or an ally. For 1 turn, the first harmful non-mental skill used on the target will be countered and the countered enemy will have 'Water Prison Technique' applied on them. This skill is invisible.",
             "energy": [
                 "Ninjutsu"

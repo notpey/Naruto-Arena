@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-konan",
     "characterId": "young-konan",
     "name": "Young Konan",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/tsmObzW.png",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Konan is a sweet girl who is always caring about her teammates more than about herself. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [

@@ -2,14 +2,14 @@ module.exports = {
     "id": "hyuuga-neji-s",
     "characterId": "hyuuga-neji-s",
     "name": "Hyuuga Neji (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/GdN4ylI.png",
     "characterdeescription": "The only of the original genins to become a Jounin, Neji has only increased his already powerful set of abilities and skills during the near three years of time. While still being able to rely on his pressure point attacks, Neji is now also able to unleash giant waves of chakra for brutish damage as well.",
     "requiredMissionId": "pride-of-the-hyuuga",
     "skills": [
         {
             "id": "hyuuga-neji-s-eight-trigrams-vacuum-palm",
             "name": "Eight Trigrams Vacuum Palm",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/PYtn7Tm.png",
             "skilldescription": "Hyuuga Neji (S) deals 20 damage to one enemy and removes 1 random energy from them.",
             "energy": [
                 "Taijutsu",
@@ -39,7 +39,7 @@ module.exports = {
         {
             "id": "hyuuga-neji-s-eight-trigrams-mountain-crusher",
             "name": "Eight Trigrams Mountain Crusher",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/bVSedPE.png",
             "skilldescription": "Hyuuga Neji (S) targets one enemy, destroying any destructible defense they have and dealing 45 damage to them.",
             "energy": [
                 "Taijutsu",
@@ -67,7 +67,7 @@ module.exports = {
         {
             "id": "hyuuga-neji-s-byakugan-eight-trigrams-field",
             "name": "Byakugan - Eight Trigrams Field",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/W4sAefq.png",
             "skilldescription": "For 2 turns, all enemies will be unable to reduce damage or become invulnerable. For 1 turn, any enemy that uses a new harmful skill on Hyuuga Neji (S) will be countered and this skill will be replaced by 'Pressure Point Strike'. This skill is invisible.",
             "energy": [
                 "Bloodline"
@@ -125,7 +125,7 @@ module.exports = {
         {
             "id": "hyuuga-neji-s-byakugan-defense",
             "name": "Byakugan Defense",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/FXM6jYa.png",
             "skilldescription": "This skill makes Hyuuga Neji (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -153,7 +153,7 @@ module.exports = {
         {
             "id": "hyuuga-neji-s-pressure-point-strike",
             "name": "Pressure Point Strike",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/QTNMUo0.png",
             "skilldescription": "Hyuuga Neji (S) attacks one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
             "energy": [
                 "Random"

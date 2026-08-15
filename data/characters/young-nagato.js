@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-nagato",
     "characterId": "young-nagato",
     "name": "Young Nagato",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/C1aW0e7.png",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Nagato is a quiet boy who is not only afraid of the world, but also afraid of himself. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [

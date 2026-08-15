@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-itachi",
     "characterId": "young-itachi",
     "name": "Young Itachi",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/N9A11eT.png",
     "characterdeescription": "The first child born to Uchiha Mikoto and Fugaku, Itachi's childhood was marked with violence. The death and destruction he experienced at such a young age traumatised Itachi and made him a pacifist, leading to him training non-stop to achieve his dream of becoming a ninja among ninja in order to erase fighting from the world. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [

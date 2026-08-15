@@ -2,14 +2,14 @@ module.exports = {
     "id": "akimichi-chouji-s",
     "characterId": "akimichi-chouji-s",
     "name": "Akimichi Chouji (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/EU9MrUy.png",
     "characterdeescription": "After nearly three years, Chouji has developed in both strength and size, mastering the Akimichi clan techniques. No longer does Chouji need the Akimichi pills to tap into his true strength, instead, he merely needs to control his chakra and become a force to reckon with.",
     "requiredMissionId": "a-portly-but-steadfast-ninja",
     "skills": [
         {
             "id": "akimichi-chouji-s-expansion-technique",
             "name": "Expansion Technique",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/W3vl8FY.png",
             "skilldescription": "For 4 turns, Akimichi Chouji (S) gains 25 points of destructible defense, 'Spiked Meat Tank' will do its alternate effects and have 1 less turn of cooldown, and 'Mega Palm Thrust' will be improved.",
             "energy": [
                 "Random"
@@ -41,7 +41,7 @@ module.exports = {
         {
             "id": "akimichi-chouji-s-spiked-meat-tank",
             "name": "Spiked Meat Tank",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/IEOExfb.png",
             "skilldescription": "Akimichi Chouji (S) targets one ally or himself and will counter all enemy non-mental skills used on the target for 1 turn. The countered enemies will take 25 damage. This skill is invisible. Alternate: Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
             "energy": [
                 "Bloodline"
@@ -71,7 +71,7 @@ module.exports = {
         {
             "id": "akimichi-chouji-s-spiked-meat-tank-alt",
             "name": "Spiked Meat Tank (Alternate)",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/IEOExfb.png",
             "skilldescription": "Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
             "energy": [
                 "Bloodline"
@@ -104,7 +104,7 @@ module.exports = {
         {
             "id": "akimichi-chouji-s-mega-palm-thrust",
             "name": "Mega Palm Thrust",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/xTH8pAA.png",
             "skilldescription": "Akimichi Chouji (S) deals 25 piercing damage to one enemy. During 'Expansion Technique', this damage is improved to 40, the targeted enemy has their non-strategic skills stunned for 1 turn, and this skill has an 1 turn cooldown.",
             "energy": [
                 "Taijutsu",
@@ -168,7 +168,7 @@ module.exports = {
         {
             "id": "akimichi-chouji-s-effortful-block",
             "name": "Effortful Block",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/9h6FhK5.png",
             "skilldescription": "This skill makes Akimichi Chouji (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"

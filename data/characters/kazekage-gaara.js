@@ -2,14 +2,14 @@ module.exports = {
     "id": "kazekage-gaara",
     "characterId": "kazekage-gaara",
     "name": "Kazekage Gaara",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/iX1Omvr.png",
     "characterdeescription": "After a few short years and much soul-searching, Gaara has risen to be his village's Kazekage. Rather than destroying others he now protects those he cares about to prove his existence. ORIGINAL DESIGN: Liann",
     "requiredMissionId": "finding-his-purpose",
     "skills": [
         {
             "id": "kazekage-gaara-desert-missile",
             "name": "Desert Missile",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/0gRwpJG.png",
             "skilldescription": "Kazekage Gaara deals 15 piercing damage to one enemy and reduces their non-affliction damage by 10 for 1 turn. This effect lasts 1 additional turn for each Desert Charge Kazekage Gaara has and then removes all Desert Charges on him.",
             "energy": [
                 "Bloodline"
@@ -49,7 +49,7 @@ module.exports = {
         {
             "id": "kazekage-gaara-desert-prison",
             "name": "Desert Prison",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/7lhw4ni.png",
             "skilldescription": "Kazekage Gaara deals 25 damage to one enemy and stuns them for 1 turn. This skill grants Kazekage Gaara 1 Desert Charge.",
             "energy": [
                 "Bloodline",
@@ -96,7 +96,7 @@ module.exports = {
         {
             "id": "kazekage-gaara-sand-summoning",
             "name": "Sand Summoning",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/75wCs8N.png",
             "skilldescription": "Kazekage Gaara gains 5 points of permanent damage reduction and 1 Desert Charge. His allies gain 10 points of permanent destructible defense. 'Desert Missile' and 'Desert Prison' will deal 5 additional damage permanently. This skill stacks.",
             "energy": [
                 "Random"
@@ -153,7 +153,7 @@ module.exports = {
         {
             "id": "kazekage-gaara-sand-sphere",
             "name": "Sand Sphere",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ISeDMEa.png",
             "skilldescription": "This skill makes Kazekage Gaara invulnerable for 1 turn.",
             "energy": [
                 "Random"

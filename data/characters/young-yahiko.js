@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-yahiko",
     "characterId": "young-yahiko",
     "name": "Young Yahiko",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/9jHP6Qq.png",
     "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Yahiko is a stoic boy who leads his team in the fight for the survival during the war. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [

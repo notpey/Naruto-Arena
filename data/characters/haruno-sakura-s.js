@@ -2,14 +2,14 @@ module.exports = {
     "id": "haruno-sakura-s",
     "characterId": "haruno-sakura-s",
     "name": "Haruno Sakura (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/dMRqjIP.png",
     "characterdeescription": "With her extensive training under Tsunade for the last two and a half years, Sakura has gained a greater understanding of healing and the human body. While Sakura's physical strength and healing prowess have both increased, her greatest ability is a powerful chakra storing seal taught to her by Tsunade.",
     "requiredMissionId": "a-girl-grown-up",
     "skills": [
         {
             "id": "haruno-sakura-s-chakra-enhanced-punch",
             "name": "Chakra Enhanced Punch",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/R6sD2MG.png",
             "skilldescription": "Haruno Sakura (S) deals 25 damage to one enemy. While 'Chakra Gathering' is active, this skill will deal 35 damage to one enemy, and 10 damage to all other enemies.",
             "energy": [
                 "Taijutsu"
@@ -54,7 +54,7 @@ module.exports = {
         {
             "id": "haruno-sakura-s-superior-healing",
             "name": "Superior Healing",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/uJHSPqu.png",
             "skilldescription": "Haruno Sakura (S) heals half of one ally's missing health, rounded, and removes all enemy affliction skills from them. While 'Chakra Gathering' is active, this skill will cost 1 random energy and have no cooldown.",
             "energy": [
                 "Ninjutsu"
@@ -85,7 +85,7 @@ module.exports = {
         {
             "id": "haruno-sakura-s-chakra-gathering",
             "name": "Chakra Gathering",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/zgbp6dp.png",
             "skilldescription": "Haruno Sakura (S) gains 3 seals. During this time, each skill that Haruno Sakura (S) uses other than her invulnerability will use up 1 Seal. While 'Chakra Gathering' is active, Haruno Sakura (S) can use this skill again for no cost to heal herself for 15 health and remove all harmful effects on her.",
             "energy": [
                 "Random"
@@ -128,7 +128,7 @@ module.exports = {
         {
             "id": "haruno-sakura-s-insightful-dodge",
             "name": "Insightful Dodge",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/H1t6mfB.png",
             "skilldescription": "This skill makes Haruno Sakura (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -156,7 +156,7 @@ module.exports = {
         {
             "id": "haruno-sakura-s-chakra-heal-release",
             "name": "Chakra Gathering: Heal",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/zgbp6dp.png",
             "skilldescription": "Haruno Sakura (S) heals herself for 15 health and removes all harmful effects on her.",
             "energy": [],
             "target": "self",

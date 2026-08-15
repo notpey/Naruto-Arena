@@ -2,14 +2,14 @@ module.exports = {
     "id": "uzumaki-naruto-s",
     "characterId": "uzumaki-naruto-s",
     "name": "Uzumaki Naruto (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/K0gVNTu.png",
     "characterdeescription": "Having trained with Jiraya for almost three years, Naruto has grown, both mentally and physically. With his training behind him, Naruto is able to utilize his clones even more, granting him strong defense while augmenting his already powerful rasengan.",
     "requiredMissionId": "the-prodigal-son-returns",
     "skills": [
         {
             "id": "uzumaki-naruto-s-oodama-rasengan",
             "name": "Oodama Rasengan",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/fYmYPhq.png",
             "skilldescription": "Uzumaki Naruto (S) deals 40 damage to one enemy. This skill ignores invulnerability.",
             "energy": [
                 "Taijutsu",
@@ -37,7 +37,7 @@ module.exports = {
         {
             "id": "uzumaki-naruto-s-mass-shadow-clones",
             "name": "Mass Shadow Clones",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/XvBwj6z.png",
             "skilldescription": "The following turn, Uzumaki Naruto (S) will counter the first new harmful skill used on him and 'Oodama Rasengan' will be replaced by 'Rasenshuriken'. This skill is invisible.",
             "energy": [
                 "Random"
@@ -83,7 +83,7 @@ module.exports = {
         {
             "id": "uzumaki-naruto-s-chakra-boost",
             "name": "Chakra Boost",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/CbWBxfA.png",
             "skilldescription": "Uzumaki Naruto (S) removes all harmful skills on him then gains 2 random energies. The following turn, Uzumaki Naruto (S) will gain 10 points of damage reduction and 'Oodama Rasengan' will cost 2 random energies.",
             "energy": [
                 "Random",
@@ -134,7 +134,7 @@ module.exports = {
         {
             "id": "uzumaki-naruto-s-shadow-clone-save",
             "name": "Shadow Clone Save",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/xw8NvvK.png",
             "skilldescription": "This skill makes Uzumaki Naruto (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -162,7 +162,7 @@ module.exports = {
         {
             "id": "uzumaki-naruto-s-rasenshuriken",
             "name": "Rasenshuriken",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/KMSMh17.png",
             "skilldescription": "Uzumaki Naruto (S) deals 50 piercing damage to one enemy. This skill deals 50 additional damage to an enemy countered by 'Mass Shadow Clones'. This skill ignores invulnerability.",
             "energy": [
                 "Taijutsu",

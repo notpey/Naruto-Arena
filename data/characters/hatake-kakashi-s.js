@@ -2,14 +2,14 @@ module.exports = {
     "id": "hatake-kakashi-s",
     "characterId": "hatake-kakashi-s",
     "name": "Hatake Kakashi (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/QkC8m4x.png",
     "characterdeescription": "Kakashi has not let the years pass by idle, and has trained as hard as any other, improving his sharingan and his own unique jutsu. While Kakashi's raikiri is still a potent finisher, he is now also able to rely on his kamui, aiming it at his enemies or even rescuing his allies.",
     "requiredMissionId": "from-teacher-to-partner",
     "skills": [
         {
             "id": "hatake-kakashi-s-lightning-beast-fang",
             "name": "Lightning Beast Fang",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/rcVY3zt.png",
             "skilldescription": "Hatake Kakashi (S) deals 25 piercing damage to one enemy and stuns them for 1 turn. The following turn, this skill will be replaced by 'Finishing Raikiri'.",
             "energy": [
                 "Ninjutsu",
@@ -73,7 +73,7 @@ module.exports = {
         {
             "id": "hatake-kakashi-s-kakashi-kamui",
             "name": "Kakashi Kamui",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/5VLh0hv.png",
             "skilldescription": "If used on an enemy, they will receive 40 piercing damage, and for 1 turn their cooldowns will be increased by 1 and their skills will cost 1 additional random energy. If used on an ally or himself, all harmful effects on them will be removed and they will become invulnerable for 1 turn. This skill ignores invulnerability.",
             "energy": [
                 "Bloodline",
@@ -152,7 +152,7 @@ module.exports = {
         {
             "id": "hatake-kakashi-s-team-tactics",
             "name": "Team Tactics",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/u6PAqZ8.png",
             "skilldescription": "For 3 turns, Hatake Kakashi (S)'s allies will have the cooldown of their skills reduced by 1. The following 3 turns, the first new harmful skill used by one enemy will be copied and will replace this skill for 1 turn. This skill cannot be reflected.",
             "energy": [
                 "Random",
@@ -186,7 +186,7 @@ module.exports = {
         {
             "id": "hatake-kakashi-s-bunshin-stand-in",
             "name": "Bunshin Stand-in",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/lp2Q1v2.png",
             "skilldescription": "This skill makes Hatake Kakashi (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -214,7 +214,7 @@ module.exports = {
         {
             "id": "hatake-kakashi-s-finishing-raikiri",
             "name": "Finishing Raikiri",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/aQUkK2t.png",
             "skilldescription": "Hatake Kakashi (S) targets one enemy, dealing 30 piercing damage to them. This skill will deal 10 additional damage to that enemy if they are stunned or if 'Lightning Beast Fang' was used on them the previous turn.",
             "energy": [
                 "Ninjutsu",

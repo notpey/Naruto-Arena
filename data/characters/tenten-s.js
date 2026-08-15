@@ -2,14 +2,14 @@ module.exports = {
     "id": "tenten-s",
     "characterId": "tenten-s",
     "name": "Tenten (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/KIlLyZW.png",
     "characterdeescription": "Now a chuunin, Tenten has added a myriad of powerful and potent weapons in her arsenal, even procuring the legendary fan of the sage of the six paths. Having an arsenal of weapons at her side, Tenten can chose to fight at different levels, upgrading her weapons until she finds something suitable for her battle.",
     "requiredMissionId": "a-genius-of-ranged-combat",
     "skills": [
         {
             "id": "tenten-s-kunai-grenade",
             "name": "Kunai Grenade",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/aJmF4ft.png",
             "skilldescription": "Tenten (S) deals 20 damage to one enemy and 10 damage to all other enemies. This skill cannot be countered or reflected.",
             "energy": [
                 "Taijutsu"
@@ -45,7 +45,7 @@ module.exports = {
         {
             "id": "tenten-s-chain-spin",
             "name": "Chain Spin",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/HtNe7Ys.png",
             "skilldescription": "Tenten (S) makes her team invulnerable to non-strategic skills for 1 turn.",
             "energy": [
                 "Random"
@@ -73,7 +73,7 @@ module.exports = {
         {
             "id": "tenten-s-weapon-upgrade",
             "name": "Weapon Upgrade",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/EzGlhJv.png",
             "skilldescription": "Tenten (S) gains 5 points of destructible defense. The first time this skill is used, it will replace 'Kunai Grenade' and 'Chain Spin'. The second time it is used, they will be replaced again. The third time this skill is used, it will reset, and her skills will revert back to the original ones.",
             "energy": [],
             "target": "self",
@@ -102,7 +102,7 @@ module.exports = {
         {
             "id": "tenten-s-leaping-dodge",
             "name": "Leaping Dodge",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/qM4w2Qr.png",
             "skilldescription": "This skill makes Tenten (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -130,7 +130,7 @@ module.exports = {
         {
             "id": "tenten-s-heavenly-chain-disaster",
             "name": "Heavenly Chain Disaster",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/VB5VDDo.png",
             "skilldescription": "Tenten (S) deals 25 piercing damage to all enemies.",
             "energy": [
                 "Taijutsu",
@@ -157,7 +157,7 @@ module.exports = {
         {
             "id": "tenten-s-iron-protection-wall",
             "name": "Iron Protection Wall",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/jkb9GzA.png",
             "skilldescription": "Tenten (S) makes her team invulnerable to physical skills for 1 turn and grants them 20 points of permanent destructible defense. This effect stacks.",
             "energy": [
                 "Ninjutsu",
@@ -188,7 +188,7 @@ module.exports = {
         {
             "id": "tenten-s-bashousen-coil-of-wind",
             "name": "Bashousen: Coil of Wind",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/48AoQR3.png",
             "skilldescription": "The following turn, any new non-mental skill used on Tenten (S) or her team will be reflected onto the character who used it. This skill is invisible.",
             "energy": [
                 "Ninjutsu",
@@ -218,7 +218,7 @@ module.exports = {
         {
             "id": "tenten-s-bashousen-coil-of-fire",
             "name": "Bashousen: Coil of Fire",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/S2wOVgc.png",
             "skilldescription": "Tenten (S) targets all enemies, dealing 10 damage and 10 affliction damage* to them. They will then receive 5 affliction damage* for the following 3 turns.",
             "energy": [
                 "Taijutsu",

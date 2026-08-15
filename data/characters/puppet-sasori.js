@@ -2,14 +2,14 @@ module.exports = {
     "id": "puppet-sasori",
     "characterId": "puppet-sasori",
     "name": "Puppet Sasori",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/huF0Rd7.png",
     "characterdeescription": "Sasori's true form is a puppet body with a living core attached to it. In this form, he can use weapons like a flamethrower and water jets, while still controling a hundred puppets. ORIGINAL DESIGN: AnteMito",
     "requiredMissionId": "a-perfect-body",
     "skills": [
         {
             "id": "puppet-sasori-flamethrower",
             "name": "Flamethrower",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/NScpPLl.png",
             "skilldescription": "Puppet Sasori deals 20 affliction damage to one enemy. If 'Water Stream Shooters' was used on this enemy the previous turn, they will have their non-affliction damage reduced by 10 for 1 turn.",
             "energy": [
                 "Bloodline"
@@ -64,7 +64,7 @@ module.exports = {
         {
             "id": "puppet-sasori-water-stream-shooters",
             "name": "Water Stream Shooters",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/fnKcko9.png",
             "skilldescription": "Puppet Sasori deals 20 piercing damage to one enemy. If 'Flamethrower' was used on this enemy the previous turn, they will be stunned for 1 turn.",
             "energy": [
                 "Ninjutsu"
@@ -117,7 +117,7 @@ module.exports = {
         {
             "id": "puppet-sasori-performance-of-a-hundred-puppets",
             "name": "Performance of a Hundred Puppets",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/8Cf3egf.png",
             "skilldescription": "For 3 turns, 'Flamethrower' and 'Water Stream Shooters' will deal 10 additional damage. During this time, Puppet Sasori targets all enemies and everytime they use a new harmful skill, they will take 5 piercing damage. The following 3 turns, this skill will be replaced by 'Puppet Attack'.",
             "energy": [
                 "Random"
@@ -163,7 +163,7 @@ module.exports = {
         {
             "id": "puppet-sasori-living-core",
             "name": "Living Core",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/r9oI8D1.png",
             "skilldescription": "This skill makes Puppet Sasori invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -191,7 +191,7 @@ module.exports = {
         {
             "id": "puppet-sasori-puppet-attack",
             "name": "Puppet Attack",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Q1HF3wS.png",
             "skilldescription": "Puppet Sasori deals 25 damage to all enemies.",
             "energy": [
                 "Random",

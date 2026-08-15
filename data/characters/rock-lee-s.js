@@ -2,14 +2,14 @@ module.exports = {
     "id": "rock-lee-s",
     "characterId": "rock-lee-s",
     "name": "Rock Lee (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/n9iULjL.png",
     "characterdeescription": "Now a chuunin, Lee has trained endlessly with Gai, and not only learned new abilities, but has learned what it truly means to fight. In battle, Lee now fights for his friends and allies, growing stronger as they fall around him.",
     "requiredMissionId": "a-genius-of-hard-work",
     "skills": [
         {
             "id": "rock-lee-s-leaf-rising-wind",
             "name": "Leaf Rising Wind",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ZmY4vF1.png",
             "skilldescription": "Rock Lee (S) targets one enemy, dealing 15 damage to them and lowering their non-affliction damage by 10 for 2 turns. This skill will deal 10 additional damage, and the damage reduction effect will last 1 additional turn for each ally that is dead.",
             "energy": [
                 "Taijutsu"
@@ -50,7 +50,7 @@ module.exports = {
         {
             "id": "rock-lee-s-leaf-great-whirlwind",
             "name": "Leaf Great Whirlwind",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/t2sNHYG.png",
             "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to one enemy and gaining 10 points of damage reduction for 1 turn. The following turn, this skill will deal 10 additional damage and grant 10 additional damage reduction. This skill will deal 5 additional damage for every ally that has been killed.",
             "energy": [
                 "Taijutsu"
@@ -110,7 +110,7 @@ module.exports = {
         {
             "id": "rock-lee-s-maximum-force-blast",
             "name": "Maximum Force Blast",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/j35nh5A.png",
             "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to them. This skill will deal 15 additional damage for each ally that is dead and 15 additional damage for every 30 health that Rock Lee (S) has lost.",
             "energy": [
                 "Random",
@@ -145,7 +145,7 @@ module.exports = {
         {
             "id": "rock-lee-s-jumping-dodge",
             "name": "Jumping Dodge",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/y6PYTiZ.png",
             "skilldescription": "This skill makes Rock Lee (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"

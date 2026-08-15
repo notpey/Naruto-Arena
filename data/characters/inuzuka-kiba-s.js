@@ -2,14 +2,14 @@ module.exports = {
     "id": "inuzuka-kiba-s",
     "characterId": "inuzuka-kiba-s",
     "name": "Inuzuka Kiba (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/O9pHpzM.png",
     "characterdeescription": "Over the last several years. Kiba, and his dog, Akamaru have grown considerably, not wanting to be left last in their group. Having improved their team work, and provided they are given enough time, Kiba and Akamaru can become unstoppable rampaging beasts.",
     "requiredMissionId": "a-boy-and-his-dog",
     "skills": [
         {
             "id": "inuzuka-kiba-s-three-headed-wolf",
             "name": "Three-Headed Wolf",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/TkewjMk.png",
             "skilldescription": "Inuzuka Kiba (S) gains 30 points of damage reduction and ignores enemy stun effects and energy drain or removal effects for 3 turns. The following 3 turns, this skill will be replaced by 'Tail Chasing Rotating Fang'.",
             "energy": [
                 "Bloodline",
@@ -44,7 +44,7 @@ module.exports = {
         {
             "id": "inuzuka-kiba-s-rotating-fang",
             "name": "Rotating Fang",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/WNui7wo.png",
             "skilldescription": "Inuzuka Kiba (S) deals 30 damage to one enemy and 20 damage to another random enemy. During 'Three-Headed Wolf', this skill will instead deal 20 damage to all other enemies.",
             "energy": [
                 "Taijutsu",
@@ -86,7 +86,7 @@ module.exports = {
         {
             "id": "inuzuka-kiba-s-fang-over-fang",
             "name": "Fang Over Fang",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/gpMpjn1.png",
             "skilldescription": "Inuzuka Kiba (S) deals 35 damage and 10 affliction damage* to one enemy and then reduces their non-affliction damage by 10 permanently. During 'Three-Headed Wolf', this skill will deal 5 additional damage.",
             "energy": [
                 "Taijutsu",
@@ -141,7 +141,7 @@ module.exports = {
         {
             "id": "inuzuka-kiba-s-hide-in-the-shade",
             "name": "Hide in the Shade",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/2NGDdwF.png",
             "skilldescription": "This skill makes Inuzuka Kiba (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -169,7 +169,7 @@ module.exports = {
         {
             "id": "inuzuka-kiba-s-tail-chasing-rotating-fang",
             "name": "Tail Chasing Rotating Fang",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Rvw0gam.png",
             "skilldescription": "Inuzuka Kiba (S) deals 40 damage to all enemies and stuns them for 1 turn.",
             "energy": [
                 "Taijutsu",

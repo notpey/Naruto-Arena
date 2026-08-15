@@ -2,14 +2,14 @@ module.exports = {
     "id": "itachi-body-double",
     "characterId": "itachi-body-double",
     "name": "Itachi Body Double",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/E7mAnm3.png",
     "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Itachi. The body double is controlled by Itachi but only has a third of his chakra.",
     "requiredMissionId": "the-real-itachi",
     "skills": [
         {
             "id": "itachi-body-double-finger-genjutsu",
             "name": "Finger Genjutsu",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/YZXkMwP.png",
             "skilldescription": "Itachi Body Double targets one enemy. If the affected enemy uses a new harmful skill, that skill will be countered, that enemy will take 10 damage, and Itachi Body Double will gain 1 genjutsu energy. The target of this skill is invisible.",
             "energy": [
                 "Genjutsu"
@@ -49,7 +49,7 @@ module.exports = {
         {
             "id": "itachi-body-double-genjutsu-reversal",
             "name": "Genjutsu Reversal",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ZVPp494.png",
             "skilldescription": "For 2 turns, if any enemy uses a non-mental skill on Itachi Body Double, he will reflect that skill onto the enemy who used it. This skill is invisible.",
             "energy": [
                 "Bloodline",
@@ -79,7 +79,7 @@ module.exports = {
         {
             "id": "itachi-body-double-fire-release-fireball",
             "name": "Fire Release: Fireball",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/rIju3Zc.png",
             "skilldescription": "Itachi Body Double attacks, dealing 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
             "energy": [
                 "Ninjutsu"
@@ -126,7 +126,7 @@ module.exports = {
         {
             "id": "itachi-body-double-illusionary-raven-bunshin",
             "name": "Illusionary Raven Bunshin",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/RuNxccO.png",
             "skilldescription": "This skill makes Itachi Body Double invulnerable for 1 turn.",
             "energy": [
                 "Random"

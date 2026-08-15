@@ -3100,7 +3100,7 @@ const characters = [
         "characterId": "tsuchi-kin",
         "name": "Tsuchi Kin",
         "facePicture": "https://i.imgur.com/hOoNOfj.png",
-        "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision.",
+        "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
         "skills": [
             {
                 "id": "tsuchi-kin-illusion-bell-needles",
@@ -4087,7 +4087,7 @@ const characters = [
         "id": "teuchi",
         "characterId": "teuchi",
         "name": "Teuchi",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/za8CSxN.png",
         "characterdeescription": "Teuchi is a citizen of the Hidden Leaf Village and the owner of Ramen Ichiraku. As a teenager, Teuchi devoted his life to making ramen, what undoubtedly makes him the most important character from the Naruto franchise. ORIGINAL DESIGN: Alexandre",
         "requiredMissionId": null,
         "skills": [
@@ -4221,7 +4221,7 @@ const characters = [
         "id": "young-minato",
         "characterId": "young-minato",
         "name": "Young Minato",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/REfg6Ri.png",
         "characterdeescription": "Minato is a prodigy kid from the Hidden Leaf Village who is capable of fighting other shinobi in higher ranks by having faster and stronger taijutsu skills. He entered the Hidden Leaf's Academy with the dream of earning the villagers' respect and recognition by becoming Hokage. ORIGINAL DESIGN: Liann",
         "requiredMissionId": null,
         "skills": [
@@ -4386,7 +4386,7 @@ const characters = [
         "id": "young-kushina",
         "characterId": "young-kushina",
         "name": "Young Kushina",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/DyZ6C5C.png",
         "characterdeescription": "Kushina is a kunoichi from the Hidden Leaf Village originated from the Hidden Eddy Village's Uzumaki Clan. Due to her special origins, Kushina has a red colored hair that constantly puts her into trouble. ORIGINAL DESIGN: TheDarkLegend",
         "requiredMissionId": null,
         "skills": [
@@ -4547,7 +4547,7 @@ const characters = [
         "id": "young-itachi",
         "characterId": "young-itachi",
         "name": "Young Itachi",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/N9A11eT.png",
         "characterdeescription": "The first child born to Uchiha Mikoto and Fugaku, Itachi's childhood was marked with violence. The death and destruction he experienced at such a young age traumatised Itachi and made him a pacifist, leading to him training non-stop to achieve his dream of becoming a ninja among ninja in order to erase fighting from the world. ORIGINAL DESIGN: Liann",
         "requiredMissionId": null,
         "skills": [
@@ -4683,7 +4683,7 @@ const characters = [
         "id": "young-yahiko",
         "characterId": "young-yahiko",
         "name": "Young Yahiko",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/9jHP6Qq.png",
         "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Yahiko is a stoic boy who leads his team in the fight for the survival during the war. ORIGINAL DESIGN: Liann",
         "requiredMissionId": null,
         "skills": [
@@ -4850,7 +4850,7 @@ const characters = [
         "id": "young-konan",
         "characterId": "young-konan",
         "name": "Young Konan",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/tsmObzW.png",
         "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Konan is a sweet girl who is always caring about her teammates more than about herself. ORIGINAL DESIGN: Liann",
         "requiredMissionId": null,
         "skills": [
@@ -5018,7 +5018,7 @@ const characters = [
         "id": "young-nagato",
         "characterId": "young-nagato",
         "name": "Young Nagato",
-        "facePicture": "deadcharacter-remaster.png?v=2",
+        "facePicture": "https://i.imgur.com/C1aW0e7.png",
         "characterdeescription": "The Rain Orphans were three children who lost their parents due to the Hidden Rain Village's involvement in the Second Shinobi World War. Nagato is a quiet boy who is not only afraid of the world, but also afraid of himself. ORIGINAL DESIGN: Liann",
         "requiredMissionId": null,
         "skills": [
@@ -13327,14 +13327,14 @@ const characters = [
         "id": "uzumaki-naruto-s",
         "characterId": "uzumaki-naruto-s",
         "name": "Uzumaki Naruto (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/K0gVNTu.png",
         "characterdeescription": "Having trained with Jiraya for almost three years, Naruto has grown, both mentally and physically. With his training behind him, Naruto is able to utilize his clones even more, granting him strong defense while augmenting his already powerful rasengan.",
         "requiredMissionId": "the-prodigal-son-returns",
         "skills": [
             {
                 "id": "uzumaki-naruto-s-oodama-rasengan",
                 "name": "Oodama Rasengan",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/fYmYPhq.png",
                 "skilldescription": "Uzumaki Naruto (S) deals 40 damage to one enemy. This skill ignores invulnerability.",
                 "energy": [
                     "Taijutsu",
@@ -13362,7 +13362,7 @@ const characters = [
             {
                 "id": "uzumaki-naruto-s-mass-shadow-clones",
                 "name": "Mass Shadow Clones",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/XvBwj6z.png",
                 "skilldescription": "The following turn, Uzumaki Naruto (S) will counter the first new harmful skill used on him and 'Oodama Rasengan' will be replaced by 'Rasenshuriken'. This skill is invisible.",
                 "energy": [
                     "Random"
@@ -13408,7 +13408,7 @@ const characters = [
             {
                 "id": "uzumaki-naruto-s-chakra-boost",
                 "name": "Chakra Boost",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/CbWBxfA.png",
                 "skilldescription": "Uzumaki Naruto (S) removes all harmful skills on him then gains 2 random energies. The following turn, Uzumaki Naruto (S) will gain 10 points of damage reduction and 'Oodama Rasengan' will cost 2 random energies.",
                 "energy": [
                     "Random",
@@ -13459,7 +13459,7 @@ const characters = [
             {
                 "id": "uzumaki-naruto-s-shadow-clone-save",
                 "name": "Shadow Clone Save",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/xw8NvvK.png",
                 "skilldescription": "This skill makes Uzumaki Naruto (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -13487,7 +13487,7 @@ const characters = [
             {
                 "id": "uzumaki-naruto-s-rasenshuriken",
                 "name": "Rasenshuriken",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/KMSMh17.png",
                 "skilldescription": "Uzumaki Naruto (S) deals 50 piercing damage to one enemy. This skill deals 50 additional damage to an enemy countered by 'Mass Shadow Clones'. This skill ignores invulnerability.",
                 "energy": [
                     "Taijutsu",
@@ -13532,14 +13532,14 @@ const characters = [
         "id": "haruno-sakura-s",
         "characterId": "haruno-sakura-s",
         "name": "Haruno Sakura (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/dMRqjIP.png",
         "characterdeescription": "With her extensive training under Tsunade for the last two and a half years, Sakura has gained a greater understanding of healing and the human body. While Sakura's physical strength and healing prowess have both increased, her greatest ability is a powerful chakra storing seal taught to her by Tsunade.",
         "requiredMissionId": "a-girl-grown-up",
         "skills": [
             {
                 "id": "haruno-sakura-s-chakra-enhanced-punch",
                 "name": "Chakra Enhanced Punch",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/R6sD2MG.png",
                 "skilldescription": "Haruno Sakura (S) deals 25 damage to one enemy. While 'Chakra Gathering' is active, this skill will deal 35 damage to one enemy, and 10 damage to all other enemies.",
                 "energy": [
                     "Taijutsu"
@@ -13584,7 +13584,7 @@ const characters = [
             {
                 "id": "haruno-sakura-s-superior-healing",
                 "name": "Superior Healing",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/uJHSPqu.png",
                 "skilldescription": "Haruno Sakura (S) heals half of one ally's missing health, rounded, and removes all enemy affliction skills from them. While 'Chakra Gathering' is active, this skill will cost 1 random energy and have no cooldown.",
                 "energy": [
                     "Ninjutsu"
@@ -13615,7 +13615,7 @@ const characters = [
             {
                 "id": "haruno-sakura-s-chakra-gathering",
                 "name": "Chakra Gathering",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/zgbp6dp.png",
                 "skilldescription": "Haruno Sakura (S) gains 3 seals. During this time, each skill that Haruno Sakura (S) uses other than her invulnerability will use up 1 Seal. While 'Chakra Gathering' is active, Haruno Sakura (S) can use this skill again for no cost to heal herself for 15 health and remove all harmful effects on her.",
                 "energy": [
                     "Random"
@@ -13658,7 +13658,7 @@ const characters = [
             {
                 "id": "haruno-sakura-s-insightful-dodge",
                 "name": "Insightful Dodge",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/H1t6mfB.png",
                 "skilldescription": "This skill makes Haruno Sakura (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -13686,7 +13686,7 @@ const characters = [
             {
                 "id": "haruno-sakura-s-chakra-heal-release",
                 "name": "Chakra Gathering: Heal",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/zgbp6dp.png",
                 "skilldescription": "Haruno Sakura (S) heals herself for 15 health and removes all harmful effects on her.",
                 "energy": [],
                 "target": "self",
@@ -13717,14 +13717,14 @@ const characters = [
         "id": "sai",
         "characterId": "sai",
         "name": "Sai",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/DF5JgYg.png",
         "characterdeescription": "A current member of the Elite ANBU Root, Sai is a quiet, but expressive individual with a mysterious past. Sai uses a set of brushes with a special ink to give life to his art, from tigers to lions to bears, that allow him to compete with his enemies.",
         "requiredMissionId": "a-blank-slate",
         "skills": [
             {
                 "id": "sai-super-beast-imitating-drawing-lions",
                 "name": "Super Beast Imitating Drawing: Lions",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/OiwLlis.png",
                 "skilldescription": "Sai deals 30 damage to one enemy. For 1 turn, Sai will gain 20 points of destructible defense.",
                 "energy": [
                     "Genjutsu",
@@ -13760,7 +13760,7 @@ const characters = [
             {
                 "id": "sai-super-beast-imitating-drawing-snake",
                 "name": "Super Beast Imitating Drawing: Snake",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/fv2a86K.png",
                 "skilldescription": "Sai stuns one enemy's physical, energy and strategic skills for 1 turn. During this time, that enemy will be unable to reduce damage or become invulnerable. This skill ignores invulnerability. During 'Adaptive Painting', this skill will be replaced.",
                 "energy": [
                     "Genjutsu"
@@ -13798,7 +13798,7 @@ const characters = [
             {
                 "id": "sai-adaptive-painting",
                 "name": "Adaptive Painting",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/za9vp5W.png",
                 "skilldescription": "For 3 turns, any ally that is targeted by a new direct stun skill will become invulnerable for 1 turn; any ally that has energy removed/stolen will gain 1 random energy, and any ally that successfully receives new non-affliction damage by an enemy will increase Sai's damage by 10 for 1 turn.",
                 "energy": [
                     "Random",
@@ -13831,7 +13831,7 @@ const characters = [
             {
                 "id": "sai-ink-clone",
                 "name": "Ink Clone",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ExEgRJl.png",
                 "skilldescription": "This skill makes Sai invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -13859,7 +13859,7 @@ const characters = [
             {
                 "id": "sai-super-beast-imitating-drawing-bird",
                 "name": "Super Beast Imitating Drawing: Bird",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ptiedOG.png",
                 "skilldescription": "Sai deals 25 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn.",
                 "energy": [
                     "Genjutsu"
@@ -13901,14 +13901,14 @@ const characters = [
         "id": "inuzuka-kiba-s",
         "characterId": "inuzuka-kiba-s",
         "name": "Inuzuka Kiba (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/O9pHpzM.png",
         "characterdeescription": "Over the last several years. Kiba, and his dog, Akamaru have grown considerably, not wanting to be left last in their group. Having improved their team work, and provided they are given enough time, Kiba and Akamaru can become unstoppable rampaging beasts.",
         "requiredMissionId": "a-boy-and-his-dog",
         "skills": [
             {
                 "id": "inuzuka-kiba-s-three-headed-wolf",
                 "name": "Three-Headed Wolf",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/TkewjMk.png",
                 "skilldescription": "Inuzuka Kiba (S) gains 30 points of damage reduction and ignores enemy stun effects and energy drain or removal effects for 3 turns. The following 3 turns, this skill will be replaced by 'Tail Chasing Rotating Fang'.",
                 "energy": [
                     "Bloodline",
@@ -13943,7 +13943,7 @@ const characters = [
             {
                 "id": "inuzuka-kiba-s-rotating-fang",
                 "name": "Rotating Fang",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/WNui7wo.png",
                 "skilldescription": "Inuzuka Kiba (S) deals 30 damage to one enemy and 20 damage to another random enemy. During 'Three-Headed Wolf', this skill will instead deal 20 damage to all other enemies.",
                 "energy": [
                     "Taijutsu",
@@ -13985,7 +13985,7 @@ const characters = [
             {
                 "id": "inuzuka-kiba-s-fang-over-fang",
                 "name": "Fang Over Fang",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/gpMpjn1.png",
                 "skilldescription": "Inuzuka Kiba (S) deals 35 damage and 10 affliction damage* to one enemy and then reduces their non-affliction damage by 10 permanently. During 'Three-Headed Wolf', this skill will deal 5 additional damage.",
                 "energy": [
                     "Taijutsu",
@@ -14040,7 +14040,7 @@ const characters = [
             {
                 "id": "inuzuka-kiba-s-hide-in-the-shade",
                 "name": "Hide in the Shade",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/2NGDdwF.png",
                 "skilldescription": "This skill makes Inuzuka Kiba (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14068,7 +14068,7 @@ const characters = [
             {
                 "id": "inuzuka-kiba-s-tail-chasing-rotating-fang",
                 "name": "Tail Chasing Rotating Fang",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Rvw0gam.png",
                 "skilldescription": "Inuzuka Kiba (S) deals 40 damage to all enemies and stuns them for 1 turn.",
                 "energy": [
                     "Taijutsu",
@@ -14108,14 +14108,14 @@ const characters = [
         "id": "aburame-shino-s",
         "characterId": "aburame-shino-s",
         "name": "Aburame Shino (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/gpdFquj.png",
         "characterdeescription": "Still as mysterious and secretive as ever, Shino has improved greatly over the years, learning and practicing with his loyal bugs. With his new found mastery, Shino can disable enemies even harder while slowly waiting for his bugs to erupt from their bodies and destroy them.",
         "requiredMissionId": "the-konoha-man-of-mystery",
         "skills": [
             {
                 "id": "aburame-shino-s-insect-swarm",
                 "name": "Insect Swarm",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/D3ezKBM.png",
                 "skilldescription": "Aburame Shino (S) deals 15 affliction damage to one enemy for 3 turns. The following 3 turns, that enemy will be invulnerable to all friendly skills. During this time, this skill will be replaced by 'Insect Consumption'.",
                 "energy": [
                     "Bloodline",
@@ -14165,7 +14165,7 @@ const characters = [
             {
                 "id": "aburame-shino-s-insect-barricade",
                 "name": "Insect Barricade",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/99fUTD7.png",
                 "skilldescription": "The following turn, the first new harmful skill used on one ally or Aburame Shino (S) will be countered, 'Parasitic Giant Beetle Infestation' will be placed on the countered enemy and then activated. If this skill does not counter an enemy skill, Aburame Shino (S) will gain 1 red energy. This skill is invisible.",
                 "energy": [
                     "Bloodline"
@@ -14209,7 +14209,7 @@ const characters = [
             {
                 "id": "aburame-shino-s-parasitic-giant-beetle-infestation",
                 "name": "Parasitic Giant Beetle Infestation",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/mX9trNE.png",
                 "skilldescription": "Aburame Shino (S) targets one enemy. After 3 turns, they will take 25 affliction damage and all other copies of this skill on them will be activated. This skill is invisible.",
                 "energy": [
                     "Bloodline"
@@ -14251,7 +14251,7 @@ const characters = [
             {
                 "id": "aburame-shino-s-insect-cocoon",
                 "name": "Insect Cocoon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/s9ukg3d.png",
                 "skilldescription": "This skill makes Aburame Shino (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14279,7 +14279,7 @@ const characters = [
             {
                 "id": "aburame-shino-s-insect-consumption",
                 "name": "Insect Consumption",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/xcAgNFB.png",
                 "skilldescription": "Aburame Shino (S) steals 1 random energy from one enemy affected by 'Insect Swarm' and increases the damage that enemy receives from 'Insect Swarm' by 5 that turn.",
                 "energy": [
                     "Bloodline"
@@ -14324,14 +14324,14 @@ const characters = [
         "id": "hyuuga-hinata-s",
         "characterId": "hyuuga-hinata-s",
         "name": "Hyuuga Hinata (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/M5GPPe5.png",
         "characterdeescription": "With the Chuunin Exam behind her, and with Naruto's words deep in her heart, Hinata has grown and become stronger and a woman. With her mastery of the Hyuuga clan tactics, Hinata can give life to powerful chakra lions while hindering her enemies' chakra paths.",
         "requiredMissionId": "a-lovestruck-girl",
         "skills": [
             {
                 "id": "hyuuga-hinata-s-pressure-point-closure",
                 "name": "Pressure Point Closure",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/djpQ5Eg.png",
                 "skilldescription": "Hyuuga Hinata (S) targets one enemy, dealing 10 damage to them, increasing the cost of their skills by 1 random energy for 1 turn, and removing all stacks of 'Hinata - Eight Trigrams Field' from them (including the skill itself). During 'Hinata - Eight Trigrams Field', this skill will deal 10 additional damage.",
                 "energy": [
                     "Random"
@@ -14377,7 +14377,7 @@ const characters = [
             {
                 "id": "hyuuga-hinata-s-gentle-step-twin-lion-fists",
                 "name": "Gentle Step Twin Lion Fists",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/48pvYwu.png",
                 "skilldescription": "This skill deals 30 damage to one enemy and removes 1 random energy from them. This skill will deal 5 additional damage for each 'Pressure Point Closure' stack. Once used, this skill removes all stacks of 'Pressure Point Closure' from the targeted enemy.",
                 "energy": [
                     "Ninjutsu",
@@ -14412,7 +14412,7 @@ const characters = [
             {
                 "id": "hyuuga-hinata-s-eight-trigrams-field",
                 "name": "Hinata - Eight Trigrams Field",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/uF6EIgn.png",
                 "skilldescription": "For 4 turns, if an enemy uses a new harmful skill, the energy cost increase of 'Pressure Point Closure' will last 1 additional turn on them permanently.",
                 "energy": [
                     "Random"
@@ -14440,7 +14440,7 @@ const characters = [
             {
                 "id": "hyuuga-hinata-s-byakugan-sight",
                 "name": "Byakugan Sight",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/hPD2pLH.png",
                 "skilldescription": "This skill makes Hyuuga Hinata (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14471,14 +14471,14 @@ const characters = [
         "id": "nara-shikamaru-s",
         "characterId": "nara-shikamaru-s",
         "name": "Nara Shikamaru (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/tXroLB1.png",
         "characterdeescription": "Once known to be one of the laziest ninja, Shikamaru has worked tireless to become not only stronger, but a leader too. More than ever before, Shikamaru excels at coming up with long winded and convoluted plans meant to defeat any enemies in his path.",
         "requiredMissionId": "where-the-shadows-lie",
         "skills": [
             {
                 "id": "nara-shikamaru-s-shadow-sewing",
                 "name": "Shadow Sewing",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/OuCKCqh.png",
                 "skilldescription": "Nara Shikamaru (S) deals 35 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn. If this skill is used on an enemy affected by 'Long-Range Tactics', it will deal 10 additional damage.",
                 "energy": [
                     "Genjutsu",
@@ -14527,7 +14527,7 @@ const characters = [
             {
                 "id": "nara-shikamaru-s-long-range-tactics",
                 "name": "Long-Range Tactics",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/xlrjNhU.png",
                 "skilldescription": "Nara Shikamaru (S) targets one enemy. That enemy has their non-strategic skills stunned 2 turns and Nara Shikamaru (S) will be invulnerable during this time.",
                 "energy": [
                     "Ninjutsu",
@@ -14574,7 +14574,7 @@ const characters = [
             {
                 "id": "nara-shikamaru-s-expert-analysis",
                 "name": "Expert Analysis",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/8bM6MSc.png",
                 "skilldescription": "For 3 turns, any time that one target enemy uses a new skill, that enemy will be unable to reduce damage or become invulnerable and all helpful counters and reflect skills on them will be ignored for 1 turn. This skill is invisible.",
                 "energy": [],
                 "target": "single-enemy",
@@ -14606,7 +14606,7 @@ const characters = [
             {
                 "id": "nara-shikamaru-s-panicked-dodge",
                 "name": "Panicked Dodge",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/mEXRLAE.png",
                 "skilldescription": "This skill makes Nara Shikamaru (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14637,14 +14637,14 @@ const characters = [
         "id": "akimichi-chouji-s",
         "characterId": "akimichi-chouji-s",
         "name": "Akimichi Chouji (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/EU9MrUy.png",
         "characterdeescription": "After nearly three years, Chouji has developed in both strength and size, mastering the Akimichi clan techniques. No longer does Chouji need the Akimichi pills to tap into his true strength, instead, he merely needs to control his chakra and become a force to reckon with.",
         "requiredMissionId": "a-portly-but-steadfast-ninja",
         "skills": [
             {
                 "id": "akimichi-chouji-s-expansion-technique",
                 "name": "Expansion Technique",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/W3vl8FY.png",
                 "skilldescription": "For 4 turns, Akimichi Chouji (S) gains 25 points of destructible defense, 'Spiked Meat Tank' will do its alternate effects and have 1 less turn of cooldown, and 'Mega Palm Thrust' will be improved.",
                 "energy": [
                     "Random"
@@ -14676,7 +14676,7 @@ const characters = [
             {
                 "id": "akimichi-chouji-s-spiked-meat-tank",
                 "name": "Spiked Meat Tank",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/IEOExfb.png",
                 "skilldescription": "Akimichi Chouji (S) targets one ally or himself and will counter all enemy non-mental skills used on the target for 1 turn. The countered enemies will take 25 damage. This skill is invisible. Alternate: Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
                 "energy": [
                     "Bloodline"
@@ -14706,7 +14706,7 @@ const characters = [
             {
                 "id": "akimichi-chouji-s-spiked-meat-tank-alt",
                 "name": "Spiked Meat Tank (Alternate)",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/IEOExfb.png",
                 "skilldescription": "Akimichi Chouji (S) deals 25 damage to one enemy and becomes invulnerable for 1 turn.",
                 "energy": [
                     "Bloodline"
@@ -14739,7 +14739,7 @@ const characters = [
             {
                 "id": "akimichi-chouji-s-mega-palm-thrust",
                 "name": "Mega Palm Thrust",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/xTH8pAA.png",
                 "skilldescription": "Akimichi Chouji (S) deals 25 piercing damage to one enemy. During 'Expansion Technique', this damage is improved to 40, the targeted enemy has their non-strategic skills stunned for 1 turn, and this skill has an 1 turn cooldown.",
                 "energy": [
                     "Taijutsu",
@@ -14803,7 +14803,7 @@ const characters = [
             {
                 "id": "akimichi-chouji-s-effortful-block",
                 "name": "Effortful Block",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/9h6FhK5.png",
                 "skilldescription": "This skill makes Akimichi Chouji (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14834,14 +14834,14 @@ const characters = [
         "id": "yamanaka-ino-s",
         "characterId": "yamanaka-ino-s",
         "name": "Yamanaka Ino (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/0if0azl.png",
         "characterdeescription": "Not one to be left behind, Ino has trained non-stop to improve her abilities and teamwork. With her improved techniques, Ino can not only control her enemies, but her allies too all while seeing everything on the battlefield.",
         "requiredMissionId": "blondes-have-all-the-fun",
         "skills": [
             {
                 "id": "yamanaka-ino-s-mind-body-switch",
                 "name": "Mind Body Switch",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/o3L4SaW.png",
                 "skilldescription": "Yamanaka Ino (S) targets one enemy. After 1 turn, that enemy will take 15 damage and if that enemy uses a new harmful skill during this time, they will be countered and this skill will be replaced by the skill they used for 1 turn. This skill cannot be reflected and is invisible.",
                 "energy": [
                     "Genjutsu"
@@ -14882,7 +14882,7 @@ const characters = [
             {
                 "id": "yamanaka-ino-s-proxy-surveillance",
                 "name": "Proxy Surveillance",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/5K6bokD.png",
                 "skilldescription": "Yamanaka Ino (S) targets all enemies. For 3 turns, everytime they use a new skill, they will take 5 piercing damage. During this time, all new invisible skills they use will become visible. This skill cannot be countered or reflected.",
                 "energy": [
                     "Random"
@@ -14914,7 +14914,7 @@ const characters = [
             {
                 "id": "yamanaka-ino-s-mind-clone-switch",
                 "name": "Mind Clone Switch",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/orofy9Q.png",
                 "skilldescription": "For 2 turns, both of Yamanaka Ino (S)'s allies will ignore all harmful effects other than damage and energy cost changes. This skill is invisible and will end if Yamanaka Ino (S) dies.",
                 "energy": [
                     "Genjutsu",
@@ -14945,7 +14945,7 @@ const characters = [
             {
                 "id": "yamanaka-ino-s-hide",
                 "name": "Hide",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/TrPzpBy.png",
                 "skilldescription": "This skill makes Yamanaka Ino (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -14976,14 +14976,14 @@ const characters = [
         "id": "rock-lee-s",
         "characterId": "rock-lee-s",
         "name": "Rock Lee (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/n9iULjL.png",
         "characterdeescription": "Now a chuunin, Lee has trained endlessly with Gai, and not only learned new abilities, but has learned what it truly means to fight. In battle, Lee now fights for his friends and allies, growing stronger as they fall around him.",
         "requiredMissionId": "a-genius-of-hard-work",
         "skills": [
             {
                 "id": "rock-lee-s-leaf-rising-wind",
                 "name": "Leaf Rising Wind",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ZmY4vF1.png",
                 "skilldescription": "Rock Lee (S) targets one enemy, dealing 15 damage to them and lowering their non-affliction damage by 10 for 2 turns. This skill will deal 10 additional damage, and the damage reduction effect will last 1 additional turn for each ally that is dead.",
                 "energy": [
                     "Taijutsu"
@@ -15024,7 +15024,7 @@ const characters = [
             {
                 "id": "rock-lee-s-leaf-great-whirlwind",
                 "name": "Leaf Great Whirlwind",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/t2sNHYG.png",
                 "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to one enemy and gaining 10 points of damage reduction for 1 turn. The following turn, this skill will deal 10 additional damage and grant 10 additional damage reduction. This skill will deal 5 additional damage for every ally that has been killed.",
                 "energy": [
                     "Taijutsu"
@@ -15084,7 +15084,7 @@ const characters = [
             {
                 "id": "rock-lee-s-maximum-force-blast",
                 "name": "Maximum Force Blast",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/j35nh5A.png",
                 "skilldescription": "Rock Lee (S) targets one enemy, dealing 20 damage to them. This skill will deal 15 additional damage for each ally that is dead and 15 additional damage for every 30 health that Rock Lee (S) has lost.",
                 "energy": [
                     "Random",
@@ -15119,7 +15119,7 @@ const characters = [
             {
                 "id": "rock-lee-s-jumping-dodge",
                 "name": "Jumping Dodge",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/y6PYTiZ.png",
                 "skilldescription": "This skill makes Rock Lee (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -15150,14 +15150,14 @@ const characters = [
         "id": "tenten-s",
         "characterId": "tenten-s",
         "name": "Tenten (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/KIlLyZW.png",
         "characterdeescription": "Now a chuunin, Tenten has added a myriad of powerful and potent weapons in her arsenal, even procuring the legendary fan of the sage of the six paths. Having an arsenal of weapons at her side, Tenten can chose to fight at different levels, upgrading her weapons until she finds something suitable for her battle.",
         "requiredMissionId": "a-genius-of-ranged-combat",
         "skills": [
             {
                 "id": "tenten-s-kunai-grenade",
                 "name": "Kunai Grenade",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/aJmF4ft.png",
                 "skilldescription": "Tenten (S) deals 20 damage to one enemy and 10 damage to all other enemies. This skill cannot be countered or reflected.",
                 "energy": [
                     "Taijutsu"
@@ -15193,7 +15193,7 @@ const characters = [
             {
                 "id": "tenten-s-chain-spin",
                 "name": "Chain Spin",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/HtNe7Ys.png",
                 "skilldescription": "Tenten (S) makes her team invulnerable to non-strategic skills for 1 turn.",
                 "energy": [
                     "Random"
@@ -15221,7 +15221,7 @@ const characters = [
             {
                 "id": "tenten-s-weapon-upgrade",
                 "name": "Weapon Upgrade",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/EzGlhJv.png",
                 "skilldescription": "Tenten (S) gains 5 points of destructible defense. The first time this skill is used, it will replace 'Kunai Grenade' and 'Chain Spin'. The second time it is used, they will be replaced again. The third time this skill is used, it will reset, and her skills will revert back to the original ones.",
                 "energy": [],
                 "target": "self",
@@ -15250,7 +15250,7 @@ const characters = [
             {
                 "id": "tenten-s-leaping-dodge",
                 "name": "Leaping Dodge",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/qM4w2Qr.png",
                 "skilldescription": "This skill makes Tenten (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -15278,7 +15278,7 @@ const characters = [
             {
                 "id": "tenten-s-heavenly-chain-disaster",
                 "name": "Heavenly Chain Disaster",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/VB5VDDo.png",
                 "skilldescription": "Tenten (S) deals 25 piercing damage to all enemies.",
                 "energy": [
                     "Taijutsu",
@@ -15305,7 +15305,7 @@ const characters = [
             {
                 "id": "tenten-s-iron-protection-wall",
                 "name": "Iron Protection Wall",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/jkb9GzA.png",
                 "skilldescription": "Tenten (S) makes her team invulnerable to physical skills for 1 turn and grants them 20 points of permanent destructible defense. This effect stacks.",
                 "energy": [
                     "Ninjutsu",
@@ -15336,7 +15336,7 @@ const characters = [
             {
                 "id": "tenten-s-bashousen-coil-of-wind",
                 "name": "Bashousen: Coil of Wind",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/48AoQR3.png",
                 "skilldescription": "The following turn, any new non-mental skill used on Tenten (S) or her team will be reflected onto the character who used it. This skill is invisible.",
                 "energy": [
                     "Ninjutsu",
@@ -15366,7 +15366,7 @@ const characters = [
             {
                 "id": "tenten-s-bashousen-coil-of-fire",
                 "name": "Bashousen: Coil of Fire",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/S2wOVgc.png",
                 "skilldescription": "Tenten (S) targets all enemies, dealing 10 damage and 10 affliction damage* to them. They will then receive 5 affliction damage* for the following 3 turns.",
                 "energy": [
                     "Taijutsu",
@@ -15418,14 +15418,14 @@ const characters = [
         "id": "hyuuga-neji-s",
         "characterId": "hyuuga-neji-s",
         "name": "Hyuuga Neji (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/GdN4ylI.png",
         "characterdeescription": "The only of the original genins to become a Jounin, Neji has only increased his already powerful set of abilities and skills during the near three years of time. While still being able to rely on his pressure point attacks, Neji is now also able to unleash giant waves of chakra for brutish damage as well.",
         "requiredMissionId": "pride-of-the-hyuuga",
         "skills": [
             {
                 "id": "hyuuga-neji-s-eight-trigrams-vacuum-palm",
                 "name": "Eight Trigrams Vacuum Palm",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/PYtn7Tm.png",
                 "skilldescription": "Hyuuga Neji (S) deals 20 damage to one enemy and removes 1 random energy from them.",
                 "energy": [
                     "Taijutsu",
@@ -15455,7 +15455,7 @@ const characters = [
             {
                 "id": "hyuuga-neji-s-eight-trigrams-mountain-crusher",
                 "name": "Eight Trigrams Mountain Crusher",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/bVSedPE.png",
                 "skilldescription": "Hyuuga Neji (S) targets one enemy, destroying any destructible defense they have and dealing 45 damage to them.",
                 "energy": [
                     "Taijutsu",
@@ -15483,7 +15483,7 @@ const characters = [
             {
                 "id": "hyuuga-neji-s-byakugan-eight-trigrams-field",
                 "name": "Byakugan - Eight Trigrams Field",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/W4sAefq.png",
                 "skilldescription": "For 2 turns, all enemies will be unable to reduce damage or become invulnerable. For 1 turn, any enemy that uses a new harmful skill on Hyuuga Neji (S) will be countered and this skill will be replaced by 'Pressure Point Strike'. This skill is invisible.",
                 "energy": [
                     "Bloodline"
@@ -15541,7 +15541,7 @@ const characters = [
             {
                 "id": "hyuuga-neji-s-byakugan-defense",
                 "name": "Byakugan Defense",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/FXM6jYa.png",
                 "skilldescription": "This skill makes Hyuuga Neji (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -15569,7 +15569,7 @@ const characters = [
             {
                 "id": "hyuuga-neji-s-pressure-point-strike",
                 "name": "Pressure Point Strike",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/QTNMUo0.png",
                 "skilldescription": "Hyuuga Neji (S) attacks one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
                 "energy": [
                     "Random"
@@ -15619,14 +15619,14 @@ const characters = [
         "id": "hatake-kakashi-s",
         "characterId": "hatake-kakashi-s",
         "name": "Hatake Kakashi (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/QkC8m4x.png",
         "characterdeescription": "Kakashi has not let the years pass by idle, and has trained as hard as any other, improving his sharingan and his own unique jutsu. While Kakashi's raikiri is still a potent finisher, he is now also able to rely on his kamui, aiming it at his enemies or even rescuing his allies.",
         "requiredMissionId": "from-teacher-to-partner",
         "skills": [
             {
                 "id": "hatake-kakashi-s-lightning-beast-fang",
                 "name": "Lightning Beast Fang",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/rcVY3zt.png",
                 "skilldescription": "Hatake Kakashi (S) deals 25 piercing damage to one enemy and stuns them for 1 turn. The following turn, this skill will be replaced by 'Finishing Raikiri'.",
                 "energy": [
                     "Ninjutsu",
@@ -15690,7 +15690,7 @@ const characters = [
             {
                 "id": "hatake-kakashi-s-kakashi-kamui",
                 "name": "Kakashi Kamui",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/5VLh0hv.png",
                 "skilldescription": "If used on an enemy, they will receive 40 piercing damage, and for 1 turn their cooldowns will be increased by 1 and their skills will cost 1 additional random energy. If used on an ally or himself, all harmful effects on them will be removed and they will become invulnerable for 1 turn. This skill ignores invulnerability.",
                 "energy": [
                     "Bloodline",
@@ -15769,7 +15769,7 @@ const characters = [
             {
                 "id": "hatake-kakashi-s-team-tactics",
                 "name": "Team Tactics",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/u6PAqZ8.png",
                 "skilldescription": "For 3 turns, Hatake Kakashi (S)'s allies will have the cooldown of their skills reduced by 1. The following 3 turns, the first new harmful skill used by one enemy will be copied and will replace this skill for 1 turn. This skill cannot be reflected.",
                 "energy": [
                     "Random",
@@ -15803,7 +15803,7 @@ const characters = [
             {
                 "id": "hatake-kakashi-s-bunshin-stand-in",
                 "name": "Bunshin Stand-in",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/lp2Q1v2.png",
                 "skilldescription": "This skill makes Hatake Kakashi (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -15831,7 +15831,7 @@ const characters = [
             {
                 "id": "hatake-kakashi-s-finishing-raikiri",
                 "name": "Finishing Raikiri",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/aQUkK2t.png",
                 "skilldescription": "Hatake Kakashi (S) targets one enemy, dealing 30 piercing damage to them. This skill will deal 10 additional damage to that enemy if they are stunned or if 'Lightning Beast Fang' was used on them the previous turn.",
                 "energy": [
                     "Ninjutsu",
@@ -15876,14 +15876,14 @@ const characters = [
         "id": "yamato",
         "characterId": "yamato",
         "name": "Yamato",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/bqEBFnr.png",
         "characterdeescription": "A member of the secretive ANBU organization and a man who was once injected with the cells of Hashirama, the 1st Hokage. Due to the cells that live inside of him, Yamato is capable of small scale wood element abilities, from trapping enemies to protecting his comrades.",
         "requiredMissionId": "a-new-team-leader",
         "skills": [
             {
                 "id": "yamato-bliss-bringing-hands",
                 "name": "Bliss-Bringing Hands",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/fa2R9Pp.png",
                 "skilldescription": "Yamato targets one enemy, dealing 30 damage to them and making them ignore all helpful effects except energy cost changes for 1 turn.",
                 "energy": [
                     "Bloodline",
@@ -15919,7 +15919,7 @@ const characters = [
             {
                 "id": "yamato-wood-release-wood-clone",
                 "name": "Wood Release: Wood Clone",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/V0n6c3b.png",
                 "skilldescription": "Yamato targets one ally or himself for 1 turn, countering the first physical, energy or strategic skill used against them, dealing 20 damage to the enemy and granting that ally 20 points of destructible defense. This skill is invisible.",
                 "energy": [
                     "Bloodline"
@@ -15959,7 +15959,7 @@ const characters = [
             {
                 "id": "yamato-wood-release-four-pillar-prison",
                 "name": "Wood Release: Four-Pillar Prison",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/pMDbi3L.png",
                 "skilldescription": "This skill can be used on one enemy or one ally. If used on an enemy, that enemy will have their physical, energy and strategic skills stunned for 2 turns. If used on an ally, that ally will gain 40 points of permanent destructible defense. This skill ignores invulnerability.",
                 "energy": [
                     "Bloodline",
@@ -16016,7 +16016,7 @@ const characters = [
             {
                 "id": "yamato-wood-release-wood-shelter",
                 "name": "Wood Release: Wood Shelter",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/UudEEcp.png",
                 "skilldescription": "This skill makes Yamato invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16047,14 +16047,14 @@ const characters = [
         "id": "maito-gai-s",
         "characterId": "maito-gai-s",
         "name": "Maito Gai (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/cyxLCgn.png",
         "characterdeescription": "Still the leader of Team Gai, Gai is not one to let himself fall behind in terms of training and strength. Gai no longer feels the need to go straight into the highest level of gates that he can, instead taking his time, until the time requires the green beast of Konoha to go all out.",
         "requiredMissionId": "the-green-beast",
         "skills": [
             {
                 "id": "maito-gai-s-nunchaku-taijutsu",
                 "name": "Nunchaku Taijutsu",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/dHHQmGI.png",
                 "skilldescription": "Maito Gai (S) deals 10 damage to one enemy for 3 turns. During this time, if an enemy uses a new harmful physical skill on Maito Gai (S), he will deal 10 damage to them.*",
                 "energy": [
                     "Taijutsu"
@@ -16098,7 +16098,7 @@ const characters = [
             {
                 "id": "maito-gai-s-fiery-kick",
                 "name": "Fiery Kick",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/HxQ3okr.png",
                 "skilldescription": "Maito Gai (S) targets one enemy, dealing 35 damage to them and reducing all non-affliction damage they deal by 20 for 1 turn.",
                 "energy": [
                     "Taijutsu",
@@ -16134,7 +16134,7 @@ const characters = [
             {
                 "id": "maito-gai-s-single-gate-release",
                 "name": "Single Gate Release",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/DSUDqoQ.png",
                 "skilldescription": "Maito Gai (S) receives 5 affliction damage*, but permanently gains 5 points of damage reduction and increases the damage of 'Nunchaku Taijutsu' and 'Fiery Kick' by 5. At 6 usages of this skill, 'Fiery Kick' will be replaced by 'Morning Peacock', and at 7 usages of this skill, it will be replaced by 'Daytime Tiger'. This skill can only be used 7 times.",
                 "energy": [],
                 "target": "self",
@@ -16180,7 +16180,7 @@ const characters = [
             {
                 "id": "maito-gai-s-muscle-block",
                 "name": "Muscle Block",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/KgkDleV.png",
                 "skilldescription": "This skill makes Maito Gai (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16208,7 +16208,7 @@ const characters = [
             {
                 "id": "maito-gai-s-morning-peacock",
                 "name": "Morning Peacock",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/rZHrDmS.png",
                 "skilldescription": "Maito Gai (S) deals 60 damage to one enemy and stuns them for 1 turn.",
                 "energy": [
                     "Taijutsu",
@@ -16244,7 +16244,7 @@ const characters = [
             {
                 "id": "maito-gai-s-daytime-tiger",
                 "name": "Daytime Tiger",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Ip9pKpB.png",
                 "skilldescription": "Maito Gai (S) deals 300 damage to one enemy.",
                 "energy": [
                     "Taijutsu",
@@ -16271,14 +16271,14 @@ const characters = [
         "id": "kankuro-s",
         "characterId": "kankuro-s",
         "name": "Kankuro (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/Mq5ImWG.png",
         "characterdeescription": "In the last couple years Kankuro has become a Jounin and has created a new puppet. He is now able to harness three puppets at once and is a more versatile combatant. ORIGINAL DESIGN: Yaseen16",
         "requiredMissionId": "the-aspiring-puppet-master",
         "skills": [
             {
                 "id": "kankuro-s-kuroari-trap",
                 "name": "Kuroari Trap",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/n0dVypN.png",
                 "skilldescription": "Kankuro (S) targets one enemy, countering any harmful skill they use for 1 turn. If countered, that enemy will take 100% more damage from 'Karasu Knives' the following turn. This skill is invisible until triggered.",
                 "energy": [
                     "Random"
@@ -16317,7 +16317,7 @@ const characters = [
             {
                 "id": "kankuro-s-karasu-knives",
                 "name": "Karasu Knives",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/isLgZw1.png",
                 "skilldescription": "Kankuro (S) targets an enemy, dealing 20 damage to them. The following turn, that enemy will take 10 affliction damage.*",
                 "energy": [
                     "Random",
@@ -16365,7 +16365,7 @@ const characters = [
             {
                 "id": "kankuro-s-sanshouo-shield",
                 "name": "Sanshouo Shield",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/3bqzxTD.png",
                 "skilldescription": "For 3 turns, Kankuro (S) and his allies will have 10 points of damage reduction and will ignore harmful non-conditional affliction damage. This skill becomes 'Defensive Puppet Control' for 3 turns after used.",
                 "energy": [
                     "Random",
@@ -16409,7 +16409,7 @@ const characters = [
             {
                 "id": "kankuro-s-puppet-distraction",
                 "name": "Puppet Distraction",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/CSxXuFZ.png",
                 "skilldescription": "This skill makes Kankuro (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16437,7 +16437,7 @@ const characters = [
             {
                 "id": "kankuro-s-defensive-puppet-control",
                 "name": "Defensive Puppet Control",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/V0T3xOE.png",
                 "skilldescription": "Kankuro (S) targets one ally or himself, granting them 20 points of damage reduction for 1 turn.",
                 "energy": [],
                 "target": "single-ally",
@@ -16468,14 +16468,14 @@ const characters = [
         "id": "temari-s",
         "characterId": "temari-s",
         "name": "Temari (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/hTu7W3f.png",
         "characterdeescription": "Temari has grown over the years. She is now a Jounin as well as the sister of Kankuro and Gaara. Temari is also the Hidden Sand Village's ambassador to the Hidden Leaf Village.",
         "requiredMissionId": "the-third-sand-sibling",
         "skills": [
             {
                 "id": "temari-s-first-moon",
                 "name": "First Moon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/7z5yOKa.png",
                 "skilldescription": "'Wind Scythe' will deal 5 additional damage permanently. Temari (S) gains 15 points of damage reduction permanently and this skill becomes 'Second Moon' permanently when used.",
                 "energy": [],
                 "target": "self",
@@ -16508,7 +16508,7 @@ const characters = [
             {
                 "id": "temari-s-ally-protection",
                 "name": "Ally Protection",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/iQYMkJx.png",
                 "skilldescription": "Temari (S) targets one ally. For 1 turn, that ally will gain 20 points of damage reduction and they cannot be killed.",
                 "energy": [
                     "Random"
@@ -16539,7 +16539,7 @@ const characters = [
             {
                 "id": "temari-s-wind-scythe",
                 "name": "Wind Scythe",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/t5cDkdF.png",
                 "skilldescription": "Temari (S) deals 25 damage to one enemy.",
                 "energy": [
                     "Ninjutsu"
@@ -16562,7 +16562,7 @@ const characters = [
             {
                 "id": "temari-s-fan-offensive-defense",
                 "name": "Fan Offensive Defense",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/zAC9lgX.png",
                 "skilldescription": "This skill makes Temari (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16590,7 +16590,7 @@ const characters = [
             {
                 "id": "temari-s-second-moon",
                 "name": "Second Moon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/yim1I1h.png",
                 "skilldescription": "Temari (S) ends 'First Moon'. Temari (S) gains 5 points of damage reduction and 10 points of unpierceable damage reduction permanently and 'Wind Scythe' will deal 10 additional damage permanently. This skill becomes 'Third Moon' permanently when used.",
                 "energy": [],
                 "target": "self",
@@ -16630,7 +16630,7 @@ const characters = [
             {
                 "id": "temari-s-third-moon",
                 "name": "Third Moon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/IJVBvYr.png",
                 "skilldescription": "Temari (S) deals 20 damage to all enemies and makes them deal 5 less damage for 1 turn.",
                 "energy": [
                     "Ninjutsu",
@@ -16669,14 +16669,14 @@ const characters = [
         "id": "kazekage-gaara",
         "characterId": "kazekage-gaara",
         "name": "Kazekage Gaara",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/iX1Omvr.png",
         "characterdeescription": "After a few short years and much soul-searching, Gaara has risen to be his village's Kazekage. Rather than destroying others he now protects those he cares about to prove his existence. ORIGINAL DESIGN: Liann",
         "requiredMissionId": "finding-his-purpose",
         "skills": [
             {
                 "id": "kazekage-gaara-desert-missile",
                 "name": "Desert Missile",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/0gRwpJG.png",
                 "skilldescription": "Kazekage Gaara deals 15 piercing damage to one enemy and reduces their non-affliction damage by 10 for 1 turn. This effect lasts 1 additional turn for each Desert Charge Kazekage Gaara has and then removes all Desert Charges on him.",
                 "energy": [
                     "Bloodline"
@@ -16716,7 +16716,7 @@ const characters = [
             {
                 "id": "kazekage-gaara-desert-prison",
                 "name": "Desert Prison",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/7lhw4ni.png",
                 "skilldescription": "Kazekage Gaara deals 25 damage to one enemy and stuns them for 1 turn. This skill grants Kazekage Gaara 1 Desert Charge.",
                 "energy": [
                     "Bloodline",
@@ -16763,7 +16763,7 @@ const characters = [
             {
                 "id": "kazekage-gaara-sand-summoning",
                 "name": "Sand Summoning",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/75wCs8N.png",
                 "skilldescription": "Kazekage Gaara gains 5 points of permanent damage reduction and 1 Desert Charge. His allies gain 10 points of permanent destructible defense. 'Desert Missile' and 'Desert Prison' will deal 5 additional damage permanently. This skill stacks.",
                 "energy": [
                     "Random"
@@ -16820,7 +16820,7 @@ const characters = [
             {
                 "id": "kazekage-gaara-sand-sphere",
                 "name": "Sand Sphere",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ISeDMEa.png",
                 "skilldescription": "This skill makes Kazekage Gaara invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16851,14 +16851,14 @@ const characters = [
         "id": "yakushi-kabuto-s",
         "characterId": "yakushi-kabuto-s",
         "name": "Yakushi Kabuto (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/bFuiE0L.png",
         "characterdeescription": "Kabuto is the loyal servant of Orochimaru and is a very dangerous missing-nin. He is a calculating individual who is both accomplished at combat and healing.",
         "requiredMissionId": "a-double-agent",
         "skills": [
             {
                 "id": "yakushi-kabuto-s-charging-mystical-palm",
                 "name": "Charging Mystical Palm",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/AdyJI48.png",
                 "skilldescription": "Yakushi Kabuto (S) deals 20 damage to one enemy. For 1 turn, that enemy will ignore all helpful effects except energy cost changes.",
                 "energy": [
                     "Ninjutsu"
@@ -16893,7 +16893,7 @@ const characters = [
             {
                 "id": "yakushi-kabuto-s-dead-soul-technique",
                 "name": "Dead Soul Technique",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/KeMc7ui.png",
                 "skilldescription": "Yakushi Kabuto (S) targets one enemy, dealing 30 piercing damage to them. For the rest of the game, that enemy will ignore healing effects.",
                 "energy": [
                     "Ninjutsu",
@@ -16931,7 +16931,7 @@ const characters = [
             {
                 "id": "yakushi-kabuto-s-medical-ninjutsu",
                 "name": "Medical Ninjutsu",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/BtimDkr.png",
                 "skilldescription": "Yakushi Kabuto (S) heals one ally or himself for 25 health and removes all enemy affliction skills from them.",
                 "energy": [
                     "Ninjutsu"
@@ -16962,7 +16962,7 @@ const characters = [
             {
                 "id": "yakushi-kabuto-s-precise-evasion",
                 "name": "Precise Evasion",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/WaHCzhg.png",
                 "skilldescription": "This skill makes Yakushi Kabuto (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -16993,14 +16993,14 @@ const characters = [
         "id": "orochimaru-s",
         "characterId": "orochimaru-s",
         "name": "Orochimaru (S)",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/I8WePdy.png",
         "characterdeescription": "Orochimaru returns, strong as ever and with some new tricks up his sleeve, but his body seems to be on borrowed time.",
         "requiredMissionId": "return-of-the-snake",
         "skills": [
             {
                 "id": "orochimaru-s-second-skin",
                 "name": "Second Skin",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/LW8QXSc.png",
                 "skilldescription": "Orochimaru (S) sets his health to 100 (this is a healing effect). This skill will be replaced by 'Triple Rashoumon' permanently.",
                 "energy": [
                     "Ninjutsu"
@@ -17037,7 +17037,7 @@ const characters = [
             {
                 "id": "orochimaru-s-sword-snake-horde",
                 "name": "Sword Snake Horde",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/AtllSnq.png",
                 "skilldescription": "Orochimaru (S) deals 20 affliction damage to one enemy. For 1 turn, the stun effects of their skills will last 1 turn less.",
                 "energy": [
                     "Bloodline"
@@ -17077,7 +17077,7 @@ const characters = [
             {
                 "id": "orochimaru-s-extended-kusanagi",
                 "name": "Extended Kusanagi",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/H9vu4aA.png",
                 "skilldescription": "Orochimaru (S) targets one enemy. That enemy has their non-mental skills stunned for 2 turns. During this time, this enemy takes 20 piercing damage each turn.",
                 "energy": [
                     "Taijutsu",
@@ -17117,7 +17117,7 @@ const characters = [
             {
                 "id": "orochimaru-s-ground-mobility",
                 "name": "Ground Mobility",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/RWYh63j.png",
                 "skilldescription": "This skill makes Orochimaru (S) invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -17145,7 +17145,7 @@ const characters = [
             {
                 "id": "orochimaru-s-triple-rashoumon",
                 "name": "Triple Rashoumon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/cNLf2Mq.png",
                 "skilldescription": "Orochimaru (S) targets both teams. For 2 turns, Orochimaru (S)'s team will be invulnerable to harmful skills. For 1 turn, the enemy team will be invulnerable to harmful skills. This skill cannot be countered or reflected.",
                 "energy": [
                     "Ninjutsu",
@@ -17195,14 +17195,14 @@ const characters = [
         "id": "four-tails-kyuubi-naruto",
         "characterId": "four-tails-kyuubi-naruto",
         "name": "Four Tails Kyuubi Naruto",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/JwO8ylH.png",
         "characterdeescription": "Naruto, after giving into his rage and manifesting a fourth tail, ceases to be himself. In this state, Naruto becomes a mindless being of rage and destruction - but the price is his own life.",
         "requiredMissionId": "what-lies-beneath",
         "skills": [
             {
                 "id": "four-tails-kyuubi-naruto-transformation",
                 "name": "Four Tails Transformation",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/KqbxHIZ.png",
                 "skilldescription": "Four Tails Kyuubi Naruto gains 15 points of unpierceable damage reduction and 15 points of destructible defense permanently. He takes 5 affliction damage* each turn. He ignores healing effects and enemy stun effects. Four Tails Kyuubi Naruto can use 'Shockwave Smash' and 'Compressed Chakra Blast' while this skill is active. This skill becomes 'Enrage' permanently. This skill cannot be removed.",
                 "energy": [
                     "Random"
@@ -17244,7 +17244,7 @@ const characters = [
             {
                 "id": "four-tails-kyuubi-naruto-shockwave-smash",
                 "name": "Shockwave Smash",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/pNtv4Ur.png",
                 "skilldescription": "Four Tails Kyuubi Naruto deals 20 damage to all enemies. This skill may only be used during 'Four Tails Transformation' and cannot be reflected.",
                 "energy": [
                     "Random",
@@ -17275,7 +17275,7 @@ const characters = [
             {
                 "id": "four-tails-kyuubi-naruto-compressed-chakra-blast",
                 "name": "Compressed Chakra Blast",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/E0fppGJ.png",
                 "skilldescription": "Four Tails Kyuubi Naruto deals 50 piercing damage to one enemy. This skill may only be used during 'Four Tails Transformation' and cannot be reflected.",
                 "energy": [
                     "Random",
@@ -17308,7 +17308,7 @@ const characters = [
             {
                 "id": "four-tails-kyuubi-naruto-skin-of-chakra",
                 "name": "Skin of Chakra",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/BRrJuMb.png",
                 "skilldescription": "This skill makes Four Tails Kyuubi Naruto invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -17336,7 +17336,7 @@ const characters = [
             {
                 "id": "four-tails-kyuubi-naruto-enrage",
                 "name": "Enrage",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/NgRmGUF.png",
                 "skilldescription": "Four Tails Kyuubi Naruto takes 10 affliction damage*. For 2 turns, 'Shockwave Smash' will deal 5 additional damage and 'Compressed Chakra Blast' will cost 1 random energy less.",
                 "energy": [],
                 "target": "self",
@@ -17387,14 +17387,14 @@ const characters = [
         "id": "kisame-body-double",
         "characterId": "kisame-body-double",
         "name": "Kisame Body Double",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/iNA5D02.png",
         "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Kisame. The body double is controlled by Kisame but only has a third of his chakra.",
         "requiredMissionId": "return-of-a-rival",
         "skills": [
             {
                 "id": "kisame-body-double-explosive-water-shock-wave",
                 "name": "Explosive Water Shock Wave",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/QKfBldd.png",
                 "skilldescription": "For 4 turns, Kisame Body Double and his allies will lose 1 less energy if a energy removal or stealing skill is used on them. For 4 turns, all enemies who use a new skill will have the cooldown of that skill increased by 2 turns. During this time, 'Water Prison Technique' and 'Five Man-Eating Sharks' will be improved and this skill will be replaced by 'Sentient Water Disabling'.",
                 "energy": [
                     "Bloodline",
@@ -17451,7 +17451,7 @@ const characters = [
             {
                 "id": "kisame-body-double-water-prison-technique",
                 "name": "Water Prison Technique",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/U1Q3tsi.png",
                 "skilldescription": "Kisame Body Double deals 15 piercing damage to one enemy, stuns their non-strategic skills for 1 turn and makes them invulnerable to friendly skills also for 1 turn. During this time, Kisame Body Double gains 15 points of damage reduction. During 'Explosive Water Shock Wave', this skill costs 1 random energy instead.",
                 "energy": [
                     "Bloodline"
@@ -17507,7 +17507,7 @@ const characters = [
             {
                 "id": "kisame-body-double-five-man-eating-sharks",
                 "name": "Five Man-Eating Sharks",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ZYiHeHQ.png",
                 "skilldescription": "Kisame Body Double deals 25 damage to one enemy for 2 turns. During 'Explosive Water Shock Wave', this skill costs 1 random energy less.",
                 "energy": [
                     "Ninjutsu",
@@ -17539,7 +17539,7 @@ const characters = [
             {
                 "id": "kisame-body-double-samehada-block",
                 "name": "Samehada Block",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Yu8K5hE.png",
                 "skilldescription": "This skill makes Kisame Body Double invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -17567,7 +17567,7 @@ const characters = [
             {
                 "id": "kisame-body-double-sentient-water-disabling",
                 "name": "Sentient Water Disabling",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/IsLCn9B.png",
                 "skilldescription": "Kisame Body Double targets himself or an ally. For 1 turn, the first harmful non-mental skill used on the target will be countered and the countered enemy will have 'Water Prison Technique' applied on them. This skill is invisible.",
                 "energy": [
                     "Ninjutsu"
@@ -17612,14 +17612,14 @@ const characters = [
         "id": "itachi-body-double",
         "characterId": "itachi-body-double",
         "name": "Itachi Body Double",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/E7mAnm3.png",
         "characterdeescription": "By using one of Pain's techniques a Sand Nin spy for Akatsuki is changed to look like Itachi. The body double is controlled by Itachi but only has a third of his chakra.",
         "requiredMissionId": "the-real-itachi",
         "skills": [
             {
                 "id": "itachi-body-double-finger-genjutsu",
                 "name": "Finger Genjutsu",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/YZXkMwP.png",
                 "skilldescription": "Itachi Body Double targets one enemy. If the affected enemy uses a new harmful skill, that skill will be countered, that enemy will take 10 damage, and Itachi Body Double will gain 1 genjutsu energy. The target of this skill is invisible.",
                 "energy": [
                     "Genjutsu"
@@ -17659,7 +17659,7 @@ const characters = [
             {
                 "id": "itachi-body-double-genjutsu-reversal",
                 "name": "Genjutsu Reversal",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ZVPp494.png",
                 "skilldescription": "For 2 turns, if any enemy uses a non-mental skill on Itachi Body Double, he will reflect that skill onto the enemy who used it. This skill is invisible.",
                 "energy": [
                     "Bloodline",
@@ -17689,7 +17689,7 @@ const characters = [
             {
                 "id": "itachi-body-double-fire-release-fireball",
                 "name": "Fire Release: Fireball",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/rIju3Zc.png",
                 "skilldescription": "Itachi Body Double attacks, dealing 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
                 "energy": [
                     "Ninjutsu"
@@ -17736,7 +17736,7 @@ const characters = [
             {
                 "id": "itachi-body-double-illusionary-raven-bunshin",
                 "name": "Illusionary Raven Bunshin",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/RuNxccO.png",
                 "skilldescription": "This skill makes Itachi Body Double invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -17767,14 +17767,14 @@ const characters = [
         "id": "deidara",
         "characterId": "deidara",
         "name": "Deidara",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/Wgw4vZ4.png",
         "characterdeescription": "A former ninja of the Earth Village and now a junior Akatsuki member, Deidara is able to fuse clay and chakra to create devastating explosives. ORIGINAL DESIGN: Liann",
         "requiredMissionId": "a-true-artist",
         "skills": [
             {
                 "id": "deidara-c1-birds",
                 "name": "C1: Birds",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/N4ocNTw.png",
                 "skilldescription": "Deidara deals 10 piercing damage to one enemy for 2 turns. During this skill Deidara will be invulnerable to mental skills and this enemy's energy skills will deal 10 less damage*. 'Art is a Bang!' will deal 5 additional damage permanently*. This effect stacks.",
                 "energy": [
                     "Random"
@@ -17837,7 +17837,7 @@ const characters = [
             {
                 "id": "deidara-c1-centipede",
                 "name": "C1: Centipede",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/zAYKfoK.png",
                 "skilldescription": "Deidara deals 25 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to energy skills and this enemy's physical skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
                 "energy": [
                     "Ninjutsu"
@@ -17902,7 +17902,7 @@ const characters = [
             {
                 "id": "deidara-art-is-a-bang",
                 "name": "Art is a Bang!",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ldD9EAu.png",
                 "skilldescription": "Deidara deals 25 piercing damage to all enemies. Deidara will instantly die after this skill is used. This skill cannot be countered or reflected and its self-death effect cannot be ignored.",
                 "energy": [
                     "Bloodline",
@@ -17938,7 +17938,7 @@ const characters = [
             {
                 "id": "deidara-clay-mold",
                 "name": "Clay Mold",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/5z4UE9Q.png",
                 "skilldescription": "Deidara gains 5 points of permanent destructible defense. This effect stacks. The first time this skill is used, it replaces 'C1: Birds' and 'C1: Centipede' with their alternative versions. The second time this skill is used Deidara's skills will revert back to their original versions.",
                 "energy": [],
                 "target": "self",
@@ -17967,7 +17967,7 @@ const characters = [
             {
                 "id": "deidara-c3-statue",
                 "name": "C3: Statue",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/JmF9ILU.png",
                 "skilldescription": "Deidara deals 35 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to physical skills and this enemy's mental skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
                 "energy": [
                     "Ninjutsu",
@@ -18033,7 +18033,7 @@ const characters = [
             {
                 "id": "deidara-c2-dragon",
                 "name": "C2: Dragon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/vXzUE7g.png",
                 "skilldescription": "For 2 turns, all enemies will take 10 piercing damage if they use a new skill. During this time they will take 5 additional damage from energy skills and 'Clay Mold' will grant 10 additional destructible defense.",
                 "energy": [
                     "Random",
@@ -18080,14 +18080,14 @@ const characters = [
         "id": "hiruko-sasori",
         "characterId": "hiruko-sasori",
         "name": "Hiruko Sasori",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/TA5UaWE.png",
         "characterdeescription": "Hiruko is a puppet used by the Akatsuki shinobi, Sasori. Serving as a \"puppet armor\", it allowed Sasori to hide inside of it. Hiruko is a human puppet made from the corpse of a renowned shinobi - this puppet is also Sasori's favorite. ORIGINAL DESIGN: Liann",
         "requiredMissionId": "covering-puppet",
         "skills": [
             {
                 "id": "hiruko-sasori-poisonous-tail-stab",
                 "name": "Poisonous Tail Stab",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/mkBepem.png",
                 "skilldescription": "Hiruko Sasori deals 10 affliction damage to one enemy, who will take 5 affliction damage each following turn permanently. This skill stacks.",
                 "energy": [
                     "Taijutsu"
@@ -18130,7 +18130,7 @@ const characters = [
             {
                 "id": "hiruko-sasori-sand-clone-trap",
                 "name": "Sand Clone Trap",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/aaIW9Km.png",
                 "skilldescription": "For 1 turn, Hiruko Sasori will ignore all enemy damage dealt. Every enemy that use a new non-strategic skill on him during this time will take 10 affliction damage instantly and then take 10 affliction damage permanently. This skill stacks and ends when Hiruko Sasori dies. This skill is invisible.",
                 "energy": [
                     "Ninjutsu"
@@ -18174,7 +18174,7 @@ const characters = [
             {
                 "id": "hiruko-sasori-puppet-reveal",
                 "name": "Puppet Reveal",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/YOqOLrm.png",
                 "skilldescription": "Hiruko Sasori removes all enemy affliction skills on him then becomes invulnerable to energy and affliction skills for 3 turns. During this time, 'Poisonous Tail Stab' will be replaced by 'Eight Waves of Needles' and 'Sand Clone Trap' will be replaced by 'Prosthetic Arm Senbon'.",
                 "energy": [
                     "Random"
@@ -18216,7 +18216,7 @@ const characters = [
             {
                 "id": "hiruko-sasori-tail-deflection",
                 "name": "Tail Deflection",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/KdJD3ve.png",
                 "skilldescription": "This skill makes Hiruko Sasori invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -18244,7 +18244,7 @@ const characters = [
             {
                 "id": "hiruko-sasori-eight-waves-of-needles",
                 "name": "Eight Waves of Needles",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Ossz08T.png",
                 "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 affliction damage to all enemies each turn permanently. This skill stacks.",
                 "energy": [
                     "Taijutsu",
@@ -18286,7 +18286,7 @@ const characters = [
             {
                 "id": "hiruko-sasori-prosthetic-arm-senbon",
                 "name": "Prosthetic Arm Senbon",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/GpzHQEE.png",
                 "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 piercing damage and 5 affliction damage* to all enemies for 3 turns. When this skill ends, Hiruko Sasori will become invulnerable for 1 turn. This skill ends if Hiruko Sasori dies.",
                 "energy": [
                     "Random",
@@ -18343,14 +18343,14 @@ const characters = [
         "id": "sasori-of-the-red-sand",
         "characterId": "sasori-of-the-red-sand",
         "name": "Sasori of the Red Sand",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/EJRSPPq.png",
         "characterdeescription": "Sasori is a senior Akatsuki member and a legendary puppet master. He is even rumored to have defeated an entire nation with puppets alone. ORIGINAL DESIGN: Pavera",
         "requiredMissionId": "master-of-puppets",
         "skills": [
             {
                 "id": "sasori-of-the-red-sand-thousand-hands",
                 "name": "Thousand Hands",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/0YTQQqA.png",
                 "skilldescription": "Sasori of the Red Sand deals 10 damage to one enemy for 2 turns and gains 5 points of permanent destructible defense each turn. If 'Poison Gas' is used on the target in the following turn, it will last 1 additional turn on them*. The target of this skill will take 5 additional damage from 'Poison Gas' for 1 turn*.",
                 "energy": [
                     "Random"
@@ -18399,7 +18399,7 @@ const characters = [
             {
                 "id": "sasori-of-the-red-sand-poison-gas",
                 "name": "Poison Gas",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/ct8Y9cl.png",
                 "skilldescription": "Sasori of the Red Sand deals 10 affliction damage to one enemy for 4 turns and gains 10 points of permanent destructible defense. During this time, if that enemy uses a new skill, they will be dealt 5 affliction damage. This skill lasts 1 additional turn if the enemy is affected by 'Thousand Hands'. This skill stacks.",
                 "energy": [
                     "Random",
@@ -18470,7 +18470,7 @@ const characters = [
             {
                 "id": "sasori-of-the-red-sand-iron-sand",
                 "name": "Iron Sand",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Dnv7UG4.png",
                 "skilldescription": "Sasori of the Red Sand will gain 5 points of permanent destructible defense each turn for 3 turns. During this time, every enemy who uses a new skill on Sasori of the Red Sand will be dealt 5 piercing damage. For 3 turns, this skill will be replaced by 'Iron Sand World Method' and 'Thousand Hands' will be replaced by 'Iron Sand Gathering Assault'.",
                 "energy": [
                     "Bloodline"
@@ -18505,7 +18505,7 @@ const characters = [
             {
                 "id": "sasori-of-the-red-sand-puppet-protection",
                 "name": "Puppet Protection",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/067sl2R.png",
                 "skilldescription": "This skill makes Sasori of the Red Sand invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -18533,7 +18533,7 @@ const characters = [
             {
                 "id": "sasori-of-the-red-sand-iron-sand-gathering-assault",
                 "name": "Iron Sand Gathering Assault",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Ul782SR.png",
                 "skilldescription": "Sasori of the Red Sand deals 30 piercing damage to one enemy and makes that enemy unable to reduce damage or become invulnerable for 1 turn. Sasori of the Red Sand also gains 15 points of destructible defense for 1 turn.",
                 "energy": [
                     "Ninjutsu",
@@ -18585,7 +18585,7 @@ const characters = [
             {
                 "id": "sasori-of-the-red-sand-iron-sand-world-method",
                 "name": "Iron Sand World Method",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/V8SqtNC.png",
                 "skilldescription": "Sasori of the Red Sand deals 25 piercing damage to all enemies. Any enemy whose health drops to 10 or below will be instantly killed. This skill cannot be countered or reflected.",
                 "energy": [
                     "Bloodline",
@@ -18623,14 +18623,14 @@ const characters = [
         "id": "puppet-sasori",
         "characterId": "puppet-sasori",
         "name": "Puppet Sasori",
-        "facePicture": "deadcharacter.png",
+        "facePicture": "https://i.imgur.com/huF0Rd7.png",
         "characterdeescription": "Sasori's true form is a puppet body with a living core attached to it. In this form, he can use weapons like a flamethrower and water jets, while still controling a hundred puppets. ORIGINAL DESIGN: AnteMito",
         "requiredMissionId": "a-perfect-body",
         "skills": [
             {
                 "id": "puppet-sasori-flamethrower",
                 "name": "Flamethrower",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/NScpPLl.png",
                 "skilldescription": "Puppet Sasori deals 20 affliction damage to one enemy. If 'Water Stream Shooters' was used on this enemy the previous turn, they will have their non-affliction damage reduced by 10 for 1 turn.",
                 "energy": [
                     "Bloodline"
@@ -18685,7 +18685,7 @@ const characters = [
             {
                 "id": "puppet-sasori-water-stream-shooters",
                 "name": "Water Stream Shooters",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/fnKcko9.png",
                 "skilldescription": "Puppet Sasori deals 20 piercing damage to one enemy. If 'Flamethrower' was used on this enemy the previous turn, they will be stunned for 1 turn.",
                 "energy": [
                     "Ninjutsu"
@@ -18738,7 +18738,7 @@ const characters = [
             {
                 "id": "puppet-sasori-performance-of-a-hundred-puppets",
                 "name": "Performance of a Hundred Puppets",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/8Cf3egf.png",
                 "skilldescription": "For 3 turns, 'Flamethrower' and 'Water Stream Shooters' will deal 10 additional damage. During this time, Puppet Sasori targets all enemies and everytime they use a new harmful skill, they will take 5 piercing damage. The following 3 turns, this skill will be replaced by 'Puppet Attack'.",
                 "energy": [
                     "Random"
@@ -18784,7 +18784,7 @@ const characters = [
             {
                 "id": "puppet-sasori-living-core",
                 "name": "Living Core",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/r9oI8D1.png",
                 "skilldescription": "This skill makes Puppet Sasori invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -18812,7 +18812,7 @@ const characters = [
             {
                 "id": "puppet-sasori-puppet-attack",
                 "name": "Puppet Attack",
-                "skillimage": "deadcharacter.png",
+                "skillimage": "https://i.imgur.com/Q1HF3wS.png",
                 "skilldescription": "Puppet Sasori deals 25 damage to all enemies.",
                 "energy": [
                     "Random",

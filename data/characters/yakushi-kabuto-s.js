@@ -2,14 +2,14 @@ module.exports = {
     "id": "yakushi-kabuto-s",
     "characterId": "yakushi-kabuto-s",
     "name": "Yakushi Kabuto (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/bFuiE0L.png",
     "characterdeescription": "Kabuto is the loyal servant of Orochimaru and is a very dangerous missing-nin. He is a calculating individual who is both accomplished at combat and healing.",
     "requiredMissionId": "a-double-agent",
     "skills": [
         {
             "id": "yakushi-kabuto-s-charging-mystical-palm",
             "name": "Charging Mystical Palm",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/AdyJI48.png",
             "skilldescription": "Yakushi Kabuto (S) deals 20 damage to one enemy. For 1 turn, that enemy will ignore all helpful effects except energy cost changes.",
             "energy": [
                 "Ninjutsu"
@@ -44,7 +44,7 @@ module.exports = {
         {
             "id": "yakushi-kabuto-s-dead-soul-technique",
             "name": "Dead Soul Technique",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/KeMc7ui.png",
             "skilldescription": "Yakushi Kabuto (S) targets one enemy, dealing 30 piercing damage to them. For the rest of the game, that enemy will ignore healing effects.",
             "energy": [
                 "Ninjutsu",
@@ -82,7 +82,7 @@ module.exports = {
         {
             "id": "yakushi-kabuto-s-medical-ninjutsu",
             "name": "Medical Ninjutsu",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/BtimDkr.png",
             "skilldescription": "Yakushi Kabuto (S) heals one ally or himself for 25 health and removes all enemy affliction skills from them.",
             "energy": [
                 "Ninjutsu"
@@ -113,7 +113,7 @@ module.exports = {
         {
             "id": "yakushi-kabuto-s-precise-evasion",
             "name": "Precise Evasion",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/WaHCzhg.png",
             "skilldescription": "This skill makes Yakushi Kabuto (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"

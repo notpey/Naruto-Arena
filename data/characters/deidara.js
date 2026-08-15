@@ -2,14 +2,14 @@ module.exports = {
     "id": "deidara",
     "characterId": "deidara",
     "name": "Deidara",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/Wgw4vZ4.png",
     "characterdeescription": "A former ninja of the Earth Village and now a junior Akatsuki member, Deidara is able to fuse clay and chakra to create devastating explosives. ORIGINAL DESIGN: Liann",
     "requiredMissionId": "a-true-artist",
     "skills": [
         {
             "id": "deidara-c1-birds",
             "name": "C1: Birds",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/N4ocNTw.png",
             "skilldescription": "Deidara deals 10 piercing damage to one enemy for 2 turns. During this skill Deidara will be invulnerable to mental skills and this enemy's energy skills will deal 10 less damage*. 'Art is a Bang!' will deal 5 additional damage permanently*. This effect stacks.",
             "energy": [
                 "Random"
@@ -72,7 +72,7 @@ module.exports = {
         {
             "id": "deidara-c1-centipede",
             "name": "C1: Centipede",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/zAYKfoK.png",
             "skilldescription": "Deidara deals 25 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to energy skills and this enemy's physical skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
             "energy": [
                 "Ninjutsu"
@@ -137,7 +137,7 @@ module.exports = {
         {
             "id": "deidara-art-is-a-bang",
             "name": "Art is a Bang!",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ldD9EAu.png",
             "skilldescription": "Deidara deals 25 piercing damage to all enemies. Deidara will instantly die after this skill is used. This skill cannot be countered or reflected and its self-death effect cannot be ignored.",
             "energy": [
                 "Bloodline",
@@ -173,7 +173,7 @@ module.exports = {
         {
             "id": "deidara-clay-mold",
             "name": "Clay Mold",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/5z4UE9Q.png",
             "skilldescription": "Deidara gains 5 points of permanent destructible defense. This effect stacks. The first time this skill is used, it replaces 'C1: Birds' and 'C1: Centipede' with their alternative versions. The second time this skill is used Deidara's skills will revert back to their original versions.",
             "energy": [],
             "target": "self",
@@ -202,7 +202,7 @@ module.exports = {
         {
             "id": "deidara-c3-statue",
             "name": "C3: Statue",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/JmF9ILU.png",
             "skilldescription": "Deidara deals 35 piercing damage to one enemy. For 1 turn Deidara will be invulnerable to physical skills and this enemy's mental skills will deal 10 less damage. 'Art is a Bang!' will deal 5 additional damage permanently. This effect stacks.",
             "energy": [
                 "Ninjutsu",
@@ -268,7 +268,7 @@ module.exports = {
         {
             "id": "deidara-c2-dragon",
             "name": "C2: Dragon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/vXzUE7g.png",
             "skilldescription": "For 2 turns, all enemies will take 10 piercing damage if they use a new skill. During this time they will take 5 additional damage from energy skills and 'Clay Mold' will grant 10 additional destructible defense.",
             "energy": [
                 "Random",

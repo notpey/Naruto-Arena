@@ -2,14 +2,14 @@ module.exports = {
     "id": "sai",
     "characterId": "sai",
     "name": "Sai",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/DF5JgYg.png",
     "characterdeescription": "A current member of the Elite ANBU Root, Sai is a quiet, but expressive individual with a mysterious past. Sai uses a set of brushes with a special ink to give life to his art, from tigers to lions to bears, that allow him to compete with his enemies.",
     "requiredMissionId": "a-blank-slate",
     "skills": [
         {
             "id": "sai-super-beast-imitating-drawing-lions",
             "name": "Super Beast Imitating Drawing: Lions",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/OiwLlis.png",
             "skilldescription": "Sai deals 30 damage to one enemy. For 1 turn, Sai will gain 20 points of destructible defense.",
             "energy": [
                 "Genjutsu",
@@ -45,7 +45,7 @@ module.exports = {
         {
             "id": "sai-super-beast-imitating-drawing-snake",
             "name": "Super Beast Imitating Drawing: Snake",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/fv2a86K.png",
             "skilldescription": "Sai stuns one enemy's physical, energy and strategic skills for 1 turn. During this time, that enemy will be unable to reduce damage or become invulnerable. This skill ignores invulnerability. During 'Adaptive Painting', this skill will be replaced.",
             "energy": [
                 "Genjutsu"
@@ -83,7 +83,7 @@ module.exports = {
         {
             "id": "sai-adaptive-painting",
             "name": "Adaptive Painting",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/za9vp5W.png",
             "skilldescription": "For 3 turns, any ally that is targeted by a new direct stun skill will become invulnerable for 1 turn; any ally that has energy removed/stolen will gain 1 random energy, and any ally that successfully receives new non-affliction damage by an enemy will increase Sai's damage by 10 for 1 turn.",
             "energy": [
                 "Random",
@@ -116,7 +116,7 @@ module.exports = {
         {
             "id": "sai-ink-clone",
             "name": "Ink Clone",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ExEgRJl.png",
             "skilldescription": "This skill makes Sai invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -144,7 +144,7 @@ module.exports = {
         {
             "id": "sai-super-beast-imitating-drawing-bird",
             "name": "Super Beast Imitating Drawing: Bird",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/ptiedOG.png",
             "skilldescription": "Sai deals 25 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn.",
             "energy": [
                 "Genjutsu"

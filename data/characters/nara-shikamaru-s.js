@@ -2,14 +2,14 @@ module.exports = {
     "id": "nara-shikamaru-s",
     "characterId": "nara-shikamaru-s",
     "name": "Nara Shikamaru (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/tXroLB1.png",
     "characterdeescription": "Once known to be one of the laziest ninja, Shikamaru has worked tireless to become not only stronger, but a leader too. More than ever before, Shikamaru excels at coming up with long winded and convoluted plans meant to defeat any enemies in his path.",
     "requiredMissionId": "where-the-shadows-lie",
     "skills": [
         {
             "id": "nara-shikamaru-s-shadow-sewing",
             "name": "Shadow Sewing",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/OuCKCqh.png",
             "skilldescription": "Nara Shikamaru (S) deals 35 damage to one enemy and stuns their physical, energy and strategic skills for 1 turn. If this skill is used on an enemy affected by 'Long-Range Tactics', it will deal 10 additional damage.",
             "energy": [
                 "Genjutsu",
@@ -58,7 +58,7 @@ module.exports = {
         {
             "id": "nara-shikamaru-s-long-range-tactics",
             "name": "Long-Range Tactics",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/xlrjNhU.png",
             "skilldescription": "Nara Shikamaru (S) targets one enemy. That enemy has their non-strategic skills stunned 2 turns and Nara Shikamaru (S) will be invulnerable during this time.",
             "energy": [
                 "Ninjutsu",
@@ -105,7 +105,7 @@ module.exports = {
         {
             "id": "nara-shikamaru-s-expert-analysis",
             "name": "Expert Analysis",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/8bM6MSc.png",
             "skilldescription": "For 3 turns, any time that one target enemy uses a new skill, that enemy will be unable to reduce damage or become invulnerable and all helpful counters and reflect skills on them will be ignored for 1 turn. This skill is invisible.",
             "energy": [],
             "target": "single-enemy",
@@ -137,7 +137,7 @@ module.exports = {
         {
             "id": "nara-shikamaru-s-panicked-dodge",
             "name": "Panicked Dodge",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/mEXRLAE.png",
             "skilldescription": "This skill makes Nara Shikamaru (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"

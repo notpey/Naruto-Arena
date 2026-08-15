@@ -2,14 +2,14 @@ module.exports = {
     "id": "hiruko-sasori",
     "characterId": "hiruko-sasori",
     "name": "Hiruko Sasori",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/TA5UaWE.png",
     "characterdeescription": "Hiruko is a puppet used by the Akatsuki shinobi, Sasori. Serving as a \"puppet armor\", it allowed Sasori to hide inside of it. Hiruko is a human puppet made from the corpse of a renowned shinobi - this puppet is also Sasori's favorite. ORIGINAL DESIGN: Liann",
     "requiredMissionId": "covering-puppet",
     "skills": [
         {
             "id": "hiruko-sasori-poisonous-tail-stab",
             "name": "Poisonous Tail Stab",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/mkBepem.png",
             "skilldescription": "Hiruko Sasori deals 10 affliction damage to one enemy, who will take 5 affliction damage each following turn permanently. This skill stacks.",
             "energy": [
                 "Taijutsu"
@@ -52,7 +52,7 @@ module.exports = {
         {
             "id": "hiruko-sasori-sand-clone-trap",
             "name": "Sand Clone Trap",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/aaIW9Km.png",
             "skilldescription": "For 1 turn, Hiruko Sasori will ignore all enemy damage dealt. Every enemy that use a new non-strategic skill on him during this time will take 10 affliction damage instantly and then take 10 affliction damage permanently. This skill stacks and ends when Hiruko Sasori dies. This skill is invisible.",
             "energy": [
                 "Ninjutsu"
@@ -96,7 +96,7 @@ module.exports = {
         {
             "id": "hiruko-sasori-puppet-reveal",
             "name": "Puppet Reveal",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/YOqOLrm.png",
             "skilldescription": "Hiruko Sasori removes all enemy affliction skills on him then becomes invulnerable to energy and affliction skills for 3 turns. During this time, 'Poisonous Tail Stab' will be replaced by 'Eight Waves of Needles' and 'Sand Clone Trap' will be replaced by 'Prosthetic Arm Senbon'.",
             "energy": [
                 "Random"
@@ -138,7 +138,7 @@ module.exports = {
         {
             "id": "hiruko-sasori-tail-deflection",
             "name": "Tail Deflection",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/KdJD3ve.png",
             "skilldescription": "This skill makes Hiruko Sasori invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -166,7 +166,7 @@ module.exports = {
         {
             "id": "hiruko-sasori-eight-waves-of-needles",
             "name": "Eight Waves of Needles",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/Ossz08T.png",
             "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 affliction damage to all enemies each turn permanently. This skill stacks.",
             "energy": [
                 "Taijutsu",
@@ -208,7 +208,7 @@ module.exports = {
         {
             "id": "hiruko-sasori-prosthetic-arm-senbon",
             "name": "Prosthetic Arm Senbon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/GpzHQEE.png",
             "skilldescription": "Hiruko Sasori removes all enemy affliction skills on his team and then deals 5 piercing damage and 5 affliction damage* to all enemies for 3 turns. When this skill ends, Hiruko Sasori will become invulnerable for 1 turn. This skill ends if Hiruko Sasori dies.",
             "energy": [
                 "Random",

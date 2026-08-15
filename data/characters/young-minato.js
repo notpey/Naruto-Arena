@@ -2,7 +2,7 @@ module.exports = {
     "id": "young-minato",
     "characterId": "young-minato",
     "name": "Young Minato",
-    "facePicture": "deadcharacter-remaster.png?v=2",
+    "facePicture": "https://i.imgur.com/REfg6Ri.png",
     "characterdeescription": "Minato is a prodigy kid from the Hidden Leaf Village who is capable of fighting other shinobi in higher ranks by having faster and stronger taijutsu skills. He entered the Hidden Leaf's Academy with the dream of earning the villagers' respect and recognition by becoming Hokage. ORIGINAL DESIGN: Liann",
     "requiredMissionId": null,
     "skills": [

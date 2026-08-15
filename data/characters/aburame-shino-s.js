@@ -2,14 +2,14 @@ module.exports = {
     "id": "aburame-shino-s",
     "characterId": "aburame-shino-s",
     "name": "Aburame Shino (S)",
-    "facePicture": "deadcharacter.png",
+    "facePicture": "https://i.imgur.com/gpdFquj.png",
     "characterdeescription": "Still as mysterious and secretive as ever, Shino has improved greatly over the years, learning and practicing with his loyal bugs. With his new found mastery, Shino can disable enemies even harder while slowly waiting for his bugs to erupt from their bodies and destroy them.",
     "requiredMissionId": "the-konoha-man-of-mystery",
     "skills": [
         {
             "id": "aburame-shino-s-insect-swarm",
             "name": "Insect Swarm",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/D3ezKBM.png",
             "skilldescription": "Aburame Shino (S) deals 15 affliction damage to one enemy for 3 turns. The following 3 turns, that enemy will be invulnerable to all friendly skills. During this time, this skill will be replaced by 'Insect Consumption'.",
             "energy": [
                 "Bloodline",
@@ -59,7 +59,7 @@ module.exports = {
         {
             "id": "aburame-shino-s-insect-barricade",
             "name": "Insect Barricade",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/99fUTD7.png",
             "skilldescription": "The following turn, the first new harmful skill used on one ally or Aburame Shino (S) will be countered, 'Parasitic Giant Beetle Infestation' will be placed on the countered enemy and then activated. If this skill does not counter an enemy skill, Aburame Shino (S) will gain 1 red energy. This skill is invisible.",
             "energy": [
                 "Bloodline"
@@ -103,7 +103,7 @@ module.exports = {
         {
             "id": "aburame-shino-s-parasitic-giant-beetle-infestation",
             "name": "Parasitic Giant Beetle Infestation",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/mX9trNE.png",
             "skilldescription": "Aburame Shino (S) targets one enemy. After 3 turns, they will take 25 affliction damage and all other copies of this skill on them will be activated. This skill is invisible.",
             "energy": [
                 "Bloodline"
@@ -145,7 +145,7 @@ module.exports = {
         {
             "id": "aburame-shino-s-insect-cocoon",
             "name": "Insect Cocoon",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/s9ukg3d.png",
             "skilldescription": "This skill makes Aburame Shino (S) invulnerable for 1 turn.",
             "energy": [
                 "Random"
@@ -173,7 +173,7 @@ module.exports = {
         {
             "id": "aburame-shino-s-insect-consumption",
             "name": "Insect Consumption",
-            "skillimage": "deadcharacter.png",
+            "skillimage": "https://i.imgur.com/xcAgNFB.png",
             "skilldescription": "Aburame Shino (S) steals 1 random energy from one enemy affected by 'Insect Swarm' and increases the damage that enemy receives from 'Insect Swarm' by 5 that turn.",
             "energy": [
                 "Bloodline"
