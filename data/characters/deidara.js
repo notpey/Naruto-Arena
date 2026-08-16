@@ -18,7 +18,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 1,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Action",
                 "Instant*"
             ],
@@ -81,7 +81,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Instant"
             ],
             "effects": [
@@ -147,7 +147,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Instant"
             ],
             "effects": [
@@ -212,7 +212,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Instant"
             ],
             "effects": [
@@ -278,7 +278,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 2,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Instant"
             ],
             "effects": [

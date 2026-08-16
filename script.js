@@ -498,10 +498,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const getVisibleSkillClasses = (classes = []) =>
-        (Array.isArray(classes) ? classes : []).filter((entry) => {
-            const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
-            return normalized && normalized !== 'invisible';
-        });
+        (Array.isArray(classes) ? classes : [])
+            .map((entry) => {
+                if (typeof entry === 'string' && entry.trim().toLowerCase() === 'energy') {
+                    return 'Chakra';
+                }
+                return entry;
+            })
+            .filter((entry) => {
+                const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
+                return normalized && normalized !== 'invisible';
+            });
 
     const shouldUseWideRankHatOffset = (rankHatUrl = '') => {
         const normalized = typeof rankHatUrl === 'string' ? rankHatUrl.trim().toLowerCase() : '';

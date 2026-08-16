@@ -13344,7 +13344,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -13497,7 +13497,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -14387,7 +14387,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -14488,7 +14488,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -15465,7 +15465,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -15636,7 +15636,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -15841,7 +15841,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -15893,7 +15893,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -16867,7 +16867,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -17286,7 +17286,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -17460,7 +17460,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -17517,7 +17517,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Action"
                 ],
                 "effects": [
@@ -17698,7 +17698,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant",
                     "Affliction*"
                 ],
@@ -17783,7 +17783,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Action",
                     "Instant*"
                 ],
@@ -17846,7 +17846,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -17912,7 +17912,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -17977,7 +17977,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -18043,7 +18043,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 2,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -18694,7 +18694,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Energy",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [

@@ -73,7 +73,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Energy",
+                "Chakra",
                 "Instant"
             ],
             "effects": [

@@ -1781,17 +1781,21 @@ const getTargetBonusDamageFromSource = ({ targetState, sourceCharacterId, source
     }, 0);
 };
 
-const hasSkillClass = (skillClasses = [], className = '') =>
-    Array.isArray(skillClasses) &&
-    skillClasses.some(
-        (entry) =>
-            typeof entry === 'string' &&
-            typeof className === 'string' &&
-            entry.trim().toLowerCase() === className.trim().toLowerCase()
-    );
+const normalizeSkillClassName = (value) => {
+    const norm = typeof value === 'string' ? value.trim().toLowerCase() : '';
+    if (norm === 'energy') return 'chakra';
+    return norm;
+};
 
-const normalizeSkillClassName = (value) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : '';
+const hasSkillClass = (skillClasses = [], className = '') => {
+    const target = normalizeSkillClassName(className);
+    return (
+        Array.isArray(skillClasses) &&
+        skillClasses.some(
+            (entry) => normalizeSkillClassName(entry) === target
+        )
+    );
+};
 
 const formatSkillClassLabel = (value = '') => {
     const normalized = normalizeSkillClassName(value);
