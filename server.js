@@ -8998,8 +8998,10 @@ const autoAdvanceTurnIfExpired = async (match) => {
 async function ensureEarlyAccessNewsPost() {
     try {
         if (!newsPostsCollection) return;
-        const count = await newsPostsCollection.countDocuments();
-        if (count === 0) {
+        const welcomePost = await newsPostsCollection.findOne({
+            title: 'Welcome to Naruto-Arena Early Access Weekend!',
+        });
+        if (!welcomePost) {
             await newsPostsCollection.insertOne({
                 title: 'Welcome to Naruto-Arena Early Access Weekend!',
                 content: `Welcome Shinobi! Early Access Weekend is officially live.\n\n` +
@@ -9011,13 +9013,49 @@ async function ensureEarlyAccessNewsPost() {
                     `- **In-Game Surrender & Active Match Resume**: Never get stranded; resume your active match if disconnected.\n\n` +
                     `Found a bug or issue? Click **🐛 Report Bug** on any screen!`,
                 author: 'Naruto-Arena Team',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                createdAt: new Date('2026-07-22T22:25:23.804Z'),
+                updatedAt: new Date('2026-07-22T22:25:23.804Z'),
             });
             console.log('Seeded Early Access Welcome news announcement.');
         }
+
+        const updatePost = await newsPostsCollection.findOne({
+            title: 'Major Update: 27 New Shippuden Characters & Combat Overhaul!',
+        });
+        if (!updatePost) {
+            await newsPostsCollection.insertOne({
+                title: 'Major Update: 27 New Shippuden Characters & Combat Overhaul!',
+                content: `Welcome Shinobi! Today brings one of the biggest content updates to Naruto-Arena yet, featuring **27 brand new Shippuden and Akatsuki characters**, a combat engine upgrade, and high-definition artwork across the board!\n\n` +
+                    `### 🌟 27 New Characters Enter the Arena!\n` +
+                    `Expand your team rosters and discover powerful new synergies with the arrival of the Shippuden era:\n\n` +
+                    `- **Team Kakashi / Yamato**: Uzumaki Naruto (S), Haruno Sakura (S), Sai, Yamato, Hatake Kakashi (S)\n` +
+                    `- **Team Kurenai**: Inuzuka Kiba (S), Aburame Shino (S), Hyuuga Hinata (S)\n` +
+                    `- **Team Asuma**: Nara Shikamaru (S), Akimichi Chouji (S), Yamanaka Ino (S)\n` +
+                    `- **Team Gai**: Rock Lee (S), Tenten (S), Hyuuga Neji (S), Maito Gai (S)\n` +
+                    `- **Sand Siblings**: Kazekage Gaara, Kankuro (S), Temari (S)\n` +
+                    `- **Sound & Rogue Shinobi**: Yakushi Kabuto (S), Orochimaru (S), Four Tails Kyuubi Naruto\n` +
+                    `- **Akatsuki & Body Doubles**: Deidara, Hiruko (Sasori), Sasori of the Red Sand, Puppet Sasori, Kisame Body Double, Itachi Body Double\n` +
+                    `- **Flashback & Special Shinobi**: Tsuchi Kin, Teuchi, Young Minato, Young Kushina, Young Itachi, Young Yahiko, Young Konan, Young Nagato\n\n` +
+                    `---\n\n` +
+                    `### ⚔️ Combat & Skill Engine Upgrades\n` +
+                    `- **Chakra Class Standardization**: All skills now consistently utilize the **Chakra** class instead of legacy Energy types.\n` +
+                    `- **Accurate Chakra Costs**: All 27 new character energy costs have been fine-tuned and verified for balanced competitive play.\n` +
+                    `- **Invulnerability Bypass**: Skills designed to bypass invulnerability (e.g. *Dead Soul Technique*, *Eight Trigrams Mountain Crusher*, *Rinnegan Domination*) now reliably strike through defensive barriers.\n` +
+                    `- **Targeting Flexibility**: Enhanced targeting rules supporting \`single-target\` (any unit), \`all-ally\`, and \`all-characters\` modes.\n\n` +
+                    `---\n\n` +
+                    `### 🎨 Visual & Mission Enhancements\n` +
+                    `- **HD Artwork & Icons**: Full character portraits and custom skill icons restored and baked for all 97 shinobi.\n` +
+                    `- **Mission Hub Backdrops**: 40+ mission illustration artworks refreshed.\n` +
+                    `- **Persistence & Performance**: Improved character asset caching and database fallback reliability.\n\n` +
+                    `Jump into Quick Play or Ladder matches now to try out new team compositions! If you notice any bugs, click **🐛 Report Bug** to let us know.`,
+                author: 'Naruto-Arena Team',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+            console.log('Seeded 27 New Characters & Combat Overhaul news announcement.');
+        }
     } catch (err) {
-        console.warn('Failed to seed Early Access news post:', err.message);
+        console.warn('Failed to seed news posts:', err.message);
     }
 }
 
