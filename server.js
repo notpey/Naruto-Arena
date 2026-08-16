@@ -5286,11 +5286,19 @@ const serializeAdminUserDocument = (user = {}) => ({
     profile: normalizeUserProfile(user),
 });
 
-const normalizeNewsParagraphs = (value) =>
-    (Array.isArray(value) ? value : [])
+const normalizeNewsParagraphs = (value) => {
+    if (typeof value === 'string') {
+        return value
+            .split(/\r?\n\r?\n+/)
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .slice(0, 100);
+    }
+    return (Array.isArray(value) ? value : [])
         .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
         .filter(Boolean)
         .slice(0, 100);
+};
 
 const buildCharacterCatalog = () =>
     charactersData.map((character = {}) => ({
@@ -5639,25 +5647,46 @@ const normalizeNewsChanges = (value) =>
         .filter(Boolean)
         .slice(0, 200);
 
-const normalizeNewsBlocks = (value) =>
-    (Array.isArray(value) ? value : [])
-        .map((entry) => ({
-            type: typeof entry?.type === 'string' ? entry.type.trim().toLowerCase() : 'paragraph',
-            text: typeof entry?.text === 'string' ? entry.text.trim() : '',
-        }))
-        .filter((entry) => entry.type === 'divider' || (entry.type === 'paragraph' && entry.text))
-        .slice(0, 200);
+const normalizeNewsBlocks = (value, fallbackContent) => {
+    if (Array.isArray(value) && value.length) {
+        return value
+            .map((entry) => ({
+                type: typeof entry?.type === 'string' ? entry.type.trim().toLowerCase() : 'paragraph',
+                text: typeof entry?.text === 'string' ? entry.text.trim() : '',
+            }))
+            .filter((entry) => entry.type === 'divider' || (entry.type === 'paragraph' && entry.text))
+            .slice(0, 200);
+    }
+    if (typeof fallbackContent === 'string' && fallbackContent.trim()) {
+        return fallbackContent
+            .split(/\r?\n\r?\n+/)
+            .map((chunk) => {
+                const trimmed = chunk.trim();
+                if (trimmed === '---' || trimmed === '___') {
+                    return { type: 'divider', text: '' };
+                }
+                return { type: 'paragraph', text: trimmed };
+            })
+            .filter((b) => b.type === 'divider' || b.text);
+    }
+    return [];
+};
 
-const serializeNewsPost = (post = {}) => ({
-    id: post._id ? String(post._id) : '',
-    title: typeof post.title === 'string' ? post.title : 'Untitled Post',
-    paragraphs: normalizeNewsParagraphs(post.paragraphs),
-    changes: normalizeNewsChanges(post.changes),
-    blocks: normalizeNewsBlocks(post.blocks),
-    author: typeof post.author === 'string' ? post.author : 'Unknown',
-    createdAt: post.createdAt || null,
-    updatedAt: post.updatedAt || null,
-});
+const serializeNewsPost = (post = {}) => {
+    const rawContent = typeof post.content === 'string' ? post.content : '';
+    const paragraphs = normalizeNewsParagraphs(post.paragraphs || rawContent);
+    const blocks = normalizeNewsBlocks(post.blocks, rawContent || paragraphs.join('\n\n'));
+    return {
+        id: post._id ? String(post._id) : '',
+        title: typeof post.title === 'string' ? post.title : 'Untitled Post',
+        paragraphs,
+        changes: normalizeNewsChanges(post.changes),
+        blocks,
+        author: typeof post.author === 'string' ? post.author : 'Unknown',
+        createdAt: post.createdAt || null,
+        updatedAt: post.updatedAt || null,
+    };
+};
 
 const buildPublicClanProfile = async (requestedClanName = '') => {
     const normalizedRequestedName = typeof requestedClanName === 'string' ? requestedClanName.trim().toLowerCase() : '';
@@ -9023,31 +9052,30 @@ async function ensureEarlyAccessNewsPost() {
             title: 'Major Update: 27 New Shippuden Characters & Combat Overhaul!',
         });
         if (!updatePost) {
+            const rawText = [
+                'Welcome Shinobi! Today brings one of the biggest content updates to Naruto-Arena yet, featuring 27 brand new Shippuden and Akatsuki characters, a combat engine upgrade, and high-definition artwork across the board!',
+                '🌟 27 New Characters Enter the Arena!',
+                'Expand your team rosters and discover powerful new synergies with the arrival of the Shippuden era:',
+                '• Team Kakashi / Yamato: Uzumaki Naruto (S), Haruno Sakura (S), Sai, Yamato, Hatake Kakashi (S)\n• Team Kurenai: Inuzuka Kiba (S), Aburame Shino (S), Hyuuga Hinata (S)\n• Team Asuma: Nara Shikamaru (S), Akimichi Chouji (S), Yamanaka Ino (S)\n• Team Gai: Rock Lee (S), Tenten (S), Hyuuga Neji (S), Maito Gai (S)\n• Sand Siblings: Kazekage Gaara, Kankuro (S), Temari (S)\n• Sound & Rogue Shinobi: Yakushi Kabuto (S), Orochimaru (S), Four Tails Kyuubi Naruto\n• Akatsuki & Body Doubles: Deidara, Hiruko (Sasori), Sasori of the Red Sand, Puppet Sasori, Kisame Body Double, Itachi Body Double\n• Flashback & Special Shinobi: Tsuchi Kin, Teuchi, Young Minato, Young Kushina, Young Itachi, Young Yahiko, Young Konan, Young Nagato',
+                '---',
+                '⚔️ Combat & Skill Engine Upgrades',
+                '• Chakra Class Standardization: All skills now consistently utilize the Chakra class instead of legacy Energy types.\n• Accurate Chakra Costs: All 27 new character energy costs have been fine-tuned and verified for balanced competitive play.\n• Invulnerability Bypass: Skills designed to bypass invulnerability (e.g. Dead Soul Technique, Eight Trigrams Mountain Crusher, Rinnegan Domination) now reliably strike through defensive barriers.\n• Targeting Flexibility: Enhanced targeting rules supporting single-target (any unit), all-ally, and all-characters modes.',
+                '---',
+                '🎨 Visual & Mission Enhancements',
+                '• HD Artwork & Icons: Full character portraits and custom skill icons restored and baked for all 97 shinobi.\n• Mission Hub Backdrops: 40+ mission illustration artworks refreshed.\n• Persistence & Performance: Improved character asset caching and database fallback reliability.',
+                'Jump into Quick Play or Ladder matches now to try out new team compositions! If you notice any bugs, click 🐛 Report Bug to let us know.'
+            ];
+            const blocks = rawText.map((item) => {
+                if (item === '---') return { type: 'divider', text: '' };
+                return { type: 'paragraph', text: item };
+            });
+            const paragraphs = rawText.filter((t) => t !== '---');
+
             await newsPostsCollection.insertOne({
                 title: 'Major Update: 27 New Shippuden Characters & Combat Overhaul!',
-                content: `Welcome Shinobi! Today brings one of the biggest content updates to Naruto-Arena yet, featuring **27 brand new Shippuden and Akatsuki characters**, a combat engine upgrade, and high-definition artwork across the board!\n\n` +
-                    `### 🌟 27 New Characters Enter the Arena!\n` +
-                    `Expand your team rosters and discover powerful new synergies with the arrival of the Shippuden era:\n\n` +
-                    `- **Team Kakashi / Yamato**: Uzumaki Naruto (S), Haruno Sakura (S), Sai, Yamato, Hatake Kakashi (S)\n` +
-                    `- **Team Kurenai**: Inuzuka Kiba (S), Aburame Shino (S), Hyuuga Hinata (S)\n` +
-                    `- **Team Asuma**: Nara Shikamaru (S), Akimichi Chouji (S), Yamanaka Ino (S)\n` +
-                    `- **Team Gai**: Rock Lee (S), Tenten (S), Hyuuga Neji (S), Maito Gai (S)\n` +
-                    `- **Sand Siblings**: Kazekage Gaara, Kankuro (S), Temari (S)\n` +
-                    `- **Sound & Rogue Shinobi**: Yakushi Kabuto (S), Orochimaru (S), Four Tails Kyuubi Naruto\n` +
-                    `- **Akatsuki & Body Doubles**: Deidara, Hiruko (Sasori), Sasori of the Red Sand, Puppet Sasori, Kisame Body Double, Itachi Body Double\n` +
-                    `- **Flashback & Special Shinobi**: Tsuchi Kin, Teuchi, Young Minato, Young Kushina, Young Itachi, Young Yahiko, Young Konan, Young Nagato\n\n` +
-                    `---\n\n` +
-                    `### ⚔️ Combat & Skill Engine Upgrades\n` +
-                    `- **Chakra Class Standardization**: All skills now consistently utilize the **Chakra** class instead of legacy Energy types.\n` +
-                    `- **Accurate Chakra Costs**: All 27 new character energy costs have been fine-tuned and verified for balanced competitive play.\n` +
-                    `- **Invulnerability Bypass**: Skills designed to bypass invulnerability (e.g. *Dead Soul Technique*, *Eight Trigrams Mountain Crusher*, *Rinnegan Domination*) now reliably strike through defensive barriers.\n` +
-                    `- **Targeting Flexibility**: Enhanced targeting rules supporting \`single-target\` (any unit), \`all-ally\`, and \`all-characters\` modes.\n\n` +
-                    `---\n\n` +
-                    `### 🎨 Visual & Mission Enhancements\n` +
-                    `- **HD Artwork & Icons**: Full character portraits and custom skill icons restored and baked for all 97 shinobi.\n` +
-                    `- **Mission Hub Backdrops**: 40+ mission illustration artworks refreshed.\n` +
-                    `- **Persistence & Performance**: Improved character asset caching and database fallback reliability.\n\n` +
-                    `Jump into Quick Play or Ladder matches now to try out new team compositions! If you notice any bugs, click **🐛 Report Bug** to let us know.`,
+                blocks,
+                paragraphs,
+                changes: [],
                 author: 'Naruto-Arena Team',
                 createdAt: new Date(),
                 updatedAt: new Date(),
