@@ -289,13 +289,19 @@ class CharacterService {
         );
 
         let backfilledMissingImages = false;
+        const isMissingOrPlaceholderImage = (url) => {
+            if (!url || typeof url !== 'string') return true;
+            const trimmed = url.trim().toLowerCase();
+            return !trimmed || trimmed === 'deadcharacter.png' || trimmed === 'deadcharacter-remaster.png' || trimmed.includes('deadcharacter');
+        };
+
         const withSeedImageFallback = (entry) => {
             const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
             const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
             const storedFace = typeof entry?.facePicture === 'string' ? entry.facePicture.trim() : '';
             const seedFace = typeof seedEntry?.facePicture === 'string' ? seedEntry.facePicture.trim() : '';
             let nextEntry = entry;
-            if (!storedFace && seedFace) {
+            if (isMissingOrPlaceholderImage(storedFace) && !isMissingOrPlaceholderImage(seedFace)) {
                 backfilledMissingImages = true;
                 nextEntry = {
                     ...nextEntry,
@@ -316,7 +322,7 @@ class CharacterService {
                 const seedSkill = skill?.id ? seedSkillsById.get(skill.id) : null;
                 const storedImage = typeof skill?.skillimage === 'string' ? skill.skillimage.trim() : '';
                 const seedImage = typeof seedSkill?.skillimage === 'string' ? seedSkill.skillimage.trim() : '';
-                if (storedImage || !seedImage) {
+                if (!isMissingOrPlaceholderImage(storedImage) || isMissingOrPlaceholderImage(seedImage)) {
                     return skill;
                 }
                 changedSkills = true;
@@ -339,9 +345,29 @@ class CharacterService {
             const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
             const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
             if (seedEntry) {
+                const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
+                const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
+                if (facePicture !== storedFace) {
+                    backfilledMissingImages = true;
+                }
+
+                const nextSkills = (Array.isArray(seedEntry.skills) ? seedEntry.skills : []).map((seedSkill) => {
+                    const storedSkill = (Array.isArray(entry.skills) ? entry.skills : []).find(s => s.id === seedSkill.id);
+                    const storedSkillImg = typeof storedSkill?.skillimage === 'string' ? storedSkill.skillimage.trim() : '';
+                    const skillimage = !isMissingOrPlaceholderImage(storedSkillImg) ? storedSkillImg : seedSkill.skillimage;
+                    if (skillimage !== storedSkillImg) {
+                        backfilledMissingImages = true;
+                    }
+                    return {
+                        ...seedSkill,
+                        skillimage,
+                    };
+                });
+
                 return {
                     ...seedEntry,
-                    facePicture: (typeof entry.facePicture === 'string' && entry.facePicture.trim()) || seedEntry.facePicture,
+                    facePicture,
+                    skills: nextSkills,
                     characterdeescription: (typeof entry.characterdeescription === 'string' && entry.characterdeescription.trim()) || seedEntry.characterdeescription,
                 };
             }
