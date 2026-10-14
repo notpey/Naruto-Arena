@@ -21,6 +21,8 @@ module.exports = function(context) {
         SESSION_COOKIE_NAME
     } = context;
 
+    router.use((req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+
     router.post('/login', loginLimiter, async (req, res) => {
         try {
             const { error: validationError, value } = loginSchema.validate(req.body || {});
@@ -91,7 +93,7 @@ module.exports = function(context) {
             }
     
             const [existingUsername, existingEmail] = await Promise.all([
-                usersCollection.findOne({ username }),
+                usersCollection.findOne({ usernameLower: username.toLowerCase() }),
                 usersCollection.findOne({ email }),
             ]);
     
@@ -120,7 +122,8 @@ module.exports = function(context) {
             const result = await usersCollection.insertOne(newUser);
             const token = signSession({ ...newUser, _id: result.insertedId });
             setSessionCookie(res, token);
-            await recalculatePlayerLadderStandings();
+            // Account creation has succeeded; a standings refresh must not report it as a failed registration.
+            await recalculatePlayerLadderStandings().catch(error => console.error('Registration standings refresh failed:', error.name));
             const createdUser = await usersCollection.findOne({ _id: result.insertedId });
     
             return res.status(201).json({

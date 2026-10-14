@@ -5,7 +5,7 @@ const path = require('node:path');
 
 test('UI/UX Hardening - CSS Resilience & Components', () => {
     const cssPath = path.join(__dirname, '..', 'style.css');
-    const cssContent = fs.readFileSync(cssPath, 'utf8');
+    const cssContent = fs.readFileSync(cssPath, 'utf8').replace(/\r\n/g, '\n');
 
     assert.ok(cssContent.includes('.game-toast-container'), 'style.css contains .game-toast-container');
     assert.ok(cssContent.includes('.game-toast'), 'style.css contains .game-toast');
@@ -118,7 +118,7 @@ test('UI/UX Hardening - Client Targeting Logic Matches Engine Rules', () => {
 
 test('UI/UX Hardening - Enemy Rank Hat Layering & Queue Visual Preservation', () => {
     const cssPath = path.join(__dirname, '..', 'style.css');
-    const cssContent = fs.readFileSync(cssPath, 'utf8');
+    const cssContent = fs.readFileSync(cssPath, 'utf8').replace(/\r\n/g, '\n');
 
     // Verify enemy anbu rank hat has z-index: 1 (behind character portrait)
     assert.ok(

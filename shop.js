@@ -28,7 +28,7 @@
     };
 
     var fetchJson = function (url, options) {
-        return fetch(url, Object.assign({ credentials: 'include' }, options || {})).then(function (res) {
+        return window.ArenaSession.fetch(url, Object.assign({ credentials: 'include' }, options || {})).then(function (res) {
             return res
                 .json()
                 .catch(function () {

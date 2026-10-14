@@ -1,0 +1,32 @@
+.account-session-dialog, .recovery-card {
+    box-sizing: border-box; width: min(440px, calc(100vw - 32px));
+    padding: 24px; border: 1px solid #eaa441; border-radius: 14px;
+    background: #111923; color: #f8f1e6; font: 16px/1.5 Arial, sans-serif;
+}
+.account-session-dialog { max-height: calc(100dvh - 32px); overflow: auto; }
+.account-session-dialog::backdrop { background: rgb(0 0 0 / 85%); }
+.account-session-dialog h2, .recovery-card h1 { margin: 0 0 12px; font-size: 24px; color: #ffb347; }
+.account-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.account-session-dialog button, .account-session-dialog a, .recovery-card button, .recovery-card a {
+    box-sizing: border-box; min-height: 44px; padding: 10px 14px; border-radius: 6px;
+    font: inherit; color: #fff; background: #293b4c; border: 1px solid #64778a;
+}
+.account-session-dialog [hidden], .recovery-card [hidden] { display: none !important; }
+.recovery-page { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #080d14; padding: 20px 0; }
+.recovery-card label { display: block; margin: 16px 0 5px; }
+.recovery-card input { box-sizing: border-box; width: 100%; min-height: 46px; padding: 10px; font: inherit; border: 1px solid #64778a; border-radius: 6px; }
+.recovery-card button { margin-top: 20px; width: 100%; background: #a84c05; cursor: pointer; }
+.recovery-card button:disabled { opacity: .6; cursor: wait; }
+.recovery-card a { display: inline-block; margin-top: 16px; }
+.recovery-status { min-height: 24px; overflow-wrap: anywhere; }
+.account-recovery-link { display: inline-block; padding: 12px 4px; color: inherit; font-size: 16px; }
+.login .account-recovery-link { position: absolute; bottom: 6px; left: 30%; color: #15110b; }
+@media (max-width: 600px) {
+    body:has(.login-form) { margin: 0; min-width: 0; }
+    body:has(.login-form) .background { width: 100%; min-height: 100dvh; height: auto; background-size: cover; }
+    body:has(.login-form) .login { position: relative; inset: auto; margin: 32px auto; width: calc(100% - 32px); height: auto; padding: 24px; box-sizing: border-box; background: #fbe9b8; border-radius: 12px; }
+    body:has(.login-form) .logintext { position: static; width: auto; margin: 0 0 16px; }
+    body:has(.login-form) .login-form { display: grid; gap: 10px; }
+    body:has(.login-form) .login-form > * { position: static; margin: 0; width: 100%; box-sizing: border-box; transform: none; }
+    body:has(.login-form) .login-form input, body:has(.login-form) .login-form button { min-height: 46px; font-size: 16px; }
+}

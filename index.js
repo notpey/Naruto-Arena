@@ -352,7 +352,7 @@
 
   function markClanInvitationsViewed(user) {
     try {
-      localStorage.setItem(clanInvitationSeenStorageKey, getClanInvitationSignature(user));
+      window.ArenaSession.storage.setItem(clanInvitationSeenStorageKey, getClanInvitationSignature(user));
     } catch (error) {}
     updateClanPanelNotification(user);
   }
@@ -371,7 +371,7 @@
     }
     var seenSignature = "";
     try {
-      seenSignature = localStorage.getItem(clanInvitationSeenStorageKey) || "";
+      seenSignature = window.ArenaSession.storage.getItem(clanInvitationSeenStorageKey) || "";
     } catch (error) {}
     badge.style.display = seenSignature === getClanInvitationSignature(user) ? "none" : "inline-block";
   }
@@ -857,7 +857,7 @@
     }
     setNewsStatus("Loading news...");
     try {
-      var response = await fetch("/api/news", {
+      var response = await window.ArenaSession.fetch("/api/news", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -997,7 +997,7 @@
     }
     setNewsPostListStatus("Loading posts...");
     try {
-      var response = await fetch("/api/admin/news", {
+      var response = await window.ArenaSession.fetch("/api/admin/news", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1019,7 +1019,7 @@
       return;
     }
     try {
-      var response = await fetch("/api/characters/catalog", {
+      var response = await window.ArenaSession.fetch("/api/characters/catalog", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1082,7 +1082,7 @@
     }
     setLatestReleasesStatus("Loading latest releases...");
     try {
-      var response = await fetch("/api/admin/latest-releases", {
+      var response = await window.ArenaSession.fetch("/api/admin/latest-releases", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1114,7 +1114,7 @@
     }
     setLatestReleasesStatus("Saving latest releases...");
     try {
-      var response = await fetch("/api/admin/latest-releases", {
+      var response = await window.ArenaSession.fetch("/api/admin/latest-releases", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -1147,7 +1147,7 @@
     }
     setMaintenanceModeStatus("Loading maintenance mode...");
     try {
-      var response = await fetch("/api/admin/maintenance", {
+      var response = await window.ArenaSession.fetch("/api/admin/maintenance", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1171,7 +1171,7 @@
     maintenanceModeToggleButton.disabled = true;
     setMaintenanceModeStatus(maintenanceModeEnabled ? "Disabling maintenance mode..." : "Enabling maintenance mode...");
     try {
-      var response = await fetch("/api/admin/maintenance", {
+      var response = await window.ArenaSession.fetch("/api/admin/maintenance", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -1223,7 +1223,7 @@
     }
     setNewsAdminStatus(postId ? "Updating post..." : "Creating post...");
     try {
-      var response = await fetch(endpoint, {
+      var response = await window.ArenaSession.fetch(endpoint, {
         method: method,
         headers: {
           "Content-Type": "application/json"
@@ -1257,7 +1257,7 @@
     }
     setNewsAdminStatus("Deleting post...");
     try {
-      var response = await fetch("/api/admin/news/" + encodeURIComponent(postId), {
+      var response = await window.ArenaSession.fetch("/api/admin/news/" + encodeURIComponent(postId), {
         method: "DELETE",
         credentials: "same-origin"
       });
@@ -1331,7 +1331,7 @@
 
     setWinratesStatus("Loading character winrates...");
     try {
-      var response = await fetch("/api/admin/winrates", {
+      var response = await window.ArenaSession.fetch("/api/admin/winrates", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1372,7 +1372,7 @@
 
     setPlayerAccountStatus("Loading account...");
     try {
-      var response = await fetch("/api/admin/users/" + encodeURIComponent(username), {
+      var response = await window.ArenaSession.fetch("/api/admin/users/" + encodeURIComponent(username), {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1463,7 +1463,7 @@
 
     setPlayerAccountsStatus("Loading player accounts...");
     try {
-      var response = await fetch("/api/admin/users", {
+      var response = await window.ArenaSession.fetch("/api/admin/users", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1504,7 +1504,7 @@
     }
     setPlayerAccountStatus("Saving account...");
     try {
-      var response = await fetch("/api/admin/users/" + encodeURIComponent(selectedAdminAccountUsername), {
+      var response = await window.ArenaSession.fetch("/api/admin/users/" + encodeURIComponent(selectedAdminAccountUsername), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -1813,7 +1813,7 @@
     hideDeleteConfirm();
     setCharacterEditorModalStatus("Deleting character...");
     try {
-      var response = await fetch("/api/admin/characters/" + encodeURIComponent(idToDelete), {
+      var response = await window.ArenaSession.fetch("/api/admin/characters/" + encodeURIComponent(idToDelete), {
         method: "DELETE",
         credentials: "same-origin"
       });
@@ -1897,7 +1897,7 @@
 
   async function loadAdminMissionsForCharEditor() {
     try {
-      var response = await fetch("/api/admin/missions", { credentials: "same-origin" });
+      var response = await window.ArenaSession.fetch("/api/admin/missions", { credentials: "same-origin" });
       if (!response.ok) return;
       var data = await response.json().catch(function () { return {}; });
       adminMissionsForCharEditor = Array.isArray(data && data.missions) ? data.missions : [];
@@ -1925,7 +1925,7 @@
 
     setCharacterEditorStatus("Loading characters...");
     try {
-      var response = await fetch("/api/admin/characters", {
+      var response = await window.ArenaSession.fetch("/api/admin/characters", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -1965,7 +1965,7 @@
     openCharacterEditorModal();
 
     try {
-      var response = await fetch("/api/admin/characters/" + encodeURIComponent(characterId), {
+      var response = await window.ArenaSession.fetch("/api/admin/characters/" + encodeURIComponent(characterId), {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -2022,7 +2022,7 @@
         ? "/api/admin/characters"
         : "/api/admin/characters/" + encodeURIComponent(selectedAdminCharacterId);
       var method = isNewCharacter ? "POST" : "PUT";
-      var response = await fetch(url, {
+      var response = await window.ArenaSession.fetch(url, {
         method: method,
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
@@ -2071,7 +2071,7 @@
     characterEditorExport.disabled = true;
     setCharacterEditorStatus("Preparing characters.js export...");
     try {
-      var response = await fetch("/api/admin/characters/export", {
+      var response = await window.ArenaSession.fetch("/api/admin/characters/export", {
         credentials: "same-origin"
       });
 
@@ -2111,7 +2111,7 @@
     resetWinratesButton.disabled = true;
     setWinratesStatus("Resetting winrates...");
     try {
-      var response = await fetch("/api/admin/winrates/reset", {
+      var response = await window.ArenaSession.fetch("/api/admin/winrates/reset", {
         method: "POST",
         credentials: "same-origin"
       });
@@ -2399,7 +2399,7 @@
 
   async function loadClanMembers() {
     try {
-      var response = await fetch("/api/clan/members", {
+      var response = await window.ArenaSession.fetch("/api/clan/members", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -2472,7 +2472,7 @@
         acceptButton.disabled = true;
         setClanInvitationsStatus("Accepting invitation...");
         try {
-          var response = await fetch("/api/clan/invitations/accept", {
+          var response = await window.ArenaSession.fetch("/api/clan/invitations/accept", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -2517,7 +2517,7 @@
       return;
     }
     try {
-      var response = await fetch("/api/clan/invitations", {
+      var response = await window.ArenaSession.fetch("/api/clan/invitations", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -2693,7 +2693,7 @@
     }
     var currentPage = getCurrentActivityPageLabel();
     try {
-      await fetch("/api/activity", {
+      await window.ArenaSession.fetch("/api/activity", {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -2718,13 +2718,13 @@
     try {
       var navAvatarEl = document.getElementById("ca-nav-avatar-circle");
       if (!user || !user.username) {
-        localStorage.removeItem("narutoUser");
+        window.ArenaSession.storage.removeItem("narutoUser");
         if (navAvatarEl) navAvatarEl.src = defaultProfileAvatar;
         return;
       }
       var navAvatarUrl = user.profile && user.profile.avatarUrl ? user.profile.avatarUrl : defaultProfileAvatar;
       if (navAvatarEl) navAvatarEl.src = navAvatarUrl;
-      localStorage.setItem("narutoUser", JSON.stringify({
+      window.ArenaSession.storage.setItem("narutoUser", JSON.stringify({
         username: user.username,
         avatarUrl: navAvatarUrl,
         clanAbbreviation: user.profile && user.profile.clan && user.profile.clan.abbreviation
@@ -3164,7 +3164,7 @@
 
   async function fetchPublicClanProfile(clanName) {
     try {
-      var response = await fetch("/api/clans/" + encodeURIComponent(clanName) + "/profile", {
+      var response = await window.ArenaSession.fetch("/api/clans/" + encodeURIComponent(clanName) + "/profile", {
         credentials: "same-origin",
         cache: "no-store"
       });
@@ -3224,7 +3224,7 @@
       return;
     }
     try {
-      var response = await fetch("/api/clan/recruitment", {
+      var response = await window.ArenaSession.fetch("/api/clan/recruitment", {
         credentials: "same-origin"
       });
       var data = await response.json().catch(function () {
@@ -3327,7 +3327,7 @@
     }
 
     try {
-      var response = await fetch("/api/leaderboards/sidebar", {
+      var response = await window.ArenaSession.fetch("/api/leaderboards/sidebar", {
         credentials: "same-origin"
       });
       if (!response.ok) {
@@ -3499,7 +3499,7 @@
 
   async function fetchPublicProfile(username) {
     try {
-      var response = await fetch("/api/users/" + encodeURIComponent(username) + "/profile", {
+      var response = await window.ArenaSession.fetch("/api/users/" + encodeURIComponent(username) + "/profile", {
         credentials: "same-origin",
         cache: "no-store"
       });
@@ -3545,7 +3545,7 @@
   async function initializeReleaseInputs() {
     var releases = [];
     try {
-      var response = await fetch("/api/latest-releases", {
+      var response = await window.ArenaSession.fetch("/api/latest-releases", {
         credentials: "same-origin"
       });
       if (response.ok) {
@@ -3567,7 +3567,7 @@
 
   async function fetchSessionUser() {
     try {
-      var response = await fetch("/api/me", {
+      var response = await window.ArenaSession.fetch("/api/me", {
         credentials: "same-origin"
       });
       if (!response.ok) {
@@ -3640,7 +3640,7 @@
   function hydrateFromCachedUser() {
     var cached = null;
     try {
-      cached = JSON.parse(localStorage.getItem("narutoUser") || "null");
+      cached = JSON.parse(window.ArenaSession.storage.getItem("narutoUser") || "null");
     } catch (error) {
       cached = null;
     }
@@ -3896,7 +3896,7 @@
     authToggle.disabled = true;
 
     try {
-      var response = await fetch(endpoint, {
+      var response = await window.ArenaSession.fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -3913,6 +3913,11 @@
         return;
       }
 
+      var sessionCheck = await window.ArenaSession.fetch('/api/me');
+      if (!sessionCheck.ok) {
+        setStatus('Sign-in could not be confirmed. Enable cookies for this site and try again.', 'error');
+        return;
+      }
       var responseUser = data && data.user && data.user.username ? data.user : null;
       var usernameLabel = responseUser ? responseUser.username : username;
       setCurrentSessionUser(responseUser);
@@ -3931,7 +3936,7 @@
     setAccountStatus("");
 
     try {
-      var response = await fetch("/api/logout", {
+      var response = await window.ArenaSession.fetch("/api/logout", {
         method: "POST",
         credentials: "same-origin"
       });
@@ -4156,7 +4161,7 @@
       setClanRegisterStatus("Creating clan...");
 
       try {
-        var response = await fetch("/api/clan/create", {
+        var response = await window.ArenaSession.fetch("/api/clan/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4220,7 +4225,7 @@
       setLeaveClanStatus("Leaving clan...");
 
       try {
-        var response = await fetch("/api/clan/leave", {
+        var response = await window.ArenaSession.fetch("/api/clan/leave", {
           method: "POST",
           credentials: "same-origin"
         });
@@ -4325,7 +4330,7 @@
       setClanAvatarStatus("Saving clan avatar...", "");
 
       try {
-        var response = await fetch("/api/clan/avatar", {
+        var response = await window.ArenaSession.fetch("/api/clan/avatar", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4416,7 +4421,7 @@
       setClanManagementStatus("Saving rank names...");
 
       try {
-        var response = await fetch("/api/clan/ranks", {
+        var response = await window.ArenaSession.fetch("/api/clan/ranks", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4475,7 +4480,7 @@
       setClanManagementStatus("Deleting custom rank...");
 
       try {
-        var response = await fetch("/api/clan/ranks/delete", {
+        var response = await window.ArenaSession.fetch("/api/clan/ranks/delete", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4544,7 +4549,7 @@
       setClanManagementStatus("Assigning rank...");
 
       try {
-        var response = await fetch("/api/clan/member-rank", {
+        var response = await window.ArenaSession.fetch("/api/clan/member-rank", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4622,7 +4627,7 @@
       setClanInfoStatus("Saving clan info...");
 
       try {
-        var response = await fetch("/api/clan/update", {
+        var response = await window.ArenaSession.fetch("/api/clan/update", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4689,7 +4694,7 @@
       setClanRecruitmentStatus("Sending invitation...");
 
       try {
-        var response = await fetch("/api/clan/invite", {
+        var response = await window.ArenaSession.fetch("/api/clan/invite", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4732,7 +4737,7 @@
       setClanRecruitmentStatus("Retracting invitation...");
 
       try {
-        var response = await fetch("/api/clan/invite/retract", {
+        var response = await window.ArenaSession.fetch("/api/clan/invite/retract", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4808,7 +4813,7 @@
       }
 
       try {
-        var response = await fetch("/api/profile/avatar", {
+        var response = await window.ArenaSession.fetch("/api/profile/avatar", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4859,7 +4864,7 @@
       }
 
       try {
-        var response = await fetch("/api/profile/backgrounds", {
+        var response = await window.ArenaSession.fetch("/api/profile/backgrounds", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -4931,7 +4936,7 @@
       }
 
       try {
-        var response = await fetch("/api/profile/reset-account", {
+        var response = await window.ArenaSession.fetch("/api/profile/reset-account", {
           method: "POST",
           credentials: "same-origin"
         });

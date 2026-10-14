@@ -2,82 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <script>
-        (function () {
-            var STAGE_W = 1100;
-            var STAGE_H = 800;
-            var viewportMeta = document.getElementById("viewport-meta");
-            var resizeTimer = null;
-
-            function applyMobileFit() {
-                var winW = window.innerWidth || document.documentElement.clientWidth;
-                var winH = window.innerHeight || document.documentElement.clientHeight;
-
-                if (viewportMeta) {
-                    viewportMeta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover");
-                }
-
-                var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || winW < 768;
-                var isPortrait = winH > winW;
-                var overlay = document.getElementById("mobile-orientation-overlay");
-
-                if (overlay && !overlay.classList.contains("dismissed")) {
-                    if (isMobile && isPortrait) {
-                        overlay.style.display = "flex";
-                    } else {
-                        overlay.style.display = "none";
-                    }
-                }
-
-                if (winW < STAGE_W || winH < STAGE_H) {
-                    var scaleW = winW / STAGE_W;
-                    var scaleH = winH / STAGE_H;
-                    var scale = Math.min(scaleW, scaleH);
-                    if (scale < 1) {
-                        document.documentElement.style.background = "#06080d";
-                        document.documentElement.style.overflow = "hidden";
-                        document.body.style.overflow = "hidden";
-                        document.body.style.width = STAGE_W + "px";
-                        document.body.style.height = STAGE_H + "px";
-                        document.body.style.position = "fixed";
-                        document.body.style.left = "50%";
-                        document.body.style.top = "50%";
-                        document.body.style.transformOrigin = "center center";
-                        document.body.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
-                        return;
-                    }
-                }
-                
-                document.documentElement.style.background = "";
-                document.documentElement.style.overflow = "";
-                document.body.style.overflow = "";
-                document.body.style.width = "";
-                document.body.style.height = "";
-                document.body.style.position = "";
-                document.body.style.left = "";
-                document.body.style.top = "";
-                document.body.style.transformOrigin = "";
-                document.body.style.transform = "";
-            }
-
-            function debouncedFit() {
-                if (resizeTimer) clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(applyMobileFit, 50);
-            }
-
-            if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", applyMobileFit);
-            } else {
-                applyMobileFit();
-            }
-            window.addEventListener("resize", debouncedFit);
-            window.addEventListener("orientationchange", function() {
-                setTimeout(applyMobileFit, 100);
-            });
-            window.__applyMobileLandscapeFit = applyMobileFit;
-        })();
-    </script>
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script src="mobile-layout.js?v=1" defer></script>
     <title>Naruto-Arena Game</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,6 +17,10 @@
     <link rel="shortcut icon" href="favicon.ico?v=3">
     <link rel="apple-touch-icon" href="favicon.png?v=3">
     <link rel="stylesheet" href="style.css?v=27">
+    <link rel="stylesheet" href="account.css?v=1">
+    <script src="character-images.js?v=1"></script>
+    <script src="account-client.js?v=1"></script>
+    <link rel="stylesheet" href="mobile-layout.css?v=1">
 </head>
 <body class="ingame-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -539,6 +469,6 @@
 
 </div>
 <script src="characters.js?v=42"></script>
-<script src="script.js?v=42"></script>
+<script src="script.js?v=43"></script>
 </body>
 </html>

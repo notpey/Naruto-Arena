@@ -40,7 +40,7 @@
             }
 
             function fetchJsonLocal(url, options) {
-                return fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
+                return window.ArenaSession.fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
                     return res.json().catch(function () {
                         return {};
                     }).then(function (data) {
@@ -469,7 +469,7 @@
             var volBadge = document.getElementById("settings-volume-val");
             if (volSlider) {
                 try {
-                    var rawSound = localStorage.getItem("narutoSoundSettings");
+                    var rawSound = window.ArenaSession.storage.getItem("narutoSoundSettings");
                     if (rawSound) {
                         var parsedSound = JSON.parse(rawSound);
                         if (parsedSound && typeof parsedSound.volume === 'number') {
@@ -484,7 +484,7 @@
                     var val = parseInt(e.target.value, 10) || 0;
                     if (volBadge) volBadge.textContent = val + "%";
                     try {
-                        localStorage.setItem("narutoSoundSettings", JSON.stringify({ volume: val / 100 }));
+                        window.ArenaSession.storage.setItem("narutoSoundSettings", JSON.stringify({ volume: val / 100 }));
                     } catch(err) {}
                 });
             }
@@ -494,12 +494,12 @@
             if (dummyBtn) {
                 dummyBtn.addEventListener("click", function() {
                     if (settingsModal) settingsModal.classList.add("hidden");
-                    var raw = localStorage.getItem("narutoSelectedTeam");
+                    var raw = window.ArenaSession.storage.getItem("narutoSelectedTeam");
                     var team = null;
                     try {
                         team = JSON.parse(raw);
                     } catch (e) {}
-                    fetch("/api/admin/training-dummy/start", {
+                    window.ArenaSession.fetch("/api/admin/training-dummy/start", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ team: Array.isArray(team) && team.length === 3 ? team : undefined })
@@ -520,7 +520,7 @@
                 bugBtn.addEventListener("click", function() {
                     var desc = prompt("Describe the bug or issue you encountered:");
                     if (desc && desc.trim()) {
-                        fetch("/api/bugs", {
+                        window.ArenaSession.fetch("/api/bugs", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ title: desc.trim(), category: "general", description: desc.trim() })
@@ -562,7 +562,7 @@
             });
 
             function loadQuests() {
-                fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
+                window.ArenaSession.fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         cachedQuests = d.quests || [];
                         renderQuestsList();
@@ -616,7 +616,7 @@
             }
 
             window.claimQuest = function(questId) {
-                fetch("/api/quests/claim", {
+                window.ArenaSession.fetch("/api/quests/claim", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ questId: questId })
@@ -632,7 +632,7 @@
 
             // 🏆 Achievements Functions
             function loadAchievements() {
-                fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
+                window.ArenaSession.fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         renderAchievementsList(d.achievements || []);
                     }
@@ -681,7 +681,7 @@
             }
 
             window.claimAchievement = function(achievementId, tier) {
-                fetch("/api/achievements/claim", {
+                window.ArenaSession.fetch("/api/achievements/claim", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ achievementId: achievementId, tier: tier })
@@ -697,7 +697,7 @@
 
             // 📅 Login Rewards Functions
             function loadLoginRewards() {
-                fetch("/api/login-rewards").then(function(r) { return r.json(); }).then(function(d) {
+                window.ArenaSession.fetch("/api/login-rewards").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         renderLoginCalendar(d);
                     }
@@ -753,7 +753,7 @@
                 claimLoginBtn.addEventListener("click", function() {
                     var msgEl = document.getElementById("login-reward-msg");
                     if (msgEl) msgEl.textContent = "Claiming...";
-                    fetch("/api/login-rewards/claim", {
+                    window.ArenaSession.fetch("/api/login-rewards/claim", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" }
                     }).then(function(r) { return r.json(); }).then(function(d) {
@@ -783,7 +783,7 @@
                     }
                     if (msgEl) msgEl.textContent = "Validating code...";
 
-                    fetch("/api/promo-codes/redeem", {
+                    window.ArenaSession.fetch("/api/promo-codes/redeem", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ code: codeStr })

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    if (/\/(selection|ingame)\.html$/.test(location.pathname) && !await window.ArenaSession.ready) return;
     initBugReporter();
     const pageName = window.location.pathname.split('/').pop().toLowerCase();
     const shouldUseCustomCursor = pageName === 'ingame.html' || pageName === 'selection.html';
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const readSettings = () => {
             try {
-                const raw = localStorage.getItem(SOUND_SETTINGS_STORAGE_KEY);
+                const raw = window.ArenaSession.storage.getItem(SOUND_SETTINGS_STORAGE_KEY);
                 if (!raw) return { ...defaultSettings };
                 const parsed = JSON.parse(raw);
                 return {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const persist = () => {
             try {
-                localStorage.setItem(SOUND_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+                window.ArenaSession.storage.setItem(SOUND_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
             } catch (error) {
                 // Ignore storage failures.
             }
@@ -308,7 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!(img instanceof HTMLImageElement)) return;
         attachImageFallback(img, fallbackSrc);
         delete img.dataset.fallbackApplied;
-        img.src = src || fallbackSrc || '';
+        img.src = window.localCharacterImage(src) || fallbackSrc || '';
     };
     const attachGameImageFallbacks = () => {
         document
@@ -341,7 +342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadCharacterRoster = async () => {
         const fallbackRoster = getStaticCharacterRoster();
         try {
-            const response = await fetch(`${API_BASE_URL}/api/characters`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters`, {
                 credentials: 'include',
                 cache: 'no-store',
             });
@@ -394,7 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loginButton.disabled = true;
         setLoginStatus('Signing in...', 'info');
         try {
-            const response = await fetch(`${API_BASE_URL}/api/login`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -409,8 +410,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(message);
             }
 
+            const session = await window.ArenaSession.fetch('/api/me');
+            if (!session.ok) throw new Error('Sign-in could not be confirmed. Enable cookies for this site and try again.');
             setLoginStatus('Login successful. Redirecting...', 'success');
-            localStorage.setItem('narutoUser', JSON.stringify({ username: data.user?.username }));
+            window.ArenaSession.storage.setItem('narutoUser', JSON.stringify({ username: data.user?.username }));
             window.location.href = 'selection.html';
         } catch (error) {
             console.error('Login failed:', error);
@@ -421,7 +424,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     if (loginForm && loginButton) {
-        loginButton.addEventListener('click', submitLogin);
         loginForm.addEventListener('submit', submitLogin);
     }
 
@@ -542,7 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const readCachedUser = () => {
-        const cachedUser = localStorage.getItem('narutoUser');
+        const cachedUser = window.ArenaSession.storage.getItem('narutoUser');
         if (!cachedUser) return null;
         try {
             return JSON.parse(cachedUser);
@@ -554,7 +556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const writeCachedUser = (user) => {
         if (!user?.username) return;
-        localStorage.setItem(
+        window.ArenaSession.storage.setItem(
             'narutoUser',
             JSON.stringify({
                 username: user.username,
@@ -698,7 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const fetchProfile = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/me`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/me`, {
                 credentials: 'include',
             });
             if (!response.ok) {
@@ -737,7 +739,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const checkActiveMatchOnHubLoad = async () => {
             if (!slotList) return;
             try {
-                const res = await fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' });
+                const res = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' });
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data && data.ok && data.matchFound && data.matchId) {
@@ -764,7 +766,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fetchPublicProfile = async (username) => {
         if (!username) return null;
         try {
-            const response = await fetch(
+            const response = await window.ArenaSession.fetch(
                 `${API_BASE_URL}/api/users/${encodeURIComponent(username)}/profile`,
                 {
                     credentials: 'include',
@@ -1960,7 +1962,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const reorderQueuedSkills = async (actorSlots = []) => {
             if (!matchIdFromUrl) return;
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/reorder`,
                     {
                         method: 'POST',
@@ -2331,7 +2333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const endTurnDueToTimeout = async () => {
             if (!matchIdFromUrl) return;
             try {
-                await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/turn/end`, {
+                await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/turn/end`, {
                     method: 'POST',
                     credentials: 'include',
                 });
@@ -2404,7 +2406,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            const cachedUser = JSON.parse(localStorage.getItem('narutoUser') || '{}');
+            const cachedUser = JSON.parse(window.ArenaSession.storage.getItem('narutoUser') || '{}');
             if (cachedUser?.username) {
                 currentPlayerUsername = cachedUser.username;
             }
@@ -2461,7 +2463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!endTurnModalEl || !matchIdFromUrl) return;
             setModalBackdropVisible(true);
             try {
-                const res = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}`, {
+                const res = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}`, {
                     credentials: 'include',
                 });
                 if (!res.ok) {
@@ -2610,7 +2612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 surrenderConfirmOkButton.disabled = true;
                 surrenderConfirmOkButton.textContent = '...';
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
+                    const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
@@ -2648,7 +2650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 stopMatchRealtime();
                 if (matchIdFromUrl) {
                     try {
-                        fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
+                        window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
@@ -3050,8 +3052,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             gauntletRunIndicatorFetchInFlight = true;
             try {
                 const [runResponse, catalogResponse] = await Promise.all([
-                    fetch(`${API_BASE_URL}/api/gauntlet/run`, { credentials: 'include' }),
-                    fetch(`${API_BASE_URL}/api/gauntlet/catalog`, { credentials: 'include' }),
+                    window.ArenaSession.fetch(`${API_BASE_URL}/api/gauntlet/run`, { credentials: 'include' }),
+                    window.ArenaSession.fetch(`${API_BASE_URL}/api/gauntlet/catalog`, { credentials: 'include' }),
                 ]);
                 if (!runResponse.ok || !catalogResponse.ok) return;
                 const runData = await runResponse.json();
@@ -4325,7 +4327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     data = await wsPromise;
                 } else {
-                    const res = await fetch(
+                    const res = await window.ArenaSession.fetch(
                         `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/targets`,
                         {
                             method: 'POST',
@@ -4400,7 +4402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selection,
                 classChoice,
             });
-            return fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/queue`, {
+            return window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/skill/queue`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -4539,7 +4541,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const matchId = matchIdFromUrl;
             if (!matchId || !Array.isArray(getRosterData()) || getRosterData().length === 0) return;
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchId)}?resetPendingExchange=1`,
                     {
                         credentials: 'include',
@@ -4640,7 +4642,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         const previousPendingTurnState = clonePendingTurnState();
                                         const previousPlayerPoolState = normalizePool(playerPoolState);
                                         applyOptimisticCancelQueuedSkill(slotIndex);
-                                        fetch(
+                                        window.ArenaSession.fetch(
                                             `${API_BASE_URL}/api/match/${encodeURIComponent(
                                                 matchIdFromUrl
                                             )}/skill/cancel`,
@@ -4854,7 +4856,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 matchPollInFlight = true;
                 try {
-                    const res = await fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}`, {
+                    const res = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}`, {
                         credentials: 'include',
                     });
                     if (!res.ok) {
@@ -4899,7 +4901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 endTurnOkButton.disabled = true;
             }
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/turn/end`,
                     {
                         method: 'POST',
@@ -4928,7 +4930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const adjustRandomChakra = async (chakraType, delta) => {
             if (!matchIdFromUrl) return;
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/turn/random/adjust`,
                     {
                         method: 'POST',
@@ -4957,7 +4959,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!matchIdFromUrl || battleEndShown) return;
             if (!currentPlayerUsername || currentPlayerUsername !== currentTurnUsername) return;
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/chakra/exchange`,
                     {
                         method: 'POST',
@@ -5071,7 +5073,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const handleSurrender = async () => {
             if (!matchIdFromUrl) return;
             try {
-                const response = await fetch(
+                const response = await window.ArenaSession.fetch(
                     `${API_BASE_URL}/api/match/${encodeURIComponent(matchIdFromUrl)}/surrender`,
                     {
                         method: 'POST',
@@ -5196,14 +5198,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const handleLogout = async () => {
         try {
-            await fetch(`${API_BASE_URL}/api/logout`, {
+            await window.ArenaSession.fetch(`${API_BASE_URL}/api/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
         } catch (error) {
             console.warn('Logout request failed; proceeding to clear session locally.', error);
         } finally {
-            localStorage.removeItem('narutoUser');
+            window.ArenaSession.storage.removeItem('narutoUser');
             window.location.href = 'selection-login.html';
         }
     };
@@ -5347,7 +5349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resumeMatchIfActive = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/match/status`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, {
                 credentials: 'include',
             });
             const data = await response.json();
@@ -5367,7 +5369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (matchmakingPoll) return;
         matchmakingPoll = setInterval(async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/match/status`, {
+                const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, {
                     credentials: 'include',
                 });
                 const data = await response.json();
@@ -5412,7 +5414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setSearchingState('searching', mode);
         openSearching();
         try {
-            const response = await fetch(`${API_BASE_URL}/api/match/join`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/join`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -5453,7 +5455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         openSearching();
         try {
             await persistTeamSelection();
-            const response = await fetch(`${API_BASE_URL}/api/admin/training-dummy/start`, {
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/admin/training-dummy/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -5484,7 +5486,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         closeSearching();
         try {
-            await fetch(`${API_BASE_URL}/api/match/cancel`, {
+            await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/cancel`, {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -5863,7 +5865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         try {
-            await fetch(`${API_BASE_URL}/api/team/save`, {
+            await window.ArenaSession.fetch(`${API_BASE_URL}/api/team/save`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -6249,7 +6251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 buyBtn.disabled = true;
                 if (errorEl) errorEl.textContent = 'Unlocking character...';
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
+                    const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
@@ -6426,7 +6428,7 @@ function initBugReporter() {
         submitBtn.textContent = 'Submitting...';
 
         try {
-            const response = await fetch('/api/bugs', {
+            const response = await window.ArenaSession.fetch('/api/bugs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

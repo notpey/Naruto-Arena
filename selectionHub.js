@@ -127,7 +127,7 @@
         }
 
         function fetchJson(url, options) {
-            return fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
+            return window.ArenaSession.fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
                 return res.json().catch(function () {
                     return {};
                 }).then(function (data) {
@@ -2092,14 +2092,14 @@
                 guide.setAttribute('hidden', '');
                 guide.style.setProperty('display', 'none', 'important');
             }
-            try { localStorage.setItem('naruto_academy_guide_dismissed', 'true'); } catch (e) {}
+            try { window.ArenaSession.storage.setItem('naruto_academy_guide_dismissed', 'true'); } catch (e) {}
         }
         window.dismissAcademyGuide = hideGuide;
         document.addEventListener('DOMContentLoaded', function() {
             var btn = document.querySelector('.academy-guide-dismiss-btn');
             if (btn) btn.addEventListener('click', hideGuide);
             try {
-                var dismissed = localStorage.getItem('naruto_academy_guide_dismissed');
+                var dismissed = window.ArenaSession.storage.getItem('naruto_academy_guide_dismissed');
                 var guide = document.getElementById('academy-starter-guide');
                 if (dismissed && guide) {
                     guide.classList.add('dismissed');

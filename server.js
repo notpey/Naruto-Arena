@@ -17,14 +17,15 @@ const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
 const gauntlet = require('./gauntlet');
 const { sortCharactersByRosterOrder } = require('./data/rosterOrder');
+const { localizeArtwork } = require('./services/characterImages');
 let charactersData = require('./data/characters/index.js');
-const charactersBrowserScript = `const characters = ${JSON.stringify(charactersData)};\nif (typeof window !== 'undefined') window.characters = characters;`;
+const charactersBrowserScript = `const characters = ${JSON.stringify(localizeArtwork(charactersData))};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
 const app = express();
 const wsServer = new WebSocketServer({ noServer: true });
 const wsConnections = new Set();
 app.use(compression());
-app.use(express.static(path.join(__dirname)));
+// Static files are served below, after page access checks and cache headers.
 
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
@@ -6102,7 +6103,7 @@ const getSessionUserFromRequest = async (req = {}) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await usersCollection.findOne({ username: decoded.username });
-        return user || null;
+        return user && (Number(decoded.sessionVersion) || 0) === (Number(user.sessionVersion) || 0) ? user : null;
     } catch (error) {
         return null;
     }
@@ -6202,7 +6203,7 @@ app.use(async (req, res, next) => {
 
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await usersCollection.findOne({ username: decoded.username });
-        if (!user || String(user.role || '').trim().toLowerCase() !== 'admin') {
+        if (!user || (Number(decoded.sessionVersion) || 0) !== (Number(user.sessionVersion) || 0) || String(user.role || '').trim().toLowerCase() !== 'admin') {
             return res.redirect('/');
         }
 
@@ -6312,6 +6313,7 @@ const signSession = (user) =>
             sub: user._id?.toString?.() || user.username,
             username: user.username,
             role: user.role || 'player',
+            sessionVersion: Number(user.sessionVersion) || 0,
         },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRY }
@@ -6503,12 +6505,14 @@ const getSessionUserCached = async (token) => {
             { username: new RegExp(`^${rawUsername.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
         ]
     });
-    const resolved = user ? { ...serializeUserForClient(user) } : null;
+    const validVersion = user && (Number(decoded.sessionVersion) || 0) === (Number(user.sessionVersion) || 0);
+    const resolved = validVersion ? { ...serializeUserForClient(user), sessionVersion: Number(user.sessionVersion) || 0 } : null;
     sessionUserCache.set(token, { user: resolved, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
     return resolved;
 };
 
 const requireSession = async (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
     try {
         const token = req.cookies?.[SESSION_COOKIE_NAME];
         if (!token) {
@@ -6523,8 +6527,12 @@ const requireSession = async (req, res, next) => {
         req.authUser = authUser;
         next();
     } catch (error) {
-        console.error('Session verification failed:', error);
-        return res.status(401).json({ error: 'Unauthorized.' });
+        if (['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError'].includes(error.name)) {
+            clearSessionCookie(res);
+            return res.status(401).json({ error: 'Your session expired. Please sign in again.' });
+        }
+        console.error('Session lookup failed:', error.name);
+        return res.status(503).json({ error: 'Unable to check your session. Please retry.' });
     }
 };
 
@@ -9105,6 +9113,7 @@ async function initDb() {
     promoCodesCollection = db.collection('promoCodes');
     await usersCollection.createIndex({ username: 1 }, { unique: true });
     await usersCollection.createIndex({ usernameLower: 1 });
+    await usersCollection.createIndex({ 'passwordReset.tokenHash': 1 }, { sparse: true });
     await usersCollection.createIndex(
         { email: 1 },
         { unique: true, partialFilterExpression: { email: { $type: 'string' } } }
@@ -9137,6 +9146,7 @@ async function initDb() {
         usersCollection,
         normalizeUserProfile,
         buildDefaultUserProfile,
+        recalculatePlayerLadderStandings,
         signSession,
         setSessionCookie,
         clearSessionCookie,
@@ -9145,6 +9155,15 @@ async function initDb() {
         SESSION_COOKIE_NAME
     });
     app.use('/api', authRouter);
+    app.use('/api', require('./routes/recovery')({
+        usersCollection,
+        invalidateSessions(username) {
+            sessionUserCache.clear();
+            for (const ws of wsConnections) {
+                if (ws.username === username) ws.close(1008, 'Please sign in again');
+            }
+        },
+    }));
 
     const bugsRouter = require('./routes/bugs.js')({
         bugsCollection,
@@ -10869,6 +10888,7 @@ app.post('/api/refresh', requireSession, async (req, res) => {
 });
 
 app.get('/api/me', requireSession, async (req, res) => {
+    res.set('Cache-Control', 'no-store');
     const user = await usersCollection.findOne({ username: req.authUser.username });
     if (!user) {
         return res.status(401).json({ error: 'Unauthorized.' });
@@ -11279,7 +11299,7 @@ app.get('/api/characters', async (req, res) => {
                     bypassLocks ||
                     profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds);
                 return {
-                    ...character,
+                    ...localizeArtwork(character),
                     unlocked,
                 };
             }),
@@ -13270,14 +13290,17 @@ app.post('/api/gauntlet/run/node/enter', requireSession, async (req, res) => {
 
 // Basic static routes for the frontend
 app.get(['/', '/selection-login', '/selection-login.html'], (req, res) => {
+    if (req.path === '/selection-login') return res.redirect(308, '/selection-login.html');
     res.sendFile(path.join(__dirname, 'selection-login.html'));
 });
 
 app.get(['/selection', '/selection.html'], (req, res) => {
+    if (req.path === '/selection') return res.redirect(308, req.originalUrl.replace('/selection', '/selection.html'));
     res.sendFile(path.join(__dirname, 'selection.html'));
 });
 
 app.get(['/ingame', '/ingame.html'], (req, res) => {
+    if (req.path === '/ingame') return res.redirect(308, req.originalUrl.replace('/ingame', '/ingame.html'));
     res.sendFile(path.join(__dirname, 'ingame.html'));
 });
 

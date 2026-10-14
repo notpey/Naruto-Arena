@@ -1,0 +1,53 @@
+@media (max-width: 1099px) {
+    html { min-width: 0; overflow-x: hidden; background: #080d14; }
+    body.selection-client-page, body.ingame-client-page {
+        min-width: 0; width: 100%; min-height: 100dvh; height: auto;
+        display: block; overflow: auto; position: static; transform: none;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    body.game-remaster > .background, body.game-remaster > .backgroundingame {
+        width: 1100px; height: 800px; margin: 0 auto; position: relative;
+        zoom: var(--mobile-game-scale, 1);
+    }
+    body.ingame-client-page { display: flex; align-items: center; justify-content: center; }
+    body.selection-client-page > .selection-hub-nav {
+        position: sticky; top: 0; left: auto; right: auto; width: 100%; height: auto;
+        min-height: 54px; padding: 6px; box-sizing: border-box; z-index: 100;
+        display: flex; overflow: visible; flex-wrap: wrap; gap: 6px;
+    }
+    body.selection-client-page > .selection-hub-nav .selection-hub-brand { display: none; }
+    body.selection-client-page > .selection-hub-nav .selection-hub-tabs {
+        display: flex; flex: 1 1 100%; width: 100%; min-width: 0; overflow-x: auto; gap: 4px;
+    }
+    body.selection-client-page > .selection-hub-nav .selection-hub-tab { flex: 0 0 auto; min-height: 44px; padding: 10px 12px; font-size: 14px; }
+    body.selection-client-page > .selection-hub-nav .selection-hub-ryo { margin-left: auto; min-height: 44px; }
+    body.selection-client-page > .selection-hub-nav .selection-hub-settings-button { min-height: 44px; min-width: 44px; }
+    body.game-remaster > .selection-hub-environment {
+        position: relative !important; inset: auto !important; width: 100% !important; height: auto !important;
+        min-height: calc(100dvh - 110px); overflow: visible !important;
+    }
+    body.game-remaster > .selection-hub-environment .selection-hub-env-panel {
+        height: auto; min-height: calc(100dvh - 110px); overflow: visible; padding: 16px !important;
+    }
+    body.game-remaster > .selection-hub-environment h1 { font-size: clamp(22px, 5vw, 34px); overflow-wrap: anywhere; }
+    body.game-remaster > .selection-hub-environment .selection-hub-env-toolbar { flex-wrap: wrap; gap: 8px; }
+    body.game-remaster > .selection-hub-environment button { min-height: 44px; }
+    body.game-remaster > .selection-hub-environment .selection-hub-inventory-grid,
+    body.game-remaster > .selection-hub-environment .selection-hub-cosmetics-grid,
+    body.game-remaster > .selection-hub-environment .selection-hub-shop-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); overflow: visible;
+    }
+    body.hub-view-shop > .background, body.hub-view-inventory > .background,
+    body.hub-view-missions > .background, body.hub-view-story > .background { display: none; }
+    body > .academy-guide-overlay { position: fixed; inset: 0; width: 100%; height: 100dvh; padding: 16px; box-sizing: border-box; overflow: auto; }
+    body > .academy-guide-overlay .academy-guide-card { width: min(540px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 18px; box-sizing: border-box; }
+    body > .academy-guide-overlay button { min-height: 44px; }
+}
+@media (max-width: 600px) {
+    body.selection-client-page > .selection-hub-nav .selection-hub-tabs {
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible;
+    }
+    body.selection-client-page > .selection-hub-nav .selection-hub-tab {
+        white-space: normal; font-size: 12px; padding: 8px 4px;
+    }
+}

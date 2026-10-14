@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>Recover your account · Naruto-Arena</title>
+    <link rel="stylesheet" href="account.css">
+    <script src="recovery-client.js" defer></script>
+</head>
+<body class="recovery-page">
+    <main class="recovery-card">
+        <h1 id="recovery-title">Forgot your password?</h1>
+        <p id="recovery-description">Enter the email you used to register. We’ll email you a link to choose a new password.</p>
+        <form id="recovery-form">
+            <div id="email-fields"><label for="recovery-email">Email address</label><input id="recovery-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+            <div id="password-fields" hidden>
+                <label for="recovery-password">New password</label><input id="recovery-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128">
+                <label for="recovery-confirm">Confirm new password</label><input id="recovery-confirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128">
+            </div>
+            <button type="submit" id="recovery-submit">Email reset link</button>
+            <p id="recovery-status" class="recovery-status" role="status" aria-live="polite"></p>
+        </form>
+        <a href="selection-login.html">Back to sign in</a>
+        <a id="request-new-link" href="recover.html" hidden>Request a new link</a>
+    </main>
+</body>
+</html>
