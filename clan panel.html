@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naruto-Arena � Clan Panel</title>
+  <title>Naruto-Arena — Clan Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="brand.css" />
   <style>
 
@@ -290,6 +290,15 @@
     .clan-panel-crumb a { color: var(--ca-parchment); }
     .clan-panel-crumb a:hover { color: var(--ca-orange); }
     .clan-panel-crumb .cur { color: var(--ca-purple-lit); }
+    .clan-page-title {
+      margin: 0 0 18px;
+      color: var(--ca-orange);
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
 
     .clan-shell {
       display: grid;
@@ -883,6 +892,7 @@
       <nav class="clan-panel-crumb" aria-label="Breadcrumb">
         <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Clan Panel</span>
       </nav>
+      <h1 class="clan-page-title ca-subpage-title">Clan Panel</h1>
       <section class="clan-shell">
         <div class="clan-summary">
           <img class="clan-avatar" id="clan-panel-avatar" src="https://i.postimg.cc/3JqVcPXm/default.png" alt="Clan avatar" />
@@ -1202,30 +1212,7 @@
       </div>
     </div>
 
-    <aside class="aside">
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Player Levels</h3>
-        <div class="ladder-list" id="sidebar-top-player-levels"></div>
-      </section>
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Clan Levels</h3>
-        <div class="ladder-list" id="sidebar-top-clan-levels"></div>
-      </section>
-      <section class="stats-panel">
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Winstreak</h3>
-          <ol class="stats-list" id="sidebar-top-current-streaks"></ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Wins</h3>
-          <ol class="stats-list" id="sidebar-top-wins"></ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 20 Highest Win Streak</h3>
-          <ol class="stats-list" id="sidebar-top-highest-streaks"></ol>
-        </div>
-      </section>
-    </aside>
+
   </div>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>

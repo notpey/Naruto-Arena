@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naruto-Arena Profile</title>
+  <title>Naruto-Arena — Player Profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="brand.css" />
   <style>
     * {
@@ -370,6 +370,17 @@
     .profile-crumb a { color: var(--ca-parchment); }
     .profile-crumb a:hover { color: var(--ca-orange); }
     .profile-crumb .cur { color: var(--ca-purple-lit); }
+
+    .profile-page-title,
+    .clan-page-title {
+      margin: 0 0 18px;
+      color: var(--ca-orange);
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
 
     .profile-layout {
       display: grid;
@@ -916,6 +927,188 @@
         padding: 8px 10px;
       }
     }
+
+    /* Profile: retain Naruto-Arena's information sections in a quieter layout. */
+    .na-legacy-light .profile-main {
+      width: min(1140px, 100%);
+      margin: 0 auto;
+      padding: 30px 28px 56px;
+    }
+
+    .profile-layout { gap: 18px; }
+
+    .profile-overview {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .na-legacy-light .profile-main .profile-search,
+    .na-legacy-light .profile-main .profile-section {
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid #394658 !important;
+      border-radius: 4px;
+      background: #171e2a !important;
+      box-shadow: none !important;
+      color: #f7eee1 !important;
+    }
+
+    .na-legacy-light .profile-main .profile-search {
+      grid-template-columns: minmax(140px, 1fr) minmax(260px, 1.4fr);
+      align-items: center;
+      gap: 10px 22px;
+      padding-block: 16px;
+    }
+
+    .na-legacy-light .profile-main .profile-search .profile-block-head {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .na-legacy-light .profile-main .profile-search-status {
+      grid-column: 2;
+      min-height: 0;
+      color: #d8d0c4 !important;
+    }
+
+    .na-legacy-light .profile-main .profile-search-status:empty { display: none; }
+    .na-legacy-light .profile-main .profile-search-status[data-state="error"] { color: #ffaaaa !important; }
+    .na-legacy-light .profile-main .profile-search-status[data-state="success"] { color: #a8e7b0 !important; }
+
+    .na-legacy-light .profile-main .profile-block-head {
+      gap: 0;
+      padding-bottom: 13px;
+      border-bottom: 1px solid #394658;
+      color: #ffae42 !important;
+      font-size: 17px;
+      font-weight: 800 !important;
+      letter-spacing: 0.01em !important;
+      text-shadow: none !important;
+    }
+
+    .profile-main .profile-star { display: none; }
+
+    .profile-main .profile-block { gap: 15px; }
+
+    .profile-main .profile-header {
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .profile-main .profile-avatar {
+      box-sizing: border-box;
+      width: 92px;
+      height: 92px;
+      border: 1px solid #566377;
+      border-radius: 3px;
+    }
+
+    .profile-main .profile-content-split {
+      grid-template-columns: minmax(0, 1fr) 72px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .profile-main .profile-clan-badge {
+      box-sizing: border-box;
+      width: 72px;
+      height: 72px;
+      padding: 6px;
+      border-color: #566377;
+      background-color: #273242 !important;
+      color: #f7eee1 !important;
+    }
+
+    .profile-main .info-table,
+    .profile-main .quick-games-list { gap: 0; }
+
+    .na-legacy-light .profile-main .info-row,
+    .na-legacy-light .profile-main .quick-game-row {
+      min-width: 0;
+      min-height: 36px;
+      padding: 8px 0;
+      border: 0 !important;
+      border-bottom: 1px solid #303a49 !important;
+      background: transparent !important;
+      color: #f7eee1 !important;
+    }
+
+    .profile-main .info-row:last-child,
+    .profile-main .quick-game-row:last-child { border-bottom: 0 !important; }
+
+    .profile-main .info-row {
+      grid-template-columns: minmax(110px, 42%) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .profile-main .info-label,
+    .profile-main .info-value,
+    .profile-main .quick-game-row {
+      font-size: 14px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-main .info-label { color: #bcb5aa; }
+    .profile-main .info-value { color: #f7eee1; font-weight: 600; }
+    .profile-main .info-value.accent,
+    .profile-main .info-value.accent a { color: #ffae42; }
+    .profile-main .info-value.soft { color: #ddd4c6; }
+    .profile-main .info-value a { text-decoration: underline; text-underline-offset: 3px; }
+    .profile-main .info-value a:hover { color: #ffca7b; }
+
+    .profile-ladder-section .info-table {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 34px;
+    }
+
+    .profile-main .quick-game-empty {
+      padding-top: 2px;
+      color: #bcb5aa;
+      font-size: 14px;
+    }
+
+    .profile-main .profile-search-input {
+      min-width: 0;
+      border-color: #566377;
+      background: #101620 !important;
+      color: #f7eee1 !important;
+    }
+
+    .profile-main .profile-search-input::placeholder { color: #aaa395 !important; }
+    .profile-main .profile-search-input:focus-visible,
+    .profile-main .profile-search-button:focus-visible,
+    .profile-main .info-value a:focus-visible {
+      outline: 2px solid #ffae42;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 980px) {
+      .profile-overview { grid-template-columns: 1fr; }
+      .profile-main .profile-header { align-items: center; }
+    }
+
+    @media (max-width: 700px) {
+      .na-legacy-light .profile-main { padding: 22px 16px 42px; }
+      .na-legacy-light .profile-main .profile-search { grid-template-columns: 1fr; }
+      .na-legacy-light .profile-main .profile-search-status { grid-column: 1; }
+      .profile-ladder-section .info-table { grid-template-columns: 1fr; }
+      .profile-main .profile-header { grid-template-columns: 76px minmax(0, 1fr); }
+      .profile-main .profile-avatar { width: 76px; height: 76px; }
+    }
+
+    @media (max-width: 480px) {
+      .na-legacy-light .profile-main .profile-search,
+      .na-legacy-light .profile-main .profile-section { padding: 18px; }
+      .profile-main .profile-header { grid-template-columns: 1fr; }
+      .profile-main .profile-avatar { width: 88px; height: 88px; }
+      .profile-main .profile-content-split { grid-template-columns: minmax(0, 1fr) 64px; gap: 10px; }
+      .profile-main .profile-clan-badge { width: 64px; height: 64px; }
+      .profile-main .info-row { grid-template-columns: minmax(95px, 42%) minmax(0, 1fr); }
+    }
   </style>
   <link rel="stylesheet" href="shop.css">
     <link rel="stylesheet" href="account.css?v=1">
@@ -966,7 +1159,6 @@
       </ul>
 
       <div class="ca-nav-account" id="ca-nav-account">
-        <button class="ca-nav-play" type="button" id="play-now-button">� START PLAYING</button>
         <div class="ca-account-menu-wrap">
           <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
             <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
@@ -1052,10 +1244,11 @@
 <div class="app">
 
 
-    <main class="main">
+    <main class="main profile-main">
       <nav class="profile-crumb" aria-label="Breadcrumb">
         <a href="index.html">Naruto-Arena</a> &gt; <a href="profile.html">Player Profile</a> &gt; <span class="cur" id="profile-crumb-current">placeholder_ninja</span>
       </nav>
+      <h1 class="profile-page-title ca-subpage-title">Player Profile</h1>
       <div class="profile-layout">
         <section class="profile-search">
           <div class="profile-block-head">
@@ -1077,6 +1270,7 @@
           <p class="profile-search-status" id="profile-search-status" aria-live="polite"></p>
         </section>
 
+        <div class="profile-overview">
         <section class="profile-section">
           <div class="profile-header">
             <img class="profile-avatar" id="profile-avatar-image" src="https://i.postimg.cc/3JqVcPXm/default.png" alt="Profile avatar" />
@@ -1137,7 +1331,9 @@
           </div>
         </section>
 
-        <section class="profile-section">
+        </div>
+
+        <section class="profile-section profile-ladder-section">
           <div class="profile-block">
             <div class="profile-block-head">
               <span class="profile-star">*</span>
@@ -1262,215 +1458,7 @@
 
     </main>
 
-    <aside class="aside">
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Player Levels</h3>
-        <div class="ladder-list" id="sidebar-top-player-levels">
-          <div class="ladder-row">
-            <div class="ladder-rank">01</div>
-            <div>
-              <div class="ladder-name">Rafa</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 57%;"></div><div class="ladder-score">57</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">02</div>
-            <div>
-              <div class="ladder-name">nejihyuuga</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 56%;"></div><div class="ladder-score">56</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">03</div>
-            <div>
-              <div class="ladder-name">ichi404</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 55%;"></div><div class="ladder-score">55</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">04</div>
-            <div>
-              <div class="ladder-name">Shar</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 53%;"></div><div class="ladder-score">53</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">05</div>
-            <div>
-              <div class="ladder-name">HalfDead-</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 52%;"></div><div class="ladder-score">52</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">06</div>
-            <div>
-              <div class="ladder-name">ShikamaruN</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">07</div>
-            <div>
-              <div class="ladder-name">Josh</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">08</div>
-            <div>
-              <div class="ladder-name">robz</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 51%;"></div><div class="ladder-score">51</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">09</div>
-            <div>
-              <div class="ladder-name">Shari</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 50%;"></div><div class="ladder-score">50</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">10</div>
-            <div>
-              <div class="ladder-name">xinef</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 50%;"></div><div class="ladder-score">50</div></div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="ladder">
-        <h3 class="ladder-title">Top 10 Clan Levels</h3>
-        <div class="ladder-list" id="sidebar-top-clan-levels">
-          <div class="ladder-row">
-            <div class="ladder-rank">01</div>
-            <div>
-              <div class="ladder-name">Akatsuki</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 92%;"></div><div class="ladder-score">92</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">02</div>
-            <div>
-              <div class="ladder-name">Konoha</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 89%;"></div><div class="ladder-score">89</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">03</div>
-            <div>
-              <div class="ladder-name">Sand</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 85%;"></div><div class="ladder-score">85</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">04</div>
-            <div>
-              <div class="ladder-name">Mist</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 81%;"></div><div class="ladder-score">81</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">05</div>
-            <div>
-              <div class="ladder-name">Cloud</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 78%;"></div><div class="ladder-score">78</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">06</div>
-            <div>
-              <div class="ladder-name">LeafForce</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 74%;"></div><div class="ladder-score">74</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">07</div>
-            <div>
-              <div class="ladder-name">Anbu</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 71%;"></div><div class="ladder-score">71</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">08</div>
-            <div>
-              <div class="ladder-name">Uchiha</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 67%;"></div><div class="ladder-score">67</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">09</div>
-            <div>
-              <div class="ladder-name">Sannin</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 63%;"></div><div class="ladder-score">63</div></div>
-            </div>
-          </div>
-          <div class="ladder-row">
-            <div class="ladder-rank">10</div>
-            <div>
-              <div class="ladder-name">Hyuga</div>
-              <div class="ladder-bar"><div class="ladder-fill" style="width: 60%;"></div><div class="ladder-score">60</div></div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="stats-panel">
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Winstreak</h3>
-          <ol class="stats-list" id="sidebar-top-current-streaks">
-            <li>Douglasschanu +25 streak</li>
-            <li>madara +22 streak</li>
-            <li>topreactor +21 streak</li>
-            <li>ComodoroTeach +20</li>
-            <li>Clanles +20 streak</li>
-            <li>Vy +20 streak</li>
-            <li>vanns +20 streak</li>
-            <li>Cleezus888 +19 streak</li>
-            <li>yase-forfun +16 streak</li>
-            <li>TheusTop +15 streak</li>
-          </ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 10 Wins</h3>
-          <ol class="stats-list" id="sidebar-top-wins">
-            <li>juicewrld999 +8255 wins</li>
-            <li>GoodySan +7216 wins</li>
-            <li>rogerindopend +6558 wins</li>
-            <li>One_ib +6463 wins</li>
-            <li>Sirup +4921 wins</li>
-            <li>gravidadeTAUBATE +4586 wins</li>
-            <li>leohyua25 +4342 wins</li>
-            <li>newmimproved +4282 wins</li>
-            <li>beluxe +4281 wins</li>
-            <li>julu0612 +4188 wins</li>
-          </ol>
-        </div>
-        <div class="stats-group">
-          <h3 class="stats-title">Top 20 Highest Win Streak</h3>
-          <ol class="stats-list" id="sidebar-top-highest-streaks">
-            <li>Buffy +80 streak</li>
-            <li>_hoshigama- +76 streak</li>
-            <li>Cloudprince +76 streak</li>
-            <li>GodEneru +74 streak</li>
-            <li>AkatsKonan +73 streak</li>
-            <li>HalfDead- +72 streak</li>
-            <li>_Shark +67 streak</li>
-            <li>gabooo +66 streak</li>
-            <li>Cersak +65 streak</li>
-            <li>Demon +65 streak</li>
-            <li>Dan +63 streak</li>
-            <li>mrChans +61 streak</li>
-            <li>itachi_killer25 +61 streak</li>
-            <li>Sakura +60 streak</li>
-            <li>Rafa +60 streak</li>
-            <li>videogame33 +60 streak</li>
-            <li>Myotismon +60 streak</li>
-            <li>Sasuke +60 streak</li>
-            <li>Bolts +59 streak</li>
-            <li>Douglasschanu +57 streak</li>
-          </ol>
-        </div>
-      </section>
-    </aside>
+
   </div>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>

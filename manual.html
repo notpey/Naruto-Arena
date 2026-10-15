@@ -30,27 +30,6 @@
     }
     .mn-subtitle { margin: 0 0 22px; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple); }
 
-    .mn-crumb {
-      margin: 24px 0 0;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--ca-dust);
-    }
-    .mn-crumb a { color: var(--ca-parchment); }
-    .mn-crumb a:hover { color: var(--ca-orange); }
-    .mn-crumb .cur { color: var(--ca-orange); }
-
-    /* in-page section nav */
-    .mn-toc { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
-    .mn-toc a {
-      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--ca-parchment); padding: 8px 14px; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 999px; transition: border-color var(--t-fast), color var(--t-fast);
-    }
-    .mn-toc a:hover { border-color: var(--ca-orange); color: var(--ca-bone); }
-    .mn-toc a.active { border-color: rgba(124, 77, 255, 0.7); color: #fff; background: rgba(124, 77, 255, 0.14); }
 
     /* light "scroll" sheets */
     .mn-sheet {
@@ -212,17 +191,9 @@
 
   <!-- ═══ GAME MANUAL ══════════════════════════════════════════ -->
   <main class="mn-page">
-    <nav class="mn-crumb" aria-label="Breadcrumb">
-      <a href="index.html">Naruto-Arena</a> &gt; <a href="manual.html#basics">Game Manual</a> &gt; <span class="cur" id="mn-crumb-current">The Basics</span>
-    </nav>
     <div class="mn-bigtitle-wrap"><h1 class="mn-bigtitle">GAME MANUAL</h1></div>
     <p class="mn-subtitle">/ Everything you need before you step into the arena</p>
 
-    <nav class="mn-toc" aria-label="Manual sections">
-      <a class="active" href="#basics" data-manual-section="basics">The Basics</a>
-      <a href="#characters-and-skills" data-manual-section="characters-and-skills">Characters &amp; Skills</a>
-      <a href="#ninja-ladder" data-manual-section="ninja-ladder">The Ninja Ladder</a>
-    </nav>
 
     <section class="mn-sheet" id="basics" aria-labelledby="basics-h">
       <div class="mn-kicker">/ Chapter 01</div>
@@ -279,31 +250,6 @@
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
   <script src="./shop.js" defer></script>
-
-  <script>
-    (function () {
-      var labels = {
-        "basics": "The Basics",
-        "characters-and-skills": "Characters & Skills",
-        "ninja-ladder": "The Ninja Ladder"
-      };
-      var crumbCurrent = document.getElementById("mn-crumb-current");
-      var links = Array.prototype.slice.call(document.querySelectorAll("[data-manual-section]"));
-      function syncManualSection() {
-        var key = (window.location.hash || "#basics").replace("#", "") || "basics";
-        if (!labels[key]) key = "basics";
-        if (crumbCurrent) crumbCurrent.textContent = labels[key];
-        links.forEach(function (link) {
-          var active = link.getAttribute("data-manual-section") === key;
-          link.classList.toggle("active", active);
-          if (active) link.setAttribute("aria-current", "location");
-          else link.removeAttribute("aria-current");
-        });
-      }
-      window.addEventListener("hashchange", syncManualSection);
-      syncManualSection();
-    }());
-  </script>
 
   <!-- Naruto-Arena nav account sync + dropdown toggle -->
   <script>

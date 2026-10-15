@@ -1836,7 +1836,7 @@
             if (nextView === "inventory") {
                 loadInventoryEnvironment(false);
             }
-            if (nextView === "story") { showStoryList(); loadStoryEnvironment(false); }
+            if (nextView === "story") setPveMode("gauntlet");
         }
 
         if (settingsButton) {

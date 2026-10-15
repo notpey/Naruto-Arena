@@ -28,20 +28,20 @@
         heroHeader.setAttribute("aria-label", "Naruto-Arena banner");
         heroHeader.innerHTML =
           '<div class="ca-hero-inner">' +
-            '<div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">&lt;</div>' +
+            '<div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">&#9665;</div>' +
             '<div class="ca-hero-center">' +
-              '<a class="ca-hero-play" href="selection.html" data-game-window>&gt; START PLAYING</a>' +
+              '<a class="ca-hero-play" href="selection.html" data-game-window>&#8250; START PLAYING</a>' +
               '<div class="ca-hero-wordmark" aria-label="Naruto-Arena">' +
                 '<span class="ca-hero-word">NARUTO</span>' +
                 '<svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">' +
-                  '<polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.1)"/>' +
-                  '<text x="20" y="29" text-anchor="middle" fill="#e8801a" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N&#183;A</text>' +
+                  '<polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>' +
+                  '<text x="20" y="29" text-anchor="middle" fill="#e8801a" font-size="12" font-weight="900" font-family="system-ui,sans-serif">&#9889;</text>' +
                 '</svg>' +
                 '<span class="ca-hero-word">ARENA</span>' +
               '</div>' +
               '<p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>' +
             '</div>' +
-            '<div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">&gt;</div>' +
+            '<div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">&#9655;</div>' +
           '</div>';
         navEl.parentNode.insertBefore(heroHeader, navEl.nextSibling);
         heroList = [heroHeader];
@@ -49,6 +49,24 @@
 
       heroList.forEach(function (hero) {
         hero.classList.remove("ca-hero--compact");
+
+        // Keep older hand-written banners aligned with the Home banner.
+        var leftArrow = hero.querySelector(".ca-hero-arrow--left");
+        var rightArrow = hero.querySelector(".ca-hero-arrow--right");
+        var playLink = hero.querySelector(".ca-hero-play");
+        var sealText = hero.querySelector(".ca-hero-seal text");
+        var sealOutline = hero.querySelector(".ca-hero-seal polygon");
+        if (leftArrow) { leftArrow.textContent = "\u25c1"; }
+        if (rightArrow) { rightArrow.textContent = "\u25b7"; }
+        if (playLink) { playLink.textContent = "\u203a START PLAYING"; }
+        if (sealText) {
+          sealText.textContent = "\u26a1";
+          sealText.setAttribute("font-size", "12");
+          sealText.removeAttribute("letter-spacing");
+        }
+        if (sealOutline) {
+          sealOutline.setAttribute("fill", "rgba(232,128,26,0.12)");
+        }
 
         if (hero.querySelector(".ca-hero-banners")) { return; }
 
@@ -98,6 +116,25 @@
     var nav = document.querySelector(".ca-nav");
     var navLinks = document.querySelector(".ca-nav-links");
     if (!nav || !navLinks) { return; }
+
+    var accountAvatar = nav.querySelector(".ca-account-trigger .ca-nav-avatar");
+    if (accountAvatar && accountAvatar.tagName !== "IMG") {
+      var avatarImage = document.createElement("img");
+      avatarImage.className = "ca-nav-avatar";
+      avatarImage.id = "ca-nav-avatar-circle";
+      avatarImage.alt = "";
+      avatarImage.setAttribute("aria-hidden", "true");
+      avatarImage.src = "https://i.postimg.cc/3JqVcPXm/default.png";
+      try {
+        var cachedAccount = window.ArenaSession && window.ArenaSession.storage
+          ? JSON.parse(window.ArenaSession.storage.getItem("narutoUser") || "null")
+          : null;
+        if (cachedAccount && cachedAccount.avatarUrl) {
+          avatarImage.src = cachedAccount.avatarUrl;
+        }
+      } catch (error) {}
+      accountAvatar.replaceWith(avatarImage);
+    }
 
     var menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));
 

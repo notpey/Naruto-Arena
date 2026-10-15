@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Naruto-Arena · Standings placement study</title>
+  <style>
+    :root { color-scheme: dark; font-family: Arial, Helvetica, sans-serif; background: #101620; color: #eee8dc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button { font: inherit; }
+    .wrap { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .mast { border-bottom: 1px solid #303b4b; padding: 28px 0 24px; }
+    .eyebrow { margin: 0 0 8px; color: #f2a541; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0 0 8px; color: #ffae42; font-size: clamp(28px, 4vw, 42px); line-height: 1.1; }
+    .intro { max-width: 760px; margin: 0; color: #c6c0b5; line-height: 1.55; }
+    .switcher { display: flex; gap: 8px; flex-wrap: wrap; padding: 22px 0 18px; }
+    .switcher button { min-height: 42px; padding: 9px 16px; border: 1px solid #485467; border-radius: 4px; background: #171e2a; color: #e9e4dc; cursor: pointer; font-weight: 700; }
+    .switcher button[aria-selected="true"] { border-color: #ffae42; color: #ffae42; }
+    .switcher button:focus-visible { outline: 2px solid #ffae42; outline-offset: 3px; }
+    .option { padding-bottom: 54px; }
+    .option[hidden] { display: none; }
+    .option h2 { margin: 0 0 5px; font-size: 23px; color: #f7eee1; }
+    .note { margin: 0 0 18px; color: #b9b5ae; line-height: 1.5; }
+    .site { border: 1px solid #394658; border-radius: 6px; overflow: hidden; background: #101620; }
+    .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 8px 20px; background: #0d0d0f; color: #d8d2c8; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    .site-nav strong { color: #ffae42; }
+    .site-hero { display: grid; place-items: center; min-height: 104px; background: #1b2836; border-bottom: 2px solid #a66a20; color: #f7f3ea; font-size: clamp(22px, 3vw, 34px); font-weight: 900; letter-spacing: .08em; }
+    .site-body { padding: 28px; }
+    .crumb { margin: 0 0 8px; color: #a6afbb; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .page-title { margin: 0 0 20px; color: #ffae42; font-size: 30px; font-weight: 900; text-transform: uppercase; }
+    .section-title { margin: 0; color: #f7eee1; font-size: 22px; }
+    .section-copy { margin: 6px 0 18px; color: #bbb8b1; line-height: 1.5; }
+    .board { border: 1px solid #394658; border-radius: 5px; background: #171e2a; }
+    .board-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 20px; border-bottom: 1px solid #394658; }
+    .board-head strong { color: #ffae42; font-size: 18px; }
+    .board-head span { color: #b9b5ae; font-size: 12px; }
+    .categories { display: flex; gap: 7px; flex-wrap: wrap; padding: 16px 20px; }
+    .category { border: 1px solid #465062; border-radius: 3px; padding: 8px 12px; background: #101620; color: #ddd5ca; font-size: 13px; font-weight: 700; }
+    .category.active { border-color: #ffae42; color: #ffae42; }
+    .row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 15px 20px; border-top: 1px solid #394658; }
+    .place { color: #ffae42; font-size: 16px; font-weight: 900; }
+    .name { font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+    .value { color: #f6e9d7; font-size: 16px; font-weight: 800; }
+    .board-foot { padding: 14px 20px; border-top: 1px solid #394658; color: #c8c1b7; font-size: 13px; }
+    .empty { padding: 18px 20px; border-top: 1px solid #394658; color: #aaaeb7; font-size: 14px; }
+    .profile-shell { display: grid; grid-template-columns: minmax(0, 1fr) 348px; gap: 24px; }
+    .profile-lines { display: grid; gap: 12px; }
+    .profile-block { min-height: 110px; padding: 18px; border: 1px solid #394658; border-radius: 5px; background: #171e2a; }
+    .profile-block strong { color: #ffae42; }
+    .profile-block p { margin: 8px 0 0; color: #b9b5ae; font-size: 14px; }
+    .wide-snapshot { margin-top: 26px; }
+    .wide-snapshot .row { grid-template-columns: 42px minmax(0, 1fr) auto; }
+    .rail .board-head { align-items: flex-start; flex-direction: column; }
+    .rail .categories { padding: 12px; }
+    .rail .category { font-size: 12px; padding: 7px 9px; }
+    .rail .row { grid-template-columns: 28px minmax(0, 1fr); gap: 9px; padding: 12px; }
+    .rail .value { grid-column: 2; font-size: 13px; color: #c8c1b7; }
+    .tradeoff { margin: 16px 0 0; padding: 14px 16px; border-left: 2px solid #ffae42; background: #171e2a; color: #d0c8b8; line-height: 1.5; }
+    @media (max-width: 760px) { .wrap { width: min(100% - 28px, 1180px); } .site-body { padding: 18px; } .profile-shell { grid-template-columns: 1fr; } .rail { order: 2; } .site-nav { font-size: 10px; } .site-hero { min-height: 78px; } }
+  </style>
+</head>
+<body>
+  <header class="mast"><div class="wrap"><p class="eyebrow">Design study · local sample data</p><h1>Where should the standings live?</h1><p class="intro">Three placement options using the current dark palette. The preview uses the sparse local state: one player, no clan rankings. It adds no production code or fabricated competitors.</p></div></header>
+  <main class="wrap">
+    <div class="switcher" role="tablist" aria-label="Layout options">
+      <button type="button" role="tab" aria-controls="option-a" aria-selected="true" id="tab-a">A · Ladders hub</button>
+      <button type="button" role="tab" aria-controls="option-b" aria-selected="false" id="tab-b">B · Page-end snapshot</button>
+      <button type="button" role="tab" aria-controls="option-c" aria-selected="false" id="tab-c">C · Wider rail</button>
+    </div>
+    <section class="option" id="option-a" role="tabpanel" aria-labelledby="tab-a">
+      <h2>Full-size standings on Ladders</h2><p class="note">Remove the repeated right rail. Keep a small preview on Home that links into the existing Ladders page.</p>
+      <div class="site"><div class="site-nav"><strong>NARUTO-ARENA</strong><span>HOME &nbsp; GAME MANUAL &nbsp; LADDERS &nbsp; NINJA MISSIONS</span></div><div class="site-hero">NARUTO ◇ ARENA</div><div class="site-body"><p class="crumb">Naruto-Arena › Ladders</p><h3 class="page-title">Arena Standings</h3><p class="section-copy">Players and clans get full-width rows, readable values, and room for filters.</p><div class="board"><div class="board-head"><strong>Player levels</strong><span>1 ranked player</span></div><div class="categories"><span class="category active">Levels</span><span class="category">Current streak</span><span class="category">Wins</span><span class="category">Highest streak</span><span class="category">Clans</span></div><div class="row"><span class="place">01</span><span class="name">NAAdminTest</span><span class="value">Level 1</span></div><div class="board-foot">A category with no data gets one clear empty state when selected.</div></div></div></div>
+      <p class="tradeoff"><strong>Best fit:</strong> rankings have a natural home, and profile or admin pages gain space for their own tasks. Requires removing the duplicated rail from multiple templates and extending the existing Ladders categories.</p>
+    </section>
+    <section class="option" id="option-b" role="tabpanel" aria-labelledby="tab-b" hidden>
+      <h2>Page-end standings snapshot</h2><p class="note">Keep a small standings preview on non-game pages, but place it after the page's own content instead of beside it.</p>
+      <div class="site"><div class="site-nav"><strong>NARUTO-ARENA</strong><span>HOME &nbsp; GAME MANUAL &nbsp; LADDERS &nbsp; NINJA MISSIONS</span></div><div class="site-hero">NARUTO ◇ ARENA</div><div class="site-body"><p class="crumb">Naruto-Arena › Player Profile</p><h3 class="page-title">Player Profile</h3><div class="profile-lines"><div class="profile-block"><strong>Account information</strong><p>Profile information uses the full page width.</p></div><div class="profile-block"><strong>Career record</strong><p>Player details remain the page's first priority.</p></div></div><div class="wide-snapshot board"><div class="board-head"><strong>Arena standings</strong><span>View all rankings ›</span></div><div class="row"><span class="place">01</span><span class="name">NAAdminTest</span><span class="value">Level 1</span></div></div></div></div>
+      <p class="tradeoff"><strong>Tradeoff:</strong> easy to discover without stealing width, but the same module repeats across unrelated pages and lengthens each page.</p>
+    </section>
+    <section class="option" id="option-c" role="tabpanel" aria-labelledby="tab-c" hidden>
+      <h2>Wider, single-purpose rail</h2><p class="note">Keep the rankings beside page content, but widen the rail and show one category at a time.</p>
+      <div class="site"><div class="site-nav"><strong>NARUTO-ARENA</strong><span>HOME &nbsp; GAME MANUAL &nbsp; LADDERS &nbsp; NINJA MISSIONS</span></div><div class="site-hero">NARUTO ◇ ARENA</div><div class="site-body profile-shell"><div><p class="crumb">Naruto-Arena › Player Profile</p><h3 class="page-title">Player Profile</h3><div class="profile-lines"><div class="profile-block"><strong>Account information</strong><p>The main column has less room on desktop.</p></div><div class="profile-block"><strong>Career record</strong><p>Personal stats sit next to global rankings.</p></div></div></div><div class="rail board"><div class="board-head"><strong>Arena standings</strong><span>View all ›</span></div><div class="categories"><span class="category active">Levels</span><span class="category">Wins</span><span class="category">Streaks</span></div><div class="row"><span class="place">01</span><span class="name">NAAdminTest</span><span class="value">Level 1</span></div></div></div></div>
+      <p class="tradeoff"><strong>Tradeoff:</strong> smallest structural change, but still takes space from profiles and vanishes or stacks at narrower widths.</p>
+    </section>
+  </main>
+  <script>
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(item => { const active = item === tab; item.setAttribute('aria-selected', String(active)); document.getElementById(item.getAttribute('aria-controls')).hidden = !active; });
+      });
+      tab.addEventListener('keydown', event => {
+        const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length
+          : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
+          : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+        if (next < 0) return;
+        event.preventDefault();
+        tabs[next].focus();
+        tabs[next].click();
+      });
+    });
+  </script>
+</body>
+</html>

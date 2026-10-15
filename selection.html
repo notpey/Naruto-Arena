@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <script src="mobile-layout.js?v=1" defer></script>
+    <script src="mobile-layout.js?v=3" defer></script>
     <title>Naruto-Arena Selection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
-    <link rel="stylesheet" href="mobile-layout.css?v=1">
+    <link rel="stylesheet" href="mobile-layout.css?v=3">
 </head>
 <body class="selection-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -44,8 +44,7 @@
             <button type="button" class="selection-hub-tab" data-hub-view="shop">Shop</button>
             <button type="button" class="selection-hub-tab" data-hub-view="missions">Missions</button>
             <button type="button" class="selection-hub-tab" data-hub-view="inventory">Inventory</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="story">PvE</button>
-            <button type="button" class="selection-hub-tab" data-gacha-trigger aria-label="Open Summoning Altar">Summon Altar</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="story">Chunin Exams</button>
         </div>
         <button type="button" class="selection-hub-ryo" data-hub-view="shop" aria-label="Open the Ryo shop">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
@@ -147,15 +146,11 @@
         <div class="selection-hub-env-panel" data-hub-panel="story" hidden>
             <div class="selection-hub-env-header">
                 <div>
-                    <h1>PvE</h1>
-                    <p>Fight scripted battles, run exam gauntlets, and unlock rewards.</p>
+                    <h1>Chunin Exams</h1>
+                    <p>Take on the exam gauntlet and earn rewards.</p>
                 </div>
             </div>
-            <div class="selection-hub-env-toolbar selection-hub-pve-tabs">
-                <button type="button" class="selection-hub-rank active" data-pve-mode="story">Story</button>
-                <button type="button" class="selection-hub-rank" data-pve-mode="gauntlet">Chunin Exams</button>
-            </div>
-            <div class="selection-hub-story-list" data-story-list>
+            <div class="selection-hub-story-list" data-story-list hidden>
                 <div class="selection-hub-env-empty">Loading story battles...</div>
             </div>
             <div class="selection-hub-story-briefing" data-story-briefing hidden></div>
@@ -460,13 +455,12 @@
             </div>
             <div>
                 <h2 class="settings-modal-title">Ninja Quests</h2>
-                <p class="settings-modal-subtitle">Daily, Weekly &amp; Special Event Contracts</p>
+                <p class="settings-modal-subtitle">Daily and Weekly Contracts</p>
             </div>
         </div>
         <div class="quest-subtabs">
             <button type="button" class="quest-tab-btn active" data-quest-type="daily">Daily</button>
             <button type="button" class="quest-tab-btn" data-quest-type="weekly">Weekly</button>
-            <button type="button" class="quest-tab-btn" data-quest-type="event">Event</button>
         </div>
         <div class="quest-list-scroll" id="quests-list-container">
             <div style="text-align:center; padding:32px 20px; color:#94a3b8; font-size:13px; font-weight:700;">Loading ninja contracts...</div>
@@ -661,8 +655,8 @@
 <script src="characters.js?v=42"></script>
 <script src="script.js?v=43"></script>
 <script src="shop.js?v=43"></script>
-<script src="selectionGacha.js?v=43"></script>
-<script src="selectionHub.js?v=43"></script>
+<script src="selectionGacha.js?v=44"></script>
+<script src="selectionHub.js?v=44"></script>
 <script>
     (function() {
         function hideGuide() {

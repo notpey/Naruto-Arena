@@ -14,12 +14,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const width = document.documentElement.clientWidth;
         const mobile = width < 1100;
         const battle = document.body.classList.contains('ingame-client-page');
-        const heightScale = battle ? document.documentElement.clientHeight / 800 : 1;
-        document.documentElement.style.setProperty('--mobile-game-scale', String(Math.min(1, width / 1100, heightScale)));
+        const compactSelectionNav = !battle && width < 760;
         for (const { element, marker } of entries) {
-            if (mobile) stage.before(element);
+            const detached = element.matches('.selection-hub-nav') ? compactSelectionNav : mobile;
+            if (detached) stage.before(element);
             else marker.after(element);
         }
+        const height = document.documentElement.clientHeight;
+        const hubNav = compactSelectionNav ? document.querySelector('body > .selection-hub-nav') : null;
+        const availableHeight = height - (hubNav ? hubNav.getBoundingClientRect().height : 0);
+        const fitScale = Math.min(1, width / 1100, Math.max(0, availableHeight) / 800);
+        // Keep characters and controls legible in very small windows; let the stage scroll there.
+        const minimumScale = mobile ? 0.6 : 0.7;
+        const scale = Math.max(minimumScale, fitScale);
+        document.documentElement.style.setProperty('--mobile-game-scale', String(scale));
+        document.body.classList.toggle('game-viewport-scroll', scale > fitScale + 0.001);
         const hint = document.getElementById('mobile-orientation-overlay');
         if (hint) hint.style.display = 'none'; // Keep portrait usable; do not block navigation behind a rotation prompt.
     }

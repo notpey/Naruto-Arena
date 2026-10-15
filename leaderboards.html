@@ -30,26 +30,6 @@
       padding: 0 24px 64px;
     }
 
-    .lb-crumb {
-      margin: 24px 0 10px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--ca-dust);
-    }
-    .lb-crumb a { color: var(--ca-parchment); }
-    .lb-crumb a:hover { color: var(--ca-orange); }
-    .lb-crumb .cur { color: var(--ca-orange); }
-    .lb-local-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 24px; }
-    .lb-local-nav a {
-      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--ca-parchment); padding: 8px 13px; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 999px; transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
-    }
-    .lb-local-nav a:hover { color: #fff; border-color: var(--ca-orange); }
-    .lb-local-nav a.active { color: #fff; border-color: rgba(124, 77, 255, 0.7); background: rgba(124, 77, 255, 0.14); }
-
     /* ── SUB-TABS (PLAYERS / CLANS) ────────────────────────────── */
     .lb-subtabs {
       display: flex;
@@ -93,7 +73,7 @@
       min-height: 56px;
       flex-wrap: wrap;
     }
-    .lb-cats { display: flex; gap: 30px; flex: 1 1 auto; }
+    .lb-cats { display: flex; flex-wrap: wrap; gap: 0 30px; flex: 1 1 0; min-width: 0; }
     .lb-cat {
       background: none;
       border: 0;
@@ -428,7 +408,6 @@
     .lb-hof-coming { padding: 22px 16px; font-size: 13px; font-style: italic; color: var(--ca-ink-faint); background: var(--ca-surface); }
 
     /* section heading on the dark shell (above a light sheet) */
-    .lb-section-h { margin: 18px 0 14px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-purple-lit); }
 
     /* Clan Ladder board (light) */
     .lb-clanboard { display: grid; gap: 0; border: 1px solid var(--ca-line-ink); border-radius: 8px; overflow: hidden; }
@@ -452,7 +431,36 @@
     }
     @media (max-width: 680px) {
       .lb-search input { width: 130px; }
-      .lb-cats { gap: 16px; }
+      .lb-catbar { gap: 8px 14px; padding: 0 12px; }
+      .lb-cats { gap: 0 16px; }
+      .lb-cat { padding: 12px 0; font-size: 11px; }
+      .lb-bigtitle { font-size: clamp(32px, 9vw, 44px); white-space: normal; overflow-wrap: anywhere; }
+    }
+    .lb-live { padding-top: 28px; }
+    .lb-catbar { background: #171e2a; border-color: #394658; border-radius: 5px; }
+    .lb-cats { gap: 4px 22px; }
+    .lb-cat { letter-spacing: .04em; }
+    .lb-cat:focus-visible, .lb-standing-name a:focus-visible { outline: 2px solid #ffae42; outline-offset: 3px; }
+    .lb-bigtitle-wrap { min-height: 0; margin: 24px 0 16px; }
+    .lb-bigtitle { font-size: clamp(30px, 4vw, 48px); white-space: normal; }
+    .lb-standings { background: #171e2a; border: 1px solid #394658; border-radius: 5px; box-shadow: none; }
+    .lb-standing-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 18px; min-height: 64px; padding: 12px 20px; border-top: 1px solid #394658; color: #f7eee1; }
+    .lb-standing-row:first-child { border-top: 0; }
+    .lb-standing-row:nth-child(even) { background: rgba(255,255,255,.025); }
+    .lb-standing-rank { color: #ffae42; font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .lb-standing-name { min-width: 0; font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+    .lb-standing-name a { color: inherit; text-decoration: none; text-underline-offset: 3px; }
+    .lb-standing-name a:hover { color: #ffae42; text-decoration: underline; }
+    .lb-standing-value { font-size: 16px; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .lb-standings .lb-board-empty { background: transparent; color: #d0c8b8; font-size: 15px; }
+    @media (max-width: 680px) {
+      .lb-catbar { padding: 12px; }
+      .lb-cats { flex-basis: 100%; gap: 0 18px; }
+      .lb-cat { padding: 10px 0; }
+      .lb-search { padding: 4px 0 8px; }
+      .lb-search input { width: min(240px, 65vw); }
+      .lb-standing-row { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; min-height: 58px; padding: 10px 12px; }
+      .lb-standing-name, .lb-standing-value { font-size: 14px; }
     }
   </style>
   <link rel="stylesheet" href="shop.css">
@@ -615,36 +623,21 @@
 
   <!-- ═══ LEADERBOARDS ═════════════════════════════════════════ -->
   <main class="lb-page">
-    <nav class="lb-crumb" aria-label="Breadcrumb">
-      <a href="index.html">Naruto-Arena</a> &gt; <a href="leaderboards.html#ninja-ladder">Ladders</a> &gt; <span class="cur" id="lb-crumb-current">Ninja Ladder</span>
-    </nav>
-    <nav class="lb-local-nav" aria-label="Ladder sections">
-      <a class="active" href="#ninja-ladder" data-ladder-section="ninja-ladder">Ninja Ladder</a>
-      <a href="#clan-ladder" data-ladder-section="clan-ladder">Clan Ladder</a>
-      <a href="#road-to-hokage" data-ladder-section="road-to-hokage">Road to Hokage</a>
-      <a href="#hall-of-fame" data-ladder-section="hall-of-fame">Hall of Fame</a>
-    </nav>
-
     <!-- ── NINJA LADDER (individual) ──────────────────────────── -->
     <section id="ninja-ladder" class="lb-live">
 
-      <h2 class="lb-section-h">/ Ninja Ladder — International individual ranking</h2>
-
-      <!-- Players / Clans column emphasis -->
-      <div class="lb-subtabs" role="tablist" aria-label="Leaderboard focus">
-        <button class="lb-subtab active" type="button" data-focus="players" role="tab" aria-selected="true">Players<sup>01</sup></button>
-        <button class="lb-subtab" type="button" data-focus="clans" role="tab" aria-selected="false">Clans<sup>02</sup></button>
-      </div>
 
       <!-- Category bar + search -->
       <div class="lb-catbar">
         <div class="lb-cats" role="tablist" aria-label="Leaderboard category">
-          <button class="lb-cat active" type="button" data-cat="ladder" role="tab" aria-selected="true">Top Ladder Rank<sup>10</sup></button>
-          <button class="lb-cat" type="button" data-cat="streak" role="tab" aria-selected="false">Top Streak<sup>10</sup></button>
-          <button class="lb-cat" type="button" data-cat="wins" role="tab" aria-selected="false">Highest Wins<sup>10</sup></button>
+          <button class="lb-cat active" id="lb-tab-ladder" type="button" data-cat="ladder" role="tab" aria-controls="lb-board" aria-selected="true">Player levels</button>
+          <button class="lb-cat" id="lb-tab-streak" type="button" data-cat="streak" role="tab" aria-controls="lb-board" aria-selected="false">Current streak</button>
+          <button class="lb-cat" id="lb-tab-wins" type="button" data-cat="wins" role="tab" aria-controls="lb-board" aria-selected="false">Wins</button>
+          <button class="lb-cat" id="lb-tab-highest" type="button" data-cat="highest" role="tab" aria-controls="lb-board" aria-selected="false">Highest streak</button>
+          <button class="lb-cat" id="lb-tab-clans" type="button" data-cat="clans" role="tab" aria-controls="lb-board" aria-selected="false">Clans</button>
         </div>
         <div class="lb-search">
-          <input type="search" id="lb-search-input" placeholder="Search for a player......" aria-label="Search for a player" />
+          <input type="search" id="lb-search-input" placeholder="Search players" aria-label="Search players" />
           <span class="lb-search-icon" aria-hidden="true">⌕</span>
         </div>
       </div>
@@ -655,16 +648,10 @@
       </div>
 
       <!-- Board (rendered by script) -->
-      <div class="lb-board" id="lb-board" data-focus="players">
+      <div class="lb-board lb-standings" id="lb-board" role="tabpanel" aria-labelledby="lb-tab-ladder" aria-live="polite">
         <div class="lb-board-empty">Loading rankings…</div>
       </div>
 
-      <!-- Pagination -->
-      <div class="lb-pager">
-        <a class="lb-pager-btn" id="lb-prev" aria-disabled="true" href="#">&laquo; Previous Page</a>
-        <div class="lb-pager-nums" id="lb-pager-nums"><span class="active">1</span></div>
-        <a class="lb-pager-btn" id="lb-next" aria-disabled="true" href="#">Next Page &raquo;</a>
-      </div>
     </section>
 
     <!-- ── CLAN LADDER (international clans) ───────────────────── -->
@@ -761,25 +748,23 @@
   <!-- Leaderboards data + rendering (reuses /api/leaderboards/sidebar) -->
   <script>
     (function () {
-      var DEFAULT_AVATAR = "https://i.postimg.cc/3JqVcPXm/default.png";
       var PROFILE_LOOKUP_KEY = "narutoProfileLookupUser";
 
       var CATEGORIES = {
-        ladder: { title: "TOP LADDER RANK", playerKey: "topPlayerLevels", metric: "level" },
-        streak: { title: "TOP STREAK",      playerKey: "topCurrentStreaks", metric: "streak" },
-        wins:   { title: "HIGHEST WINS",    playerKey: "topWins",          metric: "wins" }
+        ladder: { title: "PLAYER LEVELS", key: "topPlayerLevels", unit: "Level", nameKey: "username" },
+        streak: { title: "CURRENT STREAK", key: "topCurrentStreaks", unit: "streak", nameKey: "username" },
+        wins: { title: "WINS", key: "topWins", unit: "wins", nameKey: "username" },
+        highest: { title: "HIGHEST STREAK", key: "topHighestStreaks", unit: "streak", nameKey: "username" },
+        clans: { title: "CLAN LEVELS", key: "topClanLevels", unit: "Level", nameKey: "clanName" }
       };
 
       var board = document.getElementById("lb-board");
       var bigTitle = document.getElementById("lb-bigtitle");
       var searchInput = document.getElementById("lb-search-input");
-      var subtabs = Array.prototype.slice.call(document.querySelectorAll(".lb-subtab"));
       var cats = Array.prototype.slice.call(document.querySelectorAll(".lb-cat"));
 
-      var state = { focus: "players", category: "ladder", query: "", boards: null, loaded: false, failed: false };
+      var state = { category: "ladder", query: "", boards: null, loaded: false, failed: false };
 
-      function esc(value) { return String(value == null ? "" : value); }
-      function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
 
       function profileLink(username) {
         var a = document.createElement("a");
@@ -798,159 +783,23 @@
         return a;
       }
 
-      var VERIFIED_SVG =
-        '<svg class="lb-verified" viewBox="0 0 24 24" fill="#2c9cdb" aria-hidden="true">' +
-        '<path d="M12 2l2.2 1.6 2.7-.2 1 2.5 2.3 1.4-.6 2.6.6 2.6-2.3 1.4-1 2.5-2.7-.2L12 22l-2.2-1.6-2.7.2-1-2.5L3.8 16.7l.6-2.6-.6-2.6 2.3-1.4 1-2.5 2.7.2z"/>' +
-        '<path d="M10.6 14.6l-2-2 1.1-1.1 0.9.9 2.9-2.9 1.1 1.1z" fill="#fff"/></svg>';
-
-      function makeAvatar() {
-        var img = document.createElement("img");
-        img.className = "lb-avatar";
-        img.alt = "";
-        img.src = DEFAULT_AVATAR;
-        img.addEventListener("error", function () { img.style.visibility = "hidden"; });
-        return img;
-      }
-
-      function playerSubtitle(metric, value) {
-        var v = Number(value) || 0;
-        if (metric === "level") return "Level " + v;
-        if (metric === "streak") return (v >= 0 ? "+" : "") + v + " win streak";
-        return v.toLocaleString() + " wins";
-      }
-
-      function progressEl(metric, entry, maxValue) {
-        var v = Number(entry && entry.value) || 0;
-        var wrap = document.createElement("div");
-        wrap.className = "lb-prog";
-
-        var left = document.createElement("span");
-        left.className = "lb-prog-end";
-        var bar = document.createElement("div");
-        bar.className = "lb-prog-bar";
-        var fill = document.createElement("div");
-        fill.className = "lb-prog-fill";
-        var right = document.createElement("span");
-        right.className = "lb-prog-end";
-
-        var pct;
-        if (metric === "level") {
-          var explicit = Number(entry && entry.progressPercent);
-          pct = Number.isFinite(explicit) ? explicit : 0;
-          left.textContent = String(v);
-          right.textContent = String(v + 1);
-        } else {
-          pct = maxValue > 0 ? (v / maxValue) * 100 : 0;
-          left.textContent = "0";
-          right.textContent = String(v);
-        }
-        fill.style.width = clamp(Math.round(pct), 5, 100) + "%";
-
-        bar.appendChild(fill);
-        wrap.appendChild(left);
-        wrap.appendChild(bar);
-        wrap.appendChild(right);
-        return wrap;
-      }
-
-      function playerSide(entry, metric, maxValue) {
-        var side = document.createElement("div");
-        side.className = "lb-side lb-side--player";
-        if (!entry) {
-          side.className = "lb-empty-side";
-          side.textContent = "—";
-          return side;
-        }
-        side.appendChild(makeAvatar());
-
-        var info = document.createElement("div");
-        info.className = "lb-info";
-
-        var pill = document.createElement("span");
-        pill.className = "lb-name-pill";
-        pill.appendChild(profileLink(entry.username));
-        pill.insertAdjacentHTML("beforeend", VERIFIED_SVG);
-
-        var w = Number(entry.wins !== undefined ? entry.wins : (metric === "wins" ? entry.value : 0));
-        var l = Number(entry.losses !== undefined ? entry.losses : 0);
-        if (w + l > 0) {
-          var wr = Math.round((w / (w + l)) * 100);
-          var wrPill = document.createElement("span");
-          wrPill.className = "lb-winrate-badge";
-          wrPill.textContent = wr + "% WR";
-          pill.appendChild(wrPill);
-        }
-
-        var title = document.createElement("div");
-        title.className = "lb-rowtitle";
-        title.textContent = playerSubtitle(metric, entry.value);
-
-        info.appendChild(pill);
-        info.appendChild(title);
-        info.appendChild(progressEl(metric, entry, maxValue));
-        side.appendChild(info);
-        return side;
-      }
-
-      function clanSide(entry, maxValue) {
-        var side = document.createElement("div");
-        side.className = "lb-side lb-side--clan";
-        if (!entry) {
-          side.className = "lb-empty-side lb-side--clan";
-          side.textContent = "—";
-          return side;
-        }
-        side.appendChild(makeAvatar());
-
-        var info = document.createElement("div");
-        info.className = "lb-info";
-
-        var pill = document.createElement("span");
-        pill.className = "lb-name-pill";
-        pill.appendChild(clanLink(entry.clanName));
-
-        var title = document.createElement("div");
-        title.className = "lb-rowtitle";
-        title.textContent = "Alliance · Level " + (Number(entry.value) || 1);
-
-        info.appendChild(pill);
-        info.appendChild(title);
-        info.appendChild(progressEl("level", entry, maxValue));
-        side.appendChild(info);
-        return side;
-      }
-
-      function medalCell(rank) {
-        var cell = document.createElement("div");
-        cell.className = "lb-medal";
-        var badge = document.createElement("div");
-        badge.className = "lb-medal-badge";
-        if (rank === 1) {
-          badge.innerHTML = "♛";
-        } else if (rank <= 3) {
-          badge.textContent = String(rank);
-        } else {
-          badge.classList.add("num");
-          badge.textContent = String(rank);
-        }
-        cell.appendChild(badge);
-        return cell;
-      }
-
       function render() {
         if (!board) return;
-        board.dataset.focus = state.focus;
         var cat = CATEGORIES[state.category];
         if (bigTitle) bigTitle.textContent = cat.title;
+        if (searchInput) {
+          var noun = cat.nameKey === "clanName" ? "clans" : "players";
+          searchInput.placeholder = "Search " + noun;
+          searchInput.setAttribute("aria-label", "Search " + noun);
+        }
 
         var boards = state.boards || {};
-        var players = Array.isArray(boards[cat.playerKey]) ? boards[cat.playerKey] : [];
-        var clans = Array.isArray(boards.topClanLevels) ? boards.topClanLevels : [];
+        var allEntries = Array.isArray(boards[cat.key]) ? boards[cat.key] : [];
+        var entries = allEntries;
 
         var q = state.query.trim().toLowerCase();
         if (q) {
-          players = players.filter(function (p) { return String(p.username || "").toLowerCase().indexOf(q) !== -1; });
-          clans = clans.filter(function (c) { return String(c.clanName || "").toLowerCase().indexOf(q) !== -1; });
+          entries = entries.filter(function (entry) { return String(entry[cat.nameKey] || "").toLowerCase().indexOf(q) !== -1; });
         }
 
         board.innerHTML = "";
@@ -963,52 +812,54 @@
           board.innerHTML = '<div class="lb-board-empty">Unable to load rankings right now.</div>';
           return;
         }
-        if (!players.length && !clans.length) {
-          board.innerHTML = '<div class="lb-board-empty">No ranked entries yet</div>';
+        if (!entries.length) {
+          board.innerHTML = '<div class="lb-board-empty">' + (q ? "No matching rankings." : "No rankings in this category yet.") + '</div>';
           return;
         }
 
-        var playerMax = players.length ? Math.max(Number(players[0].value) || 0, 1) : 1;
-        var clanMax = clans.length ? Math.max(Number(clans[0].value) || 0, 1) : 1;
-        var rowCount = Math.max(players.length, clans.length);
-
-        for (var i = 0; i < rowCount; i++) {
-          var rank = i + 1;
+        entries.forEach(function (entry) {
+          var rank = allEntries.indexOf(entry) + 1;
           var row = document.createElement("div");
-          row.className = "lb-row" + (rank <= 3 ? " r" + rank : "");
-
-          row.appendChild(medalCell(rank));
-
-          var body = document.createElement("div");
-          body.className = "lb-row-body";
-          body.appendChild(playerSide(players[i], cat.metric, playerMax));
-          var div = document.createElement("div");
-          div.className = "lb-divider";
-          body.appendChild(div);
-          body.appendChild(clanSide(clans[i], clanMax));
-          row.appendChild(body);
-
+          row.className = "lb-standing-row";
+          var place = document.createElement("span");
+          place.className = "lb-standing-rank";
+          place.textContent = String(rank).padStart(2, "0");
+          var name = document.createElement("span");
+          name.className = "lb-standing-name";
+          name.appendChild(cat.nameKey === "clanName" ? clanLink(entry.clanName) : profileLink(entry.username));
+          var value = document.createElement("span");
+          value.className = "lb-standing-value";
+          value.textContent = cat.unit === "Level"
+            ? "Level " + (Number(entry.value) || 0).toLocaleString()
+            : (Number(entry.value) || 0).toLocaleString() + " " + cat.unit;
+          row.appendChild(place);
+          row.appendChild(name);
+          row.appendChild(value);
           board.appendChild(row);
-        }
+        });
       }
 
       // ── tab wiring ──────────────────────────────────────────
-      subtabs.forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          subtabs.forEach(function (b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
-          btn.classList.add("active");
-          btn.setAttribute("aria-selected", "true");
-          state.focus = btn.getAttribute("data-focus");
-          render();
-        });
-      });
       cats.forEach(function (btn) {
         btn.addEventListener("click", function () {
           cats.forEach(function (b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
           btn.classList.add("active");
           btn.setAttribute("aria-selected", "true");
           state.category = btn.getAttribute("data-cat");
+          board.setAttribute("aria-labelledby", btn.id);
+          state.query = "";
+          if (searchInput) searchInput.value = "";
           render();
+        });
+        btn.addEventListener("keydown", function (event) {
+          var index = cats.indexOf(btn);
+          var next = event.key === "ArrowRight" ? (index + 1) % cats.length
+            : event.key === "ArrowLeft" ? (index - 1 + cats.length) % cats.length
+            : event.key === "Home" ? 0 : event.key === "End" ? cats.length - 1 : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          cats[next].focus();
+          cats[next].click();
         });
       });
       if (searchInput) {
@@ -1016,28 +867,6 @@
       }
 
       // ── Clan Ladder (dedicated section) ──────────────────────
-      var ladderLabels = {
-        "ninja-ladder": "Ninja Ladder",
-        "clan-ladder": "Clan Ladder",
-        "road-to-hokage": "Road to Hokage",
-        "hall-of-fame": "Hall of Fame"
-      };
-      var ladderLinks = Array.prototype.slice.call(document.querySelectorAll("[data-ladder-section]"));
-      var ladderCrumb = document.getElementById("lb-crumb-current");
-      function syncLadderSection() {
-        var key = (window.location.hash || "#ninja-ladder").replace("#", "") || "ninja-ladder";
-        if (!ladderLabels[key]) key = "ninja-ladder";
-        if (ladderCrumb) ladderCrumb.textContent = ladderLabels[key];
-        ladderLinks.forEach(function (link) {
-          var active = link.getAttribute("data-ladder-section") === key;
-          link.classList.toggle("active", active);
-          if (active) link.setAttribute("aria-current", "location");
-          else link.removeAttribute("aria-current");
-        });
-      }
-      window.addEventListener("hashchange", syncLadderSection);
-      syncLadderSection();
-
       var clanBoard = document.getElementById("lb-clanboard");
       function renderClanLadder() {
         if (!clanBoard) return;

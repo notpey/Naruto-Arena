@@ -22,3 +22,9 @@ scratch/
 endscroll
 surrenderscroll
 
+# Local design tooling and downloaded review assets
+/.agents/skills/impeccable/
+/.codex/
+/.impeccable/
+/tmp-mission-art/
+

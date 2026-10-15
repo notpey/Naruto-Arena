@@ -179,11 +179,7 @@
   var profileSearchInput = document.getElementById("profile-search-input");
   var profileSearchStatus = document.getElementById("profile-search-status");
   var defaultProfileAvatar = "found-remaster.png";
-  var sidebarTopPlayerLevels = document.getElementById("sidebar-top-player-levels");
-  var sidebarTopClanLevels = document.getElementById("sidebar-top-clan-levels");
-  var sidebarTopCurrentStreaks = document.getElementById("sidebar-top-current-streaks");
-  var sidebarTopWins = document.getElementById("sidebar-top-wins");
-  var sidebarTopHighestStreaks = document.getElementById("sidebar-top-highest-streaks");
+  var homeStandingsPreview = document.getElementById("home-standings-preview");
   var winratesGrid = document.getElementById("winrates-grid");
   var winratesStatus = document.getElementById("winrates-status");
   var resetWinratesButton = document.getElementById("reset-winrates-button");
@@ -243,6 +239,7 @@
   var newsFeed = document.getElementById("news-feed");
   var newsStatus = document.getElementById("news-status");
   var newsFeedContent = document.getElementById("news-feed-content");
+  var newsRetryButton = document.getElementById("news-retry-button");
   var newsPrevButton = document.getElementById("news-prev-button");
   var newsNextButton = document.getElementById("news-next-button");
   var newsFeedCounter = document.getElementById("news-feed-counter");
@@ -470,6 +467,14 @@
       return;
     }
     newsStatus.textContent = message || "";
+    if (newsRetryButton) {
+      newsRetryButton.hidden = state !== "error";
+      newsRetryButton.disabled = state === "loading";
+    }
+    var newsControls = newsFeed && newsFeed.querySelector(".ca-news-controls");
+    if (newsControls) {
+      newsControls.hidden = state === "error" || state === "empty" || state === "loading";
+    }
     if (state) {
       newsStatus.dataset.state = state;
       return;
@@ -663,7 +668,7 @@
     var article = document.createElement("section");
     article.className = "news-post";
 
-    var title = document.createElement("h1");
+    var title = document.createElement("h2");
     title.className = "mainsection-kicker";
     title.textContent = post && post.title ? String(post.title) : "Untitled Post";
     article.appendChild(title);
@@ -824,7 +829,7 @@
 
     var list = Array.isArray(posts) ? posts : [];
     if (!list.length) {
-      setNewsStatus("No news posts available yet.", "error");
+      setNewsStatus("No updates have been posted yet.", "empty");
       if (newsFeedCounter) {
         newsFeedCounter.textContent = "0 / 0";
       }
@@ -855,7 +860,7 @@
     if (!newsFeed) {
       return;
     }
-    setNewsStatus("Loading news...");
+    setNewsStatus("Loading news...", "loading");
     try {
       var response = await window.ArenaSession.fetch("/api/news", {
         credentials: "same-origin"
@@ -943,7 +948,7 @@
     clearChildren(newsPostList);
     var list = Array.isArray(posts) ? posts : [];
     if (!list.length) {
-      setNewsPostListStatus("No news posts yet.", "error");
+      setNewsPostListStatus("No news posts yet.");
       return;
     }
     list.forEach(function (post) {
@@ -3242,107 +3247,47 @@
     }
   }
 
-  function renderSidebarBarList(container, entries, labelKey, maxValueOverride) {
-    if (!container) {
-      return;
+  async function loadHomeStandingsPreview() {
+    if (!homeStandingsPreview) return;
+    function showMessage(message) {
+      clearChildren(homeStandingsPreview);
+      var paragraph = document.createElement("p");
+      paragraph.className = "ca-standings-message";
+      paragraph.textContent = message;
+      homeStandingsPreview.appendChild(paragraph);
     }
-    clearChildren(container);
-    var list = Array.isArray(entries) ? entries : [];
-    list.forEach(function (entry, index) {
-      var row = document.createElement("div");
-      row.className = "ladder-row";
-
-      var rank = document.createElement("div");
-      rank.className = "ladder-rank";
-      rank.textContent = formatRankNumber(index);
-
-      var content = document.createElement("div");
-      var name = document.createElement("div");
-      name.className = "ladder-name";
-      var label = entry && entry[labelKey] ? String(entry[labelKey]) : "Unknown";
-      if (labelKey === "username") {
-        name.appendChild(createProfileLink(label));
-      } else if (labelKey === "clanName") {
-        name.appendChild(createClanProfileLink(label));
-      } else {
-        name.textContent = label;
-      }
-
-      var bar = document.createElement("div");
-      bar.className = "ladder-bar";
-
-      var fill = document.createElement("div");
-      fill.className = "ladder-fill";
-
-      var topValue = Number(maxValueOverride);
-      if (!Number.isFinite(topValue) || topValue <= 0) {
-        topValue = list.length ? Math.max(Number(list[0].value) || 0, 1) : 1;
-      }
-      var currentValue = Math.max(Number(entry && entry.value) || 0, 0);
-      var explicitProgressPercent = Number(entry && entry.progressPercent);
-      if (Number.isFinite(explicitProgressPercent)) {
-        fill.style.width = Math.max(6, Math.min(100, Math.round(explicitProgressPercent))) + "%";
-      } else {
-        fill.style.width = Math.max(6, Math.min(100, Math.round((currentValue / topValue) * 100))) + "%";
-      }
-
-      var score = document.createElement("div");
-      score.className = "ladder-score";
-      score.textContent = formatListNumber(currentValue);
-
-      bar.appendChild(fill);
-      bar.appendChild(score);
-      content.appendChild(name);
-      content.appendChild(bar);
-      row.appendChild(rank);
-      row.appendChild(content);
-      container.appendChild(row);
-    });
-  }
-
-  function renderSidebarStatList(container, entries, formatter, suffix) {
-    if (!container) {
-      return;
-    }
-    clearChildren(container);
-    (Array.isArray(entries) ? entries : []).forEach(function (entry) {
-      var item = document.createElement("li");
-      var name = entry && entry.username ? String(entry.username) : "Unknown";
-      var valueText = formatter(entry ? entry.value : 0);
-      item.appendChild(createProfileLink(name));
-      item.appendChild(document.createTextNode(" " + valueText + (suffix ? " " + suffix : "")));
-      container.appendChild(item);
-    });
-  }
-
-  async function loadSidebarLeaderboards() {
-    if (
-      !sidebarTopPlayerLevels &&
-      !sidebarTopClanLevels &&
-      !sidebarTopCurrentStreaks &&
-      !sidebarTopWins &&
-      !sidebarTopHighestStreaks
-    ) {
-      return;
-    }
-
     try {
       var response = await window.ArenaSession.fetch("/api/leaderboards/sidebar", {
         credentials: "same-origin"
       });
-      if (!response.ok) {
+      if (!response.ok) throw new Error("Unable to load rankings");
+      var data = await response.json();
+      var boards = data && data.leaderboards ? data.leaderboards : {};
+      var topPlayers = Array.isArray(boards.topPlayerLevels) ? boards.topPlayerLevels.slice(0, 3) : [];
+      clearChildren(homeStandingsPreview);
+      if (!topPlayers.length) {
+        showMessage("No player rankings yet.");
         return;
       }
-      var data = await response.json().catch(function () {
-        return {};
+      topPlayers.forEach(function (entry, index) {
+        var row = document.createElement("div");
+        row.className = "ca-standing-row";
+        var rank = document.createElement("span");
+        rank.className = "ca-standing-rank";
+        rank.textContent = formatRankNumber(index);
+        var name = createProfileLink(entry && entry.username ? String(entry.username) : "Unknown");
+        name.className = "ca-standing-name";
+        var value = document.createElement("span");
+        value.className = "ca-standing-value";
+        value.textContent = "Level " + (Number(entry && entry.value) || 0).toLocaleString();
+        row.appendChild(rank);
+        row.appendChild(name);
+        row.appendChild(value);
+        homeStandingsPreview.appendChild(row);
       });
-      var boards = data && data.leaderboards ? data.leaderboards : {};
-      renderSidebarBarList(sidebarTopPlayerLevels, boards.topPlayerLevels, "username", 50);
-      renderSidebarBarList(sidebarTopClanLevels, boards.topClanLevels, "clanName", 50);
-      renderSidebarStatList(sidebarTopCurrentStreaks, boards.topCurrentStreaks, formatSignedListNumber, "streak");
-      renderSidebarStatList(sidebarTopWins, boards.topWins, formatListNumber, "wins");
-      renderSidebarStatList(sidebarTopHighestStreaks, boards.topHighestStreaks, formatSignedListNumber, "streak");
-    } catch (error) {}
+    } catch (error) {
+      showMessage("Rankings are unavailable right now.");
+    }
   }
 
   function populateProfile(user) {
@@ -4131,6 +4076,12 @@
   if (newsNextButton) {
     newsNextButton.addEventListener("click", function () {
       showNextNewsPost();
+    });
+  }
+
+  if (newsRetryButton) {
+    newsRetryButton.addEventListener("click", function () {
+      loadPublicNews();
     });
   }
 
@@ -5005,7 +4956,7 @@
   updateMode();
   hydrateFromCachedUser();
   initializeReleaseInputs();
-  loadSidebarLeaderboards();
+  loadHomeStandingsPreview();
   loadAdminWinrates();
   loadAdminUsers();
   loadAdminCharacters();

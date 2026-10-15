@@ -22,14 +22,20 @@
 
     .ms-page { width: min(1340px, 100%); margin: 0 auto; padding: 0 24px 64px; }
 
-    /* Big editorial header */
-    .ms-bigtitle-wrap { position: relative; height: 78px; overflow: hidden; margin: 30px 0 4px; }
+    /* Page heading stays fully visible at every width. */
+    .ms-bigtitle-wrap { margin: 28px 0 18px; }
     .ms-bigtitle {
-      position: absolute; bottom: -22px; left: -4px; margin: 0;
-      font-size: clamp(58px, 8vw, 104px); font-weight: 900; letter-spacing: 0.01em;
-      text-transform: uppercase; color: var(--ca-orange); line-height: 1; white-space: nowrap; opacity: 0.94;
+      margin: 0; font-size: clamp(32px, 5vw, 58px); font-weight: 900;
+      letter-spacing: 0.01em; text-transform: uppercase; color: var(--ca-orange);
+      line-height: 1.08; overflow-wrap: anywhere;
     }
-    .ms-subtitle { margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-purple); }
+    .ms-discovery { max-width: 1040px; margin: 0 auto 18px; }
+    .ms-discovery label { display: block; margin-bottom: 8px; color: var(--ca-bone); font-size: 14px; font-weight: 700; }
+    .ms-discovery input { width: 100%; min-height: 44px; padding: 10px 14px; border: 1px solid rgba(208,200,184,.35); border-radius: 4px; background: #11151d; color: var(--ca-bone); font: inherit; }
+    .ms-discovery input::placeholder { color: var(--ca-dust); }
+    .ms-discovery input:focus-visible { outline: 2px solid var(--ca-amber); outline-offset: 2px; }
+    .ms-discovery-status { min-height: 20px; margin: 7px 0 0; color: var(--ca-parchment); font-size: 13px; }
+    .ms-search-results { margin-top: 14px; }
 
     /* Toolbar (black bar) */
     .ms-toolbar {
@@ -53,134 +59,131 @@
     .ms-grid {
       display: grid; gap: 26px 22px; margin-top: 18px;
       grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
-      background: linear-gradient(165deg, #181d28 0%, #0e121a 100%);
-      border: 2px solid #8b7d5c;
-      border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      background: #151922;
+      border: 1px solid rgba(208, 200, 184, 0.24);
+      border-radius: 8px;
       padding: 28px 26px;
       color: #f4efe2;
     }
-    .ms-card { display: flex; flex-direction: column; min-height: 0; }
+    .ms-card { display: flex; flex-direction: column; min-height: 0; padding: 14px; border: 1px solid rgba(208, 200, 184, 0.24); border-radius: 6px; background: #171e2a; color: inherit; }
+    .ms-card:focus-visible { outline: 2px solid var(--ca-amber); outline-offset: 4px; }
     .ms-card-level { min-height: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #4caf50; }
     .ms-card-name {
-      height: 42px; font-size: 19px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase;
+      min-height: 42px; font-size: 18px; font-weight: 800; letter-spacing: 0.01em; text-transform: uppercase;
       color: #fbe9b8; margin: 2px 0 8px; line-height: 1.05;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .ms-card-art { position: relative; aspect-ratio: 5 / 4; overflow: hidden; background: #0b0e14; border: 2px solid #c49a45; border-radius: 6px; }
-    .ms-card-art img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-base); }
+    .ms-card-art { position: relative; background: #0b0e14; border: 1px solid rgba(208, 200, 184, 0.32); border-radius: 6px; overflow: hidden; }
+    .ms-card-art img { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; display: block; transition: transform var(--t-base); }
     .ms-card:hover .ms-card-art { border-color: #ffae42; }
     .ms-card:hover .ms-card-art img { transform: scale(1.04); }
-    .ms-card-overlay {
-      position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 12px 12px;
-      background: linear-gradient(180deg, transparent, rgba(5,7,14,0.95));
-    }
-    .ms-card-mname { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.15; }
-    .ms-card-rankline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
-    .ms-card-rank { font-size: 11px; color: #cdc9c2; }
+    .ms-card-overlay { padding: 10px 12px 12px; }
+    .ms-card-mname { font-size: 12px; font-weight: 700; color: var(--ca-parchment); line-height: 1.3; }
+    .ms-card-rankline { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+    .ms-card-rank { font-size: 12px; color: #cdc9c2; }
     .ms-card-rank .lbl { text-decoration: underline; text-transform: uppercase; letter-spacing: 0.04em; }
-    .ms-card-rank .val { color: #ff5a5a; }
-    .ms-status-pill { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
-    .ms-status-pill.available { background: #1f7a3f; color: #cdfbd9; box-shadow: 0 0 10px rgba(31,122,63,0.4); }
+    .ms-card-rank .val { color: #fbe9b8; }
+    .ms-status-pill { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 8px; border-radius: 3px; white-space: nowrap; }
+    .ms-status-pill.available { background: #1f7a3f; color: #cdfbd9; }
     .ms-status-pill.locked { background: #c41e3a; color: #fff; }
     .ms-status-pill.completed { background: rgba(255,255,255,0.16); color: var(--ca-bone); }
-    .ms-card-view { margin-top: 9px; text-align: right; font-size: 12px; font-style: italic; color: #b8b09d; }
+    .ms-card-view { margin-top: 9px; text-align: right; font-size: 12px; color: #b8b09d; }
     .ms-card:hover .ms-card-view { color: #ffae42; text-decoration: underline; }
-    .ms-empty { padding: 50px 20px; text-align: center; color: #b8b09d; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .ms-empty { padding: 50px 20px; text-align: center; color: #d0c8b8 !important; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.6; }
 
-    .ms-card-section {
-      height: 28px; font-size: 11px; font-style: italic; color: #90a4ae; margin: -4px 0 8px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
+    .ms-card-section { display: none; }
 
     /* ── LANDING: rank category blocks ────────────────────────── */
     .ms-cats {
       margin: 18px auto 0;
       max-width: 1040px;
-      background: linear-gradient(165deg, #181d28 0%, #0e121a 100%);
-      border: 2px solid #8b7d5c;
-      border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-      padding: 8px 34px;
+      background: #151922;
+      border: 1px solid rgba(208, 200, 184, 0.24);
+      border-radius: 8px;
+      padding: 4px 24px;
       color: #f4efe2;
     }
     .ms-cat {
-      display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center;
-      padding: 26px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #f4efe2;
+      display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 20px; align-items: center;
+      padding: 15px 18px; margin-bottom: 10px; border: 1px solid rgba(208, 200, 184, 0.24); border-radius: 6px; background: #171e2a; color: #f4efe2;
+      text-decoration: none;
     }
-    .ms-cat:last-child { border-bottom: 0; }
-    .ms-cat-title { margin: 0 0 8px; font-size: 18px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: #fbe9b8; }
+    .ms-cat-title { margin: 0 0 5px; font-size: 18px; font-weight: 800; letter-spacing: 0.01em; text-transform: uppercase; color: #fbe9b8; }
     .ms-cat-count { font-size: 12px; font-weight: 700; color: #ffae42; }
-    .ms-cat p { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: #b8b09d; max-width: 600px; }
-    .ms-cat-cta { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; color: #ffae42; }
+    .ms-cat p { margin: 0 0 12px; font-size: 15px; line-height: 1.65; color: #d0c8b8; max-width: 660px; }
+    .ms-cat-intro { max-width: 70ch; margin: -2px 0 22px; color: #d0c8b8; font-size: 15px; line-height: 1.55; }
+    .ms-cat-cta { font-size: 13px; font-weight: 700; color: #ffbe61; }
     .ms-cat:hover .ms-cat-cta { color: #fff; text-decoration: underline; }
     .ms-cat:hover .ms-cat-title { color: #ffae42; }
+    .ms-cat:focus-visible { outline: 2px solid #ffae42; outline-offset: 4px; border-radius: 4px; }
     .ms-cat-thumb {
-      width: 200px; height: 120px;
-      display: grid; place-items: center;
-      border-radius: 8px; border: 2px solid #c49a45; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      width: 120px; height: 80px;
+      position: relative; display: block;
+      border-radius: 4px; border: 1px solid rgba(255, 174, 66, .55); overflow: hidden;
+      background: #0d121c;
+      transition: border-color var(--t-fast);
     }
-    .ms-cat-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .ms-cat-thumb span { font-size: 38px; font-weight: 900; letter-spacing: 0.04em; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-    .ms-cat-thumb.t-dc { background: linear-gradient(135deg, #1f7a3f, #46c46a); }
-    .ms-cat-thumb.t-b  { background: linear-gradient(135deg, #b07d12, var(--ca-gold)); }
-    .ms-cat-thumb.t-a  { background: linear-gradient(135deg, #7a3d08, var(--ca-purple)); }
-    .ms-cat-thumb.t-s  { background: linear-gradient(135deg, var(--ca-purple-ui), var(--ca-violet)); }
-
-    .ms-local-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 20px; }
-    .ms-local-nav a {
-      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--ca-parchment); padding: 8px 13px; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 999px; transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+    .ms-cat:hover .ms-cat-thumb { border-color: #fff1cf; }
+    .ms-cat-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.86) saturate(.9); }
+    .ms-cat-thumb span {
+      position: absolute; left: 5px; bottom: 5px; padding: 2px 6px;
+      border: 1px solid rgba(255, 174, 66, .6); border-radius: 2px;
+      background: rgba(10, 12, 18, .9); color: #ffae42;
+      font-size: 14px; font-weight: 900; line-height: 1.2;
     }
-    .ms-local-nav a:hover { color: #fff; border-color: var(--ca-orange); }
-    .ms-local-nav a.active { color: #fff; border-color: rgba(124, 77, 255, 0.7); background: rgba(124, 77, 255, 0.14); }
 
     /* ── CATEGORY: breadcrumb + intro + inline toolbar ────────── */
-    .ms-crumb-nav { margin: 22px 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ca-parchment); }
-    .ms-crumb-nav a { color: var(--ca-parchment); }
-    .ms-crumb-nav a:hover { color: var(--ca-orange); }
-    .ms-crumb-nav .cur { color: var(--ca-orange); }
-    .ms-cat-intro { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--ca-parchment); max-width: 760px; }
     .ms-search-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ca-parchment); }
     .ms-search-inline { margin-left: 0; }
     .ms-toolbar .ms-check { margin-left: auto; }
-    .ms-crumb a { color: var(--ca-ink-soft); }
+    .ms-crumb a { color: #c8beb0; }
     .ms-crumb a:hover { color: var(--ca-orange); }
 
-    @media (max-width: 560px) {
-      .ms-cat { grid-template-columns: 1fr; gap: 14px; }
-      .ms-cat-thumb { width: 100%; height: 120px; order: -1; }
+    @media (max-width: 700px) {
+      .ms-page { padding-right: 16px; padding-left: 16px; }
+      .ms-bigtitle-wrap { margin-top: 20px; }
+      .ms-cats { padding: 4px 18px; }
+      .ms-cat { grid-template-columns: 90px minmax(0, 1fr); gap: 14px; }
+      .ms-cat-thumb { width: 90px; height: 64px; }
+      .ms-cat-thumb span { font-size: 12px; }
+      .ms-cat-title { font-size: 16px; }
+      .ms-cat p { font-size: 14px; }
     }
+    @media (max-width: 430px) { .ms-cat-title { font-size: 15px; } }
 
     /* ── DETAIL VIEW (dark shinobi scroll) ────────────────────────────── */
     #ms-detail-view {
-      background: linear-gradient(165deg, #181d28 0%, #0e121a 100%);
-      border: 2px solid #8b7d5c;
-      border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-      padding: 26px 30px 34px;
+      background: #151922;
+      border: 1px solid rgba(208, 200, 184, 0.24);
+      border-radius: 8px;
+      padding: 24px 26px 30px;
       margin-top: 22px;
-      color: #f4efe2;
+      color: #f2ede4;
     }
-    .ms-crumb { margin: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #b8b09d; }
+    .ms-crumb { margin: 0 0 2px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #c8beb0; }
     .ms-crumb .cur { color: #ffae42; }
-    .ms-detail-nav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 26px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .ms-detail-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 14px 0 24px; padding-bottom: 14px; border-bottom: 1px solid rgba(208, 200, 184, 0.18); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #d0c8b8; }
     .ms-detail-nav a:hover { color: #ffae42; }
-    .ms-detail-nav .accent { color: #a36bff; }
-    .ms-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #4caf50; }
-    .ms-detail-title { font-size: 30px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: #fbe9b8; margin: 2px 0 22px; }
-    .ms-detail-grid { display: grid; grid-template-columns: 360px 1fr 1fr 1fr; gap: 30px; align-items: start; }
-    .ms-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #0b0e14; border: 2px solid #c49a45; border-radius: 6px; }
-    .ms-col-head { display: inline-block; background: #141923; border: 1px solid #c49a45; padding: 4px 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fbe9b8; margin-bottom: 14px; border-radius: 4px; }
-    .ms-col-head.reward { background: #1f7a3f; border-color: #2e7d32; color: #fff; }
-    .ms-col-line { font-size: 13px; color: #b8b09d; margin: 0 0 9px; line-height: 1.5; }
+    .ms-detail-nav .accent { color: #ffae42; }
+    .ms-detail-level { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #91d49e; }
+    .ms-detail-title { font-size: clamp(26px, 3vw, 34px); font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: #fbe9b8; margin: 3px 0 22px; }
+    .ms-detail-grid { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+    .ms-detail-grid > div { min-width: 0; padding: 16px; background: rgba(7, 10, 16, 0.34); border: 1px solid rgba(208, 200, 184, 0.16); border-radius: 7px; }
+    .ms-detail-art { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; background: #0b0e14; border: 1px solid #ffae42; border-radius: 6px; }
+    .ms-detail-goals { grid-column: 2; grid-row: 1; }
+    .ms-detail-info { grid-column: 1; grid-row: 2; }
+    .ms-detail-reward { grid-column: 2; grid-row: 2; }
+    .ms-col-head { display: inline-flex; align-items: center; min-height: 30px; background: rgba(255, 174, 66, 0.08); border: 1px solid rgba(255, 174, 66, 0.62); padding: 5px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #ffe2a5; margin: 0 0 14px; border-radius: 4px; }
+    .ms-col-head.reward { background: rgba(35, 125, 73, 0.28); border-color: #3e9a60; color: #c9f5d5; }
+    .ms-col-line { font-size: 14px; color: #d0c8b8; margin: 0 0 11px; line-height: 1.55; overflow-wrap: anywhere; }
     .ms-col-line::before { content: "– "; color: #90a4ae; }
-    .ms-col-line strong { color: #fbe9b8; font-weight: 700; }
-    .ms-col-sub { margin-top: 22px; }
-    .ms-reward-char { margin-top: 6px; }
-    .ms-reward-char img { width: 84px; height: 84px; object-fit: cover; border: 2px solid #c49a45; border-radius: 6px; display: block; margin-bottom: 8px; }
-    .ms-reward-name { font-size: 13px; font-weight: 700; color: #fbe9b8; }
+    .ms-col-line strong { color: #fbe9b8 !important; font-weight: 800; }
+    .ms-col-line a { color: #ffbe61; text-decoration: underline; text-decoration-color: rgba(255, 190, 97, 0.45); text-underline-offset: 3px; }
+    .ms-col-line a:hover { color: #fff; }
+    .ms-col-sub { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(208, 200, 184, 0.14); }
+    .ms-reward-char { margin-top: 8px; }
+    .ms-reward-char img { width: 96px; height: 96px; object-fit: cover; background: #0b0e14; border: 1px solid #ffae42; border-radius: 6px; display: block; margin-bottom: 9px; }
+    .ms-reward-name { font-size: 14px; font-weight: 800; color: #fbe9b8; }
 
     /* Footer */
     .ms-footer { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 24px 30px; text-align: center; }
@@ -191,10 +194,15 @@
     .ms-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
 
     @media (max-width: 980px) {
-      .ms-detail-grid { grid-template-columns: 1fr 1fr; }
+      .ms-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 640px) {
+      #ms-detail-view { padding: 18px 16px 22px; }
+      .ms-detail-nav { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 20px; }
       .ms-detail-grid { grid-template-columns: 1fr; }
+      .ms-detail-goals, .ms-detail-info, .ms-detail-reward { grid-column: 1; grid-row: auto; }
+      .ms-detail-grid > div { padding: 14px; }
+      .ms-detail-art { max-height: 380px; aspect-ratio: 4 / 3; }
       .ms-search { margin-left: 0; }
     }
   </style>
@@ -359,50 +367,46 @@
 
     <!-- ── LANDING: rank category overview ────────────────────── -->
     <section id="ms-landing">
-      <nav class="ms-crumb-nav" aria-label="Breadcrumb">
-        <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Ninja Missions</span>
-      </nav>
       <div class="ms-bigtitle-wrap"><h1 class="ms-bigtitle">NINJA MISSIONS</h1></div>
-      <p class="ms-subtitle">/ Choose a rank and complete goals to unlock characters and rewards</p>
-      <nav class="ms-local-nav" aria-label="Mission sections">
-        <a class="active" href="missions.html" data-mission-section="overview">Overview</a>
-        <a href="missions.html?rank=dc" data-mission-section="dc">D/C Rank</a>
-        <a href="missions.html?rank=b" data-mission-section="b">B Rank</a>
-        <a href="missions.html?rank=a" data-mission-section="a">A Rank</a>
-        <a href="missions.html?rank=s" data-mission-section="s">S Rank</a>
-      </nav>
 
-      <div class="ms-cats">
+      <div class="ms-discovery">
+        <label for="ms-all-search">Find a mission</label>
+        <input type="search" id="ms-all-search" placeholder="Search by mission or character" autocomplete="off" />
+        <p class="ms-discovery-status" id="ms-all-search-status" role="status" aria-live="polite"></p>
+      </div>
+      <div id="ms-search-results" class="ms-grid ms-search-results" hidden></div>
+
+      <div class="ms-cats" id="ms-cats">
         <a class="ms-cat" href="missions.html?rank=dc">
-          <div class="ms-cat-thumb t-dc" aria-hidden="true"><span>D·C</span></div>
+          <div class="ms-cat-thumb" aria-hidden="true"><img src="assets/mission-ranks/rank-dc.png" alt="" width="530" height="354" loading="lazy" decoding="async" /><span>D·C</span></div>
           <div class="ms-cat-body">
             <h2 class="ms-cat-title">D &amp; C Rank Missions <span class="ms-cat-count" data-count="dc"></span></h2>
-            <p>The D and C Rank Missions are the proving grounds for new and unexperienced shinobi. Clearing them unlocks notably the Sound ninja and early upgrades to get your roster started.</p>
-            <span class="ms-cat-cta">Check out the D &amp; C Rank Missions! ›</span>
+            <p>The proving grounds for new shinobi. Complete these missions to unlock Sound ninja and early roster upgrades.</p>
+            <span class="ms-cat-cta">View missions ›</span>
           </div>
         </a>
         <a class="ms-cat" href="missions.html?rank=b">
-          <div class="ms-cat-thumb t-b" aria-hidden="true"><span>B</span></div>
+          <div class="ms-cat-thumb" aria-hidden="true"><img src="assets/mission-ranks/rank-b.png" alt="" width="530" height="354" loading="lazy" decoding="async" /><span>B</span></div>
           <div class="ms-cat-body">
             <h2 class="ms-cat-title">B Rank Missions <span class="ms-cat-count" data-count="b"></span></h2>
-            <p>The B Rank Missions are reserved for experienced ninja. With these missions you can unlock villains and the subordinates of the most dangerous shinobi.</p>
-            <span class="ms-cat-cta">Check out the B Rank Missions! ›</span>
+            <p>For experienced ninja. Face dangerous rivals and recruit the fighters who serve them.</p>
+            <span class="ms-cat-cta">View missions ›</span>
           </div>
         </a>
         <a class="ms-cat" href="missions.html?rank=a">
-          <div class="ms-cat-thumb t-a" aria-hidden="true"><span>A</span></div>
+          <div class="ms-cat-thumb" aria-hidden="true"><img src="assets/mission-ranks/rank-a.png" alt="" width="530" height="354" loading="lazy" decoding="async" /><span>A</span></div>
           <div class="ms-cat-body">
             <h2 class="ms-cat-title">A Rank Missions <span class="ms-cat-count" data-count="a"></span></h2>
-            <p>The A Rank Missions are only assigned to highly experienced ninja. With these missions you are able to unlock team leaders and elite fighters.</p>
-            <span class="ms-cat-cta">Check out the A Rank Missions! ›</span>
+            <p>Assignments for elite ninja, with legendary leaders and powerful fighters to unlock.</p>
+            <span class="ms-cat-cta">View missions ›</span>
           </div>
         </a>
         <a class="ms-cat" href="missions.html?rank=s">
-          <div class="ms-cat-thumb t-s" aria-hidden="true"><span>S</span></div>
+          <div class="ms-cat-thumb" aria-hidden="true"><img src="assets/mission-ranks/rank-s.png" alt="" width="530" height="354" loading="lazy" decoding="async" /><span>S</span></div>
           <div class="ms-cat-body">
             <h2 class="ms-cat-title">S Rank Missions <span class="ms-cat-count" data-count="s"></span></h2>
-            <p>The S Rank Missions are only for the best of the best. With these missions you are able to unlock legendary ninja and hokage-tier shinobi.</p>
-            <span class="ms-cat-cta">Check out the S Rank Missions! ›</span>
+            <p>Reserved for the best of the best. These are the arena's most demanding assignments.</p>
+            <span class="ms-cat-cta">View missions ›</span>
           </div>
         </a>
       </div>
@@ -410,23 +414,13 @@
 
     <!-- ── CATEGORY: rank page ────────────────────────────────── -->
     <section id="ms-category" hidden>
-      <nav class="ms-crumb-nav" aria-label="Breadcrumb">
-        <a href="index.html">Naruto-Arena</a> &gt; <a href="missions.html">Ninja Missions</a> &gt; <span class="cur" id="ms-cat-crumb">Rank</span>
-      </nav>
       <div class="ms-bigtitle-wrap"><h1 class="ms-bigtitle" id="ms-cat-title">RANK MISSIONS</h1></div>
       <p class="ms-cat-intro" id="ms-cat-intro"></p>
-      <nav class="ms-local-nav" aria-label="Mission sections">
-        <a href="missions.html" data-mission-section="overview">Back to Ninja Missions</a>
-        <a href="missions.html?rank=dc" data-mission-section="dc">D/C Rank</a>
-        <a href="missions.html?rank=b" data-mission-section="b">B Rank</a>
-        <a href="missions.html?rank=a" data-mission-section="a">A Rank</a>
-        <a href="missions.html?rank=s" data-mission-section="s">S Rank</a>
-      </nav>
 
       <div class="ms-toolbar">
         <label class="ms-search-label" for="ms-search-input">Search Mission:</label>
         <div class="ms-search ms-search-inline">
-          <input type="search" id="ms-search-input" placeholder="Search for a name mission..." aria-label="Search missions" />
+          <input type="search" id="ms-search-input" placeholder="Search by mission or character" aria-label="Search missions" />
           <span class="ms-search-icon" aria-hidden="true">⌕</span>
         </div>
         <label class="ms-check"><input type="checkbox" id="ms-available-only" /> Only Show Available</label>
@@ -473,9 +467,11 @@
       var searchInput = document.getElementById("ms-search-input");
       var availableOnly = document.getElementById("ms-available-only");
       var catTitle = document.getElementById("ms-cat-title");
-      var catCrumb = document.getElementById("ms-cat-crumb");
       var catIntro = document.getElementById("ms-cat-intro");
-      var missionSectionLinks = Array.prototype.slice.call(document.querySelectorAll("[data-mission-section]"));
+      var landingSearchInput = document.getElementById("ms-all-search");
+      var landingSearchResults = document.getElementById("ms-search-results");
+      var landingSearchStatus = document.getElementById("ms-all-search-status");
+      var categoriesEl = document.getElementById("ms-cats");
 
       var missionCatalog = [];
       var missionMap = new Map();
@@ -500,14 +496,10 @@
       // mission data model, so this is the documented fallback mapping; D & C
       // are grouped together per the classic Naruto-Arena flow).
       var RANK_META = {
-        dc: { label: "D & C Rank Missions", title: "D & C RANK MISSIONS",
-              intro: "With D and C Rank Missions you unlock many new characters and upgrades to existing characters — the proving grounds for new and unexperienced shinobi." },
-        b:  { label: "B Rank Missions", title: "B RANK MISSIONS",
-              intro: "B Rank Missions are reserved for experienced shinobi, unlocking villains and the subordinates of the most dangerous ninja." },
-        a:  { label: "A Rank Missions", title: "A RANK MISSIONS",
-              intro: "A Rank Missions are assigned to highly experienced shinobi, unlocking team leaders and elite fighters." },
-        s:  { label: "S Rank Missions", title: "S RANK MISSIONS",
-              intro: "S Rank Missions are only for the best of the best — unlocking legendary ninja and hokage-tier shinobi." }
+        dc: { label: "D & C Rank Missions", title: "D & C RANK MISSIONS", intro: "The proving grounds for new shinobi. Complete these missions to unlock Sound ninja and early roster upgrades." },
+        b:  { label: "B Rank Missions", title: "B RANK MISSIONS", intro: "For experienced ninja. Face dangerous rivals and recruit the fighters who serve them." },
+        a:  { label: "A Rank Missions", title: "A RANK MISSIONS", intro: "Assignments for elite ninja, with legendary leaders and powerful fighters to unlock." },
+        s:  { label: "S Rank Missions", title: "S RANK MISSIONS", intro: "Reserved for the best of the best. These are the arena's most demanding assignments." }
       };
       function rankOf(m) {
         var lv = getLevelRequirementValue(m) || 1;
@@ -703,12 +695,13 @@
         overlay.className = "ms-card-overlay";
         var mname = document.createElement("div");
         mname.className = "ms-card-mname";
-        mname.textContent = m.characterName ? "Featuring " + m.characterName : m.title;
+        mname.textContent = m.characterName ? "Featuring " + m.characterName : "";
+        mname.hidden = !m.characterName;
         var rankline = document.createElement("div");
         rankline.className = "ms-card-rankline";
         var rank = document.createElement("div");
         rank.className = "ms-card-rank";
-        rank.innerHTML = '<span class="lbl">Rank:</span> <span class="val">At least ' + (getLevelRequirementValue(m) || "Any") + '</span>';
+        rank.innerHTML = '<span class="lbl">Level:</span> <span class="val">' + (getLevelRequirementValue(m) || "Any") + '</span>';
         var pill = document.createElement("span");
         pill.className = "ms-status-pill " + st;
         pill.textContent = st === "locked" ? "✕ Locked" : (st === "completed" ? "Completed" : "Available");
@@ -735,7 +728,6 @@
         if (!grid) return;
         var meta = RANK_META[rank];
         if (catTitle) catTitle.textContent = meta.title;
-        if (catCrumb) catCrumb.textContent = meta.label;
         if (catIntro) catIntro.textContent = meta.intro;
 
         var q = String(searchInput && searchInput.value ? searchInput.value : "").trim().toLowerCase();
@@ -752,7 +744,10 @@
 
         grid.innerHTML = "";
         if (!list.length) {
-          grid.innerHTML = '<div class="ms-empty">No ' + meta.label + ' match these filters. Try a different search or show all missions.</div>';
+          var rankHasMissions = missionCatalog.some(function (m) { return rankOf(m) === rank; });
+          grid.innerHTML = '<div class="ms-empty">' + (rankHasMissions
+            ? 'No ' + meta.label + ' match these filters. Try a different search or show all missions.'
+            : 'No ' + meta.label + ' are available yet.') + '</div>';
           return;
         }
         list.forEach(function (m) { grid.appendChild(buildCard(m)); });
@@ -763,8 +758,22 @@
         missionCatalog.forEach(function (m) { counts[rankOf(m)]++; });
         Object.keys(counts).forEach(function (r) {
           var el = document.querySelector('.ms-cat-count[data-count="' + r + '"]');
-          if (el) el.textContent = counts[r] ? "(" + counts[r] + ")" : "(0)";
+          if (el) el.textContent = missionCatalog.length ? "(" + counts[r] + ")" : "";
         });
+        var query = landingSearchInput ? landingSearchInput.value.trim().toLowerCase() : "";
+        if (categoriesEl) categoriesEl.hidden = !!query;
+        if (landingSearchResults) landingSearchResults.hidden = !query;
+        if (!landingSearchStatus || !landingSearchResults) return;
+        landingSearchResults.replaceChildren();
+        if (!query) { landingSearchStatus.textContent = missionCatalog.length ? "Browse by rank or search all missions." : ""; return; }
+        if (!missionCatalog.length) { landingSearchStatus.textContent = "Missions are unavailable right now."; return; }
+        var matches = missionCatalog.filter(function (m) {
+          return [m.title, m.characterName, m.reward_character_name].some(function (value) {
+            return String(value || "").toLowerCase().includes(query);
+          });
+        });
+        landingSearchStatus.textContent = matches.length ? matches.length + (matches.length === 1 ? " mission found" : " missions found") : "No missions match your search.";
+        matches.forEach(function (m) { landingSearchResults.appendChild(buildCard(m)); });
       }
 
       // ── DETAIL ──────────────────────────────────────────────
@@ -796,7 +805,7 @@
         var lvl = document.createElement("div");
         lvl.className = "ms-detail-level";
         lvl.textContent = "Level " + (getLevelRequirementValue(mission) || 1);
-        var title = document.createElement("div");
+        var title = document.createElement("h1");
         title.className = "ms-detail-title";
         title.textContent = mission.title;
 
@@ -811,21 +820,21 @@
 
         // information + requirements column
         var infoCol = document.createElement("div");
+        infoCol.className = "ms-detail-info";
         var infoHead = document.createElement("div"); infoHead.className = "ms-col-head"; infoHead.textContent = "› Information";
         infoCol.appendChild(infoHead);
-        var l1 = document.createElement("p"); l1.className = "ms-col-line"; l1.innerHTML = "<strong>Mission Name:</strong> " + mission.title; infoCol.appendChild(l1);
         var lt = document.createElement("p"); lt.className = "ms-col-line"; lt.innerHTML = '<strong>Mission Type:</strong> <a href="missions.html?rank=' + mrank + '">' + mmeta.label + "</a>"; infoCol.appendChild(lt);
-        var l2 = document.createElement("p"); l2.className = "ms-col-line"; l2.innerHTML = "<strong>Mission Level:</strong> " + (getLevelRequirementValue(mission) || 1); infoCol.appendChild(l2);
         if (mission.characterName) { var l3 = document.createElement("p"); l3.className = "ms-col-line"; l3.innerHTML = "<strong>Featured:</strong> " + mission.characterName; infoCol.appendChild(l3); }
         var reqLines = getRequirementLines(mission);
         var reqSub = document.createElement("div"); reqSub.className = "ms-col-sub";
         var reqHead = document.createElement("div"); reqHead.className = "ms-col-head"; reqHead.textContent = "› Requirements"; reqSub.appendChild(reqHead);
-        var rLvl = document.createElement("p"); rLvl.className = "ms-col-line"; rLvl.innerHTML = "<strong>Rank:</strong> At least " + (getLevelRequirementValue(mission) || "Any"); reqSub.appendChild(rLvl);
+        var rLvl = document.createElement("p"); rLvl.className = "ms-col-line"; rLvl.innerHTML = "<strong>Level required:</strong> " + (getLevelRequirementValue(mission) || "Any"); reqSub.appendChild(rLvl);
         reqLines.forEach(function (r) { var p = document.createElement("p"); p.className = "ms-col-line"; p.textContent = r; reqSub.appendChild(p); });
         infoCol.appendChild(reqSub);
 
         // goals column
         var goalsCol = document.createElement("div");
+        goalsCol.className = "ms-detail-goals";
         var goalsHead = document.createElement("div"); goalsHead.className = "ms-col-head"; goalsHead.textContent = "› Goals"; goalsCol.appendChild(goalsHead);
         var goals = Array.isArray(mission.goals) ? mission.goals : [];
         if (!goals.length) { var ge = document.createElement("p"); ge.className = "ms-col-line"; ge.textContent = "Finish the mission to unlock its reward."; goalsCol.appendChild(ge); }
@@ -833,6 +842,7 @@
 
         // reward column
         var rewardCol = document.createElement("div");
+        rewardCol.className = "ms-detail-reward";
         var rewardHead = document.createElement("div"); rewardHead.className = "ms-col-head reward"; rewardHead.textContent = "› Reward"; rewardCol.appendChild(rewardHead);
         var rcn = String((mission.reward_character_name) || (mission.reward_character) || "").trim();
         if (rcn) {
@@ -874,33 +884,20 @@
         if (categoryView) categoryView.hidden = view !== "category";
         if (detailView) { detailView.hidden = view !== "detail"; if (view !== "detail") detailView.innerHTML = ""; }
       }
-      function syncMissionNav(key) {
-        key = key || "overview";
-        missionSectionLinks.forEach(function (link) {
-          var active = link.getAttribute("data-mission-section") === key;
-          link.classList.toggle("active", active);
-          if (active) link.setAttribute("aria-current", "page");
-          else link.removeAttribute("aria-current");
-        });
-      }
-
       function route() {
         var id = getParam("mission");
         var rank = (getParam("rank") || "").toLowerCase();
         if (id && missionMap.has(id)) {
           showOnly("detail");
           renderDetail(missionMap.get(id));
-          syncMissionNav(rankOf(missionMap.get(id)));
           window.scrollTo(0, 0);
         } else if (RANK_META[rank]) {
           showOnly("category");
           renderCategory(rank);
-          syncMissionNav(rank);
           window.scrollTo(0, 0);
         } else {
           showOnly("landing");
           renderLanding();
-          syncMissionNav("overview");
           window.scrollTo(0, 0);
         }
       }
@@ -944,6 +941,7 @@
       }
       if (searchInput) searchInput.addEventListener("input", refreshCategory);
       if (availableOnly) availableOnly.addEventListener("change", refreshCategory);
+      if (landingSearchInput) landingSearchInput.addEventListener("input", renderLanding);
 
       loadMissions();
     }());

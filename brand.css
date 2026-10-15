@@ -26,7 +26,7 @@
   /* --- Bone / Parchment scale (light info zones) --- */
   --ca-bone:        #f2ede4;   /* primary text / parchment surface */
   --ca-parchment:   #c8beb0;   /* muted / meta text */
-  --ca-dust:        #8f877c;   /* placeholder / disabled */
+  --ca-dust:        #b0a79c;   /* readable secondary text on dark surfaces */
 
   /* --- Light content surfaces (warm-white / parchment "sheets")
          The dark navy shell is the FRAME; primary page content sits
@@ -1037,6 +1037,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  line-height: normal;
   padding: 8px 28px;
   font-size: 12px;
   font-weight: 800;
@@ -1238,6 +1239,37 @@ button {
 .news-status[data-state="error"] {
   color: #ff8f8f;
 }
+
+.ca-home .news-status {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.ca-home .news-status[data-state="error"],
+.ca-home .news-status[data-state="empty"] {
+  padding: 18px 20px;
+  border: 1px solid rgba(215, 149, 58, 0.24);
+  background: linear-gradient(135deg, rgba(215, 149, 58, 0.08), rgba(255, 255, 255, 0.025));
+}
+
+.ca-home .news-status[data-state="error"] { color: var(--ca-bone); }
+.ca-home .news-status[data-state="empty"] { color: var(--ca-parchment); }
+
+.ca-news-retry {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(215, 149, 58, 0.55);
+  background: rgba(215, 149, 58, 0.12);
+  color: var(--ca-amber);
+  font: 700 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.ca-news-retry:hover { background: rgba(215, 149, 58, 0.2); }
+.ca-news-retry:focus-visible { outline: 2px solid var(--ca-amber); outline-offset: 2px; }
+.ca-news-retry:disabled { cursor: wait; opacity: 0.65; }
 
 .ca-news-controls {
   display: flex;
@@ -1785,6 +1817,10 @@ button {
     padding-top: 0;
     margin-top: 20px;
   }
+  .ca-home .ca-sidebar {
+    order: 0;
+    margin-top: 16px;
+  }
   .ca-sidebar-backdrop {
     display: none;
   }
@@ -1799,9 +1835,11 @@ button {
 @media (max-width: 960px) {
   .ca-nav-burger { display: flex; }
   .ca-nav-inner {
-    grid-template-columns: auto auto 1fr;
+    display: flex;
+    justify-content: space-between;
     gap: 12px;
   }
+  .ca-nav-seal { margin-right: auto; }
   .ca-nav-links {
     position: absolute;
     top: 100%;
@@ -1869,9 +1907,11 @@ button {
   .ca-nav-account {
     min-width: 0;
   }
+  .ca-nav-play { display: none; }
   .ca-hero-inner {
-    grid-template-columns: 32px 1fr 32px;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
     height: 180px;
+    padding: 0 14px;
   }
   .ca-hero-word {
     font-size: 28px;
@@ -1879,6 +1919,14 @@ button {
   .ca-page {
     padding-left: 14px;
     padding-right: 14px;
+  }
+  .ca-page > *,
+  .ca-main,
+  .ca-main > * { min-width: 0; }
+  .ca-announce-heading {
+    font-size: clamp(34px, 10vw, 48px);
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
   }
   .ca-release-grid {
     grid-template-columns: 1fr;
@@ -1929,22 +1977,29 @@ button {
   gap: 8px;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 5px 12px;
+  min-height: 38px;
+  padding: 4px 10px;
   color: var(--ca-parchment);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  cursor: pointer;
   transition: border-color var(--t-fast), color var(--t-fast);
 }
 .ca-account-trigger:hover {
   color: var(--ca-bone);
   border-color: rgba(215, 149, 58, 0.4);
 }
+.ca-account-trigger:focus-visible {
+  outline: 2px solid #ffae42;
+  outline-offset: 2px;
+}
 .ca-account-trigger .ca-nav-avatar {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ca-purple-dim), var(--ca-purple));
+  object-fit: cover;
+  background: #171e2a;
   border: 1px solid rgba(215, 149, 58, 0.5);
   flex: 0 0 auto;
 }
@@ -3100,6 +3155,12 @@ strong, b {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
+/* Legacy page copy rules must not recolor the shared banner tagline. */
+.na-legacy-light .ca-hero-tagline {
+    color: #e8c89b !important;
+    font-weight: 700 !important;
+}
+
 /* ============================================================
    ANNOUNCEMENTS & NEWS FEED DARK SHINOBI OVERRIDES
    Fixes white-on-beige text contrast in news posts and releases
@@ -3523,7 +3584,6 @@ strong, b {
 .gi-sheet,
 .gi-empty,
 .ms-sheet,
-.ms-cat,
 .ms-empty,
 .st-sheet,
 .st-episode,
@@ -3583,7 +3643,6 @@ strong, b {
 .lb-hub-note,
 .st-episode-synopsis,
 .ms-cat-intro,
-.ms-cat p,
 .editor-note-copy,
 .release-copy {
   color: #2c221c !important; /* Rich readable dark text */
@@ -3595,9 +3654,14 @@ strong, b {
 .mn-sheet strong, .mn-sheet p strong, .mn-list li strong,
 .gi-sheet strong, .ms-sheet strong, .st-sheet strong,
 .ca-content-sheet strong, .mainsection strong,
-.na-legacy-light strong, .st-col-line strong, .ms-col-line strong {
+.na-legacy-light strong, .st-col-line strong {
   color: #0d0a08 !important; /* Solid black-ink bold text */
   font-weight: 800 !important;
+}
+
+/* Account names sit on the dark nav even on legacy content pages. */
+.ca-nav .ca-nav-welcome strong {
+  color: #ffffff !important;
 }
 
 /* List Items on light parchment sheets */
@@ -3699,5 +3763,122 @@ strong, b {
   font-weight: 800 !important;
 }
 
+.ca-subpage-title {
+  color: var(--ca-orange) !important;
+  font-size: clamp(24px, 2.5vw, 32px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+.ca-subpage-title::before {
+  content: "/ " !important;
+  color: var(--ca-amber) !important;
+}
+
+body.na-legacy-light h1.ca-subpage-title:not(.aside *):not(.sidebar *):not(.stats-title):not(.ladder-title) {
+  color: var(--ca-orange) !important;
+  font-size: clamp(24px, 2.5vw, 32px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+.mainsection h1.ca-subpage-title {
+  color: var(--ca-orange) !important;
+  font-size: clamp(24px, 2.5vw, 32px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+/* Non-game canvas: keep the illustrated header and content cards, but let
+   page content sit directly on one quiet background instead of a framed sheet. */
+body:not(.selection-client-page):not(.ingame-client-page) {
+  background: #101620 !important;
+  background-image: none !important;
+  background-attachment: scroll !important;
+}
+
+.na-legacy-light .main,
+.gi-grid,
+.ms-grid,
+.ms-cats,
+#ms-detail-view {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.gi-grid,
+.ms-grid,
+.ms-cats {
+  padding: 0 !important;
+}
+
+#ms-detail-view { padding: 0 !important; }
+
+/* Rankings live on Ladders; task pages get their full content width. */
+.app {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.app > .aside {
+  display: none !important;
+}
+
+.ca-standings-preview {
+  margin-top: 32px;
+  border: 1px solid #394658;
+  border-radius: 5px;
+  background: #171e2a;
+  color: #f7eee1;
+}
+.ca-standings-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 20px;
+}
+.ca-standings-head h2 {
+  margin: 0;
+  color: #ffae42;
+  font-size: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.ca-standings-head a {
+  color: #f7eee1;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ca-standings-head a:hover { color: #ffae42; }
+.ca-standings-head a:focus-visible,
+.ca-standing-name:focus-visible { outline: 2px solid #ffae42; outline-offset: 3px; }
+.ca-standing-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid #394658;
+}
+.ca-standing-rank { color: #ffae42; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ca-standing-name { min-width: 0; color: #f7eee1; font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.ca-standing-name:hover { color: #ffae42; }
+.ca-standing-value { font-size: 14px; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ca-standings-message { margin: 0; padding: 16px 20px; border-top: 1px solid #394658; color: #c8c1b7; }
+@media (max-width: 600px) {
+  .ca-standings-head { align-items: flex-start; flex-direction: column; gap: 7px; padding: 15px; }
+  .ca-standing-row { padding: 11px 15px; }
+}
 
 

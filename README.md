@@ -1,7 +1,8 @@
-This is the last time anyone from these games see me (This was the original plan I had of making this N-A). Here's Naruto-Arena. You will probably need to edit the rank names in server.js. Host it on render. Missions and Edit missions aren't linked, you can link it yourself in the sidebar or just change the address to missions.html/editmission.html. To role yourself as Admin when you first use this, make your mongo cloud atlas, connect it in the .env, use npm start and role yourself as admin via mongodb compass on your computer.
+# Naruto-Arena
 
-Some design editing is needed since I merged C-A and N-A into one. Example files are included.
+Naruto-Arena is a browser strategy game with an Express and MongoDB server. The current web client is the reference for gameplay and presentation. The server owns match state and combat outcomes through `battleLogic.js`; client work should preserve that behavior.
 
+The repository includes the game client, non-game pages, character data, missions, ladders, and admin tools. A Godot client migration is planned while keeping the existing server authoritative.
 
 ## Features
 
@@ -31,7 +32,9 @@ npm install
 
 ### 2. Create `.env`
 
-Add the environment variables your local server needs:
+Copy `.env.example` to `.env`, then set a local MongoDB connection and a unique `JWT_SECRET`. The example uses port 4002. Keep `.env` out of commits.
+
+The core variables are:
 
 ```env
 MONGODB_URI=your_mongodb_connection_string
@@ -42,7 +45,7 @@ JWT_SECRET=replace_with_a_secure_secret
 JWT_EXPIRY=7d
 SESSION_COOKIE_NAME=naruto_session
 SESSION_MAX_AGE_MS=604800000
-CORS_ORIGIN=http://localhost:4000
+CORS_ORIGIN=http://localhost:4002
 ```
 
 Optional variables used by the server:
@@ -54,7 +57,7 @@ ENABLE_BATTLE_BOTS=true
 ALLOW_INSECURE_HTTP=true
 HTTPS_KEY_PATH=
 HTTPS_CERT_PATH=
-PORT=4000
+PORT=4002
 ```
 
 ### 3. Start the app
@@ -66,7 +69,7 @@ npm start
 Default local port:
 
 ```text
-http://localhost:4000
+http://localhost:4002
 ```
 
 ## Scripts
@@ -75,6 +78,8 @@ http://localhost:4000
 npm start   # run the server
 npm test    # run Node test runner
 ```
+
+GitHub Actions also runs `npm test` for pushes and pull requests.
 
 ## Deployment
 

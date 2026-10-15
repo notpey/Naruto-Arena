@@ -22,34 +22,23 @@
 
     .gi-page { width: min(1340px, 100%); margin: 0 auto; padding: 0 24px 64px; }
 
-    /* Sub-tabs */
-    .gi-subtabs { display: flex; justify-content: center; gap: 34px; padding: 26px 0 22px; }
-    .gi-subtab {
-      background: none; border: 0; cursor: pointer; font-family: var(--font-ui);
-      font-size: 14px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--ca-dust); padding: 4px 2px; position: relative; transition: color var(--t-fast);
+    .gi-page-title {
+      margin: 26px 0 10px; color: var(--ca-orange);
+      font-size: clamp(30px, 4.5vw, 48px); font-weight: 900;
+      letter-spacing: 0.03em; line-height: 1.05; text-transform: uppercase;
     }
-    .gi-subtab sup { font-size: 9px; margin-left: 3px; color: var(--ca-orange); }
-    .gi-subtab:hover { color: var(--ca-bone); }
-    .gi-subtab.active { color: var(--ca-orange); }
-    .gi-subtab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: linear-gradient(90deg, var(--ca-orange), var(--ca-violet)); }
+    body.gi-detail-mode .gi-page-title, body.gi-detail-mode .gi-catbar { display: none; }
+    body.gi-detail-mode .gi-page { max-width: 1180px; }
 
-    /* Category bar + search */
+    /* Compact roster tools */
     .gi-catbar {
-      display: flex; align-items: center; gap: 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
       background: linear-gradient(180deg, rgba(10, 12, 20, 0.98), rgba(5, 7, 14, 0.98));
-      border: 1px solid rgba(232, 128, 26, 0.18); padding: 0 20px; min-height: 56px; flex-wrap: wrap;
+      border: 1px solid rgba(232, 128, 26, 0.18); border-radius: 6px; padding: 10px 16px; min-height: 52px; flex-wrap: wrap;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
     }
-    .gi-cats { display: flex; gap: 30px; flex: 1 1 auto; justify-content: center; }
-    .gi-cat {
-      background: none; border: 0; cursor: pointer; font-family: var(--font-ui);
-      font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--ca-parchment); padding: 18px 0; position: relative; white-space: nowrap;
-    }
-    .gi-cat sup { font-size: 8px; margin-left: 4px; color: var(--ca-dust); }
-    .gi-cat.active { color: var(--ca-orange); }
-    .gi-cat.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--ca-orange), var(--ca-violet)); }
+    .gi-roster-count { color: var(--ca-parchment); font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .gi-roster-count span { color: var(--ca-orange); }
     .gi-search { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
     .gi-search input {
       background: rgba(255, 253, 248, 0.06); border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.25);
@@ -61,8 +50,6 @@
     .gi-search input:focus { border-bottom-color: var(--ca-orange); background: rgba(255, 253, 248, 0.1); box-shadow: 0 0 0 3px rgba(232, 128, 26, 0.14); }
     .gi-search-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(232,128,26,0.36); color: var(--ca-amber); font-size: 12px; }
 
-    .gi-intro { margin: 22px 0 26px; font-size: 13px; color: var(--ca-parchment); line-height: 1.5; }
-    .gi-intro::before { content: "/ "; color: var(--ca-purple); font-weight: 800; }
 
     /* In-game info panel (light sheet) */
     .gi-ingame { padding: 28px 30px; max-width: 820px; margin-top: 24px;
@@ -110,14 +97,14 @@
     .gi-crumb a:hover { color: var(--ca-orange); }
     .gi-crumb .cur { color: var(--ca-orange); }
     .gi-detail-nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 14px 0 26px; padding-bottom: 14px; border-bottom: 1px solid var(--ca-line-ink); font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
-    .gi-detail-nav a { display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border: 1px solid rgba(27, 35, 48, 0.12); border-radius: 6px; background: rgba(255, 253, 248, 0.62); color: var(--ca-ink-soft); transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast); }
+    .gi-detail-nav a { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border: 1px solid rgba(27, 35, 48, 0.12); border-radius: 6px; background: rgba(255, 253, 248, 0.62); color: var(--ca-ink-soft); transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast); }
     .gi-detail-nav a:hover { color: var(--ca-orange); }
     .gi-detail-nav .accent { color: var(--ca-violet); }
 
     .gi-char-head { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 22px; max-width: 820px; margin: 0 auto 32px; align-items: start; }
     .gi-char-face { width: 100px; height: 100px; object-fit: cover; background: var(--ca-surface-sunk); border: 1px solid rgba(27, 35, 48, 0.16); border-radius: 6px; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14); }
     .gi-char-titlerow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 9px; border-bottom: 1px solid var(--ca-line-ink); margin-bottom: 12px; }
-    .gi-char-name { font-size: 22px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ca-orange); }
+    .gi-char-name { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; color: #9b5100; }
     .gi-badge { font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; }
     .gi-badge--default { background: var(--ca-surface-sunk); color: var(--ca-ink-soft); }
     .gi-char-desc { font-size: 13px; line-height: 1.62; color: var(--ca-ink-soft); margin: 0 0 14px; max-width: 660px; }
@@ -125,29 +112,47 @@
     .gi-char-unlock::before { content: "› REQUIREMENTS TO UNLOCK — "; color: var(--ca-surface-light); font-weight: 700; }
 
     /* Skills grid */
-    .gi-skill-legend { max-width: 980px; margin: -8px auto 16px; padding: 8px 12px; border-left: 3px solid var(--ca-violet); background: rgba(124, 77, 255, 0.08); color: var(--ca-ink-soft); font-size: 12px; line-height: 1.45; }
-    .gi-skill-legend strong { color: var(--ca-violet); }
     .gi-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; max-width: 980px; margin: 0 auto; }
-    .gi-skill { padding: 12px; border: 1px solid rgba(27, 35, 48, 0.08); border-radius: 8px; background: rgba(255, 253, 248, 0.46); }
-    .gi-skill.alt { border-left: 3px solid var(--ca-violet); background: linear-gradient(90deg, rgba(124, 77, 255, 0.08), rgba(255, 253, 248, 0.48) 34%); }
+    .gi-skill { padding: 14px 0; border-top: 1px solid var(--ca-line-ink); }
+    .gi-skill.alt { border-top-color: rgba(124, 77, 255, 0.4); }
     .gi-skill-head { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 16px; align-items: start; }
     .gi-skill-img { width: 100px; height: 100px; object-fit: cover; background: var(--ca-surface-sunk); border: 1px solid rgba(27, 35, 48, 0.16); border-radius: 6px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12); }
     .gi-skill-labelrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
     .gi-skill-kicker { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ca-ink-faint); }
     .gi-skill.alt .gi-skill-kicker { color: var(--ca-violet); }
-    .gi-alt-badge { display: inline-flex; align-items: center; min-height: 18px; padding: 2px 7px; border: 1px solid rgba(124, 77, 255, 0.28); border-radius: 999px; background: rgba(124, 77, 255, 0.12); color: #4c2cb5; font-size: 9px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+    .gi-alt-badge { display: inline-flex; align-items: center; min-height: 18px; color: #5f37bd; font-size: 11px; font-weight: 800; text-transform: uppercase; }
     .gi-skill-name { font-size: 16px; font-weight: 800; color: #8a4f00; margin: 2px 0 6px; padding-bottom: 5px; border-bottom: 1px solid var(--ca-line-ink); }
     .gi-skill.alt .gi-skill-name { color: #6b3fd8; border-bottom-color: rgba(124, 77, 255, 0.22); }
     .gi-skill-desc { margin: 0; font-size: 13px; line-height: 1.58; color: var(--ca-ink-soft); }
-    .gi-skill-meta {
-      display: flex; align-items: center; gap: 0; margin-top: 14px;
-      background: var(--ca-ink); border: 1px solid var(--ca-ink); border-radius: 999px;
-      padding: 6px 14px; font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ca-parchment); flex-wrap: wrap;
-    }
-    .gi-skill-meta .seg { display: flex; align-items: center; gap: 6px; padding: 0 12px; border-right: 1px solid rgba(255,255,255,0.12); }
-    .gi-skill-meta .seg:last-child { border-right: 0; }
-    .gi-skill-meta .lbl { color: #99a0ad; font-weight: 700; }
-    .gi-skill-meta .val { color: #fff; font-weight: 700; font-style: italic; }
+    .gi-skill-meta { display: flex; align-items: center; gap: 8px 18px; margin-top: 14px; padding: 10px 0 0; border-top: 1px solid var(--ca-line-ink); font-size: 11px; line-height: 1.4; flex-wrap: wrap; }
+    .gi-skill-meta .seg { display: inline-flex; align-items: center; gap: 5px; }
+    .gi-skill-meta .lbl { color: var(--ca-ink-soft); font-weight: 700; }
+    .gi-skill-meta .val { color: var(--ca-ink); font-weight: 800; }
+
+    /* Character detail uses the shared dark sheet. Keep its text and dividers
+       on that surface rather than inheriting the light sheet token colors. */
+    #gi-detail-view { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0; margin-top: 28px; }
+    #gi-detail-view .gi-char-head { max-width: none; grid-template-columns: 106px minmax(0, 1fr); align-items: center; gap: 20px; margin: 0 0 24px; padding: 18px; border: 1px solid #344052; border-radius: 6px; background: #171e2a; }
+    #gi-detail-view .gi-char-face { width: 106px; height: 106px; border-color: #455164; box-shadow: none; }
+    #gi-detail-view .gi-char-name { color: #ffae42 !important; text-shadow: none !important; }
+    #gi-detail-view .gi-detail-nav { border-color: #344052; }
+    #gi-detail-view .gi-char-titlerow { margin-bottom: 8px; padding: 0; border: 0; }
+    #gi-detail-view .gi-char-desc { max-width: 720px; margin: 0; color: #d0c8b8 !important; font-size: 14px; }
+    #gi-detail-view .gi-char-unlock { margin-top: 14px; background: #0b1019 !important; border: 1px solid #344052 !important; border-radius: 4px; color: #f3eadb !important; font-size: 12px; }
+    #gi-detail-view .gi-char-unlock::before { color: #ffae42 !important; }
+    #gi-detail-view .gi-skills { max-width: none; gap: 18px; grid-auto-rows: 1fr; }
+    #gi-detail-view .gi-skill { display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: 14px; min-width: 0; padding: 18px; border: 1px solid #344052 !important; border-radius: 6px; background: #171e2a !important; }
+    #gi-detail-view .gi-skill.alt { border-color: #75608c !important; background: #1b1b2c !important; }
+    #gi-detail-view .gi-skill-head { grid-template-columns: 88px minmax(0, 1fr); gap: 16px; }
+    #gi-detail-view .gi-skill-img { width: 88px; height: 88px; box-shadow: none; }
+    #gi-detail-view .gi-skill-name { margin: 0 0 8px; padding: 0; border: 0 !important; color: #ffb347 !important; text-shadow: none !important; line-height: 1.3; }
+    #gi-detail-view .gi-skill.alt .gi-skill-name { color: #d1a9f2 !important; }
+    #gi-detail-view .gi-skill-desc { color: #d0c8b8 !important; line-height: 1.55; }
+    #gi-detail-view .gi-alt-badge { color: #d1a9f2; margin-bottom: 5px; }
+    #gi-detail-view .gi-skill-meta { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; gap: 10px 14px; margin-top: 0; padding-top: 13px; border-color: #344052; font-size: 12px; }
+    #gi-detail-view .gi-skill-meta .seg { min-width: 0; flex-direction: column; align-items: flex-start; gap: 4px; }
+    #gi-detail-view .gi-skill-meta .lbl { color: #aeb7c4; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    #gi-detail-view .gi-skill-meta .val { color: #f3eadb; overflow-wrap: anywhere; }
     .gi-pips { display: inline-flex; gap: 3px; }
     .gi-pip { width: 11px; height: 11px; display: inline-block; border-radius: 2px; }
     .gi-pip.taijutsu { background: #2ecc71; }
@@ -169,6 +174,10 @@
       .gi-char-head { grid-template-columns: 100px minmax(0, 1fr); }
       .gi-detail-nav { align-items: stretch; flex-direction: column; }
       .gi-detail-nav a { justify-content: center; }
+      .gi-page-title { margin-top: 20px; }
+      .gi-catbar { align-items: stretch; flex-direction: column; }
+      .gi-search { width: 100%; }
+      .gi-search input { width: 100%; }
     }
 
     @media (max-width: 520px) {
@@ -176,6 +185,14 @@
       .gi-skill-head { grid-template-columns: 1fr; }
       .gi-char-face,
       .gi-skill-img { justify-self: start; }
+      #gi-detail-view .gi-char-head { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+      #gi-detail-view .gi-char-face { width: 88px; height: 88px; }
+      #gi-detail-view .gi-skills { grid-auto-rows: auto; }
+      #gi-detail-view .gi-skill { grid-template-rows: auto auto; }
+      #gi-detail-view .gi-skill-head { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; }
+      #gi-detail-view .gi-skill-img { width: 72px; height: 72px; }
+      #gi-detail-view .gi-skill-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #gi-detail-view .gi-skill-meta .seg:last-child { grid-column: 1 / -1; }
     }
   </style>
   <link rel="stylesheet" href="shop.css">
@@ -333,30 +350,24 @@
   <!-- ═══ GAME INFO ════════════════════════════════════════════ -->
   <main class="gi-page">
 
-    <div class="gi-subtabs" role="tablist" aria-label="Game info section">
-      <button class="gi-subtab" type="button" data-view="ingame" role="tab" aria-selected="false">In-Game<sup>01</sup></button>
-      <button class="gi-subtab active" type="button" data-view="characters" role="tab" aria-selected="true">Characters &amp; Skills<sup>02</sup></button>
-    </div>
+    <h1 class="gi-page-title">Characters &amp; Skills</h1>
 
     <div class="gi-catbar">
-      <div class="gi-cats" role="tablist" aria-label="Series">
-        <button class="gi-cat active" type="button" data-series="naruto" role="tab" aria-selected="true">Naruto<sup id="gi-naruto-count">00</sup></button>
-      </div>
+      <div class="gi-roster-count"><span id="gi-character-count">00</span> characters</div>
       <div class="gi-search">
-        <input type="search" id="gi-search-input" placeholder="Search......" aria-label="Search characters" />
+        <input type="search" id="gi-search-input" placeholder="Search characters" aria-label="Search characters" />
         <span class="gi-search-icon" aria-hidden="true">⌕</span>
       </div>
     </div>
 
     <!-- list view (grid or in-game) -->
     <section id="gi-list-view">
-      <p class="gi-intro" id="gi-intro">Naruto-Arena makes you select 3 characters when you start a new game. This page gives you an overview of all characters available in the game.</p>
       <div class="gi-grid" id="gi-grid"><div class="gi-empty">Loading characters…</div></div>
-      <div class="gi-ingame" id="gi-ingame" hidden>
+      <div class="gi-ingame" id="gi-ingame">
         <h2>How a match works</h2>
         <p>Naruto-Arena is a turn-based strategy game. You bring a team of <strong>three characters</strong> into battle and spend <strong>chakra</strong> each turn to activate their skills.</p>
         <p>Every skill has a <strong>cooldown</strong>, a set of <strong>classes</strong> (Physical, Instant, Melee, and so on), and an <strong>chakra nature</strong> it requires. Reading those values — shown on every character's detail page — is the core of building a winning team.</p>
-        <p>Browse the <strong>Characters &amp; Skills</strong> tab to study each fighter's kit before you queue up. Choose <strong>Start Playing</strong> when you're ready to put a team together.</p>
+        <p>Browse the roster above to study each fighter's kit before you queue up. Choose <strong>Start Playing</strong> when you're ready to put a team together.</p>
       </div>
     </section>
 
@@ -391,14 +402,12 @@
         : (typeof characters !== "undefined" && Array.isArray(characters) ? characters : []);
       var missionByMissionId = new Map();
 
-      var subtabs = Array.prototype.slice.call(document.querySelectorAll(".gi-subtab"));
       var searchInput = document.getElementById("gi-search-input");
       var listView = document.getElementById("gi-list-view");
       var detailView = document.getElementById("gi-detail-view");
       var grid = document.getElementById("gi-grid");
-      var intro = document.getElementById("gi-intro");
       var ingame = document.getElementById("gi-ingame");
-      var narutoCount = document.getElementById("gi-naruto-count");
+      var characterCount = document.getElementById("gi-character-count");
       var BASE_SKILL_COUNT = 4;
 
       function charId(c) {
@@ -433,7 +442,7 @@
         catch (e) { return ""; }
       }
 
-      if (narutoCount) narutoCount.textContent = String(roster.length).padStart(2, "0");
+      if (characterCount) characterCount.textContent = String(roster.length).padStart(2, "0");
 
       // ── GRID ────────────────────────────────────────────────
       function renderGrid(query) {
@@ -522,14 +531,10 @@
         var info = document.createElement("div");
         var titlerow = document.createElement("div");
         titlerow.className = "gi-char-titlerow";
-        var nm = document.createElement("span");
+        var nm = document.createElement("h1");
         nm.className = "gi-char-name";
         nm.textContent = c.name ? String(c.name) : "Unknown Character";
-        var badge = document.createElement("span");
-        badge.className = "gi-badge gi-badge--default";
-        badge.textContent = "Default";
         titlerow.appendChild(nm);
-        titlerow.appendChild(badge);
         var desc = document.createElement("p");
         desc.className = "gi-char-desc";
         desc.textContent = charDesc(c);
@@ -547,7 +552,7 @@
             : requiredMissionId;
           unlock.appendChild(missionLink);
         } else {
-          unlock.appendChild(document.createTextNode("no requirements needed"));
+          unlock.hidden = true;
         }
         info.appendChild(titlerow);
         info.appendChild(desc);
@@ -560,13 +565,6 @@
         detailView.appendChild(head);
 
         var skills = visibleSkills(c);
-        var hasAlternates = skills.some(function (sk, index) { return isAlternateSkill(sk, index); });
-        if (hasAlternates) {
-          var legend = document.createElement("p");
-          legend.className = "gi-skill-legend";
-          legend.innerHTML = "<strong>Alternate Skill</strong> = unlockable or condition-based skill outside the character's base set.";
-          detailView.appendChild(legend);
-        }
         var skillsWrap = document.createElement("div");
         skillsWrap.className = "gi-skills";
         if (!skills.length) {
@@ -590,10 +588,6 @@
             var col = document.createElement("div");
             var labelrow = document.createElement("div");
             labelrow.className = "gi-skill-labelrow";
-            var kicker = document.createElement("div");
-            kicker.className = "gi-skill-kicker";
-            kicker.textContent = "Skill";
-            labelrow.appendChild(kicker);
             if (altSkill) {
               var altBadge = document.createElement("span");
               altBadge.className = "gi-alt-badge";
@@ -620,13 +614,13 @@
               : [];
             var seg1 = document.createElement("span");
             seg1.className = "seg";
-            seg1.innerHTML = '<span class="lbl">/ Cooldown</span> <span class="val">' + cd + '</span>';
+            seg1.innerHTML = '<span class="lbl">Cooldown</span> <span class="val">' + cd + '</span>';
             var seg2 = document.createElement("span");
             seg2.className = "seg";
-            seg2.innerHTML = '<span class="lbl">/ Classes</span> <span class="val">' + (cls.length ? cls.join(", ") : "None") + '</span>';
+            seg2.innerHTML = '<span class="lbl">Classes</span> <span class="val">' + (cls.length ? cls.join(", ") : "None") + '</span>';
             var seg3 = document.createElement("span");
             seg3.className = "seg";
-            var lbl3 = document.createElement("span"); lbl3.className = "lbl"; lbl3.textContent = "/ Nature Required";
+            var lbl3 = document.createElement("span"); lbl3.className = "lbl"; lbl3.textContent = "Nature required";
             seg3.appendChild(lbl3);
             seg3.appendChild(document.createTextNode(" "));
             seg3.appendChild(pips(sk.energy));
@@ -643,18 +637,12 @@
       }
 
       // ── VIEW SWITCH ─────────────────────────────────────────
-      function showList(view) {
+      function showList() {
+        document.body.classList.remove("gi-detail-mode");
         if (detailView) { detailView.hidden = true; detailView.innerHTML = ""; }
         if (listView) listView.hidden = false;
-        var isChars = view !== "ingame";
-        if (grid) grid.hidden = !isChars;
-        if (intro) intro.hidden = !isChars;
-        if (ingame) ingame.hidden = isChars;
-        subtabs.forEach(function (b) {
-          var on = b.getAttribute("data-view") === (isChars ? "characters" : "ingame");
-          b.classList.toggle("active", on);
-          b.setAttribute("aria-selected", on ? "true" : "false");
-        });
+        if (grid) grid.hidden = false;
+        if (ingame) ingame.hidden = false;
       }
 
       function route() {
@@ -662,6 +650,7 @@
         if (id) {
           var idx = findById(id);
           if (idx !== -1) {
+            document.body.classList.add("gi-detail-mode");
             if (listView) listView.hidden = true;
             if (detailView) detailView.hidden = false;
             renderDetail(idx);
@@ -671,18 +660,9 @@
         }
         if (detailView) detailView.hidden = true;
         if (listView) listView.hidden = false;
-        showList("characters");
+        showList();
         renderGrid(searchInput ? searchInput.value : "");
       }
-
-      subtabs.forEach(function (b) {
-        b.addEventListener("click", function () {
-          // leaving any detail view returns to the list URL
-          if (getParam()) { window.location.href = "charactersandskills.html"; return; }
-          showList(b.getAttribute("data-view"));
-          if (b.getAttribute("data-view") !== "ingame") renderGrid(searchInput ? searchInput.value : "");
-        });
-      });
       if (searchInput) searchInput.addEventListener("input", function () { renderGrid(searchInput.value); });
 
       route();
@@ -692,7 +672,7 @@
         .then(function (data) {
           if (data && data.ok && Array.isArray(data.characters) && data.characters.length) {
             roster = data.characters;
-            if (narutoCount) narutoCount.textContent = String(roster.length).padStart(2, "0");
+            if (characterCount) characterCount.textContent = String(roster.length).padStart(2, "0");
             if (detailView && !detailView.hidden) {
               route();
             } else {

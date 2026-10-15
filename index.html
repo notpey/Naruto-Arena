@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Naruto-Arena</title>
+  <title>Naruto-Arena — Home</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -16,7 +16,7 @@
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
 </head>
-<body>
+<body class="ca-home">
 
   <!-- ═══ NAV ═══════════════════════════════════════════════ -->
   <nav class="ca-nav">
@@ -120,12 +120,13 @@
     <main class="ca-main">
 
       <!-- ANNOUNCEMENT heading -->
-      <h1 class="ca-announce-heading">ANNOUNCEMENT</h1>
+      <h1 class="ca-announce-heading">LATEST NEWS</h1>
 
       <!-- NEWS FEED (dynamic — JS injects into news-feed-content) -->
       <section class="ca-news-section" id="news-feed" aria-label="News feed">
         <div class="ca-news-header">
           <p class="news-status" id="news-status" aria-live="polite"></p>
+          <button class="ca-news-retry" id="news-retry-button" type="button" hidden>Try again</button>
         </div>
 
         <!-- JS renders .news-post cards inside here -->
@@ -135,6 +136,16 @@
           <button class="ca-news-btn" type="button" id="news-prev-button" aria-label="Show previous news post">&lsaquo;</button>
           <span class="ca-news-counter" id="news-feed-counter">0 / 0</span>
           <button class="ca-news-btn" type="button" id="news-next-button" aria-label="Show next news post">&rsaquo;</button>
+        </div>
+      </section>
+
+      <section class="ca-standings-preview" aria-labelledby="ca-standings-title">
+        <div class="ca-standings-head">
+          <h2 id="ca-standings-title">Arena standings</h2>
+          <a href="leaderboards.html#ninja-ladder">View all rankings &rsaquo;</a>
+        </div>
+        <div id="home-standings-preview" class="ca-standings-list" aria-live="polite">
+          <p class="ca-standings-message">Loading player rankings…</p>
         </div>
       </section>
 
@@ -219,54 +230,6 @@
           </nav>
           <p class="ca-auth-status" id="account-status" aria-live="polite"></p>
         </div>
-      </section>
-
-      <!-- LEADERBOARD PANELS (static/dynamic) -->
-      <section class="ca-ladder-panel">
-        <h3 class="ca-ladder-title">/ Top 10 Player Levels</h3>
-        <div class="ca-ladder-list" id="sidebar-top-player-levels">
-          <div class="ladder-row"><div class="ladder-rank">01</div><div><div class="ladder-name">Rafa</div><div class="ladder-bar"><div class="ladder-fill" style="width:57%"></div><div class="ladder-score">57</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">02</div><div><div class="ladder-name">nejihyuuga</div><div class="ladder-bar"><div class="ladder-fill" style="width:56%"></div><div class="ladder-score">56</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">03</div><div><div class="ladder-name">ichi404</div><div class="ladder-bar"><div class="ladder-fill" style="width:55%"></div><div class="ladder-score">55</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">04</div><div><div class="ladder-name">Shar</div><div class="ladder-bar"><div class="ladder-fill" style="width:53%"></div><div class="ladder-score">53</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">05</div><div><div class="ladder-name">HalfDead-</div><div class="ladder-bar"><div class="ladder-fill" style="width:52%"></div><div class="ladder-score">52</div></div></div></div>
-        </div>
-      </section>
-
-      <section class="ca-ladder-panel">
-        <h3 class="ca-ladder-title">/ Top 10 Clan Levels</h3>
-        <div class="ca-ladder-list" id="sidebar-top-clan-levels">
-          <div class="ladder-row"><div class="ladder-rank">01</div><div><div class="ladder-name">Akatsuki</div><div class="ladder-bar"><div class="ladder-fill" style="width:92%"></div><div class="ladder-score">92</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">02</div><div><div class="ladder-name">Konoha</div><div class="ladder-bar"><div class="ladder-fill" style="width:89%"></div><div class="ladder-score">89</div></div></div></div>
-          <div class="ladder-row"><div class="ladder-rank">03</div><div><div class="ladder-name">Sand</div><div class="ladder-bar"><div class="ladder-fill" style="width:85%"></div><div class="ladder-score">85</div></div></div></div>
-        </div>
-      </section>
-
-      <section class="ca-stats-panel">
-        <h3 class="ca-ladder-title">/ Top 10 Win Streak</h3>
-        <ol class="ca-stats-list" id="sidebar-top-current-streaks">
-          <li>Douglasschanu +25 streak</li>
-          <li>madara +22 streak</li>
-          <li>topreactor +21 streak</li>
-          <li>ComodoroTeach +20</li>
-          <li>Clanles +20 streak</li>
-        </ol>
-        <h3 class="ca-ladder-title" style="margin-top:14px">/ Top 10 Wins</h3>
-        <ol class="ca-stats-list" id="sidebar-top-wins">
-          <li>juicewrld999 +8255 wins</li>
-          <li>GoodySan +7216 wins</li>
-          <li>rogerindopend +6558 wins</li>
-          <li>One_ib +6463 wins</li>
-          <li>Sirup +4921 wins</li>
-        </ol>
-        <h3 class="ca-ladder-title" style="margin-top:14px">/ Top 20 Highest Streak</h3>
-        <ol class="ca-stats-list" id="sidebar-top-highest-streaks">
-          <li>Buffy +80 streak</li>
-          <li>_hoshigama- +76 streak</li>
-          <li>Cloudprince +76 streak</li>
-          <li>GodEneru +74 streak</li>
-          <li>AkatsKonan +73 streak</li>
-        </ol>
       </section>
 
     </aside>

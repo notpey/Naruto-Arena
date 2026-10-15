@@ -679,9 +679,9 @@ const DEFAULT_MISSION_CATALOG = [
         requirements: [],
         goals: [
             {
-                type: 'win_streak',
-                character_id: 'yakushi-kabuto',
-                character_name: 'Young Kabuto',
+                type: 'win_streak_any',
+                character_ids: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
+                character_name: 'Naruto, Sakura, or Sasuke',
                 wins: 4,
             },
             {
@@ -1313,7 +1313,7 @@ const DEFAULT_MISSION_CATALOG = [
         goals: [
             {
                 type: 'win_matches_any',
-                character_ids: ['rokushou-aoi'],
+                character_ids: ['oboro', 'shigure'],
                 group_label: 'any Rain Ninja',
                 wins: 25,
             },
@@ -3065,10 +3065,46 @@ const normalizeMissionCatalogEntry = (mission = {}, index = 0) => {
     };
 };
 
+const repairLegacyMissionGoals = (mission = {}) => {
+    const source = mission && typeof mission === 'object' ? mission : {};
+    const missionId = slugifyMissionId(source.missionId || source.title);
+    const goals = Array.isArray(source.goals) ? source.goals : source.objectives;
+    if (missionId === 'survival' && Array.isArray(goals)) {
+        const hasLockedKabutoGoal = goals.some(
+            (goal) => goal?.type === 'win_streak' &&
+                normalizeCharacterId(goal.character_id) === 'yakushi-kabuto'
+        );
+        if (hasLockedKabutoGoal) {
+            return {
+                ...source,
+                goals: goals.map((goal) =>
+                    goal?.type === 'win_streak' && normalizeCharacterId(goal.character_id) === 'yakushi-kabuto'
+                        ? { ...DEFAULT_MISSION_CATALOG.find((entry) => entry.missionId === 'survival').goals[0] }
+                        : goal
+                ),
+            };
+        }
+    }
+    const hasSelfLockedRainGoal = Array.isArray(goals) && goals.some(
+        (goal) => goal?.type === 'win_matches_any' &&
+            Array.isArray(goal.character_ids) && goal.character_ids.length === 1 &&
+            normalizeCharacterId(goal.character_ids[0]) === 'rokushou-aoi'
+    );
+    if (missionId === 'the-theft-plan' &&
+        normalizeCharacterId(source.reward_character) === 'rokushou-aoi' &&
+        (hasSelfLockedRainGoal || (Array.isArray(goals) && goals.length === 0))) {
+        return {
+            ...source,
+            goals: DEFAULT_MISSION_CATALOG.find((entry) => entry.missionId === 'the-theft-plan').goals,
+        };
+    }
+    return source;
+};
+
 const normalizeMissionCatalog = (missions = []) => {
     const seen = new Set();
     return (Array.isArray(missions) ? missions : [])
-        .map((mission, index) => normalizeMissionCatalogEntry(mission, index))
+        .map((mission, index) => normalizeMissionCatalogEntry(repairLegacyMissionGoals(mission), index))
         .filter((mission) => mission.missionId && mission.title)
         .map((mission) => {
             let nextMissionId = mission.missionId;
@@ -4157,6 +4193,18 @@ const getSkillUseCountForUser = (match, username, skillId, characterId = '') => 
     }, 0);
 };
 
+const awardMissionCompletion = (profile, rewardCharacterId, unlockedIds, alreadyCompleted) => {
+    if (!alreadyCompleted) {
+        profile.summonScrolls = Math.max(0, (Number(profile.summonScrolls) || 0) + 2);
+        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) + 250);
+    }
+    if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
+        unlockedIds.add(rewardCharacterId);
+        return rewardCharacterId;
+    }
+    return '';
+};
+
 const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
     if (!match || !Array.isArray(match.players) || match.players.length < 2) {
         return null;
@@ -4387,13 +4435,11 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     nextProgress.unlockedAt = nextProgress.completedAt;
                     if (!alreadyCompleted) {
                         completedMissionIds.push(mission.missionId);
-                        profile.summonScrolls = Math.max(0, (Number(profile.summonScrolls) || 0) + 2);
-                        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) + 250);
                     }
-                    if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
-                        unlockedIds.add(rewardCharacterId);
-                        unlockedCharacterIds.push(rewardCharacterId);
-                    }
+                    const newlyUnlockedCharacterId = awardMissionCompletion(
+                        profile, rewardCharacterId, unlockedIds, alreadyCompleted
+                    );
+                    if (newlyUnlockedCharacterId) unlockedCharacterIds.push(newlyUnlockedCharacterId);
                 }
 
                 const progressChanged =
@@ -9134,7 +9180,7 @@ async function initDb() {
     characterCatalog = buildCharacterCatalog();
     await getStoredLadderRankTiers();
     await backfillUserProfiles();
-    await ensureEarlyAccessNewsPost();
+    // News posts are managed in the ACP; restarting must not recreate deleted posts.
     console.log('Connected to MongoDB.');
 
     // Initialize routers after DB is ready
@@ -9170,6 +9216,8 @@ async function initDb() {
         optionalSession: typeof optionalSession === 'function' ? optionalSession : (req, res, next) => next(),
     });
     app.use('/api/bugs', bugsRouter);
+
+    app.use('/api', require('./retiredFeatures.js'));
 
     const gachaRouter = require('./routes/gacha.js')({
         usersCollection,
@@ -9588,6 +9636,9 @@ async function initDb() {
         insertMatchActive: typeof insertMatchActive !== 'undefined' ? insertMatchActive : undefined,
         serializeNewsPost,
         newsPostsCollection,
+        normalizeNewsBlocks,
+        normalizeNewsParagraphs,
+        normalizeNewsChanges,
         normalizeUserProfile,
         assertTeamCanBeUsed,
         removeQueuedEntry,
@@ -13417,6 +13468,9 @@ if (require.main === module) {
 
 module.exports = {
     buildMatchPayloadForUser,
+    getDefaultMissionCatalog,
+    normalizeMissionCatalog,
+    awardMissionCompletion,
     app,
 };
 

@@ -1,4 +1,5 @@
         (function initGachaAltarController() {
+            if (!document.querySelector("[data-gacha-trigger]")) return;
             var modal = document.getElementById("gacha-modal");
             var ratesModal = document.getElementById("gacha-rates-modal");
             var shardShopModal = document.getElementById("gacha-shard-shop-modal");
@@ -564,7 +565,7 @@
             function loadQuests() {
                 window.ArenaSession.fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
-                        cachedQuests = d.quests || [];
+                        cachedQuests = (d.quests || []).filter(function(q) { return q.metric !== "gachaPulls"; });
                         renderQuestsList();
                     }
                 }).catch(console.error);
@@ -634,7 +635,7 @@
             function loadAchievements() {
                 window.ArenaSession.fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
-                        renderAchievementsList(d.achievements || []);
+                        renderAchievementsList((d.achievements || []).filter(function(ach) { return ach.metric !== "gachaPulls"; }));
                     }
                 }).catch(console.error);
             }
