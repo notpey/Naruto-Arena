@@ -39,6 +39,9 @@ test('character drafts are shared with admins, versioned, and isolated from live
     try {
         const denied = await fetch(base, { headers: { 'x-role': 'player' } });
         assert.equal(denied.status, 403);
+        assert.equal((await fetch(base, { headers: { 'x-role': 'moderator' } })).status, 403);
+        assert.equal((await fetch(base, { headers: { 'x-role': 'global_moderator' } })).status, 200);
+        assert.equal((await fetch(`http://127.0.0.1:${server.address().port}/api/admin/latest-releases`, { headers: { 'x-role': 'global_moderator' } })).status, 403);
 
         const createdResponse = await fetch(base, json('POST', {
             name: 'Concept One', health: 110,
@@ -52,7 +55,7 @@ test('character drafts are shared with admins, versioned, and isolated from live
         assert.equal(created.passive.name, 'Quiet Focus');
         assert.equal((await (await fetch(base)).json()).drafts.length, 1);
 
-        const updatedResponse = await fetch(`${base}/${created.id}`, json('PUT', { ...created, name: 'Concept Two' }));
+        const updatedResponse = await fetch(`${base}/${created.id}`, json('PUT', { ...created, name: 'Concept Two' }, 'global_moderator'));
         assert.equal(updatedResponse.status, 200);
         assert.equal((await updatedResponse.json()).draft.version, 2);
         const stale = await fetch(`${base}/${created.id}`, json('PUT', { ...created, name: 'Stale version' }));
@@ -65,7 +68,7 @@ test('character drafts are shared with admins, versioned, and isolated from live
         assert.equal((await fetch(commentsUrl, json('POST', { text: 'No access' }, 'player'))).status, 403);
         assert.equal((await fetch(commentsUrl, json('POST', { text: 'Bad reply', replyTo: '22222222-2222-2222-2222-222222222222' }))).status, 400);
         assert.equal((await fetch(commentsUrl, json('POST', { title: 'x'.repeat(121), text: 'Too long' }))).status, 400);
-        const suggestionResponse = await fetch(commentsUrl, json('POST', { type: 'suggestion', title: 'Cooldown balance', text: 'Reduce this cooldown.' }));
+        const suggestionResponse = await fetch(commentsUrl, json('POST', { type: 'suggestion', title: 'Cooldown balance', text: 'Reduce this cooldown.' }, 'global_moderator'));
         assert.equal(suggestionResponse.status, 201);
         const suggestion = (await suggestionResponse.json()).comment;
         assert.equal(suggestion.title, 'Cooldown balance');

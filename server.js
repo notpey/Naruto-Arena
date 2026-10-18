@@ -3502,7 +3502,7 @@ const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
         throw new Error('Team characters must be unique.');
     }
     const normalizedRole = String(userRole || '').trim().toLowerCase();
-    if (normalizedRole === 'admin' || normalizedRole === 'moderator') {
+    if (['admin', 'global_moderator', 'moderator'].includes(normalizedRole)) {
         return;
     }
     const lockedCharacterIds = await getMissionLockedCharacterIds();
@@ -6219,6 +6219,7 @@ app.use(async (req, res, next) => {
         '/charactereditor.html',
         '/charactercreator',
         '/charactercreator.html',
+        '/globalmoderator-acp.html',
         '/editmission',
         '/editmission.html',
         '/newspost',
@@ -6251,11 +6252,22 @@ app.use(async (req, res, next) => {
 
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await usersCollection.findOne({ username: decoded.username });
-        if (!user || (Number(decoded.sessionVersion) || 0) !== (Number(user.sessionVersion) || 0) || String(user.role || '').trim().toLowerCase() !== 'admin') {
+        if (!user || (Number(decoded.sessionVersion) || 0) !== (Number(user.sessionVersion) || 0)) {
             return res.redirect('/');
         }
 
-        return next();
+        const role = String(user.role || '').trim().toLowerCase();
+        if (role === 'admin') return next();
+        if (role === 'global_moderator') {
+            if (req.path === '/admin' || req.path === '/admin.html') {
+                return res.sendFile(path.join(__dirname, 'globalmoderator-acp.html'));
+            }
+            if (['/charactercreator', '/charactercreator.html', '/globalmoderator-acp.html'].includes(req.path)) {
+                return next();
+            }
+        }
+
+        return res.redirect('/');
     } catch (error) {
         return res.redirect('/');
     }
@@ -9642,6 +9654,7 @@ async function initDb() {
         normalizeNewsParagraphs,
         normalizeNewsChanges,
         normalizeUserProfile,
+        serializeAdminUserDocument,
         assertTeamCanBeUsed,
         removeQueuedEntry,
         buildTrainingDummyMatch,
@@ -11339,7 +11352,7 @@ app.get('/api/characters', async (req, res) => {
         const token = req.cookies?.[SESSION_COOKIE_NAME];
         const authUser = token ? await getSessionUserFromToken(token) : null;
         const normalizedRole = String(authUser?.role || '').trim().toLowerCase();
-        const bypassLocks = normalizedRole === 'admin' || normalizedRole === 'moderator';
+        const bypassLocks = ['admin', 'global_moderator', 'moderator'].includes(normalizedRole);
         const lockedCharacterIds = authUser && !bypassLocks ? await getMissionLockedCharacterIds() : new Set();
         const profile = authUser ? normalizeUserProfile(authUser) : null;
         const characterList = Array.isArray(charactersData) ? charactersData : [];
@@ -13358,10 +13371,10 @@ app.get(['/ingame', '/ingame.html'], (req, res) => {
 });
 
 app.get(['/admin', '/admin.html'], requireSession, async (req, res) => {
-    if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
-        return res.redirect('/');
-    }
-    return res.sendFile(path.join(__dirname, 'admin.html'));
+    const role = String(req.authUser?.role || '').trim().toLowerCase();
+    if (role === 'admin') return res.sendFile(path.join(__dirname, 'admin.html'));
+    if (role === 'global_moderator') return res.sendFile(path.join(__dirname, 'globalmoderator-acp.html'));
+    return res.redirect('/');
 });
 
 app.get(['/profile', '/profile.html'], (req, res) => {

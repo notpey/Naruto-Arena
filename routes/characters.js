@@ -47,7 +47,7 @@ module.exports = function(context) {
             const token = req.cookies?.[SESSION_COOKIE_NAME];
             const authUser = token ? await getSessionUserFromToken(token) : null;
             const normalizedRole = String(authUser?.role || '').trim().toLowerCase();
-            const bypassLocks = normalizedRole === 'admin' || normalizedRole === 'moderator';
+            const bypassLocks = ['admin', 'global_moderator', 'moderator'].includes(normalizedRole);
             const lockedCharacterIds = authUser && !bypassLocks ? await getMissionLockedCharacterIds() : new Set();
             const profile = authUser ? normalizeUserProfile(authUser) : null;
             const characterList = characterService ? characterService.getCharacters() : [];

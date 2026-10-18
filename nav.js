@@ -216,6 +216,16 @@
         navLinks.appendChild(li);
         window.rebindNavEvents();
     };
+
+    window.injectCreatorNav = function() {
+        if (!navLinks || document.querySelector("#admin-nav-item")) return;
+        var li = document.createElement("li");
+        li.className = "ca-nav-item";
+        li.id = "admin-nav-item";
+        li.innerHTML = '<a class="ca-nav-link" href="admin.html">Control Panel</a>';
+        navLinks.appendChild(li);
+        window.rebindNavEvents();
+    };
     
     window.rebindNavEvents();
 

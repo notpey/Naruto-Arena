@@ -1435,7 +1435,7 @@
       var meta = document.createElement("span");
       meta.className = "player-account-entry-meta";
       meta.textContent =
-        (entry && entry.role ? formatRole(entry.role) : "Player") +
+        formatRole(entry && entry.role) +
         " | " +
         (entry && entry.ladderRatio ? String(entry.ladderRatio) : "0.00%");
       button.appendChild(meta);
@@ -2632,11 +2632,11 @@
   }
 
   function formatRole(value) {
-    var label = String(value || "player").trim();
-    if (!label) {
-      return "Player";
-    }
-    return label.charAt(0).toUpperCase() + label.slice(1);
+    var role = String(value || "player").trim().toLowerCase();
+    if (role === "global_moderator") return "Global Moderator";
+    if (role === "moderator") return "Moderator";
+    if (role === "admin") return "Admin";
+    return "Member";
   }
 
   function sanitizeClanRouteName(value) {
@@ -4976,6 +4976,8 @@
     }
     if (isAdmin && window.injectAdminNav) {
       window.injectAdminNav();
+    } else if (user && String(user.role || "").trim().toLowerCase() === "global_moderator" && window.injectCreatorNav) {
+      window.injectCreatorNav();
     }
 
     var safeRequestedClanName = sanitizeClanRouteName(requestedClanName);
