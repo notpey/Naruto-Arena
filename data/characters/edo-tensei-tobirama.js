@@ -10,10 +10,9 @@ module.exports = {
             "id": "edo-tensei-tobirama-water-assault",
             "name": "Water Assault",
             "skillimage": "https://i.imgur.com/fMuYLsW.png",
-            "skilldescription": "Edo Tensei Tobirama makes one enemy ignore all helpful effects except energy cost changes for 1 turn and deals 15 damage to them.",
+            "skilldescription": "Edo Tensei Tobirama makes one enemy ignore all helpful effects except chakra cost changes for 1 turn and deals 15 damage to them.",
             "energy": [
-                "Ninjutsu",
-                "Genjutsu"
+                "Ninjutsu"
             ],
             "target": "single-enemy",
             "damage": 0,
@@ -31,7 +30,7 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "invulnerableToHelpfulSkills": true,
-                        "tooltipText": "This character ignores all helpful effects except energy cost changes.",
+                        "tooltipText": "This character ignores all helpful effects except chakra cost changes.",
                         "turnDurationAnchor": "source_turn"
                     }
                 },

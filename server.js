@@ -6217,6 +6217,8 @@ app.use(async (req, res, next) => {
         '/admin.html',
         '/charactereditor',
         '/charactereditor.html',
+        '/charactercreator',
+        '/charactercreator.html',
         '/editmission',
         '/editmission.html',
         '/newspost',

@@ -10,7 +10,7 @@ module.exports = {
             "id": "sakon-and-ukon-gattling-punch",
             "name": "Gattling Punch",
             "skillimage": "https://i.imgur.com/nB8CLYd.png",
-            "skilldescription": "Sakon and Ukon deal 40 damage to one enemy. During 'Parasite Demon Demolition', this skill will deal 10 less damage.",
+            "skilldescription": "Sakon and Ukon deal 40 damage to one enemy. During 'Parasite Demon Demolition', this skill will deal 5 less damage.",
             "energy": [
                 "Taijutsu",
                 "Random"

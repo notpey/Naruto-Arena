@@ -57,7 +57,7 @@ module.exports = {
                     "condition": {
                         "scope": "self",
                         "statusId": "akadou_yoroi_chakra_focus",
-                        "consumeOnMatch": true
+                        "consumeOnSuccessfulTransfer": true
                     }
                 }
             ]
@@ -136,7 +136,7 @@ module.exports = {
                     "condition": {
                         "scope": "self",
                         "statusId": "akadou_yoroi_chakra_focus",
-                        "consumeOnMatch": true
+                        "consumeOnSuccessfulTransfer": true
                     }
                 }
             ]
@@ -145,7 +145,7 @@ module.exports = {
             "id": "akadou-yoroi-chakra-focus",
             "name": "Chakra Focus",
             "skillimage": "https://i.imgur.com/8oUT5Mk.png",
-            "skilldescription": "For 3 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random chakra. This effect is consumed when triggered.",
+            "skilldescription": "For 3 turns, the next use of 'Energy Drain' or 'Draining Assault' against an enemy with chakra also steals 1 random chakra, then ends Chakra Focus. If the enemy has no chakra to steal, Chakra Focus remains active.",
             "energy": [
                 "Random"
             ],

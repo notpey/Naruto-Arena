@@ -80,7 +80,7 @@ module.exports = {
             "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
             "name": "Protective Eight Trigrams Sixty-Four Palms",
             "skillimage": "https://i.imgur.com/CFkIcA6.png",
-            "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn and refreshes 10 destructible defense on Hinata's next turn.",
+            "skilldescription": "Hyuuga Hinata grants each ally 10 points of destructible defense for 1 turn. An enemy that breaks this defense has their chakra costs increased by 1 random for 1 turn. During 'Byakugan', the defense lasts 2 turns. On Hinata's next turn, each ally whose defense remains gains a separate 10 destructible defense for 1 turn. This happens once.",
             "energy": [
                 "Ninjutsu"
             ],
@@ -108,7 +108,7 @@ module.exports = {
                                 "tooltipText": "This character's skills cost 1 additional random chakra."
                             }
                         },
-                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                        "tooltipText": "This character has 10 destructible defense. An enemy that destroys it has their skill costs increased by 1 random chakra."
                     },
                     "condition": {
                         "scope": "self",
@@ -122,9 +122,12 @@ module.exports = {
                     "scope": "all-allies",
                     "metadata": {
                         "destructibleDefensePoints": 10,
+                        "_turnEndApplyStatusToSelfUsed": false,
                         "turnEndApplyStatusToSelf": {
                             "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
                             "duration": 1,
+                            "fresh": true,
+                            "once": true,
                             "metadata": {
                                 "helpful": true,
                                 "destructibleDefensePoints": 10,
@@ -141,7 +144,7 @@ module.exports = {
                                 "tooltipText": "This character's skills cost 1 additional random chakra."
                             }
                         },
-                        "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                        "tooltipText": "This character has 10 destructible defense. On Hinata's next turn, it grants another 10 destructible defense once if it remains. An enemy that destroys it has their skill costs increased by 1 random chakra."
                     },
                     "condition": {
                         "scope": "self",
@@ -154,7 +157,7 @@ module.exports = {
             "id": "hyuuga-hinata-byakugan",
             "name": "Byakugan",
             "skillimage": "https://i.imgur.com/TcjSSGB.png",
-            "skilldescription": "Hyuuga Hinata costs no chakra and gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
+            "skilldescription": "Byakugan costs no chakra. Hinata gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' lasts 1 additional turn. 'Protective Eight Trigrams Sixty-Four Palms' lasts 1 additional turn and grants a one-time 10 destructible defense refresh on Hinata's next turn if its original defense remains.",
             "energy": [],
             "target": "self",
             "damage": 0,

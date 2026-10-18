@@ -366,7 +366,7 @@
       <div class="gi-ingame" id="gi-ingame">
         <h2>How a match works</h2>
         <p>Naruto-Arena is a turn-based strategy game. You bring a team of <strong>three characters</strong> into battle and spend <strong>chakra</strong> each turn to activate their skills.</p>
-        <p>Every skill has a <strong>cooldown</strong>, a set of <strong>classes</strong> (Physical, Instant, Melee, and so on), and an <strong>chakra nature</strong> it requires. Reading those values — shown on every character's detail page — is the core of building a winning team.</p>
+        <p>Every skill has a <strong>cooldown</strong>, a set of <strong>classes</strong> (Physical, Instant, Melee, and so on), and a <strong>chakra cost</strong>. Reading those values — shown on every character's detail page — is the core of building a winning team.</p>
         <p>Browse the roster above to study each fighter's kit before you queue up. Choose <strong>Start Playing</strong> when you're ready to put a team together.</p>
       </div>
     </section>
@@ -620,7 +620,7 @@
             seg2.innerHTML = '<span class="lbl">Classes</span> <span class="val">' + (cls.length ? cls.join(", ") : "None") + '</span>';
             var seg3 = document.createElement("span");
             seg3.className = "seg";
-            var lbl3 = document.createElement("span"); lbl3.className = "lbl"; lbl3.textContent = "Nature required";
+            var lbl3 = document.createElement("span"); lbl3.className = "lbl"; lbl3.textContent = "Chakra cost";
             seg3.appendChild(lbl3);
             seg3.appendChild(document.createTextNode(" "));
             seg3.appendChild(pips(sk.energy));

@@ -1,5 +1,6 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
+const { randomUUID } = require('node:crypto');
 
 module.exports = function(context) {
     const router = express.Router();
@@ -268,6 +269,196 @@ module.exports = function(context) {
 
 
     router.use(adminCheck);
+    const draftKey = (id) => `character_draft:${id}`;
+    const draftText = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
+    const draftNumber = (value, max) => Math.min(max, Math.max(0, Math.floor(Number(value) || 0)));
+    function normalizeCharacterDraft(input) {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+        const name = draftText(input.name, 80);
+        if (!name) return null;
+        const skills = Array.isArray(input.skills) ? input.skills.slice(0, 12) : [];
+        return {
+            name,
+            portrait: draftText(input.portrait, 500),
+            description: draftText(input.description, 4000),
+            health: draftNumber(input.health, 9999) || 100,
+            unlock: draftText(input.unlock, 300),
+            notes: draftText(input.notes, 8000),
+            stage: ['idea', 'review', 'revised'].includes(input.stage) ? input.stage : 'idea',
+            passive: input.passive && typeof input.passive === 'object' && !Array.isArray(input.passive) ? {
+                name: draftText(input.passive.name, 80),
+                icon: draftText(input.passive.icon, 500),
+                description: draftText(input.passive.description, 4000),
+                notes: draftText(input.passive.notes, 2000),
+            } : null,
+            skills: skills.map((skill) => ({
+                name: draftText(skill?.name, 80),
+                icon: draftText(skill?.icon, 500),
+                description: draftText(skill?.description, 4000),
+                cooldown: draftNumber(skill?.cooldown, 99),
+                target: draftText(skill?.target, 100),
+                classes: draftText(skill?.classes, 300),
+                notes: draftText(skill?.notes, 2000),
+                alternate: skill?.alternate === true,
+                cost: Object.fromEntries(['bloodline', 'ninjutsu', 'taijutsu', 'genjutsu', 'random'].map(
+                    (type) => [type, draftNumber(skill?.cost?.[type], 9)]
+                )),
+            })),
+        };
+    }
+    const publicDraft = (doc) => ({
+        id: doc.id, version: doc.version, createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt, createdBy: doc.createdBy,
+        updatedBy: doc.updatedBy, ...doc.draft,
+    });
+    const commentKey = (draftId, commentId) => `character_draft_comment:${draftId}:${commentId}`;
+    const publicComment = (doc) => ({
+        id: doc.id, draftId: doc.draftId, author: doc.author,
+        type: doc.type, title: doc.title || '', text: doc.text, replyTo: doc.replyTo,
+        createdAt: doc.createdAt, resolvedAt: doc.resolvedAt || null,
+        resolvedBy: doc.resolvedBy || null,
+    });
+    router.use('/character-drafts', (req, res, next) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        next();
+    });
+    router.get('/character-drafts', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        try {
+            const docs = await appStateCollection.find({ key: /^character_draft:/ }).sort({ updatedAt: -1 }).toArray();
+            return res.json({ ok: true, drafts: docs.map(publicDraft) });
+        } catch (error) {
+            console.error('Character draft list error:', error);
+            return res.status(500).json({ error: 'Unable to load character drafts.' });
+        }
+    });
+    router.post('/character-drafts', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const draft = normalizeCharacterDraft(req.body);
+        if (!draft) return res.status(400).json({ error: 'A character name is required.' });
+        const now = new Date();
+        const doc = {
+            key: draftKey(randomUUID()), id: '', version: 1,
+            createdAt: now, updatedAt: now,
+            createdBy: req.authUser.username, updatedBy: req.authUser.username, draft,
+        };
+        doc.id = doc.key.slice('character_draft:'.length);
+        try {
+            await appStateCollection.insertOne(doc);
+            return res.status(201).json({ ok: true, draft: publicDraft(doc) });
+        } catch (error) {
+            console.error('Character draft create error:', error);
+            return res.status(500).json({ error: 'Unable to save character draft.' });
+        }
+    });
+    router.put('/character-drafts/:id', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const id = String(req.params.id || '');
+        if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).json({ error: 'Draft not found.' });
+        const draft = normalizeCharacterDraft(req.body);
+        if (!draft) return res.status(400).json({ error: 'A character name is required.' });
+        const version = Number(req.body?.version);
+        if (!Number.isSafeInteger(version) || version < 1) return res.status(400).json({ error: 'A draft version is required.' });
+        try {
+            const result = await appStateCollection.updateOne(
+                { key: draftKey(id), version },
+                { $set: { draft, updatedAt: new Date(), updatedBy: req.authUser.username }, $inc: { version: 1 } }
+            );
+            if (!result.matchedCount) {
+                const existing = await appStateCollection.findOne({ key: draftKey(id) });
+                return res.status(existing ? 409 : 404).json({ error: existing ? 'This draft changed since you opened it. Reload before saving.' : 'Draft not found.' });
+            }
+            const saved = await appStateCollection.findOne({ key: draftKey(id) });
+            return res.json({ ok: true, draft: publicDraft(saved) });
+        } catch (error) {
+            console.error('Character draft update error:', error);
+            return res.status(500).json({ error: 'Unable to update character draft.' });
+        }
+    });
+    router.get('/character-drafts/:id/comments', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const id = String(req.params.id || '');
+        if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).json({ error: 'Draft not found.' });
+        try {
+            if (!await appStateCollection.findOne({ key: draftKey(id) })) return res.status(404).json({ error: 'Draft not found.' });
+            const docs = await appStateCollection.find({ kind: 'character_draft_comment', draftId: id }).sort({ createdAt: 1 }).toArray();
+            return res.json({ ok: true, comments: docs.map(publicComment) });
+        } catch (error) {
+            console.error('Character draft comments load error:', error);
+            return res.status(500).json({ error: 'Unable to load draft discussion.' });
+        }
+    });
+    router.post('/character-drafts/:id/comments', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const id = String(req.params.id || '');
+        if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).json({ error: 'Draft not found.' });
+        const text = draftText(req.body?.text, 3000);
+        const title = draftText(req.body?.title, 120);
+        const type = req.body?.type === 'suggestion' ? 'suggestion' : 'comment';
+        const replyTo = req.body?.replyTo ? String(req.body.replyTo) : null;
+        if (!text || (typeof req.body?.text === 'string' && req.body.text.trim().length > 3000)) {
+            return res.status(400).json({ error: 'Write a message of 1 to 3000 characters.' });
+        }
+        if (!replyTo && typeof req.body?.title === 'string' && req.body.title.trim().length > 120) {
+            return res.status(400).json({ error: 'Topic subject must be 120 characters or fewer.' });
+        }
+        if (replyTo && !/^[0-9a-f-]{36}$/.test(replyTo)) return res.status(400).json({ error: 'Invalid reply target.' });
+        try {
+            if (!await appStateCollection.findOne({ key: draftKey(id) })) return res.status(404).json({ error: 'Draft not found.' });
+            if (replyTo && !await appStateCollection.findOne({ key: commentKey(id, replyTo) })) {
+                return res.status(400).json({ error: 'The message you are replying to was not found.' });
+            }
+            const commentId = randomUUID();
+            const doc = {
+                key: commentKey(id, commentId), kind: 'character_draft_comment',
+                id: commentId, draftId: id, author: req.authUser.username,
+                type, title: replyTo ? '' : title || text.split('\n')[0].slice(0, 120),
+                text, replyTo, createdAt: new Date(), resolvedAt: null, resolvedBy: null,
+            };
+            await appStateCollection.insertOne(doc);
+            return res.status(201).json({ ok: true, comment: publicComment(doc) });
+        } catch (error) {
+            console.error('Character draft comment create error:', error);
+            return res.status(500).json({ error: 'Unable to post draft message.' });
+        }
+    });
+    router.patch('/character-drafts/:id/comments/:commentId', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const id = String(req.params.id || '');
+        const commentId = String(req.params.commentId || '');
+        if (!/^[0-9a-f-]{36}$/.test(id) || !/^[0-9a-f-]{36}$/.test(commentId)) {
+            return res.status(404).json({ error: 'Suggestion not found.' });
+        }
+        if (typeof req.body?.resolved !== 'boolean') return res.status(400).json({ error: 'Resolved must be true or false.' });
+        try {
+            const key = commentKey(id, commentId);
+            const comment = await appStateCollection.findOne({ key });
+            if (!comment || comment.type !== 'suggestion') return res.status(404).json({ error: 'Suggestion not found.' });
+            await appStateCollection.updateOne({ key }, { $set: {
+                resolvedAt: req.body.resolved ? new Date() : null,
+                resolvedBy: req.body.resolved ? req.authUser.username : null,
+            } });
+            return res.json({ ok: true, comment: publicComment(await appStateCollection.findOne({ key })) });
+        } catch (error) {
+            console.error('Character draft suggestion update error:', error);
+            return res.status(500).json({ error: 'Unable to update suggestion.' });
+        }
+    });
+    router.delete('/character-drafts/:id', async (req, res) => {
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        const id = String(req.params.id || '');
+        if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).json({ error: 'Draft not found.' });
+        try {
+            const result = await appStateCollection.deleteOne({ key: draftKey(id) });
+            if (result.deletedCount) await appStateCollection.deleteMany({ kind: 'character_draft_comment', draftId: id });
+            return res.status(result.deletedCount ? 200 : 404).json(result.deletedCount ? { ok: true } : { error: 'Draft not found.' });
+        } catch (error) {
+            console.error('Character draft delete error:', error);
+            return res.status(500).json({ error: 'Unable to delete character draft.' });
+        }
+    });
     router.get('/latest-releases', requireSession, async (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
@@ -507,6 +698,12 @@ module.exports = function(context) {
                         title: 'Character Editor',
                         description: 'Create, update, delete, and export playable character records.',
                         status: 'Live editor',
+                    },
+                    {
+                        href: 'charactercreator.html',
+                        title: 'Character Creator',
+                        description: 'Draft character and skill ideas for balance review without changing the live roster.',
+                        status: 'Concept drafts',
                     },
                     {
                         href: 'editmission.html',

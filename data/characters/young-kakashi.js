@@ -107,9 +107,9 @@ module.exports = {
             "id": "young-kakashi-implanted-sharingan",
             "name": "Implanted Sharingan",
             "skillimage": "https://i.imgur.com/VrPbW1z.png",
-            "skilldescription": "For 2 turns, if one enemy uses a new skill on Young Kakashi, his skills will deal 10 additional damage for 1 turn. This skill is invisible and ends when triggered.",
+            "skilldescription": "Young Kakashi targets one enemy, removes 1 random chakra from their pool, and stuns their chakra skills for 1 turn.",
             "energy": [],
-            "target": "self",
+            "target": "single-enemy",
             "damage": 0,
             "cooldown": 1,
             "classes": [
@@ -118,24 +118,21 @@ module.exports = {
             ],
             "effects": [
                 {
+                    "type": "remove_chakra",
+                    "amount": 1,
+                    "chakraType": "random",
+                    "scope": "target"
+                },
+                {
                     "type": "apply_status",
-                    "statusId": "young_kakashi_implanted_sharingan_trap",
-                    "duration": 2,
-                    "scope": "self",
+                    "statusId": "young_kakashi_implanted_sharingan_stun",
+                    "duration": 1,
+                    "scope": "target",
                     "metadata": {
-                        "helpful": true,
-                        "hideTooltipFromEnemy": true,
-                        "triggerOnEnemyHarmfulSkill": true,
-                        "counterApplyStatusToRecipient": {
-                            "statusId": "young_kakashi_implanted_sharingan_bonus",
-                            "duration": 1,
-                            "metadata": {
-                                "helpful": true,
-                                "damageBonusFlat": 10,
-                                "tooltipText": "Young Kakashi deals 10 additional damage with his skills."
-                            }
-                        },
-                        "tooltipText": "If an enemy uses a new skill on this character, his skills deal 10 additional damage for 1 turn."
+                        "harmful": true,
+                        "cannotUseSkillClasses": ["energy", "ninjutsu"],
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "This character's chakra skills are stunned."
                     }
                 }
             ]

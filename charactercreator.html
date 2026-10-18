@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Character Creator — Naruto-Arena ACP</title>
+  <link rel="stylesheet" href="brand.css">
+  <link rel="stylesheet" href="charactercreator.css">
+  <script src="charactercreator.js" defer></script>
+</head>
+<body>
+  <div class="creator-shell">
+    <header class="creator-header">
+      <div>
+        <a class="back-link" href="admin.html">← Admin Control Panel</a>
+        <h1>Character Creator</h1>
+        <p>Build a concept for team review. Drafts never change the playable roster.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="button secondary" id="new-draft">New draft</button>
+        <button type="button" class="button" id="save-draft">Save draft</button>
+      </div>
+    </header>
+
+    <div class="creator-layout">
+      <aside class="draft-sidebar" aria-label="Saved character drafts">
+        <div class="sidebar-heading">
+          <h2>Team drafts</h2>
+          <button type="button" class="text-button" id="refresh-drafts">Refresh</button>
+        </div>
+        <label class="draft-search-label" for="draft-search">Find a draft</label>
+        <input id="draft-search" class="draft-search" type="search" placeholder="Search characters">
+        <div class="draft-list" id="draft-list"><p class="empty">Loading drafts…</p></div>
+      </aside>
+
+      <main class="creator-main">
+        <div class="editor-toolbar">
+          <span id="save-state" role="status" aria-live="polite">New concept</span>
+          <div class="toolbar-actions">
+            <button type="button" class="text-button" id="copy-link" hidden>Copy link</button>
+            <button type="button" class="text-button" id="export-draft">Export JSON</button>
+            <button type="button" class="text-button danger" id="delete-draft" hidden>Delete draft</button>
+          </div>
+        </div>
+        <nav class="creator-tabs" aria-label="Creator views">
+          <button type="button" class="creator-tab active" data-view="edit" aria-current="page">Edit</button>
+          <button type="button" class="creator-tab" data-view="preview">Preview</button>
+          <button type="button" class="creator-tab" data-view="discussion">Discussion <span id="discussion-count" hidden></span></button>
+        </nav>
+
+        <div class="workspace">
+          <form id="draft-form" class="view-panel inline-editor" data-panel="edit" autocomplete="off">
+            <section class="inline-character">
+              <div class="inline-card-title"><input name="name" maxlength="80" placeholder="Character name" aria-label="Character name" required></div>
+              <div class="inline-character-main"><div class="inline-art"><div class="inline-art-preview" id="portrait-preview">Portrait</div><input name="portrait" type="url" maxlength="500" placeholder="Portrait image URL" aria-label="Portrait image URL"></div><textarea name="description" rows="4" maxlength="4000" placeholder="Character description" aria-label="Character description"></textarea></div>
+              <div class="inline-character-bottom"><label>Max health <input name="health" type="number" min="1" max="9999" value="100" aria-label="Maximum health"></label><label>Mission to unlock <input name="unlock" maxlength="300" placeholder="None"></label><label>Review stage <select name="stage"><option value="idea">Idea</option><option value="review">Ready for review</option><option value="revised">Revised</option></select></label></div>
+            </section>
+
+            <section class="passive-section"><div class="inline-section-bar"><h2>Passive skill</h2><button type="button" class="button secondary" id="toggle-passive">Add passive</button></div><div id="passive-editor"></div></section>
+
+            <section class="skills-section"><div class="inline-section-bar"><h2>Skills</h2><button type="button" class="button secondary" id="add-skill">Add skill</button></div><div id="skill-editor" class="inline-skill-grid"></div></section>
+
+            <details class="editor-details review-details"><summary>Balance notes for reviewers</summary><textarea name="notes" rows="3" maxlength="8000" placeholder="Tradeoffs and open questions for the team" aria-label="Balance notes"></textarea></details>
+          </form>
+
+          <section class="preview view-panel" data-panel="preview" aria-label="Skills page style character preview" hidden>
+            <div class="view-heading"><div><h2>Character preview</h2><p>Shown in the skills page layout. This is still a concept draft.</p></div><button type="button" class="button secondary" id="preview-edit">Edit character</button></div>
+            <div id="preview-content"></div>
+          </section>
+
+          <section class="discussion view-panel" data-panel="discussion" aria-label="Draft discussion" hidden>
+            <div class="view-heading"><div><h2>Discussion</h2><p>One topic per question or proposed change. Replies stay together.</p></div><button type="button" class="text-button" id="refresh-comments">Refresh topics</button></div>
+            <div id="discussion-empty" class="discussion-empty" hidden>Save this draft to start a discussion.</div>
+            <div id="topic-index">
+              <div class="topic-toolbar"><strong>Topics</strong><button type="button" class="button secondary" id="new-topic">New topic</button></div>
+              <div id="topic-list" class="topic-list" aria-live="polite"></div>
+              <form id="topic-form" class="comment-form" hidden>
+                <h3>Start a topic</h3>
+                <div class="topic-form-top"><label class="field">Subject <input name="title" maxlength="120" placeholder="What should the team discuss?" required></label><label class="field">Type <select name="type"><option value="comment">Discussion</option><option value="suggestion">Suggested change</option></select></label></div>
+                <label class="field">Opening post <textarea name="text" maxlength="3000" rows="4" placeholder="Give the team enough context to respond…" required></textarea></label>
+                <div class="comment-form-footer"><span id="topic-state" role="status" aria-live="polite"></span><div class="header-actions"><button type="button" class="button secondary" id="cancel-topic">Cancel</button><button type="submit" class="button">Create topic</button></div></div>
+              </form>
+            </div>
+            <div id="topic-detail" hidden>
+              <button type="button" class="text-button" id="back-to-topics">← All topics</button>
+              <div id="topic-heading" class="topic-heading"></div>
+              <div id="discussion-list" class="discussion-list" aria-live="polite"></div>
+              <form id="comment-form" class="comment-form">
+                <label class="field" for="comment-text">Write a reply</label>
+                <textarea id="comment-text" name="text" maxlength="3000" rows="4" placeholder="Add to this discussion…" required></textarea>
+                <div class="comment-form-footer"><span id="comment-state" role="status" aria-live="polite"></span><button type="submit" class="button" id="post-comment">Post reply</button></div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

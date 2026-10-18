@@ -18,7 +18,7 @@ module.exports = {
                 "missingStatusId": "nara_shikamaru_meditate"
             },
             "damage": 0,
-            "cooldown": 1,
+            "cooldown": 0,
             "classes": [
                 "Strategic",
                 "Instant"

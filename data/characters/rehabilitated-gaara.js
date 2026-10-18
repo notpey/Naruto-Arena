@@ -10,7 +10,7 @@ module.exports = {
             "id": "rehabilitated-gaara-sand-mastery",
             "name": "Sand Mastery",
             "skillimage": "https://i.imgur.com/q60UfkP.png",
-            "skilldescription": "Rehabilitated Gaara deals 15 damage to one enemy for 3 turns and gains 35 points of permanent destructible defense. This skill does not stack and will re-apply itself.",
+            "skilldescription": "Rehabilitated Gaara deals 15 damage to one enemy for 3 turns and gains 35 points of permanent destructible defense. This skill cannot be used again while that defense remains. Reapplying the damage effect does not stack it.",
             "energy": [
                 "Random",
                 "Random"

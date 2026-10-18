@@ -1249,3 +1249,122 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
         }
     );
 });
+
+test('Shino Leach keeps growing and Female Bug can refresh without stacking', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
+    const damage = [];
+    for (let use = 0; use < 3; use += 1) {
+        match.board.p1[0].state.cooldowns = {};
+        const previousHp = match.board.p2[0].hp;
+        queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+        damage.push(previousHp - match.board.p2[0].hp);
+    }
+    assert.deepEqual(damage, [10, 15, 20]);
+    assert.match(
+        match.board.p1[0].state.statuses.find((status) => status.id === 'aburame_shino_chakra_leach_growth')
+            ?.metadata.tooltipText || '',
+        /15 additional damage/
+    );
+
+    for (let use = 0; use < 2; use += 1) {
+        match.board.p1[0].state.cooldowns = {};
+        queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    }
+    const marks = match.board.p2[0].state.statuses.filter((status) => status.id === 'aburame_shino_female_bug');
+    assert.equal(marks.length, 1);
+    assert.equal(marks[0].remainingTurns, 3);
+    assert.equal(marks[0].metadata.bonusDamageFromSourceSkillsFlat, 5);
+});
+
+test('Byakugan Protective Palms grants one lasting refresh to each ally', () => {
+    const match = makeMatch(
+        [getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
+        [getCharIndex('haruno-sakura')]
+    );
+    const nextTurn = () => {
+        tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+        tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    };
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    nextTurn();
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    nextTurn();
+    match.board.p1.forEach((unit) => {
+        assert.equal(unit.state.statuses.filter((status) => status.id.includes('protective_palms')).length, 1);
+    });
+    nextTurn();
+    match.board.p1.forEach((unit) => {
+        const defense = unit.state.statuses.filter((status) => status.id.includes('protective_palms'));
+        assert.equal(defense.length, 2);
+        assert.equal(defense.reduce((total, status) => total + status.metadata.destructibleDefensePoints, 0), 20);
+        assert.equal(defense.find((status) => status.id.endsWith('_refresh'))?.remainingTurns, 1);
+    });
+    nextTurn();
+    match.board.p1.forEach((unit) => {
+        assert.equal(unit.state.statuses.some((status) => status.id.includes('protective_palms')), false);
+    });
+});
+
+test('Meditate can mark another enemy immediately and Water Assault costs only Ninjutsu', () => {
+    const match = makeMatch([getCharIndex('nara-shikamaru')], [1, 2]);
+    for (const slot of [0, 1]) {
+        queueSkill(match, 'p1', 0, [{ username: 'p2', slot }]);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    }
+    match.board.p2.forEach((unit) => {
+        assert.equal(unit.state.statuses.some((status) => status.id === 'nara_shikamaru_meditate'), true);
+    });
+    assert.equal(match.board.p1[0].state.cooldowns['nara-shikamaru-meditate'] || 0, 0);
+    assert.deepEqual(
+        computeEffectiveEnergyCost({
+            skill: getCharacter('edo-tensei-tobirama').skills[0],
+            actorState: match.board.p1[0].state,
+        }),
+        { reservedSpecific: { taijutsu: 0, ninjutsu: 1, bloodline: 0, genjutsu: 0 }, requiredRandom: 0 }
+    );
+});
+
+test('Young Kakashi removes chakra and stuns chakra skills for one turn', () => {
+    const match = makeMatch([getCharIndex('young-kakashi')], [getCharIndex('edo-tensei-tobirama')]);
+    match.chakraPools.p2.ninjutsu = 1;
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.chakraPools.p2.ninjutsu, 0);
+    assert.equal(
+        match.board.p2[0].state.statuses.some((status) =>
+            status.id === 'young_kakashi_implanted_sharingan_stun' &&
+            status.metadata.cannotUseSkillClasses.includes('ninjutsu')
+        ),
+        true
+    );
+    match.chakraPools.p2.ninjutsu = 1;
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 100, 'Water Assault should be stunned even with chakra available');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 85, 'Water Assault should be usable after the stun');
+});
+
+test('Yoroi keeps Chakra Focus when there is no chakra to steal', () => {
+    const match = makeMatch([getCharIndex('akadou-yoroi')], [getCharIndex('haruno-sakura')]);
+    match.board.p1[0].state.statuses.push({
+        id: 'akadou_yoroi_chakra_focus', remainingTurns: 3, metadata: { helpful: true },
+    });
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p1[0].state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus'), true);
+    match.chakraPools.p2.taijutsu = 1;
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.chakraPools.p2.taijutsu, 0);
+    assert.equal(match.chakraPools.p1.taijutsu, 1);
+    assert.equal(match.board.p1[0].state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus'), false);
+});

@@ -45,7 +45,11 @@ module.exports = {
                         "skillDamageBonuses": {
                             "aburame-shino-chakra-leach": 5
                         },
-                        "tooltipText": "Chakra Leach deals 5 additional damage."
+                        "mergeSkillDamageBonuses": true,
+                        "stackMetadataKey": "chakraLeachBonus",
+                        "stackDelta": 5,
+                        "stackMax": 9999,
+                        "tooltipTextTemplate": "Chakra Leach deals {chakraLeachBonus} additional damage."
                     }
                 }
             ]
@@ -54,12 +58,9 @@ module.exports = {
             "id": "aburame-shino-female-bug",
             "name": "Female Bug",
             "skillimage": "https://i.imgur.com/QMWOMRt.png",
-            "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
+            "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. Using Female Bug on them again refreshes its duration without stacking its effects.",
             "energy": [],
             "target": "single-enemy",
-            "targetCondition": {
-                "missingStatusId": "aburame_shino_female_bug"
-            },
             "damage": 0,
             "cooldown": 2,
             "classes": [

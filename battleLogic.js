@@ -6246,12 +6246,18 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
+                    let transferred = 0;
                     for (let i = 0; i < maxAmount; i += 1) {
                         const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
                         if (!available.length) break;
                         const picked = available[Math.floor(Math.random() * available.length)];
                         targetPool[picked] = Math.max(0, (Number(targetPool[picked]) || 0) - 1);
                         sourcePool[picked] = (Number(sourcePool[picked]) || 0) + 1;
+                        transferred += 1;
+                    }
+                    if (transferred > 0 && condition?.consumeOnSuccessfulTransfer && condition.statusId) {
+                        const scopedState = condition.scope === 'target' ? targetState : actorState;
+                        consumeStatus(scopedState, condition.statusId);
                     }
                     match.chakraPools[recipient.username] = targetPool;
                     match.chakraPools[actingUsername] = sourcePool;
@@ -6860,7 +6866,11 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     });
                 }
                 const turnEndApplyStatusToSelf = status?.metadata?.turnEndApplyStatusToSelf;
-                if (turnEndApplyStatusToSelf && typeof turnEndApplyStatusToSelf === 'object') {
+                if (
+                    turnEndApplyStatusToSelf &&
+                    typeof turnEndApplyStatusToSelf === 'object' &&
+                    (!turnEndApplyStatusToSelf.once || !status.metadata._turnEndApplyStatusToSelfUsed)
+                ) {
                     applyStatus({
                         targetState: actorState,
                         statusId: turnEndApplyStatusToSelf.statusId,
@@ -6871,6 +6881,9 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                         metadata: turnEndApplyStatusToSelf.metadata || {},
                         fresh: Boolean(turnEndApplyStatusToSelf.fresh),
                     });
+                    if (turnEndApplyStatusToSelf.once) {
+                        status.metadata._turnEndApplyStatusToSelfUsed = true;
+                    }
                 }
                 const turnEndApplyStatusToEnemies = Array.isArray(status?.metadata?.turnEndApplyStatusToEnemies)
                     ? status.metadata.turnEndApplyStatusToEnemies

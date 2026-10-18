@@ -210,7 +210,11 @@
                                                         "skillDamageBonuses": {
                                                                 "aburame-shino-chakra-leach": 5
                                                         },
-                                                        "tooltipText": "Chakra Leach deals 5 additional damage."
+                                                        "mergeSkillDamageBonuses": true,
+                                                        "stackMetadataKey": "chakraLeachBonus",
+                                                        "stackDelta": 5,
+                                                        "stackMax": 9999,
+                                                        "tooltipTextTemplate": "Chakra Leach deals {chakraLeachBonus} additional damage."
                                                 }
                                         }
                                 ]
@@ -219,12 +223,9 @@
                                 "id": "aburame-shino-female-bug",
                                 "name": "Female Bug",
                                 "skillimage": "https://i.imgur.com/QMWOMRt.png",
-                                "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. This skill cannot be used on an enemy already affected by it.",
+                                "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. Using Female Bug on them again refreshes its duration without stacking its effects.",
                                 "energy": [],
                                 "target": "single-enemy",
-                                "targetCondition": {
-                                        "missingStatusId": "aburame_shino_female_bug"
-                                },
                                 "damage": 0,
                                 "cooldown": 2,
                                 "classes": [
@@ -395,7 +396,7 @@
                                 "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
                                 "name": "Protective Eight Trigrams Sixty-Four Palms",
                                 "skillimage": "https://i.imgur.com/CFkIcA6.png",
-                                "skilldescription": "Hyuuga Hinata grants her team 10 points of destructible defense for 1 turn. Any enemy that breaks this destructible defense will have their chakra costs increased by 1 random for 1 turn. During 'Byakugan', this defense lasts 1 additional turn and refreshes 10 destructible defense on Hinata's next turn.",
+                                "skilldescription": "Hyuuga Hinata grants each ally 10 points of destructible defense for 1 turn. An enemy that breaks this defense has their chakra costs increased by 1 random for 1 turn. During 'Byakugan', the defense lasts 2 turns. On Hinata's next turn, each ally whose defense remains gains a separate 10 destructible defense for 1 turn. This happens once.",
                                 "energy": [
                                         "Ninjutsu"
                                 ],
@@ -423,7 +424,7 @@
                                                                         "tooltipText": "This character's skills cost 1 additional random chakra."
                                                                 }
                                                         },
-                                                        "tooltipText": "This character has 10 destructible defense. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                                                        "tooltipText": "This character has 10 destructible defense. An enemy that destroys it has their skill costs increased by 1 random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -437,9 +438,12 @@
                                                 "scope": "all-allies",
                                                 "metadata": {
                                                         "destructibleDefensePoints": 10,
+                                                        "_turnEndApplyStatusToSelfUsed": false,
                                                         "turnEndApplyStatusToSelf": {
                                                                 "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
                                                                 "duration": 1,
+                                                                "fresh": true,
+                                                                "once": true,
                                                                 "metadata": {
                                                                         "helpful": true,
                                                                         "destructibleDefensePoints": 10,
@@ -456,7 +460,7 @@
                                                                         "tooltipText": "This character's skills cost 1 additional random chakra."
                                                                 }
                                                         },
-                                                        "tooltipText": "This character has 10 destructible defense. This defense refreshes once on Hinata's next turn. If it is destroyed, Hinata's skills cost 1 additional random chakra."
+                                                        "tooltipText": "This character has 10 destructible defense. On Hinata's next turn, it grants another 10 destructible defense once if it remains. An enemy that destroys it has their skill costs increased by 1 random chakra."
                                                 },
                                                 "condition": {
                                                         "scope": "self",
@@ -469,7 +473,7 @@
                                 "id": "hyuuga-hinata-byakugan",
                                 "name": "Byakugan",
                                 "skillimage": "https://i.imgur.com/TcjSSGB.png",
-                                "skilldescription": "Hyuuga Hinata costs no chakra and gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' and 'Protective Eight Trigrams Sixty-Four Palms' last 1 additional turn.",
+                                "skilldescription": "Byakugan costs no chakra. Hinata gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' lasts 1 additional turn. 'Protective Eight Trigrams Sixty-Four Palms' lasts 1 additional turn and grants a one-time 10 destructible defense refresh on Hinata's next turn if its original defense remains.",
                                 "energy": [],
                                 "target": "self",
                                 "damage": 0,
@@ -541,7 +545,7 @@
                                         "missingStatusId": "nara_shikamaru_meditate"
                                 },
                                 "damage": 0,
-                                "cooldown": 1,
+                                "cooldown": 0,
                                 "classes": [
                                         "Strategic",
                                         "Instant"
