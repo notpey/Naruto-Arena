@@ -133,13 +133,14 @@
        on that surface rather than inheriting the light sheet token colors. */
     #gi-detail-view { background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; padding: 0; margin-top: 28px; }
     #gi-detail-view .gi-char-head { max-width: none; grid-template-columns: 106px minmax(0, 1fr); align-items: center; gap: 20px; margin: 0 0 24px; padding: 18px; border: 1px solid #344052; border-radius: 6px; background: #171e2a; }
+    #gi-detail-view .gi-char-info { min-width: 0; }
     #gi-detail-view .gi-char-face { width: 106px; height: 106px; border-color: #455164; box-shadow: none; }
     #gi-detail-view .gi-char-name { color: #ffae42 !important; text-shadow: none !important; }
     #gi-detail-view .gi-detail-nav { border-color: #344052; }
     #gi-detail-view .gi-char-titlerow { margin-bottom: 8px; padding: 0; border: 0; }
-    #gi-detail-view .gi-char-desc { max-width: 720px; margin: 0; color: #d0c8b8 !important; font-size: 14px; }
-    #gi-detail-view .gi-char-unlock { margin-top: 14px; background: #0b1019 !important; border: 1px solid #344052 !important; border-radius: 4px; color: #f3eadb !important; font-size: 12px; }
-    #gi-detail-view .gi-char-unlock::before { color: #ffae42 !important; }
+    #gi-detail-view .gi-char-desc { max-width: none; margin: 0; color: #d0c8b8 !important; font-size: 14px; }
+    #gi-detail-view .gi-char-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; color: #c5cbd4; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    #gi-detail-view .gi-char-meta a { color: #ffcb76; text-decoration: underline; text-underline-offset: 2px; }
     #gi-detail-view .gi-skills { max-width: none; gap: 18px; grid-auto-rows: 1fr; }
     #gi-detail-view .gi-skill { display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: 14px; min-width: 0; padding: 18px; border: 1px solid #344052 !important; border-radius: 6px; background: #171e2a !important; }
     #gi-detail-view .gi-skill.alt { border-color: #75608c !important; background: #1b1b2c !important; }
@@ -148,6 +149,8 @@
     #gi-detail-view .gi-skill-name { margin: 0 0 8px; padding: 0; border: 0 !important; color: #ffb347 !important; text-shadow: none !important; line-height: 1.3; }
     #gi-detail-view .gi-skill.alt .gi-skill-name { color: #d1a9f2 !important; }
     #gi-detail-view .gi-skill-desc { color: #d0c8b8 !important; line-height: 1.55; }
+    #gi-detail-view .gi-skill-desc .skill-ref { color: #ffcb76; font-weight: 800; }
+    #gi-detail-view .gi-skill-desc .skill-term { color: #9ed6e3; font-weight: 700; }
     #gi-detail-view .gi-alt-badge { color: #d1a9f2; margin-bottom: 5px; }
     #gi-detail-view .gi-skill-meta { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; gap: 10px 14px; margin-top: 0; padding-top: 13px; border-color: #344052; font-size: 12px; }
     #gi-detail-view .gi-skill-meta .seg { min-width: 0; flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -391,6 +394,7 @@
   </footer>
 
   <script src="./characters.js"></script>
+  <script src="./skill-description-format.js"></script>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
   <script src="./shop.js" defer></script>
@@ -529,6 +533,7 @@
         face.onerror = function () { this.src = "deadcharacter-remaster.png?v=2"; };
         face.alt = c.name ? String(c.name) : "";
         var info = document.createElement("div");
+        info.className = "gi-char-info";
         var titlerow = document.createElement("div");
         titlerow.className = "gi-char-titlerow";
         var nm = document.createElement("h1");
@@ -538,25 +543,29 @@
         var desc = document.createElement("p");
         desc.className = "gi-char-desc";
         desc.textContent = charDesc(c);
-        var unlock = document.createElement("div");
-        unlock.className = "gi-char-unlock";
+        var meta = document.createElement("div");
+        meta.className = "gi-char-meta";
+        var health = document.createElement("span");
+        health.textContent = "100 max health";
+        meta.appendChild(health);
+        var mission = document.createElement("span");
+        mission.appendChild(document.createTextNode("Mission: "));
         var requiredMissionId = String(c.requiredMissionId || "").trim();
         if (requiredMissionId) {
           var requiredMission = missionByMissionId.get(requiredMissionId);
-          unlock.appendChild(document.createTextNode("Requires: "));
           var missionLink = document.createElement("a");
-          missionLink.className = "gi-char-unlock-link";
           missionLink.href = "missions.html?mission=" + encodeURIComponent(requiredMissionId);
           missionLink.textContent = requiredMission && requiredMission.title
             ? requiredMission.title
             : requiredMissionId;
-          unlock.appendChild(missionLink);
+          mission.appendChild(missionLink);
         } else {
-          unlock.hidden = true;
+          mission.appendChild(document.createTextNode("None"));
         }
+        meta.appendChild(mission);
         info.appendChild(titlerow);
         info.appendChild(desc);
-        info.appendChild(unlock);
+        info.appendChild(meta);
         head.appendChild(face);
         head.appendChild(info);
 
@@ -599,7 +608,7 @@
             sname.textContent = sk.name ? String(sk.name) : "Unknown Skill";
             var sdesc = document.createElement("p");
             sdesc.className = "gi-skill-desc";
-            sdesc.textContent = sk.skilldescription ? String(sk.skilldescription) : "No description available.";
+            window.renderSkillDescription(sdesc, sk.skilldescription ? String(sk.skilldescription) : "No description available.", (c.skills || []).map(function (entry) { return entry && entry.name; }));
             col.appendChild(labelrow);
             col.appendChild(sname);
             col.appendChild(sdesc);
