@@ -231,7 +231,7 @@ module.exports = function(context) {
                     aliveCount: aliveLookup[opponent.username],
                 },
             ];
-            const board = battleLogic.buildInitialBoard(playerDocs);
+            const board = battleLogic.buildInitialBoard(playerDocs, getCharactersList());
             const matchDocument = {
                 matchId: built.matchId,
                 mode,

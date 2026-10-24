@@ -414,7 +414,7 @@ test('Invulnerability Targeting: Orochimaru (S) Triple Rashoumon targets all cha
     assert.equal(options.targets.length, 2, 'Triple Rashoumon targets all characters');
 });
 
-test('Invulnerability Targeting: Momochi Zabuza Soundless Murder (Empowered) targets invulnerable enemies', () => {
+test('Invulnerability Targeting: Zabuza Kubikiribōchō after Hidden Mist targets invulnerable enemies', () => {
     const zabuza = require('../data/characters/momochi-zabuza.js');
     const dummy = require('../data/characters/uzumaki-naruto.js');
     const { match, roster } = buildMockMatch({ p1Char: zabuza, p2Char: dummy });
@@ -427,15 +427,18 @@ test('Invulnerability Targeting: Momochi Zabuza Soundless Murder (Empowered) tar
         metadata: { invulnerable: true },
     });
 
-    // Skill 4: Empowered Soundless Murder (index 4 in skills list)
+    match.board.p1[0].state.statuses.push({
+        id: 'zabuza_hidden_mist_attack', remainingTurns: 2,
+        metadata: { ignoreInvulnerabilityForSkillIds: ['momochi-zabuza-kubikiribocho'] },
+    });
     const options = battleLogic.computeTargetOptions({
         match,
         actingUsername: 'p1',
         actorSlot: 0,
-        skillIndex: 4,
+        skillIndex: 0,
         characters: roster,
     });
-    assert.equal(options.targets.length, 1, 'Empowered Soundless Murder can target invulnerable enemy');
+    assert.equal(options.targets.length, 1, 'Mist empowered Kubikiribōchō can target invulnerable enemy');
 });
 
 test('Team Targeting: Tenten (S) and Shino (S) all-allies skills target all team members', () => {

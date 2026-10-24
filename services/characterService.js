@@ -6,6 +6,10 @@ const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
 const STARTER_REBALANCE_MIGRATION_ID = 'starter-rebalance-2026-07-16';
 const EXAMS_REBALANCE_MIGRATION_ID = 'exams-rebalance-2026-07-16-v4';
+const NARUTO_REWORK_MIGRATION_ID = 'uzumaki-naruto-rework-2026-10-23';
+const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-24-v2';
+const KAKASHI_IRUKA_REWORK_MIGRATION_ID = 'kakashi-iruka-rework-2026-10-24';
+const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
@@ -214,6 +218,10 @@ class CharacterService {
                     key: CHARACTER_MIGRATIONS_STATE_KEY,
                     [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
                     [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                    [`completed.${NARUTO_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -262,6 +270,10 @@ class CharacterService {
                         key: CHARACTER_MIGRATIONS_STATE_KEY,
                         [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
                         [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                        [`completed.${NARUTO_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },
@@ -278,9 +290,17 @@ class CharacterService {
                 : {};
         const shouldApplyStarterRebalance = !completedMigrations[STARTER_REBALANCE_MIGRATION_ID];
         const shouldApplyExamsRebalance = !completedMigrations[EXAMS_REBALANCE_MIGRATION_ID];
+        const shouldApplyNarutoRework = !completedMigrations[NARUTO_REWORK_MIGRATION_ID];
+        const shouldApplySakuraSasukeRework = !completedMigrations[SAKURA_SASUKE_REWORK_MIGRATION_ID];
+        const shouldApplyKakashiIrukaRework = !completedMigrations[KAKASHI_IRUKA_REWORK_MIGRATION_ID];
+        const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
             ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
+            ...(shouldApplyNarutoRework ? ['uzumaki-naruto'] : []),
+            ...(shouldApplySakuraSasukeRework ? ['haruno-sakura', 'uchiha-sasuke'] : []),
+            ...(shouldApplyKakashiIrukaRework ? ['hatake-kakashi', 'umino-iruka'] : []),
+            ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
         ]);
         const defaultByCharacterId = new Map(
             defaultCharacters
@@ -345,6 +365,10 @@ class CharacterService {
             const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
             const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
             if (seedEntry) {
+                if (shouldApplyNarutoRework && characterId === 'uzumaki-naruto') return seedEntry;
+                if (shouldApplySakuraSasukeRework && (characterId === 'haruno-sakura' || characterId === 'uchiha-sasuke')) return seedEntry;
+                if (shouldApplyKakashiIrukaRework && (characterId === 'hatake-kakashi' || characterId === 'umino-iruka')) return seedEntry;
+                if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
                 const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
                 const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
                 if (facePicture !== storedFace) {
@@ -396,6 +420,10 @@ class CharacterService {
         if (
             shouldApplyStarterRebalance ||
             shouldApplyExamsRebalance ||
+            shouldApplyNarutoRework ||
+            shouldApplySakuraSasukeRework ||
+            shouldApplyKakashiIrukaRework ||
+            shouldApplyWavesAndMizukiRework ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
         ) {
@@ -412,6 +440,10 @@ class CharacterService {
                         key: CHARACTER_MIGRATIONS_STATE_KEY,
                         [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
                         [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                        [`completed.${NARUTO_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },

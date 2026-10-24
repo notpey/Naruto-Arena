@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Announcements | Naruto-Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png?v=3">
+  <link rel="stylesheet" href="brand.css">
+  <link rel="stylesheet" href="news-page.css">
+  <script src="account-client.js?v=1"></script>
+  <script src="news-author.js" defer></script>
+  <script src="news-page.js" defer></script>
+</head>
+<body class="news-page">
+  <header class="news-site-header">
+    <div class="news-site-header-inner">
+      <a class="news-site-brand ca-nav-seal" href="index.html" aria-label="Naruto-Arena home"><span class="ca-nav-wordmark"><span>NARUTO</span><span>ARENA</span></span></a>
+      <nav aria-label="Main navigation"><a href="index.html">Home</a><a href="news.html" aria-current="page">News</a><a href="charactersandskills.html">Characters &amp; Skills</a><a href="selection.html">Play</a></nav>
+      <a class="news-site-account" href="index.html#auth-panel">Account</a>
+    </div>
+  </header>
+  <main class="news-page-shell">
+    <header class="news-page-intro"><h1>Announcements</h1><p>Game updates, new characters, events, and changes to the arena.</p></header>
+    <div class="news-page-layout">
+      <aside class="news-archive" aria-labelledby="news-archive-heading"><div class="news-archive-top"><h2 id="news-archive-heading">All posts</h2><label class="news-search-label" for="news-search">Search announcements</label><input id="news-search" type="search" placeholder="Search posts"></div><p id="news-archive-status" class="news-page-status" aria-live="polite">Loading announcements…</p><div id="news-archive-list" class="news-archive-list"></div></aside>
+      <div class="news-reading-layout"><article id="news-article" class="news-article" aria-live="polite"><p class="news-page-status">Loading announcement…</p></article><aside class="news-on-page" aria-labelledby="news-on-page-heading"><h2 id="news-on-page-heading">On this page</h2><nav id="news-toc" aria-label="Article sections"></nav></aside></div>
+    </div>
+  </main>
+  <footer class="news-page-footer"><a href="index.html">Naruto-Arena</a><span>Updates from the arena</span></footer>
+</body>
+</html>

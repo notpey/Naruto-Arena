@@ -339,6 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return [];
     };
+    let loadedRosterRyoBalance = 0;
     const loadCharacterRoster = async () => {
         const fallbackRoster = getStaticCharacterRoster();
         try {
@@ -351,6 +352,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(data?.error || 'Unable to load character data.');
             }
             window.characters = data.characters;
+            if (pageName === 'selection.html') {
+                loadedRosterRyoBalance = Math.max(0, Number(data.ryo) || 0);
+                document.querySelectorAll('[data-shop-balance]').forEach((el) => {
+                    el.textContent = loadedRosterRyoBalance.toLocaleString('en-US');
+                });
+            }
             return data.characters;
         } catch (error) {
             console.warn('Using bundled character data because live character data could not be loaded.', error);
@@ -359,7 +366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     let pageCharacterRoster = getStaticCharacterRoster();
-    if (shouldUseCustomCursor) {
+    if (pageName === 'ingame.html') {
         attachGameImageFallbacks();
         loadCharacterRoster().then((liveRoster) => {
             if (Array.isArray(liveRoster) && liveRoster.length > 0) {
@@ -429,7 +436,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const slotList = document.querySelector('.slot-list');
     const nameEl = document.getElementById('character-name');
+    const characterArcEl = document.getElementById('character-arc');
+    const rosterSearchEl = document.getElementById('roster-search');
+    const rosterArcFilterEl = document.getElementById('roster-arc-filter');
+    const rosterLockFilterEl = document.getElementById('roster-lock-filter');
+    const rosterSortEl = document.getElementById('roster-sort');
+    const rosterResultCountEl = document.getElementById('roster-result-count');
+    const rosterEmptyEl = document.getElementById('roster-empty');
+    const rosterEmptyResetEl = document.getElementById('roster-empty-reset');
+    const rosterCatalog = window.NarutoRosterCatalog;
     const charBioEl = document.getElementById('character-bio');
+    const passiveEl = document.getElementById('character-passive');
+    const passiveImageEl = document.getElementById('character-passive-image');
+    const passiveNameEl = document.getElementById('character-passive-name');
+    const skillDetailKindEl = document.getElementById('skill-detail-kind');
     const portraitEl = document.getElementById('character-portrait');
     const skillNameEl = document.getElementById('skill-name');
     const skillDescEl = document.getElementById('skill-description');
@@ -438,9 +458,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cooldownEl = document.getElementById('skill-cooldown');
     const cooldownWrapper = cooldownEl ? cooldownEl.parentElement : null;
     const skillDetailImageEl = document.getElementById('skill-detail-image');
+    const skillDetailCardEl = document.querySelector('.skill-detail-card');
     const skillDetailMetaEl = document.querySelector('.skill-detail-meta');
     const skillViewer = document.querySelector('.skillviewer');
-    const skillScroll = document.querySelector('.skillscroll');
     const skillImagesContainer = document.querySelector('.skill-images');
     let skillImages = Array.from(document.querySelectorAll('.skill-image'));
     const selectedSlots = Array.from(document.querySelectorAll('.selected-character-slot'));
@@ -987,6 +1007,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dynamicSkillSignatureByKey = new Map();
         let queuedTargetSignatureByCard = new WeakMap();
         let lastMatchStateSignature = '';
+        let observedCombatEventIds = null;
         let latestGauntletIndicatorMatch = null;
         let gauntletRunIndicatorFallback = null;
         let gauntletRunIndicatorFallbackKey = '';
@@ -1241,6 +1262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
             return statuses.reduce(
                 (totals, status) => {
+                    if ((Number(status?.remainingTurns) || 0) <= 0) return totals;
                     const metadata = status?.metadata || {};
                     const classScopedMap =
                         metadata.randomCostIncreaseForSkillClasses &&
@@ -1320,8 +1342,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return normalizedEnergy;
             }
             const reductions = getActorCostReductions(actorSlot);
-            let remainingRandomReduction = Math.max(0, reductions.random);
-            let remainingSpecificReductions = {
+            const baseCost = getEnergyCost(normalizedEnergy);
+            const specificReductions = {
                 taijutsu: Math.max(0, reductions.taijutsu),
                 ninjutsu: Math.max(0, reductions.ninjutsu),
                 bloodline: Math.max(0, reductions.bloodline),
@@ -1343,7 +1365,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 (sum, map) => {
                     let statusIncrease = 0;
                     Object.entries(map).forEach(([className, amount]) => {
-                        if (!skillClasses.includes(String(className).toLowerCase())) return;
+                        const normalizedClass = String(className).toLowerCase() === 'energy'
+                            ? 'chakra'
+                            : String(className).toLowerCase();
+                        if (!skillClasses.includes(normalizedClass)) return;
                         statusIncrease = Math.max(statusIncrease, Math.max(0, Number(amount) || 0));
                     });
                     return sum + statusIncrease;
@@ -1354,29 +1379,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 Math.max(0, reductions.randomIncrease) +
                 (skillIsMental ? 0 : Math.max(0, reductions.nonMentalRandomIncrease)) +
                 classScopedIncrease;
-            const reduced = [];
-            normalizedEnergy.forEach((entry) => {
-                const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
-                if (normalized === 'random' && remainingRandomReduction > 0) {
-                    remainingRandomReduction -= 1;
-                    return;
-                }
-                if (Object.prototype.hasOwnProperty.call(remainingSpecificReductions, normalized) &&
-                    remainingSpecificReductions[normalized] > 0) {
-                    remainingSpecificReductions[normalized] -= 1;
-                    return;
-                }
-                reduced.push(entry);
-            });
-            Object.entries(specificIncreases).forEach(([type, amount]) => {
+            const effective = [];
+            chakraTypes.forEach((type) => {
+                const amount = Math.max(0,
+                    (baseCost.specific[type] || 0) - specificReductions[type] + specificIncreases[type]
+                );
                 for (let i = 0; i < amount; i += 1) {
-                    reduced.push(type.charAt(0).toUpperCase() + type.slice(1));
+                    effective.push(type.charAt(0).toUpperCase() + type.slice(1));
                 }
             });
-            for (let i = 0; i < randomIncrease; i += 1) {
-                reduced.push('Random');
+            const effectiveRandom = Math.max(0,
+                baseCost.random + randomIncrease - Math.max(0, reductions.random)
+            );
+            for (let i = 0; i < effectiveRandom; i += 1) {
+                effective.push('Random');
             }
-            return reduced;
+            return effective;
         };
 
         const setSkillInteractivity = (isPlayersTurn) => {
@@ -1681,7 +1699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const isActorEnemyTargetingStunned = (actorUnit) => {
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
-            return statuses.some((status) => status?.metadata?.cannotUseHarmfulSkills);
+            return statuses.some((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.cannotUseHarmfulSkills);
         };
 
         const isSkillBlockedByClassLock = (actorUnit, skill) => {
@@ -1692,12 +1710,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : [];
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
             const isMental = skillClasses.includes('mental');
-            if (statuses.some((status) => status?.metadata?.cannotUseNonMentalSkills) && !isMental) {
+            if (statuses.some((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.cannotUseNonMentalSkills) && !isMental) {
                 return true;
             }
             if (!skillClasses.length) return false;
             const blockedClasses = new Set(
                 statuses.flatMap((status) => {
+                    if ((Number(status?.remainingTurns) || 0) <= 0) return [];
                     const blocked = status?.metadata?.cannotUseSkillClasses;
                     if (!Array.isArray(blocked)) return [];
                     return blocked
@@ -1712,6 +1731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isSkillBlockedByIndexLock = (actorUnit, skillIdx) => {
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
             return statuses.some((status) => {
+                if ((Number(status?.remainingTurns) || 0) <= 0) return false;
                 const blocked = status?.metadata?.cannotUseSkillIndices;
                 if (!Array.isArray(blocked)) return false;
                 return blocked.some((entry) => Number.parseInt(entry, 10) === Number.parseInt(skillIdx, 10));
@@ -1747,13 +1767,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const getCooldownRemainingForMeta = (meta, actorUnit) => {
             const cooldowns = actorUnit?.state?.cooldowns || {};
             const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
-            const skillId = effectiveSkill?.id;
+            const baseSkill = playerSkillMetaByKey.get(`${meta.actorSlot}:${meta.skillIdx}`)?.baseSkill;
+            const skillId = effectiveSkill?.useBaseSkillCooldown && baseSkill?.id
+                ? baseSkill.id
+                : effectiveSkill?.id;
             if (!skillId) return 0;
             return Math.max(0, Number(cooldowns[skillId]) || 0);
         };
         const isActorStunned = (actorUnit) => {
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
-            return statuses.some((status) => status?.metadata?.cannotUseSkills);
+            return statuses.some((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.cannotUseSkills);
         };
 
         const hasValidTargetsForSkill = (meta, actorUnit, effectiveSkill) => {
@@ -1897,10 +1920,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const badge = getCooldownBadgeForImage(meta.imgEl);
                 if (!badge) return;
                 const actorUnit = Array.isArray(playerUnits) ? playerUnits[meta.actorSlot] : null;
-                const cooldowns = actorUnit?.state?.cooldowns || {};
-                const effectiveSkill = getEffectiveSkillForActorSlot(meta.actorSlot, meta.skillIdx) || meta?.skill;
-                const skillId = effectiveSkill?.id || '';
-                const cooldownRemaining = skillId ? Math.max(0, Number(cooldowns[skillId]) || 0) : 0;
+                const cooldownRemaining = getCooldownRemainingForMeta(meta, actorUnit);
                 if (cooldownRemaining > 0) {
                     badge.textContent = String(cooldownRemaining);
                     badge.style.display = 'flex';
@@ -3225,6 +3245,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const resolveStatusIconSrc = (group, statusSkill) => {
                 const statusesInGroup = Array.isArray(group?.statuses) ? group.statuses : [];
                 for (const status of statusesInGroup) {
+                    const statusIcon = status?.metadata?.statusIcon;
+                    if (typeof statusIcon === 'string' && statusIcon) return statusIcon;
                     const mapped = tentenWeaponStatusIconById[status?.id];
                     if (mapped) return mapped;
                 }
@@ -3767,12 +3789,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chakraPools: data.chakraPools || null,
                 pendingTurn: data.pendingTurn || null,
                 gauntletMatch: data.gauntletMatch || null,
+                combatEventIds: (Array.isArray(data.combatEvents) ? data.combatEvents : []).map((event) => event?.id),
             });
             if (matchStateSignature === lastMatchStateSignature) {
                 return;
             }
             lastMatchStateSignature = matchStateSignature;
             measureIngameStep('applyMatchState', () => {
+            const combatEvents = Array.isArray(data.combatEvents) ? data.combatEvents : [];
+            if (observedCombatEventIds === null) {
+                observedCombatEventIds = new Set(combatEvents.map((event) => event?.id).filter(Boolean));
+            } else {
+                const newCounterEvents = combatEvents.filter((event) =>
+                    event?.id && !observedCombatEventIds.has(event.id) && event.outcome === 'countered'
+                );
+                observedCombatEventIds = new Set(combatEvents.map((event) => event?.id).filter(Boolean));
+                newCounterEvents.slice(-2).forEach((event) => {
+                    const counterSkill = getRosterData()?.flatMap((character) => character?.skills || [])
+                        .find((skill) => skill?.id === event.counterSourceSkillId);
+                    const counterName = counterSkill?.name || event.counterSourceSkillName || 'Counter';
+                    showGameToast(`${counterName} countered ${event.skillName || 'a skill'}.`, 'warning', 4200);
+                });
+            }
             if (data.player?.username) {
                 currentPlayerUsername = data.player.username;
             }
@@ -4554,8 +4592,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const enemyCardsLocal = Array.from(document.querySelectorAll('.enemy-characters .character-card'));
                 playerCardsLocal.forEach((card) => card && card.classList.remove('targetable'));
                 if (!playerCardsLocal.length || !enemyCardsLocal.length) return;
-                const team = data.player?.team || [];
-                const enemyTeam = data.opponent?.team || [];
+                // The board owns each slot's character. A stored team can be out of
+                // sync with an existing match, which puts another unit's status
+                // (including its passive) beside the portrait from the team list.
+                const boardTeam = (username, fallbackTeam) => {
+                    const units = data.board?.[username];
+                    if (!Array.isArray(units)) return fallbackTeam;
+                    return units.map((unit, slot) =>
+                        Number.isInteger(unit?.rosterIndex) ? unit.rosterIndex : fallbackTeam[slot]
+                    );
+                };
+                const team = boardTeam(data.player?.username, data.player?.team || []);
+                const enemyTeam = boardTeam(data.opponent?.username, data.opponent?.team || []);
                 if (!Array.isArray(team) || team.length > playerCardsLocal.length) return;
                 if (!Array.isArray(enemyTeam) || enemyTeam.length > enemyCardsLocal.length) return;
                 currentPlayerTeamIndices = team.slice();
@@ -4688,6 +4736,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             card.classList.remove('action-invalid-shake');
                                             void card.offsetWidth;
                                             card.classList.add('action-invalid-shake');
+                                        } else if (isActorEnemyTargetingStunned(actorUnit) && skillIsEnemyTargeting(effectiveSkill)) {
+                                            showGameToast(`${character.name || 'Shinobi'} cannot target enemies right now.`, 'warning');
+                                        } else if (isSkillBlockedByClassLock(actorUnit, effectiveSkill) || isSkillBlockedByIndexLock(actorUnit, skillIdx)) {
+                                            showGameToast(`${effectiveSkill?.name || 'Skill'} is unavailable this turn.`, 'warning');
+                                        } else if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) {
+                                            showGameToast(`${effectiveSkill?.name || 'Skill'} needs its required condition.`, 'warning');
+                                        } else if (!hasValidTargetsForSkill({ actorSlot: slotIndex, skillIdx }, actorUnit, effectiveSkill)) {
+                                            showGameToast(`No legal targets for ${effectiveSkill?.name || 'skill'}.`, 'warning');
+                                        } else if (getQueuedSkillForActorSlot(slotIndex)) {
+                                            showGameToast(`Cancel ${character.name || 'this character'}'s queued skill first.`, 'warning');
                                         } else {
                                             const cd = getCooldownRemainingForMeta({ actorSlot: slotIndex, skillIdx }, actorUnit);
                                             if (cd > 0) {
@@ -5177,15 +5235,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchingBackdrop = document.querySelector('.searching-backdrop');
     const searchingOverlay = document.querySelector('.searchingscroll');
     const searchingMessage = document.querySelector('.searching');
-    const searchingSpinner = document.querySelector('.sharingan');
+    const searchingModeLabel = document.querySelector('.match-dialog-mode');
+    const searchingDetail = document.querySelector('.searching-detail');
+    const searchingWaiting = document.querySelector('.match-search-waiting');
+    const searchingOpening = document.querySelector('.match-search-opening');
     const cancelSearchingButton = document.querySelector('.cancel-button');
     const privateMatchBackdrop = document.querySelector('.private-match-backdrop');
     const privateMatchInput = document.querySelector('.private-match-input');
     const privateMatchError = document.querySelector('.private-match-error');
     const privateMatchOkButton = document.querySelector('.private-match-ok');
     const privateMatchCancelButton = document.querySelector('.private-match-cancel');
-    const defaultCancelButtonLabel = cancelSearchingButton ? cancelSearchingButton.textContent : '';
     let activeSearchTargetUsername = '';
+    let activeSearchMode = 'quick';
     const foundMatchSound = new Audio('sounds/found-match.mp3');
     const skillViewerOpenSound = new Audio('sounds/scroll_open.mp3');
     const skillViewerCloseSound = new Audio('sounds/scroll_close.mp3');
@@ -5224,69 +5285,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         soundManager.play(audio);
     };
 
-    const setSearchingState = (state = 'searching', mode = 'quick') => {
+    const setSearchingState = (state = 'searching', mode = activeSearchMode) => {
         if (!searchingMessage) return;
+        const modeLabels = { ladder: 'Ranked match', quick: 'Quick match', private: 'Private match', training: 'Training' };
+        if (searchingModeLabel) searchingModeLabel.textContent = modeLabels[mode] || modeLabels.quick;
+        searchingOverlay?.classList.toggle('is-found', state === 'found');
+        if (searchingWaiting) searchingWaiting.hidden = state === 'found';
+        if (searchingOpening) searchingOpening.hidden = state !== 'found';
+        if (cancelSearchingButton) cancelSearchingButton.disabled = state === 'found';
         if (state === 'found') {
-            searchingMessage.textContent = 'Opponent found!';
-            if (searchingSpinner) {
-                setImageSrcWithFallback(searchingSpinner, REMASTER_ASSETS.found, REMASTER_ASSETS.sharingan);
-                searchingSpinner.style.visibility = 'visible';
-                searchingSpinner.style.animation = 'none';
-            }
-            if (cancelSearchingButton) {
-                cancelSearchingButton.textContent = '';
-                cancelSearchingButton.disabled = true;
-                cancelSearchingButton.style.top = '';
-                cancelSearchingButton.style.left = '';
-                cancelSearchingButton.style.marginTop = '50px';
-                cancelSearchingButton.style.marginLeft = '125px';
-                cancelSearchingButton.style.width = '200px';
-                cancelSearchingButton.style.textAlign = 'center';
-                cancelSearchingButton.style.backgroundColor = 'transparent';
-                cancelSearchingButton.style.border = 'none';
-                cancelSearchingButton.style.pointerEvents = 'none';
-            }
+            searchingMessage.textContent = mode === 'training' ? 'Training battle ready' : 'Opponent found';
+            if (searchingDetail) searchingDetail.textContent = 'Your battle is about to begin.';
+            searchingMessage.focus({ preventScroll: true });
             playOneShotSound(foundMatchSound);
             return;
         }
         searchingMessage.textContent =
             mode === 'training'
-                ? 'Preparing training dummy'
+                ? 'Preparing training battle'
                 : mode === 'private' && activeSearchTargetUsername
                     ? `Searching for ${activeSearchTargetUsername}`
                     : 'Searching for an opponent';
-        if (searchingSpinner) {
-            setImageSrcWithFallback(searchingSpinner, REMASTER_ASSETS.sharingan, REMASTER_ASSETS.sharingan);
-            searchingSpinner.style.visibility = 'visible';
-            searchingSpinner.style.animation = '';
-        }
-        if (cancelSearchingButton) {
-            cancelSearchingButton.textContent = defaultCancelButtonLabel || 'Cancel';
-            cancelSearchingButton.disabled = false;
-            cancelSearchingButton.style.top = '';
-            cancelSearchingButton.style.left = '';
-            cancelSearchingButton.style.marginTop = '';
-            cancelSearchingButton.style.marginLeft = '';
-            cancelSearchingButton.style.width = '';
-            cancelSearchingButton.style.textAlign = '';
-            cancelSearchingButton.style.backgroundColor = '';
-            cancelSearchingButton.style.border = '';
-            cancelSearchingButton.style.pointerEvents = '';
-        }
+        if (searchingDetail) searchingDetail.textContent =
+            mode === 'ladder' ? 'Looking for a ranked opponent.'
+                : mode === 'private' ? 'Looking for this player in the private queue.'
+                    : mode === 'training' ? 'Setting up your practice battle.'
+                        : 'Looking for an available opponent.';
     };
 
     const openSearching = () => {
         if (!searchingOverlay || !searchingBackdrop) return;
         searchingBackdrop.classList.remove('hidden');
         searchingBackdrop.classList.add('visible');
+        if (!cancelSearchingButton?.disabled) cancelSearchingButton?.focus({ preventScroll: true });
     };
 
     const closeSearching = () => {
         if (!searchingOverlay || !searchingBackdrop) return;
+        const wasOpen = searchingBackdrop.classList.contains('visible');
+        const returnButton = activeSearchMode === 'ladder' ? ladderButton
+            : activeSearchMode === 'private' ? privateButton
+                : activeSearchMode === 'training' ? trainingDummyButton : quickButton;
         clearPendingMatchRedirect();
         setSearchingState('searching');
         searchingBackdrop.classList.add('hidden');
         searchingBackdrop.classList.remove('visible');
+        if (wasOpen) returnButton?.focus({ preventScroll: true });
     };
 
     closeSearching();
@@ -5313,6 +5357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (privateMatchError) {
             privateMatchError.textContent = '';
         }
+        privateButton?.focus({ preventScroll: true });
     };
 
     const scheduleMatchRedirect = (matchId, matchStartsAt) => {
@@ -5337,7 +5382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return true;
         }
         openSearching();
-        setSearchingState('found');
+        setSearchingState('found', activeSearchMode);
         isSearching = false;
         if (matchmakingPoll) {
             clearInterval(matchmakingPoll);
@@ -5410,6 +5455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         isSearching = true;
+        activeSearchMode = mode;
         activeSearchTargetUsername = mode === 'private' ? (options.targetUsername || '').trim() : '';
         setSearchingState('searching', mode);
         openSearching();
@@ -5450,6 +5496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         isSearching = true;
+        activeSearchMode = 'training';
         activeSearchTargetUsername = '';
         setSearchingState('searching', 'training');
         openSearching();
@@ -5581,37 +5628,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     const openSkillViewer = () => {
         if (!skillViewer || !skillViewer.classList.contains('collapsed')) return;
         skillViewer.classList.remove('collapsed');
+        skillViewer.setAttribute('aria-hidden', 'false');
         playSkillViewerSound(skillViewerOpenSound);
     };
 
     const closeSkillViewer = () => {
         if (!skillViewer || skillViewer.classList.contains('collapsed')) return;
         skillViewer.classList.add('collapsed');
+        skillViewer.setAttribute('aria-hidden', 'true');
+        rosterSlotElements.forEach((slot) => slot?.classList.remove('preview-active'));
+        if (skillViewer.contains(document.activeElement) && currentCharacterIndex !== null) {
+            rosterSlotElements[currentCharacterIndex]?.focus({ preventScroll: true });
+        }
         playSkillViewerSound(skillViewerCloseSound);
     };
 
     if (skillViewer) {
         closeSkillViewer();
+        skillViewer.setAttribute('aria-hidden', String(skillViewer.classList.contains('collapsed')));
     }
 
-    if (skillScroll && skillViewer) {
-        skillScroll.addEventListener('click', () => {
-            if (skillViewer.classList.contains('collapsed')) {
-                openSkillViewer();
-                return;
-            }
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || !skillViewer || skillViewer.classList.contains('collapsed')) return;
+        if (skillViewer.contains(document.activeElement) || slotList.contains(document.activeElement)) {
+            event.preventDefault();
             closeSkillViewer();
-        });
-    }
+        }
+    });
 
     let roster = Array.isArray(pageCharacterRoster) ? pageCharacterRoster : [];
+    if (pageName === 'selection.html') {
+        roster = await loadCharacterRoster();
+    }
+
+    const unlockActionEl = document.getElementById('character-unlock-action');
+    const unlockPriceEl = document.getElementById('character-unlock-price');
+    const unlockBuyBtn = document.getElementById('character-unlock-buy');
+    const unlockErrorEl = document.getElementById('character-unlock-error');
+    let rosterRyoBalance = loadedRosterRyoBalance;
+    const setRosterRyoBalance = (value) => {
+        rosterRyoBalance = Math.max(0, Number(value) || 0);
+        document.querySelectorAll('[data-shop-balance]').forEach((el) => {
+            el.textContent = Math.round(rosterRyoBalance).toLocaleString('en-US');
+        });
+    };
 
     const CHARACTERS_PER_PAGE = 21;
-    const totalSlots = Math.max(roster.length, CHARACTERS_PER_PAGE);
-    const totalPages = Math.max(1, Math.ceil(totalSlots / CHARACTERS_PER_PAGE));
+    let totalPages = 1;
     let currentRosterPage = 0;
+    let rosterLockMode = 'all';
     let currentCharacterIndex = null;
     slotList.innerHTML = '';
+
+    if (rosterArcFilterEl && rosterCatalog) {
+        const arcGroups = new Map();
+        rosterCatalog.listAvailableArcs(roster).forEach((arc) => {
+            let group = arcGroups.get(arc.series);
+            if (!group) {
+                group = document.createElement('optgroup');
+                group.label = arc.series;
+                rosterArcFilterEl.appendChild(group);
+                arcGroups.set(arc.series, group);
+            }
+            const option = document.createElement('option');
+            option.value = arc.id;
+            option.textContent = arc.label;
+            group.appendChild(option);
+        });
+    }
 
     const renderEnergy = (energyList = []) => {
         if (!energyBarEl) return;
@@ -5659,6 +5743,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setActiveSkillImage = (activeIndex) => {
         skillImages.forEach((img, idx) => {
             img.classList.toggle('active', idx === activeIndex);
+            img.setAttribute('aria-pressed', String(idx === activeIndex));
         });
     };
 
@@ -5684,14 +5769,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderSkill = (skill, activeIndex = 0) => {
         if (!skill) return;
+        skillDetailCardEl?.classList.remove('is-empty');
+        skillDetailCardEl?.classList.remove('is-passive');
+        if (skillDetailKindEl) skillDetailKindEl.hidden = true;
+        if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
         if (skillNameEl) {
             skillNameEl.textContent = skill.name || 'Skill name';
             skillNameEl.style.visibility = 'visible';
         }
         if (skillDescEl) {
-            skillDescEl.textContent = skill.skilldescription || '';
+            const description = skill.skilldescription || '';
+            const skillNames = (roster[currentCharacterIndex]?.skills || []).map((entry) => entry?.name);
+            if (typeof window.renderSkillDescription === 'function') {
+                window.renderSkillDescription(skillDescEl, description, skillNames);
+            } else {
+                skillDescEl.textContent = description;
+            }
+            skillDescEl.scrollTop = 0;
         }
         if (skillDetailImageEl) {
+            skillDetailImageEl.style.display = '';
             attachImageFallback(skillDetailImageEl, REMASTER_ASSETS.skillFallback);
             setImageSrcWithFallback(skillDetailImageEl, skill.skillimage, REMASTER_ASSETS.skillFallback);
             skillDetailImageEl.alt = skill.name || 'Selected skill';
@@ -5707,16 +5804,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         setActiveSkillImage(activeIndex);
     };
 
-    const renderCharacterOverview = (character) => {
-        if (skillNameEl) {
-            skillNameEl.textContent = '';
-            skillNameEl.style.visibility = 'hidden';
-        }
+    const renderPassive = (character) => {
+        const passive = character?.passive;
+        if (!passive || (!passive.name && !passive.description)) return;
+        skillDetailCardEl?.classList.remove('is-empty');
+        skillDetailCardEl?.classList.add('is-passive');
+        if (skillDetailKindEl) skillDetailKindEl.hidden = false;
+        if (passiveEl) passiveEl.setAttribute('aria-pressed', 'true');
+        if (skillNameEl) skillNameEl.textContent = passive.name || 'Passive effect';
         if (skillDescEl) {
-            skillDescEl.textContent = '';
+            if (typeof window.renderSkillDescription === 'function') {
+                window.renderSkillDescription(skillDescEl, passive.description || '',
+                    (character.skills || []).map((skill) => skill?.name));
+            } else {
+                skillDescEl.textContent = passive.description || '';
+            }
+            skillDescEl.scrollTop = 0;
         }
         if (skillDetailImageEl) {
-            setImageSrcWithFallback(skillDetailImageEl, '', REMASTER_ASSETS.skillFallback);
+            attachImageFallback(skillDetailImageEl, REMASTER_ASSETS.skillFallback);
+            setImageSrcWithFallback(skillDetailImageEl, passive.icon, REMASTER_ASSETS.skillFallback);
+            skillDetailImageEl.alt = '';
+            skillDetailImageEl.style.display = '';
+        }
+        if (skillDetailMetaEl) skillDetailMetaEl.style.display = 'none';
+        setActiveSkillImage(-1);
+    };
+
+    const renderCharacterOverview = () => {
+        skillDetailCardEl?.classList.add('is-empty');
+        skillDetailCardEl?.classList.remove('is-passive');
+        if (skillDetailKindEl) skillDetailKindEl.hidden = true;
+        if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
+        if (skillNameEl) {
+            skillNameEl.textContent = 'No skills to preview';
+            skillNameEl.style.visibility = 'visible';
+        }
+        if (skillDescEl) {
+            skillDescEl.textContent = 'This character has no visible skills.';
+        }
+        if (skillDetailImageEl) {
+            skillDetailImageEl.style.display = 'none';
             skillDetailImageEl.alt = '';
         }
         if (skillDetailMetaEl) {
@@ -5745,8 +5873,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderCharacter = (character, index) => {
         if (!character) return;
         currentCharacterIndex = index;
+        rosterSlotElements.forEach((slot) => slot?.classList.remove('preview-active'));
+        if (!skillViewer?.classList.contains('collapsed') && rosterSlotElements[index] && !rosterSlotElements[index].classList.contains('slot-empty')) {
+            rosterSlotElements[index].classList.add('preview-active');
+        }
         if (nameEl) {
             nameEl.textContent = character.name || 'Unknown shinobi';
+        }
+        if (characterArcEl) {
+            const arc = rosterCatalog?.getArc(character);
+            characterArcEl.hidden = !arc;
+            characterArcEl.textContent = arc ? `${arc.series} / ${arc.label}` : '';
         }
         if (charBioEl) {
             charBioEl.textContent =
@@ -5754,12 +5891,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 character.characterdeescription ||
                 '';
         }
+        if (passiveEl) {
+            const passive = character.passive;
+            const hasPassive = Boolean(passive && (passive.name || passive.description));
+            passiveEl.hidden = !hasPassive;
+            if (hasPassive) {
+                if (passiveNameEl) passiveNameEl.textContent = passive.name || 'Passive effect';
+                if (passiveImageEl) {
+                    attachImageFallback(passiveImageEl, REMASTER_ASSETS.skillFallback);
+                    setImageSrcWithFallback(passiveImageEl, passive.icon, REMASTER_ASSETS.skillFallback);
+                    passiveImageEl.alt = '';
+                }
+                passiveEl.onclick = () => renderPassive(character);
+                passiveEl.setAttribute('aria-label', `View passive effect: ${passive.name || 'Passive effect'}`);
+            }
+        }
+        if (unlockActionEl) {
+            const locked = character.unlocked === false;
+            unlockActionEl.hidden = !locked;
+            if (unlockPriceEl) unlockPriceEl.textContent = Math.max(0, Number(character.shopPrice) || 1000).toLocaleString('en-US');
+            if (unlockErrorEl) unlockErrorEl.textContent = '';
+            if (unlockBuyBtn) {
+                const price = Math.max(0, Number(character.shopPrice) || 1000);
+                unlockBuyBtn.disabled = locked && rosterRyoBalance < price;
+                unlockBuyBtn.textContent = locked && rosterRyoBalance < price ? 'Not enough Ryo' : 'Unlock character';
+            }
+        }
         if (portraitEl) {
             attachImageFallback(portraitEl, REMASTER_ASSETS.characterFallback);
             setImageSrcWithFallback(portraitEl, character.facePicture, REMASTER_ASSETS.characterFallback);
             portraitEl.alt = character.name ? `${character.name} portrait` : 'Character portrait';
         }
-        renderCharacterOverview(character);
         if (Array.isArray(character.skills)) {
             const viewerSkills = character.skills.filter(
                 (skill) => skill && !skill.omitFromSelectionViewer
@@ -5780,22 +5942,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                         : skill.name || `Skill ${skillIdx + 1}`;
                     targetImg.classList.toggle('alternate-skill', Boolean(skill.hiddenFromSelectionViewer));
                     targetImg.style.visibility = 'visible';
+                    targetImg.setAttribute('role', 'button');
+                    targetImg.setAttribute('aria-label', `View ${targetImg.title}`);
+                    targetImg.tabIndex = 0;
+                    targetImg.draggable = false;
                     targetImg.onclick = () => handleSkillSelect(skillIdx);
+                    targetImg.onkeydown = (event) => {
+                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                        event.preventDefault();
+                        handleSkillSelect(skillIdx);
+                    };
                 } else {
                     setImageSrcWithFallback(targetImg, '', REMASTER_ASSETS.skillFallback);
                     targetImg.alt = `Skill ${skillIdx + 1}`;
                     targetImg.title = '';
                     targetImg.classList.remove('alternate-skill');
                     targetImg.style.visibility = 'hidden';
+                    targetImg.tabIndex = -1;
                     targetImg.onclick = null;
+                    targetImg.onkeydown = null;
                 }
             });
+            if (viewerSkills.length) renderSkill(viewerSkills[0], 0);
+            else if (character.passive) renderPassive(character);
+            else renderCharacterOverview();
+        } else {
+            ensureSkillImageSlots(0);
+            if (character.passive) renderPassive(character);
+            else renderCharacterOverview();
         }
     };
 
-    const handleCharacterSelect = (index, { openViewer = true } = {}) => {
+    const handleCharacterSelect = (index, { openViewer = true, toggleViewer = false } = {}) => {
         const character = roster[index];
         if (!character) return;
+        if (toggleViewer && currentCharacterIndex === index && !skillViewer?.classList.contains('collapsed')) {
+            closeSkillViewer();
+            return;
+        }
         if (openViewer) {
             openSkillViewer();
         }
@@ -5824,8 +6008,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rosterSlot = rosterSlotElements[rosterIndex];
         if (
             rosterSlot &&
-            (rosterSlot.classList.contains('slot-empty') || rosterSlot.classList.contains('slot-locked'))
+            (rosterSlot.classList.contains('slot-empty') || rosterSlot.classList.contains('slot-locked') || rosterSlot.classList.contains('slot-in-team'))
         ) {
+            event.preventDefault();
             return;
         }
         const character = roster[rosterIndex];
@@ -5878,41 +6063,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleSlotDragEnd = () => {};
 
-    const clearRosterSlot = (index) => {
-        const slot = rosterSlotElements[index];
-        if (!slot) return;
-        slot.innerHTML = '';
-        slot.classList.add('slot-empty');
-        slot.classList.remove('slot-locked');
-        slot.draggable = false;
-        slot.title = '';
-    };
-
     const buildRosterSlot = (index) => {
         const slot = rosterSlotElements[index];
         const character = roster[index];
         if (!slot) return;
         slot.innerHTML = '';
         const isSelected = selectedAssignments.some((assignment) => assignment?.rosterIndex === index);
-        if (!character || isSelected) {
+        if (!character) {
             slot.classList.add('slot-empty');
-            slot.classList.remove('slot-locked');
+            slot.classList.remove('slot-locked', 'slot-in-team');
+            slot.classList.remove('preview-active');
             slot.draggable = false;
             slot.title = '';
             return;
         }
         slot.classList.remove('slot-empty');
         const locked = character.unlocked === false;
-        slot.classList.toggle('slot-locked', locked);
-        slot.draggable = !locked;
-        slot.title = locked ? `${character.name || 'Character'} is locked.` : '';
+        slot.classList.toggle('slot-locked', locked && !isSelected);
+        slot.classList.toggle('slot-in-team', isSelected);
+        slot.draggable = !locked && !isSelected;
+        const arc = rosterCatalog?.getArc(character);
+        slot.title = [character.name || 'Character', arc?.label, isSelected ? 'In team — click to preview' : locked ? 'Locked — open to unlock with Ryo' : 'Double click to add to team']
+            .filter(Boolean).join(' · ');
+        slot.setAttribute('aria-label', `${character.name || 'Character'}, ${arc?.label || 'arc not assigned'}, ${isSelected ? 'in team' : locked ? 'locked' : 'unlocked'}`);
         const image = document.createElement('img');
         image.className = 'slot-image';
         attachImageFallback(image, REMASTER_ASSETS.characterFallback);
         setImageSrcWithFallback(image, character.facePicture, REMASTER_ASSETS.characterFallback);
         image.alt = character.name || `Character ${index + 1}`;
+        image.draggable = !locked && !isSelected;
         slot.appendChild(image);
-        if (locked) {
+        if (isSelected) {
+            const teamLabel = document.createElement('span');
+            teamLabel.className = 'slot-team-label';
+            teamLabel.textContent = 'IN TEAM';
+            slot.appendChild(teamLabel);
+        } else if (locked) {
             const lock = document.createElement('span');
             lock.className = 'slot-lock-label';
             lock.textContent = 'LOCKED';
@@ -5986,7 +6172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             isRosterIndexSelectable(payload.rosterIndex)
         ) {
             incoming = { characterIndex: payload.rosterIndex, rosterIndex: payload.rosterIndex };
-            clearRosterSlot(payload.rosterIndex);
         } else if (
             payload.type === 'selected' &&
             Number.isInteger(payload.selectedIndex) &&
@@ -6000,6 +6185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const displaced = selectedAssignments[targetSlotIndex];
         setSelectedSlot(targetSlotIndex, incoming);
+        if (Number.isInteger(incoming.rosterIndex)) buildRosterSlot(incoming.rosterIndex);
 
         if (displaced && Number.isInteger(displaced.rosterIndex)) {
             fillRosterSlot(displaced.rosterIndex);
@@ -6064,8 +6250,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (existingSlotIndex >= 0) return;
         const emptySlotIndex = selectedAssignments.findIndex((assignment) => !assignment);
         if (emptySlotIndex < 0) return;
-        clearRosterSlot(rosterIndex);
         setSelectedSlot(emptySlotIndex, { characterIndex: rosterIndex, rosterIndex });
+        buildRosterSlot(rosterIndex);
         updateGameButtons();
         persistTeamSelection();
     };
@@ -6107,23 +6293,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    const updateRosterLockFilter = () => {
+        if (!rosterLockFilterEl) return;
+        const labels = {
+            all: ['Showing all characters. Click to show unlocked characters.', 'All characters — click for unlocked'],
+            unlocked: ['Showing unlocked characters. Click to show locked characters.', 'Unlocked characters — click for locked'],
+            locked: ['Showing locked characters. Click to show all characters.', 'Locked characters — click for all'],
+        };
+        rosterLockFilterEl.dataset.state = rosterLockMode;
+        rosterLockFilterEl.setAttribute('aria-label', labels[rosterLockMode][0]);
+        rosterLockFilterEl.title = labels[rosterLockMode][1];
+    };
+
     const renderRosterPage = () => {
         slotList.innerHTML = '';
         rosterSlotElements.length = 0;
+        const search = rosterSearchEl?.value || '';
+        const arc = rosterArcFilterEl?.value || '';
+        const availability = rosterLockMode === 'all' ? '' : rosterLockMode;
+        const sort = rosterSortEl?.value || 'arc';
+        const visibleIndices = rosterCatalog
+            ? rosterCatalog.filterRosterIndices(roster, { search, arc, availability, sort })
+            : roster.map((_, index) => index);
+        totalPages = Math.max(1, Math.ceil(visibleIndices.length / CHARACTERS_PER_PAGE));
+        currentRosterPage = Math.min(currentRosterPage, totalPages - 1);
+        document.querySelector('.selectionpage')?.setAttribute('data-has-roster-pages', totalPages > 1 ? 'true' : 'false');
+        if (rosterResultCountEl) {
+            const count = visibleIndices.length;
+            rosterResultCountEl.textContent = `${count} ${count === 1 ? 'character' : 'characters'}`
+                + (totalPages > 1 ? ` · Page ${currentRosterPage + 1} of ${totalPages}` : '');
+        }
+        if (rosterEmptyEl) rosterEmptyEl.hidden = visibleIndices.length > 0;
         const pageStart = currentRosterPage * CHARACTERS_PER_PAGE;
         const pageEnd = pageStart + CHARACTERS_PER_PAGE;
 
-        for (let i = pageStart; i < pageEnd; i += 1) {
+        for (const i of visibleIndices.slice(pageStart, pageEnd)) {
             const listItem = document.createElement('li');
             listItem.className = 'slot-item';
             listItem.dataset.index = i;
+            listItem.tabIndex = 0;
+            listItem.setAttribute('role', 'button');
             listItem.addEventListener('dragover', handleRosterDragOver);
             listItem.addEventListener('drop', (event) => handleRosterDrop(event, i));
 
             const handleClick = () => {
                 if (listItem.classList.contains('slot-empty')) return;
+                if (listItem.classList.contains('slot-in-team')) {
+                    handleCharacterSelect(i, { toggleViewer: true });
+                    return;
+                }
                 if (listItem.classList.contains('slot-locked')) {
-                    openCharacterUnlockModal(roster[i]);
+                    handleCharacterSelect(i, { toggleViewer: true });
                     return;
                 }
                 const now = Date.now();
@@ -6138,21 +6358,60 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 queueSelectionPreview(() => {
                     if (listItem.classList.contains('slot-empty') || listItem.classList.contains('slot-locked')) return;
-                    handleCharacterSelect(i);
+                    handleCharacterSelect(i, { toggleViewer: true });
                 });
             };
 
             listItem.addEventListener('click', handleClick);
+            listItem.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                handleClick();
+            });
             listItem.addEventListener('dragstart', (event) => handleSlotDragStart(event, i));
             listItem.addEventListener('dragend', handleSlotDragEnd);
 
             rosterSlotElements[i] = listItem;
             slotList.appendChild(listItem);
             buildRosterSlot(i);
+            if (i === currentCharacterIndex && !skillViewer?.classList.contains('collapsed') && !listItem.classList.contains('slot-empty')) {
+                listItem.classList.add('preview-active');
+            }
+        }
+
+        const shownCount = Math.max(0, Math.min(CHARACTERS_PER_PAGE, visibleIndices.length - pageStart));
+        for (let cell = shownCount; cell < CHARACTERS_PER_PAGE; cell += 1) {
+            const placeholder = document.createElement('li');
+            placeholder.className = 'slot-item slot-placeholder';
+            placeholder.setAttribute('aria-hidden', 'true');
+            slotList.appendChild(placeholder);
         }
 
         updateRosterPageButtons();
     };
+
+    const resetRosterFilters = () => {
+        if (rosterSearchEl) rosterSearchEl.value = '';
+        if (rosterArcFilterEl) rosterArcFilterEl.value = '';
+        rosterLockMode = 'all';
+        updateRosterLockFilter();
+        currentRosterPage = 0;
+        renderRosterPage();
+        rosterSearchEl?.focus();
+    };
+    [rosterSearchEl, rosterArcFilterEl, rosterSortEl].forEach((control) => {
+        control?.addEventListener(control === rosterSearchEl ? 'input' : 'change', () => {
+            currentRosterPage = 0;
+            renderRosterPage();
+        });
+    });
+    rosterLockFilterEl?.addEventListener('click', () => {
+        rosterLockMode = { all: 'unlocked', unlocked: 'locked', locked: 'all' }[rosterLockMode];
+        updateRosterLockFilter();
+        currentRosterPage = 0;
+        renderRosterPage();
+    });
+    rosterEmptyResetEl?.addEventListener('click', resetRosterFilters);
 
     selectedSlots.forEach((slot, slotIndex) => {
         slot.addEventListener('click', () => {
@@ -6188,7 +6447,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!isRosterIndexSelectable(rosterIdx)) return;
             if (used.has(rosterIdx)) return;
             const assignment = { characterIndex: rosterIdx, rosterIndex: rosterIdx };
-            clearRosterSlot(rosterIdx);
             setSelectedSlot(slotIdx, assignment);
             used.add(rosterIdx);
         });
@@ -6212,73 +6470,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const openCharacterUnlockModal = (character = {}) => {
-        const unlockModalEl = document.getElementById('character-unlock-modal');
-        if (!unlockModalEl || !character) return;
-
-        const avatarEl = document.getElementById('unlock-modal-avatar');
-        const titleEl = document.getElementById('unlock-modal-title');
-        const rankEl = document.getElementById('unlock-modal-rank');
-        const descEl = document.getElementById('unlock-modal-desc');
-        const priceEl = document.getElementById('unlock-modal-price');
-        const buyBtn = document.getElementById('unlock-modal-buy-btn');
-        const missionBtn = document.getElementById('unlock-modal-mission-btn');
-        const closeBtn = document.getElementById('unlock-modal-close');
-        const errorEl = document.getElementById('unlock-modal-error');
-
-        if (avatarEl) setImageSrcWithFallback(avatarEl, character.facePicture, REMASTER_ASSETS.characterFallback);
-        if (titleEl) titleEl.textContent = character.name || character.id || 'Ninja';
-        if (rankEl) rankEl.textContent = `Required Mission: ${character.requiredMissionId || 'Chunins & Above'}`;
-        if (descEl) descEl.textContent = character.characterdeescription || 'Master shinobi with unique battle skills.';
-        if (errorEl) errorEl.textContent = '';
-
-        const price = character.shopPrice || 1000;
-        if (priceEl) priceEl.textContent = price.toLocaleString();
-
-        if (missionBtn) {
-            if (character.requiredMissionId) {
-                missionBtn.href = `missions.html?missionId=${encodeURIComponent(character.requiredMissionId)}`;
-                missionBtn.style.display = 'inline-flex';
-            } else {
-                missionBtn.style.display = 'none';
+    if (unlockBuyBtn) {
+        unlockBuyBtn.addEventListener('click', async () => {
+            const character = roster[currentCharacterIndex];
+            if (!character || character.unlocked !== false) return;
+            unlockBuyBtn.disabled = true;
+            unlockBuyBtn.textContent = 'Unlocking...';
+            if (unlockErrorEl) unlockErrorEl.textContent = '';
+            try {
+                const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ characterId: character.characterId || character.id }),
+                });
+                const data = await response.json();
+                if (!response.ok || !data?.ok) throw new Error(data?.error || 'Unable to unlock this character.');
+                character.unlocked = true;
+                setRosterRyoBalance(data.ryo);
+                renderRosterPage();
+                renderCharacter(character, currentCharacterIndex);
+                soundManager.play(new Audio('sounds/start-round.mp3'));
+            } catch (error) {
+                if (unlockErrorEl) unlockErrorEl.textContent = error.message || 'Unable to unlock this character.';
+                unlockBuyBtn.disabled = false;
+                unlockBuyBtn.textContent = 'Try again';
             }
-        }
-
-        if (closeBtn) closeBtn.onclick = () => unlockModalEl.classList.add('hidden');
-
-        if (buyBtn) {
-            buyBtn.onclick = async () => {
-                buyBtn.disabled = true;
-                if (errorEl) errorEl.textContent = 'Unlocking character...';
-                try {
-                    const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ characterId: character.characterId || character.id })
-                    });
-                    const data = await response.json();
-                    if (!response.ok || !data?.ok) {
-                        throw new Error(data?.error || 'Could not complete purchase.');
-                    }
-                    unlockModalEl.classList.add('hidden');
-                    character.unlocked = true;
-                    if (Array.isArray(window.characters)) {
-                        const charObj = window.characters.find((c) => (c.characterId || c.id) === (character.characterId || character.id));
-                        if (charObj) charObj.unlocked = true;
-                    }
-                    renderRosterPage();
-                    soundManager.play(new Audio('sounds/start-round.mp3'));
-                } catch (err) {
-                    if (errorEl) errorEl.textContent = err.message || 'Purchase failed.';
-                } finally {
-                    buyBtn.disabled = false;
-                }
-            };
-        }
-
-        unlockModalEl.classList.remove('hidden');
-    };
+        });
+    }
 
     renderRosterPage();
     updateGameButtons();

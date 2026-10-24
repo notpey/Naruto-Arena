@@ -253,6 +253,9 @@
   var newsResetButton = document.getElementById("news-reset-button");
   var newsPostList = document.getElementById("news-post-list");
   var newsPostListStatus = document.getElementById("news-post-list-status");
+  var newsLivePreview = document.getElementById("news-live-preview");
+  var newsEditorHeading = document.getElementById("news-editor-heading");
+  var newsCatalogStatus = document.getElementById("news-catalog-status");
   var latestReleasesForm = document.getElementById("latest-releases-form");
   var latestReleaseSelects = [
     document.getElementById("latest-release-1"),
@@ -265,6 +268,8 @@
   var maintenanceModeStatus = document.getElementById("maintenance-mode-status");
   var maintenanceModeToggleButton = document.getElementById("maintenance-mode-toggle-button");
   var adminNewsPosts = [];
+  var isNewsEditorDirty = false;
+  var newsEditorAuthor = "";
   var characterCatalog = [];
   var adminLatestReleases = [];
   var maintenanceModeEnabled = false;
@@ -673,13 +678,15 @@
     title.textContent = post && post.title ? String(post.title) : "Untitled Post";
     article.appendChild(title);
 
-    var meta = document.createElement("p");
-    meta.className = "mainsection-meta";
-    meta.innerHTML = "&raquo; " + formatDateTime(post && post.updatedAt ? post.updatedAt : post && post.createdAt) + " by <span class=\"byline\"></span>";
-    var byline = meta.querySelector(".byline");
-    if (byline) {
-      byline.textContent = post && post.author ? String(post.author) : "Unknown";
-    }
+    var meta = document.createElement("div");
+    meta.className = "news-post-meta";
+    meta.appendChild(window.ArenaNewsAuthor.create(post && post.author ? String(post.author) : "Unknown"));
+    var published = document.createElement("time");
+    published.className = "news-post-date";
+    var publishedAt = post && (post.updatedAt || post.createdAt);
+    if (publishedAt) published.dateTime = String(publishedAt);
+    published.textContent = formatDateTime(publishedAt);
+    meta.appendChild(published);
     article.appendChild(meta);
 
     var body = document.createElement("div");
@@ -698,8 +705,27 @@
         return;
       }
       if (block && block.text) {
+        var blockText = String(block.text);
+        if (blockText.indexOf("## ") === 0) {
+          var heading = document.createElement("h3");
+          heading.className = "news-article-heading";
+          heading.textContent = blockText.slice(3);
+          body.appendChild(heading);
+          return;
+        }
+        if (blockText.split("\n").every(function (line) { return line.indexOf("- ") === 0; })) {
+          var list = document.createElement("ul");
+          list.className = "news-article-list";
+          blockText.split("\n").forEach(function (line) {
+            var item = document.createElement("li");
+            item.textContent = line.slice(2);
+            list.appendChild(item);
+          });
+          body.appendChild(list);
+          return;
+        }
         var paragraph = document.createElement("p");
-        paragraph.textContent = String(block.text);
+        paragraph.textContent = blockText;
         body.appendChild(paragraph);
       }
     });
@@ -818,6 +844,13 @@
     }
 
     article.appendChild(body);
+    if (post && post.id) {
+      var readMore = document.createElement("a");
+      readMore.className = "news-post-read";
+      readMore.href = "news.html?post=" + encodeURIComponent(String(post.id));
+      readMore.textContent = "Read full announcement";
+      article.appendChild(readMore);
+    }
     return article;
   }
 
@@ -902,7 +935,28 @@
     if (newsPostIdInput) {
       newsPostIdInput.value = "";
     }
+    newsEditorAuthor = currentSessionUser && currentSessionUser.username ? currentSessionUser.username : "Preview";
+    if (window.ArenaNewsComposer) window.ArenaNewsComposer.reset();
+    if (newsEditorHeading) newsEditorHeading.textContent = "New announcement";
+    if (newsSaveButton) newsSaveButton.textContent = "Publish post";
+    isNewsEditorDirty = false;
+    if (newsPostList) renderAdminNewsPosts(adminNewsPosts);
+    renderNewsPreview();
     setNewsAdminStatus("");
+  }
+
+  function renderNewsPreview() {
+    if (!newsLivePreview || !window.ArenaNewsComposer) return;
+    var blocks = window.ArenaNewsComposer.getBlocks();
+    var changes = window.ArenaNewsComposer.getChanges();
+    var preview = renderNewsPost({
+      title: newsTitleInput && newsTitleInput.value.trim() ? newsTitleInput.value.trim() : "Your headline appears here",
+      author: newsEditorAuthor || (currentSessionUser && currentSessionUser.username) || "Preview",
+      createdAt: new Date().toISOString(),
+      blocks: blocks,
+      changes: changes
+    });
+    newsLivePreview.replaceChildren(preview);
   }
 
   function populateNewsEditor(post) {
@@ -913,9 +967,14 @@
     if (newsPostIdInput) {
       newsPostIdInput.value = post.id || "";
     }
+    newsEditorAuthor = post.author || "Unknown";
     if (newsTitleInput) {
       newsTitleInput.value = post.title || "";
     }
+    if (window.ArenaNewsComposer) window.ArenaNewsComposer.load(post);
+    if (newsEditorHeading) newsEditorHeading.textContent = "Edit announcement";
+    if (newsSaveButton) newsSaveButton.textContent = "Save changes";
+    isNewsEditorDirty = false;
     if (newsContentInput) {
       newsContentInput.value = buildNewsEditorText(post.blocks || []);
     }
@@ -939,6 +998,7 @@
       }).join("\n") : "";
     }
     setNewsAdminStatus("");
+    renderNewsPreview();
   }
 
   function renderAdminNewsPosts(posts) {
@@ -965,7 +1025,10 @@
       button.style.border = "0";
       button.style.background = "transparent";
       button.addEventListener("click", function () {
+        if (isNewsEditorDirty && !window.confirm("Discard your unsaved changes and open this post?")) return;
         populateNewsEditor(post);
+        renderAdminNewsPosts(adminNewsPosts);
+        if (newsTitleInput) newsTitleInput.focus();
       });
 
       var title = document.createElement("span");
@@ -978,11 +1041,20 @@
       deleteButton.className = "news-post-delete";
       deleteButton.textContent = "Delete";
       deleteButton.addEventListener("click", function () {
+        if (!window.confirm("Delete this published post? This cannot be undone.")) return;
         deleteNewsPost(post && post.id ? String(post.id) : "");
       });
 
+      var viewLink = document.createElement("a");
+      viewLink.className = "news-post-view";
+      viewLink.href = "news.html?post=" + encodeURIComponent(String(post && post.id ? post.id : ""));
+      viewLink.textContent = "View";
+      var entryActions = document.createElement("div");
+      entryActions.className = "news-post-entry-actions";
+      entryActions.appendChild(viewLink);
+      entryActions.appendChild(deleteButton);
       row.appendChild(button);
-      row.appendChild(deleteButton);
+      row.appendChild(entryActions);
       entry.appendChild(row);
 
       var meta = document.createElement("span");
@@ -990,6 +1062,8 @@
       meta.textContent = formatDateTime(post && post.updatedAt ? post.updatedAt : post && post.createdAt) +
         " | " + (post && post.author ? String(post.author) : "Unknown");
       entry.appendChild(meta);
+
+      if (post && newsPostIdInput && newsPostIdInput.value === post.id) entry.classList.add("is-selected");
 
       newsPostList.appendChild(entry);
     });
@@ -1020,7 +1094,7 @@
   }
 
   async function loadCharacterCatalog() {
-    if (!newsChangesInput && !latestReleasesForm) {
+    if (!newsChangesInput && !latestReleasesForm && !window.ArenaNewsComposer) {
       return;
     }
     try {
@@ -1031,11 +1105,16 @@
         return {};
       });
       if (!response.ok) {
+        if (newsCatalogStatus) { newsCatalogStatus.textContent = "Character list unavailable. Reload this page to try again."; newsCatalogStatus.dataset.state = "error"; }
         return;
       }
       characterCatalog = data && Array.isArray(data.characters) ? data.characters : [];
+      if (newsCatalogStatus) newsCatalogStatus.textContent = characterCatalog.length ? "" : "No characters are available yet.";
+      if (window.ArenaNewsComposer) window.ArenaNewsComposer.setCatalog(characterCatalog);
       populateLatestReleaseSelectOptions();
-    } catch (error) {}
+    } catch (error) {
+      if (newsCatalogStatus) { newsCatalogStatus.textContent = "Character list unavailable. Reload this page to try again."; newsCatalogStatus.dataset.state = "error"; }
+    }
   }
 
   function populateLatestReleaseSelectOptions() {
@@ -1211,8 +1290,12 @@
       setNewsAdminStatus("Title is required.", "error");
       return;
     }
-    var blocks = buildNewsBlocksFromText(newsContentInput && newsContentInput.value ? newsContentInput.value : "");
-    var changes = parseNewsChanges(newsChangesInput && newsChangesInput.value ? newsChangesInput.value : "");
+    var blocks = window.ArenaNewsComposer ? window.ArenaNewsComposer.getBlocks() : buildNewsBlocksFromText(newsContentInput && newsContentInput.value ? newsContentInput.value : "");
+    var changes = window.ArenaNewsComposer ? window.ArenaNewsComposer.getChanges() : parseNewsChanges(newsChangesInput && newsChangesInput.value ? newsChangesInput.value : "");
+    if (!blocks.length && !changes.length) {
+      setNewsAdminStatus("Add article content or a character change before publishing.", "error");
+      return;
+    }
     var payload = {
       title: title,
       blocks: blocks,
@@ -1243,8 +1326,8 @@
         setNewsAdminStatus(data && data.error ? data.error : "Unable to save news post.", "error");
         return;
       }
-      setNewsAdminStatus("News post saved.", "success");
       populateNewsEditor(data && data.post ? data.post : null);
+      setNewsAdminStatus("News post saved.", "success");
       loadAdminNewsPosts();
       loadPublicNews();
     } catch (error) {
@@ -3602,6 +3685,10 @@
 
   function setCurrentSessionUser(user) {
     currentSessionUser = user && user.username ? user : null;
+    if (newsLivePreview && currentSessionUser && (!newsPostIdInput || !newsPostIdInput.value)) {
+      newsEditorAuthor = currentSessionUser.username;
+      renderNewsPreview();
+    }
     updateClanPanelNotification(currentSessionUser);
     if (currentSessionUser) {
       reportCurrentActivity();
@@ -4036,6 +4123,14 @@
   }
 
   if (newsAdminForm) {
+    if (window.ArenaNewsComposer) window.ArenaNewsComposer.setOnChange(renderNewsPreview);
+    if (newsTitleInput) newsTitleInput.addEventListener("input", renderNewsPreview);
+    newsAdminForm.addEventListener("input", function () { isNewsEditorDirty = true; });
+    newsAdminForm.addEventListener("change", function () { isNewsEditorDirty = true; });
+    newsAdminForm.addEventListener("click", function (event) {
+      if (event.target.closest("[data-news-add-block], #news-add-change, [data-action]")) isNewsEditorDirty = true;
+    });
+    renderNewsPreview();
     newsAdminForm.addEventListener("submit", function (event) {
       event.preventDefault();
       saveNewsPost();
@@ -4044,6 +4139,7 @@
 
   if (newsResetButton) {
     newsResetButton.addEventListener("click", function () {
+      if (isNewsEditorDirty && !window.confirm("Discard your unsaved changes and start a new post?")) return;
       resetNewsEditor();
     });
   }

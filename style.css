@@ -119,7 +119,7 @@
 .game-remaster {
     --game-stage-w: var(--game-remaster-stage-w);
     --game-stage-h: var(--game-remaster-stage-h);
-    --remaster-selection-panel-left: 82px;
+    --remaster-selection-panel-left: calc((var(--game-remaster-stage-w) - var(--selection-panel-remaster-w)) / 2);
     --remaster-selection-panel-top: 468px;
     --remaster-panel-shadow:
         drop-shadow(0 10px 14px rgba(0, 0, 0, 0.38))

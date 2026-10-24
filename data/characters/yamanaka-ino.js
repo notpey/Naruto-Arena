@@ -239,7 +239,6 @@ module.exports = {
                             "yamanaka_ino_mind_body_switch_stage_2",
                             "yamanaka_ino_mind_body_switch_stage_3",
                             "nara_shikamaru_shadow_imitation",
-                            "haruno_sakura_ko_punch_stun",
                             "uzumaki_naruto_rasengan_stun"
                         ]
                     }

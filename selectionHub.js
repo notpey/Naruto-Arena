@@ -1001,7 +1001,12 @@
             loadedMissions = true;
             missionGrid.innerHTML = '<div class="selection-hub-env-empty">Loading missions...</div>';
             fetchJson("/api/missions").then(function (data) {
-                missions = (Array.isArray(data.missions) ? data.missions : []).map(normalizeMission).sort(function (a, b) {
+                var activeIds = new Set((Array.isArray(window.characters) ? window.characters : [])
+                    .map(function (character) { return character && character.characterId; })
+                    .filter(Boolean));
+                missions = (Array.isArray(data.missions) ? data.missions : []).map(normalizeMission).filter(function (mission) {
+                    return !mission.reward_character || activeIds.has(mission.reward_character);
+                }).sort(function (a, b) {
                     var levelDiff = (getLevelRequirementValue(a) || 0) - (getLevelRequirementValue(b) || 0);
                     if (levelDiff !== 0) return levelDiff;
                     var order = (a.sortOrder || 0) - (b.sortOrder || 0);
@@ -1812,7 +1817,7 @@
         }
 
         function setHubView(view) {
-            var nextView = view || "play";
+            var nextView = view === "missions" ? "missions" : "play";
             var isEnvironment = nextView !== "play";
             document.body.classList.remove("hub-view-shop", "hub-view-missions", "hub-view-inventory", "hub-view-story");
             if (isEnvironment) {
@@ -1831,12 +1836,7 @@
                 else button.removeAttribute("aria-current");
             });
             setSettingsOpen(false);
-            if (nextView === "shop") loadShopEnvironment(false);
             if (nextView === "missions") { showMissionsGrid(); loadMissionEnvironment(false); }
-            if (nextView === "inventory") {
-                loadInventoryEnvironment(false);
-            }
-            if (nextView === "story") setPveMode("gauntlet");
         }
 
         if (settingsButton) {
@@ -1854,11 +1854,8 @@
         });
 
         try {
-            var initialHubView = new URLSearchParams(window.location.search).get("view");
-            if (initialHubView === "story") {
-                setHubView("story");
-            }
-        } catch (error) {}
+            setHubView(new URLSearchParams(window.location.search).get("view"));
+        } catch (error) { setHubView("play"); }
 
         shopTabButtons.forEach(function (button) {
             button.addEventListener("click", function (event) {

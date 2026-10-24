@@ -36,13 +36,75 @@ const ensureUnitStateShape = (unit) => {
     return unit.state;
 };
 
+const syncLinkedStatuses = (match) => {
+    Object.entries(match?.board || {}).forEach(([username, units]) => {
+        (Array.isArray(units) ? units : []).forEach((unit, slot) => {
+            if (!unit) return;
+            const state = ensureUnitStateShape(unit);
+            state.statuses = state.statuses.filter((status) => {
+                const linkedStatusId = status?.metadata?.linkedTargetStatusId;
+                const linkedKey = status?.metadata?.linkedTargetKey;
+                if (!linkedStatusId || !linkedKey) return true;
+                const separator = linkedKey.lastIndexOf(':');
+                const targetUsername = linkedKey.slice(0, separator);
+                const targetSlot = Number(linkedKey.slice(separator + 1));
+                const targetUnit = match.board?.[targetUsername]?.[targetSlot];
+                const ownerStunned = Boolean(getStatusMetadataTotals(state).cannotUseSkills);
+                if (ownerStunned && targetUnit) {
+                    const targetState = ensureUnitStateShape(targetUnit);
+                    targetState.statuses = targetState.statuses.filter((entry) =>
+                        !(entry?.id === linkedStatusId && entry.sourceUsername === username && entry.sourceSlot === slot)
+                    );
+                }
+                return !ownerStunned && targetUnit?.alive !== false &&
+                    (targetUnit?.state?.statuses || []).some((entry) =>
+                        entry?.id === linkedStatusId && (Number(entry.remainingTurns) || 0) > 0 &&
+                        entry.sourceUsername === username && entry.sourceSlot === slot
+                    );
+            });
+        });
+    });
+};
+
 const buildInitialBoard = (players = [], characters = defaultCharacters) => {
     const board = {};
     players.forEach((player) => {
         const team = Array.isArray(player.team) ? player.team : [];
         board[player.username] = team.map((rosterIndex, slot) => {
             const character = Array.isArray(characters) ? characters[rosterIndex] : null;
-            const startStatuses = Array.isArray(character?.startStatuses) ? character.startStatuses : [];
+            const passive = character?.passive;
+            const passiveStatus = passive?.name
+                ? {
+                      statusId: `${character?.characterId || character?.id || ''}_${passive.name}`
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '_')
+                          .replace(/^_+|_+$/g, ''),
+                      duration: 99,
+                      metadata: {
+                          passive: true,
+                          permanent: true,
+                          cannotBeCleansed: true,
+                          sourceSkillName: passive.name,
+                          statusIcon: passive.icon || '',
+                          tooltipText: `${passive.description || ''}\nThis passive cannot be removed.`.trim(),
+                          physicalDamageBonusWhileHelpful:
+                              Math.max(0, Number(passive.physicalDamageBonusWhileHelpful) || 0),
+                          destructibleDefenseBonusGranted:
+                              Math.max(0, Number(passive.destructibleDefenseBonusGranted) || 0),
+                          physicalDamageBonusAgainstTargetStatus:
+                              passive.physicalDamageBonusAgainstTargetStatus || null,
+                          allyFollowupDamageMark:
+                              passive.allyFollowupDamageMark || null,
+                          healingBlockOnStun: passive.healingBlockOnStun || null,
+                          bonusAgainstNonDamagingSkillUser:
+                              Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
+                      },
+                  }
+                : null;
+            const startStatuses = [
+                ...(passiveStatus ? [passiveStatus] : []),
+                ...(Array.isArray(character?.startStatuses) ? character.startStatuses : []),
+            ];
             return {
                 slot,
                 rosterIndex,
@@ -1136,7 +1198,9 @@ const refreshDerivedStatusTooltips = (targetState) => {
 
 const consumeStatus = (actorState, statusId) => {
     if (!Array.isArray(actorState?.statuses)) return;
-    const nextStatuses = actorState.statuses.filter((status) => status?.id !== statusId);
+    const nextStatuses = actorState.statuses.filter(
+        (status) => status?.id !== statusId || status?.metadata?.passive === true
+    );
     if (nextStatuses.length !== actorState.statuses.length) {
         actorState.statuses = nextStatuses;
         refreshDerivedStatusTooltips(actorState);
@@ -1205,6 +1269,16 @@ const doesEffectConditionMatch = ({
         if (targetRelation === 'enemy' && sameTeam) return false;
     }
     if (condition.statusId && !hasStatus(scopedState, condition.statusId)) return false;
+    if (condition.statusId && condition.statusFromActor) {
+        const actorSlot = Number.isInteger(actorUnit?.slot) ? actorUnit.slot : null;
+        const appliedByActor = (scopedState.statuses || []).some((status) =>
+            status?.id === condition.statusId &&
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            status?.sourceUsername === actorUsername &&
+            (actorSlot === null || status?.sourceSlot === actorSlot)
+        );
+        if (!appliedByActor) return false;
+    }
     if (
         Array.isArray(condition?.statusIdsAny) &&
         condition.statusIdsAny.length > 0 &&
@@ -1264,6 +1338,7 @@ const doesEffectConditionMatch = ({
 
 const isConditionalDamageOverrideOnly = (condition) => {
     if (!condition || typeof condition !== 'object') return false;
+    if (condition.requireMatch === true) return false;
     if (!Number.isFinite(condition?.conditionalAmount)) return false;
     if (Array.isArray(condition.all)) {
         return condition.all.every((entry) => isConditionalDamageOverrideOnly({
@@ -2060,6 +2135,35 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
     }, 0);
 };
 
+const getCharacterPassiveDamageBonus = ({ actorState, actorUsername, actorSlot, targetState, skillClasses }) => {
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    if (!hasSkillClass(skillClasses || [], 'physical')) return 0;
+    const hasHelpfulEffect = statuses.some(
+        (status) => (Number(status?.remainingTurns) || 0) > 0 &&
+            status?.metadata?.passive !== true &&
+            status?.metadata?.harmful !== true &&
+            (status?.metadata?.helpful === true ||
+                (actorUsername && status?.sourceUsername === actorUsername))
+    );
+    return statuses.reduce((sum, status) => {
+        if ((Number(status?.remainingTurns) || 0) <= 0 || status?.metadata?.passive !== true) return sum;
+        const metadata = status.metadata;
+        if (hasHelpfulEffect) {
+            sum += Math.max(0, Number(metadata.physicalDamageBonusWhileHelpful) || 0);
+        }
+        const against = metadata.physicalDamageBonusAgainstTargetStatus;
+        if (against?.statusId && (targetState?.statuses || []).some((targetStatus) =>
+            targetStatus?.id === against.statusId &&
+            (Number(targetStatus?.remainingTurns) || 0) > 0 &&
+            targetStatus?.sourceUsername === actorUsername &&
+            (actorSlot === null || targetStatus?.sourceSlot === actorSlot)
+        )) {
+            sum += Math.max(0, Number(against.amount) || 0);
+        }
+        return sum;
+    }, 0);
+};
+
 const getSamePreviousTargetDamageBonus = ({ actorState, recipient, skillId }) => {
     if (!actorState || !recipient || !skillId) return 0;
     const previousTargetKey =
@@ -2439,9 +2543,12 @@ const maybeTriggerReactiveDefenses = ({
     }
     const trapIndex = statuses.findIndex((status) => {
         const remaining = Number(status?.remainingTurns) || 0;
+        if (!skillIsHarmful && !Boolean(status?.metadata?.triggerOnOwnerHelpfulSkill)) return false;
         return (
             remaining > 0 &&
+            (!Boolean(status?.metadata?.triggerOnlyOnOwnerSkillUse) || isSelfTrapTrigger) &&
             (Boolean(status?.metadata?.triggerOnEnemyHarmfulNonMental) ||
+                (Boolean(status?.metadata?.triggerOnOwnerHelpfulSkill) && isSelfTrapTrigger && !skillIsHarmful) ||
                 Boolean(status?.metadata?.triggerOnEnemyHarmfulSkill) ||
                 Boolean(status?.metadata?.triggerOnEnemyHarmfulNonStrategic) ||
                 Boolean(status?.metadata?.triggerOnEnemyPhysicalOrStrategicSkill) ||
@@ -2471,13 +2578,27 @@ const maybeTriggerReactiveDefenses = ({
         return false;
     }
     const counterDamage = Math.max(0, Number(trapMetadata?.counterDamage) || 0);
-    if (counterDamage > 0) {
+    const counterDamageSkillClasses = Array.isArray(trapMetadata?.counterDamageSkillClasses)
+        ? trapMetadata.counterDamageSkillClasses
+        : [];
+    if (counterDamage > 0 && (
+        !trapMetadata?.counterDamageRespectsInvulnerability ||
+        !isUnitInvulnerableForSkill(actorUnit, counterDamageSkillClasses)
+    )) {
+        const counterSourceUsername = trapMetadata?.counterDamageAttributedToStatusSource
+            ? trapStatus?.sourceUsername || recipient.username
+            : recipient.username;
+        const counterSourceSlot = trapMetadata?.counterDamageAttributedToStatusSource &&
+            Number.isInteger(trapStatus?.sourceSlot)
+            ? trapStatus.sourceSlot
+            : Number.isInteger(recipient.slot) ? recipient.slot : null;
         applyDamageToUnit(actorUnit, counterDamage, {
             match,
-            sourceUsername: recipient.username,
-            sourceSlot: Number.isInteger(recipient.slot) ? recipient.slot : null,
+            sourceUsername: counterSourceUsername,
+            sourceSlot: counterSourceSlot,
             targetUsername: actingUsername,
             sourceSkillId: trapStatus?.sourceSkillId || null,
+            skillClasses: counterDamageSkillClasses,
             damageDebugReason: 'counter',
             ignoreDamageReduction: Boolean(trapMetadata?.counterDamageIgnoresReduction),
             ignoreDestructibleDefense: Boolean(trapMetadata?.counterDamageIgnoresDestructibleDefense),
@@ -2506,7 +2627,9 @@ const maybeTriggerReactiveDefenses = ({
             metadata: counterStatusMetadata,
             // Counter-applied statuses land during the triggering unit's turn, so they
             // need to start fresh or a 1-turn effect expires at that same turn end.
-            fresh: true,
+            fresh: trapMetadata?.counterStatusFresh === undefined
+                ? true
+                : Boolean(trapMetadata.counterStatusFresh),
         });
     }
     const counterApplyStatusToRecipient = trapMetadata?.counterApplyStatusToRecipient;
@@ -2575,9 +2698,29 @@ const maybeTriggerReactiveDefenses = ({
         }
     }
     const counterCopySkillReplacementFor = trapMetadata?.counterCopySkillReplacementFor;
+    const copyRequiresPassiveName = trapMetadata?.counterCopyRequiresPassiveName;
+    const copyOwnerUnit = trapStatus?.sourceUsername && Number.isInteger(trapStatus?.sourceSlot)
+        ? match.board?.[trapStatus.sourceUsername]?.[Number(trapStatus.sourceSlot)] || null
+        : null;
+    const hasCopyPassive = !copyRequiresPassiveName || (
+        Array.isArray(copyOwnerUnit?.state?.statuses) &&
+        copyOwnerUnit.state.statuses.some((status) =>
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            status?.metadata?.passive === true &&
+            status?.metadata?.sourceSkillName === copyRequiresPassiveName
+        )
+    );
+    const copyBlockedBySkill = Boolean(trapMetadata?.counterCopyExcludeUniqueAndPreparation) && (
+        hasSkillClass(skill?.classes || [], 'unique') ||
+        Boolean(skill?.requiresPreparation) ||
+        Boolean(skill?.hiddenFromSelectionViewer) ||
+        Boolean(skill?.isHidden)
+    );
     if (
         typeof counterCopySkillReplacementFor === 'string' &&
         counterCopySkillReplacementFor &&
+        hasCopyPassive &&
+        !copyBlockedBySkill &&
         typeof sourceSkillId === 'string' &&
         sourceSkillId &&
         trapStatus?.sourceUsername &&
@@ -2608,7 +2751,7 @@ const maybeTriggerReactiveDefenses = ({
                         : {}),
                     tooltipText: 'This character has copied an enemy skill.',
                 },
-                fresh: true,
+                fresh: false,
             });
         }
     }
@@ -2784,6 +2927,17 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     const damageForReflection = ignoreEnemyNonMentalDamage ? Math.max(0, Number(rawAmount) || 0) : 0;
     const cannotReduceDamage = hasStatusMetadataFlag(targetState, 'cannotReduceDamage');
     let incoming = Math.max(0, Number(rawAmount) || 0);
+    const followupMark = (Array.isArray(targetState.statuses) ? targetState.statuses : []).find((status) =>
+        (Number(status?.remainingTurns) || 0) > 0 &&
+        (Number(status?.metadata?.allyFollowupDamageBonus) || 0) > 0 &&
+        status?.sourceUsername === context?.sourceUsername &&
+        Number.isInteger(status?.sourceSlot) &&
+        Number.isInteger(context?.sourceSlot) &&
+        status.sourceSlot !== context.sourceSlot
+    );
+    if (followupMark && incoming > 0) {
+        incoming += Math.max(0, Number(followupMark.metadata.allyFollowupDamageBonus) || 0);
+    }
     if (ignoreEnemyPhysicalDamage) {
         incoming = 0;
     }
@@ -3072,8 +3226,40 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     }
     const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
     unit.hp = Math.max(contextualMinimumHp, (Number(unit.hp) || 0) - dealt);
+    if (dealt > 0 && followupMark) {
+        targetState.statuses = targetState.statuses.filter((status) => status !== followupMark);
+    }
     if (dealt > 0) {
         setLastDamageDebug(targetState, dealt, context);
+    }
+    if (dealt > 0 && unit.alive !== false && context?.match && context?.sourceUsername &&
+        context.sourceUsername !== context.targetUsername && Number.isInteger(context?.sourceSlot)) {
+        const sourceUnit = context.match.board?.[context.sourceUsername]?.[context.sourceSlot] || null;
+        const sourcePassive = sourceUnit?.alive !== false
+            ? (Array.isArray(sourceUnit?.state?.statuses) ? sourceUnit.state.statuses : []).find((status) =>
+                (Number(status?.remainingTurns) || 0) > 0 &&
+                status?.metadata?.passive === true &&
+                status?.metadata?.allyFollowupDamageMark?.statusId
+            )
+            : null;
+        const mark = sourcePassive?.metadata?.allyFollowupDamageMark;
+        if (mark && Array.isArray(mark.skillIds) && mark.skillIds.includes(context.sourceSkillId)) {
+            applyStatus({
+                targetState,
+                statusId: mark.statusId,
+                duration: Math.max(1, Number(mark.duration) || 1),
+                sourceSkillId: context.sourceSkillId,
+                sourceUsername: context.sourceUsername,
+                sourceSlot: context.sourceSlot,
+                metadata: {
+                    harmful: true,
+                    allyFollowupDamageBonus: Math.max(0, Number(mark.amount) || 0),
+                    turnDurationAnchor: 'source_turn',
+                    tooltipText: `The next damaging hit from another ally of ${sourcePassive.metadata.sourceSkillName || 'this character'} deals ${Math.max(0, Number(mark.amount) || 0)} additional damage.`,
+                },
+                fresh: true,
+            });
+        }
     }
     if (dealt > 0) {
         const removeIds = new Set();
@@ -3976,6 +4162,7 @@ const getSkillByIndices = (characters, rosterIndex, skillIndex, actorState = nul
 
 const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
     if (!match || !actingUsername) return;
+    syncLinkedStatuses(match);
     const pending = match.pendingTurns?.[actingUsername];
     if (!pending || !pending.queuedByActorSlot) return;
 
@@ -4037,6 +4224,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
     const turnPercentMitigationStateByRecipient = new Map();
 
     for (let queueIndex = 0; queueIndex < queuedActions.length; queueIndex += 1) {
+        syncLinkedStatuses(match);
         const queued = queuedActions[queueIndex];
         const actorSlot = Number.parseInt(queued?.actorSlot, 10);
         if (!Number.isInteger(actorSlot) || actorSlot < 0) continue;
@@ -4050,6 +4238,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const baseSkill = Array.isArray(characters?.[actorUnit.rosterIndex]?.skills)
             ? characters[actorUnit.rosterIndex].skills[queued.skillIndex]
             : null;
+        if (baseSkill?.hiddenFromSelectionViewer || baseSkill?.isHidden) continue;
+        if (baseSkill?.requiresPreparation) continue;
         const skill = getSkillByIndices(characters, actorUnit.rosterIndex, queued.skillIndex, actorState);
         if (!skill) continue;
         const cooldownSkillId =
@@ -4289,11 +4479,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             );
         }
         const skillCannotBeCountered = Boolean(skill?.cannotBeCountered);
+        const actingCharacter = characters?.[actorUnit?.rosterIndex] || null;
         const actingCharacterId =
-            (typeof characters?.[actorUnit?.rosterIndex]?.id === 'string' &&
-                characters[actorUnit.rosterIndex].id) ||
-            (typeof characters?.[actorUnit?.rosterIndex]?.characterId === 'string' &&
-                characters[actorUnit.rosterIndex].characterId) ||
+            (typeof actingCharacter?.id === 'string' && actingCharacter.id) ||
+            (typeof actingCharacter?.characterId === 'string' && actingCharacter.characterId) ||
             null;
         const castStartStatuses = (Array.isArray(actorState.statuses) ? actorState.statuses : [])
             .filter((status) => (status?.remainingTurns || 0) > 0)
@@ -4639,6 +4828,26 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             });
         const resolveRecipients = (effect) => {
             const scope = effect?.scope;
+            if (scope === 'linked-enemy-other-than-target') {
+                const linkedStatusId = effect?.metadata?.linkedTargetStatusId;
+                const selectedKeys = new Set(selectedTargets.map((entry) => `${entry.username}:${entry.slot}`));
+                return reflectRecipients(opponentUnits.filter((entry) =>
+                    !selectedKeys.has(`${entry.username}:${entry.slot}`) &&
+                    (entry.unit.state?.statuses || []).some((status) =>
+                        status?.id === linkedStatusId && (Number(status.remainingTurns) || 0) > 0 &&
+                        status.sourceUsername === actingUsername && status.sourceSlot === actorSlot
+                    )
+                ));
+            }
+            if (scope === 'all-enemy-without-source-status') {
+                const excludedStatusId = effect?.metadata?.excludedStatusId;
+                return reflectRecipients(opponentUnits.filter((entry) =>
+                    !(entry.unit.state?.statuses || []).some((status) =>
+                        status?.id === excludedStatusId && (Number(status.remainingTurns) || 0) > 0 &&
+                        status.sourceUsername === actingUsername && status.sourceSlot === actorSlot
+                    )
+                ));
+            }
             if (scope === 'self') {
                 return filterHelpfulImmuneRecipients({
                     effect,
@@ -4934,7 +5143,6 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             return [];
         })();
         if (
-            skillIsHarmful &&
             !skillCannotBeCountered &&
             maybeTriggerReactiveDefenses({
                 match,
@@ -4952,6 +5160,34 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         ) {
             skillCancelledByEvade = true;
             pendingDamage.clear();
+        }
+        const damagingEffects = effects.some((effect) =>
+                effect?.type === 'damage' || effect?.type === 'health_steal_damage' ||
+                Math.max(0, Number(effect?.metadata?.turnEndDamage) || 0) > 0
+            );
+        if (!damagingEffects) {
+                (match.board?.[opponentUsername] || []).forEach((opponentUnit, opponentSlot) => {
+                    if (!opponentUnit || opponentUnit.alive === false) return;
+                    const passive = (opponentUnit.state?.statuses || []).find((status) =>
+                        status?.metadata?.passive === true &&
+                        (Number(status?.metadata?.bonusAgainstNonDamagingSkillUser) || 0) > 0 &&
+                        (Number(status.remainingTurns) || 0) > 0
+                    );
+                    if (!passive || characters?.[opponentUnit.rosterIndex]?.characterId !== 'mizuki') return;
+                    applyStatus({
+                        targetState: actorState, statusId: 'mizuki_meld_in_the_shadows_mark', duration: 1,
+                        sourceSkillId: null, sourceUsername: opponentUsername, sourceSlot: opponentSlot,
+                        metadata: { harmful: true, turnDurationAnchor: 'source_turn',
+                            bonusDamageFromSourceSkillsFlat: Number(passive.metadata.bonusAgainstNonDamagingSkillUser),
+                            bonusDamageFromSourceCharacterId: 'mizuki',
+                            bonusDamageAppliesToSkillIds: [
+                                'mizuki-kunai-ambush', 'mizuki-execution-shuriken',
+                                'mizuki-execution-shuriken-windmill',
+                            ],
+                            tooltipText: 'Mizuki deals 5 additional damage to this character until his turn ends.' },
+                        fresh: false,
+                    });
+                });
         }
         for (const recipient of preflightRecipientsByTargetType) {
             if (!recipient?.unit || recipient.unit.alive === false) continue;
@@ -5098,6 +5334,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         skillClasses: skill.classes || [],
                     });
                     const skillSpecificBonus = getSkillSpecificDamageBonus(actorState, skill.id || null);
+                    const passiveBonus = getCharacterPassiveDamageBonus({
+                        actorState,
+                        actorUsername: actingUsername,
+                        actorSlot,
+                        targetState,
+                        skillClasses: skill.classes,
+                    });
                     const samePreviousTargetBonus = getSamePreviousTargetDamageBonus({
                         actorState,
                         recipient,
@@ -5112,7 +5355,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     });
                     const totalAmount = Math.max(
                         0,
-                        amount + skillSpecificBonus + samePreviousTargetBonus + targetSourceBonus
+                        amount + skillSpecificBonus + passiveBonus + samePreviousTargetBonus + targetSourceBonus
                     );
                     queueDamage(recipient, totalAmount, effect);
                 });
@@ -5497,6 +5740,19 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             );
                         });
                     }
+                    const passiveDefenseBonus = (actorState.statuses || []).reduce((sum, status) =>
+                        (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.passive === true
+                            ? sum + Math.max(0, Number(status.metadata.destructibleDefenseBonusGranted) || 0)
+                            : sum,
+                    0);
+                    if (passiveDefenseBonus > 0 && recipient.username === actingUsername &&
+                        (Number(runtimeMetadata?.destructibleDefensePoints) || 0) > 0) {
+                        runtimeMetadata = {
+                            ...runtimeMetadata,
+                            destructibleDefensePoints:
+                                Math.max(0, Number(runtimeMetadata.destructibleDefensePoints) || 0) + passiveDefenseBonus,
+                        };
+                    }
                     applyStatus({
                         targetState: destinationState,
                         statusId: runtimeStatusId,
@@ -5511,6 +5767,27 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             (runtimeMetadata?.turnDurationAnchor === 'source_turn' &&
                                 !runtimeMetadata?.triggerOnApply),
                     });
+                    const healingBlock = actingCharacter?.passive?.healingBlockOnStun;
+                    const hasPassive = (actorState.statuses || []).some((status) =>
+                        status?.metadata?.passive === true &&
+                        status?.metadata?.sourceSkillName === actingCharacter?.passive?.name &&
+                        (Number(status.remainingTurns) || 0) > 0
+                    );
+                    if (applyingStun && healingBlock?.statusId && hasPassive &&
+                        destinationState.statuses.some((status) =>
+                            status?.id === runtimeStatusId && status.sourceUsername === actingUsername &&
+                            status.sourceSlot === actorSlot && (Number(status.remainingTurns) || 0) > 0
+                        )) {
+                        applyStatus({
+                            targetState: destinationState, statusId: healingBlock.statusId,
+                            duration: healingBlock.duration || 1, sourceSkillId: skill.id || null,
+                            sourceUsername: actingUsername, sourceSlot: actorSlot,
+                            metadata: { harmful: true, healReceivedMultiplier: 0,
+                                turnDurationAnchor: 'source_turn',
+                                tooltipText: 'Demon of the Ice: this character cannot be healed.' },
+                            fresh: true,
+                        });
+                    }
                     if (Boolean(runtimeMetadata?.removeEnemyAfflictionStatusesOnApply)) {
                         cleanseEnemyAfflictionStatuses(
                             recipient.unit,
@@ -5828,6 +6105,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter(
                         (status) => {
                             if (!status || (Number(status?.remainingTurns) || 0) <= 0) return true;
+                            if (status?.metadata?.passive === true || status?.metadata?.cannotBeCleansed === true) return true;
                             if (!removeAll && removed >= maxCount) return true;
 
                             const sourceUsername = status?.sourceUsername || '';
@@ -6475,6 +6753,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     })) return;
                     targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter((status) => {
                         if (!status) return false;
+                        if (status?.metadata?.passive === true) return true;
                         if (targetStatusId && status.id === targetStatusId) return false;
                         if (afflictionOnly && (Boolean(status?.metadata?.afflictionDamage) || status?.metadata?.action)) {
                             if (!harmfulOnly || Boolean(status?.metadata?.harmful)) return false;
@@ -6725,6 +7004,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
 
 const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
     if (!match || !endingUsername) return;
+    syncLinkedStatuses(match);
     const players = Array.isArray(match.players) ? match.players : [];
     const turnEndUnpierceableBudgetByRecipient = new Map();
     const turnEndStandardMitigationBudgetByRecipient = new Map();
@@ -7644,6 +7924,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
             });
         }
     });
+    syncLinkedStatuses(match);
 };
 
 const applyOnTeamMemberUseSkillBonuses = ({ match, actorState, actingUsername, skill, skillIsMental }) => {

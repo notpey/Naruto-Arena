@@ -4,7 +4,7 @@ const { resolvePendingTurnSkills, tickStatusesForTurnEnd } = require('../battleL
 const characters = require('../data/characters');
 
 test('Flat damage reduction budget accumulates and caps across multiple attacks in the same turn', () => {
-    // Player 1 has 3 attackers (Uchiha Sasuke lion combo, 25 base damage each)
+    // Player 1 has 3 attackers dealing 25 base damage each.
     // Player 2 has 1 target with 15 flat damage reduction
     const match = {
         players: [{ username: 'p1' }, { username: 'p2' }],
@@ -47,10 +47,23 @@ test('Flat damage reduction budget accumulates and caps across multiple attacks 
         },
     };
 
+    const testCharacters = [...characters];
+    testCharacters[2] = {
+        ...characters[2],
+        skills: [{
+            id: 'test-flat-reduction-attack',
+            name: 'Flat Reduction Test Attack',
+            target: 'single-enemy',
+            classes: ['Physical', 'Instant'],
+            energy: [],
+            cooldown: 0,
+            effects: [{ type: 'damage', amount: 25, scope: 'target' }],
+        }],
+    };
     resolvePendingTurnSkills({
         match,
         actingUsername: 'p1',
-        characters,
+        characters: testCharacters,
     });
 
     const targetHp = match.board.p2[0].hp;

@@ -1,192 +1,78 @@
 module.exports = {
-    "id": "momochi-zabuza",
-    "characterId": "momochi-zabuza",
-    "name": "Momochi Zabuza",
-    "facePicture": "https://i.imgur.com/8OoPNPv.png",
-    "characterdeescription": "Zabuza is a missing-nin from the Hidden Mist Village that specializes in silent assassination. Using the various ninjutsu abilities Zabuza has, he is able to attack his enemies all at once, or stealthily try to kill them.",
-    "requiredMissionId": "devotion",
-    "skills": [
+    id: 'momochi-zabuza', characterId: 'momochi-zabuza', name: 'Zabuza Momochi',
+    facePicture: 'https://i.imgur.com/8OoPNPv.png', requiredMissionId: 'devotion',
+    characterdeescription: 'One of the Seven Ninja Swordsmen of the Mist, Zabuza Momochi is a ruthless missing-nin whose mastery of silent assassination earned him the title Demon of the Hidden Mist. Armed with the massive Kubikiribōchō, he terrorizes his opponents through concealment, overwhelming force, and deadly Water Release techniques.',
+    passive: { name: 'Silent Killing', icon: 'https://i.imgur.com/9eJkbJa.png',
+        description: 'Whenever Water Clone Technique successfully counters an enemy skill, that enemy becomes unable to reduce damage or become invulnerable for 1 turn.' },
+    skills: [
         {
-            "id": "momochi-zabuza-soundless-murder",
-            "name": "Soundless Murder",
-            "skillimage": "https://i.imgur.com/74KvAbq.png",
-            "skilldescription": "Momochi Zabuza deals 30 piercing damage to one enemy. During 'Hidden Mist', this skill will deal 15 additional damage and will ignore invulnerability.",
-            "energy": [
-                "Taijutsu",
-                "Random"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 30,
-                    "scope": "target",
-                    "metadata": {
-                        "ignoreDestructibleDefense": true
-                    }
-                }
-            ]
+            id: 'momochi-zabuza-kubikiribocho', name: 'Kubikiribōchō',
+            skillimage: 'https://i.imgur.com/aZfxDVs.png',
+            skilldescription: 'Zabuza attacks one enemy with his enormous sword, dealing 20 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 10 physical damage to each.',
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 20, scope: 'target' }],
         },
         {
-            "id": "momochi-zabuza-water-dragon-missile",
-            "name": "Water Dragon Missile",
-            "skillimage": "https://i.imgur.com/2l9QztL.png",
-            "skilldescription": "Momochi Zabuza deals 15 damage to all enemies and stuns their physical and strategic skills for 1 turn.",
-            "energy": [
-                "Ninjutsu",
-                "Random"
+            id: 'momochi-zabuza-water-prison-technique', name: 'Water Prison Technique',
+            skillimage: 'https://i.imgur.com/dT988nl.png',
+            skilldescription: 'Zabuza traps one enemy inside a sphere of water for 2 turns, stunning their harmful skills during this time. If Zabuza is stunned, this skill ends.',
+            energy: ['Ninjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 3,
+            classes: ['Chakra', 'Control'], effects: [
+                { type: 'apply_status', statusId: 'zabuza_water_prison', duration: 2, scope: 'target',
+                    metadata: { harmful: true, ongoingClass: 'control', cannotUseHarmfulSkills: true,
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character cannot use harmful skills while Water Prison Technique is active. The prison ends if Zabuza is stunned.' } },
+                { type: 'apply_status', statusId: 'zabuza_water_prison_link', duration: 2, scope: 'self',
+                    condition: { scope: 'target', statusId: 'zabuza_water_prison', statusFromActor: true },
+                    metadata: { helpful: true, ongoingClass: 'control', linkedTargetStatusId: 'zabuza_water_prison',
+                        copyTargetKeyToKeys: ['linkedTargetKey'],
+                        skillReplacements: { 'momochi-zabuza-kubikiribocho': 'momochi-zabuza-kubikiribocho-clone' },
+                        tooltipText: 'A water clone attacks the enemies outside Zabuza’s Water Prison.' } },
             ],
-            "target": "all-enemy",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Ninjutsu",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 15,
-                    "scope": "all-enemy"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "momochi_zabuza_water_dragon_stun",
-                    "duration": 1,
-                    "scope": "all-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "strategic"
-                        ],
-                        "tooltipText": "This character's physical and strategic skills are stunned.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
         {
-            "id": "momochi-zabuza-hidden-mist",
-            "name": "Hidden Mist",
-            "skillimage": "https://i.imgur.com/7mpGS0U.png",
-            "skilldescription": "For 2 turns, all enemies' physical and chakra skills will cost 1 additional random chakra and Momochi Zabuza will gain 5 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
-            "energy": [
-                "Genjutsu"
+            id: 'momochi-zabuza-hidden-mist-technique', name: 'Hidden Mist Technique',
+            skillimage: 'https://i.imgur.com/IkZwEbi.png',
+            skilldescription: "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability. This skill ignores invulnerability.",
+            energy: ['Ninjutsu'], target: 'self', damage: 0, cooldown: 3, ignoreInvulnerability: true,
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'zabuza_hidden_mist_cost', duration: 2, scope: 'all-enemy',
+                    metadata: { harmful: true, randomCostIncreaseForSkillClasses: { physical: 1, chakra: 1, energy: 1, ninjutsu: 1 },
+                        tooltipText: 'Physical and Chakra skills cost 1 additional random chakra from Hidden Mist Technique.' } },
+                { type: 'apply_status', statusId: 'zabuza_hidden_mist_defense', duration: 2, scope: 'self',
+                    metadata: { helpful: true, damageReductionFlat: 5,
+                        onExpireApplyStatusToSelf: { statusId: 'zabuza_hidden_mist_attack', duration: 2,
+                            metadata: { helpful: true,
+                                skillDamageBonuses: { 'momochi-zabuza-kubikiribocho': 10, 'momochi-zabuza-kubikiribocho-clone': 10 },
+                                ignoreInvulnerabilityForSkillIds: ['momochi-zabuza-kubikiribocho', 'momochi-zabuza-kubikiribocho-clone'],
+                                tooltipText: 'Kubikiribōchō deals 10 additional damage and ignores invulnerability.' } },
+                        tooltipText: 'Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability.' } },
             ],
-            "target": "self",
-            "ignoreInvulnerability": true,
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "momochi_zabuza_hidden_mist_enemy_cost",
-                    "duration": 2,
-                    "scope": "all-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "randomCostIncreaseForSkillClasses": {
-                            "physical": 1,
-                            "energy": 1,
-                            "ninjutsu": 1
-                        },
-                        "tooltipText": "This character's physical and chakra skills cost 1 additional random chakra from Hidden Mist."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "momochi_zabuza_hidden_mist_defense",
-                    "duration": 2,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "damageReductionFlat": 5,
-                        "mergeNumericAddKeys": [
-                            "damageReductionFlat"
-                        ],
-                        "onExpireApplyStatusToSelf": {
-                            "statusId": "momochi_zabuza_hidden_mist_empowered",
-                            "duration": 2,
-                            "metadata": {
-                                "helpful": true,
-                                "skillReplacements": {
-                                    "momochi-zabuza-soundless-murder": "momochi-zabuza-soundless-murder-empowered"
-                                },
-                                "tooltipText": "'Soundless Murder' deals additional damage and ignores invulnerability."
-                            }
-                        },
-                        "tooltipText": "Momochi Zabuza has 5 damage reduction from Hidden Mist."
-                    }
-                }
-            ]
         },
         {
-            "id": "momochi-zabuza-water-clone-zabuza",
-            "name": "Water Clone Zabuza",
-            "skillimage": "https://i.imgur.com/nl8kDkS.png",
-            "skilldescription": "This skill makes Momochi Zabuza invulnerable for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'momochi-zabuza-water-clone-technique', name: 'Water Clone Technique',
+            skillimage: 'https://i.imgur.com/m1hfJAx.png',
+            skilldescription: 'Zabuza creates a water clone to defend himself or one ally for 1 turn. The first enemy harmful Physical skill used against that character is countered, destroying the clone.',
+            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'zabuza_water_clone', duration: 1, scope: 'target',
+                    metadata: { helpful: true, triggerOnEnemyHarmfulSkillClassesAny: ['physical'],
+                        counterCancelsSkill: true,
+                        counterStatusId: 'zabuza_silent_killing', counterStatusDuration: 1, counterStatusFresh: false,
+                        counterStatusMetadata: { harmful: true, cannotReduceDamage: true, cannotBecomeInvulnerable: true,
+                            turnDurationAnchor: 'source_turn', tooltipText: 'Silent Killing: this character cannot reduce damage or become invulnerable.' },
+                        tooltipText: 'The next harmful Physical skill against this character is countered by Zabuza’s water clone.' } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
         },
         {
-            "id": "momochi-zabuza-soundless-murder-empowered",
-            "name": "Soundless Murder",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "deadcharacter.png",
-            "skilldescription": "Momochi Zabuza deals 45 piercing damage to one enemy, ignoring invulnerability.",
-            "energy": [
-                "Taijutsu",
-                "Random"
+            id: 'momochi-zabuza-kubikiribocho-clone', baseSkillId: 'momochi-zabuza-kubikiribocho', useBaseSkillCooldown: true,
+            hiddenFromSelectionViewer: true, name: 'Kubikiribōchō', skillimage: 'https://i.imgur.com/aZfxDVs.png',
+            skilldescription: 'A water clone deals 10 physical damage to each enemy outside Water Prison Technique.',
+            energy: ['Taijutsu'], target: 'all-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 10, scope: 'all-enemy-without-source-status',
+                    metadata: { excludedStatusId: 'zabuza_water_prison' } },
             ],
-            "target": "single-enemy",
-            "ignoreInvulnerability": true,
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 45,
-                    "scope": "target",
-                    "metadata": {
-                        "ignoreDestructibleDefense": true
-                    }
-                }
-            ]
-        }
-    ]
+        },
+    ],
 };

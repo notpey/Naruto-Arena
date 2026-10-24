@@ -12,11 +12,11 @@
     <link rel="shortcut icon" href="favicon.ico?v=3">
     <link rel="apple-touch-icon" href="favicon.png?v=3">
     <link rel="stylesheet" href="style.css?v=38">
-    <link rel="stylesheet" href="shop.css?v=22">
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
     <link rel="stylesheet" href="mobile-layout.css?v=3">
+    <link rel="stylesheet" href="game-surfaces.css?v=11">
 </head>
 <body class="selection-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -28,30 +28,18 @@
     </div>
 </div>
 <div class="background">
-    <button type="button" class="shop-icon" data-shop-trigger aria-label="Open the Ryo shop" title="Ryo Shop">
-        <span class="shop-icon-glyph">両</span>
-        <span class="shop-icon-balance" data-shop-balance>0</span>
-    </button>
     <nav class="selection-hub-nav" aria-label="Selection hub navigation">
-        <div class="selection-hub-brand">
-            <svg class="selection-hub-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true" focusable="false">
-                <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" />
-                <text x="20" y="29" text-anchor="middle">N&#183;A</text>
-            </svg>
-        </div>
+        <div class="selection-hub-brand" aria-label="Naruto Arena"><span class="selection-hub-wordmark">NARUTO<span>ARENA</span></span></div>
         <div class="selection-hub-tabs">
             <button type="button" class="selection-hub-tab active" data-hub-view="play">Start Playing</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="shop">Shop</button>
             <button type="button" class="selection-hub-tab" data-hub-view="missions">Missions</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="inventory">Inventory</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="story">Chunin Exams</button>
         </div>
-        <button type="button" class="selection-hub-ryo" data-hub-view="shop" aria-label="Open the Ryo shop">
+        <div class="selection-hub-ryo" aria-label="Ryo balance" title="Spend Ryo on locked characters in the roster">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
             <span data-shop-balance>0</span>
-        </button>
+        </div>
         <div class="selection-hub-settings">
-            <button type="button" class="selection-hub-settings-button" data-settings-trigger aria-label="Open settings" aria-expanded="false"><span aria-hidden="true">&#9881;</span></button>
+            <button type="button" class="selection-hub-settings-button" data-settings-trigger aria-label="Open settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.87 1.87-.06-.06A1.7 1.7 0 0 0 16 18.4a1.7 1.7 0 0 0-1 1.54V20H9v-.06a1.7 1.7 0 0 0-1-1.54 1.7 1.7 0 0 0-1.87.35l-.06.06-1.87-1.87.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.54-1H3v-4h.06A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88L4.2 7.06l1.87-1.87.06.06A1.7 1.7 0 0 0 8 5.6a1.7 1.7 0 0 0 1-1.54V4h6v.06a1.7 1.7 0 0 0 1 1.54 1.7 1.7 0 0 0 1.87-.35l.06-.06 1.87 1.87-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.54 1H21v4h-.06A1.7 1.7 0 0 0 19.4 15Z"/></svg></button>
         </div>
     </nav>
     <!-- Shinobi Academy Starter Guide (FTUE Overlay for First-Time Players) -->
@@ -81,7 +69,7 @@
                     <div class="academy-step-num">3</div>
                     <div class="academy-step-text">
                         <strong>Climb Ranks & Earn Ryo</strong>
-                        <span>Win matches to gain XP, unlock higher rank titles, and earn Ryo for shop items!</span>
+                        <span>Win matches to gain XP and Ryo, then unlock characters from their roster previews.</span>
                     </div>
                 </div>
             </div>
@@ -89,21 +77,6 @@
         </div>
     </div>
     <section class="selection-hub-environment" data-hub-environment hidden>
-        <div class="selection-hub-env-panel" data-hub-panel="shop" hidden>
-            <div class="selection-hub-env-header">
-                <div>
-                    <h1>Shinobi Bazaar & Cosmetics Shop</h1>
-                    <p>Unlock characters, custom player avatars, glowing ninja titles, and battle borders using Ryo.</p>
-                </div>
-            </div>
-            <div class="selection-hub-env-toolbar selection-hub-shop-tabs">
-                <button type="button" class="selection-hub-rank active" data-shop-tab="characters">Shinobi Roster</button>
-                <button type="button" class="selection-hub-rank" data-shop-tab="avatars">Avatars</button>
-                <button type="button" class="selection-hub-rank" data-shop-tab="titles">Titles</button>
-                <button type="button" class="selection-hub-rank" data-shop-tab="borders">Borders</button>
-            </div>
-            <div class="selection-hub-shop-grid" data-shop-env-grid></div>
-        </div>
         <div class="selection-hub-env-panel" data-hub-panel="missions" hidden>
             <div class="selection-hub-env-header">
                 <div>
@@ -127,64 +100,48 @@
             </div>
             <div class="selection-hub-mission-detail" data-mission-detail hidden></div>
         </div>
-        <div class="selection-hub-env-panel" data-hub-panel="inventory" hidden>
-            <div class="selection-hub-env-header">
-                <div>
-                    <h1>Shinobi Vault & Inventory</h1>
-                    <p>Inspect unlocked cosmetics, preview styles, and equip active avatars, titles, and borders.</p>
-                </div>
-            </div>
-            <div class="selection-hub-env-toolbar selection-hub-inventory-tabs">
-                <button type="button" class="selection-hub-rank active" data-inventory-tab="avatars">Avatars</button>
-                <button type="button" class="selection-hub-rank" data-inventory-tab="titles">Titles</button>
-                <button type="button" class="selection-hub-rank" data-inventory-tab="borders">Borders</button>
-                <button type="button" class="selection-hub-rank" data-inventory-tab="backgrounds">Backgrounds</button>
-                <button type="button" class="selection-hub-rank" data-inventory-tab="consumables">Consumables</button>
-            </div>
-            <div class="selection-hub-inventory-grid"></div>
-        </div>
-        <div class="selection-hub-env-panel" data-hub-panel="story" hidden>
-            <div class="selection-hub-env-header">
-                <div>
-                    <h1>Chunin Exams</h1>
-                    <p>Take on the exam gauntlet and earn rewards.</p>
-                </div>
-            </div>
-            <div class="selection-hub-story-list" data-story-list hidden>
-                <div class="selection-hub-env-empty">Loading story battles...</div>
-            </div>
-            <div class="selection-hub-story-briefing" data-story-briefing hidden></div>
-            <div class="selection-hub-gauntlet" data-gauntlet-panel hidden>
-                <div class="selection-hub-env-empty">Loading Chunin Exams...</div>
-            </div>
-        </div>
     </section>
     <div class="searching-backdrop hidden">
-        <div class="searchingscroll">
-            <P class="searching">Searching for an opponent</P>
-            <img src="sharingan-remaster.png?v=2" alt="searchingscroll" class="sharingan">
-            <img src="sasukesearch-remaster.png?v=2" alt="Matchmaking status" class="sasukesearch">
-            <button type="submit" class="cancel-button">Cancel</button>
+        <div class="searchingscroll" role="dialog" aria-modal="true" aria-labelledby="match-search-title" aria-describedby="match-search-detail">
+            <div class="match-dialog-heading">
+                <span class="match-dialog-kicker">Matchmaking <span class="match-dialog-mode">Quick match</span></span>
+                <h2 id="match-search-title" class="searching" role="status" aria-live="polite" tabindex="-1">Searching for an opponent</h2>
+                <p id="match-search-detail" class="searching-detail">Looking for an available opponent.</p>
+            </div>
+            <div class="match-search-visual" aria-hidden="true">
+                <span class="match-search-ring match-search-ring-outer"></span>
+                <span class="match-search-ring match-search-ring-inner"></span>
+                <img src="sasukesearch-remaster.png?v=2" alt="" class="sasukesearch">
+                <img src="sharingan-remaster.png?v=2" alt="" class="sharingan">
+                <span class="match-search-found-icon">✓</span>
+            </div>
+            <div class="match-search-footer">
+                <span class="match-search-waiting">Searching for players<span class="match-search-dots" aria-hidden="true"></span></span>
+                <button type="button" class="cancel-button">Cancel search</button>
+                <span class="match-search-opening" hidden>Opening battle…</span>
+            </div>
         </div>
     </div>
 
     <div class="private-match-backdrop hidden">
-        <div class="private-match-modal">
-            <p class="private-match-title">Enter Opponent Username</p>
-            <input type="text" class="private-match-input" maxlength="64" autocomplete="off">
-            <p class="private-match-error"></p>
-            <button type="button" class="private-match-ok">OK</button>
-            <button type="button" class="private-match-cancel">CANCEL</button>
+        <div class="private-match-modal" role="dialog" aria-modal="true" aria-labelledby="private-match-title" aria-describedby="private-match-description">
+            <span class="match-dialog-kicker">Private match</span>
+            <h2 id="private-match-title" class="private-match-title">Find a player</h2>
+            <p id="private-match-description" class="private-match-description">Enter the exact username of the player you want to face.</p>
+            <label class="private-match-label" for="private-match-username">Opponent username</label>
+            <input id="private-match-username" type="text" class="private-match-input" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="private-match-error">
+            <p id="private-match-error" class="private-match-error" role="alert"></p>
+            <div class="private-match-actions">
+                <button type="button" class="private-match-cancel">Cancel</button>
+                <button type="button" class="private-match-ok">Find player</button>
+            </div>
         </div>
     </div>
 
-    <img class="selectionscroll" src="selectionscroll-remaster.png?v=2" alt="selectionscroll">
     <div class="selectionpage">
 
-    <div class="skillviewer collapsed">
-    <img class="skillscroll" src="skillscroll-remaster.png?v=2" alt="selectionscroll">
-
-    <div class="skillpage">
+    <div class="skillviewer collapsed" aria-hidden="true">
+    <div class="skillpage" id="selection-skill-panel">
 
 <div class="skill-card">
     <div class="skill-header">
@@ -192,29 +149,43 @@
             <img id="character-portrait" src="" alt="Character portrait" class="character-portrait">
             <div class="character-text">
                 <div id="character-name" class="character-name">Select a character</div>
+                <div id="character-arc" class="character-arc" hidden></div>
                 <p id="character-bio" class="character-bio"></p>
+                <div id="character-unlock-action" class="character-unlock-action" hidden>
+                    <span class="character-unlock-price">Unlock for <strong id="character-unlock-price">0</strong> Ryo</span>
+                    <button type="button" id="character-unlock-buy" class="character-unlock-buy">Unlock character</button>
+                    <span id="character-unlock-error" class="character-unlock-error" role="status"></span>
+                </div>
             </div>
         </div>
-        <div class="skill-images">
-            <img data-skill-index="0" src="" alt="Skill 1" class="skill-image">
-            <img data-skill-index="1" src="" alt="Skill 2" class="skill-image">
-            <img data-skill-index="2" src="" alt="Skill 3" class="skill-image">
-            <img data-skill-index="3" src="" alt="Skill 4" class="skill-image">
-        </div>
     </div>
-    <div class="skill-detail-card">
+    <div class="skill-side" role="group" aria-label="Character abilities">
+            <div class="skill-images" role="group" aria-label="Skills">
+                <img data-skill-index="0" src="" alt="Skill 1" class="skill-image">
+                <img data-skill-index="1" src="" alt="Skill 2" class="skill-image">
+                <img data-skill-index="2" src="" alt="Skill 3" class="skill-image">
+                <img data-skill-index="3" src="" alt="Skill 4" class="skill-image">
+            </div>
+            <button type="button" id="character-passive" class="character-passive" aria-pressed="false" hidden>
+                <img id="character-passive-image" class="character-passive-image" src="skillqqueue-remaster.png?v=2" alt="">
+                <div class="character-passive-content">
+                    <div class="character-passive-heading"><span class="character-passive-label">Passive effect</span><strong id="character-passive-name"></strong></div>
+                </div>
+            </button>
+    </div>
+    <div class="skill-detail-card" aria-live="polite">
         <div class="skill-detail-head">
             <img id="skill-detail-image" class="skill-detail-image" src="" alt="Selected skill">
             <div class="skill-detail-content">
-                <div class="skill-detail-kicker">SKILL</div>
+                <span id="skill-detail-kind" class="skill-detail-kind" hidden>Passive effect</span>
                 <div id="skill-name" class="skill-name">Skill name</div>
                 <div id="skill-description" class="skill-description">Choose a character to view skills.</div>
             </div>
         </div>
         <div class="skill-detail-meta">
-            <span class="sdm-seg"><span class="sdm-lbl">/ CHAKRA</span><div class="energy-bar" id="energy-bar"></div></span>
-            <span class="sdm-seg"><span class="sdm-lbl">/ CLASSES</span><div class="skill-classes" id="skill-classes"></div></span>
-            <span class="sdm-seg sdm-seg--last"><span class="sdm-lbl">/ COOLDOWN</span><span id="skill-cooldown" class="cooldown-value">-</span></span>
+            <span class="sdm-seg"><span class="sdm-lbl">Chakra</span><div class="energy-bar" id="energy-bar"></div></span>
+            <span class="sdm-seg"><span class="sdm-lbl">Classes</span><div class="skill-classes" id="skill-classes"></div></span>
+            <span class="sdm-seg sdm-seg--last"><span class="sdm-lbl">Cooldown</span><span id="skill-cooldown" class="cooldown-value">-</span></span>
         </div>
     </div>
 </div>
@@ -223,6 +194,34 @@
 
     </div>
 
+<div class="roster-toolbar" role="search" aria-label="Find roster characters">
+    <label class="roster-search" for="roster-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m15.5 15.5 4.4 4.4"></path></svg>
+        <input id="roster-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search characters" aria-label="Search characters">
+    </label>
+    <label class="roster-select" for="roster-arc-filter">
+        <span class="visually-hidden">Filter by story arc</span>
+        <select id="roster-arc-filter" aria-label="Filter by story arc"><option value="">All arcs</option></select>
+    </label>
+    <button type="button" id="roster-lock-filter" class="roster-lock-filter" data-state="all" aria-label="Showing all characters. Click to show unlocked characters." title="All characters — click for unlocked">
+        <svg class="roster-lock-icon roster-lock-icon--all" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="10" width="8" height="9" rx="1"/><path d="M4 10V7a2.5 2.5 0 0 1 5 0v3"/><rect x="13.5" y="10" width="8" height="9" rx="1"/><path d="M15 10V7a2.5 2.5 0 0 1 5 0"/></svg>
+        <svg class="roster-lock-icon roster-lock-icon--unlocked" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 7.5-2"/><circle cx="12" cy="15.5" r="1"/></svg>
+        <svg class="roster-lock-icon roster-lock-icon--locked" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/><circle cx="12" cy="15.5" r="1"/></svg>
+    </button>
+    <label class="roster-select roster-sort" for="roster-sort">
+        <span class="visually-hidden">Sort characters</span>
+        <select id="roster-sort" aria-label="Sort characters">
+            <option value="arc">Arc order</option>
+            <option value="name">Name A–Z</option>
+        </select>
+    </label>
+    <span id="roster-result-count" class="visually-hidden" role="status" aria-live="polite"></span>
+</div>
+<div id="roster-empty" class="roster-empty" hidden>
+    <strong>No characters found</strong>
+    <span>Try another name, arc, or availability filter.</span>
+    <button type="button" id="roster-empty-reset">Show all characters</button>
+</div>
 <button type="button" class="nextpage roster-page-button" aria-label="Next character page">
     <span aria-hidden="true">›</span>
 </button>
@@ -232,6 +231,7 @@
 </button>
 
 
+<div class="roster-sidebar">
 <div class="player-card">
     <div class="player-avatar-frame" id="player-avatar-frame">
         <img src="found-remaster.png" alt="Player Avatar" class="player-avatar" id="player-avatar-img" onerror="this.onerror=null; this.src='found-remaster.png';">
@@ -262,185 +262,15 @@
     <li class="selected-character-slot">2</li>
     <li class="selected-character-slot">3</li>
 </ul>
+</div>
 
 <div class="button-container">
-    <button class="game-button ladder-button">
-        <img src="ladderbutton.png" alt="Start Ladder Game">
-    </button>
-    <button class="game-button quick-button">
-        <img src="quickbutton.png" alt="Start Quick Game">
-    </button>
-    <button class="game-button private-button">
-        <img src="privatebutton.png" alt="Start Private Game">
-    </button>
+    <button class="game-button ladder-button" aria-label="Start ranked match"><span class="mode-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 2 8 5v10l-8 5-8-5V7l8-5Z"/><path d="m12 6 3.5 6-3.5 6-3.5-6L12 6Z"/></svg></span><span class="mode-copy"><strong>Ranked Match</strong><small>Compete on the ladder</small></span></button>
+    <button class="game-button quick-button" aria-label="Start quick match"><span class="mode-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h16M12 4l8 8-8 8"/><path d="M4 5h4M4 19h4"/></svg></span><span class="mode-copy"><strong>Quick Match</strong><small>Find an opponent</small></span></button>
+    <button class="game-button private-button" aria-label="Start private match"><span class="mode-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 10V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-3"/><path d="M9 12h10M15 8l4 4-4 4"/></svg></span><span class="mode-copy"><strong>Private Match</strong><small>Challenge a player</small></span></button>
 </div>
 </div> <!-- Closed .selectionpage -->
 </div> <!-- Closed .background to ensure all modals are direct body children -->
-
-<!-- Gacha Altar Modal -->
-<div id="gacha-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel gacha-modal-panel">
-        <button type="button" class="shinobi-modal-close" id="gacha-modal-close" aria-label="Close">&times;</button>
-        
-        <!-- Top Title & Currencies Bar -->
-        <div class="gacha-top-bar">
-            <div class="gacha-altar-title-wrap">
-                <div class="gacha-seal-crest">
-                    <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                        <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
-                        <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">封</text>
-                    </svg>
-                </div>
-                <div class="gacha-title-text-group">
-                    <h2 class="gacha-modal-title">Shinobi Summon Altar</h2>
-                    <span class="gacha-modal-tagline">Ancient Seals &amp; Shinobi Pacts</span>
-                </div>
-            </div>
-            
-            <div class="gacha-currencies">
-                <div class="gacha-currency-pill" title="Summon Scrolls">
-                    <span class="pill-label">SCROLLS</span>
-                    <strong id="gacha-scrolls-count">0</strong>
-                </div>
-                <div class="gacha-currency-pill" title="Ryo">
-                    <span class="pill-label">RYO</span>
-                    <strong id="gacha-ryo-count">0</strong>
-                </div>
-                <div class="gacha-currency-pill" title="Chakra Shards">
-                    <span class="pill-label">SHARDS</span>
-                    <strong id="gacha-shards-count">0</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Banner Tabs & Quick Utilities Bar -->
-        <div class="gacha-sub-nav-bar">
-            <div class="gacha-banner-tabs" id="gacha-banner-tabs"></div>
-            
-            <div class="gacha-utilities-group">
-                <div class="gacha-pity-badge" id="gacha-pity-counter">Pity: 0/50 (Guaranteed Epic)</div>
-                <button type="button" class="gacha-utility-btn" id="gacha-open-rates-btn">Drop Rates</button>
-                <button type="button" class="gacha-utility-btn" id="gacha-open-shard-shop-btn">Shard Shop</button>
-            </div>
-        </div>
-
-        <!-- Banner Card Content -->
-        <div id="gacha-banner-card">
-            <div class="gacha-banner-artwork" id="gacha-banner-artwork">
-                <div class="gacha-banner-vignette"></div>
-                <div class="gacha-rate-up-badge">RATE UP</div>
-                
-                <div class="gacha-banner-info">
-                    <span class="gacha-banner-kicker">FEATURED BANNER</span>
-                    <h3 id="gacha-banner-name">Scroll of the Five Nations</h3>
-                    <p id="gacha-banner-sub">Standard Shinobi Summon</p>
-                    <p class="gacha-banner-desc-text" id="gacha-banner-desc">Summon brave shinobi across all five hidden villages with guaranteed drop protection!</p>
-                    
-                    <!-- Unified Featured Shinobi showcase -->
-                    <div class="gacha-featured-showcase" id="gacha-banner-featured-faces"></div>
-                </div>
-                
-                <div class="gacha-hero-render-wrap">
-                    <img class="gacha-hero-render" id="gacha-hero-render" src="itachi-render.png" alt="Featured Shinobi">
-                </div>
-            </div>
-
-            <!-- AAA Summon Action Buttons -->
-            <div class="gacha-action-row">
-                <button type="button" class="gacha-summon-btn gacha-btn-single" id="gacha-pull-single-btn">
-                    <div class="summon-btn-top">
-                        <span class="summon-btn-title">SUMMON ×1</span>
-                    </div>
-                    <div class="summon-btn-cost-badge" id="gacha-cost-single">1 Scroll or 100 Ryo</div>
-                </button>
-                
-                <button type="button" class="gacha-summon-btn gacha-btn-multi" id="gacha-pull-multi-btn">
-                    <div class="summon-btn-top">
-                        <span class="summon-btn-title">SUMMON ×10</span>
-                        <span class="summon-btn-sr-guarantee">GUARANTEED SR+</span>
-                    </div>
-                    <div class="summon-btn-cost-badge" id="gacha-cost-multi">9 Scrolls or 900 Ryo</div>
-                </button>
-            </div>
-        </div>
-
-        <div id="gacha-results-container" class="hidden">
-            <div class="gacha-results-header">
-                <h3 class="gacha-results-title">Summoning Results</h3>
-                <p class="gacha-results-subtitle">Shinobi Added to Your Squad &bull; Duplicates Converted to Chakra Shards</p>
-            </div>
-            <div class="gacha-cards-grid" id="gacha-cards-grid"></div>
-            <button type="button" class="shinobi-btn-primary" id="gacha-claim-results-btn">Collect Shinobi</button>
-        </div>
-    </div>
-</div>
-
-<!-- Gacha Drop Rates Modal -->
-<div id="gacha-rates-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel gacha-rates-panel">
-        <button type="button" class="shinobi-modal-close" id="gacha-rates-close" aria-label="Close">&times;</button>
-        <h3 class="gacha-rates-title">Summon Drop Rates</h3>
-        <div class="gacha-rates-table">
-            <div class="gacha-rate-row"><span style="color:#ef4444; font-weight:800;">Legendary</span><span>1.0%</span></div>
-            <div class="gacha-rate-row"><span style="color:#fbbf24; font-weight:800;">Epic</span><span>5.0%</span></div>
-            <div class="gacha-rate-row"><span style="color:#c084fc; font-weight:800;">Rare</span><span>15.0%</span></div>
-            <div class="gacha-rate-row"><span style="color:#34d399; font-weight:800;">Uncommon</span><span>30.0%</span></div>
-            <div class="gacha-rate-row"><span style="color:#38bdf8; font-weight:800;">Common</span><span>49.0%</span></div>
-        </div>
-        <div class="gacha-rates-info-notes">
-            <p><strong>Pity System:</strong> Guaranteed Epic or higher drop at 50 summons without an Epic+.</p>
-            <p><strong>Duplicate Conversion:</strong> Duplicates award Chakra Shards based on rarity (Common: 10, Uncommon: 25, Rare: 50, Epic: 100, Legendary: 150).</p>
-        </div>
-    </div>
-</div>
-
-<!-- Shard Crafting Shop Modal -->
-<div id="gacha-shard-shop-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel gacha-shard-shop-panel">
-        <button type="button" class="shinobi-modal-close" id="gacha-shard-shop-close" aria-label="Close">&times;</button>
-        <div class="shard-shop-header">
-            <div class="shard-shop-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
-                    <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">珠</text>
-                </svg>
-            </div>
-            <div>
-                <h3 class="shard-shop-title">Chakra Shard Crafting</h3>
-                <p class="shard-shop-subtitle">Forge duplicate Chakra Shards into rare ninja items</p>
-            </div>
-        </div>
-
-        <div class="gacha-shard-balance-bar">
-            <span class="shard-balance-label">Available Balance</span>
-            <span class="shard-balance-value"><strong id="shard-shop-balance">0</strong> Chakra Shards</span>
-        </div>
-        <div id="shard-shop-message" class="shard-shop-msg"></div>
-        <div class="gacha-shard-shop-grid">
-            <div class="shard-shop-item">
-                <div class="shard-item-info">
-                    <div class="shard-item-name">Summon Scroll</div>
-                    <div class="shard-item-cost">Cost: <strong>50 Shards</strong></div>
-                </div>
-                <button type="button" class="shard-craft-btn" data-craft-type="scroll">Craft ×1</button>
-            </div>
-            <div class="shard-shop-item">
-                <div class="shard-item-info">
-                    <div class="shard-item-name">500 Ryo</div>
-                    <div class="shard-item-cost">Cost: <strong>20 Shards</strong></div>
-                </div>
-                <button type="button" class="shard-craft-btn" data-craft-type="ryo">Craft ×1</button>
-            </div>
-            <div class="shard-shop-item">
-                <div class="shard-item-info">
-                    <div class="shard-item-name">Direct Character Unlock Token</div>
-                    <div class="shard-item-cost">Cost: <strong>200 Shards</strong></div>
-                </div>
-                <button type="button" class="shard-craft-btn" data-craft-type="character">Craft ×1</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Quests Modal -->
 <div id="quests-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
@@ -653,8 +483,9 @@
 </div>
 
 <script src="characters.js?v=42"></script>
-<script src="script.js?v=43"></script>
-<script src="shop.js?v=43"></script>
+<script src="roster-catalog.js?v=1"></script>
+<script src="skill-description-format.js?v=2"></script>
+<script src="script.js?v=51"></script>
 <script src="selectionGacha.js?v=44"></script>
 <script src="selectionHub.js?v=44"></script>
 <script>

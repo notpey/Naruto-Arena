@@ -1044,7 +1044,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="news-editor.css" />
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
@@ -1198,40 +1198,31 @@
 
     <main class="main">
 
-      <section class="mainsection">
-        <h1 class="mainsection-kicker ca-subpage-title">News Post</h1>
-        <p class="mainsection-meta">&raquo; Publish and edit homepage announcements</p>
+      <section class="mainsection" id="newsroom">
+        <h1 class="mainsection-kicker ca-subpage-title">Newsroom</h1>
+        <p class="mainsection-meta">Write announcements, character releases, events, and balance notes.</p>
         <div class="news-admin-layout">
           <section class="news-editor-card">
-            <h2 class="news-editor-title">Post Editor</h2>
+            <div class="news-editor-heading"><div><h2 class="news-editor-title" id="news-editor-heading">New announcement</h2><p class="news-admin-help">Build the story below. The preview updates as you write.</p></div><button class="news-admin-button secondary" type="button" id="news-reset-button">New post</button></div>
             <form class="news-admin-form" id="news-admin-form">
               <input type="hidden" id="news-post-id" />
               <label class="news-admin-label" for="news-title">
-                Title
-                <input class="news-admin-input" type="text" id="news-title" maxlength="120" required />
+                Headline
+                <input class="news-admin-input" type="text" id="news-title" maxlength="120" placeholder="What should players know?" required />
               </label>
-              <label class="news-admin-label" for="news-content">
-                News Content
-                <textarea class="news-admin-textarea" id="news-content" placeholder="Write the announcement here. Use a line with --- to insert a divider."></textarea>
-              </label>
-              <p class="news-admin-help">Use `---` on its own line to insert a divider inside the post.</p>
-              <label class="news-admin-label" for="news-changes">
-                Character and Skill Changes
-                <textarea class="news-admin-textarea" id="news-changes" placeholder="One change per line. Example: Naruto's Rasengan now deals 30 damage instead of 50."></textarea>
-              </label>
-              <p class="news-admin-help">Use one line per change in this format: `Buff|Nerf | Character Name | Skill Name | Change text`. Use `\n` inside the change text for a line break.</p>
+              <div class="news-compose-section"><div class="news-compose-heading"><div><h3>Article</h3><p>Arrange paragraphs, section headings, lists, and dividers.</p></div></div><div id="news-block-editor" class="news-block-editor"></div><div class="news-add-actions"><button type="button" data-news-add-block="paragraph">+ Paragraph</button><button type="button" data-news-add-block="heading">+ Heading</button><button type="button" data-news-add-block="list">+ List</button><button type="button" data-news-add-block="divider">+ Divider</button></div></div>
+              <div class="news-compose-section"><div class="news-compose-heading"><div><h3>Character changes</h3><p>Choose a roster portrait and skill. Their images appear automatically in the published post.</p></div><button type="button" class="news-admin-button secondary" id="news-add-change">+ Add change</button></div><p class="news-admin-status" id="news-catalog-status" aria-live="polite">Loading characters…</p><div id="news-change-editor" class="news-change-editor"></div></div>
               <p class="news-admin-status" id="news-admin-status" aria-live="polite"></p>
               <div class="news-admin-actions">
-                <button class="news-admin-button secondary" type="button" id="news-reset-button">New Post</button>
-                <button class="news-admin-button primary" type="submit" id="news-save-button">Save Post</button>
+                <button class="news-admin-button primary" type="submit" id="news-save-button">Publish post</button>
               </div>
             </form>
           </section>
-          <section class="news-list-card">
-            <h2 class="news-list-title">Existing Posts</h2>
+          <div class="news-side-stack"><section class="news-list-card news-preview-card"><div class="news-preview-heading"><h2 class="news-list-title">Preview</h2><span>Player view</span></div><div id="news-live-preview" class="news-live-preview"></div></section><section class="news-list-card">
+            <h2 class="news-list-title">Published posts</h2>
             <p class="news-admin-status" id="news-post-list-status" aria-live="polite"></p>
             <div class="news-post-list" id="news-post-list"></div>
-          </section>
+          </section></div>
         </div>
       </section>
 
@@ -1239,9 +1230,10 @@
 
 
   </div>
+  <script src="./news-composer.js" defer></script>
+  <script src="./news-author.js" defer></script>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
-  <script src="./shop.js" defer></script>
 
   
   <!-- Shinobi-Arena nav account sync (injected): mirrors #account-panel into the nav + dropdown toggle -->

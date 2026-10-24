@@ -75,3 +75,134 @@ test('getStoredCharacters ensures official seed skills and effects take preceden
     assert.equal(sealEnemyEffect?.metadata?.ignoreOngoingSourceStun, true, 'ignoreOngoingSourceStun must be present');
 });
 
+test('Naruto rework replaces stale stored artwork and skills once', async () => {
+    const oldNaruto = {
+        id: 'uzumaki-naruto', characterId: 'uzumaki-naruto', name: 'Uzumaki Naruto',
+        facePicture: 'https://example.com/old-naruto.png',
+        characterdeescription: 'Old Naruto description',
+        skills: [{ id: 'uzumaki-naruto-combo', name: 'Uzumaki Naruto Combo' }],
+    };
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldNaruto] }
+            : { key, completed: {
+                'starter-rebalance-2026-07-16': new Date(),
+                'exams-rebalance-2026-07-16-v4': new Date(),
+            } },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const naruto = stored.find(character => character.id === 'uzumaki-naruto');
+    assert.equal(naruto.facePicture, 'https://i.imgur.com/NwbpKdo.png');
+    assert.equal(naruto.skills[0].name, 'Shadow Clone Assault');
+    assert.equal(naruto.passive.name, 'Unpredictable Ninja');
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.uzumaki-naruto-rework-2026-10-23']));
+});
+
+test('Sakura and Sasuke rework replaces stale stored character concepts once', async () => {
+    const oldSakura = {
+        id: 'haruno-sakura', characterId: 'haruno-sakura', name: 'Haruno Sakura',
+        facePicture: 'https://example.com/old-sakura.png',
+        skills: [{ id: 'haruno-sakura-ko-punch', name: 'KO Punch' }],
+    };
+    const oldSasuke = {
+        id: 'uchiha-sasuke', characterId: 'uchiha-sasuke', name: 'Uchiha Sasuke',
+        facePicture: 'https://example.com/old-sasuke.png',
+        skills: [{ id: 'uchiha-sasuke-lion-combo', name: 'Lion Combo' }],
+    };
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldSakura, oldSasuke] }
+            : { key, completed: {
+                'starter-rebalance-2026-07-16': new Date(),
+                'exams-rebalance-2026-07-16-v4': new Date(),
+                'uzumaki-naruto-rework-2026-10-23': new Date(),
+            } },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const sakura = stored.find(character => character.id === 'haruno-sakura');
+    const sasuke = stored.find(character => character.id === 'uchiha-sasuke');
+    assert.equal(sakura.skills[0].name, 'Kunai Interference');
+    assert.equal(sakura.passive.name, 'Exceptional Chakra Control');
+    assert.equal(sasuke.skills[0].name, 'Shadow Shuriken Technique');
+    assert.equal(sasuke.passive.name, 'Uchiha Prodigy');
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.team-7-sakura-sasuke-rework-2026-10-24-v2']));
+});
+
+test('Kakashi and Iruka rework replaces stale stored kits once', async () => {
+    const oldKakashi = {
+        id: 'hatake-kakashi', characterId: 'hatake-kakashi', name: 'Hatake Kakashi',
+        facePicture: 'https://example.com/old-kakashi.png',
+        skills: [{ id: 'hatake-kakashi-sharingan-counter', name: 'Sharingan' }],
+    };
+    const oldIruka = {
+        id: 'umino-iruka', characterId: 'umino-iruka', name: 'Umino Iruka',
+        facePicture: 'https://example.com/old-iruka.png',
+        skills: [{ id: 'umino-iruka-ally-shield', name: 'Ally Shield' }],
+    };
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldKakashi, oldIruka] }
+            : { key, completed: {
+                'starter-rebalance-2026-07-16': new Date(),
+                'exams-rebalance-2026-07-16-v4': new Date(),
+                'uzumaki-naruto-rework-2026-10-23': new Date(),
+                'team-7-sakura-sasuke-rework-2026-10-24-v2': new Date(),
+            } },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const kakashi = stored.find(character => character.id === 'hatake-kakashi');
+    const iruka = stored.find(character => character.id === 'umino-iruka');
+    assert.equal(kakashi.passive.name, 'Copy Ninja');
+    assert.equal(kakashi.skills[0].name, 'Sharingan Insight');
+    assert.equal(kakashi.skills[4].name, 'Raikiri');
+    assert.equal(iruka.passive.name, 'Genin Promotion');
+    assert.equal(iruka.skills[1].name, 'Academy Instruction');
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.kakashi-iruka-rework-2026-10-24']));
+});
+
+test('Haku, Zabuza, and Mizuki rework replaces stored concepts once', async () => {
+    const old = ['haku', 'momochi-zabuza', 'mizuki'].map((id) => ({
+        id, characterId: id, name: id, facePicture: 'https://example.com/old.png',
+        characterdeescription: 'Old description', skills: [{ id: `${id}-old` }],
+    }));
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: old }
+            : { key, completed: {
+                'starter-rebalance-2026-07-16': new Date(),
+                'exams-rebalance-2026-07-16-v4': new Date(),
+                'uzumaki-naruto-rework-2026-10-23': new Date(),
+                'team-7-sakura-sasuke-rework-2026-10-24-v2': new Date(),
+                'kakashi-iruka-rework-2026-10-24': new Date(),
+            } },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    for (const [id, passive, skill] of [
+        ['haku', 'Demon of the Ice', 'Demonic Mirroring Ice Crystals'],
+        ['momochi-zabuza', 'Silent Killing', 'Kubikiribōchō'],
+        ['mizuki', 'Meld in the Shadows', 'Kunai Ambush'],
+    ]) {
+        const character = stored.find((entry) => entry.characterId === id);
+        assert.equal(character.passive.name, passive);
+        assert.equal(character.skills[0].name, skill);
+        assert.notEqual(character.characterdeescription, 'Old description');
+    }
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.waves-haku-zabuza-mizuki-rework-2026-10-24']));
+});
+

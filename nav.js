@@ -117,6 +117,12 @@
     var navLinks = document.querySelector(".ca-nav-links");
     if (!nav || !navLinks) { return; }
 
+    // Use the same compact wordmark on every shared website header.
+    var brandLink = nav.querySelector(".ca-nav-seal");
+    if (brandLink) {
+      brandLink.innerHTML = '<span class="ca-nav-wordmark"><span>NARUTO</span><span>ARENA</span></span>';
+    }
+
     var accountAvatar = nav.querySelector(".ca-account-trigger .ca-nav-avatar");
     if (accountAvatar && accountAvatar.tagName !== "IMG") {
       var avatarImage = document.createElement("img");
@@ -134,6 +140,30 @@
         }
       } catch (error) {}
       accountAvatar.replaceWith(avatarImage);
+    }
+
+    // Subpages keep their auth state in the DOM for index.js, but account
+    // settings live in the Home account panel rather than a nav dropdown.
+    var accountTrigger = nav.querySelector(".ca-account-trigger");
+    var accountMenu = nav.querySelector(".ca-account-menu");
+    if (accountTrigger && accountMenu) {
+      var accountLink = document.createElement("a");
+      accountLink.className = "ca-account-link";
+      accountLink.id = accountTrigger.id;
+      accountLink.href = "index.html#auth-panel";
+      accountLink.setAttribute("aria-label", "Open account panel on Home");
+      while (accountTrigger.firstChild) { accountLink.appendChild(accountTrigger.firstChild); }
+      var caret = accountLink.querySelector(".ca-account-caret");
+      if (caret) { caret.remove(); }
+      var guestLabel = accountLink.querySelector(".ca-nav-guest");
+      if (guestLabel) { guestLabel.textContent = "Sign in"; }
+      var welcome = accountLink.querySelector(".ca-nav-welcome");
+      if (welcome && welcome.firstChild && welcome.firstChild.nodeType === Node.TEXT_NODE) {
+        welcome.firstChild.textContent = "";
+      }
+      accountTrigger.replaceWith(accountLink);
+      accountMenu.hidden = true;
+      accountMenu.setAttribute("inert", "");
     }
 
     var menuItems = Array.prototype.slice.call(navLinks.querySelectorAll(".ca-has-menu"));

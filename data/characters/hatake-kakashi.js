@@ -1,165 +1,120 @@
 module.exports = {
-    "id": "hatake-kakashi",
-    "characterId": "hatake-kakashi",
-    "name": "Hatake Kakashi",
-    "facePicture": "https://i.imgur.com/Ult0SsC.png",
-    "characterdeescription": "The squad leader of Team 7, known as the Copy Ninja, Kakashi is a man who puts the life of his teammates above all else. Kakashi is able to copy the abilities of his enemies while using his own original technique, the Raikiri.",
-    "requiredMissionId": "team-7-fights-as-a-team",
-    "skills": [
+    id: 'hatake-kakashi',
+    characterId: 'hatake-kakashi',
+    name: 'Hatake Kakashi',
+    facePicture: 'https://i.imgur.com/wmmoCGJ.png',
+    characterdeescription: 'The squad leader of Team 7, known as the Copy Ninja, Kakashi is a man who puts the lives of his teammates above all else. He can copy enemy abilities with his Sharingan and finish a fight with his own Raikiri.',
+    requiredMissionId: 'team-7-fights-as-a-team',
+    passive: {
+        name: 'Copy Ninja',
+        icon: 'https://i.imgur.com/xg8yXfM.png',
+        description: 'When Sharingan Insight counters a skill, Kakashi copies it for 1 turn at a cost of 1 Random chakra. Unique skills and skills requiring preparation cannot be copied.',
+    },
+    skills: [
         {
-            "id": "hatake-kakashi-sharingan-counter",
-            "name": "Sharingan",
-            "skillimage": "https://i.imgur.com/4sfYWaL.png",
-            "skilldescription": "For 1 turn, the first physical, chakra or strategic skill used on Hatake Kakashi will be countered and copied. For 2 turns, Sharingan will be replaced by the copied skill, which costs 1 random chakra. This skill is invisible.",
-            "energy": [
-                "Bloodline"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
+            id: 'hatake-kakashi-sharingan-counter',
+            name: 'Sharingan Insight',
+            skillimage: 'https://i.imgur.com/wrowrxL.png',
+            skilldescription: 'Kakashi reveals hidden enemy effects for 1 turn and counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.',
+            energy: ['Bloodline'], target: 'self', damage: 0, cooldown: 2,
+            classes: ['Strategic', 'Instant', 'Unique'],
+            effects: [
                 {
-                    "type": "apply_status",
-                    "statusId": "kakashi_sharingan_counter",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "hideTooltipFromEnemy": true,
-                        "triggerOnEnemyHarmfulSkillClassesAny": [
-                            "physical",
-                            "energy",
-                            "strategic"
-                        ],
-                        "counterCancelsSkill": true,
-                        "counterCopySkillReplacementFor": "hatake-kakashi-sharingan-counter",
-                        "counterCopySkillReplacementDuration": 2,
-                        "tooltipText": "The first physical, chakra or strategic skill used on Kakashi will be countered and copied.",
-                        "counterCopiedSkillEnergy": [
-                            "Random"
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "id": "hatake-kakashi-summoning-ninja-dogs",
-            "name": "Summoning: Ninja Dogs",
-            "skillimage": "https://i.imgur.com/1TSYjNE.png",
-            "skilldescription": "Hatake Kakashi stuns one enemy's physical, chakra, and strategic skills for 1 turn. During this time, allies deal 10 additional non-affliction damage to this enemy and 'Raikiri' deals 45 piercing damage to them.",
-            "energy": [
-                "Ninjutsu"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Strategic",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "kakashi_ninja_dogs_mark",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "energy",
-                            "strategic",
-                            "ninjutsu"
-                        ],
-                        "tooltipText": "This character is stunned and takes 10 additional non-affliction damage.",
-                        "bonusDamageFromSourceNonAfflictionFlat": 10,
-                        "ongoingClass": "control"
-                    }
+                    type: 'apply_status', statusId: 'kakashi_sharingan_reveal', duration: 1, scope: 'self',
+                    metadata: {
+                        helpful: true, revealInvisibleSkills: true,
+                        tooltipText: 'Kakashi can see hidden enemy effects.',
+                    },
                 },
                 {
-                    "type": "apply_status",
-                    "statusId": "kakashi_ninja_dogs_raikiri_cost",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "skillCostOverridesBySkillId": {
-                            "hatake-kakashi-raikiri": {
-                                "energy": [
-                                    "Ninjutsu"
-                                ]
-                            }
-                        },
-                        "tooltipText": "Raikiri costs 1 Ninjutsu this turn.",
-                        "ongoingClass": "control"
-                    }
-                }
-            ]
-        },
-        {
-            "id": "hatake-kakashi-raikiri",
-            "name": "Raikiri",
-            "skillimage": "https://i.imgur.com/BUvxnE4.png",
-            "skilldescription": "Hatake Kakashi deals 35 piercing damage to one enemy. Against an enemy affected by 'Summoning: Ninja Dogs', this skill deals 45 piercing damage and costs 1 less chakra.",
-            "energy": [
-                "Ninjutsu",
-                "Random"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Ninjutsu",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 35,
-                    "scope": "target",
-                    "metadata": {
-                        "ignoreDamageReduction": true
+                    type: 'apply_status', statusId: 'kakashi_sharingan_insight', duration: 1, scope: 'self',
+                    metadata: {
+                        helpful: true, triggerOnEnemyHarmfulSkill: true,
+                        counterCancelsSkill: true,
+                        counterCopySkillReplacementFor: 'hatake-kakashi-sharingan-counter',
+                        counterCopySkillReplacementDuration: 1,
+                        counterCopyRequiresPassiveName: 'Copy Ninja',
+                        counterCopyExcludeUniqueAndPreparation: true,
+                        counterCopiedSkillEnergy: ['Random'],
+                        tooltipText: 'Kakashi counters the first harmful skill used against him. Copy Ninja can then copy that skill.',
                     },
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "kakashi_ninja_dogs_mark",
-                        "conditionalAmount": 35
-                    }
-                }
-            ]
+                },
+            ],
         },
         {
-            "id": "hatake-kakashi-clever-hiding",
-            "name": "Clever Hiding",
-            "skillimage": "https://i.imgur.com/Px6V4yg.png",
-            "skilldescription": "This skill makes Hatake Kakashi invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
+            id: 'hatake-kakashi-summoning-ninja-dogs',
+            name: 'Nin-Dogs Summoning',
+            skillimage: 'https://i.imgur.com/PFMVHdp.png',
+            skilldescription: 'Kakashi summons tracking hounds to restrain one enemy, dealing 15 physical damage and stunning their Physical skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
+            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 15, scope: 'target', metadata: { skillClasses: ['Physical'] } },
                 {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+                    type: 'apply_status', statusId: 'kakashi_nin_dogs_stun', duration: 1, scope: 'target',
+                    metadata: {
+                        harmful: true, cannotUseSkillClasses: ['physical'], turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character cannot use Physical skills.',
+                    },
+                },
+                {
+                    type: 'apply_status', statusId: 'kakashi_nin_dogs_raikiri_ready', duration: 1, scope: 'self',
+                    metadata: {
+                        helpful: true, turnDurationAnchor: 'source_turn',
+                        skillReplacements: { 'hatake-kakashi-summoning-ninja-dogs': 'hatake-kakashi-raikiri' },
+                        skillCostOverridesBySkillId: { 'hatake-kakashi-raikiri': { energy: ['Ninjutsu', 'Random'] } },
+                        tooltipText: 'Nin-Dogs Summoning is replaced by Raikiri for 1 turn. It costs 1 Ninjutsu and 1 Random chakra.',
+                    },
+                },
+            ],
+        },
+        {
+            id: 'hatake-kakashi-earth-style-headhunter-jutsu',
+            name: 'Earth Style: Headhunter Jutsu',
+            skillimage: 'https://i.imgur.com/m9r8Dpo.png',
+            skilldescription: 'Kakashi drags one enemy underground, dealing 15 physical damage and stunning their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.',
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 15, scope: 'target' },
+                {
+                    type: 'apply_status', statusId: 'kakashi_headhunter_stun', duration: 1, scope: 'target',
+                    metadata: {
+                        harmful: true, cannotUseSkillClasses: ['chakra', 'strategic'], turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character cannot use Chakra or Strategic skills.',
+                    },
+                },
+                {
+                    type: 'apply_status', statusId: 'kakashi_headhunter_raikiri_ready', duration: 1, scope: 'self',
+                    metadata: {
+                        helpful: true, turnDurationAnchor: 'source_turn',
+                        skillReplacements: { 'hatake-kakashi-earth-style-headhunter-jutsu': 'hatake-kakashi-raikiri' },
+                        skillCostOverridesBySkillId: { 'hatake-kakashi-raikiri': { energy: ['Taijutsu', 'Random'] } },
+                        tooltipText: 'Headhunter Jutsu is replaced by Raikiri for 1 turn. It costs 1 Taijutsu and 1 Random chakra.',
+                    },
+                },
+            ],
+        },
+        {
+            id: 'hatake-kakashi-defender',
+            name: 'Defender',
+            skillimage: 'https://i.imgur.com/kB9dl7E.png',
+            skilldescription: 'Kakashi defends the mission, becoming invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{
+                type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true, tooltipText: 'This character is invulnerable.' },
+            }],
+        },
+        {
+            id: 'hatake-kakashi-raikiri',
+            name: 'Raikiri',
+            skillimage: 'https://i.imgur.com/CVE7tBQ.png',
+            skilldescription: 'Kakashi charges one enemy with lightning chakra, dealing 45 piercing damage.',
+            energy: ['Ninjutsu', 'Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Chakra', 'Instant'], hiddenFromSelectionViewer: true, requiresPreparation: true,
+            effects: [{ type: 'damage', amount: 45, scope: 'target', metadata: { ignoreDamageReduction: true } }],
+        },
+    ],
 };

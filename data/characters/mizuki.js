@@ -1,221 +1,62 @@
 module.exports = {
-    "id": "mizuki",
-    "characterId": "mizuki",
-    "name": "Mizuki",
-    "facePicture": "https://i.imgur.com/NZS59L7.png",
-    "characterdeescription": "An instructor for Konoha, Mizuki is a chuunin and old friend of Iruka that over time grew jealous and petty. While Mizuki doesn't have any special abilities, he knows to instead be patient, and wait until the right time to strike.",
-    "requiredMissionId": "a-dishonored-shinobi",
-    "skills": [
+    id: 'mizuki', characterId: 'mizuki', name: 'Mizuki',
+    facePicture: 'https://i.imgur.com/4MCaK7l.png', requiredMissionId: 'a-dishonored-shinobi',
+    characterdeescription: "An instructor at the Hidden Leaf's Ninja Academy, Mizuki conceals his hunger for power beneath a sympathetic demeanor. Hoping to steal the forbidden Scroll of Seals, he manipulates Naruto's desire to become a ninja, only to have his betrayal exposed by Iruka.",
+    passive: { name: 'Meld in the Shadows', icon: 'https://i.imgur.com/JDdDwn0.png',
+        description: "Mizuki's damaging skills deal 5 additional damage to enemies who use a non-damaging skill that turn.",
+        bonusAgainstNonDamagingSkillUser: 5 },
+    skills: [
         {
-            "id": "mizuki-kunai-assault",
-            "name": "Kunai Assault",
-            "skillimage": "https://i.imgur.com/FZHixlO.png",
-            "skilldescription": "Mizuki deals 10 piercing damage to one enemy for 3 turns. This skill stacks.",
-            "energy": [
-                "Random"
+            id: 'mizuki-kunai-ambush', name: 'Kunai Ambush', skillimage: 'https://i.imgur.com/oTFkPZG.png',
+            skilldescription: 'Mizuki attacks one enemy with a barrage of kunai, dealing 15 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 15, scope: 'target' },
+                { type: 'apply_status', statusId: 'mizuki_kunai_ambush_trap', duration: 1, scope: 'target',
+                    metadata: { harmful: true, triggerOnOwnerHelpfulSkill: true,
+                        counterCancelsSkill: true, turnDurationAnchor: 'source_turn',
+                        tooltipText: 'The next helpful skill this character uses is countered.' } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Physical",
-                "Action"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "mizuki_kunai_assault",
-                    "duration": 3,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnEndDamage": 10,
-                        "turnEndTrigger": "source_turn",
-                        "turnDurationAnchor": "source_turn",
-                        "ongoingClass": "action",
-                        "ignoreTargetDamageReduction": true,
-                        "triggerOnApply": true,
-                        "mergeNumericAddKeys": [
-                            "turnEndDamage"
-                        ],
-                        "tooltipText": "This character takes 10 piercing damage from Kunai Assault."
-                    }
-                }
-            ]
         },
         {
-            "id": "mizuki-execution-shuriken",
-            "name": "Execution Shuriken",
-            "skillimage": "https://i.imgur.com/sqwpwQd.png",
-            "skilldescription": "Mizuki deals 20 damage to one enemy and 10 additional damage for each 20 health they have lost. This skill can only be used twice.",
-            "energy": [
-                "Taijutsu",
-                "Random"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "maxUses": 2,
-            "baseSkillId": "mizuki-execution-shuriken",
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target",
-                    "metadata": {
-                        "amountFromTargetMissingHpStep": 10,
-                        "amountFromTargetMissingHpDivisor": 20
-                    }
-                }
-            ]
+            id: 'mizuki-execution-shuriken', name: 'Execution Shuriken',
+            skillimage: 'https://i.imgur.com/O3Y4Q29.png',
+            skilldescription: 'Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.',
+            energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 30, scope: 'target' }],
         },
         {
-            "id": "mizuki-genjutsu-ambush-tactics",
-            "name": "Genjutsu Ambush Tactics",
-            "skillimage": "https://i.imgur.com/I4EX3j3.png",
-            "skilldescription": "After 1 turn, Mizuki will become invulnerable, 'Kunai Assault' will deal 30 damage instantly and lower the target's non-affliction damage by 5, and 'Execution Shuriken' will deal 30 additional damage for 1 turn. This skill is invisible the first turn and will end if Mizuki receives new non-affliction damage.",
-            "energy": [
-                "Genjutsu"
+            id: 'mizuki-windmill', name: 'Windmill', skillimage: 'https://i.imgur.com/jETOs8w.png',
+            skilldescription: 'Mizuki prepares his giant shuriken for a sweeping attack. For 2 turns, his next Execution Shuriken affects all enemies.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 2,
+            classes: ['Strategic', 'Instant', 'Physical*'], effects: [
+                { type: 'apply_status', statusId: 'mizuki_windmill', duration: 2, scope: 'self',
+                    metadata: { helpful: true,
+                        skillReplacements: { 'mizuki-execution-shuriken': 'mizuki-execution-shuriken-windmill' },
+                        removeSelfOnSkillUseSkillIds: ['mizuki-execution-shuriken-windmill'],
+                        tooltipText: 'The next Execution Shuriken hits all enemies, then Windmill ends.' } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "mizuki_ambush_priming",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "hideTooltipFromEnemy": true,
-                        "turnDurationAnchor": "any_turn",
-                        "removeStatusIdsOnNewNonAfflictionDamage": [
-                            "mizuki_ambush_priming"
-                        ],
-                        "onExpireApplyStatusToSelf": {
-                            "statusId": "mizuki_ambush_ready",
-                            "duration": 1,
-                            "metadata": {
-                                "helpful": true,
-                                "invulnerable": true,
-                                "skillReplacements": {
-                                    "mizuki-kunai-assault": "mizuki-kunai-assault-empowered",
-                                    "mizuki-execution-shuriken": "mizuki-execution-shuriken-empowered"
-                                },
-                                "tooltipText": "Mizuki is invulnerable. 'Kunai Assault' deals instant damage and lowers damage, and 'Execution Shuriken' deals additional damage."
-                            }
-                        },
-                        "tooltipText": "Mizuki is preparing an ambush."
-                    }
-                }
-            ]
         },
         {
-            "id": "mizuki-effortless-side-step",
-            "name": "Effortless Side-Step",
-            "skillimage": "https://i.imgur.com/Lt7IMdA.png",
-            "skilldescription": "This skill makes Mizuki invulnerable for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'mizuki-effortless-side-step', name: 'Effortless Side-step',
+            skillimage: 'https://i.imgur.com/jP0RmHY.png',
+            skilldescription: 'Mizuki becomes invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 0,
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'mizuki_effortless_side_step', duration: 1, scope: 'self',
+                    metadata: { helpful: true, invulnerable: true, tooltipText: 'Mizuki is invulnerable.' } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
         },
         {
-            "id": "mizuki-kunai-assault-empowered",
-            "name": "Kunai Assault",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/FZHixlO.png",
-            "skilldescription": "Mizuki deals 30 piercing damage to one enemy instantly. For 1 turn, this enemy will deal 5 less non-affliction damage.",
-            "energy": [
-                "Random"
+            id: 'mizuki-execution-shuriken-windmill', baseSkillId: 'mizuki-execution-shuriken', useBaseSkillCooldown: true,
+            hiddenFromSelectionViewer: true, name: 'Execution Shuriken',
+            skillimage: 'https://i.imgur.com/O3Y4Q29.png',
+            skilldescription: 'Mizuki deals 20 physical damage to all enemies, ending Windmill.',
+            energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 20, scope: 'all-enemy' },
+                { type: 'remove_status', statusId: 'mizuki_windmill', scope: 'self' },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 30,
-                    "scope": "target",
-                    "metadata": {
-                        "ignoreDestructibleDefense": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "mizuki_empowered_kunai_assault_damage_debuff",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "NonAfflictionDamageDebuff": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
-        {
-            "id": "mizuki-execution-shuriken-empowered",
-            "name": "Execution Shuriken",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/sqwpwQd.png",
-            "skilldescription": "Mizuki deals 50 damage to one enemy and 10 additional damage for each 20 health they have lost.",
-            "energy": [
-                "Taijutsu",
-                "Random"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "maxUses": 2,
-            "baseSkillId": "mizuki-execution-shuriken",
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 50,
-                    "scope": "target",
-                    "metadata": {
-                        "amountFromTargetMissingHpStep": 10,
-                        "amountFromTargetMissingHpDivisor": 20
-                    }
-                }
-            ]
-        }
-    ]
+    ],
 };

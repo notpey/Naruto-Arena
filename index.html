@@ -11,7 +11,6 @@
   <link rel="shortcut icon" href="favicon.ico?v=3">
   <link rel="apple-touch-icon" href="favicon.png?v=3">
   <link rel="stylesheet" href="brand.css" />
-  <link rel="stylesheet" href="shop.css">
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
@@ -71,11 +70,10 @@
           <a class="ca-nav-auth-link" href="#auth-panel" id="ca-nav-register-link">Register</a>
         </div>
         <!-- logged-in state (hidden by default, shown by JS) -->
-        <div id="ca-nav-user" class="ca-nav-user" hidden>
+        <a id="ca-nav-user" class="ca-nav-user" href="#auth-panel" aria-label="Go to your account panel" hidden>
           <img class="ca-nav-avatar" id="ca-nav-avatar-circle" src="" alt="" aria-hidden="true">
           <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
-          <button class="ca-nav-logout-btn" type="button" id="ca-nav-logout-btn">Log Out</button>
-        </div>
+        </a>
       </div>
 
     </div>
@@ -127,6 +125,7 @@
         <div class="ca-news-header">
           <p class="news-status" id="news-status" aria-live="polite"></p>
           <button class="ca-news-retry" id="news-retry-button" type="button" hidden>Try again</button>
+          <a class="news-archive-cta" href="news.html">All announcements &rsaquo;</a>
         </div>
 
         <!-- JS renders .news-post cards inside here -->
@@ -236,9 +235,9 @@
 
   </div><!-- /.ca-page -->
 
+  <script src="./news-author.js" defer></script>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
-  <script src="./shop.js" defer></script>
 
   <!-- Nav account sync: mirrors the sidebar auth state into the top nav -->
   <script>
@@ -246,10 +245,8 @@
       var navGuest = document.getElementById('ca-nav-guest');
       var navUser = document.getElementById('ca-nav-user');
       var navUsername = document.getElementById('ca-nav-username');
-      var navLogoutBtn = document.getElementById('ca-nav-logout-btn');
       var accountPanel = document.getElementById('account-panel');
       var guestView = document.getElementById('guest-auth-view');
-      var logoutBtn = document.getElementById('logout-button');
       var accountUsername = document.getElementById('account-username');
 
       function syncNav() {
@@ -265,13 +262,6 @@
       if (accountPanel) {
         var observer = new MutationObserver(syncNav);
         observer.observe(accountPanel, { attributes: true, attributeFilter: ['hidden', 'style'] });
-      }
-
-      // Wire nav logout to the sidebar logout button
-      if (navLogoutBtn && logoutBtn) {
-        navLogoutBtn.addEventListener('click', function () {
-          logoutBtn.click();
-        });
       }
 
       syncNav();

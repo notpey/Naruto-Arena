@@ -15,13 +15,20 @@ const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
+const { reconcileUnitPassive } = require('./services/matchPassives');
 const gauntlet = require('./gauntlet');
-const { sortCharactersByRosterOrder } = require('./data/rosterOrder');
+const { sortCharactersByRosterOrder, CANONICAL_ROSTER_ORDER } = require('./data/rosterOrder');
 const { localizeArtwork } = require('./services/characterImages');
-let charactersData = require('./data/characters/index.js');
+const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('./data/activeRoster');
+const activeRosterOrder = new Map(ACTIVE_ROSTER_IDS.map((id, index) => [id, index]));
+const selectActiveRoster = (entries) => (Array.isArray(entries) ? entries : [])
+    .filter(isActiveCharacter)
+    .sort((a, b) => (activeRosterOrder.get(a.characterId) ?? 9999) - (activeRosterOrder.get(b.characterId) ?? 9999));
+let charactersData = selectActiveRoster(require('./data/characters/index.js'));
 const charactersBrowserScript = `const characters = ${JSON.stringify(localizeArtwork(charactersData))};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
 const app = express();
+app.use('/api', require('./retiredFeatures.js'));
 const wsServer = new WebSocketServer({ noServer: true });
 const wsConnections = new Set();
 app.use(compression());
@@ -54,11 +61,7 @@ const HTTPS_KEY_PATH = process.env.HTTPS_KEY_PATH;
 const HTTPS_CERT_PATH = process.env.HTTPS_CERT_PATH;
 
 
-const LATEST_CHARACTER_RELEASES = [
-    { label: 'Rock Lee', characterId: 'rock-lee' },
-    { label: 'Aburame Shino', characterId: 'aburame-shino' },
-    { label: 'Latest Character 3', characterId: '' },
-];
+const LATEST_CHARACTER_RELEASES = [];
 const LATEST_CHARACTER_RELEASES_STATE_KEY = 'latest_character_releases';
 const MAINTENANCE_MODE_STATE_KEY = 'maintenance_mode';
 const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
@@ -71,6 +74,9 @@ const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
 const STARTER_REBALANCE_MIGRATION_ID = 'starter-rebalance-2026-07-16';
 const EXAMS_REBALANCE_MIGRATION_ID = 'exams-rebalance-2026-07-16-v4';
 const AUDIT_REBALANCE_MIGRATION_ID = 'audit-rebalance-2026-08-15-v3';
+const NARUTO_REWORK_MIGRATION_ID = 'uzumaki-naruto-rework-2026-10-23';
+const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-24-v2';
+const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
@@ -5419,12 +5425,15 @@ const saveCharacters = async (nextCharacters) => {
                 key: CHARACTER_MIGRATIONS_STATE_KEY,
                 [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
                 [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                [`completed.${NARUTO_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
         },
         { upsert: true }
     );
-    const sortedCharacters = sortCharactersByRosterOrder(nextCharacters);
+    const sortedCharacters = selectActiveRoster(nextCharacters);
     charactersData = sortedCharacters;
     characterCatalog = buildCharacterCatalog();
     try {
@@ -5440,7 +5449,7 @@ const saveCharacters = async (nextCharacters) => {
 // characters shipped in code; it is merged in below without resurrecting anything
 // the admin has deliberately deleted by characterId.
 const getStoredCharacters = async () => {
-    const defaultCharacters = Array.isArray(charactersData) ? charactersData : [];
+    const defaultCharacters = selectActiveRoster(charactersData);
     if (!appStateCollection) {
         return defaultCharacters;
     }
@@ -5460,6 +5469,9 @@ const getStoredCharacters = async () => {
                     key: CHARACTER_MIGRATIONS_STATE_KEY,
                     [`completed.${STARTER_REBALANCE_MIGRATION_ID}`]: now,
                     [`completed.${EXAMS_REBALANCE_MIGRATION_ID}`]: now,
+                    [`completed.${NARUTO_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -5477,10 +5489,16 @@ const getStoredCharacters = async () => {
     const shouldApplyStarterRebalance = !completedMigrations[STARTER_REBALANCE_MIGRATION_ID];
     const shouldApplyExamsRebalance = !completedMigrations[EXAMS_REBALANCE_MIGRATION_ID];
     const shouldApplyAuditRebalance = !completedMigrations[AUDIT_REBALANCE_MIGRATION_ID];
+    const shouldApplyNarutoRework = !completedMigrations[NARUTO_REWORK_MIGRATION_ID];
+    const shouldApplySakuraSasukeRework = !completedMigrations[SAKURA_SASUKE_REWORK_MIGRATION_ID];
+    const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyAuditRebalance ? Array.from(AUDIT_REBALANCE_CHARACTER_IDS) : []),
+        ...(shouldApplyNarutoRework ? ['uzumaki-naruto'] : []),
+        ...(shouldApplySakuraSasukeRework ? ['haruno-sakura', 'uchiha-sasuke'] : []),
+        ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
     ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
@@ -5539,15 +5557,19 @@ const getStoredCharacters = async () => {
         }
         return nextEntry;
     };
+    const activeStoredCharacters = storedState.characters.filter(isActiveCharacter);
     const storedIds = new Set(
-        storedState.characters
+        activeStoredCharacters
             .map((entry) => (entry && typeof entry.characterId === 'string' ? entry.characterId : ''))
             .filter(Boolean)
     );
-    const migratedStoredCharacters = storedState.characters.map((entry) => {
+    const migratedStoredCharacters = activeStoredCharacters.map((entry) => {
         const characterId = entry && typeof entry.characterId === 'string' ? entry.characterId : '';
         const seedEntry = characterId ? defaultByCharacterId.get(characterId) : null;
         if (seedEntry) {
+            if (shouldApplyNarutoRework && characterId === 'uzumaki-naruto') return seedEntry;
+            if (shouldApplySakuraSasukeRework && (characterId === 'haruno-sakura' || characterId === 'uchiha-sasuke')) return seedEntry;
+            if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
             const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
             const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
             if (facePicture !== storedFace) {
@@ -5607,7 +5629,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -5618,6 +5640,15 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyAuditRebalance) {
             completedMigrationUpdates[`completed.${AUDIT_REBALANCE_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyNarutoRework) {
+            completedMigrationUpdates[`completed.${NARUTO_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplySakuraSasukeRework) {
+            completedMigrationUpdates[`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyWavesAndMizukiRework) {
+            completedMigrationUpdates[`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
@@ -6014,6 +6045,7 @@ const backfillUserProfiles = async () => {
                 createdAt: 1,
                 profile: 1,
                 savedTeamIndices: 1,
+                rosterRevision: 1,
             },
         }
     );
@@ -6024,12 +6056,20 @@ const backfillUserProfiles = async () => {
             continue;
         }
         const normalizedProfile = normalizeUserProfile(user);
-        const nextSavedTeamIndices = Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
+        const rosterRevision = 'ten-character-roster-v1';
+        const needsRosterMigration = user.rosterRevision !== rosterRevision;
+        const oldTeam = Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
+        const remappedTeam = needsRosterMigration
+            ? oldTeam.map((index) => ACTIVE_ROSTER_IDS.indexOf(CANONICAL_ROSTER_ORDER[index]))
+            : oldTeam;
+        const nextSavedTeamIndices = remappedTeam.length === 3 &&
+            remappedTeam.every((index) => Number.isInteger(index) && index >= 0) &&
+            new Set(remappedTeam).size === 3 ? remappedTeam : [];
         const nextUsernameLower =
             typeof user.username === 'string' ? user.username.trim().toLowerCase() : '';
         const needsProfile =
             JSON.stringify(user.profile || null) !== JSON.stringify(normalizedProfile);
-        const needsSavedTeams = !Array.isArray(user.savedTeamIndices);
+        const needsSavedTeams = !Array.isArray(user.savedTeamIndices) || needsRosterMigration;
         const needsUsernameLower = user.usernameLower !== nextUsernameLower;
         if (!needsProfile && !needsSavedTeams && !needsUsernameLower) {
             continue;
@@ -6041,6 +6081,7 @@ const backfillUserProfiles = async () => {
                     usernameLower: nextUsernameLower,
                     profile: normalizedProfile,
                     savedTeamIndices: nextSavedTeamIndices,
+                    rosterRevision,
                 },
             }
         );
@@ -6085,7 +6126,7 @@ const normalizeLatestCharacterReleases = (entries = []) => {
     const defaults = Array.isArray(LATEST_CHARACTER_RELEASES) ? LATEST_CHARACTER_RELEASES : [];
     return [0, 1, 2].map((index) => {
         const entry = Array.isArray(entries) ? entries[index] || {} : {};
-        const fallback = defaults[index] || { label: `Latest Character ${index + 1}`, characterId: '' };
+        const fallback = defaults[index] || { label: '', characterId: '' };
         const requestedCharacterId =
             typeof entry?.characterId === 'string' ? entry.characterId.trim() : '';
         const character = requestedCharacterId ? characterMap.get(requestedCharacterId) : null;
@@ -6097,7 +6138,7 @@ const normalizeLatestCharacterReleases = (entries = []) => {
             };
         }
         return {
-            label: fallback.label || `Latest Character ${index + 1}`,
+            label: fallback.label || '',
             characterId: '',
             facePicture: '',
         };
@@ -6700,10 +6741,12 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'skillDamageBonuses',
     'skillReplacements',
     'skillReplacementsByRemainingTurns',
+    'skillTargetOverrides',
     'sourceSkillName',
     'stackDelta',
     'stackMax',
     'stackMetadataKey',
+    'statusIcon',
     'taijutsuCostIncrease',
     'taijutsuCostReduction',
     'tooltipText',
@@ -6734,26 +6777,27 @@ const sanitizeStatusMetadataForClient = (metadata = {}) => {
     return sanitized;
 };
 
-const shouldHideStatusFromViewer = ({ status, unitUsername, viewerUsername }) => {
+const shouldHideStatusFromViewer = ({ status, unitUsername, viewerUsername, revealInvisibleSkills = false }) => {
     const metadata = status?.metadata || {};
     if (Boolean(metadata.hideTooltip)) {
         return true;
     }
-    if (viewerUsername !== unitUsername && Boolean(metadata.hideTooltipFromEnemy)) {
+    if (viewerUsername !== unitUsername && Boolean(metadata.hideTooltipFromEnemy) && !revealInvisibleSkills) {
         return true;
     }
     if (
         viewerUsername === unitUsername &&
-        (Boolean(metadata.hideTooltipFromOwner) || Boolean(metadata.hideTooltipFromUnitOwner))
+        (Boolean(metadata.hideTooltipFromOwner) || Boolean(metadata.hideTooltipFromUnitOwner)) &&
+        !revealInvisibleSkills
     ) {
         return true;
     }
     return false;
 };
 
-const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername }) => {
+const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername, revealInvisibleSkills = false }) => {
     if (!status || typeof status !== 'object') return null;
-    if (shouldHideStatusFromViewer({ status, unitUsername, viewerUsername })) {
+    if (shouldHideStatusFromViewer({ status, unitUsername, viewerUsername, revealInvisibleSkills })) {
         return null;
     }
     return {
@@ -6764,10 +6808,10 @@ const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername }) => {
     };
 };
 
-const sanitizeUnitStateForViewer = ({ unit, unitUsername, viewerUsername }) => {
+const sanitizeUnitStateForViewer = ({ unit, unitUsername, viewerUsername, revealInvisibleSkills = false }) => {
     const statuses = Array.isArray(unit?.state?.statuses)
         ? unit.state.statuses
-              .map((status) => sanitizeStatusForViewer({ status, unitUsername, viewerUsername }))
+              .map((status) => sanitizeStatusForViewer({ status, unitUsername, viewerUsername, revealInvisibleSkills }))
               .filter(Boolean)
         : [];
     const state = { statuses };
@@ -6786,6 +6830,13 @@ const sanitizeUnitStateForViewer = ({ unit, unitUsername, viewerUsername }) => {
 
 const sanitizeBoardForViewer = (board, viewerUsername) => {
     if (!board || typeof board !== 'object' || !viewerUsername) return null;
+    const revealInvisibleSkills = (Array.isArray(board[viewerUsername]) ? board[viewerUsername] : []).some((unit) =>
+        unit?.alive !== false &&
+        (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : []).some((status) =>
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            Boolean(status?.metadata?.revealInvisibleSkills)
+        )
+    );
     return Object.fromEntries(
         Object.entries(board).map(([unitUsername, units]) => [
             unitUsername,
@@ -6795,7 +6846,7 @@ const sanitizeBoardForViewer = (board, viewerUsername) => {
                       rosterIndex: Number.isInteger(unit?.rosterIndex) ? unit.rosterIndex : null,
                       alive: unit?.alive !== false,
                       hp: Number.isFinite(Number(unit?.hp)) ? Number(unit.hp) : 0,
-                      state: sanitizeUnitStateForViewer({ unit, unitUsername, viewerUsername }),
+                      state: sanitizeUnitStateForViewer({ unit, unitUsername, viewerUsername, revealInvisibleSkills }),
                   }))
                 : [],
         ])
@@ -7534,7 +7585,7 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
         },
         botPlayer,
     ];
-    const board = battleLogic.buildInitialBoard(playerDocs);
+    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
     const matchDocument = {
         matchId: built.matchId,
         mode,
@@ -7580,7 +7631,7 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
         },
         botPlayer,
     ];
-    const board = battleLogic.buildInitialBoard(playerDocs);
+    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
 
     if (built.currentTurn !== username) {
         built.turnOrder = [username, botPlayer.username];
@@ -7686,7 +7737,7 @@ const buildStoryBattleBotMatch = async ({ username, team, chapter, node, difficu
         },
         botPlayer,
     ];
-    const board = battleLogic.buildInitialBoard(playerDocs);
+    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
     if (isHardMode) {
         applyHardStoryModifiersToBoard(board, botPlayer.username);
     }
@@ -7749,7 +7800,7 @@ const buildGauntletBattleBotMatch = async ({ username, runState, node }) => {
         },
         botPlayer,
     ];
-    const board = battleLogic.buildInitialBoard(playerDocs);
+    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
     const playerUnits = Array.isArray(board?.[username]) ? board[username] : [];
     playerUnits.forEach((unit, index) => {
         if (!unit) return;
@@ -8806,7 +8857,7 @@ const ensureBoardState = async (match) => {
     let changed = false;
     const players = Array.isArray(match.players) ? match.players : [];
     if (!match.board) {
-        match.board = battleLogic.buildInitialBoard(players);
+        match.board = battleLogic.buildInitialBoard(players, charactersData);
         changed = true;
     }
     // Backfill aliveCount and board entries
@@ -8816,7 +8867,7 @@ const ensureBoardState = async (match) => {
             changed = true;
         }
         if (!match.board[player.username]) {
-            match.board[player.username] = battleLogic.buildInitialBoard([player])[player.username];
+            match.board[player.username] = battleLogic.buildInitialBoard([player], charactersData)[player.username];
             changed = true;
         }
         const units = Array.isArray(match.board[player.username]) ? match.board[player.username] : [];
@@ -8847,6 +8898,9 @@ const ensureBoardState = async (match) => {
             }
             const state = battleLogic.getUnitState(match, player.username, slot);
             if (!state || !Array.isArray(state.statuses) || typeof state.cooldowns !== 'object') {
+                changed = true;
+            }
+            if (reconcileUnitPassive(unit, charactersData, battleLogic.buildInitialBoard)) {
                 changed = true;
             }
             if (unit.alive !== false) {
@@ -8895,6 +8949,7 @@ const ensureBoardState = async (match) => {
                     chakraPools: match.chakraPools,
                     economy: match.economy,
                     pendingTurns: match.pendingTurns,
+                    combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
                     storyResults: match.storyResults || null,
@@ -8919,7 +8974,7 @@ const finalizeTurn = async (match, username) => {
     if (!match || match.currentTurn !== username) return match;
     if (match.status === 'ended') return match;
     if (!match.board) {
-        match.board = battleLogic.buildInitialBoard(match.players || []);
+        match.board = battleLogic.buildInitialBoard(match.players || [], charactersData);
     }
     const econ = match.economy;
     const pools = match.chakraPools;
@@ -8984,6 +9039,7 @@ const finalizeTurn = async (match, username) => {
                     chakraPools: match.chakraPools,
                     economy: match.economy,
                     pendingTurns: match.pendingTurns,
+                    combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
                     storyResults: match.storyResults || null,
@@ -9053,6 +9109,7 @@ const finalizeTurn = async (match, username) => {
                 chakraPools: pools,
                 economy: econ,
                 pendingTurns: match.pendingTurns,
+                combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                 turnStartedAt: match.turnStartedAt,
                 turnExpiresAt: match.turnExpiresAt,
             },
@@ -9230,8 +9287,6 @@ async function initDb() {
         optionalSession: typeof optionalSession === 'function' ? optionalSession : (req, res, next) => next(),
     });
     app.use('/api/bugs', bugsRouter);
-
-    app.use('/api', require('./retiredFeatures.js'));
 
     const gachaRouter = require('./routes/gacha.js')({
         usersCollection,
@@ -10055,7 +10110,7 @@ app.post('/api/team/save', requireSession, async (req, res) => {
                 { username, team, aliveCount: aliveLookup[username] },
                 { username: opponent.username, team: opponent.team, aliveCount: aliveLookup[opponent.username] },
             ];
-            const board = battleLogic.buildInitialBoard(playerDocs);
+            const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
             await insertMatchActive({
                 matchId,
                 mode,
@@ -11023,7 +11078,10 @@ app.get('/api/news', async (req, res) => {
 
 app.get('/api/missions', async (req, res) => {
     try {
-        const missions = await getStoredMissionCatalog();
+        const missions = (await getStoredMissionCatalog()).filter((mission) => {
+            const rewardCharacterId = normalizeCharacterId(mission?.reward_character);
+            return !rewardCharacterId || activeRosterOrder.has(rewardCharacterId);
+        });
         let missionState = createDefaultMissionState();
         try {
             const token = req.cookies?.[SESSION_COOKIE_NAME];
@@ -11356,8 +11414,10 @@ app.get('/api/characters', async (req, res) => {
         const lockedCharacterIds = authUser && !bypassLocks ? await getMissionLockedCharacterIds() : new Set();
         const profile = authUser ? normalizeUserProfile(authUser) : null;
         const characterList = Array.isArray(charactersData) ? charactersData : [];
+        const missionCatalog = await getStoredMissionCatalog();
         return res.json({
             ok: true,
+            ryo: profile ? profile.ryo : 0,
             characters: characterList.map((character) => {
                 const characterId = normalizeCharacterId(character?.characterId);
                 const unlocked =
@@ -11367,6 +11427,9 @@ app.get('/api/characters', async (req, res) => {
                 return {
                     ...localizeArtwork(character),
                     unlocked,
+                    shopPrice: character.requiredMissionId
+                        ? getShopPriceForMissionId(character.requiredMissionId, missionCatalog)
+                        : 1000,
                 };
             }),
         });

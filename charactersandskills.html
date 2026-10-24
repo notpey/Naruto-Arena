@@ -144,6 +144,9 @@
     #gi-detail-view .gi-skills { max-width: none; gap: 18px; grid-auto-rows: 1fr; }
     #gi-detail-view .gi-skill { display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: 14px; min-width: 0; padding: 18px; border: 1px solid #344052 !important; border-radius: 6px; background: #171e2a !important; }
     #gi-detail-view .gi-skill.alt { border-color: #75608c !important; background: #1b1b2c !important; }
+    #gi-detail-view .gi-passive { margin: 0 0 20px; padding: 18px; border: 1px solid #46576a; border-radius: 6px; background: #1c2735; }
+    #gi-detail-view .gi-passive .gi-skill-kicker { display: block; margin-bottom: 6px; color: #f3eadb; }
+    #gi-detail-view .gi-passive .gi-skill-name { border: 0; padding: 0; }
     #gi-detail-view .gi-skill-head { grid-template-columns: 88px minmax(0, 1fr); gap: 16px; }
     #gi-detail-view .gi-skill-img { width: 88px; height: 88px; box-shadow: none; }
     #gi-detail-view .gi-skill-name { margin: 0 0 8px; padding: 0; border: 0 !important; color: #ffb347 !important; text-shadow: none !important; line-height: 1.3; }
@@ -198,7 +201,6 @@
       #gi-detail-view .gi-skill-meta .seg:last-child { grid-column: 1 / -1; }
     }
   </style>
-  <link rel="stylesheet" href="shop.css">
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
@@ -397,7 +399,6 @@
   <script src="./skill-description-format.js"></script>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
-  <script src="./shop.js" defer></script>
 
   <!-- Game Info: face grid + own-page character detail (no modal) -->
   <script>
@@ -572,6 +573,35 @@
         detailView.appendChild(crumb);
         detailView.appendChild(nav);
         detailView.appendChild(head);
+
+        if (c.passive && c.passive.name) {
+          var passive = document.createElement("article");
+          passive.className = "gi-passive";
+          var passiveHead = document.createElement("div");
+          passiveHead.className = "gi-skill-head";
+          var passiveImg = document.createElement("img");
+          passiveImg.className = "gi-skill-img";
+          passiveImg.src = c.passive.icon || "deadcharacter-remaster.png?v=2";
+          passiveImg.onerror = function () { this.src = "deadcharacter-remaster.png?v=2"; };
+          passiveImg.alt = c.passive.name;
+          var passiveText = document.createElement("div");
+          var passiveLabel = document.createElement("span");
+          passiveLabel.className = "gi-skill-kicker";
+          passiveLabel.textContent = "Passive skill";
+          var passiveName = document.createElement("h2");
+          passiveName.className = "gi-skill-name";
+          passiveName.textContent = c.passive.name;
+          var passiveDescription = document.createElement("p");
+          passiveDescription.className = "gi-skill-desc";
+          window.renderSkillDescription(passiveDescription, c.passive.description || "", (c.skills || []).map(function (entry) { return entry && entry.name; }));
+          passiveText.appendChild(passiveLabel);
+          passiveText.appendChild(passiveName);
+          passiveText.appendChild(passiveDescription);
+          passiveHead.appendChild(passiveImg);
+          passiveHead.appendChild(passiveText);
+          passive.appendChild(passiveHead);
+          detailView.appendChild(passive);
+        }
 
         var skills = visibleSkills(c);
         var skillsWrap = document.createElement("div");

@@ -4,6 +4,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const characters = require("../data/characters/index.js");
+const { buildMatchPayloadForUser } = require('../server.js');
 const narutoStarterCharacter = require('../narutoStarterCharacter.js');
 const sakuraStarterCharacter = require('../sakuraStarterCharacter.js');
 const sasukeStarterCharacter = require('../sasukeStarterCharacter.js');
@@ -13,6 +14,8 @@ const {
     buildInitialBoard,
     resolvePendingTurnSkills,
     resolveEffectiveSkill,
+    computeTargetOptions,
+    applyDamageToUnit,
     computeEffectiveEnergyCost,
     tickStatusesForTurnEnd,
     isSkillIndexBlockedForActor,
@@ -127,7 +130,7 @@ const collectCharacterStatusReferences = () => {
     const producedStatusIds = new Set(['invulnerable', 'stunned']);
     const referencedStatusIds = [];
     const isStatusProducerPath = (pathParts) =>
-        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus/i.test(pathParts.join('.'));
+        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun/i.test(pathParts.join('.'));
     const addReference = (statusId) => {
         if (typeof statusId === 'string' && statusId.trim()) {
             referencedStatusIds.push(statusId.trim());
@@ -344,225 +347,266 @@ test('character editor presets match starter kits in characters.js', () => {
     assert.ok(batch2PresetIndex < appIndex, 'second shared starter presets must load before index.js');
 });
 
-test('Naruto skill IDs and replacements are internally consistent', () => {
+test('Naruto rework keeps four active skills and a separate passive', () => {
     const naruto = getNaruto();
-    const skillIds = new Set(naruto.skills.map((skill) => skill.id));
     assert.deepEqual(
         naruto.skills.map((skill) => skill.id),
         [
-            'uzumaki-naruto-combo',
-            'uzumaki-naruto-overwhelming-chakra-wave',
-            'uzumaki-naruto-shadow-clones',
+            'uzumaki-naruto-shadow-clone-assault',
+            'uzumaki-naruto-shadow-clone-technique',
+            'uzumaki-naruto-demon-wind-shuriken-feint',
             'uzumaki-naruto-sexy-technique',
-            'uzumaki-naruto-rasengan',
         ]
     );
-
-    naruto.skills.forEach((skill) => {
-        (Array.isArray(skill.effects) ? skill.effects : []).forEach((effect) => {
-            const replacements = effect?.metadata?.skillReplacements || {};
-            Object.entries(replacements).forEach(([fromSkillId, toSkillId]) => {
-                assert.ok(skillIds.has(fromSkillId), `replacement source ${fromSkillId} must exist`);
-                assert.ok(skillIds.has(toSkillId), `replacement target ${toSkillId} must exist`);
-            });
-        });
-    });
+    assert.equal(naruto.passive.name, 'Unpredictable Ninja');
+    assert.equal(naruto.passive.physicalDamageBonusWhileHelpful, 5);
+    assert.deepEqual(naruto.skills.map(skill => skill.energy), [
+        ['Taijutsu'], ['Random'], ['Taijutsu', 'Random'], ['Random'],
+    ]);
+    assert.deepEqual(naruto.skills.map(skill => skill.cooldown), [0, 3, 2, 4]);
 });
 
-test('battleLogic resolves Naruto starter kit behavior used by the editor data', () => {
+test('Naruto passive is a permanent visible match effect, outside the skill tray', () => {
+    const match = makeMatch();
+    const statuses = match.board.p1[0].state.statuses;
+    const passive = statuses.find(status => status.id === 'uzumaki_naruto_unpredictable_ninja');
+    assert.ok(passive, 'passive exists from match start');
+    assert.equal(passive.remainingTurns, 99);
+    assert.equal(passive.metadata.sourceSkillName, 'Unpredictable Ninja');
+    assert.equal(passive.metadata.statusIcon, getNaruto().passive.icon);
+    assert.ok(passive.metadata.tooltipText.startsWith(getNaruto().passive.description));
+    assert.match(passive.metadata.tooltipText, /This passive cannot be removed/);
+    assert.equal(getNaruto().skills.length, 4, 'passive does not occupy a skill slot');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.ok(match.board.p1[0].state.statuses.some(status => status.id === passive.id && status.remainingTurns === 99));
+    const ownerPayload = buildMatchPayloadForUser(match, 'p1');
+    const enemyPayload = buildMatchPayloadForUser(match, 'p2');
+    for (const payload of [ownerPayload, enemyPayload]) {
+        const visible = payload.board.p1[0].state.statuses.find(status => status.id === passive.id);
+        assert.equal(visible.metadata.sourceSkillName, 'Unpredictable Ninja');
+        assert.equal(visible.metadata.statusIcon, getNaruto().passive.icon);
+        assert.equal(visible.metadata.tooltipText, passive.metadata.tooltipText);
+    }
+});
+
+test('Naruto passive survives status cleansing and explicit status removal', () => {
+    const match = makeMatch();
+    const passiveId = 'uzumaki_naruto_unpredictable_ninja';
+    const testCharacters = [...characters];
+    const castEffect = (effect) => {
+        testCharacters[0] = {
+            ...getNaruto(),
+            skills: [{ id: 'test-status-removal', name: 'Test Status Removal', target: 'self',
+                classes: ['Strategic', 'Instant'], energy: [], cooldown: 0, effects: [effect] }],
+        };
+        queueSkill(match, 'p1', 0);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters: testCharacters });
+    };
+    match.board.p1[0].state.statuses.push({ id: 'temporary_buff', remainingTurns: 2, metadata: { helpful: true } });
+    castEffect({ type: 'cleanse_statuses', scope: 'self' });
+    assert.equal(match.board.p1[0].state.statuses.some(status => status.id === 'temporary_buff'), false);
+    assert.equal(match.board.p1[0].state.statuses.some(status => status.id === passiveId), true);
+    castEffect({ type: 'remove_status', scope: 'self', statusId: passiveId });
+    assert.equal(match.board.p1[0].state.statuses.some(status => status.id === passiveId), true);
+});
+
+test('Naruto rework applies Shadow Clone Technique and consumes it after empowered Feint', () => {
     let match = makeMatch();
-
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 80, 'Assault starts at 20 damage without a helpful effect');
 
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const narutoState = match.board.p1[0].state;
     assert.equal(
         narutoState.statuses.some(
             (status) =>
-                status.id === 'uzumaki_naruto_shadow_clones_active' &&
-                status.remainingTurns === 99 &&
-                status.metadata.damageReductionFlat === 10
+                status.id === 'uzumaki_naruto_shadow_clone_technique' &&
+                status.remainingTurns === 3 &&
+                status.metadata.damageReductionFlat === 15
         ),
         true
-    );
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 0,
-            skillIndex: 2,
-            actorState: narutoState,
-        }).id,
-        'uzumaki-naruto-rasengan'
     );
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 75, 'Combo should deal 25 during Shadow Clones');
+    assert.equal(match.board.p2[0].hp, 45, 'Assault deals 20 + 10 clone bonus + 5 passive bonus');
 
+    match.board.p2[0].hp = 100;
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 40, 'Rasengan replacement should deal 35');
+    assert.equal(match.board.p2[0].hp, 55, 'Feint deals 25 + 15 clone bonus + 5 passive bonus');
     assert.equal(
         match.board.p2[0].state.statuses.some(
             (status) =>
                 status.id === 'uzumaki_naruto_rasengan_stun' &&
-                status.metadata.cannotUseSkillClasses.includes('physical') &&
-                !status.metadata.cannotUseSkillClasses.includes('strategic')
+                status.metadata.cannotUseSkillClasses.includes('physical')
         ),
         true
     );
-
-    match = makeMatch();
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    const stateAfterWave = match.board.p1[0].state;
-    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 0), false);
-    assert.equal(isSkillIndexBlockedForActor(stateAfterWave, 4), false);
-    assert.equal(
-        stateAfterWave.statuses.some(
-            (status) =>
-                status.id === 'uzumaki_naruto_overwhelming_chakra_wave_focus' &&
-                status.metadata.skillDamageBonuses?.['uzumaki-naruto-combo'] === 5 &&
-                status.metadata.skillDamageBonuses?.['uzumaki-naruto-rasengan'] === 5
-        ),
-        true
-    );
-    assert.equal(Object.values(match.chakraPools.p1).reduce((sum, amount) => sum + amount, 0), 0);
-
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(Object.values(match.chakraPools.p1).reduce((sum, amount) => sum + amount, 0), 0);
-
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(Object.values(match.chakraPools.p1).reduce((sum, amount) => sum + amount, 0), 1);
+    assert.equal(narutoState.statuses.some(status => status.id === 'uzumaki_naruto_shadow_clone_technique'), false);
 });
 
-test('battleLogic resolves Sakura starter kit behavior used by the editor data', () => {
-    const match = makeMatch([1], [2]);
+test('Naruto passive works with other helpful effects and ignores harmful effects', () => {
+    const match = makeMatch();
+    const narutoState = match.board.p1[0].state;
+    narutoState.statuses.push({ id: 'test_harmful', remainingTurns: 1, metadata: { harmful: true } });
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 80);
+    narutoState.statuses.push({ id: 'test_helpful', remainingTurns: 1, metadata: { helpful: true } });
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 55);
+    narutoState.statuses = [
+        ...narutoState.statuses.filter(status => status.metadata?.passive),
+        {
+            id: 'ally_protection', remainingTurns: 1, sourceUsername: 'p1',
+            metadata: { damageReductionFlat: 5 },
+        },
+    ];
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 30, 'an allied helpful effect also triggers the passive');
+});
 
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+test('Sakura rework keeps four skills and a visible passive that strengthens Guard Duty', () => {
+    const sakura = getSakura();
+    assert.deepEqual(sakura.skills.map(skill => skill.name), [
+        'Kunai Interference', 'Guard Duty', 'Clone Technique', 'Sakura Hide',
+    ]);
+    const match = makeMatch([1, 0], [2, 3]);
+    const passive = match.board.p1[0].state.statuses.find(status => status.metadata?.passive);
+    assert.equal(passive.metadata.sourceSkillName, 'Exceptional Chakra Control');
+    assert.equal(passive.metadata.statusIcon, sakura.passive.icon);
+    assert.equal(passive.remainingTurns, 99);
+    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses[0].metadata.statusIcon, sakura.passive.icon);
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[1].hp, 100);
+    assert.equal(match.board.p2[0].state.statuses.find(status => status.id === 'haruno_sakura_kunai_interference')?.metadata.nonAfflictionDamageDebuffFlat, 10);
+
+    queueSkill(match, 'p1', 1, [{ username: 'p1', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    const guardDefense = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_defense');
+    const guardReduction = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_reduction');
+    assert.equal(guardDefense.metadata.destructibleDefensePoints, 30, '25 base defense plus 5 from passive');
+    assert.equal(guardReduction.metadata.damageReductionFlat, 10);
+    assert.match(guardDefense.metadata.tooltipText, /30 destructible defense/);
+    assert.equal(guardDefense.sourceSkillId, guardReduction.sourceSkillId, 'both effects share one Guard Duty tooltip icon');
+    applyDamageToUnit(match.board.p1[1], 30);
+    assert.equal(match.board.p1[1].state.statuses.some(status => status.id === guardDefense.id), false);
+    assert.equal(match.board.p1[1].state.statuses.some(status => status.id === guardReduction.id), true, 'damage reduction lasts after destructible defense breaks');
+    applyDamageToUnit(match.board.p1[1], 20);
+    assert.equal(match.board.p1[1].hp, 90, 'remaining damage reduction still mitigates the next attack');
+
+    queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const sakuraState = match.board.p1[0].state;
-    assert.equal(
-        sakuraState.statuses.some(
-            (status) =>
-                status.id === 'haruno_sakura_inner_sakura_active' &&
-                status.remainingTurns === 99 &&
-                status.metadata.damageReductionFlat === 5 &&
-                status.metadata.skillReplacements?.['haruno-sakura-inner-sakura'] ===
-                    'haruno-sakura-inner-sakura-strangle'
-        ),
-        true
-    );
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 1,
-            skillIndex: 2,
-            actorState: sakuraState,
-        }).id,
-        'haruno-sakura-inner-sakura-strangle'
-    );
+    const clone = sakuraState.statuses.find(status => status.id === 'haruno_sakura_clone_technique');
+    assert.equal(clone.metadata.damageReductionFlat, 10);
+    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: 1, skillIndex: 0, actorState: sakuraState }).target, 'all-enemy');
+    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: 1, skillIndex: 1, actorState: sakuraState }).target, 'all-allies');
+    assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0, skillIndex: 0, characters }).mode, 'all');
+    assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0, skillIndex: 1, characters }).mode, 'all');
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.find(status => status.id === clone.id).metadata.skillTargetOverrides['haruno-sakura-guard-duty'], 'all-allies');
 
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'KO Punch should deal 20 during Inner Sakura');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'haruno_sakura_ko_punch_stun' &&
-                status.metadata.cannotUseSkillClasses.includes('physical') &&
-                status.metadata.cannotUseSkillClasses.includes('strategic')
-        ),
-        true
-    );
+    assert.equal(match.board.p2[0].hp, 75, 'Clone Kunai deals 10 instead of 15');
+    assert.equal(match.board.p2[1].hp, 90, 'Clone Kunai hits the other enemy');
+    assert.equal(match.board.p2[0].state.statuses.find(status => status.id === 'haruno_sakura_kunai_interference')?.metadata.nonAfflictionDamageDebuffFlat, 5);
 
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 60, 'Inner Sakura Strangle should deal 20 to an enemy');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'haruno_sakura_inner_sakura_strangle_enemy_weakness' &&
-                status.metadata.damageDebuffFlat === 10
-        ),
-        true
-    );
-
-    match.board.p1[0].hp = 50;
-    queueSkill(match, 'p1', 1, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 75, 'Cure should heal Sakura or an ally for 25');
-
+    for (const unit of match.board.p1) {
+        const defenseStatus = unit.state.statuses.find(entry => entry.id === 'haruno_sakura_guard_duty_defense');
+        const reductionStatus = unit.state.statuses.find(entry => entry.id === 'haruno_sakura_guard_duty_reduction');
+        assert.equal(defenseStatus.metadata.destructibleDefensePoints, 20, '15 base defense plus 5 passive');
+        assert.equal(reductionStatus.metadata.damageReductionFlat, 5);
+    }
     queueSkill(match, 'p1', 3);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p1[0].state.statuses.some((status) => status.id === 'invulnerable' && status.metadata.invulnerable),
-        true
-    );
+    assert.equal(sakuraState.statuses.some(status => status.id === 'invulnerable' && status.metadata.invulnerable), true);
 });
 
-test('battleLogic resolves Sasuke starter kit behavior used by the editor data', () => {
+test('Sasuke Fireball burn drives his passive bonus and Shadow Shuriken follow-up', () => {
+    const sasuke = getSasuke();
+    assert.deepEqual(sasuke.skills.map(skill => skill.name), [
+        'Shadow Shuriken Technique', 'Fire Style: Great Fireball Jutsu', 'Sharingan', 'Stealth',
+    ]);
     const match = makeMatch([2], [1]);
-
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    const sasukeState = match.board.p1[0].state;
-    assert.equal(
-        sasukeState.statuses.some(
-            (status) =>
-                status.id === 'uchiha_sasuke_sharingan_focus' &&
-                status.remainingTurns === 99 &&
-                status.metadata.damageReductionFlat === 10 &&
-                status.metadata.samePreviousTargetDamageBonusFlat === 5 &&
-                status.metadata.samePreviousTargetMarkerStatusId ===
-                    'uchiha_sasuke_sharingan_previous_target' &&
-                status.metadata.skillReplacements?.['uchiha-sasuke-sharingan'] ===
-                    'uchiha-sasuke-grand-fireball-technique'
-        ),
-        true
-    );
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 2,
-            skillIndex: 2,
-            actorState: sasukeState,
-        }).id,
-        'uchiha-sasuke-grand-fireball-technique'
-    );
+    const passive = match.board.p1[0].state.statuses.find(status => status.metadata?.passive);
+    assert.equal(passive.metadata.sourceSkillName, 'Uchiha Prodigy');
+    assert.equal(passive.metadata.statusIcon, sasuke.passive.icon);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'Lion Combo should deal 30 to the previous Sharingan target');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'uchiha_sasuke_sharingan_previous_target' &&
-                status.sourceUsername === 'p1' &&
-                status.metadata.tooltipText.includes('5 additional damage')
-        ),
-        true,
-        'Sasuke previous target marker should be visible on the target'
-    );
+    assert.equal(match.board.p2[0].hp, 80, 'unmarked Shuriken deals 20');
 
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 30, 'Chidori should deal 40 piercing damage to the previous target');
-    assert.equal(
-        match.board.p1[0].state.statuses.some(
-            (status) =>
-                status.id === 'uchiha_sasuke_chidori_cost_shift' &&
-                status.metadata.skillCostOverridesBySkillId?.['uchiha-sasuke-lion-combo']
-        ),
-        true
-    );
+    assert.equal(match.board.p2[0].hp, 60, 'Fireball deals 20 chakra damage');
+    const burn = match.board.p2[0].state.statuses.find(status => status.id === 'uchiha_sasuke_great_fireball_burn');
+    assert.equal(burn.remainingTurns, 3);
+    assert.equal(burn.sourceUsername, 'p1');
+    assert.equal(burn.metadata.turnEndDamage, 5);
+    assert.equal(burn.metadata.afflictionDamage, true);
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 35, 'marked Shuriken deals 20 plus 5 from passive');
+    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'uchiha_sasuke_shadow_shuriken_stun'), true);
+    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === burn.id), false, 'Shuriken ends remaining Fireball effect');
+
+    const tickMatch = makeMatch([2], [1]);
+    queueSkill(tickMatch, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match: tickMatch, actingUsername: 'p1', characters });
+    for (const hp of [75, 70, 65]) {
+        tickStatusesForTurnEnd({ match: tickMatch, endingUsername: 'p1' });
+        assert.equal(tickMatch.board.p2[0].hp, hp, 'Fireball burn ticks for 5 affliction damage');
+    }
+    assert.equal(tickMatch.board.p2[0].state.statuses.some(status => status.id === burn.id), false);
+
+    const foreignBurnMatch = makeMatch([2], [1]);
+    foreignBurnMatch.board.p2[0].state.statuses.push({
+        id: burn.id, remainingTurns: 2, sourceUsername: 'p2', sourceSlot: 0,
+        metadata: { harmful: true, afflictionDamage: true },
+    });
+    queueSkill(foreignBurnMatch, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match: foreignBurnMatch, actingUsername: 'p1', characters });
+    assert.equal(foreignBurnMatch.board.p2[0].hp, 80, 'another source’s Fireball does not activate Sasuke’s passive');
+    assert.equal(foreignBurnMatch.board.p2[0].state.statuses.some(status => status.id === burn.id), true);
+    assert.equal(foreignBurnMatch.board.p2[0].state.statuses.some(status => status.id === 'uchiha_sasuke_shadow_shuriken_stun'), false);
+});
+
+test('Sasuke Sharingan visibly counters the first harmful Physical skill and then ends', () => {
+    const match = makeMatch([2], [2]);
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    const state = match.board.p1[0].state;
+    const sharingan = state.statuses.find(status => status.id === 'uchiha_sasuke_sharingan');
+    assert.equal(sharingan.remainingTurns, 3);
+    assert.equal(sharingan.metadata.damageReductionFlat, 10);
+    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses.some(status => status.id === sharingan.id), true);
+
+    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 90, 'Sharingan reduces Chakra damage but does not counter it');
+    assert.equal(state.statuses.some(status => status.id === sharingan.id), true);
+
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 90, 'Sharingan counters the Physical skill');
+    assert.equal(state.statuses.some(status => status.id === sharingan.id), false, 'Sharingan ends after countering');
 
     queueSkill(match, 'p1', 3);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p1[0].state.statuses.some((status) => status.id === 'invulnerable' && status.metadata.invulnerable),
-        true
-    );
+    assert.equal(state.statuses.some(status => status.id === 'invulnerable' && status.metadata.invulnerable), true);
 });
 
 test('battleLogic resolves Kiba starter kit behavior used by the editor data', () => {
@@ -1133,13 +1177,13 @@ test('Tayuya Summoning Doki description matches its damage reduction value', () 
 
 test('Zabuza Hidden Mist description matches its damage reduction value', () => {
     const zabuza = getCharacter('momochi-zabuza');
-    const hiddenMist = zabuza.skills.find((skill) => skill.id === 'momochi-zabuza-hidden-mist');
+    const hiddenMist = zabuza.skills.find((skill) => skill.id === 'momochi-zabuza-hidden-mist-technique');
     const defenseStatus = hiddenMist.effects.find(
-        (effect) => effect.statusId === 'momochi_zabuza_hidden_mist_defense'
+        (effect) => effect.statusId === 'zabuza_hidden_mist_defense'
     );
 
     assert.equal(defenseStatus.metadata.damageReductionFlat, 5);
-    assert.match(hiddenMist.skilldescription, /5 points of damage reduction/);
+    assert.match(hiddenMist.skilldescription, /5 damage reduction/);
     assert.match(defenseStatus.metadata.tooltipText, /5 damage reduction/);
 });
 

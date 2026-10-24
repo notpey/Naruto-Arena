@@ -3,14 +3,20 @@ const characters = [
         "id": "uzumaki-naruto",
         "characterId": "uzumaki-naruto",
         "name": "Uzumaki Naruto",
-        "facePicture": "https://i.imgur.com/jp3OIOA.png",
-        "characterdeescription": "A Genin from Team 7, Naruto is an orphan with the goal to one day become Hokage. Using his signature move, Shadow Clones, Naruto is able to perform powerful moves such as the Uzumaki Naruto Combo and the Rasengan.",
+        "facePicture": "https://i.imgur.com/NwbpKdo.png",
+        "characterdeescription": "Shunned by the Hidden Leaf Village for the Nine-Tailed Fox sealed within him, Naruto Uzumaki is a mischievous young genin determined to earn everyone's recognition and one day become Hokage. Armed with his newly learned Shadow Clone Technique and an unshakable spirit, Naruto begins his journey alongside Team 7, eager to prove that he's more than the village outcast.",
+        "passive": {
+            "name": "Unpredictable Ninja",
+            "icon": "https://i.imgur.com/TxXUuaP.png",
+            "description": "Naruto's damaging Physical skills deal 5 additional damage while he is affected by a helpful effect.",
+            "physicalDamageBonusWhileHelpful": 5
+        },
         "skills": [
             {
-                "id": "uzumaki-naruto-combo",
-                "name": "Uzumaki Naruto Combo",
-                "skillimage": "https://i.imgur.com/wZVMrBY.png",
-                "skilldescription": "Uzumaki Naruto deals 25 damage to one enemy.",
+                "id": "uzumaki-naruto-shadow-clone-assault",
+                "name": "Shadow Clone Assault",
+                "skillimage": "https://i.imgur.com/VrsLUU6.png",
+                "skilldescription": "Naruto attacks one enemy with his shadow clones, dealing 20 physical damage. During Shadow Clone Technique, this skill deals 10 additional damage.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -24,17 +30,19 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 20,
                         "scope": "target"
                     }
                 ]
             },
             {
-                "id": "uzumaki-naruto-overwhelming-chakra-wave",
-                "name": "Overwhelming Chakra Wave",
-                "skillimage": "https://i.imgur.com/N1LUxVU.png",
-                "skilldescription": "Uzumaki Naruto will gain 1 random chakra after 1 turn. Permanently, 'Uzumaki Naruto Combo' and 'Rasengan' deal 5 additional damage.",
-                "energy": [],
+                "id": "uzumaki-naruto-shadow-clone-technique",
+                "name": "Shadow Clone Technique",
+                "skillimage": "https://i.imgur.com/5QFHIrv.png",
+                "skilldescription": "Naruto creates numerous shadow clones, gaining 15 damage reduction for 3 turns. During this time, Shadow Clone Assault and Demon Wind Shuriken Feint are empowered.",
+                "energy": [
+                    "Random"
+                ],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 3,
@@ -45,61 +53,63 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uzumaki_naruto_overwhelming_chakra_wave_focus",
-                        "duration": 99,
+                        "statusId": "uzumaki_naruto_shadow_clone_technique",
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 15,
                             "skillDamageBonuses": {
-                                "uzumaki-naruto-combo": 5,
-                                "uzumaki-naruto-rasengan": 5
+                                "uzumaki-naruto-shadow-clone-assault": 10,
+                                "uzumaki-naruto-demon-wind-shuriken-feint": 15
                             },
-                            "tooltipText": "Uzumaki Naruto Combo and Rasengan deal 5 additional damage."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "uzumaki_naruto_overwhelming_chakra_wave_pending",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "turnDurationAnchor": "any_turn",
-                            "tooltipText": "Naruto will gain 1 random chakra after 1 turn.",
-                            "onExpireEffects": [
-                                {
-                                    "type": "gain_chakra",
-                                    "chakraType": "random",
-                                    "amount": 1
-                                }
-                            ]
+                            "tooltipText": "Naruto has 15 damage reduction. Shadow Clone Assault deals 10 additional damage; Demon Wind Shuriken Feint deals 15 additional damage."
                         }
                     }
                 ]
             },
             {
-                "id": "uzumaki-naruto-shadow-clones",
-                "name": "Shadow Clones",
-                "skillimage": "https://i.imgur.com/eQSV2d1.png",
-                "skilldescription": "Uzumaki Naruto gains 10 points of damage reduction permanently and this skill is replaced by 'Rasengan'.",
-                "energy": [],
-                "target": "self",
+                "id": "uzumaki-naruto-demon-wind-shuriken-feint",
+                "name": "Demon Wind Shuriken Feint",
+                "skillimage": "https://i.imgur.com/F2Jw7I4.png",
+                "skilldescription": "Naruto surprises one enemy with a transformed shuriken, dealing 25 physical damage and stunning their Physical skills for 1 turn. During Shadow Clone Technique, this skill deals 15 additional damage and ends Shadow Clone Technique.",
+                "energy": [
+                    "Taijutsu",
+                    "Random"
+                ],
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 2,
                 "classes": [
-                    "Strategic",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target"
+                    },
+                    {
                         "type": "apply_status",
-                        "statusId": "uzumaki_naruto_shadow_clones_active",
-                        "duration": 99,
-                        "scope": "self",
+                        "statusId": "uzumaki_naruto_rasengan_stun",
+                        "duration": 1,
+                        "scope": "target",
                         "metadata": {
-                            "damageReductionFlat": 10,
-                            "skillReplacements": {
-                                "uzumaki-naruto-shadow-clones": "uzumaki-naruto-rasengan"
-                            },
-                            "tooltipText": "Naruto has 10 damage reduction\nShadow Clones is replaced by Rasengan."
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical skills are stunned."
+                        }
+                    },
+                    {
+                        "type": "remove_status",
+                        "statusId": "uzumaki_naruto_shadow_clone_technique",
+                        "scope": "self",
+                        "condition": {
+                            "statusId": "uzumaki_naruto_shadow_clone_technique"
                         }
                     }
                 ]
@@ -107,8 +117,8 @@ const characters = [
             {
                 "id": "uzumaki-naruto-sexy-technique",
                 "name": "Sexy Technique",
-                "skillimage": "https://i.imgur.com/BgiSFsF.png",
-                "skilldescription": "This skill makes Uzumaki Naruto invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/lopF3Mp.png",
+                "skilldescription": "This skill makes Naruto Uzumaki invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -126,50 +136,9 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uzumaki-naruto-rasengan",
-                "name": "Rasengan",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/lro3e07.png",
-                "skilldescription": "Uzumaki Naruto deals 35 damage to one enemy and stuns their non-strategic skills for 1 turn.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Ninjutsu",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 35,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "uzumaki_naruto_rasengan_stun",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "mental",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's non-strategic skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
                         }
                     }
                 ]
@@ -181,15 +150,21 @@ const characters = [
         "characterId": "haruno-sakura",
         "name": "Haruno Sakura",
         "facePicture": "https://i.imgur.com/q2K5CEj.png",
-        "characterdeescription": "A Genin from Team 7, Sakura is very intelligent, but self-conscious about herself. Having just recently received training from Tsunade, Sakura is now able to deliver powerful punches and heal her own allies.",
+        "characterdeescription": "A young kunoichi with exceptional chakra control and a sharp mind, Sakura Haruno joins Team 7 alongside Naruto Uzumaki and Sasuke Uchiha, hoping to prove herself as a capable shinobi. Though initially inexperienced in combat and often overshadowed by her teammates, Sakura's early encounters with dangerous enemies begin to test her courage and strengthen her resolve to protect those she cares about.",
+        "passive": {
+            "name": "Exceptional Chakra Control",
+            "icon": "https://i.imgur.com/srHzKvO.png",
+            "description": "Destructible defense granted by Sakura's skills is increased by 5.",
+            "destructibleDefenseBonusGranted": 5
+        },
         "skills": [
             {
-                "id": "haruno-sakura-ko-punch",
-                "name": "KO Punch",
-                "skillimage": "https://i.imgur.com/CoiXCFk.png",
-                "skilldescription": "Haruno Sakura deals 20 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
+                "id": "haruno-sakura-kunai-interference",
+                "name": "Kunai Interference",
+                "skillimage": "https://i.imgur.com/Y4iU5Lv.png",
+                "skilldescription": "Sakura attacks one enemy with a kunai, dealing 15 physical damage and causing their harmful skills to deal 10 less non-affliction damage for 1 turn. During Clone Technique, this skill instead affects all enemies, dealing 10 physical damage and reducing their non-affliction damage by 5 for 1 turn.",
                 "energy": [
-                    "Taijutsu"
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -201,33 +176,64 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
+                        "amount": 15,
+                        "scope": "target",
+                        "condition": {
+                            "missingStatusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "haruno_sakura_ko_punch_stun",
+                        "statusId": "haruno_sakura_kunai_interference",
                         "duration": 1,
                         "scope": "target",
+                        "condition": {
+                            "missingStatusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "strategic"
-                            ],
-                            "tooltipText": "This character's physical and strategic skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "nonAfflictionDamageDebuffFlat": 10,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's harmful skills deal 10 less non-affliction damage."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "statusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_kunai_interference",
+                        "duration": 1,
+                        "scope": "all-enemy",
+                        "condition": {
+                            "statusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "nonAfflictionDamageDebuffFlat": 5,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's harmful skills deal 5 less non-affliction damage."
                         }
                     }
                 ]
             },
             {
-                "id": "haruno-sakura-cure",
-                "name": "Cure",
-                "skillimage": "https://i.imgur.com/SHNkcVv.png",
-                "skilldescription": "Haruno Sakura heals herself or an ally for 25 health.",
+                "id": "haruno-sakura-guard-duty",
+                "name": "Guard Duty",
+                "skillimage": "https://i.imgur.com/t4I45Ck.png",
+                "skilldescription": "Sakura protects herself or one ally, granting them 25 destructible defense and 10 damage reduction for 2 turns. During Clone Technique, this skill instead grants all allies 15 destructible defense and 5 damage reduction for 2 turns.",
                 "energy": [
-                    "Ninjutsu"
+                    "Random",
+                    "Random"
                 ],
                 "target": "self-or-single-ally",
                 "damage": 0,
@@ -238,21 +244,80 @@ const characters = [
                 ],
                 "effects": [
                     {
-                        "type": "heal",
-                        "amount": 25,
-                        "scope": "target"
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_guard_duty_defense",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "missingStatusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 25,
+                            "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense.",
+                            "tooltipText": "This character has 25 destructible defense."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_guard_duty_reduction",
+                        "duration": 2,
+                        "scope": "target",
+                        "condition": {
+                            "missingStatusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "tooltipText": "This character has 10 damage reduction."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_guard_duty_defense",
+                        "duration": 2,
+                        "scope": "all-allies",
+                        "condition": {
+                            "statusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 15,
+                            "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense.",
+                            "tooltipText": "This character has 15 destructible defense."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haruno_sakura_guard_duty_reduction",
+                        "duration": 2,
+                        "scope": "all-allies",
+                        "condition": {
+                            "statusId": "haruno_sakura_clone_technique",
+                            "requireMatch": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "damageReductionFlat": 5,
+                            "tooltipText": "This character has 5 damage reduction."
+                        }
                     }
                 ]
             },
             {
-                "id": "haruno-sakura-inner-sakura",
-                "name": "Inner Sakura",
-                "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "Haruno Sakura gains 5 points of damage reduction permanently and ignores stun effects for 1 turn. This skill is replaced by 'Inner Sakura Strangle'.",
-                "energy": [],
+                "id": "haruno-sakura-clone-technique",
+                "name": "Clone Technique",
+                "skillimage": "https://i.imgur.com/6GrbwOM.png",
+                "skilldescription": "Sakura creates illusionary clones for 3 turns, gaining 10 damage reduction. During this time, Kunai Interference and Guard Duty affect all eligible targets instead of one.",
+                "energy": [
+                    "Genjutsu"
+                ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 3,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -260,26 +325,17 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "haruno_sakura_inner_sakura_active",
-                        "duration": 99,
+                        "statusId": "haruno_sakura_clone_technique",
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
-                            "damageReductionFlat": 5,
-                            "skillReplacements": {
-                                "haruno-sakura-inner-sakura": "haruno-sakura-inner-sakura-strangle"
+                            "helpful": true,
+                            "damageReductionFlat": 10,
+                            "skillTargetOverrides": {
+                                "haruno-sakura-kunai-interference": "all-enemy",
+                                "haruno-sakura-guard-duty": "all-allies"
                             },
-                            "tooltipText": "Sakura has 5 damage reduction\nInner Sakura is replaced by Inner Sakura Strangle."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "haruno_sakura_inner_sakura_stun_immunity",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "cannotBeStunned": true,
-                            "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
-                            "turnDurationAnchor": "source_turn"
+                            "tooltipText": "Sakura has 10 damage reduction. Kunai Interference affects all enemies and Guard Duty affects all allies."
                         }
                     }
                 ]
@@ -287,8 +343,8 @@ const characters = [
             {
                 "id": "haruno-sakura-sakura-hide",
                 "name": "Sakura Hide",
-                "skillimage": "https://i.imgur.com/IYpA8yI.png",
-                "skilldescription": "This skill makes Haruno Sakura invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/MJNI438.png",
+                "skilldescription": "This skill makes Sakura Haruno invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -306,86 +362,9 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "haruno-sakura-inner-sakura-strangle",
-                "name": "Inner Sakura Strangle",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/srHzKvO.png",
-                "skilldescription": "Haruno Sakura ignores stun effects for 1 turn and targets one enemy or one ally. An ally receives 5 damage and deals an additional 5 damage permanently. An enemy receives 20 damage and deals 10 less damage with their next damaging skill.",
-                "energy": [
-                    "Genjutsu"
-                ],
-                "target": "single-character",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Mental",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "haruno_sakura_inner_sakura_stun_immunity",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "cannotBeStunned": true,
-                            "tooltipText": "Haruno Sakura ignores stun effects for 1 turn.",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    },
-                    {
-                        "type": "HealthLoss",
-                        "amount": 5,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "targetRelation": "ally"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "haruno_sakura_inner_sakura_strangle_ally_power",
-                        "duration": 99,
-                        "scope": "target",
-                        "metadata": {
-                            "damageBonusFlat": 5,
-                            "tooltipText": "This character deals 5 additional damage."
-                        },
-                        "condition": {
-                            "scope": "target",
-                            "targetRelation": "ally"
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "targetRelation": "enemy"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "haruno_sakura_inner_sakura_strangle_enemy_weakness",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "damageDebuffFlat": 10,
-                            "tooltipText": "This character's next damaging skill deals 10 less damage.",
-                            "turnDurationAnchor": "source_turn"
-                        },
-                        "condition": {
-                            "scope": "target",
-                            "targetRelation": "enemy"
                         }
                     }
                 ]
@@ -397,15 +376,24 @@ const characters = [
         "characterId": "uchiha-sasuke",
         "name": "Uchiha Sasuke",
         "facePicture": "https://i.imgur.com/bwuEwsM.png",
-        "characterdeescription": "A Genin from Team 7, Sasuke is the lone survivor of the Uchiha clan and has sworn vengeance against his brother. Using his sharingan, Sasuke is able to anticipate incoming attacks and is capable of advanced offensive moves.",
+        "characterdeescription": "A gifted young shinobi and one of the few survivors of the Uchiha clan, Sasuke Uchiha trains relentlessly to gain the strength needed to avenge his family. Already skilled in his clan's signature Fire Release techniques, Sasuke joins Team 7, where his encounters with dangerous enemies begin to awaken the power of his Sharingan.",
+        "passive": {
+            "name": "Uchiha Prodigy",
+            "icon": "https://i.imgur.com/3mHd0j3.png",
+            "description": "Sasuke's Physical skills deal 5 additional damage to enemies affected by his Fireball Jutsu.",
+            "physicalDamageBonusAgainstTargetStatus": {
+                "statusId": "uchiha_sasuke_great_fireball_burn",
+                "amount": 5
+            }
+        },
         "skills": [
             {
-                "id": "uchiha-sasuke-lion-combo",
-                "name": "Lion Combo",
-                "skillimage": "https://i.imgur.com/z0L2daw.png",
-                "skilldescription": "Uchiha Sasuke deals 25 damage to one enemy.",
+                "id": "uchiha-sasuke-shadow-shuriken-technique",
+                "name": "Shadow Shuriken Technique",
+                "skillimage": "https://i.imgur.com/ynDNiUT.png",
+                "skilldescription": "Sasuke throws shuriken at one enemy, dealing 20 physical damage. If that enemy is affected by his Fireball Jutsu, this skill also stuns their Physical skills for 1 turn and ends Fireball Jutsu's remaining effect.",
                 "energy": [
-                    "Bloodline"
+                    "Ninjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -417,55 +405,77 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 20,
                         "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_sasuke_shadow_shuriken_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "uchiha_sasuke_great_fireball_burn",
+                            "statusFromActor": true
+                        },
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical skills are stunned."
+                        }
+                    },
+                    {
+                        "type": "remove_status",
+                        "statusId": "uchiha_sasuke_great_fireball_burn",
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "uchiha_sasuke_great_fireball_burn",
+                            "statusFromActor": true
+                        }
                     }
                 ]
             },
             {
-                "id": "uchiha-sasuke-chidori",
-                "name": "Chidori",
-                "skillimage": "https://i.imgur.com/rJ3WZmI.png",
-                "skilldescription": "Uchiha Sasuke deals 35 piercing damage to one enemy. For 1 turn, 'Lion Combo' and 'Grand Fireball Technique' will cost 1 random chakra.",
+                "id": "uchiha-sasuke-great-fireball-jutsu",
+                "name": "Fire Style: Great Fireball Jutsu",
+                "skillimage": "https://i.imgur.com/60VDgWY.png",
+                "skilldescription": "Sasuke unleashes a massive fireball at one enemy, dealing 20 chakra damage and 5 affliction damage* for 3 turns.",
                 "energy": [
-                    "Ninjutsu",
-                    "Random"
+                    "Bloodline"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
-                    "Ninjutsu",
-                    "Instant"
+                    "Chakra",
+                    "Instant",
+                    "Affliction*"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 35,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
+                        "amount": 20,
+                        "scope": "target"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "uchiha_sasuke_chidori_cost_shift",
-                        "duration": 1,
-                        "scope": "self",
+                        "statusId": "uchiha_sasuke_great_fireball_burn",
+                        "duration": 3,
+                        "scope": "target",
                         "metadata": {
-                            "skillCostOverridesBySkillId": {
-                                "uchiha-sasuke-lion-combo": {
-                                    "energy": [
-                                        "Random"
-                                    ]
-                                },
-                                "uchiha-sasuke-grand-fireball-technique": {
-                                    "energy": [
-                                        "Random"
-                                    ]
-                                }
-                            },
-                            "tooltipText": "Lion Combo and Grand Fireball Technique cost 1 random chakra."
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "triggerOnApply": true,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "This character takes 5 affliction damage from Fire Style: Great Fireball Jutsu for 3 turns."
                         }
                     }
                 ]
@@ -474,11 +484,13 @@ const characters = [
                 "id": "uchiha-sasuke-sharingan",
                 "name": "Sharingan",
                 "skillimage": "https://i.imgur.com/IkTLWta.png",
-                "skilldescription": "Uchiha Sasuke gains 10 damage reduction permanently. Whenever an enemy uses a skill on Sasuke, they will take 5 additional damage from Sasuke's skills permanently. This skill is replaced by 'Grand Fireball Technique'.",
-                "energy": [],
+                "skilldescription": "Sasuke activates his Sharingan, gaining 10 damage reduction for 3 turns and countering the first harmful Physical skill used against him during this time. Sharingan ends after successfully countering a skill.",
+                "energy": [
+                    "Random"
+                ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 3,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -486,27 +498,26 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uchiha_sasuke_sharingan_focus",
-                        "duration": 99,
+                        "statusId": "uchiha_sasuke_sharingan",
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "damageReductionFlat": 10,
-                            "samePreviousTargetDamageBonusFlat": 5,
-                            "samePreviousTargetMarkerStatusId": "uchiha_sasuke_sharingan_previous_target",
-                            "samePreviousTargetMarkerTooltipText": "Sasuke will deal 5 additional damage to this character if he targets them again.",
-                            "skillReplacements": {
-                                "uchiha-sasuke-sharingan": "uchiha-sasuke-grand-fireball-technique"
-                            },
-                            "tooltipText": "Sasuke has 10 damage reduction\nIf he targets the same enemy again, his skills deal 5 additional damage\nSharingan is replaced by Grand Fireball Jutsu."
+                            "triggerOnEnemyHarmfulSkillClassesAny": [
+                                "physical"
+                            ],
+                            "counterCancelsSkill": true,
+                            "tooltipText": "Sasuke has 10 damage reduction. The first harmful Physical skill used against him is countered, ending Sharingan."
                         }
                     }
                 ]
             },
             {
-                "id": "uchiha-sasuke-swift-block",
-                "name": "Swift Block",
-                "skillimage": "https://i.imgur.com/dit1Ltq.png",
-                "skilldescription": "This skill makes Uchiha Sasuke invulnerable for 1 turn.",
+                "id": "uchiha-sasuke-stealth",
+                "name": "Stealth",
+                "skillimage": "https://i.imgur.com/dC3c6Vs.png",
+                "skilldescription": "This skill makes Sasuke Uchiha invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -524,44 +535,9 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uchiha-sasuke-grand-fireball-technique",
-                "name": "Grand Fireball Technique",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/IkTLWta.png",
-                "skilldescription": "Uchiha Sasuke deals 5 affliction damage to all enemies this turn and 5 affliction damage to them the following turn.",
-                "energy": [
-                    "Ninjutsu"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Affliction",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "uchiha_sasuke_grand_fireball_burn",
-                        "duration": 2,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 5,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "triggerOnApply": true,
-                            "afflictionDamage": true,
-                            "ignoreDamageReduction": true,
-                            "ignoreDestructibleDefense": true,
-                            "tooltipText": "This character takes 5 affliction damage from Grand Fireball Technique."
                         }
                     }
                 ]
@@ -1618,7 +1594,6 @@ const characters = [
                                 "yamanaka_ino_mind_body_switch_stage_2",
                                 "yamanaka_ino_mind_body_switch_stage_3",
                                 "nara_shikamaru_shadow_imitation",
-                                "haruno_sakura_ko_punch_stun",
                                 "uzumaki_naruto_rasengan_stun"
                             ]
                         }
@@ -5181,15 +5156,30 @@ const characters = [
         "id": "umino-iruka",
         "characterId": "umino-iruka",
         "name": "Umino Iruka",
-        "facePicture": "https://i.imgur.com/snz8zD4.png",
-        "characterdeescription": "An instructor for Konoha, Iruka is a caring man who has acted like something of a father and mentor to Naruto throughout his youth. Iruka fights with his allies in mind, preferring to protect them and help them as support.",
+        "facePicture": "https://i.imgur.com/rgSncXo.png",
+        "characterdeescription": "A chunin of the Hidden Leaf Village and an instructor at the Ninja Academy, Iruka dedicates himself to guiding the next generation of shinobi. Despite losing his parents to the Nine-Tailed Fox, he becomes one of the first people to recognize Naruto Uzumaki's potential, risking his own life to protect the young ninja.",
         "requiredMissionId": "duty-of-a-sensei",
+        "passive": {
+            "name": "Genin Promotion",
+            "icon": "https://i.imgur.com/fo7qWJv.png",
+            "description": "When Iruka damages an enemy with one of his skills, the next damaging hit from another ally against that enemy deals 5 additional damage. This mark lasts 2 turns and does not stack.",
+            "allyFollowupDamageMark": {
+                "statusId": "iruka_genin_promotion_mark",
+                "duration": 2,
+                "amount": 5,
+                "skillIds": [
+                    "umino-iruka-shuriken-throw",
+                    "umino-iruka-academy-instruction",
+                    "umino-iruka-sealed-bomb-square-release"
+                ]
+            }
+        },
         "skills": [
             {
                 "id": "umino-iruka-shuriken-throw",
                 "name": "Shuriken Throw",
                 "skillimage": "https://i.imgur.com/LmS1XVp.png",
-                "skilldescription": "Umino Iruka deals 20 damage to one enemy and 10 additional damage for each 25 health Umino Iruka has lost.",
+                "skilldescription": "Iruka throws shuriken at one enemy, dealing 20 physical damage. If they are affected by his Sealed Bomb Square Release, the trap detonates immediately.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -5204,10 +5194,118 @@ const characters = [
                     {
                         "type": "damage",
                         "amount": 20,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 25,
                         "scope": "target",
                         "metadata": {
-                            "amountFromSourceMissingHpStep": 10,
-                            "amountFromSourceMissingHpDivisor": 25
+                            "skillClasses": [
+                                "Chakra"
+                            ]
+                        },
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "iruka_sealed_bomb_trap",
+                            "statusFromActor": true
+                        }
+                    },
+                    {
+                        "type": "remove_status",
+                        "statusId": "iruka_sealed_bomb_trap",
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "iruka_sealed_bomb_trap",
+                            "statusFromActor": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "umino-iruka-academy-instruction",
+                "name": "Academy Instruction",
+                "skillimage": "https://i.imgur.com/NJMON6n.png",
+                "skilldescription": "Iruka prepares himself or one ally to defend, granting 15 destructible defense for 2 turns. For 1 turn, the first enemy to use a new harmful skill on that ally takes 10 physical damage.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self-or-single-ally",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Physical*"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "iruka_academy_instruction_defense",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 15,
+                            "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense from Academy Instruction."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "iruka_academy_instruction_trap",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterCancelsSkill": false,
+                            "counterDamageAttributedToStatusSource": true,
+                            "counterDamageRespectsInvulnerability": true,
+                            "counterDamage": 10,
+                            "counterDamageSkillClasses": [
+                                "Physical"
+                            ],
+                            "tooltipText": "The first enemy to use a new harmful skill on this character takes 10 physical damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "umino-iruka-sealed-bomb-square-release",
+                "name": "Sealed Bomb Square Release",
+                "skillimage": "https://i.imgur.com/TeDfWJB.png",
+                "skilldescription": "Iruka places an invisible explosive trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 25 damage and ends. Shuriken Throw can detonate it early.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Chakra",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "iruka_sealed_bomb_trap",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "hideTooltipFromUnitOwner": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "triggerOnlyOnOwnerSkillUse": true,
+                            "counterDamageAttributedToStatusSource": true,
+                            "counterDamageRespectsInvulnerability": true,
+                            "counterCancelsSkill": false,
+                            "counterDamage": 25,
+                            "counterDamageSkillClasses": [
+                                "Chakra"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "If this character uses a new harmful skill, Sealed Bomb Square Release deals 25 damage. Shuriken Throw can detonate the trap early."
                         }
                     }
                 ]
@@ -5215,14 +5313,14 @@ const characters = [
             {
                 "id": "umino-iruka-ally-shield",
                 "name": "Ally Shield",
-                "skillimage": "https://i.imgur.com/KCALU7E.png",
-                "skilldescription": "Umino Iruka makes one ally invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/sdo9YZ8.png",
+                "skilldescription": "Iruka makes himself or one ally invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
-                "target": "single-ally",
+                "target": "self-or-single-ally",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 4,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -5235,79 +5333,6 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "helpful": true,
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "umino-iruka-sealed-bomb-square-release",
-                "name": "Sealed Bomb Square Release",
-                "skillimage": "https://i.imgur.com/TeDfWJB.png",
-                "skilldescription": "Umino Iruka targets one enemy. The following turn, if that enemy uses a new harmful skill, they will take 40 damage that ignores invulnerability, and for 1 turn they will take 25 additional damage from physical and chakra skills. This skill is invisible.",
-                "energy": [
-                    "Ninjutsu"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Strategic",
-                    "Ninjutsu",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "iruka_sealed_bomb_trap",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "hideTooltipFromUnitOwner": true,
-                            "triggerOnEnemyHarmfulSkill": true,
-                            "counterDamage": 40,
-                            "counterDamageIgnoresReduction": true,
-                            "counterDamageIgnoresDestructibleDefense": true,
-                            "counterStatusId": "iruka_sealed_bomb_vulnerability",
-                            "counterStatusDuration": 1,
-                            "counterStatusMetadata": {
-                                "harmful": true,
-                                "damageTakenBonusBySkillClass": {
-                                    "physical": 25,
-                                    "energy": 25
-                                },
-                                "tooltipText": "This character takes 25 additional damage from physical and chakra skills from Sealed Bomb Square Release."
-                            },
-                            "tooltipText": "If this character uses a new harmful skill, they will take 40 damage from Sealed Bomb Square Release and take 25 additional damage from physical and chakra skills.",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "umino-iruka-iruka-parry",
-                "name": "Iruka Parry",
-                "skillimage": "https://i.imgur.com/EhxgxK3.png",
-                "skilldescription": "This skill makes Umino Iruka invulnerable for 1 turn.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "invulnerable",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
@@ -5320,15 +5345,21 @@ const characters = [
         "id": "mizuki",
         "characterId": "mizuki",
         "name": "Mizuki",
-        "facePicture": "https://i.imgur.com/NZS59L7.png",
-        "characterdeescription": "An instructor for Konoha, Mizuki is a chuunin and old friend of Iruka that over time grew jealous and petty. While Mizuki doesn't have any special abilities, he knows to instead be patient, and wait until the right time to strike.",
+        "facePicture": "https://i.imgur.com/4MCaK7l.png",
         "requiredMissionId": "a-dishonored-shinobi",
+        "characterdeescription": "An instructor at the Hidden Leaf's Ninja Academy, Mizuki conceals his hunger for power beneath a sympathetic demeanor. Hoping to steal the forbidden Scroll of Seals, he manipulates Naruto's desire to become a ninja, only to have his betrayal exposed by Iruka.",
+        "passive": {
+            "name": "Meld in the Shadows",
+            "icon": "https://i.imgur.com/JDdDwn0.png",
+            "description": "Mizuki's damaging skills deal 5 additional damage to enemies who use a non-damaging skill that turn.",
+            "bonusAgainstNonDamagingSkillUser": 5
+        },
         "skills": [
             {
-                "id": "mizuki-kunai-assault",
-                "name": "Kunai Assault",
-                "skillimage": "https://i.imgur.com/FZHixlO.png",
-                "skilldescription": "Mizuki deals 10 piercing damage to one enemy for 3 turns. This skill stacks.",
+                "id": "mizuki-kunai-ambush",
+                "name": "Kunai Ambush",
+                "skillimage": "https://i.imgur.com/oTFkPZG.png",
+                "skilldescription": "Mizuki attacks one enemy with a barrage of kunai, dealing 15 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.",
                 "energy": [
                     "Random"
                 ],
@@ -5337,26 +5368,25 @@ const characters = [
                 "cooldown": 1,
                 "classes": [
                     "Physical",
-                    "Action"
+                    "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target"
+                    },
+                    {
                         "type": "apply_status",
-                        "statusId": "mizuki_kunai_assault",
-                        "duration": 3,
+                        "statusId": "mizuki_kunai_ambush_trap",
+                        "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "turnEndDamage": 10,
-                            "turnEndTrigger": "source_turn",
+                            "triggerOnOwnerHelpfulSkill": true,
+                            "counterCancelsSkill": true,
                             "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "ignoreTargetDamageReduction": true,
-                            "triggerOnApply": true,
-                            "mergeNumericAddKeys": [
-                                "turnEndDamage"
-                            ],
-                            "tooltipText": "This character takes 10 piercing damage from Kunai Assault."
+                            "tooltipText": "The next helpful skill this character uses is countered."
                         }
                     }
                 ]
@@ -5364,114 +5394,10 @@ const characters = [
             {
                 "id": "mizuki-execution-shuriken",
                 "name": "Execution Shuriken",
-                "skillimage": "https://i.imgur.com/sqwpwQd.png",
-                "skilldescription": "Mizuki deals 20 damage to one enemy and 10 additional damage for each 20 health they have lost. This skill can only be used twice.",
+                "skillimage": "https://i.imgur.com/O3Y4Q29.png",
+                "skilldescription": "Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.",
                 "energy": [
                     "Taijutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "maxUses": 2,
-                "baseSkillId": "mizuki-execution-shuriken",
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "metadata": {
-                            "amountFromTargetMissingHpStep": 10,
-                            "amountFromTargetMissingHpDivisor": 20
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "mizuki-genjutsu-ambush-tactics",
-                "name": "Genjutsu Ambush Tactics",
-                "skillimage": "https://i.imgur.com/I4EX3j3.png",
-                "skilldescription": "After 1 turn, Mizuki will become invulnerable, 'Kunai Assault' will deal 30 damage instantly and lower the target's non-affliction damage by 5, and 'Execution Shuriken' will deal 30 additional damage for 1 turn. This skill is invisible the first turn and will end if Mizuki receives new non-affliction damage.",
-                "energy": [
-                    "Genjutsu"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 3,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "mizuki_ambush_priming",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "hideTooltipFromEnemy": true,
-                            "turnDurationAnchor": "any_turn",
-                            "removeStatusIdsOnNewNonAfflictionDamage": [
-                                "mizuki_ambush_priming"
-                            ],
-                            "onExpireApplyStatusToSelf": {
-                                "statusId": "mizuki_ambush_ready",
-                                "duration": 1,
-                                "metadata": {
-                                    "helpful": true,
-                                    "invulnerable": true,
-                                    "skillReplacements": {
-                                        "mizuki-kunai-assault": "mizuki-kunai-assault-empowered",
-                                        "mizuki-execution-shuriken": "mizuki-execution-shuriken-empowered"
-                                    },
-                                    "tooltipText": "Mizuki is invulnerable. 'Kunai Assault' deals instant damage and lowers damage, and 'Execution Shuriken' deals additional damage."
-                                }
-                            },
-                            "tooltipText": "Mizuki is preparing an ambush."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "mizuki-effortless-side-step",
-                "name": "Effortless Side-Step",
-                "skillimage": "https://i.imgur.com/Lt7IMdA.png",
-                "skilldescription": "This skill makes Mizuki invulnerable for 1 turn.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "invulnerable",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "mizuki-kunai-assault-empowered",
-                "name": "Kunai Assault",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/FZHixlO.png",
-                "skilldescription": "Mizuki deals 30 piercing damage to one enemy instantly. For 1 turn, this enemy will deal 5 less non-affliction damage.",
-                "energy": [
                     "Random"
                 ],
                 "target": "single-enemy",
@@ -5485,40 +5411,89 @@ const characters = [
                     {
                         "type": "damage",
                         "amount": 30,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDestructibleDefense": true
-                        }
-                    },
+                        "scope": "target"
+                    }
+                ]
+            },
+            {
+                "id": "mizuki-windmill",
+                "name": "Windmill",
+                "skillimage": "https://i.imgur.com/jETOs8w.png",
+                "skilldescription": "Mizuki prepares his giant shuriken for a sweeping attack. For 2 turns, his next Execution Shuriken affects all enemies.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Strategic",
+                    "Instant",
+                    "Physical*"
+                ],
+                "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "mizuki_empowered_kunai_assault_damage_debuff",
-                        "duration": 1,
-                        "scope": "target",
+                        "statusId": "mizuki_windmill",
+                        "duration": 2,
+                        "scope": "self",
                         "metadata": {
-                            "harmful": true,
-                            "NonAfflictionDamageDebuff": 5,
-                            "tooltipText": "This character deals 5 less non-affliction damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "helpful": true,
+                            "skillReplacements": {
+                                "mizuki-execution-shuriken": "mizuki-execution-shuriken-windmill"
+                            },
+                            "removeSelfOnSkillUseSkillIds": [
+                                "mizuki-execution-shuriken-windmill"
+                            ],
+                            "tooltipText": "The next Execution Shuriken hits all enemies, then Windmill ends."
                         }
                     }
                 ]
             },
             {
-                "id": "mizuki-execution-shuriken-empowered",
-                "name": "Execution Shuriken",
+                "id": "mizuki-effortless-side-step",
+                "name": "Effortless Side-step",
+                "skillimage": "https://i.imgur.com/jP0RmHY.png",
+                "skilldescription": "Mizuki becomes invulnerable for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "mizuki_effortless_side_step",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Mizuki is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "mizuki-execution-shuriken-windmill",
+                "baseSkillId": "mizuki-execution-shuriken",
+                "useBaseSkillCooldown": true,
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/sqwpwQd.png",
-                "skilldescription": "Mizuki deals 50 damage to one enemy and 10 additional damage for each 20 health they have lost.",
+                "name": "Execution Shuriken",
+                "skillimage": "https://i.imgur.com/O3Y4Q29.png",
+                "skilldescription": "Mizuki deals 20 physical damage to all enemies, ending Windmill.",
                 "energy": [
                     "Taijutsu",
                     "Random"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 0,
-                "maxUses": 2,
-                "baseSkillId": "mizuki-execution-shuriken",
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -5526,12 +5501,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 50,
-                        "scope": "target",
-                        "metadata": {
-                            "amountFromTargetMissingHpStep": 10,
-                            "amountFromTargetMissingHpDivisor": 20
-                        }
+                        "amount": 20,
+                        "scope": "all-enemy"
+                    },
+                    {
+                        "type": "remove_status",
+                        "statusId": "mizuki_windmill",
+                        "scope": "self"
                     }
                 ]
             }
@@ -5798,29 +5774,98 @@ const characters = [
         "facePicture": "https://i.imgur.com/1iuyTS5.png",
         "requiredMissionId": "hidden-hunter",
         "shopPrice": 500,
-        "characterdeescription": "The sole survivor of the Yuki clan, and the subordinate of Zabuza; Haku, despite being young, holds enough potential strength to surpass almost any ninja. Using his ice based bloodline, and his intelligence, Haku can attack and defend nearly simultaneously.",
+        "characterdeescription": "A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.",
+        "passive": {
+            "name": "Demon of the Ice",
+            "icon": "https://i.imgur.com/aBCcujF.png",
+            "description": "Enemies stunned by Haku cannot be healed for 1 turn.",
+            "healingBlockOnStun": {
+                "statusId": "haku_demon_of_the_ice",
+                "duration": 1
+            }
+        },
         "skills": [
             {
-                "id": "haku-flying-water-needles-of-death",
-                "name": "Flying Water Needles of Death",
-                "skillimage": "https://i.imgur.com/DaN3ECR.png",
-                "skilldescription": "Haku deals 30 damage to one enemy. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies.",
+                "id": "haku-demonic-mirroring-ice-crystals",
+                "name": "Demonic Mirroring Ice Crystals",
+                "skillimage": "https://i.imgur.com/2sgPkS0.png",
+                "skilldescription": "Haku surrounds one enemy with demonic mirrors of ice for 4 turns, dealing 10 damage to that enemy each turn. During this time, Haku gains 30 points of destructible defense, and Flying Needles of Death and Acupuncture are improved. If Haku is stunned, this skill ends.",
                 "energy": [
                     "Bloodline",
                     "Random"
                 ],
                 "target": "single-enemy",
-                "damage": 30,
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Chakra",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "haku_mirror_target",
+                        "duration": 4,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ongoingClass": "control",
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "triggerOnApply": true,
+                            "tooltipText": "Haku deals 10 damage to this character each turn. The mirrors end if Haku is stunned."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haku_mirror_guard",
+                        "duration": 4,
+                        "scope": "self",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "haku_mirror_target",
+                            "statusFromActor": true
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "destructibleDefensePoints": 30,
+                            "linkedTargetStatusId": "haku_mirror_target",
+                            "copyTargetKeyToKeys": [
+                                "linkedTargetKey"
+                            ],
+                            "skillReplacements": {
+                                "haku-flying-needles-of-death": "haku-flying-needles-of-death-mirrors",
+                                "haku-acupuncture": "haku-acupuncture-mirrors"
+                            },
+                            "tooltipText": "Haku has 30 destructible defense and empowers Flying Needles of Death and Acupuncture while the mirrors remain."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haku-flying-needles-of-death",
+                "name": "Flying Needles of Death",
+                "skillimage": "https://i.imgur.com/1wG05K5.png",
+                "skilldescription": "Haku launches a volley of water needles at one enemy, dealing 20 piercing damage. During Demonic Mirroring Ice Crystals, this skill also deals 10 piercing damage to the target of Demonic Mirroring Ice Crystals, unless they are the original target.",
+                "energy": [
+                    "Ninjutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Physical",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 30,
-                        "scope": "target"
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
                     }
                 ]
             },
@@ -5828,74 +5873,40 @@ const characters = [
                 "id": "haku-acupuncture",
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku targets one enemy, stunning them and making them unable to reduce damage or become invulnerable for 1 turn. During 'Demonic Mirroring Ice Crystals', this skill targets all enemies and costs 1 additional random chakra. This skill ignores invulnerability.",
+                "skilldescription": "Haku strikes one enemy's pressure points with senbon, stunning their Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
                 "energy": [
-                    "Ninjutsu"
+                    "Bloodline"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 1,
-                "ignoreInvulnerability": true,
                 "classes": [
-                    "Strategic",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "haku_acupuncture_debuff",
+                        "statusId": "haku_acupuncture_stun",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable.",
-                            "turnDurationAnchor": "source_turn"
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "chakra"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical and Chakra skills are stunned."
                         }
                     }
                 ]
             },
             {
-                "id": "haku-demonic-mirroring-ice-crystals",
-                "name": "Demonic Mirroring Ice Crystals",
-                "skillimage": "https://i.imgur.com/2sgPkS0.png",
-                "skilldescription": "Haku becomes invulnerable for 3 turns. While active, 'Flying Water Needles of Death' will target all enemies, and 'Acupuncture' will target all enemies and cost 1 additional random chakra.",
-                "energy": [
-                    "Bloodline",
-                    "Ninjutsu"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 6,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "haku_demonic_mirroring_ice_crystals",
-                        "duration": 3,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "invulnerable": true,
-                            "skillReplacements": {
-                                "haku-flying-water-needles-of-death": "haku-flying-water-needles-of-death-empowered",
-                                "haku-acupuncture": "haku-acupuncture-empowered"
-                            },
-                            "tooltipText": "Haku is invulnerable.\nFlying Water Needles of Death targets all enemies.\nAcupuncture targets all enemies.\nAcupuncture costs 1 additional random chakra."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "haku-needle-parry",
-                "name": "Needle Parry",
-                "skillimage": "https://i.imgur.com/0qDDVuG.png",
-                "skilldescription": "This skill makes Haku invulnerable for 1 turn.",
+                "id": "haku-mirror-flee",
+                "name": "Mirror Flee",
+                "skillimage": "https://i.imgur.com/Jo62MEC.png",
+                "skilldescription": "Haku becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5909,73 +5920,102 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "haku_needle_parry_invulnerable",
+                        "statusId": "haku_mirror_flee",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "Haku is invulnerable for 1 turn."
+                            "tooltipText": "Haku is invulnerable."
                         }
                     }
                 ]
             },
             {
-                "id": "haku-flying-water-needles-of-death-empowered",
+                "id": "haku-flying-needles-of-death-mirrors",
+                "baseSkillId": "haku-flying-needles-of-death",
+                "useBaseSkillCooldown": true,
                 "hiddenFromSelectionViewer": true,
-                "name": "Flying Water Needles of Death",
-                "skillimage": "https://i.imgur.com/DaN3ECR.png",
-                "skilldescription": "Haku deals 30 damage to all enemies during 'Demonic Mirroring Ice Crystals'.",
+                "name": "Flying Needles of Death",
+                "skillimage": "https://i.imgur.com/1wG05K5.png",
+                "skilldescription": "Haku deals 20 piercing damage to one enemy and 10 piercing damage to the enemy in his mirrors, if different.",
                 "energy": [
-                    "Bloodline",
-                    "Random"
+                    "Ninjutsu"
                 ],
-                "target": "all-enemy",
-                "damage": 30,
+                "target": "single-enemy",
+                "damage": 0,
                 "cooldown": 0,
+                "classes": [
+                    "Chakra",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 10,
+                        "scope": "linked-enemy-other-than-target",
+                        "metadata": {
+                            "linkedTargetStatusId": "haku_mirror_target",
+                            "ignoreDamageReduction": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haku-acupuncture-mirrors",
+                "baseSkillId": "haku-acupuncture",
+                "useBaseSkillCooldown": true,
+                "hiddenFromSelectionViewer": true,
+                "name": "Acupuncture",
+                "skillimage": "https://i.imgur.com/dDxetJr.png",
+                "skilldescription": "Haku stuns one enemy's Physical and Chakra skills and also stuns the mirrored enemy's Physical skills for 1 turn.",
+                "energy": [
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "damage",
-                        "amount": 30,
-                        "scope": "all-enemy"
-                    }
-                ]
-            },
-            {
-                "id": "haku-acupuncture-empowered",
-                "hiddenFromSelectionViewer": true,
-                "name": "Acupuncture",
-                "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku targets all enemies during 'Demonic Mirroring Ice Crystals', stunning them and making them unable to reduce damage or become invulnerable for 1 turn. This skill ignores invulnerability.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "ignoreInvulnerability": true,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
                         "type": "apply_status",
-                        "statusId": "haku_acupuncture_debuff",
+                        "statusId": "haku_acupuncture_stun",
                         "duration": 1,
-                        "scope": "all-enemy",
+                        "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character is stunned and cannot reduce damage or become invulnerable.",
-                            "turnDurationAnchor": "source_turn"
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "chakra"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical and Chakra skills are stunned."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "haku_mirror_acupuncture_stun",
+                        "duration": 1,
+                        "scope": "linked-enemy-other-than-target",
+                        "metadata": {
+                            "harmful": true,
+                            "linkedTargetStatusId": "haku_mirror_target",
+                            "cannotUseSkillClasses": [
+                                "physical"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical skills are stunned by Haku."
                         }
                     }
                 ]
@@ -5985,23 +6025,27 @@ const characters = [
     {
         "id": "momochi-zabuza",
         "characterId": "momochi-zabuza",
-        "name": "Momochi Zabuza",
+        "name": "Zabuza Momochi",
         "facePicture": "https://i.imgur.com/8OoPNPv.png",
-        "characterdeescription": "Zabuza is a missing-nin from the Hidden Mist Village that specializes in silent assassination. Using the various ninjutsu abilities Zabuza has, he is able to attack his enemies all at once, or stealthily try to kill them.",
         "requiredMissionId": "devotion",
+        "characterdeescription": "One of the Seven Ninja Swordsmen of the Mist, Zabuza Momochi is a ruthless missing-nin whose mastery of silent assassination earned him the title Demon of the Hidden Mist. Armed with the massive Kubikiribōchō, he terrorizes his opponents through concealment, overwhelming force, and deadly Water Release techniques.",
+        "passive": {
+            "name": "Silent Killing",
+            "icon": "https://i.imgur.com/9eJkbJa.png",
+            "description": "Whenever Water Clone Technique successfully counters an enemy skill, that enemy becomes unable to reduce damage or become invulnerable for 1 turn."
+        },
         "skills": [
             {
-                "id": "momochi-zabuza-soundless-murder",
-                "name": "Soundless Murder",
-                "skillimage": "https://i.imgur.com/74KvAbq.png",
-                "skilldescription": "Momochi Zabuza deals 30 piercing damage to one enemy. During 'Hidden Mist', this skill will deal 15 additional damage and will ignore invulnerability.",
+                "id": "momochi-zabuza-kubikiribocho",
+                "name": "Kubikiribōchō",
+                "skillimage": "https://i.imgur.com/aZfxDVs.png",
+                "skilldescription": "Zabuza attacks one enemy with his enormous sword, dealing 20 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 10 physical damage to each.",
                 "energy": [
-                    "Taijutsu",
-                    "Random"
+                    "Taijutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -6009,65 +6053,78 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 30,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDestructibleDefense": true
-                        }
+                        "amount": 20,
+                        "scope": "target"
                     }
                 ]
             },
             {
-                "id": "momochi-zabuza-water-dragon-missile",
-                "name": "Water Dragon Missile",
-                "skillimage": "https://i.imgur.com/2l9QztL.png",
-                "skilldescription": "Momochi Zabuza deals 15 damage to all enemies and stuns their physical and strategic skills for 1 turn.",
+                "id": "momochi-zabuza-water-prison-technique",
+                "name": "Water Prison Technique",
+                "skillimage": "https://i.imgur.com/dT988nl.png",
+                "skilldescription": "Zabuza traps one enemy inside a sphere of water for 2 turns, stunning their harmful skills during this time. If Zabuza is stunned, this skill ends.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
                 ],
-                "target": "all-enemy",
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 3,
                 "classes": [
-                    "Ninjutsu",
-                    "Instant"
+                    "Chakra",
+                    "Control"
                 ],
                 "effects": [
                     {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "all-enemy"
+                        "type": "apply_status",
+                        "statusId": "zabuza_water_prison",
+                        "duration": 2,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "ongoingClass": "control",
+                            "cannotUseHarmfulSkills": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character cannot use harmful skills while Water Prison Technique is active. The prison ends if Zabuza is stunned."
+                        }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "momochi_zabuza_water_dragon_stun",
-                        "duration": 1,
-                        "scope": "all-enemy",
+                        "statusId": "zabuza_water_prison_link",
+                        "duration": 2,
+                        "scope": "self",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "zabuza_water_prison",
+                            "statusFromActor": true
+                        },
                         "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "strategic"
+                            "helpful": true,
+                            "ongoingClass": "control",
+                            "linkedTargetStatusId": "zabuza_water_prison",
+                            "copyTargetKeyToKeys": [
+                                "linkedTargetKey"
                             ],
-                            "tooltipText": "This character's physical and strategic skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "skillReplacements": {
+                                "momochi-zabuza-kubikiribocho": "momochi-zabuza-kubikiribocho-clone"
+                            },
+                            "tooltipText": "A water clone attacks the enemies outside Zabuza’s Water Prison."
                         }
                     }
                 ]
             },
             {
-                "id": "momochi-zabuza-hidden-mist",
-                "name": "Hidden Mist",
-                "skillimage": "https://i.imgur.com/7mpGS0U.png",
-                "skilldescription": "For 2 turns, all enemies' physical and chakra skills will cost 1 additional random chakra and Momochi Zabuza will gain 5 points of damage reduction. The following 2 turns, 'Soundless Murder' will deal 15 additional damage and will ignore invulnerability. This skill ignores invulnerability.",
+                "id": "momochi-zabuza-hidden-mist-technique",
+                "name": "Hidden Mist Technique",
+                "skillimage": "https://i.imgur.com/IkZwEbi.png",
+                "skilldescription": "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability. This skill ignores invulnerability.",
                 "energy": [
-                    "Genjutsu"
+                    "Ninjutsu"
                 ],
                 "target": "self",
-                "ignoreInvulnerability": true,
                 "damage": 0,
                 "cooldown": 3,
+                "ignoreInvulnerability": true,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -6075,55 +6132,58 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "momochi_zabuza_hidden_mist_enemy_cost",
+                        "statusId": "zabuza_hidden_mist_cost",
                         "duration": 2,
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
                             "randomCostIncreaseForSkillClasses": {
                                 "physical": 1,
+                                "chakra": 1,
                                 "energy": 1,
                                 "ninjutsu": 1
                             },
-                            "tooltipText": "This character's physical and chakra skills cost 1 additional random chakra from Hidden Mist."
+                            "tooltipText": "Physical and Chakra skills cost 1 additional random chakra from Hidden Mist Technique."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "momochi_zabuza_hidden_mist_defense",
+                        "statusId": "zabuza_hidden_mist_defense",
                         "duration": 2,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
                             "damageReductionFlat": 5,
-                            "mergeNumericAddKeys": [
-                                "damageReductionFlat"
-                            ],
                             "onExpireApplyStatusToSelf": {
-                                "statusId": "momochi_zabuza_hidden_mist_empowered",
+                                "statusId": "zabuza_hidden_mist_attack",
                                 "duration": 2,
                                 "metadata": {
                                     "helpful": true,
-                                    "skillReplacements": {
-                                        "momochi-zabuza-soundless-murder": "momochi-zabuza-soundless-murder-empowered"
+                                    "skillDamageBonuses": {
+                                        "momochi-zabuza-kubikiribocho": 10,
+                                        "momochi-zabuza-kubikiribocho-clone": 10
                                     },
-                                    "tooltipText": "'Soundless Murder' deals additional damage and ignores invulnerability."
+                                    "ignoreInvulnerabilityForSkillIds": [
+                                        "momochi-zabuza-kubikiribocho",
+                                        "momochi-zabuza-kubikiribocho-clone"
+                                    ],
+                                    "tooltipText": "Kubikiribōchō deals 10 additional damage and ignores invulnerability."
                                 }
                             },
-                            "tooltipText": "Momochi Zabuza has 5 damage reduction from Hidden Mist."
+                            "tooltipText": "Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability."
                         }
                     }
                 ]
             },
             {
-                "id": "momochi-zabuza-water-clone-zabuza",
-                "name": "Water Clone Zabuza",
-                "skillimage": "https://i.imgur.com/nl8kDkS.png",
-                "skilldescription": "This skill makes Momochi Zabuza invulnerable for 1 turn.",
+                "id": "momochi-zabuza-water-clone-technique",
+                "name": "Water Clone Technique",
+                "skillimage": "https://i.imgur.com/m1hfJAx.png",
+                "skilldescription": "Zabuza creates a water clone to defend himself or one ally for 1 turn. The first enemy harmful Physical skill used against that character is countered, destroying the clone.",
                 "energy": [
                     "Random"
                 ],
-                "target": "self",
+                "target": "self-or-single-ally",
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
@@ -6133,30 +6193,44 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "zabuza_water_clone",
                         "duration": 1,
-                        "scope": "self",
+                        "scope": "target",
                         "metadata": {
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulSkillClassesAny": [
+                                "physical"
+                            ],
+                            "counterCancelsSkill": true,
+                            "counterStatusId": "zabuza_silent_killing",
+                            "counterStatusDuration": 1,
+                            "counterStatusFresh": false,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "cannotReduceDamage": true,
+                                "cannotBecomeInvulnerable": true,
+                                "turnDurationAnchor": "source_turn",
+                                "tooltipText": "Silent Killing: this character cannot reduce damage or become invulnerable."
+                            },
+                            "tooltipText": "The next harmful Physical skill against this character is countered by Zabuza’s water clone."
                         }
                     }
                 ]
             },
             {
-                "id": "momochi-zabuza-soundless-murder-empowered",
-                "name": "Soundless Murder",
+                "id": "momochi-zabuza-kubikiribocho-clone",
+                "baseSkillId": "momochi-zabuza-kubikiribocho",
+                "useBaseSkillCooldown": true,
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "deadcharacter.png",
-                "skilldescription": "Momochi Zabuza deals 45 piercing damage to one enemy, ignoring invulnerability.",
+                "name": "Kubikiribōchō",
+                "skillimage": "https://i.imgur.com/aZfxDVs.png",
+                "skilldescription": "A water clone deals 10 physical damage to each enemy outside Water Prison Technique.",
                 "energy": [
-                    "Taijutsu",
-                    "Random"
+                    "Taijutsu"
                 ],
-                "target": "single-enemy",
-                "ignoreInvulnerability": true,
+                "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -6164,10 +6238,10 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 45,
-                        "scope": "target",
+                        "amount": 10,
+                        "scope": "all-enemy-without-source-status",
                         "metadata": {
-                            "ignoreDestructibleDefense": true
+                            "excludedStatusId": "zabuza_water_prison"
                         }
                     }
                 ]
@@ -8559,15 +8633,20 @@ const characters = [
         "id": "hatake-kakashi",
         "characterId": "hatake-kakashi",
         "name": "Hatake Kakashi",
-        "facePicture": "https://i.imgur.com/Ult0SsC.png",
-        "characterdeescription": "The squad leader of Team 7, known as the Copy Ninja, Kakashi is a man who puts the life of his teammates above all else. Kakashi is able to copy the abilities of his enemies while using his own original technique, the Raikiri.",
+        "facePicture": "https://i.imgur.com/wmmoCGJ.png",
+        "characterdeescription": "The squad leader of Team 7, known as the Copy Ninja, Kakashi is a man who puts the lives of his teammates above all else. He can copy enemy abilities with his Sharingan and finish a fight with his own Raikiri.",
         "requiredMissionId": "team-7-fights-as-a-team",
+        "passive": {
+            "name": "Copy Ninja",
+            "icon": "https://i.imgur.com/xg8yXfM.png",
+            "description": "When Sharingan Insight counters a skill, Kakashi copies it for 1 turn at a cost of 1 Random chakra. Unique skills and skills requiring preparation cannot be copied."
+        },
         "skills": [
             {
                 "id": "hatake-kakashi-sharingan-counter",
-                "name": "Sharingan",
-                "skillimage": "https://i.imgur.com/4sfYWaL.png",
-                "skilldescription": "For 1 turn, the first physical, chakra or strategic skill used on Hatake Kakashi will be countered and copied. For 2 turns, Sharingan will be replaced by the copied skill, which costs 1 random chakra. This skill is invisible.",
+                "name": "Sharingan Insight",
+                "skillimage": "https://i.imgur.com/wrowrxL.png",
+                "skilldescription": "Kakashi reveals hidden enemy effects for 1 turn and counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -8576,38 +8655,47 @@ const characters = [
                 "cooldown": 2,
                 "classes": [
                     "Strategic",
-                    "Instant"
+                    "Instant",
+                    "Unique"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "kakashi_sharingan_counter",
+                        "statusId": "kakashi_sharingan_reveal",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "hideTooltipFromEnemy": true,
-                            "triggerOnEnemyHarmfulSkillClassesAny": [
-                                "physical",
-                                "energy",
-                                "strategic"
-                            ],
+                            "revealInvisibleSkills": true,
+                            "tooltipText": "Kakashi can see hidden enemy effects."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kakashi_sharingan_insight",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulSkill": true,
                             "counterCancelsSkill": true,
                             "counterCopySkillReplacementFor": "hatake-kakashi-sharingan-counter",
-                            "counterCopySkillReplacementDuration": 2,
-                            "tooltipText": "The first physical, chakra or strategic skill used on Kakashi will be countered and copied.",
+                            "counterCopySkillReplacementDuration": 1,
+                            "counterCopyRequiresPassiveName": "Copy Ninja",
+                            "counterCopyExcludeUniqueAndPreparation": true,
                             "counterCopiedSkillEnergy": [
                                 "Random"
-                            ]
+                            ],
+                            "tooltipText": "Kakashi counters the first harmful skill used against him. Copy Ninja can then copy that skill."
                         }
                     }
                 ]
             },
             {
                 "id": "hatake-kakashi-summoning-ninja-dogs",
-                "name": "Summoning: Ninja Dogs",
-                "skillimage": "https://i.imgur.com/1TSYjNE.png",
-                "skilldescription": "Hatake Kakashi stuns one enemy's physical, chakra, and strategic skills for 1 turn. During this time, allies deal 10 additional non-affliction damage to this enemy and 'Raikiri' deals 45 piercing damage to them.",
+                "name": "Nin-Dogs Summoning",
+                "skillimage": "https://i.imgur.com/PFMVHdp.png",
+                "skilldescription": "Kakashi summons tracking hounds to restrain one enemy, dealing 15 physical damage and stunning their Physical skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -8616,85 +8704,122 @@ const characters = [
                 "cooldown": 2,
                 "classes": [
                     "Strategic",
-                    "Control"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "kakashi_ninja_dogs_mark",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "strategic",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character is stunned and takes 10 additional non-affliction damage.",
-                            "bonusDamageFromSourceNonAfflictionFlat": 10,
-                            "ongoingClass": "control"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "kakashi_ninja_dogs_raikiri_cost",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "skillCostOverridesBySkillId": {
-                                "hatake-kakashi-raikiri": {
-                                    "energy": [
-                                        "Ninjutsu"
-                                    ]
-                                }
-                            },
-                            "tooltipText": "Raikiri costs 1 Ninjutsu this turn.",
-                            "ongoingClass": "control"
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "hatake-kakashi-raikiri",
-                "name": "Raikiri",
-                "skillimage": "https://i.imgur.com/BUvxnE4.png",
-                "skilldescription": "Hatake Kakashi deals 35 piercing damage to one enemy. Against an enemy affected by 'Summoning: Ninja Dogs', this skill deals 45 piercing damage and costs 1 less chakra.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Ninjutsu",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 35,
+                        "amount": 15,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDamageReduction": true
-                        },
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "kakashi_ninja_dogs_mark",
-                            "conditionalAmount": 35
+                            "skillClasses": [
+                                "Physical"
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kakashi_nin_dogs_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character cannot use Physical skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kakashi_nin_dogs_raikiri_ready",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "skillReplacements": {
+                                "hatake-kakashi-summoning-ninja-dogs": "hatake-kakashi-raikiri"
+                            },
+                            "skillCostOverridesBySkillId": {
+                                "hatake-kakashi-raikiri": {
+                                    "energy": [
+                                        "Ninjutsu",
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Nin-Dogs Summoning is replaced by Raikiri for 1 turn. It costs 1 Ninjutsu and 1 Random chakra."
                         }
                     }
                 ]
             },
             {
-                "id": "hatake-kakashi-clever-hiding",
-                "name": "Clever Hiding",
-                "skillimage": "https://i.imgur.com/Px6V4yg.png",
-                "skilldescription": "This skill makes Hatake Kakashi invulnerable for 1 turn.",
+                "id": "hatake-kakashi-earth-style-headhunter-jutsu",
+                "name": "Earth Style: Headhunter Jutsu",
+                "skillimage": "https://i.imgur.com/m9r8Dpo.png",
+                "skilldescription": "Kakashi drags one enemy underground, dealing 15 physical damage and stunning their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.",
+                "energy": [
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 2,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kakashi_headhunter_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "chakra",
+                                "strategic"
+                            ],
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character cannot use Chakra or Strategic skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "kakashi_headhunter_raikiri_ready",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "skillReplacements": {
+                                "hatake-kakashi-earth-style-headhunter-jutsu": "hatake-kakashi-raikiri"
+                            },
+                            "skillCostOverridesBySkillId": {
+                                "hatake-kakashi-raikiri": {
+                                    "energy": [
+                                        "Taijutsu",
+                                        "Random"
+                                    ]
+                                }
+                            },
+                            "tooltipText": "Headhunter Jutsu is replaced by Raikiri for 1 turn. It costs 1 Taijutsu and 1 Random chakra."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hatake-kakashi-defender",
+                "name": "Defender",
+                "skillimage": "https://i.imgur.com/kB9dl7E.png",
+                "skilldescription": "Kakashi defends the mission, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -8712,8 +8837,38 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "hatake-kakashi-raikiri",
+                "name": "Raikiri",
+                "skillimage": "https://i.imgur.com/CVE7tBQ.png",
+                "skilldescription": "Kakashi charges one enemy with lightning chakra, dealing 45 piercing damage.",
+                "energy": [
+                    "Ninjutsu",
+                    "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Chakra",
+                    "Instant"
+                ],
+                "hiddenFromSelectionViewer": true,
+                "requiresPreparation": true,
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "target",
+                        "metadata": {
+                            "ignoreDamageReduction": true
                         }
                     }
                 ]
