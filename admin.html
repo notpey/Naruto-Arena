@@ -104,7 +104,7 @@
     .acp-status { padding: 0 16px 16px; color: var(--ca-parchment); font-size: 12px; line-height: 1.55; }
     .acp-status strong { color: #fff; }
     .acp-ranks { padding: 18px; overflow: auto; }
-    .acp-table { width: 100%; border-collapse: collapse; min-width: 680px; color: var(--ca-ink); background: var(--ca-surface-light); }
+    .acp-table { --ca-dust: #534a40; width: 100%; border-collapse: collapse; min-width: 680px; color: var(--ca-ink); background: var(--ca-surface-light); }
     .acp-table th, .acp-table td { padding: 11px 12px; border-bottom: 1px solid var(--ca-line-ink); text-align: left; }
     .acp-table th {
       background: #000;
@@ -134,6 +134,21 @@
     }
     .acp-rank-range { color: rgba(30, 24, 16, 0.7); font-size: 12px; font-weight: 900; }
     .acp-rank-message { margin-top: 10px; color: var(--ca-parchment); font-size: 12px; font-weight: 800; }
+    .acp-access-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .acp-access-search { width: min(320px, 100%); min-height: 38px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.2); background: #10131c; color: var(--ca-bone); font: 600 13px var(--font-ui); }
+    .acp-access-search::placeholder { color: var(--ca-parchment); }
+    .acp-access-search:focus-visible, .acp-access-select:focus-visible, .acp-button:focus-visible { outline: 2px solid var(--ca-orange); outline-offset: 2px; }
+    .acp-access-table { min-width: 760px; }
+    .acp-access-table th:not(:first-child), .acp-access-table td:not(:first-child) { width: 18%; }
+    .acp-access-character { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+    .acp-access-character img { width: 36px; height: 36px; object-fit: cover; background: #10131c; }
+    .acp-access-character strong { color: var(--ca-ink) !important; line-height: 1.25; }
+    .acp-access-select { width: 100%; min-height: 36px; padding: 6px 8px; border: 1px solid rgba(0,0,0,.24); background: #fff; color: var(--ca-ink); font: 700 12px var(--font-ui); cursor: pointer; }
+    .acp-access-select[data-mode="allow"] { background: #e0f0e4; }
+    .acp-access-select[data-mode="deny"] { background: #f6dfdc; }
+    .acp-access-legend { margin: 12px 0 0; color: var(--ca-parchment); font-size: 13px; line-height: 1.5; }
+    .acp-access-swipe-hint { display: none; margin: 0 0 10px; color: var(--ca-parchment); font-size: 13px; }
+    .acp-access-message { min-height: 19px; }
     .acp-story { padding: 18px; overflow: auto; }
     .acp-story-table { min-width: 760px; }
     .acp-story-thumb {
@@ -186,6 +201,7 @@
       .acp-panel-head-row { flex-direction: column; }
       .acp-panel-actions { justify-content: flex-start; }
       .acp-tools { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+      .acp-access-swipe-hint { display: block; }
     }
   </style>
     <link rel="stylesheet" href="account.css?v=1">
@@ -251,6 +267,33 @@
             </table>
             <div class="acp-rank-message" id="acp-rank-message"></div>
             <div class="acp-note" id="acp-hokage-note"></div>
+          </div>
+        </section>
+
+        <section class="acp-panel" id="acp-character-access-panel">
+          <div class="acp-panel-head">
+            <div class="acp-panel-head-row">
+              <div>
+                <h2 class="acp-panel-title">Character Access by Web Rank</h2>
+                <p class="acp-panel-copy">Choose who can use each character. These are account roles, separate from the ninja level ranks above.</p>
+              </div>
+              <div class="acp-panel-actions">
+                <button class="acp-button secondary" type="button" id="acp-access-reload">Discard Edits</button>
+                <button class="acp-button" type="button" id="acp-access-save">Save Access</button>
+              </div>
+            </div>
+          </div>
+          <div class="acp-ranks">
+            <div class="acp-access-toolbar">
+              <input class="acp-access-search" id="acp-access-search" type="search" placeholder="Find a character" aria-label="Find a character" autocomplete="off">
+            </div>
+            <p class="acp-access-swipe-hint">Scroll the table sideways to edit all four ranks.</p>
+            <table class="acp-table acp-access-table">
+              <thead><tr><th>Character</th><th>Admin</th><th>Global Moderator</th><th>Moderator</th><th>Member</th></tr></thead>
+              <tbody id="acp-access-table"></tbody>
+            </table>
+            <p class="acp-access-legend">Default keeps the current unlock rules. Unlocked grants access to that rank. Hidden removes the character from that rank’s roster and blocks team use, purchases, and summons. Existing ownership stays saved.</p>
+            <div class="acp-rank-message acp-access-message" id="acp-access-message" role="status" aria-live="polite"></div>
           </div>
         </section>
 
@@ -602,6 +645,16 @@
       var rankSaveButton = document.getElementById("acp-rank-save");
       var rankResetButton = document.getElementById("acp-rank-reset");
       var rankMessage = document.getElementById("acp-rank-message");
+      var accessTable = document.getElementById("acp-access-table");
+      var accessSearch = document.getElementById("acp-access-search");
+      var accessSaveButton = document.getElementById("acp-access-save");
+      var accessReloadButton = document.getElementById("acp-access-reload");
+      var accessMessage = document.getElementById("acp-access-message");
+      var accessCharacters = [];
+      var accessRoles = [
+        ["admin", "Admin"], ["global_moderator", "Global Moderator"],
+        ["moderator", "Moderator"], ["player", "Member"]
+      ];
       var storyTable = document.getElementById("acp-story-table");
       var storySaveButton = document.getElementById("acp-story-save");
       var storyReloadButton = document.getElementById("acp-story-reload");
@@ -653,6 +706,108 @@
         rankMessage.textContent = message || "";
         rankMessage.style.color = isError ? "#ffb0b0" : "var(--ca-parchment)";
       }
+      function setAccessMessage(message, isError) {
+        if (!accessMessage) return;
+        accessMessage.textContent = message || "";
+        accessMessage.style.color = isError ? "#ffb0b0" : "var(--ca-parchment)";
+      }
+      function setAccessBusy(busy) {
+        if (accessSaveButton) accessSaveButton.disabled = busy;
+        if (accessReloadButton) accessReloadButton.disabled = busy;
+        if (accessSearch) accessSearch.disabled = busy;
+        if (accessTable) accessTable.querySelectorAll("select").forEach(function (select) { select.disabled = busy; });
+      }
+      function filterAccessRows() {
+        if (!accessTable) return;
+        var query = (accessSearch && accessSearch.value || "").trim().toLocaleLowerCase();
+        accessTable.querySelectorAll("tr[data-character-id]").forEach(function (row) {
+          row.hidden = Boolean(query) && row.dataset.search.indexOf(query) === -1;
+        });
+      }
+      function renderCharacterAccess(characters, policies) {
+        if (!accessTable) return;
+        accessCharacters = Array.isArray(characters) ? characters : [];
+        accessTable.innerHTML = "";
+        accessCharacters.forEach(function (character) {
+          var row = document.createElement("tr");
+          row.dataset.characterId = character.characterId;
+          row.dataset.search = ((character.name || "") + " " + character.characterId).toLocaleLowerCase();
+          var identity = document.createElement("td");
+          var wrap = document.createElement("div");
+          wrap.className = "acp-access-character";
+          var portrait = document.createElement("img");
+          portrait.src = window.localCharacterImage ? window.localCharacterImage(character.facePicture) : character.facePicture;
+          portrait.alt = "";
+          portrait.loading = "lazy";
+          var name = document.createElement("strong");
+          name.textContent = character.name || character.characterId;
+          wrap.appendChild(portrait);
+          wrap.appendChild(name);
+          identity.appendChild(wrap);
+          row.appendChild(identity);
+          accessRoles.forEach(function (role) {
+            var cell = document.createElement("td");
+            var select = document.createElement("select");
+            select.className = "acp-access-select";
+            select.dataset.role = role[0];
+            select.setAttribute("aria-label", (character.name || character.characterId) + " access for " + role[1]);
+            [["inherit", "Default"], ["allow", "Unlocked"], ["deny", "Hidden"]].forEach(function (choice) {
+              var option = document.createElement("option");
+              option.value = choice[0];
+              option.textContent = choice[1];
+              select.appendChild(option);
+            });
+            select.value = policies && policies[character.characterId] && policies[character.characterId][role[0]] || "inherit";
+            select.dataset.mode = select.value;
+            select.addEventListener("change", function () {
+              select.dataset.mode = select.value;
+              setAccessMessage("Unsaved changes. Save Access to apply them.");
+            });
+            cell.appendChild(select);
+            row.appendChild(cell);
+          });
+          accessTable.appendChild(row);
+        });
+        filterAccessRows();
+        setAccessMessage(accessCharacters.length ? "Access settings loaded." : "No active characters are available.");
+      }
+      function collectCharacterAccess() {
+        var policies = {};
+        accessTable.querySelectorAll("tr[data-character-id]").forEach(function (row) {
+          var byRole = {};
+          row.querySelectorAll("select[data-role]").forEach(function (select) {
+            if (select.value !== "inherit") byRole[select.dataset.role] = select.value;
+          });
+          if (Object.keys(byRole).length) policies[row.dataset.characterId] = byRole;
+        });
+        return policies;
+      }
+      function loadCharacterAccess() {
+        setAccessBusy(true);
+        setAccessMessage("Loading character access...");
+        fetchJson("/api/admin/character-access")
+          .then(function (data) { renderCharacterAccess(data.characters, data.policies); })
+          .catch(function (error) { setAccessMessage(error.message || "Unable to load character access.", true); })
+          .finally(function () { setAccessBusy(false); });
+      }
+      function saveCharacterAccess() {
+        setAccessBusy(true);
+        setAccessMessage("Saving character access...");
+        fetchJson("/api/admin/character-access", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ policies: collectCharacterAccess() })
+        })
+          .then(function (data) {
+            renderCharacterAccess(accessCharacters, data.policies);
+            setAccessMessage("Character access saved. Changes apply to new roster and team requests.");
+          })
+          .catch(function (error) { setAccessMessage(error.message || "Unable to save character access.", true); })
+          .finally(function () { setAccessBusy(false); });
+      }
+      if (accessSearch) accessSearch.addEventListener("input", filterAccessRows);
+      if (accessSaveButton) accessSaveButton.addEventListener("click", saveCharacterAccess);
+      if (accessReloadButton) accessReloadButton.addEventListener("click", loadCharacterAccess);
       function setStoryMessage(message, isError) {
         if (!storyMessage) return;
         storyMessage.textContent = message || "";
@@ -882,6 +1037,7 @@
           }
           renderTools(data.tools);
           renderRanks(data.ladderRules);
+          loadCharacterAccess();
           loadBugReports();
         })
         .catch(function (error) {

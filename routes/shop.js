@@ -10,12 +10,20 @@ module.exports = function(context) {
         characterService,
         cosmeticsService,
         profileHasUnlockedCharacter,
+        characterRankAccess,
+        getCharacterAvailability,
         getShopPriceForMissionId,
         normalizeCharacterId,
         normalizeMissionState,
         normalizeMissionProgressEntry,
     } = context || {};
     const requireSession = typeof context?.requireSession === 'function' ? context.requireSession : (req, res, next) => next();
+    const loadRankPolicies = () => characterRankAccess?.getPolicies?.() || Promise.resolve({});
+    const resolveAvailability = (args) => typeof getCharacterAvailability === 'function'
+        ? getCharacterAvailability(args)
+        : { hidden: false, unlocked: profileHasUnlockedCharacter(
+            args.profile, args.characterId, args.lockedCharacterIds
+        ) };
 
     router.get('/api/shop', requireSession, async (req, res) => {
         try {
@@ -25,13 +33,17 @@ module.exports = function(context) {
             }
             const profile = normalizeUserProfile(user);
             const lockedCharacterIds = await getMissionLockedCharacterIds();
+            const policies = await loadRankPolicies();
             const missionCatalog = await getStoredMissionCatalog();
             const catalog = characterService ? characterService.getCharacterCatalog() : [];
             const characters = catalog.filter((character) => {
                 if (!character.requiredMissionId) {
                     return false;
                 }
-                return !profileHasUnlockedCharacter(profile, character.characterId, lockedCharacterIds);
+                const access = resolveAvailability({
+                    policies, user, profile, characterId: character.characterId, lockedCharacterIds,
+                });
+                return !access.hidden && !access.unlocked;
             }).map((character) => {
                 const shopPrice = getShopPriceForMissionId(character.requiredMissionId, missionCatalog);
                 return {
@@ -150,7 +162,14 @@ module.exports = function(context) {
 
             const profile = normalizeUserProfile(user);
             const lockedCharacterIds = await getMissionLockedCharacterIds();
-            if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+            const access = resolveAvailability({
+                policies: await loadRankPolicies(), user, profile,
+                characterId, lockedCharacterIds,
+            });
+            if (access.hidden) {
+                return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
+            }
+            if (access.unlocked) {
                 return res.status(400).json({ error: 'Character already unlocked.' });
             }
             if ((Number(profile.ryo) || 0) < shopPrice) {
@@ -225,7 +244,14 @@ module.exports = function(context) {
 
             const profile = normalizeUserProfile(user);
             const lockedCharacterIds = await getMissionLockedCharacterIds();
-            if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+            const access = resolveAvailability({
+                policies: await loadRankPolicies(), user, profile,
+                characterId, lockedCharacterIds,
+            });
+            if (access.hidden) {
+                return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
+            }
+            if (access.unlocked) {
                 return res.status(400).json({ error: 'Character already unlocked.' });
             }
             if ((Number(profile.ryo) || 0) < price) {

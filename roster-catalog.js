@@ -31,7 +31,8 @@ const NarutoRosterCatalog = (() => {
     const getArc = (character) => arcsById.get(characterMeta.get(getCharacterId(character))?.arcId) || null;
 
     const listAvailableArcs = (roster) => {
-        const present = new Set(roster.map((character) => getArc(character)?.id).filter(Boolean));
+        const present = new Set(roster.filter((character) => character?.hidden !== true)
+            .map((character) => getArc(character)?.id).filter(Boolean));
         return arcs.filter((arc) => present.has(arc.id));
     };
 
@@ -41,6 +42,7 @@ const NarutoRosterCatalog = (() => {
             .map((_, index) => index)
             .filter((index) => {
                 const character = roster[index];
+                if (character?.hidden === true) return false;
                 if (arc && getArc(character)?.id !== arc) return false;
                 if (availability === 'locked' && character.unlocked !== false) return false;
                 if (availability === 'unlocked' && character.unlocked === false) return false;

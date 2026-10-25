@@ -9,6 +9,7 @@ module.exports = function(context) {
     const {
         requireSession,
         appStateCollection,
+        characterRankAccess,
         usersCollection,
         bugsCollection,
         newsPostsCollection,
@@ -836,6 +837,37 @@ module.exports = function(context) {
             ok: true,
             characters: getCharactersList(),
         });
+    });
+    router.get('/character-access', adminCheck, async (req, res) => {
+        try {
+            return res.json({
+                ok: true,
+                characters: getCharactersList().map((entry) => ({
+                    characterId: entry.characterId || entry.id,
+                    name: entry.name,
+                    facePicture: entry.facePicture || '',
+                })),
+                policies: await characterRankAccess.getPolicies(),
+            });
+        } catch (error) {
+            console.error('Character rank access load error:', error);
+            return res.status(500).json({ error: 'Unable to load character rank access.' });
+        }
+    });
+    router.put('/character-access', adminCheck, async (req, res) => {
+        try {
+            const policies = await characterRankAccess.savePolicies(
+                req.body?.policies, req.authUser.username
+            );
+            return res.json({ ok: true, policies });
+        } catch (error) {
+            if (error.message?.startsWith('Invalid') || error.message?.startsWith('Unknown') ||
+                error.message?.startsWith('Character access policies')) {
+                return res.status(400).json({ error: error.message });
+            }
+            console.error('Character rank access save error:', error);
+            return res.status(500).json({ error: 'Unable to save character rank access.' });
+        }
     });
     router.get('/characters/export', requireSession, (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {

@@ -19,6 +19,7 @@ const { reconcileUnitPassive } = require('./services/matchPassives');
 const gauntlet = require('./gauntlet');
 const { sortCharactersByRosterOrder, CANONICAL_ROSTER_ORDER } = require('./data/rosterOrder');
 const { localizeArtwork } = require('./services/characterImages');
+const { evaluateAccess, createCharacterRankAccessService } = require('./services/characterRankAccess');
 const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('./data/activeRoster');
 const activeRosterOrder = new Map(ACTIVE_ROSTER_IDS.map((id, index) => [id, index]));
 const selectActiveRoster = (entries) => (Array.isArray(entries) ? entries : [])
@@ -1915,6 +1916,10 @@ let mongoClient;
 let usersCollection;
 let matchesCollection;
 let appStateCollection;
+const characterRankAccess = createCharacterRankAccessService({
+    getCollection: () => appStateCollection,
+    getCharacters: () => charactersData,
+});
 let newsPostsCollection;
 let cosmeticsService = require('./services/cosmeticsService.js')({});
 const matchSocketRooms = new Map();
@@ -3506,14 +3511,22 @@ const profileHasUnlockedCharacter = (profile, characterId, lockedCharacterIds = 
     return false;
 };
 
+const getCharacterAvailability = ({ policies, user, profile, characterId, lockedCharacterIds }) => {
+    const role = String(user?.role || 'player').trim().toLowerCase();
+    const staffBypass = ['admin', 'global_moderator', 'moderator'].includes(role);
+    return evaluateAccess({
+        policies, characterId, role,
+        inheritedUnlocked: !user || staffBypass ||
+            profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds),
+    });
+};
+
 const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
     if (teamHasDuplicateCharacters(team)) {
         throw new Error('Team characters must be unique.');
     }
     const normalizedRole = String(userRole || '').trim().toLowerCase();
-    if (['admin', 'global_moderator', 'moderator'].includes(normalizedRole)) {
-        return;
-    }
+    const policies = await characterRankAccess.getPolicies();
     const lockedCharacterIds = await getMissionLockedCharacterIds();
     const normalizedProfile = normalizeUserProfile({
         profile,
@@ -3524,11 +3537,10 @@ const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
               if (!rosterCharacterId) {
                   return true;
               }
-              return !profileHasUnlockedCharacter(
-                  normalizedProfile,
-                  rosterCharacterId,
-                  lockedCharacterIds
-              );
+              return !getCharacterAvailability({
+                  policies, user: { role: normalizedRole }, profile: normalizedProfile,
+                  characterId: rosterCharacterId, lockedCharacterIds,
+              }).unlocked;
           })
         : null;
     if (invalidCharacter === undefined || invalidCharacter === null) {
@@ -3539,7 +3551,13 @@ const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
     if (!rosterCharacterId) {
         throw new Error('Invalid team selection.');
     }
-    throw new Error(`${rosterCharacterName} is locked.`);
+    const access = getCharacterAvailability({
+        policies, user: { role: normalizedRole }, profile: normalizedProfile,
+        characterId: rosterCharacterId, lockedCharacterIds,
+    });
+    throw new Error(access.hidden
+        ? `${rosterCharacterName} is unavailable for your web rank.`
+        : `${rosterCharacterName} is locked.`);
 };
 
 const buildDefaultUserProfile = (user = {}) => {
@@ -9333,6 +9351,7 @@ async function initDb() {
     const gachaRouter = require('./routes/gacha.js')({
         usersCollection,
         appStateCollection,
+        characterRankAccess,
         normalizeUserProfile,
         requireSession,
         getCharactersData: () => (typeof getCharactersData === 'function' ? getCharactersData() : charactersData),
@@ -9735,6 +9754,7 @@ async function initDb() {
         usersCollection,
         bugsCollection,
         promoCodesCollection,
+        characterRankAccess,
         charactersData,
         getCharactersData: () => charactersData,
         saveCharacters,
@@ -9780,6 +9800,8 @@ async function initDb() {
         characterService,
         cosmeticsService,
         profileHasUnlockedCharacter,
+        characterRankAccess,
+        getCharacterAvailability,
         getShopPriceForMissionId,
         normalizeCharacterId,
         normalizeMissionState,
@@ -11184,11 +11206,15 @@ app.get('/api/shop', requireSession, async (req, res) => {
         const profile = normalizeUserProfile(user);
         const lockedCharacterIds = await getMissionLockedCharacterIds();
         const missionCatalog = await getStoredMissionCatalog();
+        const policies = await characterRankAccess.getPolicies();
         const characters = buildCharacterCatalog().filter((character) => {
             if (!character.requiredMissionId) {
                 return false;
             }
-            return !profileHasUnlockedCharacter(profile, character.characterId, lockedCharacterIds);
+            const access = getCharacterAvailability({
+                policies, user, profile, characterId: character.characterId, lockedCharacterIds,
+            });
+            return !access.hidden && !access.unlocked;
         }).map((character) => {
             const shopPrice = getShopPriceForMissionId(character.requiredMissionId, missionCatalog);
             return {
@@ -11314,7 +11340,14 @@ app.post('/api/shop/purchase', requireSession, async (req, res) => {
 
         const profile = normalizeUserProfile(user);
         const lockedCharacterIds = await getMissionLockedCharacterIds();
-        if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+        const access = getCharacterAvailability({
+            policies: await characterRankAccess.getPolicies(), user, profile,
+            characterId, lockedCharacterIds,
+        });
+        if (access.hidden) {
+            return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
+        }
+        if (access.unlocked) {
             return res.status(400).json({ error: 'Character already unlocked.' });
         }
         if ((Number(profile.ryo) || 0) < shopPrice) {
@@ -11388,7 +11421,14 @@ app.post('/api/characters/buy-direct', requireSession, async (req, res) => {
 
         const profile = normalizeUserProfile(user);
         const lockedCharacterIds = await getMissionLockedCharacterIds();
-        if (profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds)) {
+        const access = getCharacterAvailability({
+            policies: await characterRankAccess.getPolicies(), user, profile,
+            characterId, lockedCharacterIds,
+        });
+        if (access.hidden) {
+            return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
+        }
+        if (access.unlocked) {
             return res.status(400).json({ error: 'Character already unlocked.' });
         }
         if ((Number(profile.ryo) || 0) < price) {
@@ -11439,11 +11479,23 @@ app.post('/api/characters/buy-direct', requireSession, async (req, res) => {
 
 
 
-app.get('/api/characters/catalog', (req, res) => {
-    return res.json({
-        ok: true,
-        characters: characterCatalog,
-    });
+app.get('/api/characters/catalog', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+        const token = req.cookies?.[SESSION_COOKIE_NAME];
+        const authUser = token ? await getSessionUserFromToken(token) : null;
+        const policies = await characterRankAccess.getPolicies();
+        return res.json({
+            ok: true,
+            characters: characterCatalog.filter((character) => !evaluateAccess({
+                policies, characterId: character.characterId,
+                role: authUser?.role, inheritedUnlocked: true,
+            }).hidden),
+        });
+    } catch (error) {
+        console.error('Character catalog load error:', error);
+        return res.status(500).json({ error: 'Unable to load character catalog.' });
+    }
 });
 
 app.get('/api/characters', async (req, res) => {
@@ -11451,9 +11503,8 @@ app.get('/api/characters', async (req, res) => {
     try {
         const token = req.cookies?.[SESSION_COOKIE_NAME];
         const authUser = token ? await getSessionUserFromToken(token) : null;
-        const normalizedRole = String(authUser?.role || '').trim().toLowerCase();
-        const bypassLocks = ['admin', 'global_moderator', 'moderator'].includes(normalizedRole);
-        const lockedCharacterIds = authUser && !bypassLocks ? await getMissionLockedCharacterIds() : new Set();
+        const lockedCharacterIds = authUser ? await getMissionLockedCharacterIds() : new Set();
+        const policies = await characterRankAccess.getPolicies();
         const profile = authUser ? normalizeUserProfile(authUser) : null;
         const characterList = Array.isArray(charactersData) ? charactersData : [];
         const missionCatalog = await getStoredMissionCatalog();
@@ -11462,13 +11513,13 @@ app.get('/api/characters', async (req, res) => {
             ryo: profile ? profile.ryo : 0,
             characters: characterList.map((character) => {
                 const characterId = normalizeCharacterId(character?.characterId);
-                const unlocked =
-                    !authUser ||
-                    bypassLocks ||
-                    profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds);
+                const access = getCharacterAvailability({
+                    policies, user: authUser, profile, characterId, lockedCharacterIds,
+                });
                 return {
                     ...localizeArtwork(character),
-                    unlocked,
+                    unlocked: access.unlocked,
+                    hidden: access.hidden,
                     shopPrice: character.requiredMissionId
                         ? getShopPriceForMissionId(character.requiredMissionId, missionCatalog)
                         : 1000,

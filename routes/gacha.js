@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { ObjectId } = require('mongodb');
+const { evaluateAccess } = require('../services/characterRankAccess');
 
 const DEFAULT_GACHA_CONFIG = {
     pityThreshold: 50,
@@ -61,6 +62,11 @@ module.exports = function (context = {}) {
         SESSION_COOKIE_NAME = 'naruto_arena_session',
         getSessionUserCached
     } = context;
+    const loadRankPolicies = () => context.characterRankAccess?.getPolicies?.() || Promise.resolve({});
+    const canShowCharacter = (policies, role, character) => !evaluateAccess({
+        policies, characterId: character?.characterId || character?.id,
+        role, inheritedUnlocked: true,
+    }).hidden;
 
     const GACHA_CONFIG_FILE = path.join(rootDir, 'gacha_config.json');
     let currentGachaMemoryCache = null;
@@ -200,7 +206,15 @@ module.exports = function (context = {}) {
             const user = authUser ? await getGachaSessionUser(req) : null;
             const profile = user ? normalizeUserProfile(user) : (authUser?.profile || { ryo: 0, summonScrolls: 0, chakraShards: 0, gachaStats: { pityCounter: 0 } });
             const config = await getStoredGachaConfig();
-            const activeBanners = (config.banners || []).filter(b => b.active !== false);
+            const policies = await loadRankPolicies();
+            const role = user?.role || authUser?.role || 'player';
+            const activeBanners = (config.banners || []).filter(b => b.active !== false)
+                .map((banner) => ({
+                    ...banner,
+                    featuredCharacters: (Array.isArray(banner.featuredCharacters)
+                        ? banner.featuredCharacters : []).filter((characterId) =>
+                        canShowCharacter(policies, role, { characterId })),
+                }));
 
             return res.json({
                 ok: true,
@@ -225,6 +239,12 @@ module.exports = function (context = {}) {
 
             const profile = normalizeUserProfile(user);
             const config = await getStoredGachaConfig();
+            const policies = await loadRankPolicies();
+            const allChars = (typeof getCharactersData === 'function' ? getCharactersData() : [])
+                .filter((character) => canShowCharacter(policies, user.role, character));
+            if (!allChars.length) {
+                return res.status(409).json({ error: 'No characters are available for your web rank.' });
+            }
             const { bannerId = 'standard', count = 1, paymentType = 'scrolls' } = req.body;
 
             const pullCount = Math.min(Math.max(Number(count) || 1, 1), 10);
@@ -255,7 +275,6 @@ module.exports = function (context = {}) {
             }
 
             const unlockedSet = new Set(Array.isArray(profile.unlockedCharacterIds) ? profile.unlockedCharacterIds : []);
-            const allChars = typeof getCharactersData === 'function' ? getCharactersData() : [];
 
             let pityCounter = Number(profile.gachaStats?.pityCounter || 0);
             const pityLimit = Number(config.pityThreshold) || 50;
@@ -377,7 +396,9 @@ module.exports = function (context = {}) {
                 const cost = 200;
                 if (shardsAvailable < cost) return res.status(400).json({ error: 'Requires 200 Chakra Shards.' });
                 const unlockedSet = new Set(Array.isArray(profile.unlockedCharacterIds) ? profile.unlockedCharacterIds : []);
-                const allChars = typeof getCharactersData === 'function' ? getCharactersData() : [];
+                const policies = await loadRankPolicies();
+                const allChars = (typeof getCharactersData === 'function' ? getCharactersData() : [])
+                    .filter((character) => canShowCharacter(policies, user.role, character));
                 const lockedList = allChars.filter((c) => !unlockedSet.has(c.characterId || c.id));
                 if (!lockedList.length) return res.status(400).json({ error: 'You have already unlocked all available characters!' });
                 const randomNinja = lockedList[Math.floor(Math.random() * lockedList.length)];

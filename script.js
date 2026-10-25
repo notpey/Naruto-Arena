@@ -6081,7 +6081,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const startableButtons = [quickButton, ladderButton, privateButton, trainingDummyButton];
     const isRosterIndexSelectable = (index) => {
         const character = roster[index];
-        return Boolean(character) && character.unlocked !== false;
+        return Boolean(character) && character.hidden !== true && character.unlocked !== false;
     };
 
     const updateGameButtons = () => {
@@ -6369,7 +6369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sort = rosterSortEl?.value || 'arc';
         const visibleIndices = rosterCatalog
             ? rosterCatalog.filterRosterIndices(roster, { search, arc, availability, sort })
-            : roster.map((_, index) => index);
+            : roster.map((_, index) => index).filter((index) => roster[index]?.hidden !== true);
         totalPages = Math.max(1, Math.ceil(visibleIndices.length / CHARACTERS_PER_PAGE));
         currentRosterPage = Math.min(currentRosterPage, totalPages - 1);
         document.querySelector('.selectionpage')?.setAttribute('data-has-roster-pages', totalPages > 1 ? 'true' : 'false');
