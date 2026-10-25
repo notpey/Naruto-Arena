@@ -10,6 +10,7 @@ const NARUTO_REWORK_MIGRATION_ID = 'uzumaki-naruto-rework-2026-10-23';
 const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-24-v2';
 const KAKASHI_IRUKA_REWORK_MIGRATION_ID = 'kakashi-iruka-rework-2026-10-24';
 const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
+const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
 
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
@@ -222,6 +223,7 @@ class CharacterService {
                     [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -274,6 +276,7 @@ class CharacterService {
                         [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },
@@ -294,6 +297,7 @@ class CharacterService {
         const shouldApplySakuraSasukeRework = !completedMigrations[SAKURA_SASUKE_REWORK_MIGRATION_ID];
         const shouldApplyKakashiIrukaRework = !completedMigrations[KAKASHI_IRUKA_REWORK_MIGRATION_ID];
         const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
+        const shouldApplyDemonBrothersRework = !completedMigrations[DEMON_BROTHERS_REWORK_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
             ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -301,6 +305,7 @@ class CharacterService {
             ...(shouldApplySakuraSasukeRework ? ['haruno-sakura', 'uchiha-sasuke'] : []),
             ...(shouldApplyKakashiIrukaRework ? ['hatake-kakashi', 'umino-iruka'] : []),
             ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
+            ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
         ]);
         const defaultByCharacterId = new Map(
             defaultCharacters
@@ -369,6 +374,7 @@ class CharacterService {
                 if (shouldApplySakuraSasukeRework && (characterId === 'haruno-sakura' || characterId === 'uchiha-sasuke')) return seedEntry;
                 if (shouldApplyKakashiIrukaRework && (characterId === 'hatake-kakashi' || characterId === 'umino-iruka')) return seedEntry;
                 if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
+                if (shouldApplyDemonBrothersRework && characterId === 'demon-brothers') return seedEntry;
                 const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
                 const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
                 if (facePicture !== storedFace) {
@@ -424,6 +430,7 @@ class CharacterService {
             shouldApplySakuraSasukeRework ||
             shouldApplyKakashiIrukaRework ||
             shouldApplyWavesAndMizukiRework ||
+            shouldApplyDemonBrothersRework ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
         ) {
@@ -444,6 +451,7 @@ class CharacterService {
                         [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },

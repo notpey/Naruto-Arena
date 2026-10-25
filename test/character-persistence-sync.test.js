@@ -206,3 +206,35 @@ test('Haku, Zabuza, and Mizuki rework replaces stored concepts once', async () =
         update.$set['completed.waves-haku-zabuza-mizuki-rework-2026-10-24']));
 });
 
+test('Demon Brothers rework replaces the stored concept once', async () => {
+    const oldBrothers = {
+        id: 'demon-brothers', characterId: 'demon-brothers', name: 'Demon Brothers',
+        facePicture: 'https://example.com/old-brothers.png',
+        characterdeescription: 'Old description',
+        skills: [{ id: 'demon-brothers-chain-wrap', name: 'Old Chain Wrap' }],
+    };
+    const writes = [];
+    const completed = {
+        'starter-rebalance-2026-07-16': new Date(),
+        'exams-rebalance-2026-07-16-v4': new Date(),
+        'uzumaki-naruto-rework-2026-10-23': new Date(),
+        'team-7-sakura-sasuke-rework-2026-10-24-v2': new Date(),
+        'kakashi-iruka-rework-2026-10-24': new Date(),
+        'waves-haku-zabuza-mizuki-rework-2026-10-24': new Date(),
+    };
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldBrothers] }
+            : { key, completed },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const brothers = stored.find((entry) => entry.characterId === 'demon-brothers');
+    assert.equal(brothers.passive.name, 'Lust for Murder');
+    assert.equal(brothers.skills[0].cooldown, 1);
+    assert.match(brothers.characterdeescription, /Gōzu and Meizu/);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.demon-brothers-rework-2026-10-25']));
+});
+

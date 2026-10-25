@@ -3,9 +3,34 @@
     padding: 24px; border: 1px solid #eaa441; border-radius: 14px;
     background: #111923; color: #f8f1e6; font: 16px/1.5 Arial, sans-serif;
 }
-.account-session-dialog { max-height: calc(100dvh - 32px); overflow: auto; }
-.account-session-dialog::backdrop { background: rgb(0 0 0 / 85%); }
-.account-session-dialog h2, .recovery-card h1 { margin: 0 0 12px; font-size: 24px; color: #ffb347; }
+.account-session-dialog {
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    width: min(360px, calc(100vw - 32px));
+    padding: 28px 30px 26px;
+    border: 1px solid #647681;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #24343e, #14232c 72%);
+    box-shadow: 0 18px 45px rgb(0 0 0 / 38%);
+    color: #f2f3f0;
+    font: 14px/1.5 'Libre Franklin', Arial, sans-serif;
+    text-align: center;
+}
+.account-session-dialog::backdrop { background: rgb(7 16 23 / 58%); }
+.account-session-dialog h2 { margin: 0 0 8px; font-size: 19px; line-height: 1.25; color: #f2f3f0; }
+.account-session-dialog p { margin: 0; color: #c4d1d4; }
+.account-session-dialog .account-actions { justify-content: center; margin-top: 20px; }
+.account-session-dialog button, .account-session-dialog a { min-width: 96px; text-decoration: none; cursor: pointer; }
+.account-session-dialog button:hover, .account-session-dialog a:hover { border-color: #e3ad68; background: #344b57; }
+.account-session-dialog button:focus-visible, .account-session-dialog a:focus-visible { outline: 2px solid #e3ad68; outline-offset: 3px; }
+.account-session-dialog .account-session-loader { display: flex; justify-content: center; gap: 7px; margin: 0 0 22px; }
+.account-session-dialog .account-session-loader span { width: 9px; height: 9px; border-radius: 2px; background: #e3ad68; animation: session-pulse 1s ease-in-out infinite; }
+.account-session-dialog .account-session-loader span:nth-child(2) { animation-delay: .15s; }
+.account-session-dialog .account-session-loader span:nth-child(3) { animation-delay: .3s; }
+.account-session-dialog:not([data-state="loading"]) .account-session-loader { display: none; }
+@keyframes session-pulse { 0%, 65%, 100% { opacity: .35; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .account-session-dialog .account-session-loader span { animation: none; opacity: 1; } }
+.recovery-card h1 { margin: 0 0 12px; font-size: 24px; color: #ffb347; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .account-session-dialog button, .account-session-dialog a, .recovery-card button, .recovery-card a {
     box-sizing: border-box; min-height: 44px; padding: 10px 14px; border-radius: 6px;

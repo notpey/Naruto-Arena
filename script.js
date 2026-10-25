@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rosterEmptyEl = document.getElementById('roster-empty');
     const rosterEmptyResetEl = document.getElementById('roster-empty-reset');
     const rosterCatalog = window.NarutoRosterCatalog;
-    const charBioEl = document.getElementById('character-bio');
+    const portraitButtonEl = document.getElementById('character-portrait-button');
     const passiveEl = document.getElementById('character-passive');
     const passiveImageEl = document.getElementById('character-passive-image');
     const passiveNameEl = document.getElementById('character-passive-name');
@@ -679,6 +679,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const SELECTION_BACKGROUND_POOL = [
         'selectionbg_1.jpg',
         'selectionbg_2.jpg',
+        'selectionbg-remaster.png?v=2',
     ];
 
     const INGAME_BACKGROUND_POOL = [
@@ -696,13 +697,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ingameUrl = user?.profile?.backgrounds?.ingameUrl || '';
         if (selectionBackground) {
             if (selectionUrl) {
-                selectionBackground.style.backgroundImage = `url("${selectionUrl}")`;
+                selectionBackground.style.setProperty('--selection-stage-image', `url("${selectionUrl}")`);
             } else {
                 if (!selectionBackground.dataset.poolBg) {
                     const randomBg = SELECTION_BACKGROUND_POOL[Math.floor(Math.random() * SELECTION_BACKGROUND_POOL.length)];
                     selectionBackground.dataset.poolBg = randomBg;
                 }
-                selectionBackground.style.backgroundImage = `url("${selectionBackground.dataset.poolBg}")`;
+                selectionBackground.style.setProperty('--selection-stage-image', `url("${selectionBackground.dataset.poolBg}")`);
             }
         }
         if (ingameBackground) {
@@ -2796,6 +2797,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     unlocksHtml +
                     `</div>`;
             }
+            battleEndOverlayEl.classList.toggle('is-victory', didWin);
+            battleEndOverlayEl.classList.toggle('is-defeat', !didWin);
             battleEndOverlayEl.classList.add('visible');
             battleEndShown = true;
             playIngameSound(didWin ? winSound : lostSound);
@@ -4102,13 +4105,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillInfo.nameEl.textContent = skill.name || 'Skill';
             }
             if (skillInfo.descEl) {
-                let rawDesc = escapeHtml(skill.skilldescription || '');
-                let formattedDesc = rawDesc
-                    .replace(/\b((?:deals?|dealing|inflicts?|inflicting)\s+(?:\d+)\s+(?:damage|affliction damage|piercing damage))\b/gi,
-                        '<strong class="desc-highlight-damage">$1</strong>')
-                    .replace(/\b((?:heals?|healing|restores?|restoring)\s+(?:\d+)\s+(?:health|hp))\b/gi,
-                        '<strong class="desc-highlight-heal">$1</strong>');
-                skillInfo.descEl.innerHTML = formattedDesc;
+                if (typeof window.renderSkillDescription === 'function') {
+                    window.renderSkillDescription(
+                        skillInfo.descEl,
+                        skill.skilldescription || '',
+                        character.skills.map((entry) => entry?.name)
+                    );
+                } else {
+                    skillInfo.descEl.textContent = skill.skilldescription || '';
+                }
             }
             if (skillInfo.cooldownEl) {
                 skillInfo.cooldownEl.textContent = skill.cooldown ?? '-';
@@ -5769,10 +5774,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderSkill = (skill, activeIndex = 0) => {
         if (!skill) return;
-        skillDetailCardEl?.classList.remove('is-empty');
-        skillDetailCardEl?.classList.remove('is-passive');
+        skillDetailCardEl?.classList.remove('is-empty', 'is-passive', 'is-biography');
         if (skillDetailKindEl) skillDetailKindEl.hidden = true;
         if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
+        if (portraitButtonEl) portraitButtonEl.setAttribute('aria-pressed', 'false');
         if (skillNameEl) {
             skillNameEl.textContent = skill.name || 'Skill name';
             skillNameEl.style.visibility = 'visible';
@@ -5807,10 +5812,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderPassive = (character) => {
         const passive = character?.passive;
         if (!passive || (!passive.name && !passive.description)) return;
-        skillDetailCardEl?.classList.remove('is-empty');
+        skillDetailCardEl?.classList.remove('is-empty', 'is-biography');
         skillDetailCardEl?.classList.add('is-passive');
-        if (skillDetailKindEl) skillDetailKindEl.hidden = false;
+        if (skillDetailKindEl) {
+            skillDetailKindEl.textContent = 'Passive effect';
+            skillDetailKindEl.hidden = false;
+        }
         if (passiveEl) passiveEl.setAttribute('aria-pressed', 'true');
+        if (portraitButtonEl) portraitButtonEl.setAttribute('aria-pressed', 'false');
         if (skillNameEl) skillNameEl.textContent = passive.name || 'Passive effect';
         if (skillDescEl) {
             if (typeof window.renderSkillDescription === 'function') {
@@ -5831,11 +5840,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         setActiveSkillImage(-1);
     };
 
+    const renderBiography = (character) => {
+        if (!character) return;
+        skillDetailCardEl?.classList.remove('is-empty', 'is-passive');
+        skillDetailCardEl?.classList.add('is-biography');
+        if (skillDetailKindEl) {
+            skillDetailKindEl.textContent = 'Biography';
+            skillDetailKindEl.hidden = false;
+        }
+        if (portraitButtonEl) portraitButtonEl.setAttribute('aria-pressed', 'true');
+        if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
+        if (skillNameEl) skillNameEl.textContent = character.name || 'Character';
+        if (skillDescEl) {
+            skillDescEl.textContent = character.characterdescription || character.characterdeescription || 'No biography available.';
+            skillDescEl.scrollTop = 0;
+        }
+        if (skillDetailImageEl) {
+            attachImageFallback(skillDetailImageEl, REMASTER_ASSETS.characterFallback);
+            setImageSrcWithFallback(skillDetailImageEl, character.facePicture, REMASTER_ASSETS.characterFallback);
+            skillDetailImageEl.alt = character.name ? `${character.name} portrait` : 'Character portrait';
+            skillDetailImageEl.style.display = '';
+        }
+        if (skillDetailMetaEl) skillDetailMetaEl.style.display = 'none';
+        setActiveSkillImage(-1);
+    };
+
     const renderCharacterOverview = () => {
         skillDetailCardEl?.classList.add('is-empty');
-        skillDetailCardEl?.classList.remove('is-passive');
+        skillDetailCardEl?.classList.remove('is-passive', 'is-biography');
         if (skillDetailKindEl) skillDetailKindEl.hidden = true;
         if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
+        if (portraitButtonEl) portraitButtonEl.setAttribute('aria-pressed', 'false');
         if (skillNameEl) {
             skillNameEl.textContent = 'No skills to preview';
             skillNameEl.style.visibility = 'visible';
@@ -5885,11 +5920,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             characterArcEl.hidden = !arc;
             characterArcEl.textContent = arc ? `${arc.series} / ${arc.label}` : '';
         }
-        if (charBioEl) {
-            charBioEl.textContent =
-                character.characterdescription ||
-                character.characterdeescription ||
-                '';
+        if (portraitButtonEl) {
+            portraitButtonEl.setAttribute('aria-label', `View biography: ${character.name || 'Character'}`);
+            portraitButtonEl.onclick = () => renderBiography(character);
         }
         if (passiveEl) {
             const passive = character.passive;

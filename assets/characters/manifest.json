@@ -2122,5 +2122,9 @@
   "https://i.imgur.com/m1hfJAx.png": {
     "local": "/assets/characters/m1hfJAx.png",
     "sha256": "1990d7c272c1817396bd054e6308dfbc0c79cd72df8777f1ce4f60e3e77094e5"
+  },
+  "https://i.imgur.com/KBp3qQG.png": {
+    "local": "/assets/characters/KBp3qQG.png",
+    "sha256": "89b156e6441564ea4b4d6536c49dce944723ed96611094a191c5eab0d104b5f6"
   }
 }

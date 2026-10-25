@@ -13,11 +13,11 @@
     <link rel="shortcut icon" href="favicon.ico?v=3">
     <link rel="apple-touch-icon" href="favicon.png?v=3">
     <link rel="stylesheet" href="style.css?v=27">
-    <link rel="stylesheet" href="account.css?v=1">
+    <link rel="stylesheet" href="account.css?v=2">
     <script src="character-images.js?v=1"></script>
-    <script src="account-client.js?v=1"></script>
+    <script src="account-client.js?v=2"></script>
     <link rel="stylesheet" href="mobile-layout.css?v=3">
-    <link rel="stylesheet" href="game-surfaces.css?v=1">
+    <link rel="stylesheet" href="game-surfaces.css?v=12">
 </head>
 <body class="ingame-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -40,6 +40,7 @@
         <div class="gauntlet-battle-popover" id="gauntlet-battle-popover" hidden></div>
     </div>
     <div class="ingame-sound-controller" aria-label="Sound controller">
+        <label class="ingame-sound-label" for="ingame-sound-volume">VOLUME</label>
         <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
     </div>
     <button type="button" class="ingame-bug-button" id="ingame-bug-report-btn">Report Bug</button>
@@ -213,20 +214,20 @@
         <button type="button" class="cancel-buttonexchange">CANCEL</button>
     </div>
 
-    <div class="surrender-confirm">
+    <div class="surrender-confirm" role="dialog" aria-modal="true" aria-labelledby="surrender-confirm-title">
         <div class="surrender-confirm-window">
             <div class="surrender-confirm-scroll"></div>
 
             <div class="surrender-confirm-content">
-                <p class="surrender-confirm-title">ARE YOU SURE YOU WISH TO SURRENDER?</p>
+                <h2 class="surrender-confirm-title" id="surrender-confirm-title">Surrender this match?</h2>
 
                 <div class="surrender-confirm-preview-row">
                     <img src="surrenderimage-remaster.png?v=2" alt="Surrender preview" class="surrender-confirm-preview-image">
                 </div>
 
                 <div class="surrender-confirm-actions">
-                    <button type="button" class="surrender-confirm-ok">OK</button>
-                    <button type="button" class="surrender-confirm-cancel">CANCEL</button>
+                    <button type="button" class="surrender-confirm-cancel">Keep playing</button>
+                    <button type="button" class="surrender-confirm-ok">Surrender</button>
                 </div>
             </div>
         </div>
@@ -453,16 +454,17 @@
     </div>
 
     <div class="bottomgame">
-        <div class="surrenderbutton">
-            <span>SURRENDER</span>
-        </div>
-        <div class="sound">
+        <button type="button" class="surrenderbutton">
+            SURRENDER
+        </button>
+        <div class="sound" aria-hidden="true">
             
         </div>
 </div>
 
 </div>
 <script src="characters.js?v=42"></script>
-<script src="script.js?v=44"></script>
+<script src="skill-description-format.js?v=2"></script>
+<script src="script.js?v=45"></script>
 </body>
 </html>

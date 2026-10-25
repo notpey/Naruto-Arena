@@ -5518,25 +5518,48 @@ const characters = [
         "characterId": "demon-brothers",
         "name": "Demon Brothers",
         "facePicture": "https://i.imgur.com/ekQ5QZR.png",
-        "characterdeescription": "A duo of Mist ninja who work for Zabuza, the Demon Brothers specialize in assassinating their targets with their shuriken chain. Using their weapons and teamwork, the Demon Brothers can gang up on one enemy, disable him, and then kill him.",
+        "characterdeescription": "Gōzu and Meizu are two ruthless missing-nin from the Hidden Mist who specialize in coordinated assassination. Concealing themselves in water, they use a deadly shuriken chain and poisoned claws to overwhelm unsuspecting enemies.",
         "requiredMissionId": "mist-ascendant",
+        "passive": {
+            "name": "Lust for Murder",
+            "icon": "https://i.imgur.com/KBp3qQG.png",
+            "description": "Demon Brothers' Physical skills deal 5 additional damage to enemies with 50 or less health."
+        },
         "skills": [
             {
                 "id": "demon-brothers-chain-wrap",
                 "name": "Chain Wrap",
                 "skillimage": "https://i.imgur.com/qm5cAjZ.png",
-                "skilldescription": "Demon Brothers stun one enemy's physical, mental, and strategic skills for 1 turn and bind them with chains for 2 turns. The following turn, this skill will be replaced by 'Chain Shred'.",
+                "skilldescription": "Demon Brothers wrap one enemy in their shuriken chain, dealing 15 physical damage and stunning their Physical skills for 1 turn. For 2 turns, this skill is replaced by Chain Shred, which can only target that enemy. If Demon Brothers are stunned, Chain Wrap ends.",
                 "energy": [
                     "Taijutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
-                    "Strategic",
-                    "Instant"
+                    "Physical",
+                    "Control"
                 ],
                 "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 15,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "sourceCurrentHpAtLeast": 51
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "sourceCurrentHpAtMost": 50
+                        }
+                    },
                     {
                         "type": "apply_status",
                         "statusId": "demon_brothers_chain_wrap_stun",
@@ -5544,36 +5567,48 @@ const characters = [
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "control",
                             "cannotUseSkillClasses": [
-                                "physical",
-                                "mental",
-                                "strategic"
+                                "physical"
                             ],
-                            "tooltipText": "This character's physical, mental, and strategic skills are stunned."
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's Physical skills are stunned by Chain Wrap."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "demon_brothers_bound_by_chain",
+                        "statusId": "demon_brothers_chain_wrap_target",
                         "duration": 2,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "tooltipText": "This character is bound by Demon Brothers' chains."
+                            "ongoingClass": "control",
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character is wrapped in Demon Brothers' shuriken chain. Chain Shred can only target them."
                         }
                     },
                     {
                         "type": "apply_status",
                         "statusId": "demon_brothers_chain_wrap_ready",
-                        "duration": 1,
+                        "duration": 2,
                         "scope": "self",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "demon_brothers_chain_wrap_target",
+                            "statusFromActor": true
+                        },
                         "metadata": {
                             "helpful": true,
+                            "ongoingClass": "control",
+                            "turnDurationAnchor": "source_turn",
+                            "linkedTargetStatusId": "demon_brothers_chain_wrap_target",
+                            "copyTargetKeyToKeys": [
+                                "linkedTargetKey"
+                            ],
                             "skillReplacements": {
                                 "demon-brothers-chain-wrap": "demon-brothers-chain-shred"
                             },
-                            "tooltipText": "Chain Wrap is replaced by Chain Shred."
+                            "tooltipText": "Chain Wrap is replaced by Chain Shred for 2 turns. It can only target the wrapped enemy."
                         }
                     }
                 ]
@@ -5582,51 +5617,52 @@ const characters = [
                 "id": "demon-brothers-bladed-gauntlet",
                 "name": "Bladed Gauntlet",
                 "skillimage": "https://i.imgur.com/SjVUKDT.png",
-                "skilldescription": "Demon Brothers deal 25 damage to one enemy. If this skill is used on an enemy affected by 'Chain Wrap' or 'Bound by Chain', it will deal 10 additional damage and Demon Brothers will gain 10 destructible defense.",
+                "skilldescription": "Demon Brothers slash one enemy with their poisoned claws, dealing 20 physical damage and 5 affliction damage* for 2 turns. Repeated use refreshes the poison's duration rather than stacking its damage.",
                 "energy": [
-                    "Random",
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
-                    "Instant"
+                    "Instant",
+                    "Affliction*"
                 ],
                 "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "sourceCurrentHpAtLeast": 51
+                        }
+                    },
                     {
                         "type": "damage",
                         "amount": 25,
                         "scope": "target",
                         "condition": {
                             "scope": "target",
-                            "statusIdsAny": [
-                                "demon_brothers_bound_by_chain",
-                                "demon_brothers_chain_wrap_stun"
-                            ],
-                            "conditionalAmount": 35
+                            "sourceCurrentHpAtMost": 50
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "demon_brothers_bladed_gauntlet_defense",
-                        "duration": 99,
-                        "scope": "self",
-                        "condition": {
-                            "scope": "target",
-                            "statusIdsAny": [
-                                "demon_brothers_bound_by_chain",
-                                "demon_brothers_chain_wrap_stun"
-                            ]
-                        },
+                        "statusId": "demon_brothers_bladed_gauntlet_poison",
+                        "duration": 2,
+                        "scope": "target",
                         "metadata": {
-                            "helpful": true,
-                            "destructibleDefensePoints": 10,
-                            "mergeNumericAddKeys": [
-                                "destructibleDefensePoints"
-                            ],
-                            "tooltipText": "Demon Brothers have 10 points of destructible defense from Bladed Gauntlet."
+                            "harmful": true,
+                            "turnEndDamage": 5,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "triggerOnApply": true,
+                            "afflictionDamage": true,
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true,
+                            "tooltipText": "This character takes 5 affliction damage from Bladed Gauntlet for 2 turns. Reapplication refreshes the duration."
                         }
                     }
                 ]
@@ -5635,13 +5671,13 @@ const characters = [
                 "id": "demon-brothers-water-melding",
                 "name": "Water Melding",
                 "skillimage": "https://i.imgur.com/ogryqGA.png",
-                "skilldescription": "Demon Brothers gain 15 points of permanent destructible defense and 1 green chakra.",
+                "skilldescription": "Demon Brothers conceal themselves within a puddle of water, gaining 15 destructible defense for 2 turns and 1 Taijutsu chakra.",
                 "energy": [
                     "Random"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 3,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -5650,14 +5686,12 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "demon_brothers_water_melding_defense",
-                        "duration": 99,
+                        "duration": 2,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "destructibleDefensePoints": 15,
-                            "mergeNumericAddKeys": [
-                                "destructibleDefensePoints"
-                            ],
-                            "tooltipText": "Demon Brothers have 15 points of permanent destructible defense from Water Melding."
+                            "tooltipText": "Demon Brothers have 15 destructible defense from Water Melding for 2 turns."
                         }
                     },
                     {
@@ -5690,6 +5724,7 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
@@ -5701,13 +5736,15 @@ const characters = [
                 "name": "Chain Shred",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/TZmKHyi.png",
-                "skilldescription": "Demon Brothers target one enemy affected by 'Chain Wrap', dealing 40 piercing damage to them and re-applying 'Chain Wrap' on them.",
+                "skilldescription": "Demon Brothers pull their shuriken chain apart, tearing through the enemy affected by Chain Wrap and dealing 45 piercing damage. Chain Wrap ends after this skill is used.",
                 "energy": [
-                    "Taijutsu"
+                    "Taijutsu",
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "targetCondition": {
-                    "statusId": "demon_brothers_chain_wrap_stun"
+                    "statusId": "demon_brothers_chain_wrap_target",
+                    "statusFromActor": true
                 },
                 "damage": 0,
                 "cooldown": 0,
@@ -5718,49 +5755,66 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 40,
+                        "amount": 45,
                         "scope": "target",
+                        "condition": {
+                            "all": [
+                                {
+                                    "scope": "target",
+                                    "statusId": "demon_brothers_chain_wrap_target",
+                                    "statusFromActor": true
+                                },
+                                {
+                                    "scope": "target",
+                                    "sourceCurrentHpAtLeast": 51
+                                }
+                            ]
+                        },
                         "metadata": {
+                            "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true
                         }
                     },
                     {
-                        "type": "apply_status",
-                        "statusId": "demon_brothers_bound_by_chain",
-                        "duration": 2,
+                        "type": "damage",
+                        "amount": 50,
                         "scope": "target",
+                        "condition": {
+                            "all": [
+                                {
+                                    "scope": "target",
+                                    "statusId": "demon_brothers_chain_wrap_target",
+                                    "statusFromActor": true
+                                },
+                                {
+                                    "scope": "target",
+                                    "sourceCurrentHpAtMost": 50
+                                }
+                            ]
+                        },
                         "metadata": {
-                            "harmful": true,
-                            "tooltipText": "This character is bound by Demon Brothers' chains."
+                            "ignoreDamageReduction": true,
+                            "ignoreDestructibleDefense": true
                         }
                     },
                     {
-                        "type": "apply_status",
+                        "type": "remove_status",
+                        "statusId": "demon_brothers_chain_wrap_target",
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "demon_brothers_chain_wrap_target",
+                            "statusFromActor": true
+                        }
+                    },
+                    {
+                        "type": "remove_status",
                         "statusId": "demon_brothers_chain_wrap_stun",
-                        "duration": 1,
                         "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "mental",
-                                "strategic"
-                            ],
-                            "tooltipText": "This character's physical, mental, and strategic skills are stunned."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "demon_brothers_chain_wrap_ready",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "skillReplacements": {
-                                "demon-brothers-chain-wrap": "demon-brothers-chain-shred"
-                            },
-                            "tooltipText": "Chain Wrap is replaced by Chain Shred."
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "demon_brothers_chain_wrap_stun",
+                            "statusFromActor": true
                         }
                     }
                 ]

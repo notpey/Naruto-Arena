@@ -12,11 +12,12 @@
     <link rel="shortcut icon" href="favicon.ico?v=3">
     <link rel="apple-touch-icon" href="favicon.png?v=3">
     <link rel="stylesheet" href="style.css?v=38">
-    <link rel="stylesheet" href="account.css?v=1">
+    <link rel="stylesheet" href="account.css?v=2">
     <script src="character-images.js?v=1"></script>
-    <script src="account-client.js?v=1"></script>
+    <script src="account-client.js?v=2"></script>
     <link rel="stylesheet" href="mobile-layout.css?v=3">
-    <link rel="stylesheet" href="game-surfaces.css?v=11">
+    <link rel="stylesheet" href="game-surfaces.css?v=18">
+    <link rel="stylesheet" href="missions.css?v=1">
 </head>
 <body class="selection-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -36,6 +37,7 @@
         </div>
         <div class="selection-hub-ryo" aria-label="Ryo balance" title="Spend Ryo on locked characters in the roster">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
+            <span class="selection-hub-ryo-label">Ryo</span>
             <span data-shop-balance>0</span>
         </div>
         <div class="selection-hub-settings">
@@ -81,24 +83,38 @@
             <div class="selection-hub-env-header">
                 <div>
                     <h1>Ninja Missions</h1>
-                    <p>Track unlock paths, rank categories, and completion progress.</p>
+                    <p>Find a mission, track its objectives, and see what it unlocks.</p>
                 </div>
+                <p class="mission-summary" data-mission-summary aria-live="polite"></p>
             </div>
             <div class="selection-hub-env-toolbar">
-                <button type="button" class="selection-hub-rank active" data-mission-rank="all">Overview</button>
-                <button type="button" class="selection-hub-rank" data-mission-rank="dc">D/C Rank</button>
-                <button type="button" class="selection-hub-rank" data-mission-rank="b">B Rank</button>
-                <button type="button" class="selection-hub-rank" data-mission-rank="a">A Rank</button>
-                <button type="button" class="selection-hub-rank" data-mission-rank="s">S Rank</button>
+                <div class="mission-rank-filters" role="group" aria-label="Mission rank">
+                    <button type="button" class="selection-hub-rank active" data-mission-rank="all" aria-pressed="true">All ranks</button>
+                    <button type="button" class="selection-hub-rank" data-mission-rank="dc" aria-pressed="false">D/C</button>
+                    <button type="button" class="selection-hub-rank" data-mission-rank="b" aria-pressed="false">B</button>
+                    <button type="button" class="selection-hub-rank" data-mission-rank="a" aria-pressed="false">A</button>
+                    <button type="button" class="selection-hub-rank" data-mission-rank="s" aria-pressed="false">S</button>
+                </div>
+                <label class="mission-status-filter">
+                    <span>Status</span>
+                    <select data-mission-status>
+                        <option value="all">All missions</option>
+                        <option value="available">Available</option>
+                        <option value="completed">Completed</option>
+                        <option value="locked">Locked</option>
+                    </select>
+                </label>
                 <label class="selection-hub-search">
-                    <span>Search</span>
-                    <input type="search" data-mission-search placeholder="Search missions..." autocomplete="off">
+                    <span class="sr-only">Search missions</span>
+                    <input type="search" data-mission-search placeholder="Search missions or rewards" autocomplete="off">
                 </label>
             </div>
-            <div class="selection-hub-mission-grid" data-mission-grid>
-                <div class="selection-hub-env-empty">Loading missions...</div>
+            <div class="mission-workspace" data-mission-workspace data-detail-open="false">
+                <div class="selection-hub-mission-grid" data-mission-grid>
+                    <div class="selection-hub-env-empty">Loading missions...</div>
+                </div>
+                <div class="selection-hub-mission-detail" data-mission-detail hidden></div>
             </div>
-            <div class="selection-hub-mission-detail" data-mission-detail hidden></div>
         </div>
     </section>
     <div class="searching-backdrop hidden">
@@ -146,11 +162,12 @@
 <div class="skill-card">
     <div class="skill-header">
         <div class="character-info">
-            <img id="character-portrait" src="" alt="Character portrait" class="character-portrait">
+            <button type="button" id="character-portrait-button" class="character-portrait-button" aria-label="View character biography" aria-pressed="false" title="View biography">
+                <img id="character-portrait" src="" alt="" class="character-portrait">
+            </button>
             <div class="character-text">
                 <div id="character-name" class="character-name">Select a character</div>
                 <div id="character-arc" class="character-arc" hidden></div>
-                <p id="character-bio" class="character-bio"></p>
                 <div id="character-unlock-action" class="character-unlock-action" hidden>
                     <span class="character-unlock-price">Unlock for <strong id="character-unlock-price">0</strong> Ryo</span>
                     <button type="button" id="character-unlock-buy" class="character-unlock-buy">Unlock character</button>
@@ -485,9 +502,9 @@
 <script src="characters.js?v=42"></script>
 <script src="roster-catalog.js?v=1"></script>
 <script src="skill-description-format.js?v=2"></script>
-<script src="script.js?v=51"></script>
+<script src="script.js?v=53"></script>
 <script src="selectionGacha.js?v=44"></script>
-<script src="selectionHub.js?v=44"></script>
+<script src="selectionHub.js?v=45"></script>
 <script>
     (function() {
         function hideGuide() {

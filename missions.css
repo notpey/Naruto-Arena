@@ -1,0 +1,236 @@
+/* Missions use the same dark surfaces and warm selection color as the roster. */
+.selection-client-page .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.selection-client-page.game-remaster .selection-hub-env-panel[data-hub-panel="missions"] {
+    gap: 0;
+    padding: 25px 48px 30px;
+    border-top: 0 !important;
+    background: #12212a !important;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-header {
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-color: #405560;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-header h1 {
+    color: #f0b866 !important;
+    font-size: 28px !important;
+    line-height: 1.1;
+    letter-spacing: -.025em;
+    text-shadow: none !important;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-header p {
+    margin-top: 7px;
+    color: #bfccd0 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0;
+    line-height: 1.4;
+    text-transform: none;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .mission-summary {
+    flex: none;
+    margin: 0;
+    color: #e5bc83 !important;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-toolbar {
+    min-height: 42px;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 0;
+    border: 0 !important;
+    background: none !important;
+}
+.mission-rank-filters { display: flex; align-items: center; gap: 4px; }
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-rank {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #bdcbd0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    box-shadow: none;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-rank:hover {
+    border-color: #657983;
+    background: #20333d;
+    color: #f4f4ef;
+}
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-rank.active {
+    border-color: #b98d54 !important;
+    background: #3b3832 !important;
+    color: #f4d1a3 !important;
+    box-shadow: none;
+}
+.mission-status-filter { display: flex; align-items: center; gap: 8px; margin-left: auto; color: #bfd0d2; font-size: 11px; font-weight: 700; }
+.mission-status-filter select,
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search input {
+    height: 36px;
+    border: 1px solid #5b7079;
+    border-radius: 4px;
+    background: #0e1b24 !important;
+    color: #f3f4f0 !important;
+    font: 600 11px/1.2 'Libre Franklin', sans-serif;
+    box-shadow: none;
+}
+.mission-status-filter select { min-width: 126px; padding: 0 9px; cursor: pointer; }
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search { margin-left: 0; }
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search input { width: 226px; padding: 0 11px; }
+body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search input::placeholder { color: #9bb0b8; opacity: 1; }
+body.selection-client-page.game-remaster [data-hub-panel="missions"] :is(button, select, input):focus-visible { outline: 2px solid #e3ad68; outline-offset: 2px; }
+
+.mission-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 47%) minmax(0, 53%);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid #536872;
+    border-radius: 8px;
+    background: #172a34;
+}
+body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-grid {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0 !important;
+    min-height: 0;
+    padding: 0 !important;
+    overflow-y: auto;
+    background: #152630 !important;
+    scrollbar-color: #5c717a #152630;
+}
+.mission-list-heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 15px 18px 12px;
+    border-bottom: 1px solid #40545e;
+    background: #152630;
+    color: #bfcdd1;
+    font: 700 11px/1.2 'Libre Franklin', sans-serif;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+.mission-list-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    width: 100%;
+    min-height: 102px;
+    padding: 15px 18px;
+    border: 0;
+    border-bottom: 1px solid #344b55;
+    background: transparent;
+    color: #f3f4f0;
+    font-family: 'Libre Franklin', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: background .16s ease;
+}
+.mission-list-row:hover { background: #203741; }
+.mission-list-row.selected { background: #2a404a; outline: 1px solid #bc9360; outline-offset: -2px; }
+.mission-row-main { display: flex; flex-direction: column; min-width: 0; gap: 5px; }
+.mission-row-title { overflow: hidden; color: #f4f4ef; font-size: 14px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.mission-list-row.selected .mission-row-title { color: #f2c58b; }
+.mission-row-reward { overflow: hidden; color: #e9b977; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.mission-row-goal { overflow: hidden; color: #b5c5ca; font-size: 11px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.mission-row-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; white-space: nowrap; }
+.mission-row-level { color: #bbccd0; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.mission-row-state,
+.mission-detail-state { color: #afdabb; font-size: 10px; font-weight: 700; }
+.mission-row-state.completed,
+.mission-detail-state.completed { color: #a9bec6; }
+.mission-row-state.locked,
+.mission-detail-state.locked { color: #eab9ab; }
+
+body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-detail {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    gap: 0;
+    width: 100%;
+    max-height: none;
+    min-height: 0;
+    padding: 20px 24px 25px;
+    overflow-y: auto;
+    border: 0;
+    border-left: 1px solid #536872;
+    border-radius: 0;
+    background: #1c303a;
+    color: #f3f4f0;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    text-transform: none;
+    box-shadow: none;
+    scrollbar-color: #647b83 #1c303a;
+}
+.mission-detail-top { display: flex; align-items: center; justify-content: space-between; min-height: 22px; margin-bottom: 12px; }
+body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-back { display: none; color: #c5d2d5; font-size: 11px; text-transform: none; }
+.mission-detail-hero { display: flex; flex-direction: column; gap: 14px; }
+.mission-detail-art { display: block; width: 100%; height: 160px; object-fit: cover; object-position: center; border: 1px solid #64747b; border-radius: 4px; box-sizing: border-box; }
+.mission-detail-hero.no-art { gap: 0; }
+.mission-detail-hero-text { min-width: 0; }
+.mission-detail-level { color: #c4d0d2; font-size: 11px; font-weight: 700; text-transform: none; }
+.mission-detail-title { margin: 5px 0 7px; color: #f2c58b; font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif !important; font-size: 22px; font-weight: 800; line-height: 1.2; text-transform: none !important; }
+.mission-detail-reward { margin: 0; color: #f0eee8; font-size: 12px; font-weight: 600; text-transform: none; }
+.mission-detail-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid #4c626c; }
+.mission-detail-section-title { margin: 0 0 12px; color: #b8dce5; font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif !important; font-size: 12px; font-weight: 800; letter-spacing: .02em; text-transform: none !important; }
+.mission-goal { margin-bottom: 12px; }
+.mission-goal:last-child { margin-bottom: 0; }
+.mission-goal-text,
+.mission-detail-note { margin: 0 0 6px; color: #d5dfe1; font-size: 12px; line-height: 1.5; }
+.mission-goal-text, .mission-detail-note { text-transform: none !important; }
+.mission-detail-note:last-child { margin-bottom: 0; }
+.mission-goal-track { overflow: hidden; height: 5px; border-radius: 2px; background: #40545c; }
+.mission-goal-fill { display: block; height: 100%; background: #e3ad68; }
+.mission-reward-row { display: flex; align-items: center; gap: 10px; }
+.mission-reward-row img { width: 38px; height: 38px; border: 1px solid #687983; border-radius: 3px; object-fit: cover; }
+.mission-reward-name { color: #f2c58b; font-size: 13px; }
+body.selection-client-page.game-remaster .mission-workspace .selection-hub-env-empty { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 50px 18px; color: #c8d5d7 !important; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.mission-clear-filters { min-height: 34px; padding: 0 15px; border: 1px solid #b98d54; border-radius: 4px; background: #31404a; color: #f2c58b; font: 700 11px 'Libre Franklin', sans-serif; cursor: pointer; }
+.mission-clear-filters:hover { background: #435058; }
+
+@media (max-width: 1099px) {
+    body.selection-client-page.game-remaster .selection-hub-env-panel[data-hub-panel="missions"] { min-height: calc(100dvh - 100px); padding: 22px !important; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-toolbar { flex-wrap: wrap; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .mission-workspace { min-height: 600px; }
+}
+@media (max-width: 759px) {
+    body.hub-view-missions.game-remaster > .selection-hub-nav { justify-content: flex-end; min-height: 104px; padding: 5px 12px !important; }
+    body.hub-view-missions.game-remaster > .selection-hub-nav .selection-hub-tabs { position: static; flex: 1 1 100%; width: 100%; justify-content: flex-start; transform: none; }
+    body.hub-view-missions.game-remaster > .selection-hub-nav .selection-hub-tab { flex: 1 1 50%; width: auto; }
+    body.hub-view-missions.game-remaster > .selection-hub-nav .selection-hub-ryo { margin-left: auto; }
+    body.selection-client-page.game-remaster .selection-hub-env-panel[data-hub-panel="missions"] { padding: 18px 16px 24px !important; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-header { align-items: flex-start; flex-direction: column; gap: 7px; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-env-header h1 { font-size: 25px !important; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .mission-summary { margin-top: 0; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .mission-rank-filters { width: 100%; overflow-x: auto; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-rank { flex: 0 0 auto; min-height: 38px; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .mission-status-filter { flex: 0 0 auto; margin-left: 0; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search { flex: 1 1 150px; }
+    body.selection-client-page.game-remaster [data-hub-panel="missions"] .selection-hub-search input { width: 100%; }
+    body.selection-client-page.game-remaster .mission-workspace { display: block; min-height: 0 !important; height: auto; overflow: visible; }
+    body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-grid { max-height: none; overflow: visible; }
+    body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-detail { border-left: 0; overflow: visible; padding: 18px; }
+    body.selection-client-page.game-remaster .mission-workspace[data-detail-open="false"] .selection-hub-mission-detail { display: none !important; }
+    body.selection-client-page.game-remaster .mission-workspace[data-detail-open="true"] .selection-hub-mission-grid { display: none !important; }
+    body.selection-client-page.game-remaster .mission-workspace .selection-hub-mission-back { display: inline-block; }
+    .mission-list-row { min-height: 96px; }
+    .mission-detail-art { height: 170px; }
+}

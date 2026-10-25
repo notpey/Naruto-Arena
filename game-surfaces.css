@@ -10,10 +10,37 @@
     --arena-shadow: 0 16px 36px rgba(0, 0, 0, .38);
 }
 
+/* Keep the artwork behind the selection UI soft without blurring its controls. */
+.selection-client-page.game-remaster .background {
+    isolation: isolate;
+    overflow: hidden;
+    background: #16252e;
+}
+.selection-client-page.game-remaster .background::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--selection-stage-image, url('selectionbg_2.jpg')) center / cover no-repeat;
+    filter: blur(5px);
+    transform: scale(1.025);
+    pointer-events: none;
+}
+.selection-client-page.game-remaster .background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('selection-noise.svg') repeat;
+    opacity: .25;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
 /* The game boards remain at their original coordinates and take over the
    visual hierarchy once the decorative scroll pieces are removed. */
 .game-remaster .selectionpage {
-    top: 458px;
+    top: 457px;
     height: 327px;
     animation: none;
 }
@@ -194,7 +221,7 @@
 .game-remaster .button-container {
     position: absolute;
     left: 62px;
-    top: -85px;
+    top: -101px;
     width: 873px;
     padding: 0;
     gap: 24px;
@@ -282,15 +309,15 @@
 
 /* Preview uses the same left and right content edges as the roster board. */
 .game-remaster .skillviewer {
-    top: -405px;
+    top: -385px;
     width: 997px;
-    height: 312px;
+    height: 264px;
     transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .22s ease, visibility .22s;
 }
 .game-remaster .skillviewer.collapsed { transform: translateY(-8px); opacity: 0; visibility: hidden; pointer-events: none; }
 .game-remaster .skillviewer.collapsed .skillpage { transform: none; opacity: 1; }
 .game-remaster .skillpage {
-    height: 312px;
+    height: 264px;
     padding: 18px 48px 16px;
     background: linear-gradient(155deg, #24363f, #16252e 58%, #101c24);
     border-color: #61747c;
@@ -302,9 +329,10 @@
     display: flex;
     align-items: center;
     gap: 22px;
-    width: 100%;
+    width: auto;
     min-width: 0;
-    margin-top: 8px;
+    margin-top: 0;
+    justify-self: end;
 }
 .game-remaster .character-passive[hidden] { display: none; }
 .game-remaster .character-passive {
@@ -349,9 +377,23 @@
     margin: 0;
 }
 .game-remaster .character-info { min-width: 0; gap: 14px; }
+.game-remaster .character-portrait-button {
+    display: block;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+}
+.game-remaster .character-portrait-button:hover .character-portrait,
+.game-remaster .character-portrait-button[aria-pressed="true"] .character-portrait { border-color: var(--arena-accent); }
+.game-remaster .character-portrait-button:focus-visible { outline: 2px solid var(--arena-accent); outline-offset: 3px; }
 .game-remaster .character-portrait {
-    width: 80px;
-    height: 80px;
+    width: 64px;
+    height: 64px;
     box-sizing: border-box;
     border: 1px solid #71828a;
     border-radius: 3px;
@@ -363,22 +405,15 @@
     color: var(--arena-accent);
     font: 700 20px/1.2 'Libre Franklin', sans-serif;
     text-transform: none;
-    margin: 0 0 8px;
+    margin: 0 0 4px;
 }
 .game-remaster .character-arc[hidden] { display: none; }
 .game-remaster .character-arc {
-    margin: -2px 0 8px;
+    margin: 0 0 5px;
     color: #a9c7cb;
     font: 700 10px/1.25 'Libre Franklin', sans-serif;
     letter-spacing: .075em;
     text-transform: uppercase;
-}
-.game-remaster .character-bio {
-    color: #d5dedd;
-    font: 400 12px/1.48 'Libre Franklin', sans-serif;
-    text-transform: none;
-    max-height: 58px;
-    scrollbar-color: #71828a transparent;
 }
 .game-remaster .skill-images {
     width: auto;
@@ -415,21 +450,30 @@
 .game-remaster .skill-image.alternate-skill.active { outline-color: #b99ad0; box-shadow: none; }
 .game-remaster .skill-image:focus-visible { outline-color: #f2f3f0; }
 .game-remaster .skill-detail-card {
-    margin-top: 8px;
-    padding-top: 10px;
+    margin-top: 9px;
+    padding-top: 12px;
     border-top: 1px solid #4c6068;
     min-height: 0;
     flex: 1 1 auto;
     overflow: hidden;
+    grid-column: 1 / -1;
+}
+.game-remaster .skill-card {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 18px;
+    align-items: start;
 }
 .game-remaster .skill-detail-kind[hidden] { display: none; }
 .game-remaster .skill-detail-kind { display: block; margin-bottom: 5px; color: #a8d1d0; font: 700 11px/1.3 'Libre Franklin', sans-serif; letter-spacing: .06em; text-transform: uppercase; }
-.game-remaster .skill-detail-head { display: flex; align-items: stretch; gap: 28px; margin: 0; min-height: 0; flex: 1 1 auto; overflow: hidden; }
+.game-remaster .skill-detail-head { display: flex; align-items: stretch; gap: 14px; margin: 0; min-height: 0; flex: 1 1 auto; overflow: hidden; }
 .game-remaster .skill-detail-content { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
 .game-remaster .skill-detail-card.is-empty .skill-detail-head { grid-template-columns: 1fr; }
 .game-remaster .skill-detail-image {
-    width: 74px;
-    height: 74px;
+    width: 92px;
+    height: 92px;
+    flex: 0 0 92px;
     box-sizing: border-box;
     border: 1px solid #71828a;
     border-radius: 3px;
@@ -444,7 +488,7 @@
 }
 .game-remaster .skill-description {
     color: #d5dedd;
-    font: 400 12px/1.48 'Libre Franklin', sans-serif;
+    font: 400 13px/1.48 'Libre Franklin', sans-serif;
     text-transform: none;
     max-height: none;
     min-height: 0;
@@ -452,6 +496,7 @@
     scrollbar-color: #71828a transparent;
 }
 .game-remaster .skill-description strong { font-weight: 800; }
+.game-remaster .skill-detail-card.is-biography .skill-description { overflow-y: auto; }
 .game-remaster .skill-description .skill-ref { color: #ffce8c; }
 .game-remaster .skill-description .skill-term--damage { color: #f2aaa0; }
 .game-remaster .skill-description .skill-term--healing { color: #a6dfba; }
@@ -460,7 +505,7 @@
 .game-remaster .skill-description .skill-term--resource { color: #a8cfff; }
 .game-remaster .skill-description .skill-term--class { color: #d9e7e8; }
 .game-remaster .skill-detail-meta {
-    margin: 11px 0 0 102px;
+    margin: 14px 0 0 106px;
     padding: 10px 0 0;
     border: 0;
     border-top: 1px solid #40525a;
@@ -480,6 +525,10 @@
 .game-remaster .cooldown-value { font-style: normal; font-weight: 600; }
 .game-remaster .energy-none { color: var(--arena-muted); font-style: normal; }
 .game-remaster .energy-pip { box-shadow: none; }
+
+.game-remaster .skillviewer:has(.character-unlock-action:not([hidden])) { top: -397px; height: 300px; }
+.game-remaster .skillpage:has(.character-unlock-action:not([hidden])) { height: 300px; }
+.game-remaster .selectionpage:has(.character-unlock-action:not([hidden])) .button-container { top: -84px; }
 
 /* Search and arc controls sit within the roster column, above the portraits. */
 .game-remaster .roster-toolbar {
@@ -691,6 +740,7 @@
     border-bottom: 1px solid #51616a;
     box-shadow: 0 5px 18px rgba(0, 0, 0, .36);
     font-family: 'Libre Franklin', sans-serif;
+    padding: 0 52px;
 }
 .game-remaster .selection-hub-nav::after { display: none; }
 .game-remaster .selection-hub-brand { width: 180px; min-width: 180px; justify-content: flex-start; }
@@ -711,7 +761,47 @@
 .game-remaster .selection-hub-tab:hover,
 .game-remaster .selection-hub-tab.active { color: #f4c27d; }
 .game-remaster .selection-hub-tab.active::after { background: #e3ad68; }
-.game-remaster .selection-hub-ryo { margin-left: auto; border-color: #76634c; background: #1b2b32; color: #f0e6d7; }
+.game-remaster .selection-hub-ryo {
+    box-sizing: border-box;
+    height: 34px;
+    min-width: 0;
+    margin-left: auto;
+    padding: 0 12px;
+    gap: 8px;
+    border: 1px solid #657780;
+    border-radius: 6px;
+    background: #20313a;
+    color: #f1eee6;
+    box-shadow: inset 0 1px rgba(255, 255, 255, .08);
+    font: 700 12px/1 'Libre Franklin', sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+.game-remaster .selection-hub-coin {
+    width: 19px;
+    height: 19px;
+    border: 1px solid #f3cd8e;
+    background: #e3ad68;
+    color: #24313a;
+    box-sizing: border-box;
+    font: 800 10px/1 'Libre Franklin', sans-serif;
+}
+.game-remaster .selection-hub-ryo-label { color: #c1d0d1; font: 700 10px/1 'Libre Franklin', sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.game-remaster .selection-hub-settings { margin-left: 8px; }
+.game-remaster .selection-hub-settings-button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #657780;
+    border-radius: 6px;
+    background: #20313a;
+    color: #edbf84;
+    box-shadow: inset 0 1px rgba(255, 255, 255, .08);
+}
+.game-remaster .selection-hub-settings-button:hover,
+.game-remaster .selection-hub-settings.open .selection-hub-settings-button { border-color: #e3ad68; background: #30444e; color: #f4d0a1; }
+.game-remaster .selection-hub-settings-button:focus-visible { outline: 2px solid #e3ad68; outline-offset: 3px; }
 .game-remaster .selection-hub-settings-button svg { width: 18px; height: 18px; display: block; }
 
 /* Battle rows and readout. Existing portraits, queue indicators, and skill
@@ -1129,3 +1219,409 @@
     .game-remaster .skillviewer,
     .game-remaster .skill-image { transition: none; }
 }
+
+/* Battle controls and decision panels */
+.game-remaster .surrenderbutton,
+.game-remaster .sound {
+    border-color: #687b83;
+    background: linear-gradient(180deg, #31444d, #1b2a33);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .1);
+}
+.game-remaster .surrenderbutton {
+    appearance: none;
+    top: 597px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    font: 800 13px 'Libre Franklin', Arial, sans-serif;
+    line-height: 1;
+    letter-spacing: .09em;
+    transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.game-remaster .surrenderbutton:hover { transform: translateY(-2px); }
+.game-remaster .surrenderbutton:active { transform: translateY(0); }
+.game-remaster .surrenderbutton:focus-visible,
+.game-remaster .ingame-sound-volume:focus-visible { outline: 2px solid var(--arena-accent); outline-offset: 3px; }
+.game-remaster .ingame-sound-controller {
+    width: 260px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 24px;
+}
+.game-remaster .ingame-sound-label {
+    color: #ecdfcc;
+    font: 800 11px 'Franklin', Arial, sans-serif;
+    letter-spacing: .1em;
+    text-align: center;
+}
+.game-remaster .ingame-sound-volume { margin: 0; cursor: pointer; }
+
+.game-remaster .ingameskilldescription strong { font-weight: 800; }
+.game-remaster .ingameskilldescription .skill-ref { color: #ffce8c; }
+.game-remaster .ingameskilldescription .skill-term--damage { color: #f2aaa0; }
+.game-remaster .ingameskilldescription .skill-term--healing { color: #a6dfba; }
+.game-remaster .ingameskilldescription .skill-term--defense { color: #9ed6e3; }
+.game-remaster .ingameskilldescription .skill-term--control { color: #d8b9f2; }
+.game-remaster .ingameskilldescription .skill-term--resource { color: #a8cfff; }
+.game-remaster .ingameskilldescription .skill-term--class { color: #d9e7e8; }
+
+.game-remaster .ChakraChooseEndTurn,
+.game-remaster .exchange_chakra {
+    border-color: #74858a;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, .5), inset 0 1px rgba(255, 255, 255, .08);
+}
+.game-remaster .ChakraChooseEndTurn::before,
+.game-remaster .exchange_chakra::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 25px;
+    width: 112px;
+    height: 350px;
+    border-radius: 5px;
+    background: #0d1820 url('win-remaster.png?v=2') center / cover no-repeat;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 8px 20px rgba(0, 0, 0, .35);
+    pointer-events: none;
+}
+.game-remaster .exchange_chakra::before { background-image: url('surrenderimage-remaster.png?v=2'); }
+.game-remaster .ChakraChooseEndTurn .chakrachoose,
+.game-remaster .exchange_chakra_title,
+.game-remaster .exchange_chakra_subtitle { color: #f6e8d5; text-shadow: none; }
+.game-remaster .chakrachoosered { color: #ef9d83; }
+.game-remaster .ChakraChooseEndTurn .chakra-container,
+.game-remaster .exchange_chakra_container { gap: 22px; }
+.game-remaster .ChakraChooseEndTurn .chakra-column,
+.game-remaster .ChakraChooseEndTurn .chakra-columnright,
+.game-remaster .exchange_chakra_column {
+    padding: 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, .045);
+}
+.game-remaster .chakra-title { color: #ebbf8a; text-shadow: none; }
+.game-remaster .chakra-name,
+.game-remaster .chakra-amount,
+.game-remaster .exchange_chakra_row .chakra-name,
+.game-remaster .exchange_chakra_row .chakra-amount { color: #ecf0ed; }
+.game-remaster .ok-buttonendturn,
+.game-remaster .ok-buttonexchange {
+    height: 38px;
+    border: 1px solid #efc58e;
+    background: #e3ad68;
+    color: #15212a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+    transition: background .16s ease, transform .16s ease;
+}
+.game-remaster .ok-buttonendturn:hover:not(:disabled),
+.game-remaster .ok-buttonexchange:hover:not(:disabled) { background: #f0c58d; transform: translateY(-2px); }
+.game-remaster .ok-buttonendturn:disabled,
+.game-remaster .ok-buttonexchange:disabled { cursor: not-allowed; }
+.game-remaster .cancel-buttonendturn,
+.game-remaster .cancel-buttonexchange { text-decoration: none; }
+.game-remaster .cancel-buttonendturn:hover,
+.game-remaster .cancel-buttonexchange:hover { color: #f0c58d; border-bottom-color: #f0c58d; }
+.game-remaster :is(.ok-buttonendturn, .ok-buttonexchange, .cancel-buttonendturn, .cancel-buttonexchange, .exchange_chakra_choice, .minus-button, .plus-button):focus-visible {
+    outline: 2px solid var(--arena-accent);
+    outline-offset: 3px;
+}
+
+.game-remaster .surrender-confirm-preview-image {
+    border-radius: 5px;
+    border: 1px solid #89999b;
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+}
+.game-remaster .surrender-confirm {
+    height: 365px;
+    overflow: hidden;
+    border-color: #7b8b8f;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, .55);
+}
+.game-remaster .surrender-confirm-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 32px 26px;
+    box-sizing: border-box;
+}
+.game-remaster .surrender-confirm-title {
+    position: static;
+    width: 100%;
+    margin: 0 0 18px;
+    font: 800 21px 'Libre Franklin', Arial, sans-serif;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+    text-align: center;
+    color: #f4eee3;
+}
+.game-remaster .surrender-confirm-preview-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.game-remaster .surrender-confirm-preview-image {
+    position: static;
+    width: 314px;
+    height: 204px;
+    max-width: 100%;
+}
+.game-remaster .surrender-confirm-actions {
+    position: static;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+.game-remaster .surrender-confirm-ok,
+.game-remaster .surrender-confirm-cancel {
+    position: static;
+    width: 138px;
+    height: 38px;
+    padding: 0 12px;
+    font: 800 12px 'Libre Franklin', Arial, sans-serif;
+    letter-spacing: .01em;
+    cursor: pointer;
+}
+.game-remaster .surrender-confirm-ok {
+    border-color: #dc9181;
+    background: #b95b4b;
+    color: #fffaf2;
+}
+.game-remaster .surrender-confirm-ok:hover { border-color: #edac9a; background: #ce6d5a; }
+.game-remaster .surrender-confirm-cancel { background: #30434c; }
+.game-remaster .battle-end-panel {
+    border-color: #77878a;
+    background: linear-gradient(155deg, #263943, #111e27);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .55);
+    filter: none;
+}
+.game-remaster .battle-end-portrait {
+    border: 1px solid #89999b;
+    border-radius: 5px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .38);
+}
+.game-remaster .battle-end-title { color: #f0c58d; font-weight: 800; letter-spacing: .025em; }
+.game-remaster .battle-end-overlay.is-defeat .battle-end-title { color: #efa08e; }
+.game-remaster .battle-end-message { line-height: 1.5; }
+.game-remaster .battle-end-continue {
+    top: 318px;
+    min-width: 180px;
+    padding: 10px 24px;
+    border: 1px solid #efc58e;
+    border-radius: 5px;
+    background: #e3ad68;
+    color: #15212a;
+    font-size: 17px;
+    font-weight: 800;
+    text-align: center;
+}
+.game-remaster .battle-end-continue:hover { background: #f0c58d; opacity: 1; }
+.game-remaster .battle-end-continue:focus-visible { outline: 2px solid #f0c58d; outline-offset: 3px; }
+
+/* Status pips share the battle panel's type, colors, and spacing. */
+.game-remaster .skilltooltipimage {
+    box-sizing: border-box;
+    border: 1px solid #82969d;
+    border-radius: 2px;
+    background: #101b22;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .35);
+}
+.game-remaster .skilltooltipimage:hover { border-color: #efc28e; }
+.game-remaster .global-status-tooltip,
+.game-remaster .status-tooltip-content {
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 16px));
+    min-width: 0;
+    max-width: none;
+    max-height: min(480px, calc(100vh - 16px));
+    overflow-y: auto;
+    padding: 14px 16px;
+    border: 1px solid #6e8188;
+    border-radius: 7px;
+    background: #192933;
+    color: #e9eeeb;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .46);
+    font: 400 12px/1.45 'Libre Franklin', Arial, sans-serif;
+    scrollbar-color: #82959b #192933;
+}
+.game-remaster .status-tooltip-item + .status-tooltip-item,
+.game-remaster .global-status-tooltip .status-tooltip-item + .status-tooltip-item {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #465b64;
+}
+.game-remaster .status-tooltip-title,
+.game-remaster .global-status-tooltip .status-tooltip-title {
+    margin: 0 0 8px;
+    color: #efc28e;
+    font: 800 13px/1.3 'Libre Franklin', Arial, sans-serif;
+    letter-spacing: .01em;
+    text-transform: none;
+}
+.game-remaster .status-tooltip-desc { gap: 6px; color: #e9eeeb; }
+.game-remaster .status-tooltip-row { gap: 5px; }
+.game-remaster .status-tooltip-effect {
+    grid-template-columns: 6px minmax(0, 1fr);
+    column-gap: 9px;
+    padding: 3px 0;
+}
+.game-remaster .status-tooltip-effect + .status-tooltip-effect { border-top-color: #344953; }
+.game-remaster .status-tooltip-bullet {
+    width: 5px;
+    height: 5px;
+    margin-top: 6px;
+    border-radius: 1px;
+    background: #d99578;
+    box-shadow: none;
+}
+.game-remaster .status-tooltip-desc-line,
+.game-remaster .global-status-tooltip .status-tooltip-desc-line { color: #e9eeeb; font-weight: 400; overflow-wrap: break-word; }
+.game-remaster .status-tooltip-emphasis { color: #f2a995; font-weight: 800; }
+.game-remaster .status-tooltip-row-meta,
+.game-remaster .status-tooltip-turns,
+.game-remaster .global-status-tooltip .status-tooltip-row-meta,
+.game-remaster .global-status-tooltip .status-tooltip-turns {
+    margin: 4px 0 0 15px;
+    padding: 4px 7px;
+    border: 1px solid #687b83;
+    border-radius: 3px;
+    background: #263943;
+    color: #e7d6c1;
+    font: 700 10px/1 'Libre Franklin', Arial, sans-serif;
+    letter-spacing: .02em;
+}
+.game-remaster .status-tooltip-line-divider { background: #465b64; margin: 7px 0; }
+
+/* Chakra costs and pools use the same compact square marker. */
+.game-remaster .energy-pip,
+.game-remaster .chakra-box,
+.game-remaster .exchange_chakra_choice,
+.game-remaster .chakra-item.random-chakra .chakra-icon {
+    border-radius: 2px !important;
+    box-shadow: inset 0 1px rgba(255, 255, 255, .18), 0 1px 2px rgba(0, 0, 0, .32);
+}
+.game-remaster .energy-pip { width: 12px; height: 12px; box-sizing: border-box; }
+.game-remaster .chakra-box { box-sizing: border-box; border: 1px solid rgba(255, 255, 255, .35) !important; }
+.game-remaster .chakra-box.green { background: linear-gradient(#4bd776, #208848) !important; }
+.game-remaster .chakra-box.red { background: linear-gradient(#df6b66, #9d383c) !important; }
+.game-remaster .chakra-box.blue { background: linear-gradient(#7775ea, #4146a7) !important; }
+.game-remaster .chakra-box.white { background: linear-gradient(#f7f8f1, #b9c1bb) !important; }
+.game-remaster .chakra-box.black { background: repeating-linear-gradient(135deg, #222b30 0 4px, #89949a 4px 8px) !important; }
+
+/* Selection settings and service dialogs use the same restrained materials as the roster. */
+.selection-client-page.game-remaster .shinobi-modal-overlay {
+    background: rgba(7, 15, 20, .78) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+.selection-client-page.game-remaster :is(.settings-modal-dialog, .quest-achieve-modal-card) {
+    box-sizing: border-box !important;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 24px 26px !important;
+    border: 1px solid #6a7d83 !important;
+    border-radius: 9px !important;
+    background: #172832 !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .55) !important;
+    color: #eef1eb !important;
+    scrollbar-color: #738991 #172832;
+}
+.selection-client-page.game-remaster .settings-modal-header {
+    gap: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom-color: #425862;
+}
+.selection-client-page.game-remaster .settings-modal-crest {
+    border: 1px solid #748993;
+    border-radius: 6px;
+    background: #263b45;
+    box-shadow: none;
+}
+.selection-client-page.game-remaster .settings-modal-crest polygon { stroke: #e3ad68 !important; }
+.selection-client-page.game-remaster .settings-modal-crest text { fill: #f0d2a6 !important; }
+.selection-client-page.game-remaster .settings-modal-title {
+    color: #f1e8dc !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+    letter-spacing: -.02em !important;
+    text-shadow: none;
+}
+.selection-client-page.game-remaster .settings-modal-subtitle { color: #bbcccf !important; font-weight: 500 !important; }
+.selection-client-page.game-remaster .settings-modal-close,
+.selection-client-page.game-remaster .shinobi-modal-close {
+    border: 1px solid #6d8189;
+    border-radius: 5px;
+    background: #263b45;
+    color: #e9edeb;
+    box-shadow: none;
+}
+.selection-client-page.game-remaster :is(.settings-modal-close, .shinobi-modal-close):hover { border-color: #e3ad68; background: #344b55; color: #fff; transform: none; }
+.selection-client-page.game-remaster :is(.settings-modal-close, .shinobi-modal-close, .settings-slider, .settings-hub-card-btn):focus-visible {
+    outline: 2px solid #e3ad68 !important;
+    outline-offset: 2px;
+}
+.selection-client-page.game-remaster .settings-section-card,
+.selection-client-page.game-remaster .settings-section-card.sound-card {
+    margin: 0;
+    padding: 14px 0;
+    border: 0;
+    border-top: 1px solid #40555e;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.selection-client-page.game-remaster .settings-modal-content .settings-section-card:first-child { padding-top: 0; border-top: 0; }
+.selection-client-page.game-remaster .settings-modal-content .settings-section-card:last-child { padding-bottom: 0; }
+.selection-client-page.game-remaster .settings-section-title {
+    margin-bottom: 10px !important;
+    color: #e7be8b !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: .04em !important;
+}
+.selection-client-page.game-remaster .audio-name { color: #ecf0ed !important; font-size: 12px !important; letter-spacing: .02em !important; }
+.selection-client-page.game-remaster .audio-val-badge {
+    padding: 4px 8px;
+    border: 1px solid #70848b;
+    border-radius: 4px;
+    background: #253a44;
+    color: #f0d0a0;
+    box-shadow: none;
+    font-variant-numeric: tabular-nums;
+}
+.selection-client-page.game-remaster .slider-endpoint-label { color: #bac9cc; }
+.selection-client-page.game-remaster .settings-slider {
+    height: 7px;
+    border: 1px solid #5f747c;
+    background: #0f1d25;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .32);
+    accent-color: #e3ad68;
+}
+.selection-client-page.game-remaster .settings-slider:hover { border-color: #e3ad68; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .32); }
+.selection-client-page.game-remaster .settings-slider::-webkit-slider-thumb { background: #e3ad68; border-color: #f2dfc3; box-shadow: 0 2px 5px rgba(0, 0, 0, .35); }
+.selection-client-page.game-remaster .settings-hub-card-btn {
+    min-height: 58px;
+    border: 1px solid #50656e !important;
+    border-radius: 5px !important;
+    background: #20343e !important;
+    box-shadow: none !important;
+}
+.selection-client-page.game-remaster .settings-hub-card-btn:hover,
+.selection-client-page.game-remaster .settings-hub-card-btn.practice:hover,
+.selection-client-page.game-remaster .settings-hub-card-btn.bug:hover {
+    border-color: #e3ad68 !important;
+    background: #2b424c !important;
+    box-shadow: none !important;
+}
+.selection-client-page.game-remaster .card-crest-badge { border: 1px solid #68808a !important; border-radius: 5px !important; background: #192b34 !important; color: #e7bd88 !important; }
+.selection-client-page.game-remaster .card-text-wrap span { color: #beccce !important; }
+.selection-client-page.game-remaster .card-arrow { color: #c9d5d5 !important; opacity: 1 !important; }
+.selection-client-page.game-remaster .quest-subtabs { border-color: #4c636d; border-radius: 6px; background: #20343e; }
+.selection-client-page.game-remaster .quest-tab-btn.active { background: #344b55; color: #f1d1a1; box-shadow: none; }
