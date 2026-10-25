@@ -19,6 +19,7 @@ test('arc sorting changes display order without changing canonical roster indice
         ['sarutobi-hiruzen', 'Sarutobi Hiruzen'],
         ['yamanaka-ino', 'Yamanaka Ino'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
+        ['ebisu', 'Ebisu'],
     ]);
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({
         characterId,
@@ -31,7 +32,7 @@ test('arc sorting changes display order without changing canonical roster indice
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster).map((index) => roster[index].characterId), [
         'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura', 'hatake-kakashi',
-        'umino-iruka', 'mizuki', 'yamanaka-ino', 'sarutobi-konohamaru',
+        'umino-iruka', 'mizuki', 'yamanaka-ino', 'sarutobi-konohamaru', 'ebisu',
         'demon-brothers', 'momochi-zabuza', 'haku',
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
     ]);

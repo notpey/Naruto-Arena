@@ -1074,6 +1074,14 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
         0
     );
     randomIncrease += classScopedIncrease;
+    if (skillHasHarmfulEffects(skill)) {
+        randomIncrease += (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce(
+            (sum, status) => (Number(status?.remainingTurns) || 0) > 0
+                ? sum + Math.max(0, Number(status?.metadata?.randomCostIncreaseForHarmfulSkills) || 0)
+                : sum,
+            0
+        );
+    }
     return {
         reservedSpecific,
         requiredRandom: Math.max(0, base.requiredRandom + randomIncrease - randomReduction),
@@ -2399,6 +2407,19 @@ const isHarmfulEffect = (effect) => {
 const skillHasHarmfulEffects = (skill) => {
     const effects = Array.isArray(skill?.effects) ? skill.effects : [];
     return effects.some((effect) => isHarmfulEffect(effect));
+};
+
+const getLivingTeamPassiveChakraCount = (match, characters, username, passiveKey, turnCount = 0) => {
+    const units = Array.isArray(match?.board?.[username]) ? match.board[username] : [];
+    return units.reduce((sum, unit) => {
+        if (!unit || unit.alive === false) return sum;
+        const passive = characters?.[unit.rosterIndex]?.passive;
+        if (passiveKey === 'teamRandomChakraEveryOwnTurns') {
+            const interval = Math.max(0, Number(passive?.[passiveKey]) || 0);
+            return sum + (interval > 0 && turnCount > 0 && turnCount % interval === 0 ? 1 : 0);
+        }
+        return sum + Math.max(0, Number(passive?.[passiveKey]) || 0);
+    }, 0);
 };
 
 const getTeamStatusMetadataMax = ({ match, username, metadataKey }) => {
@@ -4442,6 +4463,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             continue;
         }
         if (!doesActorSatisfySkillCondition(actorUnit, actorState, skill)) continue;
+        const queuedCost = queued?.reservedSpecific && Number.isFinite(Number(queued?.requiredRandom))
+            ? { reservedSpecific: queued.reservedSpecific, requiredRandom: queued.requiredRandom }
+            : computeEffectiveEnergyCost({ skill, actorState });
+        const paidChakraCount = queued?.isAutoCast ? 0 : chakraTypes.reduce(
+            (sum, type) => sum + Math.max(0, Number(queuedCost.reservedSpecific?.[type]) || 0),
+            Math.max(0, Number(queuedCost.requiredRandom) || 0)
+        );
         const ownerUseSkillTriggeredStatusIds = new Set();
         const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
         (Array.isArray(actorState?.statuses) ? actorState.statuses : []).forEach((status) => {
@@ -4615,6 +4643,22 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const effects = Array.isArray(skill.effects) ? skill.effects : [];
         if (!effects.length) continue;
         if (!doesActorSatisfySkillCondition(actorUnit, actorState, skill)) continue;
+        const ebisuMentor = actorBoard.find((unit) =>
+            unit && unit.alive !== false &&
+            characters?.[unit.rosterIndex]?.passive?.teamSkillCostDefense);
+        const mentorConfig = ebisuMentor && characters[ebisuMentor.rosterIndex].passive.teamSkillCostDefense;
+        if (mentorConfig && paidChakraCount >= Math.max(1, Number(mentorConfig.minimumCost) || 2)) {
+            applyStatus({
+                targetState: actorState,
+                statusId: mentorConfig.statusId,
+                duration: mentorConfig.duration,
+                sourceUsername: actingUsername,
+                sourceSlot: actorBoard.indexOf(ebisuMentor),
+                metadata: { helpful: true, destructibleDefensePoints: mentorConfig.points,
+                    tooltipTextTemplate: 'This character has {destructibleDefensePoints} destructible defense from Mentor Fundamentals.' },
+                fresh: true,
+            });
+        }
         if (skill?.id) {
             const skillUses =
                 actorState.skillUses && typeof actorState.skillUses === 'object' ? actorState.skillUses : {};
@@ -9026,6 +9070,7 @@ module.exports = {
     validateTargetSelection,
     resolvePendingTurnSkills,
     computeEffectiveEnergyCost,
+    getLivingTeamPassiveChakraCount,
     tickStatusesForTurnEnd,
     tickCooldownsForTurnEnd,
     getSkillCooldownRemaining,

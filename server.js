@@ -1944,6 +1944,7 @@ function updateMatchActive(matchId, updateObj) {
 }
 
 function insertMatchActive(matchObj) {
+    grantOpeningCharacterPassiveChakra(matchObj);
     if (matchObj && matchObj.matchId && matchObj.status !== 'ended') {
         activeMatchesMap.set(matchObj.matchId, matchObj);
     }
@@ -7407,6 +7408,22 @@ const applyChakraGain = (pool, gains = []) => {
     return updated;
 };
 
+const grantOpeningCharacterPassiveChakra = (match) => {
+    if (!match?.board || !match?.chakraPools || !match?.economy) return;
+    match.economy.lastChakraGain = match.economy.lastChakraGain || {};
+    for (const username of Object.keys(match.chakraPools)) {
+        const count = battleLogic.getLivingTeamPassiveChakraCount(
+            match, charactersData, username, 'teamRandomChakraAtMatchStart'
+        );
+        if (count <= 0) continue;
+        const gains = generateRandomChakra(count, match.chakraPools[username]);
+        match.chakraPools[username] = applyChakraGain(match.chakraPools[username], gains);
+        match.economy.lastChakraGain[username] = [
+            ...(match.economy.lastChakraGain[username] || []), ...gains,
+        ];
+    }
+};
+
 const getTurnDurationMsForUser = (match, username) => {
     if (!match || !username) return TURN_DURATION_MS;
     const collectTeamMetadataSum = (targetUsername, metadataKey) => {
@@ -9080,7 +9097,12 @@ const finalizeTurn = async (match, username) => {
         'additionalRandomChakraPerTurn'
     );
     const effectiveGainCount = Math.max(0, aliveCount - blockedActorGainCount);
-    const turnGains = generateRandomChakra(effectiveGainCount + additionalTurnGains, pools[username]);
+    const periodicPassiveGains = battleLogic.getLivingTeamPassiveChakraCount(
+        match, charactersData, username, 'teamRandomChakraEveryOwnTurns', econ.turnCounts[username] + 1
+    );
+    const turnGains = generateRandomChakra(
+        effectiveGainCount + additionalTurnGains + periodicPassiveGains, pools[username]
+    );
     pools[username] = applyChakraGain(pools[username], turnGains);
     econ.lastChakraGain[username] = turnGains;
 

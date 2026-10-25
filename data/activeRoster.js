@@ -15,6 +15,7 @@ const ACTIVE_ROSTER_IDS = [
     'zori-and-waraji',
     'yamanaka-ino',
     'sarutobi-konohamaru',
+    'ebisu',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

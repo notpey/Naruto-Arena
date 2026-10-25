@@ -29,6 +29,7 @@ const rawCharacters = [
     require('./gato'),
     require('./zori-and-waraji'),
     require('./sarutobi-konohamaru'),
+    require('./ebisu'),
     require('./haku'),
     require('./momochi-zabuza'),
     require('./oboro'),

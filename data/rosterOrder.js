@@ -102,6 +102,7 @@ const CANONICAL_ROSTER_ORDER = [
     'gato',                     // 97: Gatō
     'zori-and-waraji',          // 98: Zōri & Waraji
     'sarutobi-konohamaru',      // 99: Konohamaru
+    'ebisu',                    // 100: Ebisu
 ];
 
 const ORDER_MAP = new Map(

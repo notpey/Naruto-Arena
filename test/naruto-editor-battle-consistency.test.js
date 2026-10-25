@@ -130,7 +130,7 @@ const collectCharacterStatusReferences = () => {
     const producedStatusIds = new Set(['invulnerable', 'stunned']);
     const referencedStatusIds = [];
     const isStatusProducerPath = (pathParts) =>
-        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun/i.test(pathParts.join('.'));
+        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense/i.test(pathParts.join('.'));
     const addReference = (statusId) => {
         if (typeof statusId === 'string' && statusId.trim()) {
             referencedStatusIds.push(statusId.trim());
