@@ -1,249 +1,93 @@
 module.exports = {
-    "id": "yamanaka-ino",
-    "characterId": "yamanaka-ino",
-    "name": "Yamanaka Ino",
-    "facePicture": "https://i.imgur.com/qqaI3xv.png",
-    "characterdeescription": "A Genin from Team 10, Ino is a member of the Yamanaka clan, and a very confident and vain girl. Ino is able to use a variety of abilities to take over and control her enemies, making it difficult to tell friend from foe.",
-    "skills": [
-        {
-            "id": "yamanaka-ino-mind-body-disturbance",
-            "name": "Mind Body Disturbance",
-            "ignoreInvulnerability": false,
-            "skillimage": "https://i.imgur.com/3g2XWzn.png",
-            "skilldescription": "Yamanaka Ino targets one random enemy, stunning their physical, chakra, and strategic skills for 1 turn. Another random enemy takes 25 piercing damage.",
-            "energy": [
-                "Genjutsu"
+    id: 'yamanaka-ino', characterId: 'yamanaka-ino', name: 'Yamanaka Ino',
+    facePicture: 'https://i.imgur.com/h2p3QjN.png',
+    characterdeescription: "A confident young kunoichi from Konohagakure's Yamanaka clan, Ino uses secret techniques to control opponents. Her rivalry with Sakura reveals a clever fighter who prepares traps.",
+    passive: { name: 'Art of the Valentine', icon: 'https://i.imgur.com/kZPSOwC.png',
+        description: 'Whenever Ino stuns an enemy with one of her skills, that enemy receives 5 piercing damage.',
+        piercingDamageOnStun: 5,
+        piercingDamageOnStunSkillIds: [
+            'yamanaka-ino-mind-body-switch',
+            'yamanaka-ino-chakra-hair-strand-trap',
+        ] },
+    skills: [
+        { id: 'yamanaka-ino-mind-transfer-feint', name: 'Mind Transfer Feint',
+            skillimage: 'https://i.imgur.com/1RddcCQ.png',
+            skilldescription: 'Ino deals 20 physical damage to one enemy, or 30 if that enemy is stunned.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Chakra', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 20, scope: 'target' },
+                { type: 'damage', amount: 10, scope: 'target',
+                    condition: { scope: 'target', targetIsStunned: true } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Mental",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "yamanaka_ino_mind_body_disturbance_control",
-                    "duration": 1,
-                    "scope": "random-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "energy",
-                            "strategic",
-                            "ninjutsu"
-                        ],
-                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 25,
-                    "scope": "random-enemy",
-                    "metadata": {
-                        "ignoreDamageReduction": true,
-                        "ignoreDestructibleDefense": true
-                    }
-                }
-            ]
         },
-        {
-            "id": "yamanaka-ino-mind-body-switch",
-            "name": "Mind Body Switch",
-            "skillimage": "https://i.imgur.com/dHM9uYL.png",
-            "skilldescription": "Yamanaka Ino targets one enemy for 3 turns. On the first turn, their physical skills are stunned. On the second turn, their physical and chakra skills are stunned. On the third turn, they are fully stunned for 1 turn. During this time, this skill becomes 'Art of the Valentine'.",
-            "energy": [
-                "Random",
-                "Random"
+        { id: 'yamanaka-ino-mind-body-switch', name: 'Mind Body Switch',
+            skillimage: 'https://i.imgur.com/cKdM0Dy.png',
+            skilldescription: 'Ino controls one enemy for 2 turns, stunning their harmful skills. Mind Body Switch becomes Forced Betrayal. Control ends if Ino is stunned.',
+            energy: ['Genjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Chakra', 'Control'], effects: [
+                { type: 'apply_status', statusId: 'ino_mind_body_switch_target', duration: 2, scope: 'target',
+                    metadata: { harmful: true, cannotUseHarmfulSkills: true, ongoingClass: 'control',
+                        endsOnAnySourceStun: true,
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'Mind Body Switch: harmful skills are stunned while Ino maintains control.' } },
+                { type: 'apply_status', statusId: 'ino_mind_body_switch_trap_break', duration: 1, scope: 'target',
+                    condition: { scope: 'target', statusId: 'ino_hair_strand_trap', statusFromActor: true },
+                    metadata: { harmful: true, cannotReduceDamage: true, cannotBecomeInvulnerable: true,
+                        ongoingClass: 'control',
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'Cannot reduce damage or become invulnerable.' } },
+                { type: 'remove_status', statusId: 'ino_hair_strand_trap', scope: 'target',
+                    condition: { scope: 'target', statusId: 'ino_hair_strand_trap', statusFromActor: true } },
+                { type: 'apply_status', statusId: 'ino_mind_body_switch_active', duration: 2, scope: 'self',
+                    condition: { scope: 'target', statusId: 'ino_mind_body_switch_target', statusFromActor: true },
+                    metadata: { helpful: true, ongoingClass: 'control', endsOnAnySourceStun: true,
+                        linkedTargetStatusId: 'ino_mind_body_switch_target', copyTargetKeyToKeys: ['linkedTargetKey'],
+                        skillReplacements: { 'yamanaka-ino-mind-body-switch': 'yamanaka-ino-forced-betrayal' },
+                        tooltipText: 'Mind Body Switch is replaced by Forced Betrayal while the target is controlled.' } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "yamanaka_ino_mind_body_switch_stage_1",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical"
-                        ],
-                        "tooltipText": "This character's physical skills are stunned. Next turn, their physical and chakra skills will be stunned. After that, they will be fully stunned.",
-                        "onExpireEffects": [
-                            {
-                                "type": "apply_status",
-                                "statusId": "yamanaka_ino_mind_body_switch_stage_2",
-                                "duration": 1,
-                                "scope": "self",
-                                "metadata": {
-                                    "harmful": true,
-                                    "cannotUseSkillClasses": [
-                                        "physical",
-                                        "energy"
-                                    ],
-                                    "tooltipText": "This character's physical and chakra skills are stunned.",
-                                    "onExpireEffects": [
-                                        {
-                                            "type": "apply_status",
-                                            "statusId": "yamanaka_ino_mind_body_switch_stage_3",
-                                            "duration": 1,
-                                            "scope": "self",
-                                            "metadata": {
-                                                "harmful": true,
-                                                "cannotUseSkills": true,
-                                                "tooltipText": "This character is stunned and cannot use skills."
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ],
-                        "ongoingClass": "control",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "yamanaka_ino_mind_body_switch_active",
-                    "duration": 3,
-                    "scope": "self",
-                    "metadata": {
-                        "skillReplacements": {
-                            "yamanaka-ino-mind-body-switch": "yamanaka-ino-art-of-the-valentine"
-                        },
-                        "tooltipText": "Mind Body Switch is replaced by Art of the Valentine.",
-                        "ongoingClass": "control"
-                    }
-                }
-            ]
         },
-        {
-            "id": "yamanaka-ino-chakra-hair-strand-trap",
-            "name": "Chakra Hair Strand Trap",
-            "skillimage": "https://i.imgur.com/CH2jrFU.png",
-            "skilldescription": "Yamanaka Ino targets one enemy. For 1 turn, if they use a skill, they receive 10 damage, have their strategic skills stunned for 1 turn, and become unable to ignore stun effects for 1 turn. This skill is invisible.",
-            "energy": [],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Strategic",
-                "Ninjutsu",
-                "Instant"
+        { id: 'yamanaka-ino-chakra-hair-strand-trap', name: 'Chakra Hair Strand Trap',
+            skillimage: 'https://i.imgur.com/7m4IPdu.png',
+            skilldescription: 'Ino traps one enemy for 2 turns. Their next harmful skill stuns their Physical and Chakra skills for 1 turn. Mind Body Switch instead prevents damage reduction and invulnerability for 1 turn.',
+            energy: ['Genjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Strategic', 'Ninjutsu', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'ino_hair_strand_trap', duration: 2, scope: 'target',
+                    metadata: { harmful: true, hideTooltipFromUnitOwner: true,
+                        onOwnerUseSkillTrigger: true, onOwnerUseSkillHarmfulOnly: true,
+                        onOwnerUseSkillEffects: [
+                            { type: 'apply_status', statusId: 'ino_hair_strand_stun', duration: 1,
+                                scope: 'self', metadata: { harmful: true,
+                                    cannotUseSkillClasses: ['physical', 'chakra'],
+                                    tooltipText: 'Physical and Chakra skills are stunned.' } },
+                        ], turnDurationAnchor: 'source_turn',
+                        tooltipText: 'The next harmful skill triggers a Physical and Chakra stun.' } },
             ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "yamanaka_ino_chakra_hair_strand_trap",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "hideTooltipFromUnitOwner": true,
-                        "onOwnerUseSkillTrigger": true,
-                        "onOwnerUseSkillEffects": [
-                            {
-                                "type": "damage",
-                                "amount": 10,
-                                "scope": "self"
-                            },
-                            {
-                                "type": "apply_status",
-                                "statusId": "yamanaka_ino_chakra_hair_strand_trap_strategic_stun",
-                                "duration": 1,
-                                "scope": "self",
-                                "metadata": {
-                                    "harmful": true,
-                                    "cannotUseSkillClasses": [
-                                        "strategic"
-                                    ],
-                                    "cannotIgnoreStuns": true,
-                                    "tooltipText": "This character's strategic skills are stunned and they cannot ignore stun effects."
-                                }
-                            }
-                        ],
-                        "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
-        {
-            "id": "yamanaka-ino-ino-block",
-            "name": "Ino Block",
-            "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
-            "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
-            "energy": [
-                "Random"
+        { id: 'yamanaka-ino-ino-block', name: 'Ino Block',
+            skillimage: 'https://i.imgur.com/bgwFeRq.png',
+            skilldescription: 'Ino becomes invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'ino_block', duration: 1, scope: 'self',
+                    metadata: { helpful: true, invulnerable: true, tooltipText: 'Ino is invulnerable.' } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
         },
-        {
-            "id": "yamanaka-ino-art-of-the-valentine",
-            "name": "Art of the Valentine",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/p25BBXs.png",
-            "skilldescription": "Yamanaka Ino deals 15 damage to one enemy. If the target is affected by a stun effect, this skill deals 10 additional damage.",
-            "energy": [
-                "Random"
+        { id: 'yamanaka-ino-forced-betrayal', name: 'Forced Betrayal', hiddenFromSelectionViewer: true,
+            skillimage: 'https://i.imgur.com/TX3m6tw.png',
+            skilldescription: 'The enemy controlled by Mind Body Switch attacks one enemy for 30 physical damage. Mind Body Switch ends.',
+            energy: ['Random'], target: 'single-enemy',
+            targetCondition: { missingStatusId: 'ino_mind_body_switch_target' },
+            damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 30, scope: 'target',
+                    metadata: { damageSourceControlledStatusId: 'ino_mind_body_switch_target' } },
+                { type: 'remove_status', statusId: 'ino_mind_body_switch_target',
+                    scope: 'controlled-source',
+                    metadata: { controlledStatusId: 'ino_mind_body_switch_target' },
+                    condition: { scope: 'target', statusId: 'ino_mind_body_switch_target', statusFromActor: true } },
+                { type: 'remove_status', statusId: 'ino_mind_body_switch_active', scope: 'self' },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Mental",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 15,
-                    "scope": "target"
-                },
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "statusIdsAny": [
-                            "stunned",
-                            "yamanaka_ino_mind_body_disturbance_control",
-                            "yamanaka_ino_mind_body_switch_stage_1",
-                            "yamanaka_ino_mind_body_switch_stage_2",
-                            "yamanaka_ino_mind_body_switch_stage_3",
-                            "nara_shikamaru_shadow_imitation",
-                            "uzumaki_naruto_rasengan_stun"
-                        ]
-                    }
-                }
-            ]
-        }
-    ]
+        },
+    ],
 };

@@ -78,6 +78,7 @@ const NARUTO_REWORK_MIGRATION_ID = 'uzumaki-naruto-rework-2026-10-23';
 const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-24-v2';
 const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
+const INO_KONOHAMARU_REWORK_MIGRATION_ID = 'ino-konohamaru-rework-2026-10-25';
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
@@ -5430,6 +5431,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
         },
@@ -5475,6 +5477,7 @@ const getStoredCharacters = async () => {
                     [`completed.${SAKURA_SASUKE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -5496,6 +5499,8 @@ const getStoredCharacters = async () => {
     const shouldApplySakuraSasukeRework = !completedMigrations[SAKURA_SASUKE_REWORK_MIGRATION_ID];
     const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
     const shouldApplyDemonBrothersRework = !completedMigrations[DEMON_BROTHERS_REWORK_MIGRATION_ID];
+    const shouldApplyInoKonohamaruRework =
+        !completedMigrations[INO_KONOHAMARU_REWORK_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -5504,6 +5509,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplySakuraSasukeRework ? ['haruno-sakura', 'uchiha-sasuke'] : []),
         ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
         ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
+        ...(shouldApplyInoKonohamaruRework ? ['yamanaka-ino', 'sarutobi-konohamaru'] : []),
     ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
@@ -5576,6 +5582,8 @@ const getStoredCharacters = async () => {
             if (shouldApplySakuraSasukeRework && (characterId === 'haruno-sakura' || characterId === 'uchiha-sasuke')) return seedEntry;
             if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
             if (shouldApplyDemonBrothersRework && characterId === 'demon-brothers') return seedEntry;
+            if (shouldApplyInoKonohamaruRework &&
+                (characterId === 'yamanaka-ino' || characterId === 'sarutobi-konohamaru')) return seedEntry;
             const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
             const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
             if (facePicture !== storedFace) {
@@ -5635,7 +5643,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -5658,6 +5666,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyDemonBrothersRework) {
             completedMigrationUpdates[`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyInoKonohamaruRework) {
+            completedMigrationUpdates[`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },

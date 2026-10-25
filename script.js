@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const SOUND_SETTINGS_STORAGE_KEY = 'narutoSoundSettings';
     const soundVolumeInput =
         document.querySelector('.sound-volume') || document.querySelector('.ingame-sound-volume');
+    const soundToggleButton = document.getElementById('ingame-sound-toggle');
     const soundManager = (() => {
         const defaultSettings = {
             volume: 0.7,
@@ -38,9 +39,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
         let settings = readSettings();
+        let lastAudibleVolume = settings.volume > 0 ? settings.volume : defaultSettings.volume;
         const syncUi = () => {
             if (soundVolumeInput) {
                 soundVolumeInput.value = String(Math.round(settings.volume * 100));
+            }
+            if (soundToggleButton) {
+                const muted = settings.volume === 0;
+                soundToggleButton.dataset.muted = String(muted);
+                soundToggleButton.setAttribute('aria-pressed', String(muted));
+                soundToggleButton.setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
+                soundToggleButton.title = muted ? 'Unmute sound' : 'Mute sound';
             }
         };
         const persist = () => {
@@ -57,10 +66,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ...settings,
                     volume: clampVolume((event.target?.value || 0) / 100),
                 };
+                if (settings.volume > 0) lastAudibleVolume = settings.volume;
                 persist();
                 syncUi();
             });
         }
+        soundToggleButton?.addEventListener('click', () => {
+            if (settings.volume > 0) {
+                lastAudibleVolume = settings.volume;
+                settings = { ...settings, volume: 0 };
+            } else {
+                settings = { ...settings, volume: lastAudibleVolume };
+            }
+            persist();
+            syncUi();
+        });
         return {
             play(audio) {
                 if (!audio || settings.volume <= 0) return;
@@ -2787,7 +2807,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
-                battleEndTitleEl.textContent = didWin ? 'WINNER' : 'LOSER';
+                battleEndTitleEl.textContent = didWin ? 'Victory' : 'Defeat';
             }
             if (battleEndMessageEl) {
                 battleEndMessageEl.innerHTML =
@@ -2800,6 +2820,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             battleEndOverlayEl.classList.toggle('is-victory', didWin);
             battleEndOverlayEl.classList.toggle('is-defeat', !didWin);
             battleEndOverlayEl.classList.add('visible');
+            battleEndOverlayEl.setAttribute('aria-hidden', 'false');
+            battleEndContinueButton?.focus({ preventScroll: true });
             battleEndShown = true;
             playIngameSound(didWin ? winSound : lostSound);
             stopMatchRealtime();

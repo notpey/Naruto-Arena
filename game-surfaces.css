@@ -1221,43 +1221,132 @@
 }
 
 /* Battle controls and decision panels */
-.game-remaster .surrenderbutton,
-.game-remaster .sound {
+.game-remaster .surrenderbutton {
     border-color: #687b83;
     background: linear-gradient(180deg, #31444d, #1b2a33);
     box-shadow: 0 6px 16px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .1);
 }
 .game-remaster .surrenderbutton {
     appearance: none;
-    top: 597px;
-    height: 54px;
-    display: grid;
-    place-items: center;
-    padding: 0;
-    font: 800 13px 'Libre Franklin', Arial, sans-serif;
+    left: 43px;
+    top: 610px;
+    width: 174px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 12px;
+    font: 700 12px 'Libre Franklin', Arial, sans-serif;
     line-height: 1;
-    letter-spacing: .09em;
+    letter-spacing: .02em;
+    text-transform: none;
     transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.game-remaster .surrenderbutton svg { width: 17px; height: 17px; flex: none; }
+.game-remaster .surrenderbutton span {
+    position: static;
+    width: auto;
+    flex: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
 }
 .game-remaster .surrenderbutton:hover { transform: translateY(-2px); }
 .game-remaster .surrenderbutton:active { transform: translateY(0); }
 .game-remaster .surrenderbutton:focus-visible,
-.game-remaster .ingame-sound-volume:focus-visible { outline: 2px solid var(--arena-accent); outline-offset: 3px; }
+.game-remaster .ingame-sound-volume:focus-visible,
+.game-remaster .ingame-sound-toggle:focus-visible,
+.game-remaster .ingame-bug-button:focus-visible { outline: 2px solid var(--arena-accent); outline-offset: 3px; }
 .game-remaster .ingame-sound-controller {
-    width: 260px;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px 24px;
+    left: 43px;
+    top: 670px;
+    z-index: 15;
+    width: 174px;
+    height: 54px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid #687b83;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #31444d, #1b2a33);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
+    box-sizing: border-box;
 }
+.game-remaster .ingame-sound-toggle {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--arena-text);
+    cursor: pointer;
+}
+.game-remaster .ingame-sound-toggle:hover { background: #40535c; }
+.game-remaster .ingame-sound-toggle svg { width: 20px; height: 20px; }
+.game-remaster .ingame-sound-toggle .sound-mute { display: none; }
+.game-remaster .ingame-sound-toggle[data-muted="true"] .sound-wave { display: none; }
+.game-remaster .ingame-sound-toggle[data-muted="true"] .sound-mute { display: initial; }
+.game-remaster .ingame-sound-controls { flex: 1; min-width: 0; display: grid; gap: 5px; }
 .game-remaster .ingame-sound-label {
     color: #ecdfcc;
-    font: 800 11px 'Franklin', Arial, sans-serif;
-    letter-spacing: .1em;
-    text-align: center;
+    font: 700 11px 'Libre Franklin', Arial, sans-serif;
+    line-height: 1;
+    letter-spacing: .01em;
+    text-align: left;
 }
-.game-remaster .ingame-sound-volume { margin: 0; cursor: pointer; }
+.game-remaster .ingame-sound-volume {
+    width: 100%;
+    height: 4px;
+    margin: 0;
+    border-radius: 2px;
+    background: #71818a;
+    cursor: pointer;
+}
+.game-remaster .ingame-sound-volume::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #f2f3f0;
+    background: #e3ad68;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .35);
+}
+.game-remaster .ingame-sound-volume::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border: 2px solid #f2f3f0;
+    border-radius: 50%;
+    background: #e3ad68;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .35);
+}
+.game-remaster .ingame-bug-button {
+    top: 14px;
+    right: 18px;
+    min-width: 0;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid rgba(224, 235, 234, .64);
+    border-radius: 5px;
+    background: rgba(18, 34, 43, .87);
+    color: #f1f4ef;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .2);
+    font: 700 11px 'Libre Franklin', Arial, sans-serif;
+    letter-spacing: .01em;
+    text-transform: none;
+    transition: background .16s ease, border-color .16s ease;
+}
+.game-remaster .ingame-bug-button:hover {
+    border-color: var(--arena-accent);
+    background: #283e49;
+    color: #fff;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .2);
+    transform: none;
+}
 
 .game-remaster .ingameskilldescription strong { font-weight: 800; }
 .game-remaster .ingameskilldescription .skill-ref { color: #ffce8c; }
@@ -1395,29 +1484,100 @@
 .game-remaster .surrender-confirm-ok:hover { border-color: #edac9a; background: #ce6d5a; }
 .game-remaster .surrender-confirm-cancel { background: #30434c; }
 .game-remaster .battle-end-panel {
-    border-color: #77878a;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 860px;
+    height: auto;
+    min-height: 430px;
+    max-height: calc(100% - 64px);
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 32px;
+    padding: 30px;
+    box-sizing: border-box;
+    overflow: auto;
+    border-color: #687b83;
     background: linear-gradient(155deg, #263943, #111e27);
     box-shadow: 0 28px 70px rgba(0, 0, 0, .55);
     filter: none;
 }
+.game-remaster .battle-end-overlay.visible { pointer-events: auto; }
+.game-remaster .battle-end-overlay.is-defeat .battle-end-panel { min-height: 352px; }
 .game-remaster .battle-end-portrait {
-    border: 1px solid #89999b;
-    border-radius: 5px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, .38);
+    position: static;
+    width: 290px;
+    height: 368px;
+    align-self: stretch;
+    object-fit: cover;
+    border: 0;
+    border-radius: 4px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
 }
-.game-remaster .battle-end-title { color: #f0c58d; font-weight: 800; letter-spacing: .025em; }
+.game-remaster .battle-end-overlay.is-defeat .battle-end-portrait { height: 290px; }
+.game-remaster .battle-end-copy {
+    position: static;
+    width: auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 0 4px;
+    box-sizing: border-box;
+}
+.game-remaster .battle-end-title {
+    margin: 0 0 17px;
+    color: #f0c58d;
+    font: 800 52px/1 'Libre Franklin', Arial, sans-serif;
+    letter-spacing: -.035em;
+    text-align: left;
+}
 .game-remaster .battle-end-overlay.is-defeat .battle-end-title { color: #efa08e; }
-.game-remaster .battle-end-message { line-height: 1.5; }
+.game-remaster .battle-end-message {
+    margin: 0;
+    font: 400 15px/1.5 'Libre Franklin', Arial, sans-serif;
+    color: var(--arena-text);
+    overflow-wrap: anywhere;
+}
+.game-remaster .battle-end-summary { gap: 15px; }
+.game-remaster .battle-end-outcome {
+    min-height: 0;
+    font-size: 17px;
+    line-height: 1.45;
+    text-transform: none;
+}
+.game-remaster .battle-end-rewards { gap: 0; }
+.game-remaster .battle-end-reward-row {
+    min-height: 34px;
+    padding: 5px 0;
+    border: 0;
+    border-bottom: 1px solid #465962;
+    background: transparent;
+}
+.game-remaster .battle-end-reward-label { color: #becacb; }
+.game-remaster .battle-end-reward-value { color: #f0c58d; font-weight: 700; }
+.game-remaster .battle-end-unlocks {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #b9c5c8;
+    font-size: 13px;
+    line-height: 1.4;
+}
 .game-remaster .battle-end-continue {
-    top: 318px;
-    min-width: 180px;
-    padding: 10px 24px;
+    position: static;
+    transform: none;
+    align-self: flex-start;
+    min-width: 160px;
+    min-height: 42px;
+    margin-top: auto;
+    padding: 9px 20px;
     border: 1px solid #efc58e;
     border-radius: 5px;
     background: #e3ad68;
     color: #15212a;
-    font-size: 17px;
-    font-weight: 800;
+    font: 800 14px/1 'Libre Franklin', Arial, sans-serif;
     text-align: center;
 }
 .game-remaster .battle-end-continue:hover { background: #f0c58d; opacity: 1; }

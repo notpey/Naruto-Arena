@@ -17,6 +17,10 @@ const NarutoRosterCatalog = (() => {
         ['demon-brothers', 'land-of-waves'],
         ['momochi-zabuza', 'land-of-waves'],
         ['haku', 'land-of-waves'],
+        ['gato', 'land-of-waves'],
+        ['zori-and-waraji', 'land-of-waves'],
+        ['yamanaka-ino', 'prologue'],
+        ['sarutobi-konohamaru', 'prologue'],
         ['sarutobi-hiruzen', 'konoha-crush'],
     ];
 

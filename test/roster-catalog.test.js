@@ -14,7 +14,11 @@ test('arc sorting changes display order without changing canonical roster indice
         ['demon-brothers', 'Demon Brothers'],
         ['momochi-zabuza', 'Momochi Zabuza'],
         ['haku', 'Haku'],
+        ['gato', 'Gatō'],
+        ['zori-and-waraji', 'Zōri & Waraji'],
         ['sarutobi-hiruzen', 'Sarutobi Hiruzen'],
+        ['yamanaka-ino', 'Yamanaka Ino'],
+        ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
     ]);
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({
         characterId,
@@ -27,12 +31,16 @@ test('arc sorting changes display order without changing canonical roster indice
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster).map((index) => roster[index].characterId), [
         'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura', 'hatake-kakashi',
-        'umino-iruka', 'mizuki', 'demon-brothers', 'momochi-zabuza', 'haku', 'sarutobi-hiruzen',
+        'umino-iruka', 'mizuki', 'yamanaka-ino', 'sarutobi-konohamaru',
+        'demon-brothers', 'momochi-zabuza', 'haku',
+        'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
-        'demon-brothers', 'momochi-zabuza', 'haku',
+        'demon-brothers', 'momochi-zabuza', 'haku', 'gato', 'zori-and-waraji',
     ]);
-    assert.deepEqual(catalog.filterRosterIndices(roster, { availability: 'locked', search: 'HAKU' }), [2]);
+    assert.deepEqual(catalog.filterRosterIndices(roster, { availability: 'locked', search: 'HAKU' }), [
+        roster.findIndex((character) => character.characterId === 'haku'),
+    ]);
     assert.equal(catalog.filterRosterIndices(roster, { search: 'no match' }).length, 0);
-    assert.equal(catalog.getArc(roster[0]).label, 'Konoha Crush');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'sarutobi-hiruzen')).label, 'Konoha Crush');
 });

@@ -17,7 +17,7 @@
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=2"></script>
     <link rel="stylesheet" href="mobile-layout.css?v=3">
-    <link rel="stylesheet" href="game-surfaces.css?v=12">
+    <link rel="stylesheet" href="game-surfaces.css?v=13">
 </head>
 <body class="ingame-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -39,11 +39,20 @@
         </button>
         <div class="gauntlet-battle-popover" id="gauntlet-battle-popover" hidden></div>
     </div>
-    <div class="ingame-sound-controller" aria-label="Sound controller">
-        <label class="ingame-sound-label" for="ingame-sound-volume">VOLUME</label>
-        <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
+    <div class="ingame-sound-controller" aria-label="Sound controls">
+        <button type="button" class="ingame-sound-toggle" id="ingame-sound-toggle" aria-label="Mute sound" aria-pressed="false" title="Mute sound">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 9v6h4l5 4V5L8 9H4Z"></path>
+                <path class="sound-wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"></path>
+                <path class="sound-mute" d="m17 9 5 6m0-6-5 6"></path>
+            </svg>
+        </button>
+        <div class="ingame-sound-controls">
+            <label class="ingame-sound-label" for="ingame-sound-volume">Sound</label>
+            <input id="ingame-sound-volume" class="ingame-sound-volume" type="range" min="0" max="100" step="1" value="70" aria-label="Sound volume">
+        </div>
     </div>
-    <button type="button" class="ingame-bug-button" id="ingame-bug-report-btn">Report Bug</button>
+    <button type="button" class="ingame-bug-button" id="ingame-bug-report-btn">Report issue</button>
 
     <div class="story-dialogue-overlay" id="story-dialogue-overlay">
         <div class="story-dialogue-box">
@@ -233,13 +242,13 @@
         </div>
     </div>
 
-    <div class="battle-end-overlay">
+    <div class="battle-end-overlay" role="dialog" aria-modal="true" aria-labelledby="battle-end-title" aria-hidden="true">
         <div class="battle-end-panel">
             <img src="lose-remaster.png?v=2" alt="Defeated character portrait" class="battle-end-portrait">
             <div class="battle-end-copy">
-                <p class="battle-end-title">LOSER</p>
-                <p class="battle-end-message">TOO BAD!<br>YOU HAVE LOST A QUICK BATTLE AGAINST USERNAME.</p>
-                <button type="button" class="battle-end-continue" onclick="window.location.href='selection.html'">CONTINUE</button>
+                <h2 class="battle-end-title" id="battle-end-title">Defeat</h2>
+                <div class="battle-end-message">You lost a quick battle.</div>
+                <button type="button" class="battle-end-continue">Continue</button>
             </div>
         </div>
     </div>
@@ -455,16 +464,14 @@
 
     <div class="bottomgame">
         <button type="button" class="surrenderbutton">
-            SURRENDER
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4m0 1c4-3 7 3 13 0v10c-6 3-9-3-13 0"></path></svg>
+            <span>Surrender</span>
         </button>
-        <div class="sound" aria-hidden="true">
-            
-        </div>
 </div>
 
 </div>
 <script src="characters.js?v=42"></script>
 <script src="skill-description-format.js?v=2"></script>
-<script src="script.js?v=45"></script>
+<script src="script.js?v=46"></script>
 </body>
 </html>

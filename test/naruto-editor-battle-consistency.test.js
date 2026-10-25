@@ -809,8 +809,7 @@ test('battleLogic resolves Chouji starter kit behavior used by the editor data',
 });
 
 test('battleLogic resolves Ino starter kit behavior used by the editor data', () => {
-    let match = makeMatch([8], [2]);
-
+    const match = makeMatch([8], [2]);
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(
@@ -820,48 +819,17 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
             skillIndex: 1,
             actorState: match.board.p1[0].state,
         }).id,
-        'yamanaka-ino-art-of-the-valentine'
+        'yamanaka-ino-forced-betrayal'
     );
     assert.equal(
         match.board.p2[0].state.statuses.some(
             (status) =>
-                status.id === 'yamanaka_ino_mind_body_switch_stage_1' &&
-                status.metadata.cannotUseSkillClasses.includes('physical')
+                status.id === 'ino_mind_body_switch_target' &&
+                status.metadata.cannotUseHarmfulSkills
         ),
         true
     );
-
-    match = makeMatch([8], [2]);
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(
-        match.board.p2[0].hp,
-        90,
-        'Chakra Hair Strand Trap should damage the target when they use a skill'
-    );
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'yamanaka_ino_chakra_hair_strand_trap_strategic_stun' &&
-                status.metadata.cannotUseSkillClasses.includes('strategic')
-        ),
-        true
-    );
-
-    match = makeMatch([8], [2]);
-    queueSkill(match, 'p1', 0);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 75, 'Mind Body Disturbance should deal 25 piercing damage');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'yamanaka_ino_mind_body_disturbance_control' &&
-                status.metadata.cannotUseSkillClasses.includes('energy')
-        ),
-        true
-    );
+    assert.equal(match.board.p2[0].hp, 95, 'Art of the Valentine deals 5 piercing damage on stun');
 });
 
 test('battleLogic resolves Rock Lee starter kit behavior used by the editor data', () => {

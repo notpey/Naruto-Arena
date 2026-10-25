@@ -11,6 +11,10 @@ const ACTIVE_ROSTER_IDS = [
     'haku',
     'demon-brothers',
     'sarutobi-hiruzen',
+    'gato',
+    'zori-and-waraji',
+    'yamanaka-ino',
+    'sarutobi-konohamaru',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

@@ -1,0 +1,63 @@
+module.exports = {
+    id: 'zori-and-waraji',
+    characterId: 'zori-and-waraji',
+    name: 'Zōri & Waraji',
+    facePicture: 'https://i.imgur.com/EIsg1h5.png',
+    characterdeescription: "Two ruthless samurai employed as Gatō's personal bodyguards, Zōri and Waraji terrorize the Land of Waves through violence and intimidation. Though no match for accomplished shinobi, their practiced swordsmanship and willingness to fight dirty make them dangerous opponents.",
+    passive: {
+        name: 'Coordinated Blades',
+        icon: 'https://i.imgur.com/51dDIFU.png',
+        description: "Whenever Zōri uses Iaidō, Waraji's Savage Slash deals 10 additional damage for 1 turn. Whenever Waraji uses Savage Slash, Zōri's Iaidō deals 10 additional damage for 1 turn. These bonuses cannot stack.",
+    },
+    skills: [
+        {
+            id: 'zori-and-waraji-iaido', name: 'Iaidō (Zōri)',
+            skillimage: 'https://i.imgur.com/ghsKrge.png',
+            skilldescription: 'Zōri quickly draws his sword and strikes one enemy, dealing 20 piercing damage.',
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 20, scope: 'target', metadata: { ignoreDamageReduction: true } },
+                { type: 'apply_status', statusId: 'zori_and_waraji_savage_slash_bonus', duration: 1,
+                    scope: 'self', metadata: { helpful: true, turnDurationAnchor: 'source_turn',
+                        skillDamageBonuses: { 'zori-and-waraji-savage-slash': 10 },
+                        tooltipText: 'Savage Slash deals 10 additional damage for 1 turn.' } },
+            ],
+        },
+        {
+            id: 'zori-and-waraji-savage-slash', name: 'Savage Slash (Waraji)',
+            skillimage: 'https://i.imgur.com/yDtMIqS.png',
+            skilldescription: 'Waraji attacks one enemy with a brutal sword slash, dealing 25 physical damage.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 25, scope: 'target' },
+                { type: 'apply_status', statusId: 'zori_and_waraji_iaido_bonus', duration: 1,
+                    scope: 'self', metadata: { helpful: true, turnDurationAnchor: 'source_turn',
+                        skillDamageBonuses: { 'zori-and-waraji-iaido': 10 },
+                        tooltipText: 'Iaidō deals 10 additional damage for 1 turn.' } },
+            ],
+        },
+        {
+            id: 'zori-and-waraji-forced-entry', name: 'Forced Entry',
+            skillimage: 'https://i.imgur.com/6wswhvT.png',
+            skilldescription: 'Zōri and Waraji charge through the enemy team, destroying 10 points of destructible defense from each enemy and dealing 15 physical damage to all enemies.',
+            energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'destroy_destructible_defense', amount: 10, scope: 'all-enemy' },
+                { type: 'damage', amount: 15, scope: 'all-enemy' },
+            ],
+        },
+        {
+            id: 'zori-and-waraji-take-cover', name: 'Take Cover',
+            skillimage: 'https://i.imgur.com/q8dKy5X.png',
+            skilldescription: 'This skill makes Zōri & Waraji invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true,
+                    tooltipText: 'This character is invulnerable.' } }],
+        },
+    ],
+};
