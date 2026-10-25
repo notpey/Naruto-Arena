@@ -692,10 +692,14 @@ const filterHelpfulImmuneRecipients = ({ effect, recipients, actingUsername }) =
         return !isUnitInvulnerableToHelpfulSkills(recipient.unit);
     });
 
-const doesUnitSatisfySkillTargetCondition = (unit, skill) => {
+const doesUnitSatisfySkillTargetCondition = (unit, skill, actorUsername = null, actorSlot = null) => {
     const condition = skill?.targetCondition;
     const state = ensureUnitStateShape(unit);
     if (condition?.statusId && !hasStatus(state, condition.statusId)) return false;
+    if (condition?.statusId && condition?.statusFromActor &&
+        !(state.statuses || []).some((status) =>
+            status?.id === condition.statusId && (Number(status.remainingTurns) || 0) > 0 &&
+            status.sourceUsername === actorUsername && status.sourceSlot === actorSlot)) return false;
     if (
         Array.isArray(condition?.statusIdsAny) &&
         condition.statusIdsAny.length > 0 &&
@@ -806,7 +810,9 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
                     return false;
                 }
                 if (!canActorTargetUnit({ actorState, targetUsername: username, targetSlot: slot })) return false;
-                if (!doesUnitSatisfySkillTargetCondition(unit, effectiveSkill)) return false;
+                if (!doesUnitSatisfySkillTargetCondition(
+                    unit, effectiveSkill, actingUsername, actorSlot
+                )) return false;
                 return true;
             })
             .map(({ unit, slot }) => ({
@@ -1269,9 +1275,6 @@ const doesEffectConditionMatch = ({
     const scope = condition.scope === 'target' ? 'target' : 'self';
     const scopedState = scope === 'target' ? targetState : actorState;
     if (!scopedState) return false;
-    if (condition.targetIsStunned && !isUnitStunned(
-        scopedState, scope === 'target' ? targetUnit : actorUnit
-    )) return false;
     const targetRelation = typeof condition?.targetRelation === 'string' ? condition.targetRelation.trim().toLowerCase() : '';
     if (targetRelation) {
         const sameUnit = Boolean(actorUnit && targetUnit && actorUnit === targetUnit);
@@ -1710,6 +1713,9 @@ const getOutgoingDamageCap = (actorState, actorUnit = null) => {
 
 const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState, targetUnit = null, skillClasses = [] }) => {
     let amount = Number(effect?.amount) || 0;
+    if (isUnitStunned(targetState, targetUnit)) {
+        amount += Math.max(0, Number(effect?.metadata?.bonusDamageIfTargetStunned) || 0);
+    }
     const effectiveSkillClasses = Array.isArray(skillClasses) ? [...skillClasses] : [];
     if (Boolean(effect?.metadata?.afflictionDamage) && !hasSkillClass(effectiveSkillClasses, 'affliction')) {
         effectiveSkillClasses.push('affliction');
@@ -4677,7 +4683,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 ) {
                     return false;
                 }
-                if (!doesUnitSatisfySkillTargetCondition(entry.unit, skill)) return false;
+                if (!doesUnitSatisfySkillTargetCondition(
+                    entry.unit, skill, actingUsername, actorSlot
+                )) return false;
                 return (
                     bypassEnemyInvulnerability ||
                     canActorIgnoreTargetInvulnerabilityBySourceMark({
@@ -4691,11 +4699,11 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const allAliveUnits = [...actorAllies, ...opponentUnits];
         const actorHasHarmfulBlind = hasStatusMetadataFlag(actorState, 'harmfulBlind');
         const actorHasHelpfulBlind = hasStatusMetadataFlag(actorState, 'helpfulBlind');
-        const shouldRetargetToRandomEnemy =
-            (actorHasHarmfulBlind && skillHasHarmfulEffects(skill)) ||
-            hasStatusMetadataFlag(actorState, 'allSkillsBlindToRandomEnemy');
+        const allSkillsBlind = hasStatusMetadataFlag(actorState, 'allSkillsBlindToRandomEnemy');
+        const confusedTarget = allSkillsBlind ? pickRandomEntry(opponentUnits) : null;
+        const shouldRetargetToRandomEnemy = actorHasHarmfulBlind && skillHasHarmfulEffects(skill);
         const shouldRetargetToRandomAlly = actorHasHelpfulBlind && !skillHasHarmfulEffects(skill);
-        const selectedTargets = selection
+        const selectedTargets = allSkillsBlind && confusedTarget ? [confusedTarget] : selection
             .map((target) => {
                 let entry = {
                     username: target.username,
@@ -4740,7 +4748,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 ) {
                     return false;
                 }
-                if (!doesUnitSatisfySkillTargetCondition(entry.unit, skill)) return false;
+                if (!doesUnitSatisfySkillTargetCondition(
+                    entry.unit, skill, actingUsername, actorSlot
+                )) return false;
                 return (
                     bypassEnemyInvulnerability ||
                     canActorIgnoreTargetInvulnerabilityBySourceMark({
@@ -4991,6 +5001,11 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             });
         const resolveRecipients = (effect) => {
             const scope = effect?.scope;
+            if (allSkillsBlind && confusedTarget && scope !== 'controlled-source') {
+                return filterHelpfulImmuneRecipients({
+                    effect, recipients: reflectRecipients([confusedTarget]), actingUsername,
+                });
+            }
             if (scope === 'controlled-source') {
                 const controlledStatusId = effect?.metadata?.controlledStatusId;
                 const units = Array.isArray(match.board?.[opponentUsername])
@@ -5178,6 +5193,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             if (!recipient?.unit || recipient.unit.alive === false) return;
             const numericAmount = Math.max(0, Number(amount) || 0);
             if (numericAmount <= 0) return;
+            const baseDamage = Math.max(0, Number(effect?.amount) || 0) +
+                (isUnitStunned(ensureUnitStateShape(recipient.unit), recipient.unit)
+                    ? Math.max(0, Number(effect?.metadata?.bonusDamageIfTargetStunned) || 0) : 0);
             const ignoreDamageReduction =
                 Boolean(effect?.metadata?.ignoreDamageReduction) ||
                 hasSkillSpecificStatusFlag(actorState, skill.id || null, 'ignoreDamageReductionForSkillIds');
@@ -5211,12 +5229,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             const existing = pendingDamage.get(key);
             if (existing) {
                 existing.amount += numericAmount;
+                existing.sourceBaseDamage += baseDamage;
                 return;
             }
             pendingDamage.set(key, {
                 recipient,
                 amount: numericAmount,
-                sourceBaseDamage: Math.max(0, Number(effect?.amount) || 0),
+                sourceBaseDamage: baseDamage,
                 ignoreDamageReduction,
                 ignoreDestructibleDefense,
                 afflictionDamage: Boolean(effect?.metadata?.afflictionDamage),
@@ -5443,7 +5462,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     if (!recipient?.unit || recipient.unit.alive === false) return;
                     if (controlledSource &&
                         (recipient.username !== controlledSource.username ||
-                            recipient.slot === controlledSource.slot)) return;
+                            recipient.slot !== controlledSource.slot)) return;
                     if (rollPerRecipient && Number.isFinite(chance) && chance >= 0 && chance < 100) {
                         if (!rollPercentSuccess(chance)) return;
                     }
@@ -5517,13 +5536,15 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     const damageActorUnit = controlledSource?.unit || actorUnit;
                     const damageActorState = controlledSource
                         ? ensureUnitStateShape(controlledSource.unit) : actorState;
+                    const damageSkillClasses = Array.isArray(effect?.metadata?.skillClasses)
+                        ? effect.metadata.skillClasses : skill.classes || [];
                     const amount = resolveEffectDamageAmount({
                         effect,
                         actorState: damageActorState,
                         actorUnit: damageActorUnit,
                         targetState,
                         targetUnit: recipient.unit,
-                        skillClasses: skill.classes || [],
+                        skillClasses: damageSkillClasses,
                     });
                     const skillSpecificBonus = controlledSource ? 0 :
                         getSkillSpecificDamageBonus(actorState, skill.id || null);
@@ -5532,7 +5553,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         actorUsername: actingUsername,
                         actorSlot,
                         targetState,
-                        skillClasses: skill.classes,
+                        skillClasses: damageSkillClasses,
                     });
                     const samePreviousTargetBonus = controlledSource ? 0 : getSamePreviousTargetDamageBonus({
                         actorState,
@@ -5546,8 +5567,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         sourceSkillId: skill.id || null,
                         sourceUsername: controlledSource?.username || actingUsername,
                         sourceSlot: controlledSource?.slot ?? actorSlot,
-                        skillClasses: skill.classes || [],
-                        afflictionDamage: Boolean(effect?.metadata?.afflictionDamage) || hasSkillClass(skill.classes || [], 'affliction'),
+                        skillClasses: damageSkillClasses,
+                        afflictionDamage: Boolean(effect?.metadata?.afflictionDamage) ||
+                            hasSkillClass(damageSkillClasses, 'affliction'),
                     });
                     const totalAmount = Math.max(
                         0,
@@ -5579,7 +5601,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         if (!rollPercentSuccess(activationChance)) return;
                     }
                     const targetState = ensureUnitStateShape(recipient.unit);
-                    const appliesToSelf = effect?.scope === 'self';
+                    const appliesToSelf = effect?.scope === 'self' && !(allSkillsBlind && confusedTarget);
                     const destinationState = appliesToSelf ? actorState : targetState;
                     if (
                         doesEffectTargetHelpfulRecipient({ effect, recipient, actingUsername }) &&
@@ -8553,6 +8575,27 @@ const applyTriggeredEffectsFromStatus = ({
             return;
         }
         if (effect.type === 'apply_status' && effect.statusId) {
+            const effectMetadata = effect.metadata || {};
+            const appliesStun = Boolean(effectMetadata.cannotUseSkills) ||
+                Boolean(effectMetadata.cannotUseHarmfulSkills) ||
+                Boolean(effectMetadata.cannotUseNonMentalSkills) ||
+                (Array.isArray(effectMetadata.cannotUseSkillClasses) &&
+                    effectMetadata.cannotUseSkillClasses.length > 0) ||
+                (Array.isArray(effectMetadata.cannotUseSkillIndices) &&
+                    effectMetadata.cannotUseSkillIndices.length > 0);
+            if (appliesStun && hasStatusMetadataFlag(targetState, 'cannotBeStunned') &&
+                !effectMetadata.cannotIgnoreStuns &&
+                !hasStatusMetadataFlag(targetState, 'cannotIgnoreStuns')) {
+                applyStatus({
+                    targetState, statusId: 'stun_ignored_notification',
+                    duration: effect.duration, sourceSkillId: status?.sourceSkillId || null,
+                    sourceUsername: status?.sourceUsername || null,
+                    sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
+                    metadata: { harmful: true, tooltipText: effectMetadata.tooltipText || 'This character is stunned.' },
+                    fresh: Boolean(effect.fresh),
+                });
+                return;
+            }
             if (effect.scope === 'all-allies' && match && status?.sourceUsername) {
                 const teamUnits = Array.isArray(match.board?.[status.sourceUsername])
                     ? match.board[status.sourceUsername]
@@ -8580,7 +8623,7 @@ const applyTriggeredEffectsFromStatus = ({
                 sourceUsername: status?.sourceUsername || null,
                 sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
                 metadata: effect.metadata || {},
-                fresh: false,
+                fresh: Boolean(effect.fresh),
             });
             if (!Array.isArray(pendingStatuses)) {
                 applyPassiveStunDamage({

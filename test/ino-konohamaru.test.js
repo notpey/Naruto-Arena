@@ -18,6 +18,13 @@ const attacker = {
         { id: 'test-heal', name: 'Heal', target: 'single-ally',
             classes: ['Chakra', 'Instant'], energy: [], cooldown: 0,
             effects: [{ type: 'heal', amount: 10, scope: 'target' }] },
+        { id: 'test-self-guard', name: 'Self Guard', target: 'self',
+            classes: ['Strategic', 'Instant'], energy: [], cooldown: 0,
+            effects: [{ type: 'apply_status', statusId: 'test_guard', duration: 1,
+                scope: 'self', metadata: { helpful: true, invulnerable: true } }] },
+        { id: 'test-aoe', name: 'Area Hit', target: 'all-enemy',
+            classes: ['Chakra', 'Instant'], energy: [], cooldown: 0,
+            effects: [{ type: 'damage', amount: 10, scope: 'all-enemy' }] },
     ],
 };
 const characters = [ino, konohamaru, attacker];
@@ -70,9 +77,31 @@ test('Ino Feint adds 10 damage against any stun', () => {
     });
     cast(match, 'p1', 0, 0, 'p2', 1);
     assert.equal(match.board.p2[1].hp, 70);
+
+    const physicalGuard = makeMatch();
+    physicalGuard.board.p2[0].state.statuses.push({
+        id: 'physical_guard', remainingTurns: 1,
+        metadata: { physicalDamageReductionFlat: 5 },
+    });
+    cast(physicalGuard, 'p1', 0, 0, 'p2', 0);
+    assert.equal(physicalGuard.board.p2[0].hp, 85,
+        'Feint deals Physical damage despite its Chakra skill class');
+
+    const boosted = makeMatch();
+    boosted.board.p2[0].state.statuses.push({
+        id: 'foreign_stun', remainingTurns: 1,
+        metadata: { harmful: true, cannotUseSkillClasses: ['physical'] },
+    });
+    boosted.board.p1[0].state.statuses.push({
+        id: 'physical_boost', remainingTurns: 1,
+        metadata: { helpful: true, damageBonusBySkillClass: { physical: 5 } },
+    });
+    cast(boosted, 'p1', 0, 0, 'p2', 0);
+    assert.equal(boosted.board.p2[0].hp, 65,
+        'Feint applies its Physical damage bonus once to 30 base damage');
 });
 
-test('Ino Switch stuns, triggers piercing passive, and Forced Betrayal uses the controlled enemy', () => {
+test('Ino Switch stuns, triggers piercing passive, and Forced Betrayal damages its target without ending control', () => {
     const match = makeMatch();
     match.board.p2[0].state.statuses.push({
         id: 'mitigation', remainingTurns: 2,
@@ -87,13 +116,17 @@ test('Ino Switch stuns, triggers piercing passive, and Forced Betrayal uses the 
     const targets = battle.computeTargetOptions({
         match, actingUsername: 'p1', actorSlot: 0, skillIndex: 1, characters,
     }).targets;
-    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 0), false);
-    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 1), true);
-    cast(match, 'p1', 0, 1, 'p2', 1);
-    assert.equal(match.board.p2[1].hp, 70);
-    assert.match(match.board.p2[1].state.lastDamageDebugText, /Test Attacker/);
-    assert.equal(has(match.board.p2[0], 'ino_mind_body_switch_target'), false);
-    assert.equal(has(match.board.p1[0], 'ino_mind_body_switch_active'), false);
+    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 0), true);
+    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 1), false);
+    match.board.p2[0].state.statuses =
+        match.board.p2[0].state.statuses.filter((entry) => entry.id !== 'mitigation');
+    cast(match, 'p1', 0, 1, 'p2', 0);
+    assert.equal(match.board.p2[0].hp, 65);
+    assert.match(match.board.p2[0].state.lastDamageDebugText, /Test Attacker/);
+    assert.ok(has(match.board.p2[0], 'ino_mind_body_switch_target'));
+    assert.ok(has(match.board.p1[0], 'ino_mind_body_switch_active'));
+    cast(match, 'p1', 0, 1, 'p2', 0);
+    assert.equal(match.board.p2[0].hp, 35);
 });
 
 test('Ino hair trap stuns the first harmful cast and Switch consumes it', () => {
@@ -104,12 +137,33 @@ test('Ino hair trap stuns the first harmful cast and Switch consumes it', () => 
     assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'));
     assert.equal(match.board.p2[0].hp, 95, 'the trap stun triggers Ino passive');
     assert.equal(has(match.board.p2[0], 'ino_hair_strand_trap'), false);
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'),
+        'the trap stun survives the triggering turn');
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'),
+        'the trap stun blocks the target next turn');
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.equal(has(match.board.p2[0], 'ino_hair_strand_stun'), false);
 
     const second = makeMatch();
     cast(second, 'p1', 0, 2, 'p2', 0);
     cast(second, 'p1', 0, 1, 'p2', 0);
     assert.equal(has(second.board.p2[0], 'ino_hair_strand_trap'), false);
     assert.ok(has(second.board.p2[0], 'ino_mind_body_switch_trap_break'));
+});
+
+test('Ino hair trap does not stun or damage a stun-immune enemy', () => {
+    const match = makeMatch();
+    match.board.p2[0].state.statuses.push({
+        id: 'stun_immunity', remainingTurns: 2,
+        metadata: { helpful: true, cannotBeStunned: true },
+    });
+    cast(match, 'p1', 0, 2, 'p2', 0);
+    cast(match, 'p2', 0, 0, 'p1', 0);
+    assert.equal(has(match.board.p2[0], 'ino_hair_strand_stun'), false);
+    assert.equal(match.board.p2[0].hp, 100);
+    assert.equal(has(match.board.p2[0], 'ino_hair_strand_trap'), false);
 });
 
 test('Ino control ends if she is stunned', () => {
@@ -157,6 +211,12 @@ test('Konohamaru passive resets its damage counter at turn end', () => {
     assert.equal(has(unit, 'konohamaru_rivalry_defense'), false);
     hit();
     assert.ok(has(unit, 'konohamaru_rivalry_defense'));
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(has(unit, 'konohamaru_rivalry_defense'));
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(has(unit, 'konohamaru_rivalry_defense'));
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(has(unit, 'konohamaru_rivalry_defense'), false);
 });
 
 test('Konohamaru cloak protects an ally and credits his retaliation', () => {
@@ -185,6 +245,20 @@ test('Konohamaru confusion redirects a helpful targeted skill to a random enemy'
     assert.equal(match.board.p1.reduce((sum, unit) => sum + unit.hp, 0), 160);
 });
 
+test('Konohamaru confusion redirects self and team-wide skill effects to one enemy', () => {
+    const selfMatch = makeMatch();
+    cast(selfMatch, 'p1', 1, 1, 'p2', 0);
+    cast(selfMatch, 'p2', 0, 3, 'p2', 0);
+    assert.equal(has(selfMatch.board.p2[0], 'test_guard'), false);
+    assert.equal(selfMatch.board.p1.filter((unit) => has(unit, 'test_guard')).length, 1);
+
+    const areaMatch = makeMatch();
+    cast(areaMatch, 'p1', 1, 1, 'p2', 0);
+    cast(areaMatch, 'p2', 0, 4);
+    assert.equal(areaMatch.board.p1.reduce((sum, unit) => sum + unit.hp, 0), 290);
+    assert.equal(areaMatch.board.p1.filter((unit) => unit.hp === 90).length, 1);
+});
+
 test('Konohamaru Ambush hits one and pierces the others, then counters targeting', () => {
     const match = makeMatch();
     match.board.p2[1].state.statuses.push({
@@ -194,8 +268,15 @@ test('Konohamaru Ambush hits one and pierces the others, then counters targeting
     assert.equal(match.board.p2[0].hp, 80);
     assert.equal(match.board.p2[1].hp, 90);
     assert.equal(status(match.board.p2[1], 'armor').metadata.destructibleDefensePoints, 10);
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(has(match.board.p1[1], 'konohamaru_ambush_trap'),
+        'the counter remains active for the next enemy turn');
     cast(match, 'p2', 0, 1, 'p1', 1);
     assert.equal(match.board.p2[0].hp, 70);
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(has(match.board.p1[1], 'konohamaru_ambush_trap'), false,
+        'the counter expires after the next turn');
 });
 
 test('Ino Block and Replacement Technique prevent attacks for one turn', () => {

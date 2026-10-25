@@ -78,7 +78,7 @@ const NARUTO_REWORK_MIGRATION_ID = 'uzumaki-naruto-rework-2026-10-23';
 const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-24-v2';
 const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
-const INO_KONOHAMARU_REWORK_MIGRATION_ID = 'ino-konohamaru-rework-2026-10-25';
+const INO_KONOHAMARU_REWORK_MIGRATION_ID = 'ino-konohamaru-rework-2026-10-25-v2';
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
