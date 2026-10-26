@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (event.target.closest('.sound-controller, .ingame-sound-controller, .settings-slider')) {
                 return;
             }
-            if (event.target.closest('button, a, .slot-item, .selected-character-slot, .skill-image, .character-card, .tab, .selection-hub-tab, .gacha-summon-btn, .settings-hub-card-btn, [data-hub-view], [data-gacha-trigger], [data-shop-trigger], [data-settings-trigger]')) {
+            if (event.target.closest('button, a, .slot-item, .selected-character-slot, .skill-image, .character-card, .tab, .selection-hub-tab, .settings-hub-card-btn, [data-hub-view], [data-settings-trigger]')) {
                 soundManager.play(clickSound);
             }
         });
@@ -197,12 +197,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const promoModal = document.getElementById('promo-code-modal');
             if (promoModal && !promoModal.classList.contains('hidden')) {
                 promoModal.classList.add('hidden');
-                playModalCloseSound();
-                return;
-            }
-            const gachaModal = document.getElementById('gacha-modal');
-            if (gachaModal && !gachaModal.classList.contains('hidden')) {
-                gachaModal.classList.add('hidden');
                 playModalCloseSound();
                 return;
             }
@@ -374,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.characters = data.characters;
             if (pageName === 'selection.html') {
                 loadedRosterRyoBalance = Math.max(0, Number(data.ryo) || 0);
-                document.querySelectorAll('[data-shop-balance]').forEach((el) => {
+                document.querySelectorAll('[data-ryo-balance]').forEach((el) => {
                     el.textContent = loadedRosterRyoBalance.toLocaleString('en-US');
                 });
             }
@@ -5695,7 +5689,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let rosterRyoBalance = loadedRosterRyoBalance;
     const setRosterRyoBalance = (value) => {
         rosterRyoBalance = Math.max(0, Number(value) || 0);
-        document.querySelectorAll('[data-shop-balance]').forEach((el) => {
+        document.querySelectorAll('[data-ryo-balance]').forEach((el) => {
             el.textContent = Math.round(rosterRyoBalance).toLocaleString('en-US');
         });
     };
@@ -5964,12 +5958,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (unlockActionEl) {
             const locked = character.unlocked === false;
             unlockActionEl.hidden = !locked;
-            if (unlockPriceEl) unlockPriceEl.textContent = Math.max(0, Number(character.shopPrice) || 1000).toLocaleString('en-US');
+            const price = Number.isFinite(Number(character.purchasePrice))
+                ? Math.max(0, Number(character.purchasePrice)) : 1000;
+            if (unlockPriceEl) unlockPriceEl.textContent = price.toLocaleString('en-US');
             if (unlockErrorEl) unlockErrorEl.textContent = '';
             if (unlockBuyBtn) {
-                const price = Math.max(0, Number(character.shopPrice) || 1000);
                 unlockBuyBtn.disabled = locked && rosterRyoBalance < price;
-                unlockBuyBtn.textContent = locked && rosterRyoBalance < price ? 'Not enough Ryo' : 'Unlock character';
+                unlockBuyBtn.textContent = locked && rosterRyoBalance < price ? 'Not enough Ryo' : 'Purchase character';
             }
         }
         if (portraitEl) {
@@ -6156,7 +6151,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (locked) {
             const lock = document.createElement('span');
             lock.className = 'slot-lock-label';
-            lock.textContent = 'LOCKED';
+            lock.setAttribute('aria-hidden', 'true');
+            lock.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1"/></svg>';
             slot.appendChild(lock);
         }
         image.addEventListener('dragstart', (event) => handleSlotDragStart(event, index));
@@ -6527,29 +6523,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (unlockBuyBtn) {
         unlockBuyBtn.addEventListener('click', async () => {
-            const character = roster[currentCharacterIndex];
+            const purchasedIndex = currentCharacterIndex;
+            const character = roster[purchasedIndex];
             if (!character || character.unlocked !== false) return;
+            const characterId = character.characterId || character.id;
             unlockBuyBtn.disabled = true;
-            unlockBuyBtn.textContent = 'Unlocking...';
+            unlockBuyBtn.textContent = 'Purchasing...';
             if (unlockErrorEl) unlockErrorEl.textContent = '';
+            let purchaseAccepted = false;
             try {
                 const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters/buy-direct`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ characterId: character.characterId || character.id }),
+                    body: JSON.stringify({ characterId }),
                 });
                 const data = await response.json();
-                if (!response.ok || !data?.ok) throw new Error(data?.error || 'Unable to unlock this character.');
+                if (!response.ok || !data?.ok) throw new Error(data?.error || 'Unable to purchase this character.');
+                purchaseAccepted = true;
+                if (!Array.isArray(data.unlockedCharacterIds) || !data.unlockedCharacterIds.includes(characterId)) {
+                    throw new Error('Purchase succeeded, but roster access could not be confirmed. Refresh the page.');
+                }
                 character.unlocked = true;
                 setRosterRyoBalance(data.ryo);
                 renderRosterPage();
-                renderCharacter(character, currentCharacterIndex);
+                if (currentCharacterIndex === purchasedIndex) renderCharacter(character, purchasedIndex);
                 soundManager.play(new Audio('sounds/start-round.mp3'));
             } catch (error) {
                 if (unlockErrorEl) unlockErrorEl.textContent = error.message || 'Unable to unlock this character.';
-                unlockBuyBtn.disabled = false;
-                unlockBuyBtn.textContent = 'Try again';
+                unlockBuyBtn.disabled = purchaseAccepted;
+                unlockBuyBtn.textContent = purchaseAccepted ? 'Refresh roster' : 'Try again';
             }
         });
     }

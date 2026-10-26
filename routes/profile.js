@@ -302,8 +302,6 @@ module.exports = function(context) {
                 },
                 catalog: cosmeticsCatalog,
                 ryo: profile.ryo || 0,
-                summonScrolls: profile.summonScrolls || 0,
-                chakraShards: profile.chakraShards || 0,
                 customSelectionBackground: profile.customSelectionBackground || '',
                 customIngameBackground: profile.customIngameBackground || ''
             });

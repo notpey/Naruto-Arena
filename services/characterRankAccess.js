@@ -1,18 +1,40 @@
-const STATE_KEY = 'character_rank_access';
+﻿const STATE_KEY = 'character_rank_access';
+const POLICY_VERSION = 2;
 const ROLES = ['admin', 'global_moderator', 'moderator', 'player'];
-const MODES = ['inherit', 'allow', 'deny'];
+const STAFF_ROLES = new Set(['admin', 'global_moderator', 'moderator']);
+const VISIBILITY_MODES = ['visible', 'hidden'];
+const UNLOCK_MODES = ['inherit', 'allow'];
 const INITIAL_POLICIES = {
-    'yamanaka-ino': {
-        admin: 'allow',
-        global_moderator: 'allow',
-        moderator: 'deny',
-        player: 'deny',
-    },
+    'yamanaka-ino': { player: { visibility: 'hidden', unlock: 'inherit' } },
 };
 
 const normalizeRole = (role) => {
     const value = String(role || '').trim().toLowerCase();
     return ROLES.includes(value) ? value : 'player';
+};
+
+const normalizeMemberPolicy = (value, strict) => {
+    if (typeof value === 'string') {
+        if (value === 'deny') return { visibility: 'hidden', unlock: 'inherit' };
+        if (value === 'allow') return { visibility: 'visible', unlock: 'allow' };
+        if (value === 'inherit') return { visibility: 'visible', unlock: 'inherit' };
+        if (strict) throw new Error('Invalid player access setting.');
+        return null;
+    }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        if (strict) throw new Error('Invalid player access setting.');
+        return null;
+    }
+    if (strict && Object.keys(value).some((key) => !['visibility', 'unlock'].includes(key))) {
+        throw new Error('Invalid player access setting.');
+    }
+    const visibility = value.visibility || 'visible';
+    const unlock = value.unlock || 'inherit';
+    if (!VISIBILITY_MODES.includes(visibility) || !UNLOCK_MODES.includes(unlock)) {
+        if (strict) throw new Error('Invalid player access setting.');
+        return null;
+    }
+    return { visibility, unlock };
 };
 
 const normalizePolicies = (input, knownIds, strict = false) => {
@@ -30,29 +52,30 @@ const normalizePolicies = (input, knownIds, strict = false) => {
             if (strict) throw new Error(`Invalid access settings for ${characterId}.`);
             continue;
         }
-        if (strict && Object.keys(row).some((role) => !ROLES.includes(role))) {
+        if (strict && Object.keys(row).some((role) => role !== 'player')) {
             throw new Error(`Invalid rank in access settings for ${characterId}.`);
         }
-        const normalizedRow = {};
-        for (const role of ROLES) {
-            const mode = row[role] === undefined ? 'inherit' : row[role];
-            if (!MODES.includes(mode)) {
-                if (strict) throw new Error(`Invalid ${role} access for ${characterId}.`);
-                continue;
-            }
-            if (mode !== 'inherit') normalizedRow[role] = mode;
+        const member = row.player === undefined ? null : normalizeMemberPolicy(row.player, strict);
+        if (member && (member.visibility !== 'visible' || member.unlock !== 'inherit')) {
+            policies[characterId] = { player: member };
         }
-        if (Object.keys(normalizedRow).length) policies[characterId] = normalizedRow;
     }
     return policies;
 };
 
 const evaluateAccess = ({ policies, characterId, role, inheritedUnlocked }) => {
-    const mode = policies?.[characterId]?.[normalizeRole(role)] || 'inherit';
+    if (STAFF_ROLES.has(normalizeRole(role))) {
+        return { visibility: 'visible', unlockMode: 'allow', hidden: false, unlocked: true };
+    }
+    const member = normalizeMemberPolicy(policies?.[characterId]?.player || 'inherit', false) ||
+        { visibility: 'visible', unlock: 'inherit' };
+    const hidden = member.visibility === 'hidden';
     return {
-        mode,
-        hidden: mode === 'deny',
-        unlocked: mode === 'allow' || (mode === 'inherit' && Boolean(inheritedUnlocked)),
+        visibility: member.visibility,
+        unlockMode: member.unlock,
+        hidden,
+        unlocked: !hidden && (member.unlock === 'allow' ||
+            (member.unlock === 'inherit' && Boolean(inheritedUnlocked))),
     };
 };
 
@@ -65,10 +88,21 @@ const createCharacterRankAccessService = ({ getCollection, getCharacters }) => {
         async getPolicies() {
             const collection = getCollection();
             const stored = collection ? await collection.findOne({ key: STATE_KEY }) : null;
-            return normalizePolicies(
+            const policies = normalizePolicies(
                 stored ? stored.policies : INITIAL_POLICIES,
                 knownIds()
             );
+            if (collection && (!stored || !(Number(stored.version) >= POLICY_VERSION))) {
+                // Preserve legacy Member overrides while restoring the staff-wide bypass.
+                policies['yamanaka-ino'] = INITIAL_POLICIES['yamanaka-ino'];
+                await collection.updateOne(
+                    { key: STATE_KEY },
+                    { $set: { key: STATE_KEY, version: POLICY_VERSION, policies,
+                        updatedAt: new Date(), updatedBy: 'launch-roster-migration' } },
+                    { upsert: true }
+                );
+            }
+            return policies;
         },
         async savePolicies(input, updatedBy) {
             const policies = normalizePolicies(input, knownIds(), true);
@@ -76,7 +110,8 @@ const createCharacterRankAccessService = ({ getCollection, getCharacters }) => {
             if (!collection) throw new Error('Character access storage is unavailable.');
             await collection.updateOne(
                 { key: STATE_KEY },
-                { $set: { key: STATE_KEY, policies, updatedBy, updatedAt: new Date() } },
+                { $set: { key: STATE_KEY, version: POLICY_VERSION,
+                    policies, updatedBy, updatedAt: new Date() } },
                 { upsert: true }
             );
             return policies;
@@ -84,5 +119,5 @@ const createCharacterRankAccessService = ({ getCollection, getCharacters }) => {
     };
 };
 
-module.exports = { ROLES, MODES, INITIAL_POLICIES, normalizeRole, normalizePolicies,
-    evaluateAccess, createCharacterRankAccessService };
+module.exports = { ROLES, VISIBILITY_MODES, UNLOCK_MODES, INITIAL_POLICIES,
+    normalizeRole, normalizePolicies, evaluateAccess, createCharacterRankAccessService };

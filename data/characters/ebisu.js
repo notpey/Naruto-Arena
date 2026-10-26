@@ -1,5 +1,6 @@
 module.exports = {
     id: 'ebisu', characterId: 'ebisu', name: 'Ebisu',
+    requiredMissionId: 'private-lesson',
     facePicture: 'https://i.imgur.com/knE3OeU.png',
     characterdeescription: "A special jōnin of the Hidden Leaf Village renowned for his expertise in teaching fundamental shinobi techniques, Ebisu serves as Konohamaru's private tutor before being assigned to train Naruto for the Chūnin Exams. Though strict and often self-important, he is a capable instructor whose disciplined approach emphasizes precise chakra control and mastery of the basics.",
     passive: {

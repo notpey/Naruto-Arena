@@ -69,6 +69,7 @@ const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
 const DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const LEGACY_DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
+const LAUNCH_MISSION_CATALOG_VERSION = 2;
 let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
@@ -81,6 +82,13 @@ const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-20
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
 const INO_KONOHAMARU_REWORK_MIGRATION_ID = 'ino-konohamaru-rework-2026-10-25-v2';
 const HOKAGE_HIRUZEN_REWORK_MIGRATION_ID = 'hokage-hiruzen-rework-2026-10-26';
+const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
+const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
+    'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
+    'sarutobi-konohamaru', 'umino-iruka', 'mizuki', 'ebisu',
+    'demon-brothers', 'haku', 'momochi-zabuza', 'zori-and-waraji', 'gato',
+    'hatake-kakashi', 'sarutobi-hiruzen',
+]);
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
     'haruno-sakura',
@@ -152,1215 +160,7 @@ const AUDIT_REBALANCE_CHARACTER_IDS = new Set([
 const STORY_CATALOG_STATE_KEY = 'story';
 let storyCatalogCache = null;
 const STORY_HARD_MODE_RYO_REWARD = 250;
-const DEFAULT_MISSION_CATALOG = [
-    {
-        missionId: 'a-rare-opportunity',
-        title: 'A Rare Opportunity',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'shigure',
-        reward_character_name: 'Shigure',
-        reward: 'Unlock Shigure.',
-        image: 'https://i.imgur.com/2PLhd3u.png',
-        imageAlt: 'A Rare Opportunity mission artwork',
-        characterName: 'Oboro',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Oboro portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'oboro',
-                character_name: 'Oboro',
-                wins: 10,
-            },
-        ],
-        sortOrder: 4,
-    },
-    {
-        missionId: 'a-new-find-skin',
-        title: 'A New-Find Skin',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'shiore-orochimaru',
-        reward_character_name: 'Shiore Orochimaru',
-        reward: 'Unlock Shiore Orochimaru.',
-        image: 'https://i.imgur.com/7bUhwty.png',
-        imageAlt: 'A New-Find Skin mission artwork',
-        characterName: 'Uchiha Sasuke',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Sasuke portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke (classic)',
-                wins: 5,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'mitarashi-anko',
-                character_name: 'Anko',
-                wins: 5,
-            },
-        ],
-        sortOrder: 5,
-    },
-    {
-        missionId: 'the-sounds-amongst-the-leaves',
-        title: 'The Sounds Amongst the Leaves',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'akadou-yoroi',
-        reward_character_name: 'Akadou Yoroi',
-        reward: 'Unlock Akadou Yoroi.',
-        image: 'https://i.imgur.com/hntcnGO.png',
-        imageAlt: 'The Sounds Amongst the Leaves mission artwork',
-        characterName: 'Dosu Kinuta',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Dosu Kinuta portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'],
-                character_name: 'any Sound Genin (Dosu, Kin, Zaku)',
-                wins: 3,
-            },
-        ],
-        sortOrder: 6,
-    },
-    {
-        missionId: 'twisting-sound',
-        title: 'Twisting Sound',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'tsurugi-misumi',
-        reward_character_name: 'Tsurugi Misumi',
-        reward: 'Unlock Tsurugi Misumi.',
-        image: 'https://i.imgur.com/3SUVRNC.png',
-        imageAlt: 'Twisting Sound mission artwork',
-        characterName: 'Kankuro',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Kankuro portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'kankuro',
-                character_name: 'Kankuro',
-                wins: 3,
-            },
-        ],
-        sortOrder: 7,
-    },
-    {
-        missionId: 'the-survivor-of-the-seal',
-        title: 'The Survivor of the Seal',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'mitarashi-anko',
-        reward_character_name: 'Mitarashi Anko',
-        reward: 'Unlock Mitarashi Anko.',
-        image: 'https://i.imgur.com/p5YdvlZ.png',
-        imageAlt: 'The Survivor of the Seal mission artwork',
-        characterName: 'Uchiha Sasuke',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Sasuke portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches_any',
-                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
-                character_name: 'any Team 7 (old era) member',
-                wins: 6,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
-                character_name: 'any Team 8 member',
-                wins: 6,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
-                character_name: 'any Team 9 member',
-                wins: 6,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
-                character_name: 'any Team 10 (old era) member',
-                wins: 6,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
-                character_name: 'any member of Team Baki',
-                wins: 6,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'],
-                character_name: 'any Sound Genin (Dosu, Kin, Zaku)',
-                wins: 6,
-            },
-        ],
-        sortOrder: 8,
-    },
-    {
-        missionId: 'yellow-flash',
-        title: 'Yellow Flash',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'oboro',
-        reward_character_name: 'Oboro',
-        reward: 'Unlock Oboro.',
-        image: 'ingamebgexample.png',
-        imageAlt: 'Yellow Flash mission artwork',
-        characterName: 'Young Kakashi',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Young Kakashi portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'young-kakashi',
-                character_name: 'Young Kakashi',
-                wins: 5,
-            },
-        ],
-        sortOrder: 8.5,
-    },
-    {
-        missionId: 'the-search-for-jiroubou',
-        title: 'The Search for Jiroubou',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'jiroubou',
-        reward_character_name: 'Jiroubou',
-        reward: 'Unlock Jiroubou.',
-        image: 'https://i.imgur.com/R3dnnd8.png',
-        imageAlt: 'The Search for Jiroubou mission artwork',
-        characterName: 'Akimichi Chouji',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Akimichi Chouji portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'akimichi-chouji',
-                character_name: 'Chouji',
-                wins: 3,
-            },
-        ],
-        sortOrder: 9,
-    },
-    {
-        missionId: 'the-search-for-kidoumaru',
-        title: 'The Search for Kidoumaru',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'kidoumaru',
-        reward_character_name: 'Kidoumaru',
-        reward: 'Unlock Kidoumaru.',
-        image: 'https://i.imgur.com/B8vdBr1.png',
-        imageAlt: 'The Search for Kidoumaru mission artwork',
-        characterName: 'Neji Hyuuga',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Neji Hyuuga portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'neji-hyuuga',
-                character_name: 'Neji',
-                wins: 3,
-            },
-        ],
-        sortOrder: 10,
-    },
-    {
-        missionId: 'the-search-for-tayuya',
-        title: 'The Search for Tayuya',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'tayuya',
-        reward_character_name: 'Tayuya',
-        reward: 'Unlock Tayuya.',
-        image: 'https://i.imgur.com/IK9MqU3.png',
-        imageAlt: 'The Search for Tayuya mission artwork',
-        characterName: 'Nara Shikamaru',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Nara Shikamaru portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['nara-shikamaru', 'temari'],
-                character_name: 'Shikamaru or Temari (classic versions)',
-                wins: 3,
-            },
-        ],
-        sortOrder: 11,
-    },
-    {
-        missionId: 'the-search-for-sakon',
-        title: 'The Search for Sakon',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'sakon-and-ukon',
-        reward_character_name: 'Sakon and Ukon',
-        reward: 'Unlock Sakon and Ukon.',
-        image: 'https://i.imgur.com/McdkgsE.png',
-        imageAlt: 'The Search for Sakon mission artwork',
-        characterName: 'Inuzuka Kiba',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Inuzuka Kiba portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['inuzuka-kiba', 'kankuro'],
-                character_name: 'Kiba or Kankuro (classic versions)',
-                wins: 3,
-            },
-        ],
-        sortOrder: 12,
-    },
-    {
-        missionId: 'the-search-for-kimimaro',
-        title: 'The Search for Kimimaro',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'kimimaro',
-        reward_character_name: 'Kimimaro',
-        reward: 'Unlock Kimimaro.',
-        image: 'https://i.imgur.com/Vdv08uy.png',
-        imageAlt: 'The Search for Kimimaro mission artwork',
-        characterName: 'Rock Lee',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Rock Lee portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'rock-lee',
-                character_name: 'Rock Lee',
-                wins: 4,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'rock-lee',
-                character_name: 'Rock Lee',
-                wins: 10,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 10,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 10,
-            },
-        ],
-        sortOrder: 13,
-    },
-    {
-        missionId: 'the-moonlight-of-the-leaf',
-        title: 'The Moonlight of the Leaf',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'gekko-hayate',
-        reward_character_name: 'Gekko Hayate',
-        reward: 'Unlock Gekko Hayate.',
-        image: 'https://i.imgur.com/PxGy3Of.png',
-        imageAlt: 'The Moonlight of the Leaf mission artwork',
-        characterName: 'Gekko Hayate',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Gekko Hayate portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                wins: 4,
-            },
-        ],
-        sortOrder: 14,
-    },
-    {
-        missionId: 'medical-training',
-        title: 'Medical Training',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'shizune',
-        reward_character_name: 'Shizune',
-        reward: 'Unlock Shizune.',
-        image: 'https://i.imgur.com/NnjvP9X.png',
-        imageAlt: 'Medical Training mission artwork',
-        characterName: 'Haruno Sakura',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Haruno Sakura portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'haruno-sakura',
-                character_name: 'Sakura',
-                wins: 15,
-            },
-        ],
-        sortOrder: 15,
-    },
-    {
-        missionId: 'team-7-fights-as-a-team',
-        title: 'Team 7 Fights as a Team',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'hatake-kakashi',
-        reward_character_name: 'Hatake Kakashi',
-        reward: 'Unlock Hatake Kakashi.',
-        image: 'https://i.imgur.com/N0dJ4Ee.png',
-        imageAlt: 'Team 7 Fights as a Team mission artwork',
-        characterName: 'Uzumaki Naruto',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uzumaki Naruto portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
-                character_name: 'any Team 7 (old era) member',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
-                character_name: 'any Team 7 (old era) member',
-                wins: 15,
-            },
-        ],
-        sortOrder: 16,
-    },
-    {
-        missionId: 'team-8-scouting-at-its-best',
-        title: 'Team 8 Scouting at its Best',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'yuhi-kurenai',
-        reward_character_name: 'Yuhi Kurenai',
-        reward: 'Unlock Yuhi Kurenai.',
-        image: 'https://i.imgur.com/XmKsd3u.png',
-        imageAlt: 'Team 8 Scouting at its Best mission artwork',
-        characterName: 'Inuzuka Kiba',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Inuzuka Kiba portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
-                character_name: 'any Team 8 member',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['inuzuka-kiba', 'hyuuga-hinata', 'aburame-shino'],
-                character_name: 'any Team 8 member',
-                wins: 15,
-            },
-        ],
-        sortOrder: 17,
-    },
-    {
-        missionId: 'team-10-proves-its-worth',
-        title: 'Team 10 Proves Its Worth',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'sarutobi-asuma',
-        reward_character_name: 'Sarutobi Asuma',
-        reward: 'Unlock Sarutobi Asuma.',
-        image: 'https://i.imgur.com/DSBB0KM.png',
-        imageAlt: 'Team 10 Proves Its Worth mission artwork',
-        characterName: 'Nara Shikamaru',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Nara Shikamaru portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
-                character_name: 'any Team 10 (old era) member',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['nara-shikamaru', 'yamanaka-ino', 'akimichi-chouji'],
-                character_name: 'any Team 10 (old era) member',
-                wins: 15,
-            },
-        ],
-        sortOrder: 18,
-    },
-    {
-        missionId: 'team-9-the-best-taijutsu-team',
-        title: 'Team 9 the Best Taijutsu Team',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'maito-gai',
-        reward_character_name: 'Maito Gai',
-        reward: 'Unlock Maito Gai.',
-        image: 'https://i.imgur.com/9jJqhP7.png',
-        imageAlt: 'Team 9 the Best Taijutsu Team mission artwork',
-        characterName: 'Rock Lee',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Rock Lee portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
-                character_name: 'any Team 9 member',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['rock-lee', 'neji-hyuuga', 'tenten'],
-                character_name: 'any Team 9 member',
-                wins: 15,
-            },
-        ],
-        sortOrder: 19,
-    },
-    {
-        missionId: 'sand-siblings-at-war',
-        title: 'Sand Siblings at War',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'baki',
-        reward_character_name: 'Baki',
-        reward: 'Unlock Baki.',
-        image: 'https://i.imgur.com/66XAaxu.png',
-        imageAlt: 'Sand Siblings at War mission artwork',
-        characterName: 'Gaara',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Gaara portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
-                character_name: 'any member of Team Baki',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['gaara-of-the-desert', 'kankuro', 'temari'],
-                character_name: 'any member of Team Baki',
-                wins: 15,
-            },
-        ],
-        sortOrder: 20,
-    },
-    {
-        missionId: 'survival',
-        title: 'Survival',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'yakushi-kabuto',
-        reward_character_name: 'Yakushi Kabuto',
-        reward: 'Unlock Yakushi Kabuto.',
-        image: 'https://i.imgur.com/0c8IJ10.png',
-        imageAlt: 'Survival mission artwork',
-        characterName: 'Yakushi Kabuto',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Yakushi Kabuto portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
-                character_name: 'Naruto, Sakura, or Sasuke',
-                wins: 4,
-            },
-            {
-                type: 'win_streak_any',
-                character_ids: ['akadou-yoroi', 'tsurugi-misumi'],
-                character_name: 'Yoroi or Misumi',
-                wins: 4,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: [
-                    'dosu-kinuta',
-                    'tsuchi-kin',
-                    'zaku-abumi',
-                    'jiroubou',
-                    'kidoumaru',
-                    'tayuya',
-                    'sakon-and-ukon',
-                    'kimimaro',
-                ],
-                character_name: 'any Sound Ninja',
-                wins: 15,
-            },
-        ],
-        sortOrder: 21,
-    },
-    {
-        missionId: 'disciples-of-the-slug',
-        title: 'Disciples of the Slug',
-        level_requirement: 26,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'tsunade',
-        reward_character_name: 'Tsunade',
-        reward: 'Unlock Tsunade.',
-        image: 'https://i.imgur.com/TWSxGyw.png',
-        imageAlt: 'Disciples of the Slug mission artwork',
-        characterName: 'Haruno Sakura',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Haruno Sakura portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'haruno-sakura',
-                character_name: 'Sakura',
-                wins: 15,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'shizune',
-                character_name: 'Shizune',
-                wins: 20,
-            },
-        ],
-        sortOrder: 22,
-    },
-    {
-        missionId: 'disciples-of-the-toad',
-        title: 'Disciples of the Toad',
-        level_requirement: 26,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'jiraiya',
-        reward_character_name: 'Jiraiya',
-        reward: 'Unlock Jiraiya.',
-        image: 'https://i.imgur.com/gzJSyVN.png',
-        imageAlt: 'Disciples of the Toad mission artwork',
-        characterName: 'Uzumaki Naruto',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uzumaki Naruto portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 15,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'hatake-kakashi',
-                character_name: 'Kakashi',
-                wins: 20,
-            },
-        ],
-        sortOrder: 23,
-    },
-    {
-        missionId: 'disciples-of-the-snake',
-        title: 'Disciples of the Snake',
-        level_requirement: 26,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'orochimaru',
-        reward_character_name: 'Orochimaru',
-        reward: 'Unlock Orochimaru.',
-        image: 'https://i.imgur.com/B3Oyf7m.png',
-        imageAlt: 'Disciples of the Snake mission artwork',
-        characterName: 'Uchiha Sasuke',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Sasuke portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 15,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'yakushi-kabuto',
-                character_name: 'Kabuto',
-                wins: 20,
-            },
-        ],
-        sortOrder: 24,
-    },
-    {
-        missionId: 'hidden-hunter',
-        title: 'The Hidden Hunter',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'haku',
-        reward_character_name: 'Haku',
-        reward: 'Unlock Haku.',
-        image: 'https://i.imgur.com/byFZnUr.png',
-        imageAlt: 'The Hidden Hunter mission artwork',
-        characterName: 'Haku',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Haku portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 8,
-            },
-        ],
-        sortOrder: 25,
-    },
-    {
-        missionId: 'devotion',
-        title: 'Devotion',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'momochi-zabuza',
-        reward_character_name: 'Momochi Zabuza',
-        reward: 'Unlock Momochi Zabuza.',
-        image: 'https://i.imgur.com/qdaKcPJ.png',
-        imageAlt: 'Devotion mission artwork',
-        characterName: 'Momochi Zabuza',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Momochi Zabuza portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 10,
-            },
-        ],
-        sortOrder: 26,
-    },
-    {
-        missionId: 'mist-ascendant',
-        title: 'Mist Ascendant',
-        level_requirement: 1,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'demon-brothers',
-        reward_character_name: 'Demon Brothers',
-        reward: 'Unlock the Demon Brothers.',
-        image: 'https://i.imgur.com/DKtg5JS.png',
-        imageAlt: 'Mist Ascendant mission artwork',
-        characterName: 'Demon Brothers',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Demon Brothers portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 5,
-            },
-        ],
-        sortOrder: 27,
-    },
-    {
-        missionId: 'duty-of-a-sensei',
-        title: 'Duty of a Sensei',
-        level_requirement: 1,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'umino-iruka',
-        reward_character_name: 'Umino Iruka',
-        reward: 'Unlock Umino Iruka.',
-        image: 'https://i.imgur.com/EkZO4mu.png',
-        imageAlt: 'Duty of a Sensei mission artwork',
-        characterName: 'Umino Iruka',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Umino Iruka portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 5,
-            },
-        ],
-        sortOrder: 28,
-    },
-    {
-        missionId: 'a-dishonored-shinobi',
-        title: 'A Dishonored Shinobi',
-        level_requirement: 1,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'mizuki',
-        reward_character_name: 'Mizuki',
-        reward: 'Unlock Mizuki.',
-        image: 'https://i.imgur.com/fo7Yfff.png',
-        imageAlt: 'A Dishonored Shinobi mission artwork',
-        characterName: 'Mizuki',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Mizuki portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 5,
-            },
-        ],
-        sortOrder: 29,
-    },
-    {
-        missionId: 'the-god-of-the-shinobi',
-        title: 'The God of the Shinobi',
-        level_requirement: 31,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'sarutobi-hiruzen',
-        reward_character_name: 'Sarutobi Hiruzen',
-        reward: 'Unlock Sarutobi Hiruzen.',
-        image: 'https://i.imgur.com/gGjRpaE.png',
-        imageAlt: 'The God of the Shinobi mission artwork',
-        characterName: 'Sarutobi Hiruzen',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Sarutobi Hiruzen portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'jiraiya',
-                character_name: 'Jiraiya',
-                wins: 5,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'tsunade',
-                character_name: 'Tsunade',
-                wins: 5,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'orochimaru',
-                character_name: 'Orochimaru',
-                wins: 5,
-            },
-        ],
-        sortOrder: 30,
-    },
-    {
-        missionId: 'the-resurrection-of-the-first',
-        title: 'The Resurrection of the First',
-        level_requirement: 31,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'edo-tensei-hashirama',
-        reward_character_name: 'Edo Tensei Hashirama',
-        reward: 'Unlock Edo Tensei Hashirama.',
-        image: 'https://i.imgur.com/tuEip60.png',
-        imageAlt: 'The Resurrection of the First mission artwork',
-        characterName: 'Edo Tensei Hashirama',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Edo Tensei Hashirama portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'orochimaru',
-                character_name: 'Orochimaru',
-                wins: 5,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'sarutobi-hiruzen',
-                character_name: 'Hiruzen',
-                wins: 5,
-            },
-        ],
-        sortOrder: 31,
-    },
-    {
-        missionId: 'the-resurrection-of-the-second',
-        title: 'The Resurrection of the Second',
-        level_requirement: 31,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'edo-tensei-tobirama',
-        reward_character_name: 'Edo Tensei Tobirama',
-        reward: 'Unlock Edo Tensei Tobirama.',
-        image: 'https://i.imgur.com/hSYEEtM.png',
-        imageAlt: 'The Resurrection of the Second mission artwork',
-        characterName: 'Edo Tensei Tobirama',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Edo Tensei Tobirama portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'edo-tensei-hashirama',
-                character_name: 'Hashirama',
-                wins: 5,
-            },
-        ],
-        sortOrder: 32,
-    },
-    {
-        missionId: 'the-rise-of-a-jinchuuriki',
-        title: 'The Rise of a Jinchuuriki',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'kyuubi-naruto',
-        reward_character_name: 'Kyuubi Naruto',
-        reward: 'Unlock Kyuubi Naruto.',
-        image: 'https://i.imgur.com/F6YLSRV.png',
-        imageAlt: 'The Rise of a Jinchuuriki mission artwork',
-        characterName: 'Kyuubi Naruto',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Kyuubi Naruto portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 15,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 20,
-            },
-        ],
-        sortOrder: 33,
-    },
-    {
-        missionId: 'dark-enhancing',
-        title: 'Dark Enhancing',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'cursed-seal-lv1-sasuke',
-        reward_character_name: 'Cursed Seal Lv1 Sasuke',
-        reward: 'Unlock Cursed Seal Lv1 Sasuke.',
-        image: 'https://i.imgur.com/tiEsQy8.png',
-        imageAlt: 'Dark Enhancing mission artwork',
-        characterName: 'Uchiha Sasuke',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Sasuke portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 3,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'],
-                character_name: 'any Sound Genin (Dosu, Kin, Zaku)',
-                wins: 15,
-            },
-        ],
-        sortOrder: 34,
-    },
-    {
-        missionId: 'descent-into-darkness',
-        title: 'Descent into Darkness',
-        level_requirement: 11,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'cursed-seal-sasuke',
-        reward_character_name: 'Cursed Seal Sasuke',
-        reward: 'Unlock Cursed Seal Sasuke.',
-        image: 'https://i.imgur.com/q0UMDSJ.png',
-        imageAlt: 'Descent into Darkness mission artwork',
-        characterName: 'Uchiha Sasuke',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Sasuke portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 15,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'uzumaki-naruto',
-                character_name: 'Naruto',
-                wins: 20,
-            },
-        ],
-        sortOrder: 35,
-    },
-    {
-        missionId: 'chouji-awakens',
-        title: 'Chouji Awakens',
-        level_requirement: 6,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'butterfly-chouji',
-        reward_character_name: 'Butterfly Chouji',
-        reward: 'Unlock Butterfly Chouji.',
-        image: 'https://i.imgur.com/iPk7hpc.png',
-        imageAlt: 'Chouji Awakens mission artwork',
-        characterName: 'Akimichi Chouji',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Akimichi Chouji portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'akimichi-chouji',
-                character_name: 'Chouji',
-                wins: 3,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'akimichi-chouji',
-                character_name: 'Chouji',
-                wins: 15,
-            },
-        ],
-        sortOrder: 36,
-    },
-    {
-        missionId: 'the-drunken-master',
-        title: 'The Drunken Master',
-        level_requirement: 11,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'drunken-lee',
-        reward_character_name: 'Drunken Lee',
-        reward: 'Unlock Drunken Lee.',
-        image: 'https://i.imgur.com/p9XFHpr.png',
-        imageAlt: 'The Drunken Master mission artwork',
-        characterName: 'Rock Lee',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Rock Lee portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'rock-lee',
-                character_name: 'Rock Lee',
-                wins: 3,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'rock-lee',
-                character_name: 'Rock Lee',
-                wins: 10,
-            },
-        ],
-        sortOrder: 37,
-    },
-    {
-        missionId: 'the-beast-inside',
-        title: 'The Beast Inside',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'shukaku-gaara',
-        reward_character_name: 'Shukaku Gaara',
-        reward: 'Unlock Shukaku Gaara.',
-        image: 'https://i.imgur.com/svZ4Mhr.png',
-        imageAlt: 'The Beast Inside mission artwork',
-        characterName: 'Gaara',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Gaara portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 15,
-            },
-        ],
-        sortOrder: 38,
-    },
-    {
-        missionId: 'the-redemption-of-gaara',
-        title: 'The Redemption of Gaara',
-        level_requirement: 11,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'rehabilitated-gaara',
-        reward_character_name: 'Rehabilitated Gaara',
-        reward: 'Unlock Rehabilitated Gaara.',
-        image: 'https://i.imgur.com/C13X1YI.png',
-        imageAlt: 'The Redemption of Gaara mission artwork',
-        characterName: 'Gaara',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Gaara portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'gaara-of-the-desert',
-                character_name: 'Gaara',
-                wins: 15,
-            },
-        ],
-        sortOrder: 39,
-    },
-    {
-        missionId: 's-rank-criminal-kisame',
-        title: 'S Rank Criminal Kisame',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'hoshigaki-kisame',
-        reward_character_name: 'Hoshigaki Kisame',
-        reward: 'Unlock Hoshigaki Kisame.',
-        image: 'https://i.imgur.com/zwB078J.png',
-        imageAlt: 'S Rank Criminal Kisame mission artwork',
-        characterName: 'Hoshigaki Kisame',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Hoshigaki Kisame portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'maito-gai',
-                character_name: 'Gai',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'maito-gai',
-                character_name: 'Gai',
-                wins: 20,
-            },
-        ],
-        sortOrder: 40,
-    },
-    {
-        missionId: 's-rank-criminal-itachi',
-        title: 'S Rank Criminal Itachi',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'uchiha-itachi',
-        reward_character_name: 'Uchiha Itachi',
-        reward: 'Unlock Uchiha Itachi.',
-        image: 'https://i.imgur.com/jcjtJjv.png',
-        imageAlt: 'S Rank Criminal Itachi mission artwork',
-        characterName: 'Uchiha Itachi',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Uchiha Itachi portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak',
-                character_id: 'uchiha-sasuke',
-                character_name: 'Sasuke',
-                wins: 3,
-            },
-            {
-                type: 'win_streak',
-                character_id: 'hatake-kakashi',
-                character_name: 'Kakashi',
-                wins: 4,
-            },
-            {
-                type: 'win_matches',
-                character_id: 'hatake-kakashi',
-                character_name: 'Kakashi',
-                wins: 20,
-            },
-        ],
-        sortOrder: 41,
-    },
-    {
-        missionId: 'the-theft-plan',
-        title: 'The Theft Plan',
-        level_requirement: 16,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'rokushou-aoi',
-        reward_character_name: 'Rokushou Aoi',
-        reward: 'Unlock Rokushou Aoi.',
-        image: 'https://i.imgur.com/FXpa1td.png',
-        imageAlt: 'The Theft Plan mission artwork',
-        characterName: 'Rokushou Aoi',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Rokushou Aoi portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_matches_any',
-                character_ids: ['oboro', 'shigure'],
-                group_label: 'any Rain Ninja',
-                wins: 25,
-            },
-        ],
-        sortOrder: 42,
-    },
-    {
-        missionId: 'thunder-of-the-hidden-mist',
-        title: 'Thunder of the Hidden Mist',
-        level_requirement: 21,
-        mode_restriction: { allowed_modes: ['quick', 'ladder'] },
-        reward_character: 'kurosuki-raiga',
-        reward_character_name: 'Kurosuki Raiga',
-        reward: 'Unlock Kurosuki Raiga.',
-        image: 'https://i.imgur.com/NMI8ziL.png',
-        imageAlt: 'Thunder of the Hidden Mist mission artwork',
-        characterName: 'Kurosuki Raiga',
-        portrait: 'deadcharacter.png',
-        portraitAlt: 'Kurosuki Raiga portrait',
-        requirements: [],
-        goals: [
-            {
-                type: 'win_streak_any',
-                character_ids: ['momochi-zabuza', 'hoshigaki-kisame'],
-                group_label: 'any member of the Seven Swordsmen of the Mist',
-                wins: 5,
-            },
-            {
-                type: 'win_matches_any',
-                character_ids: ['hatake-kakashi', 'uchiha-sasuke'],
-                group_label: 'any character with at least one lightning-related skill (in-game)',
-                wins: 30,
-            },
-        ],
-        sortOrder: 43,
-    },
-];
+const DEFAULT_MISSION_CATALOG = require('./data/launchMissions');
 
 const getStoryPortrait = (characterId, fallback = '') => {
     const normalized = String(characterId || '').trim().toLowerCase();
@@ -2424,6 +1224,7 @@ const normalizeMissionProgressEntry = (entry = {}) => {
         );
     });
     return {
+        revision: Math.max(0, Number(source.revision) || 0),
         winStreak,
         rickGrimesWinStreak: winStreak,
         completedAt,
@@ -2432,6 +1233,13 @@ const normalizeMissionProgressEntry = (entry = {}) => {
         goalProgressByIndex,
         goalProgress: goalProgressByIndex,
     };
+};
+
+const getProgressForMissionRevision = (entry, mission) => {
+    const saved = normalizeMissionProgressEntry(entry);
+    return saved.completedAt || saved.revision === mission.revision
+        ? saved
+        : normalizeMissionProgressEntry({ revision: mission.revision });
 };
 
 const normalizeMissionGoalProgressEntry = (entry = {}) => {
@@ -3052,6 +1860,7 @@ const normalizeMissionCatalogEntry = (mission = {}, index = 0) => {
     return {
         missionId,
         title: missionTitle,
+        revision: Math.max(0, Number(source.revision) || 0),
         level_requirement: levelRequirement,
         rank: levelRequirement ? String(levelRequirement) : '',
         reward_character: rewardCharacterId,
@@ -3094,7 +1903,9 @@ const repairLegacyMissionGoals = (mission = {}) => {
                 ...source,
                 goals: goals.map((goal) =>
                     goal?.type === 'win_streak' && normalizeCharacterId(goal.character_id) === 'yakushi-kabuto'
-                        ? { ...DEFAULT_MISSION_CATALOG.find((entry) => entry.missionId === 'survival').goals[0] }
+                        ? { type: 'win_streak_any', character_ids: [
+                            'uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke',
+                        ], wins: 4 }
                         : goal
                 ),
             };
@@ -3110,7 +1921,7 @@ const repairLegacyMissionGoals = (mission = {}) => {
         (hasSelfLockedRainGoal || (Array.isArray(goals) && goals.length === 0))) {
         return {
             ...source,
-            goals: DEFAULT_MISSION_CATALOG.find((entry) => entry.missionId === 'the-theft-plan').goals,
+            goals: [{ type: 'win_matches_any', character_ids: ['oboro', 'shigure'], wins: 25 }],
         };
     }
     return source;
@@ -3170,6 +1981,16 @@ const cloneMissionCatalog = (missions = []) =>
 
 const getDefaultMissionCatalog = () => cloneMissionCatalog(DEFAULT_MISSION_CATALOG);
 
+const resolveMissionCatalogState = (storedState, defaultCatalog = getDefaultMissionCatalog()) => {
+    if (!storedState || !Array.isArray(storedState.missions)) {
+        return { missions: defaultCatalog, migrate: false };
+    }
+    if (!(Number(storedState.catalogVersion) >= LAUNCH_MISSION_CATALOG_VERSION)) {
+        return { missions: defaultCatalog, migrate: true };
+    }
+    return { missions: normalizeMissionCatalog(storedState.missions), migrate: false };
+};
+
 const getStoredMissionCatalog = async () => {
     const defaultCatalog = getDefaultMissionCatalog();
     if (!appStateCollection) {
@@ -3178,15 +1999,25 @@ const getStoredMissionCatalog = async () => {
     }
 
     const storedState = await appStateCollection.findOne({ key: MISSION_CATALOG_STATE_KEY });
-    const hasStoredDoc = Boolean(storedState && Array.isArray(storedState.missions));
-    if (!hasStoredDoc) {
+    const resolved = resolveMissionCatalogState(storedState, defaultCatalog);
+    if (resolved.migrate) {
+        await appStateCollection.updateOne(
+            { key: MISSION_CATALOG_STATE_KEY },
+            { $set: {
+                key: MISSION_CATALOG_STATE_KEY,
+                catalogVersion: LAUNCH_MISSION_CATALOG_VERSION,
+                missions: defaultCatalog,
+                updatedAt: new Date(),
+                updatedBy: 'launch-roster-migration',
+            } },
+            { upsert: true }
+        );
         missionCatalogCache = defaultCatalog;
         return defaultCatalog;
     }
 
-    const storedCatalog = normalizeMissionCatalog(storedState.missions);
-    missionCatalogCache = storedCatalog;
-    return storedCatalog;
+    missionCatalogCache = resolved.missions;
+    return resolved.missions;
 };
 
 const saveMissionCatalog = async (missions, updatedBy) => {
@@ -3201,6 +2032,7 @@ const saveMissionCatalog = async (missions, updatedBy) => {
             {
                 $set: {
                     key: MISSION_CATALOG_STATE_KEY,
+                    catalogVersion: LAUNCH_MISSION_CATALOG_VERSION,
                     missions: normalizedCatalog,
                     updatedAt: new Date(),
                     updatedBy: updatedBy || '',
@@ -3517,7 +2349,7 @@ const getCharacterAvailability = ({ policies, user, profile, characterId, locked
     const staffBypass = ['admin', 'global_moderator', 'moderator'].includes(role);
     return evaluateAccess({
         policies, characterId, role,
-        inheritedUnlocked: !user || staffBypass ||
+        inheritedUnlocked: staffBypass ||
             profileHasUnlockedCharacter(profile, characterId, lockedCharacterIds),
     });
 };
@@ -3571,8 +2403,6 @@ const buildDefaultUserProfile = (user = {}) => {
         },
         posts: 0,
         ryo: 50,
-        summonScrolls: 5,
-        chakraShards: 0,
         inventory: {
             avatars: [],
             titles: [],
@@ -3581,10 +2411,6 @@ const buildDefaultUserProfile = (user = {}) => {
         },
         equippedTitle: '',
         equippedBorder: '',
-        gachaStats: {
-            totalPulls: 0,
-            pityCounter: 0,
-        },
         clan: null,
         clanInvitations: [],
         recentQuickGames: [],
@@ -3808,82 +2634,45 @@ const normalizeRecentLadderGames = (entries = []) => {
 };
 
 const DEFAULT_QUEST_DEFINITIONS = [
-    { questId: 'daily_win_3', type: 'daily', title: 'Shinobi Victory', description: 'Win 3 battles in any mode.', target: 3, metric: 'battlesWon', rewards: { ryo: 200, summonScrolls: 0, chakraShards: 15 } },
-    { questId: 'daily_chakra_50', type: 'daily', title: 'Chakra Control', description: 'Spend 50 total Chakra in battles.', target: 50, metric: 'chakraSpent', rewards: { ryo: 150, summonScrolls: 0, chakraShards: 10 } },
-    { questId: 'daily_skills_15', type: 'daily', title: 'Jutsu Mastery', description: 'Perform 15 skills in battles.', target: 15, metric: 'skillsUsed', rewards: { ryo: 150, summonScrolls: 0, chakraShards: 10 } },
-    { questId: 'weekly_ranked_10', type: 'weekly', title: 'Ranked Gladiator', description: 'Win 10 Ranked games.', target: 10, metric: 'rankedWins', rewards: { ryo: 600, summonScrolls: 2, chakraShards: 50 } },
-    { questId: 'weekly_kills_25', type: 'weekly', title: 'Bounty Hunter', description: 'Defeat 25 enemy shinobi.', target: 25, metric: 'charactersKilled', rewards: { ryo: 500, summonScrolls: 1, chakraShards: 40 } },
-    { questId: 'event_summons_5', type: 'event', title: 'Altar Enthusiast', description: 'Perform 5 summons at the Altar.', target: 5, metric: 'gachaPulls', rewards: { ryo: 1000, summonScrolls: 2, chakraShards: 100 } }
+    { questId: 'daily_win_3', type: 'daily', title: 'Shinobi Victory', description: 'Win 3 battles in any mode.', target: 3, metric: 'battlesWon', rewards: { ryo: 200 } },
+    { questId: 'daily_chakra_50', type: 'daily', title: 'Chakra Control', description: 'Spend 50 total Chakra in battles.', target: 50, metric: 'chakraSpent', rewards: { ryo: 150 } },
+    { questId: 'daily_skills_15', type: 'daily', title: 'Jutsu Mastery', description: 'Perform 15 skills in battles.', target: 15, metric: 'skillsUsed', rewards: { ryo: 150 } },
+    { questId: 'weekly_ranked_10', type: 'weekly', title: 'Ranked Gladiator', description: 'Win 10 Ranked games.', target: 10, metric: 'rankedWins', rewards: { ryo: 600 } },
+    { questId: 'weekly_kills_25', type: 'weekly', title: 'Bounty Hunter', description: 'Defeat 25 enemy shinobi.', target: 25, metric: 'charactersKilled', rewards: { ryo: 500 } },
 ];
 
 const DEFAULT_ACHIEVEMENT_DEFINITIONS = [
-    {
-        id: 'ranked_wins',
-        title: 'Ranked Master',
-        description: 'Win ranked games to prove your shinobi skill.',
-        metric: 'rankedWins',
-        tiers: [
-            { tier: 1, target: 5, rewards: { ryo: 250, summonScrolls: 1, chakraShards: 20 } },
-            { tier: 2, target: 25, rewards: { ryo: 1000, summonScrolls: 3, chakraShards: 50 } },
-            { tier: 3, target: 100, rewards: { ryo: 3000, summonScrolls: 10, chakraShards: 200 } }
-        ]
-    },
-    {
-        id: 'win_streak',
-        title: 'Unstoppable Shinobi',
-        description: 'Win consecutive ranked games.',
-        metric: 'highestStreak',
-        tiers: [
-            { tier: 1, target: 3, rewards: { ryo: 300, summonScrolls: 1, chakraShards: 25 } },
-            { tier: 2, target: 5, rewards: { ryo: 800, summonScrolls: 2, chakraShards: 50 } },
-            { tier: 3, target: 10, rewards: { ryo: 2500, summonScrolls: 5, chakraShards: 150 } }
-        ]
-    },
-    {
-        id: 'level_milestones',
-        title: 'Academy Graduate',
-        description: 'Reach higher account level ranks.',
-        metric: 'level',
-        tiers: [
-            { tier: 1, target: 5, rewards: { ryo: 500, summonScrolls: 1, chakraShards: 30 } },
-            { tier: 2, target: 15, rewards: { ryo: 1500, summonScrolls: 3, chakraShards: 75 } },
-            { tier: 3, target: 30, rewards: { ryo: 5000, summonScrolls: 8, chakraShards: 250 } }
-        ]
-    },
-    {
-        id: 'roster_collector',
-        title: 'Ninja Squad Assembly',
-        description: 'Unlock unique shinobi characters.',
-        metric: 'unlockedCount',
-        tiers: [
-            { tier: 1, target: 10, rewards: { ryo: 400, summonScrolls: 1, chakraShards: 30 } },
-            { tier: 2, target: 25, rewards: { ryo: 1200, summonScrolls: 3, chakraShards: 80 } },
-            { tier: 3, target: 50, rewards: { ryo: 4000, summonScrolls: 7, chakraShards: 200 } }
-        ]
-    },
-    {
-        id: 'gacha_pulls',
-        title: 'Summoning Connoisseur',
-        description: 'Summon shinobi at the Gacha Altar.',
-        metric: 'gachaPulls',
-        tiers: [
-            { tier: 1, target: 10, rewards: { ryo: 500, summonScrolls: 1, chakraShards: 40 } },
-            { tier: 2, target: 50, rewards: { ryo: 2000, summonScrolls: 5, chakraShards: 100 } },
-            { tier: 3, target: 200, rewards: { ryo: 8000, summonScrolls: 15, chakraShards: 300 } }
-        ]
-    }
+    { id: 'ranked_wins', title: 'Ranked Master', description: 'Win ranked games to prove your shinobi skill.', metric: 'rankedWins', tiers: [
+        { tier: 1, target: 5, rewards: { ryo: 250 } },
+        { tier: 2, target: 25, rewards: { ryo: 1000 } },
+        { tier: 3, target: 100, rewards: { ryo: 3000 } },
+    ] },
+    { id: 'win_streak', title: 'Unstoppable Shinobi', description: 'Win consecutive ranked games.', metric: 'highestStreak', tiers: [
+        { tier: 1, target: 3, rewards: { ryo: 300 } },
+        { tier: 2, target: 5, rewards: { ryo: 800 } },
+        { tier: 3, target: 10, rewards: { ryo: 2500 } },
+    ] },
+    { id: 'level_milestones', title: 'Academy Graduate', description: 'Reach higher account level ranks.', metric: 'level', tiers: [
+        { tier: 1, target: 5, rewards: { ryo: 500 } },
+        { tier: 2, target: 15, rewards: { ryo: 1500 } },
+        { tier: 3, target: 30, rewards: { ryo: 5000 } },
+    ] },
+    { id: 'roster_collector', title: 'Ninja Squad Assembly', description: 'Unlock unique shinobi characters.', metric: 'unlockedCount', tiers: [
+        { tier: 1, target: 10, rewards: { ryo: 400 } },
+        { tier: 2, target: 25, rewards: { ryo: 1200 } },
+        { tier: 3, target: 50, rewards: { ryo: 4000 } },
+    ] },
 ];
 
 const DAILY_LOGIN_CALENDAR_REWARDS = [
-    { day: 1, ryo: 100, summonScrolls: 0, chakraShards: 10 },
-    { day: 2, ryo: 150, summonScrolls: 0, chakraShards: 20 },
-    { day: 3, ryo: 250, summonScrolls: 1, chakraShards: 25 },
-    { day: 4, ryo: 350, summonScrolls: 1, chakraShards: 35 },
-    { day: 5, ryo: 500, summonScrolls: 2, chakraShards: 50 },
-    { day: 6, ryo: 750, summonScrolls: 2, chakraShards: 75 },
-    { day: 7, ryo: 1500, summonScrolls: 5, chakraShards: 150 }
+    { day: 1, rewards: { ryo: 100 } },
+    { day: 2, rewards: { ryo: 150 } },
+    { day: 3, rewards: { ryo: 250 } },
+    { day: 4, rewards: { ryo: 350 } },
+    { day: 5, rewards: { ryo: 500 } },
+    { day: 6, rewards: { ryo: 750 } },
+    { day: 7, rewards: { ryo: 1500 } },
 ];
-
 function normalizeQuestsState(questsObj = {}) {
     const progress = questsObj.progress && typeof questsObj.progress === 'object' ? questsObj.progress : {};
     const claimedIds = Array.isArray(questsObj.claimedIds) ? questsObj.claimedIds.map(String) : [];
@@ -3895,7 +2684,6 @@ function normalizeQuestsState(questsObj = {}) {
             skillsUsed: Math.max(0, Number(progress.skillsUsed) || 0),
             charactersKilled: Math.max(0, Number(progress.charactersKilled) || 0),
             hpHealed: Math.max(0, Number(progress.hpHealed) || 0),
-            gachaPulls: Math.max(0, Number(progress.gachaPulls) || 0),
         },
         claimedIds
     };
@@ -3986,16 +2774,6 @@ const normalizeUserProfile = (user = {}) => {
         ryo: Number.isFinite(Number(source.ryo))
             ? Math.max(0, Math.round(Number(source.ryo)))
             : defaults.ryo,
-        summonScrolls: Number.isFinite(Number(source.summonScrolls))
-            ? Math.max(0, Math.round(Number(source.summonScrolls)))
-            : defaults.summonScrolls,
-        chakraShards: Number.isFinite(Number(source.chakraShards))
-            ? Math.max(0, Math.round(Number(source.chakraShards)))
-            : defaults.chakraShards,
-        gachaStats: {
-            totalPulls: Math.max(0, Number(source.gachaStats?.totalPulls) || 0),
-            pityCounter: Math.max(0, Number(source.gachaStats?.pityCounter) || 0),
-        },
         clan,
         clanInvitations: normalizeClanInvitations(source.clanInvitations),
         recentQuickGames: normalizeRecentQuickGames(source.recentQuickGames),
@@ -4223,7 +3001,6 @@ const getSkillUseCountForUser = (match, username, skillId, characterId = '') => 
 
 const awardMissionCompletion = (profile, rewardCharacterId, unlockedIds, alreadyCompleted) => {
     if (!alreadyCompleted) {
-        profile.summonScrolls = Math.max(0, (Number(profile.summonScrolls) || 0) + 2);
         profile.ryo = Math.max(0, (Number(profile.ryo) || 0) + 250);
     }
     if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
@@ -4308,8 +3085,8 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                 const rewardCharacterId = normalizeCharacterId(mission.reward_character);
                 const missionGoals = normalizeMissionGoalList(mission.goals || []);
                 const trackedGoals = missionGoals;
-                const existingProgress = normalizeMissionProgressEntry(
-                    progressByMissionId[mission.missionId] || {}
+                const existingProgress = getProgressForMissionRevision(
+                    progressByMissionId[mission.missionId] || {}, mission
                 );
                 const alreadyCompleted = Boolean(existingProgress.completedAt);
                 const existingGoalProgressByIndex = {
@@ -4454,6 +3231,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
 
                 const nextProgress = normalizeMissionProgressEntry({
                     ...existingProgress,
+                    revision: mission.revision,
                     goalProgressByIndex: nextGoalProgressByIndex,
                     goalProgress: nextGoalProgressByIndex,
                 });
@@ -5381,9 +4159,6 @@ const buildCharacterCatalog = () =>
         name: typeof character.name === 'string' ? character.name : '',
         facePicture: typeof character.facePicture === 'string' ? character.facePicture : '',
         requiredMissionId: typeof character.requiredMissionId === 'string' ? character.requiredMissionId.trim() : '',
-        shopPrice: Number.isFinite(Number(character.shopPrice))
-            ? Math.max(0, Math.round(Number(character.shopPrice)))
-            : 0,
         skills: (Array.isArray(character.skills) ? character.skills : []).map((skill = {}) => ({
             id: typeof skill.id === 'string' ? skill.id : '',
             name: typeof skill.name === 'string' ? skill.name : '',
@@ -5399,7 +4174,7 @@ const getMissionRankKey = (mission = {}) => {
     return 'dc';
 };
 
-const getShopPriceForMissionRank = (rankKey = 'dc') => {
+const getCharacterPriceForMissionRank = (rankKey = 'dc') => {
     const prices = {
         dc: 500,
         b: 1000,
@@ -5409,12 +4184,12 @@ const getShopPriceForMissionRank = (rankKey = 'dc') => {
     return prices[rankKey] || prices.dc;
 };
 
-const getShopPriceForMissionId = (missionId = '', missionCatalog = []) => {
+const getCharacterPriceForMissionId = (missionId = '', missionCatalog = []) => {
     const normalizedMissionId = slugifyMissionId(missionId);
     const mission = (Array.isArray(missionCatalog) ? missionCatalog : []).find(
         (entry) => slugifyMissionId(entry?.missionId) === normalizedMissionId
     );
-    return getShopPriceForMissionRank(getMissionRankKey(mission));
+    return getCharacterPriceForMissionRank(getMissionRankKey(mission));
 };
 
 let characterCatalog = buildCharacterCatalog();
@@ -5453,6 +4228,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
         },
@@ -5500,6 +4276,7 @@ const getStoredCharacters = async () => {
                     [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -5524,6 +4301,7 @@ const getStoredCharacters = async () => {
     const shouldApplyInoKonohamaruRework =
         !completedMigrations[INO_KONOHAMARU_REWORK_MIGRATION_ID];
     const shouldApplyHokageHiruzenRework = !completedMigrations[HOKAGE_HIRUZEN_REWORK_MIGRATION_ID];
+    const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -5534,6 +4312,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
         ...(shouldApplyInoKonohamaruRework ? ['yamanaka-ino', 'sarutobi-konohamaru'] : []),
         ...(shouldApplyHokageHiruzenRework ? ['sarutobi-hiruzen'] : []),
+        ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
     ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
@@ -5609,6 +4388,9 @@ const getStoredCharacters = async () => {
             if (shouldApplyInoKonohamaruRework &&
                 (characterId === 'yamanaka-ino' || characterId === 'sarutobi-konohamaru')) return seedEntry;
             if (shouldApplyHokageHiruzenRework && characterId === 'sarutobi-hiruzen') return seedEntry;
+            if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
+                return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
+            }
             const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
             const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
             if (facePicture !== storedFace) {
@@ -5668,7 +4450,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyLaunchUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -5697,6 +4479,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyHokageHiruzenRework) {
             completedMigrationUpdates[`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyLaunchUnlocks) {
+            completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
@@ -9365,18 +8150,6 @@ async function initDb() {
     });
     app.use('/api/bugs', bugsRouter);
 
-    const gachaRouter = require('./routes/gacha.js')({
-        usersCollection,
-        appStateCollection,
-        characterRankAccess,
-        normalizeUserProfile,
-        requireSession,
-        getCharactersData: () => (typeof getCharactersData === 'function' ? getCharactersData() : charactersData),
-        rootDir: __dirname,
-        SESSION_COOKIE_NAME,
-        getSessionUserCached
-    });
-    app.use('/api', gachaRouter);
     async function getSessionUserFromAuth(req) {
         if (!usersCollection || !req.authUser) return null;
         let user = null;
@@ -9399,12 +8172,11 @@ async function initDb() {
         }
         return user;
     }
-    const getGachaSessionUser = getSessionUserFromAuth;
 
     // ── QUESTS API ENDPOINTS ──────────────────────────────────────────────
     app.get('/api/quests', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9433,7 +8205,7 @@ async function initDb() {
 
     app.post('/api/quests/claim', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9458,8 +8230,6 @@ async function initDb() {
 
             const rewards = questDef.rewards || {};
             profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
-            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
-            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
 
             await usersCollection.updateOne(
                 { _id: user._id },
@@ -9467,8 +8237,6 @@ async function initDb() {
                     $set: {
                         'profile.quests.claimedIds': profile.quests.claimedIds,
                         'profile.ryo': profile.ryo,
-                        'profile.summonScrolls': profile.summonScrolls,
-                        'profile.chakraShards': profile.chakraShards,
                         updatedAt: new Date()
                     }
                 }
@@ -9479,8 +8247,6 @@ async function initDb() {
                 message: `Claimed ${questDef.title} reward!`,
                 rewards: questDef.rewards,
                 ryo: profile.ryo,
-                summonScrolls: profile.summonScrolls,
-                chakraShards: profile.chakraShards
             });
         } catch (err) {
             console.error('Quest claim error:', err);
@@ -9491,7 +8257,7 @@ async function initDb() {
     // ── ACHIEVEMENTS API ENDPOINTS ───────────────────────────────────────
     app.get('/api/achievements', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9503,7 +8269,6 @@ async function initDb() {
                 else if (ach.metric === 'highestStreak') metricVal = profile.ladder.highestStreak || profile.ladder.streak || 0;
                 else if (ach.metric === 'level') metricVal = profile.ladder.level || 1;
                 else if (ach.metric === 'unlockedCount') metricVal = (Array.isArray(profile.missions.unlockedCharacterIds) ? profile.missions.unlockedCharacterIds.length : 0);
-                else if (ach.metric === 'gachaPulls') metricVal = profile.gachaStats.totalPulls || 0;
 
                 const claimedSet = new Set(Array.isArray(claimedMap[ach.id]) ? claimedMap[ach.id] : []);
 
@@ -9535,7 +8300,7 @@ async function initDb() {
 
     app.post('/api/achievements/claim', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9558,7 +8323,6 @@ async function initDb() {
             else if (achDef.metric === 'highestStreak') metricVal = profile.ladder.highestStreak || profile.ladder.streak || 0;
             else if (achDef.metric === 'level') metricVal = profile.ladder.level || 1;
             else if (achDef.metric === 'unlockedCount') metricVal = (Array.isArray(profile.missions.unlockedCharacterIds) ? profile.missions.unlockedCharacterIds.length : 0);
-            else if (achDef.metric === 'gachaPulls') metricVal = profile.gachaStats.totalPulls || 0;
 
             if (metricVal < tierDef.target) {
                 return res.status(400).json({ error: 'Achievement tier objective not completed.' });
@@ -9570,8 +8334,6 @@ async function initDb() {
 
             const rewards = tierDef.rewards || {};
             profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
-            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
-            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
 
             await usersCollection.updateOne(
                 { _id: user._id },
@@ -9579,8 +8341,6 @@ async function initDb() {
                     $set: {
                         'profile.achievements.claimedTiers': profile.achievements.claimedTiers,
                         'profile.ryo': profile.ryo,
-                        'profile.summonScrolls': profile.summonScrolls,
-                        'profile.chakraShards': profile.chakraShards,
                         updatedAt: new Date()
                     }
                 }
@@ -9591,8 +8351,6 @@ async function initDb() {
                 message: `Claimed ${achDef.title} (Tier ${tierDef.tier}) reward!`,
                 rewards: tierDef.rewards,
                 ryo: profile.ryo,
-                summonScrolls: profile.summonScrolls,
-                chakraShards: profile.chakraShards
             });
         } catch (err) {
             console.error('Achievement claim error:', err);
@@ -9603,7 +8361,7 @@ async function initDb() {
     // ── DAILY LOGIN REWARDS API ENDPOINTS ────────────────────────────────
     app.get('/api/login-rewards', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9628,7 +8386,7 @@ async function initDb() {
 
     app.post('/api/login-rewards/claim', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9644,9 +8402,7 @@ async function initDb() {
             profile.loginRewards.totalClaims += 1;
             profile.loginRewards.lastClaimDate = todayStr;
 
-            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewardConfig.ryo) || 0);
-            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewardConfig.summonScrolls) || 0);
-            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewardConfig.chakraShards) || 0);
+            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewardConfig.rewards.ryo) || 0);
 
             await usersCollection.updateOne(
                 { _id: user._id },
@@ -9654,8 +8410,6 @@ async function initDb() {
                     $set: {
                         'profile.loginRewards': profile.loginRewards,
                         'profile.ryo': profile.ryo,
-                        'profile.summonScrolls': profile.summonScrolls,
-                        'profile.chakraShards': profile.chakraShards,
                         updatedAt: new Date()
                     }
                 }
@@ -9665,10 +8419,8 @@ async function initDb() {
                 ok: true,
                 message: `Day ${currentDay} Login Reward Claimed!`,
                 claimedDay: currentDay,
-                rewards: rewardConfig,
+                rewards: rewardConfig.rewards,
                 ryo: profile.ryo,
-                summonScrolls: profile.summonScrolls,
-                chakraShards: profile.chakraShards
             });
         } catch (err) {
             console.error('Login reward claim error:', err);
@@ -9679,7 +8431,7 @@ async function initDb() {
     // ── PROMO CODE REDEMPTION API ENDPOINT ────────────────────────────────
     app.post('/api/promo-codes/redeem', requireSession, async (req, res) => {
         try {
-            const user = await getGachaSessionUser(req);
+            const user = await getSessionUserFromAuth(req);
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
@@ -9698,8 +8450,8 @@ async function initDb() {
 
             if (!promoDoc) {
                 const DEFAULT_CODES = {
-                    'WELCOME2026': { ryo: 500, summonScrolls: 2, chakraShards: 50, active: true },
-                    'SHINOBI777': { ryo: 777, summonScrolls: 3, chakraShards: 77, active: true }
+                    'WELCOME2026': { ryo: 500, active: true },
+                    'SHINOBI777': { ryo: 777, active: true }
                 };
                 if (DEFAULT_CODES[inputCode]) {
                     promoDoc = { code: inputCode, ...DEFAULT_CODES[inputCode] };
@@ -9718,14 +8470,12 @@ async function initDb() {
                 return res.status(400).json({ error: 'This promo code has reached maximum redemption limit.' });
             }
 
-            const rewards = promoDoc.rewards || { ryo: promoDoc.ryo || 0, summonScrolls: promoDoc.summonScrolls || 0, chakraShards: promoDoc.chakraShards || 0 };
+            const rewards = { ryo: Math.max(0, Number(promoDoc.rewards?.ryo ?? promoDoc.ryo) || 0) };
 
             redeemedSet.add(inputCode);
             profile.redeemedCodes = Array.from(redeemedSet);
 
             profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
-            profile.summonScrolls = (Number(profile.summonScrolls) || 0) + (Number(rewards.summonScrolls) || 0);
-            profile.chakraShards = (Number(profile.chakraShards) || 0) + (Number(rewards.chakraShards) || 0);
 
             if (promoCodesCollection && promoDoc._id) {
                 await promoCodesCollection.updateOne(
@@ -9740,8 +8490,6 @@ async function initDb() {
                     $set: {
                         'profile.redeemedCodes': profile.redeemedCodes,
                         'profile.ryo': profile.ryo,
-                        'profile.summonScrolls': profile.summonScrolls,
-                        'profile.chakraShards': profile.chakraShards,
                         updatedAt: new Date()
                     }
                 }
@@ -9752,8 +8500,6 @@ async function initDb() {
                 message: `Code ${inputCode} redeemed successfully!`,
                 rewards,
                 ryo: profile.ryo,
-                summonScrolls: profile.summonScrolls,
-                chakraShards: profile.chakraShards
             });
         } catch (err) {
             console.error('Promo code redeem error:', err);
@@ -9809,23 +8555,22 @@ async function initDb() {
         getCharacterCatalog: () => (typeof buildCharacterCatalog === 'function' ? buildCharacterCatalog() : [])
     };
 
-    const shopRouter = require('./routes/shop.js')({
+    const characterPurchasesRouter = require('./routes/characterPurchases.js')({
         usersCollection,
         normalizeUserProfile,
         getMissionLockedCharacterIds,
         getStoredMissionCatalog,
         characterService,
-        cosmeticsService,
         profileHasUnlockedCharacter,
         characterRankAccess,
         getCharacterAvailability,
-        getShopPriceForMissionId,
+        getCharacterPriceForMissionId,
         normalizeCharacterId,
         normalizeMissionState,
         normalizeMissionProgressEntry,
         requireSession,
     });
-    app.use(shopRouter);
+    app.use(characterPurchasesRouter);
 
     const profileRouter = require('./routes/profile.js')({
         usersCollection,
@@ -11174,10 +9919,15 @@ app.get('/api/missions', async (req, res) => {
         } catch (sessionError) {
             console.warn('Mission session lookup failed:', sessionError);
         }
+        const visibleProgress = Object.fromEntries(missions
+            .filter((mission) => missionState.progressByMissionId[mission.missionId])
+            .map((mission) => [mission.missionId, getProgressForMissionRevision(
+                missionState.progressByMissionId[mission.missionId], mission
+            )]));
         return res.json({
             ok: true,
             missions,
-            missionProgressByMissionId: missionState.progressByMissionId,
+            missionProgressByMissionId: visibleProgress,
             unlockedCharacterIds: missionState.unlockedCharacterIds,
         });
     } catch (error) {
@@ -11214,288 +9964,6 @@ app.get('/api/story', async (req, res) => {
     }
 });
 
-app.get('/api/shop', requireSession, async (req, res) => {
-    try {
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const lockedCharacterIds = await getMissionLockedCharacterIds();
-        const missionCatalog = await getStoredMissionCatalog();
-        const policies = await characterRankAccess.getPolicies();
-        const characters = buildCharacterCatalog().filter((character) => {
-            if (!character.requiredMissionId) {
-                return false;
-            }
-            const access = getCharacterAvailability({
-                policies, user, profile, characterId: character.characterId, lockedCharacterIds,
-            });
-            return !access.hidden && !access.unlocked;
-        }).map((character) => {
-            const shopPrice = getShopPriceForMissionId(character.requiredMissionId, missionCatalog);
-            return {
-                ...character,
-                shopPrice,
-            };
-        });
-
-        const cs = cosmeticsService;
-        let cosmeticsCatalog = { avatars: [], titles: [], borders: [] };
-        if (cs && typeof cs.loadCatalog === 'function') {
-            cosmeticsCatalog = await cs.loadCatalog();
-        } else if (cs && typeof cs.getCatalogSync === 'function') {
-            cosmeticsCatalog = cs.getCatalogSync();
-        }
-
-        return res.json({
-            ok: true,
-            ryo: profile.ryo,
-            inventory: profile.inventory || { avatars: [], titles: [], borders: [], customTitles: [] },
-            equippedTitle: profile.equippedTitle || '',
-            equippedBorder: profile.equippedBorder || '',
-            avatarUrl: profile.avatarUrl || '',
-            characters,
-            cosmetics: cosmeticsCatalog,
-        });
-    } catch (error) {
-        console.error('Shop catalog load error:', error);
-        return res.status(500).json({ error: 'Unable to load shop.' });
-    }
-});
-
-app.post('/api/shop/purchase-cosmetic', requireSession, async (req, res) => {
-    try {
-        const { itemId, category } = req.body || {};
-        const cleanCategory = String(category || '').trim().toLowerCase();
-        const cleanItemId = String(itemId || '').trim();
-
-        if (!cleanItemId || !['avatars', 'titles', 'borders'].includes(cleanCategory)) {
-            return res.status(400).json({ error: 'Valid cosmetic itemId and category are required.' });
-        }
-
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
-        const rawProfile = normalizeUserProfile(user);
-        const profile = rawProfile.profile || rawProfile;
-        const inventory = profile.inventory || { avatars: [], titles: [], borders: [], customTitles: [] };
-        const ownedList = inventory[cleanCategory] || [];
-
-        if (ownedList.includes(cleanItemId)) {
-            return res.status(400).json({ error: 'You already own this item.' });
-        }
-
-        const cs = cosmeticsService;
-        let cosmeticsCatalog = { avatars: [], titles: [], borders: [] };
-        if (cs && typeof cs.loadCatalog === 'function') {
-            cosmeticsCatalog = await cs.loadCatalog();
-        } else if (cs && typeof cs.getCatalogSync === 'function') {
-            cosmeticsCatalog = cs.getCatalogSync();
-        }
-
-        const categoryList = cosmeticsCatalog[cleanCategory] || [];
-        const item = categoryList.find(c => c.id === cleanItemId);
-        if (!item) {
-            return res.status(404).json({ error: 'Cosmetic item not found in shop catalog.' });
-        }
-
-        const price = Math.max(0, Number(item.price) || 0);
-        if ((Number(profile.ryo) || 0) < price) {
-            return res.status(400).json({ error: `Not enough Ryo. Required: ${price} Ryo.` });
-        }
-
-        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - price);
-        inventory[cleanCategory] = Array.from(new Set([...ownedList, cleanItemId]));
-        profile.inventory = inventory;
-
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        const savedProfile = normalizedProfile.profile || normalizedProfile;
-        await usersCollection.updateOne(
-            { _id: user._id },
-            { $set: { profile: savedProfile, updatedAt: new Date() } }
-        );
-
-        return res.json({
-            ok: true,
-            message: `Purchased ${item.name}!`,
-            ryo: savedProfile.ryo,
-            inventory: savedProfile.inventory,
-            item
-        });
-    } catch (error) {
-        console.error('Cosmetic purchase error:', error);
-        return res.status(500).json({ error: 'Unable to complete cosmetic purchase.' });
-    }
-});
-
-app.post('/api/shop/purchase', requireSession, async (req, res) => {
-    try {
-        const characterId = normalizeCharacterId(req.body?.characterId);
-        if (!characterId) {
-            return res.status(400).json({ error: 'Character is required.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
-        const characterEntry = (Array.isArray(charactersData) ? charactersData : []).find(
-            (entry) => normalizeCharacterId(entry && entry.characterId) === characterId
-        );
-        const requiredMissionId =
-            characterEntry && typeof characterEntry.requiredMissionId === 'string'
-                ? characterEntry.requiredMissionId.trim()
-                : '';
-        if (!characterEntry || !requiredMissionId) {
-            return res.status(400).json({ error: 'This character is not available in the shop.' });
-        }
-        const missionCatalog = await getStoredMissionCatalog();
-        const shopPrice = getShopPriceForMissionId(requiredMissionId, missionCatalog);
-
-        const profile = normalizeUserProfile(user);
-        const lockedCharacterIds = await getMissionLockedCharacterIds();
-        const access = getCharacterAvailability({
-            policies: await characterRankAccess.getPolicies(), user, profile,
-            characterId, lockedCharacterIds,
-        });
-        if (access.hidden) {
-            return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
-        }
-        if (access.unlocked) {
-            return res.status(400).json({ error: 'Character already unlocked.' });
-        }
-        if ((Number(profile.ryo) || 0) < shopPrice) {
-            return res.status(400).json({ error: 'Not enough Ryo.' });
-        }
-
-        const missionState = normalizeMissionState(profile.missions);
-        const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
-        unlockedIds.add(characterId);
-        const progressByMissionId = { ...(missionState.progressByMissionId || {}) };
-        const existingProgress = normalizeMissionProgressEntry(
-            progressByMissionId[requiredMissionId] || {}
-        );
-        progressByMissionId[requiredMissionId] = normalizeMissionProgressEntry({
-            ...existingProgress,
-            completedAt: existingProgress.completedAt || new Date(),
-        });
-
-        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - shopPrice);
-        profile.missions = {
-            ...profile.missions,
-            progressByMissionId,
-            progress: progressByMissionId,
-            unlockedCharacterIds: Array.from(unlockedIds),
-        };
-
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            { $set: { profile: normalizedProfile } }
-        );
-
-        return res.json({
-            ok: true,
-            ryo: normalizedProfile.ryo,
-            unlockedCharacterIds: normalizedProfile.missions.unlockedCharacterIds,
-            missionProgressByMissionId: normalizedProfile.missions.progressByMissionId,
-        });
-    } catch (error) {
-        console.error('Shop purchase error:', error);
-        return res.status(500).json({ error: 'Unable to complete purchase.' });
-    }
-});
-
-app.post('/api/characters/buy-direct', requireSession, async (req, res) => {
-    try {
-        const characterId = normalizeCharacterId(req.body?.characterId);
-        if (!characterId) {
-            return res.status(400).json({ error: 'Character ID is required.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
-        const characterEntry = (Array.isArray(charactersData) ? charactersData : []).find(
-            (entry) => normalizeCharacterId(entry && entry.characterId) === characterId
-        );
-        if (!characterEntry) {
-            return res.status(400).json({ error: 'Character not found.' });
-        }
-
-        const requiredMissionId =
-            typeof characterEntry.requiredMissionId === 'string'
-                ? characterEntry.requiredMissionId.trim()
-                : '';
-        const missionCatalog = await getStoredMissionCatalog();
-        const price = requiredMissionId
-            ? getShopPriceForMissionId(requiredMissionId, missionCatalog)
-            : 1000;
-
-        const profile = normalizeUserProfile(user);
-        const lockedCharacterIds = await getMissionLockedCharacterIds();
-        const access = getCharacterAvailability({
-            policies: await characterRankAccess.getPolicies(), user, profile,
-            characterId, lockedCharacterIds,
-        });
-        if (access.hidden) {
-            return res.status(403).json({ error: 'This character is unavailable for your web rank.' });
-        }
-        if (access.unlocked) {
-            return res.status(400).json({ error: 'Character already unlocked.' });
-        }
-        if ((Number(profile.ryo) || 0) < price) {
-            return res.status(400).json({ error: `Not enough Ryo. Required: ${price} Ryo.` });
-        }
-
-        const missionState = normalizeMissionState(profile.missions);
-        const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
-        unlockedIds.add(characterId);
-        const progressByMissionId = { ...(missionState.progressByMissionId || {}) };
-        if (requiredMissionId) {
-            const existingProgress = normalizeMissionProgressEntry(
-                progressByMissionId[requiredMissionId] || {}
-            );
-            progressByMissionId[requiredMissionId] = normalizeMissionProgressEntry({
-                ...existingProgress,
-                completedAt: existingProgress.completedAt || new Date(),
-            });
-        }
-
-        profile.ryo = Math.max(0, (Number(profile.ryo) || 0) - price);
-        profile.missions = {
-            ...profile.missions,
-            progressByMissionId,
-            progress: progressByMissionId,
-            unlockedCharacterIds: Array.from(unlockedIds),
-        };
-
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            { $set: { profile: normalizedProfile } }
-        );
-
-        return res.json({
-            ok: true,
-            characterId,
-            price,
-            ryo: normalizedProfile.ryo,
-            unlockedCharacterIds: normalizedProfile.missions.unlockedCharacterIds,
-            missionProgressByMissionId: normalizedProfile.missions.progressByMissionId,
-        });
-    } catch (error) {
-        console.error('Direct character buy error:', error);
-        return res.status(500).json({ error: 'Unable to purchase character.' });
-    }
-});
-
-
-
 app.get('/api/characters/catalog', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     try {
@@ -11520,7 +9988,7 @@ app.get('/api/characters', async (req, res) => {
     try {
         const token = req.cookies?.[SESSION_COOKIE_NAME];
         const authUser = token ? await getSessionUserFromToken(token) : null;
-        const lockedCharacterIds = authUser ? await getMissionLockedCharacterIds() : new Set();
+        const lockedCharacterIds = await getMissionLockedCharacterIds();
         const policies = await characterRankAccess.getPolicies();
         const profile = authUser ? normalizeUserProfile(authUser) : null;
         const characterList = Array.isArray(charactersData) ? charactersData : [];
@@ -11537,8 +10005,8 @@ app.get('/api/characters', async (req, res) => {
                     ...localizeArtwork(character),
                     unlocked: access.unlocked,
                     hidden: access.hidden,
-                    shopPrice: character.requiredMissionId
-                        ? getShopPriceForMissionId(character.requiredMissionId, missionCatalog)
+                    purchasePrice: character.requiredMissionId
+                        ? getCharacterPriceForMissionId(character.requiredMissionId, missionCatalog)
                         : 1000,
                 };
             }),
@@ -13657,8 +12125,12 @@ if (require.main === module) {
 module.exports = {
     buildMatchPayloadForUser,
     getDefaultMissionCatalog,
+    resolveMissionCatalogState,
+    getProgressForMissionRevision,
     normalizeMissionCatalog,
     awardMissionCompletion,
+    buildDefaultUserProfile,
+    getCharacterAvailability,
     app,
 };
 

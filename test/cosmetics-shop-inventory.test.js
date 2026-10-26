@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 
 const createCosmeticsService = require('../services/cosmeticsService.js');
-const createShopRouter = require('../routes/shop.js');
 const createProfileRouter = require('../routes/profile.js');
 
 test('Cosmetics & Inventory System Tests', async (t) => {
@@ -29,7 +28,6 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         assert.ok(Array.isArray(catalog.avatars), 'Avatars should be an array');
         assert.ok(Array.isArray(catalog.titles), 'Titles should be an array');
         assert.ok(Array.isArray(catalog.borders), 'Borders should be an array');
-        assert.ok(catalog.avatars.some(a => a.id === 'avatar_anbu_mask'), 'Default catalog should contain avatar_anbu_mask');
 
         const testItems = [
             {
@@ -86,7 +84,7 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         assert.equal(found, undefined, 'Deleted avatar should no longer be in catalog');
     });
 
-    // 2. User & Shop purchasing test
+    // 2. Owned cosmetic equipment and inventory
     const userStore = new Map();
     let sampleUser = {
         _id: 'user_test_1',
@@ -95,8 +93,8 @@ test('Cosmetics & Inventory System Tests', async (t) => {
             ryo: 1500,
             unlockedCharacters: ['naruto', 'sasuke', 'sakura'],
             inventory: {
-                avatars: ['avatar_starter'],
-                titles: ['title_genin'],
+                avatars: ['avatar_starter', 'avatar_bulk_2'],
+                titles: ['title_genin', 'title_test_flash'],
                 borders: ['border_default']
             },
             equippedTitle: 'title_genin',
@@ -132,89 +130,6 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         next();
     };
 
-    const shopRouter = createShopRouter({
-        usersCollection: mockUsersCollection,
-        normalizeUserProfile: (p) => p,
-        getMissionLockedCharacterIds: () => [],
-        getStoredMissionCatalog: () => [],
-        characterService: { getCharacters: () => [], getCharacterCatalog: () => [] },
-        cosmeticsService,
-        profileHasUnlockedCharacter: () => false,
-        getShopPriceForMissionId: () => 0,
-        normalizeCharacterId: (id) => id,
-        normalizeMissionState: (s) => s,
-        normalizeMissionProgressEntry: (e) => e,
-        requireSession: mockRequireSession
-    });
-
-    await t.test('Shop Purchase Cosmetic: purchase avatar with Ryo', async () => {
-        let responseData = null;
-        let responseStatus = 200;
-        const req = {
-            method: 'POST',
-            url: '/api/shop/purchase-cosmetic',
-            body: { itemId: 'avatar_anbu_mask', category: 'avatars' },
-            authUser: { _id: 'user_test_1', username: 'SasukeFan' }
-        };
-        const res = {
-            status: (s) => { responseStatus = s; return res; },
-            json: (data) => { responseData = data; return res; }
-        };
-
-        const route = shopRouter.stack.find(r => r.route && r.route.path === '/api/shop/purchase-cosmetic');
-        assert.ok(route, 'Shop router should have /api/shop/purchase-cosmetic route');
-        
-        await route.route.stack[route.route.stack.length - 1].handle(req, res);
-        
-        assert.equal(responseStatus, 200);
-        assert.ok(responseData.ok, 'Purchase should succeed');
-        assert.equal(responseData.ryo, 1250, 'Ryo balance should be 1500 - 250 = 1250');
-        assert.ok(sampleUser.profile.inventory.avatars.includes('avatar_anbu_mask'), 'Inventory should now contain avatar_anbu_mask');
-    });
-
-    await t.test('Shop Purchase Cosmetic: purchase title with Ryo', async () => {
-        let responseData = null;
-        let responseStatus = 200;
-        const req = {
-            method: 'POST',
-            url: '/api/shop/purchase-cosmetic',
-            body: { itemId: 'title_leaf_prodigy', category: 'titles' },
-            authUser: { _id: 'user_test_1', username: 'SasukeFan' }
-        };
-        const res = {
-            status: (s) => { responseStatus = s; return res; },
-            json: (data) => { responseData = data; return res; }
-        };
-
-        const route = shopRouter.stack.find(r => r.route && r.route.path === '/api/shop/purchase-cosmetic');
-        await route.route.stack[route.route.stack.length - 1].handle(req, res);
-        
-        assert.equal(responseStatus, 200);
-        assert.ok(responseData.ok, 'Title purchase should succeed');
-        assert.ok(sampleUser.profile.inventory.titles.includes('title_leaf_prodigy'));
-    });
-
-    await t.test('Shop Purchase Cosmetic: reject duplicate purchase', async () => {
-        let responseData = null;
-        let responseStatus = 200;
-        const req = {
-            method: 'POST',
-            url: '/api/shop/purchase-cosmetic',
-            body: { itemId: 'avatar_anbu_mask', category: 'avatars' },
-            authUser: { _id: 'user_test_1', username: 'SasukeFan' }
-        };
-        const res = {
-            status: (s) => { responseStatus = s; return res; },
-            json: (data) => { responseData = data; return res; }
-        };
-
-        const route = shopRouter.stack.find(r => r.route && r.route.path === '/api/shop/purchase-cosmetic');
-        await route.route.stack[route.route.stack.length - 1].handle(req, res);
-        
-        assert.equal(responseStatus, 400);
-        assert.ok(responseData.error.includes('already own'), 'Should reject duplicate purchase');
-    });
-
     // 3. Profile router equip tests
     const profileRouter = createProfileRouter({
         usersCollection: mockUsersCollection,
@@ -236,7 +151,7 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         const req = {
             method: 'POST',
             url: '/api/profile/equip',
-            body: { type: 'avatar', itemId: 'avatar_anbu_mask' },
+            body: { type: 'avatar', itemId: 'avatar_bulk_2' },
             authUser: { _id: 'user_test_1', username: 'SasukeFan' }
         };
         const res = {
@@ -249,17 +164,17 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         await route.route.stack[route.route.stack.length - 1].handle(req, res);
 
         assert.equal(responseStatus, 200);
-        assert.equal(responseData.avatarUrl, 'sharingan-remaster.png?v=2', 'Avatar URL should be updated');
+        assert.equal(responseData.avatarUrl, 'avatars/bulk_2.png', 'Avatar URL should be updated');
 
         // Now equip title
         const reqTitle = {
             method: 'POST',
             url: '/api/profile/equip',
-            body: { type: 'title', itemId: 'title_leaf_prodigy' },
+            body: { type: 'title', itemId: 'title_test_flash' },
             authUser: { _id: 'user_test_1', username: 'SasukeFan' }
         };
         await route.route.stack[route.route.stack.length - 1].handle(reqTitle, res);
-        assert.equal(sampleUser.profile.equippedTitle, 'Leaf Village Prodigy');
+        assert.equal(sampleUser.profile.equippedTitle, 'The Golden Flash');
     });
 
     await t.test('Profile Inventory: fetch owned items with hydrated catalog data', async () => {
@@ -281,9 +196,9 @@ test('Cosmetics & Inventory System Tests', async (t) => {
 
         assert.equal(responseStatus, 200);
         assert.ok(Array.isArray(responseData.avatars), 'Returned avatars should be an array');
-        assert.ok(responseData.avatars.some(a => a.id === 'avatar_anbu_mask'), 'Returned avatars should include avatar_anbu_mask');
+        assert.ok(responseData.avatars.some(a => a.id === 'avatar_bulk_2'), 'Returned avatars should include avatar_bulk_2');
         assert.ok(Array.isArray(responseData.titles), 'Returned titles should be an array');
-        assert.ok(responseData.titles.some(t => t.id === 'title_leaf_prodigy'), 'Returned titles should include title_leaf_prodigy');
-        assert.equal(responseData.equippedTitle, 'Leaf Village Prodigy');
+        assert.ok(responseData.titles.some(t => t.id === 'title_test_flash'), 'Returned titles should include title_test_flash');
+        assert.equal(responseData.equippedTitle, 'The Golden Flash');
     });
 });

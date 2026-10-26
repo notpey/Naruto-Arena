@@ -38,7 +38,7 @@
         <div class="selection-hub-ryo" aria-label="Ryo balance" title="Spend Ryo on locked characters in the roster">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
             <span class="selection-hub-ryo-label">Ryo</span>
-            <span data-shop-balance>0</span>
+            <span data-ryo-balance>0</span>
         </div>
         <div class="selection-hub-settings">
             <button type="button" class="selection-hub-settings-button" data-settings-trigger aria-label="Open settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.87 1.87-.06-.06A1.7 1.7 0 0 0 16 18.4a1.7 1.7 0 0 0-1 1.54V20H9v-.06a1.7 1.7 0 0 0-1-1.54 1.7 1.7 0 0 0-1.87.35l-.06.06-1.87-1.87.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.54-1H3v-4h.06A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88L4.2 7.06l1.87-1.87.06.06A1.7 1.7 0 0 0 8 5.6a1.7 1.7 0 0 0 1-1.54V4h6v.06a1.7 1.7 0 0 0 1 1.54 1.7 1.7 0 0 0 1.87-.35l.06-.06 1.87 1.87-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.54 1H21v4h-.06A1.7 1.7 0 0 0 19.4 15Z"/></svg></button>
@@ -170,7 +170,7 @@
                 <div id="character-arc" class="character-arc" hidden></div>
                 <div id="character-unlock-action" class="character-unlock-action" hidden>
                     <span class="character-unlock-price">Unlock for <strong id="character-unlock-price">0</strong> Ryo</span>
-                    <button type="button" id="character-unlock-buy" class="character-unlock-buy">Unlock character</button>
+                    <button type="button" id="character-unlock-buy" class="character-unlock-buy">Purchase character</button>
                     <span id="character-unlock-error" class="character-unlock-error" role="status"></span>
                 </div>
             </div>
@@ -295,7 +295,7 @@
         <button type="button" class="shinobi-modal-close" id="quests-modal-close" aria-label="Close">&times;</button>
         <div class="settings-modal-header">
             <div class="settings-modal-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
                     <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
                     <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">忍</text>
                 </svg>
@@ -321,7 +321,7 @@
         <button type="button" class="shinobi-modal-close" id="achievements-modal-close" aria-label="Close">&times;</button>
         <div class="settings-modal-header">
             <div class="settings-modal-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
                     <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#c084fc" stroke-width="2" />
                     <text x="20" y="28" fill="#e9d5ff" font-size="14" font-weight="900" text-anchor="middle">栄</text>
                 </svg>
@@ -343,14 +343,14 @@
         <button type="button" class="shinobi-modal-close" id="login-rewards-modal-close" aria-label="Close">&times;</button>
         <div class="settings-modal-header">
             <div class="settings-modal-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
                     <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#34d399" stroke-width="2" />
                     <text x="20" y="28" fill="#a7f3d0" font-size="14" font-weight="900" text-anchor="middle">礼</text>
                 </svg>
             </div>
             <div>
                 <h2 class="settings-modal-title">Daily Shinobi Check-In</h2>
-                <p class="settings-modal-subtitle">Log in daily to claim Ryo, Scrolls, and Chakra Shards</p>
+                <p class="settings-modal-subtitle">Log in daily to claim Ryo</p>
             </div>
         </div>
         <div class="login-calendar-grid" id="login-calendar-grid"></div>
@@ -365,7 +365,7 @@
         <button type="button" class="shinobi-modal-close" id="promo-code-modal-close" aria-label="Close">&times;</button>
         <div class="settings-modal-header">
             <div class="settings-modal-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
                     <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f87171" stroke-width="2" />
                     <text x="20" y="28" fill="#fecaca" font-size="14" font-weight="900" text-anchor="middle">文</text>
                 </svg>
@@ -390,7 +390,7 @@
         
         <div class="settings-modal-header">
             <div class="settings-modal-crest">
-                <svg class="gacha-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
                     <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
                     <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">設</text>
                 </svg>
@@ -460,7 +460,7 @@
                             <span>文</span>
                         </div>
                         <div class="card-text-wrap">
-                            <strong>Secret Scrolls</strong>
+                            <strong>Promo Codes</strong>
                             <span>Redeem promo codes</span>
                         </div>
                         <span class="card-arrow">›</span>
@@ -503,7 +503,7 @@
 <script src="roster-catalog.js?v=1"></script>
 <script src="skill-description-format.js?v=2"></script>
 <script src="script.js?v=53"></script>
-<script src="selectionGacha.js?v=44"></script>
+<script src="selectionRewards.js?v=1"></script>
 <script src="selectionHub.js?v=45"></script>
 <script>
     (function() {

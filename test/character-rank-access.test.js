@@ -2,8 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
 const createAdminRouter = require('../routes/admin');
-const createShopRouter = require('../routes/shop');
-const createGachaRouter = require('../routes/gacha');
+const createCharacterPurchasesRouter = require('../routes/characterPurchases');
 const catalog = require('../roster-catalog');
 const {
     createCharacterRankAccessService, evaluateAccess,
@@ -26,33 +25,57 @@ function makeService() {
     return { service, characters, collection };
 }
 
-test('Ino starts hidden from Members and Moderators while Admin and Global Moderator can test her', async () => {
+test('Ino is hidden from Members even when owned; all three staff roles can use her', async () => {
     const { service } = makeService();
     const policies = await service.getPolicies();
-    for (const role of ['admin', 'global_moderator']) {
+    for (const role of ['admin', 'global_moderator', 'moderator']) {
         assert.deepEqual(evaluateAccess({ policies, characterId: 'yamanaka-ino', role,
-            inheritedUnlocked: false }), { mode: 'allow', hidden: false, unlocked: true });
+            inheritedUnlocked: false }), { visibility: 'visible', unlockMode: 'allow',
+            hidden: false, unlocked: true });
     }
-    for (const role of ['moderator', 'player']) {
-        assert.deepEqual(evaluateAccess({ policies, characterId: 'yamanaka-ino', role,
-            inheritedUnlocked: true }), { mode: 'deny', hidden: true, unlocked: false });
-    }
+    assert.deepEqual(evaluateAccess({ policies, characterId: 'yamanaka-ino', role: 'player',
+        inheritedUnlocked: true }), { visibility: 'hidden', unlockMode: 'inherit',
+        hidden: true, unlocked: false });
     assert.deepEqual(evaluateAccess({ policies, characterId: 'ebisu', role: 'player',
-        inheritedUnlocked: false }), { mode: 'inherit', hidden: false, unlocked: false });
+        inheritedUnlocked: false }), { visibility: 'visible', unlockMode: 'inherit',
+        hidden: false, unlocked: false });
 });
 
-test('saved rank access persists, validates character IDs and can return Ino to normal unlock rules', async () => {
+test('Member visibility and unlock settings persist independently', async () => {
     const { service } = makeService();
     await assert.rejects(service.savePolicies({ unknown: { player: 'allow' } }, 'Admin'), /Unknown character/);
     await assert.rejects(service.savePolicies({ ebisu: { player: 'public' } }, 'Admin'), /Invalid player access/);
-    const saved = await service.savePolicies({ ebisu: { player: 'deny', admin: 'allow' } }, 'Admin');
-    assert.deepEqual(saved, { ebisu: { admin: 'allow', player: 'deny' } });
+    const saved = await service.savePolicies({ ebisu: { player: {
+        visibility: 'hidden', unlock: 'allow',
+    } } }, 'Admin');
+    assert.deepEqual(saved, { ebisu: { player: { visibility: 'hidden', unlock: 'allow' } } });
     assert.deepEqual(await service.getPolicies(), saved);
+    assert.deepEqual(evaluateAccess({ policies: saved, characterId: 'ebisu', role: 'player',
+        inheritedUnlocked: false }), { visibility: 'hidden', unlockMode: 'allow',
+        hidden: true, unlocked: false });
     assert.deepEqual(evaluateAccess({ policies: saved, characterId: 'yamanaka-ino', role: 'player',
-        inheritedUnlocked: true }), { mode: 'inherit', hidden: false, unlocked: true });
+        inheritedUnlocked: true }), { visibility: 'visible', unlockMode: 'inherit',
+        hidden: false, unlocked: true });
 });
 
-test('ACP character access requires Admin and saves settings for all four web ranks', async () => {
+test('legacy access settings migrate and restore Ino visibility for Moderators', async () => {
+    const { service, collection } = makeService();
+    await collection.updateOne({ key: 'character_rank_access' }, { $set: {
+        key: 'character_rank_access', policies: {
+            'yamanaka-ino': { admin: 'allow', global_moderator: 'allow',
+                moderator: 'deny', player: 'allow' },
+            ebisu: { player: 'deny' },
+        },
+    } });
+    const policies = await service.getPolicies();
+    assert.deepEqual(policies['yamanaka-ino'].player,
+        { visibility: 'hidden', unlock: 'inherit' });
+    assert.deepEqual(policies.ebisu.player, { visibility: 'hidden', unlock: 'inherit' });
+    assert.equal(evaluateAccess({ policies, characterId: 'yamanaka-ino', role: 'moderator',
+        inheritedUnlocked: false }).unlocked, true);
+});
+
+test('ACP Member access requires Admin and saves separate visibility and unlock settings', async () => {
     const { service, characters } = makeService();
     const app = express();
     app.use(express.json());
@@ -77,15 +100,15 @@ test('ACP character access requires Admin and saves settings for all four web ra
             'content-type': 'application/json', 'x-role': 'moderator',
         }, body: JSON.stringify({ policies: {} }) })).status, 403);
         const initial = await (await fetch(url)).json();
-        assert.equal(initial.policies['yamanaka-ino'].player, 'deny');
+        assert.equal(initial.policies['yamanaka-ino'].player.visibility, 'hidden');
         const response = await fetch(url, {
             method: 'PUT', headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ policies: { 'yamanaka-ino': {
-                admin: 'allow', global_moderator: 'allow', moderator: 'deny', player: 'deny',
+                player: { visibility: 'hidden', unlock: 'inherit' },
             } } }),
         });
         assert.equal(response.status, 200);
-        assert.equal((await response.json()).policies['yamanaka-ino'].global_moderator, 'allow');
+        assert.equal((await response.json()).policies['yamanaka-ino'].player.visibility, 'hidden');
     } finally {
         await new Promise(resolve => server.close(resolve));
     }
@@ -103,7 +126,7 @@ test('hidden characters leave canonical roster indices intact but disappear from
     assert.equal(roster[2].id, 'ebisu');
 });
 
-test('shop omits and refuses a rank-hidden character even when the player owns it', async () => {
+test('direct purchase refuses a rank-hidden character even when the player owns it', async () => {
     const { service, characters } = makeService();
     characters[0].requiredMissionId = 'test-mission';
     const user = { _id: 'member-1', username: 'Member', role: 'player',
@@ -111,7 +134,7 @@ test('shop omits and refuses a rank-hidden character even when the player owns i
     let writes = 0;
     const app = express();
     app.use(express.json());
-    app.use(createShopRouter({
+    app.use(createCharacterPurchasesRouter({
         requireSession: (req, _res, next) => { req.authUser = user; next(); },
         usersCollection: {
             findOne: async () => user,
@@ -126,7 +149,7 @@ test('shop omits and refuses a rank-hidden character even when the player owns i
             evaluateAccess({ policies, characterId, role: account.role,
                 inheritedUnlocked: profile.missions.unlockedCharacterIds.includes(characterId) }),
         profileHasUnlockedCharacter: (profile, id) => profile.missions.unlockedCharacterIds.includes(id),
-        getShopPriceForMissionId: () => 1000,
+        getCharacterPriceForMissionId: () => 1000,
         normalizeCharacterId: (id) => id,
     }));
     const server = await new Promise(resolve => {
@@ -134,8 +157,6 @@ test('shop omits and refuses a rank-hidden character even when the player owns i
     });
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
-        const shop = await (await fetch(base + '/api/shop')).json();
-        assert.equal(shop.characters.some((character) => character.characterId === 'yamanaka-ino'), false);
         const response = await fetch(base + '/api/characters/buy-direct', {
             method: 'POST', headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ characterId: 'yamanaka-ino' }),
@@ -143,42 +164,6 @@ test('shop omits and refuses a rank-hidden character even when the player owns i
         assert.equal(response.status, 403);
         assert.equal(writes, 0);
         assert.equal(user.profile.ryo, 2000);
-    } finally {
-        await new Promise(resolve => server.close(resolve));
-    }
-});
-
-test('summons exclude rank-hidden characters from the draw pool', async () => {
-    const { service, characters } = makeService();
-    const user = { _id: 'member-2', username: 'Member', role: 'player',
-        profile: { ryo: 2000, summonScrolls: 5, chakraShards: 0,
-            unlockedCharacterIds: [], gachaStats: { pityCounter: 0 } } };
-    const app = express();
-    app.use(express.json());
-    app.use('/api', createGachaRouter({
-        requireSession: (req, _res, next) => { req.authUser = user; next(); },
-        usersCollection: {
-            findOne: async () => user,
-            updateOne: async (_filter, update) => { user.profile = update.$set.profile; },
-        },
-        normalizeUserProfile: (value) => value.profile,
-        getCharactersData: () => characters,
-        characterRankAccess: service,
-        rootDir: process.cwd(),
-    }));
-    const server = await new Promise(resolve => {
-        const instance = app.listen(0, () => resolve(instance));
-    });
-    const base = `http://127.0.0.1:${server.address().port}`;
-    try {
-        const response = await fetch(base + '/api/gacha/pull', {
-            method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ count: 3, paymentType: 'scrolls' }),
-        });
-        assert.equal(response.status, 200);
-        const data = await response.json();
-        assert.equal(data.pulls.length, 3);
-        assert.ok(data.pulls.every((pull) => pull.characterId === 'ebisu'));
     } finally {
         await new Promise(resolve => server.close(resolve));
     }

@@ -1,7 +1,7 @@
 module.exports = {
     id: 'haku', characterId: 'haku', name: 'Haku',
     facePicture: 'https://i.imgur.com/1iuyTS5.png',
-    requiredMissionId: 'hidden-hunter', shopPrice: 500,
+    requiredMissionId: 'hidden-hunter',
     characterdeescription: 'A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.',
     passive: { name: 'Demon of the Ice', icon: 'https://i.imgur.com/aBCcujF.png',
         description: 'Enemies stunned by Haku cannot be healed for 1 turn.',

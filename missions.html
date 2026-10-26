@@ -849,20 +849,20 @@
           if (mission.portrait) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
           var rname = document.createElement("div"); rname.className = "ms-reward-name"; rname.textContent = rcn; rc.appendChild(rname);
           rewardCol.appendChild(rc);
-          var scrollBonus = document.createElement("p");
-          scrollBonus.className = "ms-col-line";
-          scrollBonus.style.color = "#f3cf7a";
-          scrollBonus.style.marginTop = "8px";
-          scrollBonus.innerHTML = "<strong>Bonus Rewards:</strong> 📜 +2 Summon Scrolls &bull; 🪙 +250 Ryo";
-          rewardCol.appendChild(scrollBonus);
+          var completionBonus = document.createElement("p");
+          completionBonus.className = "ms-col-line";
+          completionBonus.style.color = "#f3cf7a";
+          completionBonus.style.marginTop = "8px";
+          completionBonus.innerHTML = "<strong>Bonus Reward:</strong> +250 Ryo";
+          rewardCol.appendChild(completionBonus);
         } else {
           var rtext = document.createElement("p"); rtext.className = "ms-col-line"; rtext.textContent = getRewardText(mission) || "Mission completion reward."; rewardCol.appendChild(rtext);
-          var scrollBonus = document.createElement("p");
-          scrollBonus.className = "ms-col-line";
-          scrollBonus.style.color = "#f3cf7a";
-          scrollBonus.style.marginTop = "8px";
-          scrollBonus.innerHTML = "<strong>Bonus Rewards:</strong> 📜 +2 Summon Scrolls &bull; 🪙 +250 Ryo";
-          rewardCol.appendChild(scrollBonus);
+          var completionBonus = document.createElement("p");
+          completionBonus.className = "ms-col-line";
+          completionBonus.style.color = "#f3cf7a";
+          completionBonus.style.marginTop = "8px";
+          completionBonus.innerHTML = "<strong>Bonus Reward:</strong> +250 Ryo";
+          rewardCol.appendChild(completionBonus);
         }
 
         gridEl.appendChild(art);

@@ -2,6 +2,7 @@ module.exports = {
     id: 'gato',
     characterId: 'gato',
     name: 'Gatō',
+    requiredMissionId: 'the-shipping-magnate',
     facePicture: 'https://i.imgur.com/s6JYPbl.png',
     characterdeescription: 'A ruthless shipping magnate who controls the Land of Waves through his vast fortune and an army of hired mercenaries. Gatō uses intimidation, betrayal, and his powerful influence to eliminate anyone who threatens his empire.',
     passive: {

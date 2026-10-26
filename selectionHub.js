@@ -6,13 +6,7 @@
         var panels = Array.prototype.slice.call(document.querySelectorAll("[data-hub-panel]"));
         var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".selection-hub-tabs [data-hub-view]"));
         var viewButtons = Array.prototype.slice.call(document.querySelectorAll("[data-hub-view]"));
-        var shopGrid = document.querySelector("[data-shop-env-grid]");
-        var shopGrid = document.querySelector("[data-shop-env-grid]");
-        var shopStatus = document.querySelector("[data-shop-env-status]");
-        var shopTabButtons = Array.prototype.slice.call(document.querySelectorAll("[data-shop-tab]"));
-        var activeShopTab = "characters";
         var activeInventoryTab = "avatars";
-        var cachedShopData = null;
         var cachedInventoryData = null;
         var loadedInventory = false;
 
@@ -31,7 +25,6 @@
         var gauntletPanelEl = document.querySelector("[data-gauntlet-panel]");
         var storyBattleStarting = false;
         var gauntletBusy = false;
-        var loadedShop = false;
         var loadedMissions = false;
         var loadedStory = false;
         var loadedGauntlet = false;
@@ -56,14 +49,6 @@
             b: "B Rank Missions",
             a: "A Rank Missions",
             s: "S Rank Missions"
-        };
-
-        var rarityColors = {
-            common: "#38bdf8",
-            uncommon: "#34d399",
-            rare: "#c084fc",
-            epic: "#fbbf24",
-            legendary: "#ef4444"
         };
 
         function updatePlayerCardDisplay(profile) {
@@ -157,261 +142,6 @@
                 .replace(/'/g, "&#39;");
         }
 
-        function updateBalanceDisplays(ryo) {
-            document.querySelectorAll("[data-shop-balance]").forEach(function (el) {
-                el.textContent = formatRyo(ryo);
-            });
-        }
-
-        function renderShopMessage(message) {
-            if (!shopGrid) return;
-            shopGrid.innerHTML = "";
-            var empty = document.createElement("div");
-            empty.className = "selection-hub-env-empty";
-            empty.textContent = message;
-            shopGrid.appendChild(empty);
-        }
-
-        function renderShopEnvironment() {
-            if (!shopGrid || !cachedShopData) return;
-            shopGrid.innerHTML = "";
-
-            shopTabButtons.forEach(function (btn) {
-                btn.classList.toggle("active", btn.getAttribute("data-shop-tab") === activeShopTab);
-            });
-
-            var ryo = Number(cachedShopData.ryo) || 0;
-            var ownedAvatars = (cachedShopData.inventory && Array.isArray(cachedShopData.inventory.avatars)) ? cachedShopData.inventory.avatars : [];
-            var ownedTitles = (cachedShopData.inventory && Array.isArray(cachedShopData.inventory.titles)) ? cachedShopData.inventory.titles : [];
-            var ownedBorders = (cachedShopData.inventory && Array.isArray(cachedShopData.inventory.borders)) ? cachedShopData.inventory.borders : [];
-
-            if (activeShopTab === "characters") {
-                var characters = Array.isArray(cachedShopData.characters) ? cachedShopData.characters : [];
-                if (!characters.length) {
-                    renderShopMessage("Every shop character is already unlocked, or none are for sale yet.");
-                    return;
-                }
-                characters.forEach(function (character) {
-                    var card = document.createElement("article");
-                    card.className = "selection-hub-shop-card";
-
-                    var face = document.createElement("div");
-                    face.className = "selection-hub-shop-face";
-                    if (character.facePicture) {
-                        var img = document.createElement("img");
-                        img.src = character.facePicture;
-                        img.alt = character.name || character.characterId || "Character";
-                        face.appendChild(img);
-                    }
-
-                    var name = document.createElement("div");
-                    name.className = "selection-hub-shop-name";
-                    name.textContent = character.name || character.characterId || "Character";
-
-                    var price = document.createElement("div");
-                    price.className = "selection-hub-shop-price";
-                    price.textContent = formatRyo(character.shopPrice) + " Ryo";
-
-                    var buy = document.createElement("button");
-                    buy.type = "button";
-                    buy.className = "selection-hub-shop-buy";
-                    buy.setAttribute("data-shop-env-buy", character.characterId || "");
-                    buy.disabled = ryo < Number(character.shopPrice || 0);
-                    buy.textContent = buy.disabled ? "Not Enough Ryo" : "Unlock";
-
-                    card.appendChild(face);
-                    card.appendChild(name);
-                    card.appendChild(price);
-                    card.appendChild(buy);
-                    shopGrid.appendChild(card);
-                });
-                return;
-            }
-
-            var cosmetics = cachedShopData.cosmetics || { avatars: [], titles: [], borders: [] };
-            var items = [];
-            var ownedList = [];
-
-            if (activeShopTab === "avatars") {
-                items = cosmetics.avatars || [];
-                ownedList = ownedAvatars;
-            } else if (activeShopTab === "titles") {
-                items = cosmetics.titles || [];
-                ownedList = ownedTitles;
-            } else if (activeShopTab === "borders") {
-                items = cosmetics.borders || [];
-                ownedList = ownedBorders;
-            }
-
-            if (!items.length) {
-                renderShopMessage("No items currently available in this category.");
-                return;
-            }
-
-            items.forEach(function (item) {
-                var isOwned = ownedList.indexOf(item.id) !== -1 || (activeShopTab === "avatars" && item.imageUrl && cachedShopData.avatarUrl === item.imageUrl);
-                var isEquipped = (activeShopTab === "avatars" && cachedShopData.avatarUrl === item.imageUrl) ||
-                                 (activeShopTab === "titles" && cachedShopData.equippedTitle === item.name) ||
-                                 (activeShopTab === "borders" && (cachedShopData.equippedBorder === item.borderStyle || cachedShopData.equippedBorder === item.borderColor));
-
-                var card = document.createElement("article");
-                card.className = "selection-hub-cosmetic-card" + (isEquipped ? " equipped" : "");
-
-                // Preview wrapper
-                var previewWrapper = document.createElement("div");
-                previewWrapper.className = "cosmetic-preview-wrapper";
-
-                if (item.category === "avatars") {
-                    var aImg = document.createElement("img");
-                    aImg.className = "cosmetic-avatar-img";
-                    aImg.src = item.imageUrl || "found-remaster.png";
-                    aImg.alt = item.name;
-                    previewWrapper.appendChild(aImg);
-                } else if (item.category === "titles") {
-                    var tPreview = document.createElement("span");
-                    tPreview.className = "cosmetic-title-preview";
-                    tPreview.style.fontWeight = "800";
-                    tPreview.style.fontSize = "13px";
-                    tPreview.style.color = "#ffae42";
-                    tPreview.style.textTransform = "uppercase";
-                    tPreview.textContent = item.name;
-                    previewWrapper.appendChild(tPreview);
-                } else if (item.category === "borders") {
-                    var bFrame = document.createElement("div");
-                    bFrame.className = "cosmetic-border-frame-preview";
-                    bFrame.style.position = "relative";
-                    bFrame.style.width = "56px";
-                    bFrame.style.height = "56px";
-                    bFrame.style.borderRadius = "6px";
-                    bFrame.style.overflow = "hidden";
-                    bFrame.style.background = "#000";
-
-                    var bImg = document.createElement("img");
-                    bImg.src = "sharingan-remaster.png?v=2";
-                    bImg.style.width = "100%";
-                    bImg.style.height = "100%";
-                    bImg.style.objectFit = "cover";
-
-                    var bOverlay = document.createElement("img");
-                    bOverlay.src = item.imageUrl || "borders/anbu_frame.svg";
-                    bOverlay.style.position = "absolute";
-                    bOverlay.style.inset = "0";
-                    bOverlay.style.width = "100%";
-                    bOverlay.style.height = "100%";
-                    bOverlay.style.objectFit = "contain";
-
-                    bFrame.appendChild(bImg);
-                    bFrame.appendChild(bOverlay);
-                    previewWrapper.appendChild(bFrame);
-                }
-
-                // Rarity Tag
-                var rCol = rarityColors[item.rarity] || "#38bdf8";
-                var rTag = document.createElement("span");
-                rTag.className = "gacha-pull-rank-tag rarity-" + (item.rarity || "common");
-                rTag.textContent = item.rarity || "common";
-
-                // Name & Desc
-                var nameEl = document.createElement("div");
-                nameEl.className = "cosmetic-card-name";
-                nameEl.textContent = item.name;
-
-                var descEl = document.createElement("div");
-                descEl.className = "cosmetic-card-desc";
-                descEl.textContent = item.description || "";
-
-                // Price
-                var priceEl = document.createElement("div");
-                priceEl.className = "cosmetic-card-price";
-                priceEl.innerHTML = '🪙 ' + formatRyo(item.price) + ' Ryo';
-
-                // Action Button
-                var btn = document.createElement("button");
-                btn.type = "button";
-                if (isEquipped) {
-                    btn.className = "cosmetic-card-btn equipped-btn";
-                    btn.textContent = "Equipped";
-                    btn.disabled = true;
-                } else if (isOwned) {
-                    btn.className = "cosmetic-card-btn equip-btn";
-                    btn.textContent = "Equip";
-                    btn.setAttribute("data-cosmetic-equip-type", item.category === "avatars" ? "avatar" : (item.category === "titles" ? "title" : "border"));
-                    btn.setAttribute("data-cosmetic-equip-id", item.id);
-                } else {
-                    btn.className = "cosmetic-card-btn buy-btn";
-                    btn.setAttribute("data-cosmetic-buy-id", item.id);
-                    btn.setAttribute("data-cosmetic-buy-cat", item.category);
-                    btn.disabled = ryo < Number(item.price || 0);
-                    btn.textContent = btn.disabled ? "Not Enough Ryo" : "Purchase";
-                }
-
-                card.appendChild(previewWrapper);
-                card.appendChild(rTag);
-                card.appendChild(nameEl);
-                card.appendChild(descEl);
-                card.appendChild(priceEl);
-                card.appendChild(btn);
-                shopGrid.appendChild(card);
-            });
-        }
-
-        function loadShopEnvironment(force) {
-            if (!shopGrid || (loadedShop && !force)) return;
-            loadedShop = true;
-            if (shopStatus) shopStatus.textContent = "Loading shop...";
-            renderShopMessage("Loading shop...");
-            fetchJson("/api/shop").then(function (data) {
-                cachedShopData = data;
-                updateBalanceDisplays(data.ryo);
-                if (shopStatus) shopStatus.textContent = "Balance: " + formatRyo(data.ryo) + " Ryo";
-                updatePlayerCardDisplay(data);
-                renderShopEnvironment();
-            }).catch(function (error) {
-                loadedShop = false;
-                if (shopStatus) shopStatus.textContent = "Shop unavailable";
-                renderShopMessage(error.message || "You must be logged in to visit the shop.");
-            });
-        }
-
-        function handleShopPurchase(characterId, button) {
-            if (!characterId || !button) return;
-            button.disabled = true;
-            button.textContent = "Unlocking...";
-            fetchJson("/api/shop/purchase", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ characterId: characterId })
-            }).then(function (data) {
-                updateBalanceDisplays(data.ryo);
-                loadedShop = false;
-                loadShopEnvironment(true);
-            }).catch(function (error) {
-                button.disabled = false;
-                button.textContent = error.message || "Try Again";
-            });
-        }
-
-        function handleCosmeticPurchase(itemId, category, button) {
-            if (!itemId || !button) return;
-            button.disabled = true;
-            button.textContent = "Purchasing...";
-            fetchJson("/api/shop/purchase-cosmetic", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ itemId: itemId, category: category })
-            }).then(function (data) {
-                alert(data.message || "Purchased successfully!");
-                updateBalanceDisplays(data.ryo);
-                loadedShop = false;
-                loadedInventory = false;
-                loadShopEnvironment(true);
-            }).catch(function (error) {
-                alert(error.message || "Purchase failed.");
-                button.disabled = false;
-                button.textContent = "Purchase";
-            });
-        }
-
         function handleEquipItem(type, itemId, button) {
             if (!type || !button) return;
             button.disabled = true;
@@ -422,11 +152,6 @@
                 body: JSON.stringify({ type: type, itemId: itemId })
             }).then(function (data) {
                 alert(data.message || "Equipped successfully!");
-                if (cachedShopData) {
-                    if (type === "avatar") cachedShopData.avatarUrl = data.avatarUrl;
-                    if (type === "title") cachedShopData.equippedTitle = data.equippedTitle;
-                    if (type === "border") cachedShopData.equippedBorder = data.equippedBorder;
-                }
                 if (cachedInventoryData) {
                     if (type === "avatar") cachedInventoryData.avatarUrl = data.avatarUrl;
                     if (type === "title") cachedInventoryData.equippedTitle = data.equippedTitle;
@@ -434,7 +159,6 @@
                 }
                 updatePlayerCardDisplay(data);
                 if (environment && !environment.hidden) {
-                    renderShopEnvironment();
                     renderInventoryTab(activeInventoryTab);
                 }
             }).catch(function (error) {
@@ -490,8 +214,6 @@
                 currentEquipped = cachedInventoryData.equippedBorder || "";
             } else if (activeInventoryTab === "consumables") {
                 var cRyo = cachedInventoryData.ryo || 0;
-                var cScrolls = cachedInventoryData.summonScrolls || 0;
-                var cShards = cachedInventoryData.chakraShards || 0;
 
                 var consumCard = document.createElement("article");
                 consumCard.className = "selection-hub-cosmetic-card";
@@ -502,8 +224,6 @@
                     '<h3 style="color:#ffae42; margin:0 0 12px 0; text-transform:uppercase; font-size:16px;">Shinobi Resources</h3>' +
                     '<div style="display:flex; justify-content:space-around; width:100%; font-size:14px; font-weight:800;">' +
                         '<div>🪙 ' + formatRyo(cRyo) + ' Ryo</div>' +
-                        '<div>📜 ' + cScrolls + ' Scrolls</div>' +
-                        '<div>💎 ' + cShards + ' Shards</div>' +
                     '</div>';
                 inventoryGrid.appendChild(consumCard);
                 return;
@@ -554,7 +274,7 @@
             if (!items.length) {
                 var empty = document.createElement("div");
                 empty.className = "selection-hub-env-empty selection-hub-inventory-empty";
-                empty.textContent = "No items in this category yet. Unlock more in the Shop!";
+                empty.textContent = "No items in this category yet.";
                 inventoryGrid.appendChild(empty);
                 return;
             }
@@ -618,7 +338,7 @@
 
                 // Rarity Tag
                 var rTag = document.createElement("span");
-                rTag.className = "gacha-pull-rank-tag rarity-" + (item.rarity || "common");
+                rTag.className = "cosmetic-rarity-tag rarity-" + (item.rarity || "common");
                 rTag.textContent = item.rarity || "common";
 
                 // Name & Desc
@@ -1808,7 +1528,7 @@
         function setHubView(view) {
             var nextView = view === "missions" ? "missions" : "play";
             var isEnvironment = nextView !== "play";
-            document.body.classList.remove("hub-view-shop", "hub-view-missions", "hub-view-inventory", "hub-view-story");
+            document.body.classList.remove("hub-view-missions", "hub-view-inventory", "hub-view-story");
             if (isEnvironment) {
                 document.body.classList.add("hub-view-" + nextView);
             }
@@ -1845,34 +1565,6 @@
         try {
             setHubView(new URLSearchParams(window.location.search).get("view"));
         } catch (error) { setHubView("play"); }
-
-        shopTabButtons.forEach(function (button) {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
-                activeShopTab = button.getAttribute("data-shop-tab") || "characters";
-                renderShopEnvironment();
-            });
-        });
-
-        if (shopGrid) {
-            shopGrid.addEventListener("click", function (event) {
-                var charBuyBtn = event.target.closest("[data-shop-env-buy]");
-                if (charBuyBtn && !charBuyBtn.disabled) {
-                    handleShopPurchase(charBuyBtn.getAttribute("data-shop-env-buy"), charBuyBtn);
-                    return;
-                }
-                var cosBuyBtn = event.target.closest("[data-cosmetic-buy-id]");
-                if (cosBuyBtn && !cosBuyBtn.disabled) {
-                    handleCosmeticPurchase(cosBuyBtn.getAttribute("data-cosmetic-buy-id"), cosBuyBtn.getAttribute("data-cosmetic-buy-cat"), cosBuyBtn);
-                    return;
-                }
-                var cosEquipBtn = event.target.closest("[data-cosmetic-equip-id]");
-                if (cosEquipBtn && !cosEquipBtn.disabled) {
-                    handleEquipItem(cosEquipBtn.getAttribute("data-cosmetic-equip-type"), cosEquipBtn.getAttribute("data-cosmetic-equip-id"), cosEquipBtn);
-                    return;
-                }
-            });
-        }
 
         if (inventoryGrid) {
             inventoryGrid.addEventListener("click", function (event) {

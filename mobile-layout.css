@@ -32,12 +32,11 @@ body.game-viewport-scroll {
     body.game-remaster > .selection-hub-environment .selection-hub-env-toolbar { flex-wrap: wrap; gap: 8px; }
     body.game-remaster > .selection-hub-environment button { min-height: 44px; }
     body.game-remaster > .selection-hub-environment .selection-hub-inventory-grid,
-    body.game-remaster > .selection-hub-environment .selection-hub-cosmetics-grid,
-    body.game-remaster > .selection-hub-environment .selection-hub-shop-grid {
+body.game-remaster > .selection-hub-environment .selection-hub-cosmetics-grid {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); overflow: visible;
-    }
-    body.hub-view-shop > .background, body.hub-view-inventory > .background,
-    body.hub-view-missions > .background, body.hub-view-story > .background { display: none; }
+    }body.hub-view-inventory > .background,
+body.hub-view-missions > .background,
+body.hub-view-story > .background { display: none; }
     body > .academy-guide-overlay { position: fixed; inset: 0; width: 100%; height: 100dvh; padding: 16px; box-sizing: border-box; overflow: auto; }
     body > .academy-guide-overlay .academy-guide-card { width: min(540px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 18px; box-sizing: border-box; }
     body > .academy-guide-overlay button { min-height: 44px; }

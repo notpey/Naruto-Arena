@@ -1,6 +1,7 @@
 module.exports = {
     id: 'sarutobi-konohamaru', characterId: 'sarutobi-konohamaru',
     name: 'Sarutobi Konohamaru',
+    requiredMissionId: 'a-new-generation',
     facePicture: 'https://i.imgur.com/dlJ8ue3.png',
     characterdeescription: "The spirited grandson of the Third Hokage, Konohamaru strives to escape his family's shadow through sheer grit, pranks, and an unbreakable rivalry with Naruto. In battle, he sows chaotic disruption using rudimentary traps, clumsy camouflage, and outrageous distractions to trip up opponents and protect his allies.",
     passive: { name: 'Stubborn Rivalry', icon: 'https://i.imgur.com/j7YvGKz.png',

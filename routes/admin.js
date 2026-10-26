@@ -1391,78 +1391,6 @@ module.exports = function(context) {
         }
     });
 
-    // ── GACHA BANNER CONFIG ──────────────────────────────────────
-    const { getStoredGachaConfig, saveStoredGachaConfig } = context;
-
-    if (typeof getStoredGachaConfig === 'function') {
-        router.get('/gacha-banners', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const config = await getStoredGachaConfig();
-                return res.json({ ok: true, config });
-            } catch (e) {
-                console.error('Admin get gacha config error:', e);
-                return res.status(500).json({ error: 'Unable to load gacha config.' });
-            }
-        });
-    }
-
-    if (typeof saveStoredGachaConfig === 'function') {
-        router.put('/gacha-banners', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const updated = await saveStoredGachaConfig(req.body);
-                return res.json({ ok: true, config: updated });
-            } catch (e) {
-                console.error('Admin save gacha config error:', e);
-                return res.status(500).json({ error: 'Unable to save gacha config.' });
-            }
-        });
-
-        router.post('/gacha-banners', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const updated = await saveStoredGachaConfig(req.body);
-                return res.json({ ok: true, config: updated });
-            } catch (e) {
-                console.error('Admin save gacha config error:', e);
-                return res.status(500).json({ error: 'Unable to save gacha config.' });
-            }
-        });
-
-        router.post('/gacha-banners/upload', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const { dataUrl } = req.body || {};
-                if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
-                    return res.status(400).json({ error: 'A valid image data URL is required.' });
-                }
-                const matchHeader = dataUrl.match(/^data:image\/([^;]+);base64,/);
-                if (!matchHeader) {
-                    return res.status(400).json({ error: 'Unsupported image data URL format.' });
-                }
-                const base64Data = dataUrl.slice(matchHeader[0].length);
-                const byteLength = Math.ceil((base64Data.length * 3) / 4);
-                const GACHA_BANNER_MAX_BYTES = 3.5 * 1024 * 1024; // 3.5 MB
-                if (byteLength > GACHA_BANNER_MAX_BYTES) {
-                    return res.status(400).json({ error: 'Banner image exceeds the 3.5 MB size limit.' });
-                }
-                return res.json({ ok: true, bannerImage: dataUrl });
-            } catch (e) {
-                console.error('Admin banner image upload error:', e);
-                return res.status(500).json({ error: 'Unable to upload banner artwork.' });
-            }
-        });
-    }
-
     router.get('/promo-codes', requireSession, async (req, res) => {
         if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
@@ -1473,11 +1401,14 @@ module.exports = function(context) {
                 codes = await promoCodesCollection.find({}).sort({ createdAt: -1 }).toArray();
             } else {
                 codes = [
-                    { _id: 'welcome2026', code: 'WELCOME2026', rewards: { ryo: 500, summonScrolls: 2, chakraShards: 50 }, active: true, timesRedeemed: 12, maxRedemptions: 1000 },
-                    { _id: 'shinobi777', code: 'SHINOBI777', rewards: { ryo: 777, summonScrolls: 3, chakraShards: 77 }, active: true, timesRedeemed: 45, maxRedemptions: 500 }
+                    { _id: 'welcome2026', code: 'WELCOME2026', rewards: { ryo: 500 }, active: true, timesRedeemed: 12, maxRedemptions: 1000 },
+                    { _id: 'shinobi777', code: 'SHINOBI777', rewards: { ryo: 777 }, active: true, timesRedeemed: 45, maxRedemptions: 500 }
                 ];
             }
-            return res.json({ ok: true, promoCodes: codes });
+            return res.json({ ok: true, promoCodes: codes.map((entry) => ({
+                ...entry,
+                rewards: { ryo: Math.max(0, Number(entry.rewards?.ryo ?? entry.ryo) || 0) }
+            })) });
         } catch (e) {
             console.error('Admin load promo codes error:', e);
             return res.status(500).json({ error: 'Unable to load promo codes.' });
@@ -1489,7 +1420,7 @@ module.exports = function(context) {
             return res.status(403).json({ error: 'Admin access required.' });
         }
         try {
-            const { code, ryo = 0, summonScrolls = 0, chakraShards = 0, maxRedemptions = 100, active = true, expiresAt } = req.body || {};
+            const { code, ryo = 0, maxRedemptions = 100, active = true, expiresAt } = req.body || {};
             const normalizedCode = String(code || '').trim().toUpperCase();
             if (!normalizedCode) {
                 return res.status(400).json({ error: 'A valid promo code string is required.' });
@@ -1497,11 +1428,7 @@ module.exports = function(context) {
 
             const promoDoc = {
                 code: normalizedCode,
-                rewards: {
-                    ryo: Math.max(0, Number(ryo) || 0),
-                    summonScrolls: Math.max(0, Number(summonScrolls) || 0),
-                    chakraShards: Math.max(0, Number(chakraShards) || 0)
-                },
+                rewards: { ryo: Math.max(0, Number(ryo) || 0) },
                 maxRedemptions: Math.max(1, Number(maxRedemptions) || 100),
                 timesRedeemed: 0,
                 active: active !== false,
@@ -1566,7 +1493,7 @@ module.exports = function(context) {
                 return res.status(403).json({ error: 'Admin access required.' });
             }
             try {
-                const { id, name, description, category, price, rarity, imageUrl } = req.body || {};
+                const { id, name, description, category, rarity, imageUrl } = req.body || {};
                 const cleanCategory = String(category || '').trim().toLowerCase();
                 const cleanName = String(name || '').trim();
                 const cleanId = String(id || '').trim() || `${cleanCategory}_${Date.now()}`;
@@ -1580,7 +1507,6 @@ module.exports = function(context) {
                     name: cleanName,
                     description: String(description || '').trim(),
                     category: cleanCategory,
-                    price: Math.max(0, Number(price) || 0),
                     rarity: String(rarity || 'common').toLowerCase(),
                     imageUrl: (cleanCategory === 'avatars' || cleanCategory === 'borders') ? String(imageUrl || '').trim() : undefined,
                     updatedAt: new Date()
@@ -1603,7 +1529,7 @@ module.exports = function(context) {
                 return res.status(403).json({ error: 'Admin access required.' });
             }
             try {
-                const { dataUrl, name, description, price, rarity, filename } = req.body || {};
+                const { dataUrl, name, description, rarity, filename } = req.body || {};
                 if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('avatars/'))) {
                     return res.status(400).json({ error: 'A valid image data URL or image web URL is required.' });
                 }
@@ -1619,9 +1545,8 @@ module.exports = function(context) {
                 const item = {
                     id: cleanId,
                     name: cleanName,
-                    description: String(description || 'Shop avatar').trim(),
+                    description: String(description || 'Player avatar').trim(),
                     category: 'avatars',
-                    price: Math.max(0, Number(price) || 200),
                     rarity: String(rarity || 'rare').toLowerCase(),
                     imageUrl: finalImageUrl,
                     createdAt: new Date()
@@ -1665,9 +1590,8 @@ module.exports = function(context) {
                     savedItems.push({
                         id: cleanId,
                         name: cleanName,
-                        description: String(entry.description || 'Shop avatar').trim(),
+                        description: String(entry.description || 'Player avatar').trim(),
                         category: 'avatars',
-                        price: Math.max(0, Number(entry.price) || 250),
                         rarity: String(entry.rarity || 'rare').toLowerCase(),
                         imageUrl: finalImageUrl,
                         createdAt: new Date()
@@ -1685,7 +1609,7 @@ module.exports = function(context) {
                 return res.json({
                     ok: true,
                     count: savedItems.length,
-                    message: `Successfully uploaded and added ${savedItems.length} avatars to the shop catalog!`,
+                    message: `Successfully uploaded and added ${savedItems.length} avatars to the cosmetics catalog!`,
                     items: savedItems
                 });
             } catch (e) {
@@ -1699,7 +1623,7 @@ module.exports = function(context) {
                 return res.status(403).json({ error: 'Admin access required.' });
             }
             try {
-                const { dataUrl, name, description, price, rarity, filename } = req.body || {};
+                const { dataUrl, name, description, rarity, filename } = req.body || {};
                 if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('borders/'))) {
                     return res.status(400).json({ error: 'A valid image data URL or border asset URL is required.' });
                 }
@@ -1717,7 +1641,6 @@ module.exports = function(context) {
                     name: cleanName,
                     description: String(description || 'Custom avatar frame').trim(),
                     category: 'borders',
-                    price: Math.max(0, Number(price) || 300),
                     rarity: String(rarity || 'rare').toLowerCase(),
                     imageUrl: finalImageUrl,
                     createdAt: new Date()

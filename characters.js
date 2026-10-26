@@ -5827,7 +5827,6 @@ const characters = [
         "name": "Haku",
         "facePicture": "https://i.imgur.com/1iuyTS5.png",
         "requiredMissionId": "hidden-hunter",
-        "shopPrice": 500,
         "characterdeescription": "A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.",
         "passive": {
             "name": "Demon of the Ice",

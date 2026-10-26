@@ -172,16 +172,6 @@
     height: var(--game-remaster-stage-h);
 }
 
-.game-remaster .shop-icon-glyph {
-    width: 28px;
-    height: 28px;
-    font-size: 15px;
-}
-
-.game-remaster .shop-icon-balance {
-    font-size: 13px;
-}
-
 .game-remaster .selectionpage {
     background-image: none;
     background-repeat: no-repeat;
@@ -566,10 +556,7 @@
     text-transform: uppercase;
     cursor: pointer;
     z-index: 7;
-}
-
-.selection-hub-shop-grid,
-.selection-hub-mission-grid,
+}.selection-hub-mission-grid,
 .selection-hub-inventory-grid {
     flex: 1 1 auto;
     min-height: 0;
@@ -585,10 +572,7 @@
     border: 1px solid #3a3225;
     border-radius: 10px;
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
-}
-
-.game-remaster .selection-hub-shop-grid,
-.game-remaster .selection-hub-mission-grid,
+}.game-remaster .selection-hub-mission-grid,
 .game-remaster .selection-hub-inventory-grid {
     grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
     gap: 22px 18px;
@@ -604,10 +588,7 @@
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-}
-
-.selection-hub-shop-card,
-.selection-hub-mission-card,
+}.selection-hub-mission-card,
 .selection-hub-inventory-card {
     display: flex;
     flex-direction: column;
@@ -621,42 +602,24 @@
     padding: 16px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.selection-hub-shop-card:hover,
-.selection-hub-mission-card:hover,
+}.selection-hub-mission-card:hover,
 .selection-hub-inventory-card:hover {
     border-color: #ffae42;
     box-shadow: 0 10px 28px rgba(255, 174, 66, 0.35);
     transform: translateY(-3px);
-}
-
-.selection-hub-shop-face,
-.selection-hub-mission-art {
+}.selection-hub-mission-art {
     position: relative;
     overflow: hidden;
     background: #090c12;
     border: 2px solid #ffae42;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-}
-
-.selection-hub-shop-face {
-    width: 88px;
-    height: 88px;
-    margin-bottom: 12px;
-}
-
-.selection-hub-shop-face img,
-.selection-hub-mission-art img {
+}.selection-hub-mission-art img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.selection-hub-shop-name,
-.selection-hub-mission-name {
+}.selection-hub-mission-name {
     height: 38px;
     color: #ffffff !important;
     font-size: 16px;
@@ -669,47 +632,6 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-}
-
-.selection-hub-shop-price {
-    margin: 8px 0 10px;
-    color: #ffc107 !important;
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-.selection-hub-shop-buy {
-    width: 100%;
-    height: 33px;
-    border: 1px solid #ffae42;
-    border-radius: 6px;
-    color: #2a1402 !important;
-    background: linear-gradient(135deg, #ffae42 0%, #e8801a 100%) !important;
-    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    transition: all 0.15s ease;
-}
-
-.selection-hub-shop-buy:hover:not(:disabled) {
-    background: linear-gradient(135deg, #ffffff, #fbe9b8);
-    border-color: #c49a45;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 174, 66, 0.3);
-}
-
-.selection-hub-shop-buy:disabled {
-    color: #6c7585;
-    background: #2a2e38;
-    border-color: #3d4350;
-    cursor: default;
-    box-shadow: none;
 }
 
 .game-remaster .training-dummy-button:not([hidden]):hover {
@@ -751,12 +673,9 @@
 .game-remaster .game-button:hover img,
 .game-remaster .logout-button:hover img {
     filter: brightness(1.06) var(--remaster-button-shadow);
-}
-
-.game-remaster .game-button:disabled,
+}.game-remaster .game-button:disabled,
 .game-remaster .game-button[aria-disabled="true"],
 .game-remaster .roster-page-button:disabled,
-.selection-hub-shop-buy:disabled,
 .selection-hub-story-begin:disabled,
 .selection-hub-gauntlet-action:disabled,
 .selection-hub-gauntlet-route-node:disabled,
@@ -910,7 +829,7 @@ body.ingame-client-page {
     z-index: 20;
 }
 
-/* Hub tab bar (Play/Shop/Missions/Inventory/Story) is a built-in, always-on
+/* Hub tab bar (Play/Missions) is a built-in, always-on
    part of the game screen now -- not gated behind the Remaster Mode preview
    toggle. Base rule below fits the classic 770x560 stage; .game-remaster
    overrides it with larger dimensions for the 1100x800 stage. */
@@ -1192,12 +1111,7 @@ body.ingame-client-page {
 .selection-hub-environment[hidden],
 .selection-hub-env-panel[hidden] {
     display: none !important;
-}
-
-/* Any non-"play" tab covers the whole stage, so the roster/team-pick UI
-   underneath doesn't need to be hidden separately -- it's fully obscured. */
-body.hub-view-shop .selectionscroll,
-body.hub-view-shop .selectionpage,
+}/* Any non-"play" tab covers the whole stage,
 body.hub-view-missions .selectionscroll,
 body.hub-view-missions .selectionpage,
 body.hub-view-inventory .selectionscroll,
@@ -1399,10 +1313,7 @@ body.hub-view-story .selectionpage {
 
 .selection-hub-search input:focus {
     border-bottom-color: #a36bff;
-}
-
-.selection-hub-shop-grid,
-.selection-hub-mission-grid,
+}.selection-hub-mission-grid,
 .selection-hub-inventory-grid {
     flex: 1 1 auto;
     min-height: 0;
@@ -1418,10 +1329,7 @@ body.hub-view-story .selectionpage {
     border: 1px solid rgba(27, 35, 48, 0.12);
     border-radius: 10px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
-}
-
-.game-remaster .selection-hub-shop-grid,
-.game-remaster .selection-hub-mission-grid,
+}.game-remaster .selection-hub-mission-grid,
 .game-remaster .selection-hub-inventory-grid {
     grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
     gap: 22px 18px;
@@ -1437,40 +1345,22 @@ body.hub-view-story .selectionpage {
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-}
-
-.selection-hub-shop-card,
-.selection-hub-mission-card,
+}.selection-hub-mission-card,
 .selection-hub-inventory-card {
     display: block;
     color: #1b2330;
     text-decoration: none;
-}
-
-.selection-hub-shop-face,
-.selection-hub-mission-art {
+}.selection-hub-mission-art {
     position: relative;
     overflow: hidden;
     background: #111111;
     border: 1px solid rgba(27, 35, 48, 0.16);
-}
-
-.selection-hub-shop-face {
-    width: 84px;
-    height: 84px;
-    margin-bottom: 10px;
-}
-
-.selection-hub-shop-face img,
-.selection-hub-mission-art img {
+}.selection-hub-mission-art img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.selection-hub-shop-name,
-.selection-hub-mission-name {
+}.selection-hub-mission-name {
     height: 36px;
     color: #1b2330;
     font-size: 16px;
@@ -1482,33 +1372,6 @@ body.hub-view-story .selectionpage {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-}
-
-.selection-hub-shop-price {
-    margin: 8px 0 10px;
-    color: #4c5562;
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.selection-hub-shop-buy {
-    width: 100%;
-    height: 31px;
-    border: 0;
-    color: #05070e;
-    background: #e8801a;
-    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-}
-
-.selection-hub-shop-buy:disabled {
-    color: #8a8680;
-    background: #ebe5d7;
-    cursor: default;
 }
 
 .selection-hub-mission-level {
@@ -1636,7 +1499,7 @@ body.hub-view-story .selectionpage {
 
 /* Story tab: episode-guide list (built in, no navigation away from the game
    screen) -- a light "sheet" scrolling inside the dark hub panel, mirroring
-   how the shop/missions grids already sit on the panel's dark background. */
+   how the missions grid sits on the panel's dark background. */
 .selection-hub-story-list[hidden],
 .selection-hub-story-briefing[hidden],
 .selection-hub-gauntlet[hidden],
@@ -2828,40 +2691,6 @@ h1, h2, h3 {
 .sound-volume {
     width: 88px;
     accent-color: var(--na-crimson);
-}
-
-/* Superseded everywhere by the hub nav's Shop tab. */
-.shop-icon {
-    display: none;
-}
-
-.shop-icon:hover {
-    background: rgba(0, 0, 0, 0.82);
-    box-shadow: 0 0 0 2px rgba(249, 190, 86, 0.35), 0 4px 12px rgba(0, 0, 0, 0.4);
-    transform: translateY(-1px) scale(1.04);
-}
-
-.shop-icon:active {
-    transform: scale(0.96);
-}
-
-.shop-icon-glyph {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, #ffe6a8, #ffb84d 55%, var(--na-crimson) 100%);
-    color: #4a2a05;
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.shop-icon-balance {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
 }
 
 .ingame-sound-controller {
@@ -6075,7 +5904,7 @@ text-transform: uppercase;
     }
 }
 
-/* Shinobi Modal Overlay System & Gacha Altar Styles */
+/* Shinobi Modal Overlay System */
 .shinobi-modal-overlay {
     position: fixed;
     top: 0;
@@ -6208,888 +6037,17 @@ text-transform: uppercase;
     color: #fff;
 }
 
-/* Gacha Altar Modal - Bespoke AAA Game Art Overhaul */
-.gacha-modal-panel {
-    max-width: 880px;
-    width: 94%;
-    background: radial-gradient(circle at 50% 0%, #171b29 0%, #0c0f18 60%, #06080e 100%);
-    border: 1.5px solid rgba(245, 158, 11, 0.45);
-    border-radius: 16px;
-    box-shadow: 0 0 50px rgba(245, 158, 11, 0.22), 0 25px 60px rgba(0, 0, 0, 0.9);
-    padding: 22px 26px;
-    color: #f8fafc;
-    position: relative;
-}
-
-/* 1. Header Top Bar */
-.gacha-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 14px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.gacha-altar-title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.gacha-seal-crest {
-    width: 38px;
-    height: 38px;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(15, 23, 42, 0.9) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
-}
-
-.gacha-seal-mark {
-    width: 22px;
-    height: 26px;
-}
-
-.gacha-title-text-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.gacha-modal-title {
-    font-size: 19px !important;
-    font-weight: 900 !important;
-    color: #fbbf24 !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    margin: 0 !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 16px rgba(245, 158, 11, 0.35);
-}
-
-.gacha-modal-tagline {
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.gacha-currencies {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-right: 32px; /* Space before close button */
-}
-
-.gacha-currency-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 5px 10px;
-    font-size: 12px;
-    color: #f1f5f9;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.gacha-currency-pill .pill-icon {
-    font-size: 13px;
-}
-
-.gacha-currency-pill .pill-label {
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    color: #94a3b8;
-    text-transform: uppercase;
-}
-
-.gacha-currency-pill strong {
-    font-weight: 800;
-    color: #fbbf24;
-}
-
-/* 2. Sub Nav Bar: Banner Tabs & Utilities */
-.gacha-sub-nav-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-}
-
-.gacha-banner-tabs {
-    display: flex;
-    gap: 8px;
-}
-
-.gacha-tab-btn {
-    padding: 8px 18px;
-    background: rgba(15, 23, 42, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: #94a3b8;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gacha-tab-btn:hover {
-    color: #fbbf24;
-    border-color: rgba(245, 158, 11, 0.4);
-    background: rgba(245, 158, 11, 0.08);
-    transform: translateY(-1px);
-}
-
-.gacha-tab-btn.active {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-    border-color: #f59e0b;
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
-    transform: translateY(-1px);
-}
-
-.gacha-utilities-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.gacha-pity-badge {
-    font-size: 11px;
-    font-weight: 800;
-    color: #fbbf24;
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    padding: 6px 12px;
-    border-radius: 8px;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-}
-
-.gacha-utility-btn {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #cbd5e1;
-    font-size: 11.5px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.gacha-utility-btn:hover {
-    color: #ffffff;
-    border-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.15);
-}
-
-/* 3. Banner Artwork Card */
-.gacha-banner-artwork {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    border-radius: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    background-color: #080c16;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    display: flex;
-    align-items: center;
-    padding: 22px 24px;
-    box-sizing: border-box;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    overflow: hidden;
-}
-
-.gacha-banner-vignette {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-    background: radial-gradient(circle at 75% 50%, rgba(8, 12, 22, 0.1) 0%, rgba(8, 12, 22, 0.75) 55%, rgba(6, 9, 17, 0.96) 100%), linear-gradient(90deg, rgba(6, 9, 17, 0.98) 0%, rgba(6, 9, 17, 0.8) 45%, rgba(6, 9, 17, 0.15) 100%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.gacha-rate-up-badge {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
-    color: #fef08a;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid #ef4444;
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
-    z-index: 4;
-}
-
-.gacha-banner-info {
-    position: relative;
-    z-index: 3;
-    max-width: 62%;
-}
-
-.gacha-banner-kicker {
-    font-size: 9.5px;
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    color: #f59e0b;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.gacha-banner-info h3 {
-    font-size: 22px !important;
-    font-weight: 900 !important;
-    color: #ffffff !important;
-    margin: 0 0 4px 0 !important;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-}
-
-.gacha-banner-info p {
-    font-size: 12px;
-    color: #fcd34d;
-    margin: 0 0 6px 0;
-    font-weight: 700;
-}
-
-.gacha-banner-desc-text {
-    font-size: 11.5px !important;
-    color: #94a3b8 !important;
-    font-weight: 500 !important;
-    line-height: 1.45;
-    margin-bottom: 12px !important;
-}
-
-/* Single Unified Featured Shinobi Showcase */
-.gacha-featured-showcase {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.gacha-featured-showcase-title {
-    font-size: 9.5px;
-    font-weight: 900;
-    color: #ffd700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-right: 2px;
-}
-
-.gacha-featured-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    border-radius: 20px;
-    padding: 3px 10px 3px 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    transition: all 0.2s ease;
-}
-
-.gacha-featured-chip:hover {
-    border-color: #ffd700;
-    background: rgba(245, 158, 11, 0.15);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.gacha-featured-chip-img {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #ffd700;
-}
-
-.gacha-featured-chip-name {
-    font-size: 10.5px;
-    font-weight: 800;
-    color: #f1f5f9;
-    letter-spacing: 0.02em;
-}
-
-.gacha-hero-render-wrap {
-    position: absolute;
-    right: 20px;
-    top: 0;
-    bottom: 0;
-    width: 260px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-
-.gacha-hero-render {
-    max-height: 220px;
-    max-width: 230px;
-    object-fit: contain;
-    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 20px rgba(245, 158, 11, 0.25));
-    animation: hero-render-float 4s ease-in-out infinite alternate;
-}
-
-@keyframes hero-render-float {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-8px); }
-}
-
-/* 4. Luxury Summon Action Buttons */
-.gacha-action-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-top: 14px;
-}
-
-.gacha-summon-btn {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 14px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gacha-btn-single {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1.5px solid rgba(59, 130, 246, 0.5);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.gacha-btn-single:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(30, 41, 59, 0.95) 100%);
-    border-color: #60a5fa;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.gacha-btn-multi {
-    background: linear-gradient(135deg, rgba(69, 10, 10, 0.85) 0%, rgba(31, 4, 8, 0.95) 100%);
-    border: 1.5px solid rgba(239, 68, 68, 0.6);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.gacha-btn-multi:hover {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.35) 0%, rgba(69, 10, 10, 0.95) 100%);
-    border-color: #f87171;
-    box-shadow: 0 8px 26px rgba(239, 68, 68, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
-}
-
-.summon-btn-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.summon-btn-icon {
-    font-size: 16px;
-}
-
-.summon-btn-title {
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.06em;
-    color: #ffffff;
-    text-transform: uppercase;
-}
-
-.summon-btn-sr-guarantee {
-    font-size: 8.5px;
-    font-weight: 900;
-    color: #ffd700;
-    background: rgba(245, 158, 11, 0.25);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    padding: 2px 6px;
-    border-radius: 4px;
-    letter-spacing: 0.06em;
-}
-
-.summon-btn-cost-badge {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #cbd5e1;
-    background: rgba(0, 0, 0, 0.45);
-    padding: 3px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.gacha-btn-single .summon-btn-cost-badge {
-    color: #93c5fd;
-    border-color: rgba(59, 130, 246, 0.3);
-}
-
-.gacha-btn-multi .summon-btn-cost-badge {
-    color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.3);
-}
-
-/* Synced Clean Fonts & Gacha Shard Shop Styles */
-.gacha-modal-title,
-.gacha-banner-info h3,
-.gacha-tab-btn,
-.summon-btn-title,
-.gacha-rates-title,
-.gacha-results-title,
-.shard-item-info h4,
-.gacha-modal-panel,
-.gacha-rates-panel,
-.gacha-banner-info p,
-.gacha-banner-desc-text,
-.summon-btn-cost,
-.gacha-currency-pill,
-.gacha-pity-badge,
-.gacha-utility-btn,
-.gacha-shard-shop-intro,
-.gacha-shard-balance-bar {
-    font-family: 'Franklin', 'Libre Franklin', system-ui, sans-serif !important;
-}
-
-/* Shard Shop Modal - Bespoke Clean Redesign */
-.gacha-shard-shop-panel {
-    max-width: 520px;
-    width: 92%;
-    background: radial-gradient(circle at 50% 0%, #171b29 0%, #0c0f18 65%, #06080e 100%);
-    border: 1.5px solid rgba(245, 158, 11, 0.45);
-    border-radius: 16px;
-    box-shadow: 0 0 45px rgba(245, 158, 11, 0.2), 0 25px 60px rgba(0, 0, 0, 0.9);
-    padding: 22px 24px;
-    color: #f8fafc;
-}
-
-.shard-shop-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.shard-shop-crest {
-    width: 36px;
-    height: 36px;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, rgba(15, 23, 42, 0.9) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
-    flex-shrink: 0;
-}
-
-.shard-shop-title {
-    font-size: 18px !important;
-    font-weight: 900 !important;
-    color: #fbbf24 !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    margin: 0 0 2px 0 !important;
-}
-
-.shard-shop-subtitle {
-    font-size: 11px;
-    color: #94a3b8;
-    margin: 0;
-    font-weight: 600;
-}
-
-.gacha-shard-balance-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 10px;
-    padding: 10px 16px;
-    font-size: 13px;
-    color: #cbd5e1;
-    margin-bottom: 14px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.shard-balance-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.shard-balance-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #f1f5f9;
-}
-
-.shard-balance-value strong {
-    color: #38bdf8;
-    font-size: 15px;
-    font-weight: 900;
-}
-
-.shard-shop-msg {
-    text-align: center;
-    font-size: 12px;
-    min-height: 16px;
-    color: #fbbf24;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.gacha-shard-shop-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.shard-shop-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 12px 16px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.shard-shop-item:hover {
-    background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(245, 158, 11, 0.4);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-}
-
-.shard-item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.shard-item-name {
-    font-size: 14px;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-}
-
-.shard-item-cost {
-    font-size: 11.5px;
-    color: #94a3b8;
-    font-weight: 600;
-}
-
-.shard-item-cost strong {
-    color: #38bdf8;
-    font-weight: 800;
-}
-
-.shard-craft-btn {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: 96px;
-    padding: 8px 16px !important;
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-    border: 1px solid #f59e0b !important;
-    border-radius: 8px !important;
-    color: #ffffff !important;
-    font-weight: 800 !important;
-    font-size: 12px !important;
-    letter-spacing: 0.04em !important;
-    cursor: pointer !important;
-    text-transform: uppercase !important;
-    box-shadow: 0 2px 10px rgba(217, 119, 6, 0.3) !important;
-    transition: all 0.2s ease !important;
-}
-
-.shard-craft-btn:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45) !important;
-    transform: translateY(-1px);
-}
-
-.summon-btn-title {
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
-.summon-btn-cost {
-    font-size: 11px;
-    opacity: 0.9;
-    letter-spacing: 0.5px;
-}
-.summon-btn-cost {
-    font-size: 12px;
-    opacity: 0.92;
-}
-
-/* Gacha Reveal Cards Grid & Rarity Colors */
-.gacha-results-header {
-    text-align: center;
-    margin-bottom: 16px;
-}
-.gacha-results-title {
-    font-size: 22px;
-    font-weight: 900;
-    color: #ffd700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 0 0 4px 0;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 215, 0, 0.4);
-}
-.gacha-results-subtitle {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #94a3b8;
-}
-.gacha-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 12px;
-    margin: 16px auto 20px auto;
-    width: 100%;
-    max-width: 760px;
-    box-sizing: border-box;
-}
-.gacha-pull-card,
-.gacha-result-card {
-    background: linear-gradient(180deg, #181d2a 0%, #0d111a 100%);
-    border: 2px solid #334155;
-    border-radius: 10px;
-    padding: 10px 6px;
-    box-sizing: border-box;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
-    opacity: 0;
-    transform: translateY(15px) scale(0.95);
-    animation: gacha-card-entry 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 155px;
-    overflow: hidden;
-}
-@keyframes gacha-card-entry {
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-.gacha-pull-card.rarity-common,
-.gacha-result-card.rarity-common {
-    border-color: #38bdf8;
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
-}
-.gacha-pull-card.rarity-uncommon,
-.gacha-result-card.rarity-uncommon {
-    border-color: #34d399;
-    box-shadow: 0 0 14px rgba(52, 211, 153, 0.45);
-}
-.gacha-pull-card.rarity-rare,
-.gacha-result-card.rarity-rare {
-    border-color: #c084fc;
-    box-shadow: 0 0 16px rgba(192, 132, 252, 0.55);
-}
-.gacha-pull-card.rarity-epic,
-.gacha-result-card.rarity-epic {
-    border-color: #fbbf24;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
-}
-.gacha-pull-card.rarity-legendary,
-.gacha-result-card.rarity-legendary {
-    border-color: #ef4444;
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.85);
-    animation: gacha-card-entry 0.35s ease forwards, legendary-aura-pulse 1.2s infinite alternate ease-in-out;
-}
-@keyframes legendary-aura-pulse {
-    0% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
-    100% { box-shadow: 0 0 35px rgba(239, 68, 68, 1); }
-}
-.gacha-pull-avatar-frame,
-.gacha-result-portrait {
-    width: 68px !important;
-    height: 68px !important;
-    min-width: 68px !important;
-    min-height: 68px !important;
-    max-width: 68px !important;
-    max-height: 68px !important;
-    border-radius: 8px;
-    overflow: hidden !important;
-    background: #090c14;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    margin: 0 auto 6px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-sizing: border-box;
-}
-.gacha-pull-avatar,
-.gacha-result-portrait img {
-    width: 68px !important;
-    height: 68px !important;
-    max-width: 68px !important;
-    max-height: 68px !important;
-    object-fit: cover !important;
-    object-position: center top !important;
-    display: block !important;
-    border-radius: 6px;
-}
-.gacha-pull-name,
-.gacha-result-name {
-    font-size: 11px;
-    font-weight: 800;
-    color: #f8fafc;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100%;
-    margin-bottom: 2px;
-    text-align: center;
-}
-.gacha-pull-rank-tag {
-    font-size: 8.5px;
-    font-weight: 900;
-    letter-spacing: 0.8px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    display: inline-block;
-}
-.gacha-pull-rank-tag.rarity-common { color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
-.gacha-pull-rank-tag.rarity-uncommon { color: #34d399; background: rgba(52, 211, 153, 0.15); }
-.gacha-pull-rank-tag.rarity-rare { color: #c084fc; background: rgba(192, 132, 252, 0.15); }
-.gacha-pull-rank-tag.rarity-epic { color: #fbbf24; background: rgba(251, 191, 36, 0.15); }
-.gacha-pull-rank-tag.rarity-legendary { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
-
-.gacha-pull-badge {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(14, 165, 233, 0.95);
-    color: #fff;
-    font-size: 8.5px;
-    font-weight: 800;
-    padding: 2px 5px;
-    border-radius: 4px;
-    border: 1px solid #38bdf8;
-    z-index: 2;
-}
-.gacha-pull-new-badge {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(34, 197, 94, 0.95);
-    color: #fff;
-    font-size: 8.5px;
-    font-weight: 800;
-    padding: 2px 5px;
-    border-radius: 4px;
-    border: 1px solid #4ade80;
-    z-index: 2;
-}
-.gacha-pull-status {
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-.gacha-pull-status.gacha-new {
-    color: #4ade80;
-    text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
-}
-.gacha-pull-status.gacha-dup {
-    color: #38bdf8;
-    text-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
-}
-#gacha-claim-results-btn {
-    margin: 16px auto 0 auto;
-    display: block;
-    min-width: 220px;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-/* Drop Rates Modal Drawer */
-.gacha-rates-panel {
-    max-width: 500px;
-}
-.gacha-rates-title {
-    font-size: 18px;
-    color: #ffd700;
-    margin: 0 0 16px 0;
-    text-align: center;
-}
-.gacha-rates-table {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-.gacha-rate-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(15, 20, 32, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    font-size: 13px;
-    color: #e2e8f0;
-}
-.gacha-rates-info-notes {
-    font-size: 12px;
-    line-height: 1.5;
-    color: #cbd5e1;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-}
-.gacha-rates-info-notes p {
-    margin: 0 0 6px 0;
-}
-.gacha-rates-info-notes p:last-child {
-    margin-bottom: 0;
-}
+/* Shared reward crest and cosmetic rarity labels */
+.rewards-seal-mark { width: 22px; height: 26px; }
+.cosmetic-rarity-tag {
+    font-size: 11px; font-weight: 900; letter-spacing: 0.8px; padding: 1px 6px;
+    border-radius: 3px; margin-bottom: 4px; text-transform: uppercase; display: inline-block;
+}
+.cosmetic-rarity-tag.rarity-common { color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
+.cosmetic-rarity-tag.rarity-uncommon { color: #34d399; background: rgba(52, 211, 153, 0.15); }
+.cosmetic-rarity-tag.rarity-rare { color: #c084fc; background: rgba(192, 132, 252, 0.15); }
+.cosmetic-rarity-tag.rarity-epic { color: #fbbf24; background: rgba(251, 191, 36, 0.15); }
+.cosmetic-rarity-tag.rarity-legendary { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
 
 .player-characters .rank-hat-anbu,
 .rank-hat[data-hat="anbu"] {
@@ -8609,17 +7567,13 @@ body.ingame-client-page .backgroundingame {
 .na-bug-btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* ============================================================
-   MASTER FULL-STAGE HUB ENVIRONMENT REDESIGN (Shop, Missions, Inventory, PvE)
-   Eliminates nested white boxes, inner borders, and dark-on-dark text.
-   Spans the full 1100x800 remaster stage with rich dark shinobi aesthetics.
-   ============================================================ */
-
-/* Hide legacy scroll assets when viewing hub tabs */
-body.hub-view-shop .selectionscroll,
-body.hub-view-shop .selectionpage,
+}/* ============================================================
+   MASTER FULL-STAGE HUB ENVIRONMENT REDESIGN (
+Missions,
+Inventory,
+PvE)
+   Eliminates nested white boxes,
+inner borders,
 body.hub-view-missions .selectionscroll,
 body.hub-view-missions .selectionpage,
 body.hub-view-inventory .selectionscroll,
@@ -8785,13 +7739,8 @@ body.hub-view-story .selectionpage {
 .selection-hub-search input:focus {
     border-color: #ffae42;
     box-shadow: 0 0 8px rgba(255, 174, 66, 0.3);
-}
-
-/* Full-Width Grid Surface (NO inner white box!) */
-.selection-hub-shop-grid,
-.selection-hub-mission-grid,
+}.selection-hub-mission-grid,
 .selection-hub-inventory-grid,
-.game-remaster .selection-hub-shop-grid,
 .game-remaster .selection-hub-mission-grid,
 .game-remaster .selection-hub-inventory-grid,
 .selection-hub-story-list,
@@ -8823,11 +7772,7 @@ body.hub-view-story .selectionpage {
     font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-}
-
-/* High-Contrast Card System */
-.selection-hub-shop-card,
-.selection-hub-mission-card,
+}.selection-hub-mission-card,
 .selection-hub-inventory-card {
     display: flex !important;
     flex-direction: column !important;
@@ -8841,19 +7786,12 @@ body.hub-view-story .selectionpage {
     padding: 18px 14px !important;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6) !important;
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.selection-hub-shop-card:hover,
-.selection-hub-mission-card:hover,
+}.selection-hub-mission-card:hover,
 .selection-hub-inventory-card:hover {
     border-color: #ffae42 !important;
     box-shadow: 0 12px 30px rgba(255, 174, 66, 0.3) !important;
     transform: translateY(-4px) !important;
-}
-
-/* Character Portrait Frame */
-.selection-hub-shop-face,
-.selection-hub-mission-art {
+}.selection-hub-mission-art {
     position: relative;
     overflow: hidden;
     width: 96px !important;
@@ -8863,19 +7801,12 @@ body.hub-view-story .selectionpage {
     border: 2px solid #ffae42 !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8) !important;
-}
-
-.selection-hub-shop-face img,
-.selection-hub-mission-art img {
+}.selection-hub-mission-art img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-/* Character / Item / Mission Title — PURE BRIGHT WHITE (HIGH CONTRAST) */
-.selection-hub-shop-name,
-.selection-hub-mission-name {
+}.selection-hub-mission-name {
     height: 40px !important;
     color: #ffffff !important;
     font-size: 16px !important;
@@ -8889,49 +7820,6 @@ body.hub-view-story .selectionpage {
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 6px !important;
-}
-
-/* Price Tag — VIBRANT GOLDEN AMBER */
-.selection-hub-shop-price {
-    margin: 8px 0 12px !important;
-    color: #ffc107 !important;
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.04em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Unlock / Buy Action Button */
-.selection-hub-shop-buy {
-    width: 100% !important;
-    height: 36px !important;
-    border: 1px solid #ffae42 !important;
-    border-radius: 6px !important;
-    color: #1b0d02 !important;
-    background: linear-gradient(135deg, #ffae42 0%, #e8801a 100%) !important;
-    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    cursor: pointer !important;
-    box-shadow: 0 3px 10px rgba(232, 128, 26, 0.4) !important;
-    transition: all 0.15s ease !important;
-}
-
-.selection-hub-shop-buy:hover:not(:disabled) {
-    background: linear-gradient(135deg, #ffffff 0%, #ffae42 100%) !important;
-    border-color: #ffffff !important;
-    box-shadow: 0 6px 18px rgba(255, 174, 66, 0.5) !important;
-    transform: translateY(-1px) !important;
-}
-
-.selection-hub-shop-buy:disabled {
-    color: #6b7787 !important;
-    background: #232b38 !important;
-    border-color: #353f50 !important;
-    cursor: default !important;
-    box-shadow: none !important;
 }
 
 /* Mission Levels & Sections */
@@ -9181,13 +8069,10 @@ body.hub-view-story .selectionpage {
     color: #ffffff !important;
     border-color: #ff4d4d !important;
     box-shadow: 0 4px 14px rgba(196, 30, 58, 0.4) !important;
-}
-
-/* ============================================================
+}/* ============================================================
    PORTRAIT THUMBNAIL QUALITY & FRAMING FIX
    ============================================================ */
-.selection-hub-mission-art,
-.selection-hub-shop-face {
+.selection-hub-mission-art {
     position: relative !important;
     overflow: hidden !important;
     width: 104px !important;
@@ -9198,10 +8083,7 @@ body.hub-view-story .selectionpage {
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8) !important;
     flex: 0 0 auto !important;
-}
-
-.selection-hub-mission-art img,
-.selection-hub-shop-face img {
+}.selection-hub-mission-art img {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
@@ -10807,8 +9689,7 @@ button, a, [role="button"], input, select {
 .settings-modal-dialog h2,
 .settings-modal-dialog h3,
 .quest-achieve-modal-card h2,
-.quest-achieve-modal-card h3,
-.gacha-modal-header h2 {
+.quest-achieve-modal-card h3 {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
@@ -11035,7 +9916,7 @@ textarea:focus-visible,
     outline-offset: 2px !important;
 }
 
-/* ── Shinobi Cosmetics, Shop & Inventory System ──────────────────────── */
+/* ── Shinobi Cosmetics & Inventory System ──────────────────────── */
 .selection-hub-cosmetics-grid,
 .selection-hub-inventory-grid {
     display: grid;

@@ -2,6 +2,7 @@ module.exports = {
     id: 'zori-and-waraji',
     characterId: 'zori-and-waraji',
     name: 'Zōri & Waraji',
+    requiredMissionId: 'gatos-enforcers',
     facePicture: 'https://i.imgur.com/EIsg1h5.png',
     characterdeescription: "Two ruthless samurai employed as Gatō's personal bodyguards, Zōri and Waraji terrorize the Land of Waves through violence and intimidation. Though no match for accomplished shinobi, their practiced swordsmanship and willingness to fight dirty make them dangerous opponents.",
     passive: {

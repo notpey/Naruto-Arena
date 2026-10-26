@@ -806,47 +806,6 @@ button {
   transition: transform var(--t-fast), opacity var(--t-fast);
 }
 
-/* Ryo shop trigger (injected by nav.js, sits just left of the account block) */
-.ca-nav-shop {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  padding: 5px 12px 5px 6px;
-  border: 1px solid rgba(215, 149, 58, 0.35);
-  border-radius: 999px;
-  background: rgba(215, 149, 58, 0.1);
-  color: var(--ca-bone);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
-}
-.ca-nav-shop:hover {
-  background: rgba(215, 149, 58, 0.22);
-  box-shadow: 0 0 0 2px rgba(215, 149, 58, 0.25);
-  transform: translateY(-1px);
-}
-.ca-nav-shop:active {
-  transform: scale(0.97);
-}
-.ca-nav-shop-coin {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #ffe6a8, #e7b85a 55%, #d7953a 100%);
-  color: #4a2a05;
-  font-size: 11px;
-  font-weight: 900;
-}
-.ca-nav-shop-balance {
-  color: #e7b85a;
-}
-
 /* Right: account */
 .ca-nav-account {
   display: flex;

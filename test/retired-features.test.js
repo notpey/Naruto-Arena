@@ -16,7 +16,7 @@ test('retired story, summoning, shop, inventory, and Chunin Exam endpoints canno
 });
 
 test('battle, roster purchases, quests, and admin routes stay available', () => {
-    for (const path of ['/characters', '/characters/buy-direct', '/match/join', '/quests', '/admin/gacha-banners']) {
+    for (const path of ['/characters', '/characters/buy-direct', '/match/join', '/quests', '/admin/promo-codes']) {
         let continued = false;
         retiredFeatures({ path }, {}, () => { continued = true; });
         assert.equal(continued, true, `Route blocked: ${path}`);

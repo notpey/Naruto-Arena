@@ -11,7 +11,7 @@ const DEFAULT_QUESTS = [
         description: 'Win 3 battles in any game mode.',
         target: 3,
         metric: 'battlesWon',
-        rewards: { ryo: 150, summonScrolls: 0, chakraShards: 10 }
+        rewards: { ryo: 200 }
     },
     {
         questId: 'daily_chakra_50',
@@ -20,7 +20,7 @@ const DEFAULT_QUESTS = [
         description: 'Spend 50 Chakra in battles.',
         target: 50,
         metric: 'chakraSpent',
-        rewards: { ryo: 100, summonScrolls: 0, chakraShards: 15 }
+        rewards: { ryo: 150 }
     },
     {
         questId: 'weekly_ranked_10',
@@ -29,7 +29,7 @@ const DEFAULT_QUESTS = [
         description: 'Win 10 Ranked games.',
         target: 10,
         metric: 'rankedWins',
-        rewards: { ryo: 500, summonScrolls: 2, chakraShards: 50 }
+        rewards: { ryo: 600 }
     }
 ];
 
@@ -40,9 +40,9 @@ const DEFAULT_ACHIEVEMENTS = [
         description: 'Win ranked games to climb the shinobi ranks.',
         metric: 'rankedWins',
         tiers: [
-            { tier: 1, target: 5, rewards: { ryo: 250, summonScrolls: 1, chakraShards: 20 } },
-            { tier: 2, target: 25, rewards: { ryo: 1000, summonScrolls: 3, chakraShards: 50 } },
-            { tier: 3, target: 100, rewards: { ryo: 3000, summonScrolls: 10, chakraShards: 200 } }
+            { tier: 1, target: 5, rewards: { ryo: 250 } },
+            { tier: 2, target: 25, rewards: { ryo: 1000 } },
+            { tier: 3, target: 100, rewards: { ryo: 3000 } }
         ]
     },
     {
@@ -51,22 +51,22 @@ const DEFAULT_ACHIEVEMENTS = [
         description: 'Win consecutive ranked games.',
         metric: 'highestStreak',
         tiers: [
-            { tier: 1, target: 3, rewards: { ryo: 300, summonScrolls: 1, chakraShards: 25 } },
-            { tier: 2, target: 5, rewards: { ryo: 800, summonScrolls: 2, chakraShards: 50 } },
-            { tier: 3, target: 10, rewards: { ryo: 2500, summonScrolls: 5, chakraShards: 150 } }
+            { tier: 1, target: 3, rewards: { ryo: 300 } },
+            { tier: 2, target: 5, rewards: { ryo: 800 } },
+            { tier: 3, target: 10, rewards: { ryo: 2500 } }
         ]
     }
 ];
 
 const DAILY_LOGIN_CALENDAR = [
-    { day: 1, rewards: { ryo: 100, summonScrolls: 0, chakraShards: 0 } },
-    { day: 2, rewards: { ryo: 0, summonScrolls: 0, chakraShards: 25 } },
-    { day: 3, rewards: { ryo: 200, summonScrolls: 0, chakraShards: 0 } },
-    { day: 4, rewards: { ryo: 0, summonScrolls: 1, chakraShards: 0 } },
-    { day: 5, rewards: { ryo: 0, summonScrolls: 0, chakraShards: 50 } },
-    { day: 6, rewards: { ryo: 300, summonScrolls: 0, chakraShards: 0 } },
-    { day: 7, rewards: { ryo: 500, summonScrolls: 3, chakraShards: 100 } }
-];
+    { day: 1, rewards: { ryo: 100 } },
+    { day: 2, rewards: { ryo: 150 } },
+    { day: 3, rewards: { ryo: 250 } },
+    { day: 4, rewards: { ryo: 350 } },
+    { day: 5, rewards: { ryo: 500 } },
+    { day: 6, rewards: { ryo: 750 } },
+    { day: 7, rewards: { ryo: 1500 } }
+]
 
 function updateProgressHelper(progressObj, metricsDelta) {
     const updated = { ...progressObj };
@@ -157,12 +157,11 @@ test('Achievements Engine: tracks multi-tiered progression and reward eligibilit
 test('Daily Login Rewards: evaluates rolling 7-day calendar rewards correctly', () => {
     const day3Config = DAILY_LOGIN_CALENDAR[2]; // Day 3
     assert.equal(day3Config.day, 3);
-    assert.equal(day3Config.rewards.ryo, 200);
+    assert.equal(day3Config.rewards.ryo, 250);
 
     const day7Config = DAILY_LOGIN_CALENDAR[6]; // Day 7
     assert.equal(day7Config.day, 7);
-    assert.equal(day7Config.rewards.summonScrolls, 3);
-    assert.equal(day7Config.rewards.chakraShards, 100);
+    assert.deepEqual(day7Config.rewards, { ryo: 1500 });
 });
 
 test('Promo Code Validation: prevents duplicate redemption and enforces limits', () => {
@@ -172,7 +171,7 @@ test('Promo Code Validation: prevents duplicate redemption and enforces limits',
         maxRedemptions: 100,
         timesRedeemed: 5,
         expiresAt: new Date(Date.now() + 86400000).toISOString(),
-        rewards: { ryo: 500, summonScrolls: 2, chakraShards: 50 }
+        rewards: { ryo: 500 }
     };
 
     const userRedeemedSet = new Set();

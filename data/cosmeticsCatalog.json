@@ -1,36 +1,9 @@
 {
   "avatars": [
     {
-      "id": "avatar_anbu_mask",
-      "name": "ANBU Black Ops Mask",
-      "description": "Stealth mask worn by elite Leaf covert operatives.",
-      "category": "avatars",
-      "rarity": "rare",
-      "price": 250,
-      "imageUrl": "sharingan-remaster.png?v=2"
-    },
-    {
-      "id": "avatar_toad_sage",
-      "name": "Mount Myoboku Sage",
-      "description": "Portrait of a shinobi who has mastered Senjutsu chakra.",
-      "category": "avatars",
-      "rarity": "epic",
-      "price": 600,
-      "imageUrl": "chakra-senjutsu.png"
-    },
-    {
-      "id": "avatar_curse_mark",
-      "name": "Heaven Cursed Seal",
-      "description": "Corrupted chakra pattern granting forbidden strength.",
-      "category": "avatars",
-      "rarity": "epic",
-      "price": 500,
-      "imageUrl": "deadcharacter-remaster.png?v=2"
-    },
-    {
       "id": "avatar_1786821448603_0_971",
       "name": "NA27",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -40,7 +13,7 @@
     {
       "id": "avatar_1786821448604_1_691",
       "name": "NA26",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -50,7 +23,7 @@
     {
       "id": "avatar_1786821448610_2_650",
       "name": "NA25",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -60,7 +33,7 @@
     {
       "id": "avatar_1786821448611_3_337",
       "name": "NA24",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -70,7 +43,7 @@
     {
       "id": "avatar_1786821448612_4_698",
       "name": "NA23",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -80,7 +53,7 @@
     {
       "id": "avatar_1786821448612_5_446",
       "name": "NA21",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -90,7 +63,7 @@
     {
       "id": "avatar_1786821448613_6_455",
       "name": "NA22",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -100,7 +73,7 @@
     {
       "id": "avatar_1786821448614_7_766",
       "name": "NA20",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -110,7 +83,7 @@
     {
       "id": "avatar_1786821448615_8_974",
       "name": "NA19",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -120,7 +93,7 @@
     {
       "id": "avatar_1786821448615_9_127",
       "name": "NA18",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -130,7 +103,7 @@
     {
       "id": "avatar_1786821448616_10_397",
       "name": "NA17",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -140,7 +113,7 @@
     {
       "id": "avatar_1786821448616_11_244",
       "name": "NA16",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -150,7 +123,7 @@
     {
       "id": "avatar_1786821448617_12_201",
       "name": "NA15",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -160,7 +133,7 @@
     {
       "id": "avatar_1786821448618_13_783",
       "name": "NA14",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -170,7 +143,7 @@
     {
       "id": "avatar_1786821448618_14_657",
       "name": "NA13",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -180,7 +153,7 @@
     {
       "id": "avatar_1786821448619_15_984",
       "name": "NA12",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -190,7 +163,7 @@
     {
       "id": "avatar_1786821448620_16_931",
       "name": "NA11",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",
@@ -200,7 +173,7 @@
     {
       "id": "avatar_1786821448620_17_688",
       "name": "NA10",
-      "description": "Shop avatar",
+      "description": "Player avatar",
       "category": "avatars",
       "price": 100,
       "rarity": "common",

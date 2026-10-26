@@ -74,6 +74,49 @@ test('Hokage Hiruzen migration replaces the old stored character while keeping i
         skill.id === 'sarutobi-hiruzen-dead-demon-consuming-seal'), false);
 });
 
+test('launch unlock migration aligns starter and mission requirements without replacing stored edits', async () => {
+    const ids = ['sarutobi-konohamaru', 'ebisu', 'zori-and-waraji', 'gato'];
+    const storedCharacters = ids.map((id) => ({
+        characterId: id, id, name: id, characterdeescription: `Edited ${id}`,
+        skills: [],
+    }));
+    storedCharacters.push({ characterId: 'uzumaki-naruto', id: 'uzumaki-naruto',
+        name: 'Uzumaki Naruto', characterdeescription: 'Edited Naruto',
+        requiredMissionId: 'obsolete-mission', skills: [] });
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedCharacters }
+            : { key, completed: {
+                'starter-rebalance-2026-07-16': new Date(),
+                'exams-rebalance-2026-07-16-v4': new Date(),
+                'uzumaki-naruto-rework-2026-10-23': new Date(),
+                'team-7-sakura-sasuke-rework-2026-10-24-v2': new Date(),
+                'kakashi-iruka-rework-2026-10-24': new Date(),
+                'waves-haku-zabuza-mizuki-rework-2026-10-24': new Date(),
+                'demon-brothers-rework-2026-10-25': new Date(),
+                'hokage-hiruzen-rework-2026-10-26': new Date(),
+            } },
+        updateOne: async (filter, update) => { writes.push({ filter, update }); },
+    };
+    const stored = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const expected = new Map([
+        ['sarutobi-konohamaru', 'a-new-generation'],
+        ['ebisu', 'private-lesson'],
+        ['zori-and-waraji', 'gatos-enforcers'],
+        ['gato', 'the-shipping-magnate'],
+    ]);
+    for (const [id, missionId] of expected) {
+        const character = stored.find((entry) => entry.characterId === id);
+        assert.equal(character.requiredMissionId, missionId);
+        assert.equal(character.characterdeescription, `Edited ${id}`);
+    }
+    const naruto = stored.find((entry) => entry.characterId === 'uzumaki-naruto');
+    assert.equal(naruto.requiredMissionId, null);
+    assert.equal(naruto.characterdeescription, 'Edited Naruto');
+    assert.ok(writes.some(({ filter }) => filter.key === 'characters'));
+});
+
 test('Naruto rework replaces stale stored artwork and skills once', async () => {
     const oldNaruto = {
         id: 'uzumaki-naruto', characterId: 'uzumaki-naruto', name: 'Uzumaki Naruto',

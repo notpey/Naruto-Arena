@@ -1,396 +1,3 @@
-        (function initGachaAltarController() {
-            if (!document.querySelector("[data-gacha-trigger]")) return;
-            var modal = document.getElementById("gacha-modal");
-            var ratesModal = document.getElementById("gacha-rates-modal");
-            var shardShopModal = document.getElementById("gacha-shard-shop-modal");
-
-            var closeBtn = document.getElementById("gacha-modal-close");
-            var ratesBtn = document.getElementById("gacha-open-rates-btn");
-            var ratesClose = document.getElementById("gacha-rates-close");
-            var shardShopBtn = document.getElementById("gacha-open-shard-shop-btn");
-            var shardShopClose = document.getElementById("gacha-shard-shop-close");
-
-            var scrollsEl = document.getElementById("gacha-scrolls-count");
-            var ryoEl = document.getElementById("gacha-ryo-count");
-            var shardsEl = document.getElementById("gacha-shards-count");
-            var pityEl = document.getElementById("gacha-pity-counter");
-            var shardBalanceEl = document.getElementById("shard-shop-balance");
-
-            var bannerTabsEl = document.getElementById("gacha-banner-tabs");
-            var artworkEl = document.getElementById("gacha-banner-artwork");
-            var nameEl = document.getElementById("gacha-banner-name");
-            var subEl = document.getElementById("gacha-banner-sub");
-            var descEl = document.getElementById("gacha-banner-desc");
-
-            var pullSingleBtn = document.getElementById("gacha-pull-single-btn");
-            var pullMultiBtn = document.getElementById("gacha-pull-multi-btn");
-            var costSingleEl = document.getElementById("gacha-cost-single");
-            var costMultiEl = document.getElementById("gacha-cost-multi");
-
-            var resultsContainer = document.getElementById("gacha-results-container");
-            var cardsGrid = document.getElementById("gacha-cards-grid");
-            var claimBtn = document.getElementById("gacha-claim-results-btn");
-
-            var activeBanners = [];
-            var currentBanner = null;
-            var userBalances = { summonScrolls: 0, ryo: 0, chakraShards: 0, pityCounter: 0 };
-            var characterRosterMap = new Map();
-
-            function formatNum(val) {
-                return Math.max(0, Math.round(Number(val) || 0)).toLocaleString("en-US");
-            }
-
-            function fetchJsonLocal(url, options) {
-                return window.ArenaSession.fetch(url, Object.assign({ credentials: "include" }, options || {})).then(function (res) {
-                    return res.json().catch(function () {
-                        return {};
-                    }).then(function (data) {
-                        if (!res.ok) {
-                            throw new Error((data && data.error) || "Request failed.");
-                        }
-                        return data;
-                    });
-                });
-            }
-
-            function buildRosterMap(catalogList) {
-                var roster = Array.isArray(catalogList) && catalogList.length ? catalogList : (typeof characters !== "undefined" ? characters : (window.characters || []));
-                if (Array.isArray(roster)) {
-                    roster.forEach(function (c) {
-                        var id = String(c.id || c.characterId || "").trim().toLowerCase();
-                        if (id) characterRosterMap.set(id, c);
-                        var nameKey = String(c.name || "").trim().toLowerCase();
-                        if (nameKey) characterRosterMap.set(nameKey, c);
-                    });
-                }
-            }
-
-            function fetchCatalog() {
-                return fetchJsonLocal("/api/characters/catalog").then(function(res) {
-                    if (res && Array.isArray(res.characters)) {
-                        buildRosterMap(res.characters);
-                        if (currentBanner) {
-                            renderFeaturedFacesOverlay(currentBanner.featuredCharacters);
-                        }
-                    }
-                }).catch(function(){});
-            }
-
-            function syncUserProfile() {
-                return fetchJsonLocal("/api/me").then(function(res) {
-                    if (res && res.user && res.user.profile) {
-                        updateBalances(res.user.profile);
-                    }
-                }).catch(function(){});
-            }
-
-            function updateBalances(data) {
-                if (!data) return;
-                var source = data.profile || (data.user && data.user.profile) || data;
-
-                if (source.summonScrolls !== undefined) userBalances.summonScrolls = Number(source.summonScrolls) || 0;
-                else if (data.summonScrolls !== undefined) userBalances.summonScrolls = Number(data.summonScrolls) || 0;
-
-                if (source.ryo !== undefined) userBalances.ryo = Number(source.ryo) || 0;
-                else if (data.ryo !== undefined) userBalances.ryo = Number(data.ryo) || 0;
-
-                if (source.chakraShards !== undefined) userBalances.chakraShards = Number(source.chakraShards) || 0;
-                else if (data.chakraShards !== undefined) userBalances.chakraShards = Number(data.chakraShards) || 0;
-
-                var gStats = source.gachaStats || data.gachaStats;
-                if (gStats && gStats.pityCounter !== undefined) {
-                    userBalances.pityCounter = Number(gStats.pityCounter) || 0;
-                }
-
-                var formattedRyo = formatNum(userBalances.ryo);
-                var formattedScrolls = formatNum(userBalances.summonScrolls);
-                var formattedShards = formatNum(userBalances.chakraShards);
-
-                if (scrollsEl) scrollsEl.textContent = formattedScrolls;
-                if (ryoEl) ryoEl.textContent = formattedRyo;
-                if (shardsEl) shardsEl.textContent = formattedShards;
-                if (shardBalanceEl) shardBalanceEl.textContent = formattedShards;
-                if (pityEl) pityEl.textContent = "Pity: " + userBalances.pityCounter + "/50 (Guaranteed Epic)";
-
-                // Sync top nav bar and global shop Ryo displays
-                document.querySelectorAll(".user-ryo-amount, .rs-shop-balance-amount, [data-shop-balance]").forEach(function(el) {
-                    el.textContent = formattedRyo;
-                });
-            }
-
-            function renderFeaturedFacesOverlay(featuredIds) {
-                var infoFacesWrap = document.getElementById("gacha-banner-featured-faces");
-                if (infoFacesWrap) infoFacesWrap.innerHTML = "";
-
-                var existingOverlay = artworkEl ? artworkEl.querySelector(".gacha-featured-faces-overlay") : null;
-                if (existingOverlay) existingOverlay.remove();
-
-                var idsList = [];
-                if (Array.isArray(featuredIds)) {
-                    idsList = featuredIds;
-                } else if (typeof featuredIds === "string") {
-                    idsList = featuredIds.split(",").map(function(s) { return s.trim(); }).filter(Boolean);
-                }
-
-                if (!idsList.length || !infoFacesWrap) return;
-
-                buildRosterMap();
-
-                var title = document.createElement("span");
-                title.className = "gacha-featured-showcase-title";
-                title.textContent = "Featured:";
-                infoFacesWrap.appendChild(title);
-
-                idsList.forEach(function (id) {
-                    var rawId = String(id || "").trim();
-                    var charId = rawId.toLowerCase();
-                    var char = characterRosterMap.get(charId);
-
-                    var faceSrc = (char && char.facePicture) ? char.facePicture : "";
-                    if (!faceSrc) {
-                        if (charId.includes("kakashi")) faceSrc = "https://i.imgur.com/rt5r1bu.png";
-                        else if (charId.includes("gai") || charId.includes("guy")) faceSrc = "https://i.imgur.com/3ulWurz.png";
-                        else if (charId.includes("asuma")) faceSrc = "https://i.imgur.com/6U45iS4.png";
-                        else if (charId.includes("itachi")) faceSrc = "itachi-render.png";
-                        else if (charId.includes("konan")) faceSrc = "konan-render.png";
-                        else if (charId.includes("pain")) faceSrc = "pain-render.png";
-                        else if (charId.includes("deidara")) faceSrc = "deidara-render.png";
-                        else faceSrc = "deadcharacter-remaster.png?v=2";
-                    }
-                    var charName = (char && char.name) ? char.name : rawId.replace(/-/g, ' ').replace(/\b\w/g, function(l){ return l.toUpperCase(); });
-
-                    var chip = document.createElement("div");
-                    chip.className = "gacha-featured-chip";
-                    chip.title = "Featured Shinobi: " + charName;
-
-                    var chipImg = document.createElement("img");
-                    chipImg.className = "gacha-featured-chip-img";
-                    chipImg.src = faceSrc;
-                    chipImg.alt = charName;
-                    chipImg.onerror = function() { this.src = "deadcharacter-remaster.png?v=2"; };
-
-                    var chipName = document.createElement("span");
-                    chipName.className = "gacha-featured-chip-name";
-                    chipName.textContent = charName;
-
-                    chip.appendChild(chipImg);
-                    chip.appendChild(chipName);
-                    infoFacesWrap.appendChild(chip);
-                });
-            }
-
-            function selectBanner(banner) {
-                currentBanner = banner;
-                if (!banner) return;
-
-                if (bannerTabsEl) {
-                    Array.prototype.slice.call(bannerTabsEl.children).forEach(function (tabBtn) {
-                        tabBtn.classList.toggle("active", tabBtn.getAttribute("data-banner-id") === banner.bannerId);
-                    });
-                }
-
-                if (artworkEl) {
-                    var bgImg = banner.bannerImage || "selectionbg_1.jpg";
-                    artworkEl.style.backgroundImage = "url('" + bgImg + "')";
-                }
-
-                var heroRenderEl = document.getElementById("gacha-hero-render");
-                if (heroRenderEl) {
-                    var bId = String(banner.bannerId || "").toLowerCase();
-                    if (bId.includes("akatsuki") || (banner.featuredCharacters && banner.featuredCharacters.includes("uchiha-itachi"))) {
-                        heroRenderEl.src = "itachi-render.png";
-                        heroRenderEl.style.display = "block";
-                    } else if (bId.includes("pain") || (banner.featuredCharacters && banner.featuredCharacters.includes("pain-render"))) {
-                        heroRenderEl.src = "pain-render.png";
-                        heroRenderEl.style.display = "block";
-                    } else if (bId.includes("deidara")) {
-                        heroRenderEl.src = "deidara-render.png";
-                        heroRenderEl.style.display = "block";
-                    } else {
-                        // For standard banner, show clean character render
-                        heroRenderEl.src = "itachi-render.png";
-                        heroRenderEl.style.display = "block";
-                    }
-                }
-
-                if (nameEl) nameEl.textContent = banner.title || "Shinobi Summon Altar";
-                if (subEl) subEl.textContent = banner.subtitle || "Rate Up Summon";
-                if (descEl) descEl.textContent = banner.description || "Summon brave shinobi across all five hidden villages!";
-
-                if (costSingleEl) {
-                    costSingleEl.textContent = (banner.singleCostScrolls || 1) + " Scroll or " + formatNum(banner.singleCostRyo || 100) + " Ryo";
-                }
-                if (costMultiEl) {
-                    costMultiEl.textContent = (banner.multiCostScrolls || 9) + " Scrolls or " + formatNum(banner.multiCostRyo || 900) + " Ryo";
-                }
-
-                renderFeaturedFacesOverlay(banner.featuredCharacters);
-            }
-
-            function renderBannerTabs(banners) {
-                if (!bannerTabsEl) return;
-                bannerTabsEl.innerHTML = "";
-                if (!banners || !banners.length) return;
-
-                banners.forEach(function (b, index) {
-                    var btn = document.createElement("button");
-                    btn.type = "button";
-                    btn.className = "gacha-tab-btn" + (index === 0 ? " active" : "");
-                    btn.setAttribute("data-banner-id", b.bannerId);
-                    btn.textContent = b.title || "Banner " + (index + 1);
-                    btn.addEventListener("click", function () {
-                        selectBanner(b);
-                    });
-                    bannerTabsEl.appendChild(btn);
-                });
-
-                selectBanner(banners[0]);
-            }
-
-            function fetchGachaConfig() {
-                fetchCatalog();
-                return fetchJsonLocal("/api/gacha/banners").then(function (data) {
-                    if (data && data.ok) {
-                        activeBanners = Array.isArray(data.banners) ? data.banners : [];
-                        updateBalances(data);
-                        renderBannerTabs(activeBanners);
-                    }
-                }).catch(function(e) {
-                    console.error("Gacha banner fetch error:", e);
-                });
-            }
-
-            function executePull(count) {
-                if (!currentBanner) return;
-                if (pullSingleBtn) pullSingleBtn.disabled = true;
-                if (pullMultiBtn) pullMultiBtn.disabled = true;
-
-                var payload = {
-                    bannerId: currentBanner.bannerId,
-                    count: count,
-                    paymentType: userBalances.summonScrolls >= (count === 10 ? currentBanner.multiCostScrolls : currentBanner.singleCostScrolls) ? "scrolls" : "ryo"
-                };
-
-                fetchJsonLocal("/api/gacha/pull", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                }).then(function(res) {
-                    if (res && res.ok) {
-                        updateBalances(res);
-                        renderPullResults(res.results || []);
-                    } else {
-                        alert((res && res.error) || "Summon failed.");
-                    }
-                }).catch(function(err) {
-                    alert(err.message || "Summon failed.");
-                }).finally(function() {
-                    if (pullSingleBtn) pullSingleBtn.disabled = false;
-                    if (pullMultiBtn) pullMultiBtn.disabled = false;
-                });
-            }
-
-            function renderPullResults(results) {
-                if (!cardsGrid || !resultsContainer) return;
-                cardsGrid.innerHTML = "";
-                buildRosterMap();
-
-                results.forEach(function(item, i) {
-                    var card = document.createElement("div");
-                    var rarity = (item.rarity || "common").toLowerCase();
-                    card.className = "gacha-pull-card gacha-result-card rarity-" + rarity;
-                    card.style.animationDelay = (i * 0.05) + "s";
-                    
-                    var char = characterRosterMap.get(String(item.characterId || "").toLowerCase());
-                    var faceSrc = item.facePicture || (char && char.facePicture) || "deadcharacter-remaster.png?v=2";
-                    var name = item.name || (char && char.name) || item.characterId;
-
-                    var dupBadge = item.isDuplicate 
-                        ? '<div class="gacha-pull-badge">+' + (item.shardsGranted || 10) + ' SHARDS</div>'
-                        : '<div class="gacha-pull-new-badge">NEW!</div>';
-
-                    card.innerHTML =
-                        dupBadge +
-                        '<div class="gacha-pull-rank-tag rarity-' + rarity + '">' + rarity.toUpperCase() + '</div>' +
-                        '<div class="gacha-pull-avatar-frame gacha-result-portrait rarity-' + rarity + '">' +
-                            '<img class="gacha-pull-avatar" src="' + (faceSrc || "") + '" alt="' + (name || "") + '" onerror="this.onerror=null;this.src=\'deadcharacter-remaster.png?v=2\';">' +
-                        '</div>' +
-                        '<div class="gacha-pull-name gacha-result-name" title="' + (name || "") + '">' + (name || "") + '</div>' +
-                        (item.isDuplicate 
-                            ? '<div class="gacha-pull-status gacha-dup">+ ' + (item.shardsGranted || 10) + ' Chakra Shards</div>' 
-                            : '<div class="gacha-pull-status gacha-new">NEW UNLOCK</div>');
-
-                    cardsGrid.appendChild(card);
-                });
-
-                var bCard = document.getElementById("gacha-banner-card");
-                if (bCard) bCard.classList.add("hidden");
-                resultsContainer.classList.remove("hidden");
-            }
-
-
-            function openGachaModal() {
-                if (modal) modal.classList.remove("hidden");
-                fetchGachaConfig();
-            }
-
-            function closeGachaModal() {
-                if (modal) modal.classList.add("hidden");
-            }
-
-            document.addEventListener("click", function(e) {
-                var trigger = e.target.closest("[data-gacha-trigger]");
-                if (trigger) {
-                    e.preventDefault();
-                    openGachaModal();
-                }
-            });
-
-            if (closeBtn) closeBtn.addEventListener("click", closeGachaModal);
-            if (ratesBtn) ratesBtn.addEventListener("click", function() { if (ratesModal) ratesModal.classList.remove("hidden"); });
-            if (ratesClose) ratesClose.addEventListener("click", function() { if (ratesModal) ratesModal.classList.add("hidden"); });
-            if (shardShopBtn) shardShopBtn.addEventListener("click", function() { if (shardShopModal) shardShopModal.classList.remove("hidden"); });
-            if (shardShopClose) shardShopClose.addEventListener("click", function() { if (shardShopModal) shardShopModal.classList.add("hidden"); });
-
-            if (pullSingleBtn) pullSingleBtn.addEventListener("click", function() { executePull(1); });
-            if (pullMultiBtn) pullMultiBtn.addEventListener("click", function() { executePull(10); });
-
-            if (claimBtn) {
-                claimBtn.addEventListener("click", function() {
-                    if (resultsContainer) resultsContainer.classList.add("hidden");
-                    var bCard = document.getElementById("gacha-banner-card");
-                    if (bCard) bCard.classList.remove("hidden");
-                });
-            }
-
-            document.querySelectorAll(".shard-craft-btn").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    var craftType = btn.getAttribute("data-craft-type");
-                    var msgEl = document.getElementById("shard-shop-message");
-                    if (msgEl) msgEl.textContent = "Crafting...";
-
-                    fetchJsonLocal("/api/gacha/craft-shards", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ craftType: craftType })
-                    }).then(function(res) {
-                        if (res && res.ok) {
-                            updateBalances(res);
-                            if (msgEl) msgEl.textContent = res.message || "Craft successful!";
-                        } else {
-                            if (msgEl) msgEl.textContent = (res && res.error) || "Craft failed.";
-                        }
-                    }).catch(function(err) {
-                        if (msgEl) msgEl.textContent = err.message || "Craft failed.";
-                    });
-                });
-            });
-
-            // Automatically fetch gacha config and sync user profile balances on page load
-            syncUserProfile();
-            fetchGachaConfig();
-        })();
-
         // ── QUESTS, ACHIEVEMENTS, LOGIN REWARDS & PROMO CODES CONTROLLER ──
         (function initQuestsAndRewardsController() {
             var questsModal = document.getElementById("quests-modal");
@@ -565,7 +172,7 @@
             function loadQuests() {
                 window.ArenaSession.fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
-                        cachedQuests = (d.quests || []).filter(function(q) { return q.metric !== "gachaPulls"; });
+                        cachedQuests = (d.quests || []);
                         renderQuestsList();
                     }
                 }).catch(console.error);
@@ -597,8 +204,6 @@
 
                     var rewardsHtml = [];
                     if (q.rewards.ryo) rewardsHtml.push('<span class="reward-pill ryo" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">' + q.rewards.ryo + ' Ryo</span>');
-                    if (q.rewards.summonScrolls) rewardsHtml.push('<span class="reward-pill scrolls" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">' + q.rewards.summonScrolls + ' Scrolls</span>');
-                    if (q.rewards.chakraShards) rewardsHtml.push('<span class="reward-pill shards" style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">' + q.rewards.chakraShards + ' Shards</span>');
 
                     html += '<div class="shinobi-quest-contract" style="position: relative; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; transition: border-color 0.15s ease;">' +
                         '<div class="quest-info" style="flex-grow: 1;">' +
@@ -624,7 +229,6 @@
                 }).then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         loadQuests();
-                        if (typeof updateBalances === 'function') updateBalances(d);
                     } else {
                         alert(d.error || "Failed to claim quest.");
                     }
@@ -635,7 +239,7 @@
             function loadAchievements() {
                 window.ArenaSession.fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
-                        renderAchievementsList((d.achievements || []).filter(function(ach) { return ach.metric !== "gachaPulls"; }));
+                        renderAchievementsList((d.achievements || []));
                     }
                 }).catch(console.error);
             }
@@ -665,8 +269,6 @@
 
                         var rewardsText = [];
                         if (t.rewards.ryo) rewardsText.push(t.rewards.ryo + ' Ryo');
-                        if (t.rewards.summonScrolls) rewardsText.push(t.rewards.summonScrolls + ' Scrolls');
-                        if (t.rewards.chakraShards) rewardsText.push(t.rewards.chakraShards + ' Shards');
 
                         html += '<div class="achievement-tier-box" style="background: #020617; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px; text-align: center;">' +
                             '<div class="tier-badge" style="font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 4px; padding: 2px 4px;">' + tierRankName + '</div>' +
@@ -689,7 +291,6 @@
                 }).then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         loadAchievements();
-                        if (typeof updateBalances === 'function') updateBalances(d);
                     } else {
                         alert(d.error || "Failed to claim achievement.");
                     }
@@ -734,8 +335,6 @@
                     var isClaimed = day.day < currentDay || (isToday && !canClaim);
                     var rewardsText = [];
                     if (day.rewards.ryo) rewardsText.push(day.rewards.ryo + ' Ryo');
-                    if (day.rewards.summonScrolls) rewardsText.push(day.rewards.summonScrolls + ' Scrolls');
-                    if (day.rewards.chakraShards) rewardsText.push(day.rewards.chakraShards + ' Shards');
 
                     var borderStyle = isToday ? 'border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.12);' : 'border: 1px solid rgba(255, 255, 255, 0.08); background: #020617;';
                     if (day.day === 7) borderStyle = 'border: 1px solid #fbbf24; background: rgba(245, 158, 11, 0.18);';
@@ -761,7 +360,6 @@
                         if (d.ok) {
                             if (msgEl) msgEl.textContent = d.message || "Login reward claimed!";
                             loadLoginRewards();
-                            if (typeof updateBalances === 'function') updateBalances(d);
                         } else {
                             if (msgEl) msgEl.textContent = d.error || "Claim failed.";
                         }
@@ -793,7 +391,6 @@
                             if (msgEl) msgEl.style.color = "#4ade80";
                             if (msgEl) msgEl.textContent = d.message || "Code redeemed!";
                             if (input) input.value = "";
-                            if (typeof updateBalances === 'function') updateBalances(d);
                         } else {
                             if (msgEl) msgEl.style.color = "#f87171";
                             if (msgEl) msgEl.textContent = d.error || "Redemption failed.";
