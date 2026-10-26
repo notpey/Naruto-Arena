@@ -38,10 +38,8 @@ test('repairs swapped Sakura and Sasuke passives on both sides of an existing ma
 
 test('removes an invalid passive from a living character without one', () => {
     const unit = battleLogic.buildInitialBoard([{ username: 'ally', team: [1] }]).ally[0];
-    const indexWithoutPassive = activeRoster.findIndex((character) => !character.passive);
-    assert.ok(indexWithoutPassive >= 0);
-    unit.rosterIndex = indexWithoutPassive;
-    assert.equal(activeRoster[indexWithoutPassive].passive, undefined);
-    assert.equal(reconcileUnitPassive(unit, activeRoster, battleLogic.buildInitialBoard), true);
+    const rosterWithoutPassive = activeRoster.map((character, index) =>
+        index === 1 ? { ...character, passive: undefined } : character);
+    assert.equal(reconcileUnitPassive(unit, rosterWithoutPassive, battleLogic.buildInitialBoard), true);
     assert.equal(unit.state.statuses.some((status) => status.metadata.passive === true), false);
 });

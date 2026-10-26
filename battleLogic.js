@@ -3235,7 +3235,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     let appliedPhysicalMitigation = basePhysicalMitigation;
     const standardBudgetMap = context?.standardMitigationBudgetMap;
     const standardBudgetKey = context?.standardMitigationBudgetKey;
-    if (standardBudgetMap instanceof Map && standardBudgetKey) {
+    if (standardBudgetMap instanceof Map && standardBudgetKey && !ignoreDamageReduction && !cannotReduceDamage) {
         const generalKey = `g:${standardBudgetKey}`;
         const physicalKey = `p:${standardBudgetKey}`;
         const generalBudget = standardBudgetMap.has(generalKey)
@@ -4637,6 +4637,17 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const effects = Array.isArray(skill.effects) ? skill.effects : [];
         if (!effects.length) continue;
         if (!doesActorSatisfySkillCondition(actorUnit, actorState, skill)) continue;
+        const teamDefenseDamageBonus = actorBoard.reduce((sum, unit) => {
+            if (!unit || unit.alive === false) return sum;
+            return sum + Math.max(0, Number(
+                characters?.[unit.rosterIndex]?.passive?.teamNonAfflictionDamageBonusWhileDestructibleDefense
+            ) || 0);
+        }, 0);
+        const teamDefenseBonusAppliedTo = new Set();
+        const hasDestructibleDefense = () => (actorState.statuses || []).some((status) =>
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            (Number(status?.metadata?.destructibleDefensePoints) || 0) > 0
+        );
         const ebisuMentor = actorBoard.find((unit) =>
             unit && unit.alive !== false &&
             characters?.[unit.rosterIndex]?.passive?.teamSkillCostDefense);
@@ -4800,6 +4811,34 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 );
             });
         const skillIsHarmful = skillHasHarmfulEffects(skill);
+        const selectedDamageTarget = selectedTargets[0] || null;
+        const activeDamageEffects = effects.filter((effect) => {
+            if (effect?.type !== 'damage' && effect?.type !== 'health_steal_damage') return false;
+            if (!effect.condition) return true;
+            return doesEffectConditionMatch({
+                condition: effect.condition, actorState,
+                targetState: selectedDamageTarget?.unit
+                    ? ensureUnitStateShape(selectedDamageTarget.unit) : actorState,
+                actorUnit, targetUnit: selectedDamageTarget?.unit || actorUnit,
+                actorUsername: actingUsername,
+                targetUsername: selectedDamageTarget?.username || actingUsername,
+            }) || isConditionalDamageOverrideOnly(effect.condition);
+        });
+        const isSingleTargetDamageSkill =
+            ['single-enemy', 'single-character', 'single-target'].includes(
+                String(skill.target || '').trim().toLowerCase()
+            ) && activeDamageEffects.length > 0 &&
+            activeDamageEffects.every((effect) => ![
+                'all-enemy', 'other-enemies', 'all-allies', 'all-units', 'random-enemy',
+            ].includes(effect.scope)) &&
+            activeDamageEffects.some((effect) => (effect.scope || 'target') === 'target');
+        const missionAssignmentStatuses = isSingleTargetDamageSkill
+            ? castStartStatuses.filter((status) =>
+                (Number(status?.metadata?.nextSingleTargetNonAfflictionDamageBonusFlat) || 0) > 0)
+            : [];
+        const missionAssignmentBonus = missionAssignmentStatuses.reduce((sum, status) =>
+            sum + Math.max(0, Number(status.metadata.nextSingleTargetNonAfflictionDamageBonusFlat) || 0), 0);
+        let missionAssignmentBonusApplied = false;
         const previousSkillTargetKey = actorState?.snapshots?.currentSkillTargetKey || '';
         const primaryEnemyTarget = selectedTargets.find(
             (entry) =>
@@ -5216,7 +5255,34 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             });
         };
 
+        const crystalBallSuppressionStatuses = (actorState.statuses || []).filter((status) =>
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            status?.sourceUsername === opponentUsername &&
+            (Number(status?.metadata?.firstHarmfulSkillAgainstSourceTeamNonAfflictionReductionFlat) || 0) > 0
+        );
+        const harmfulEffectTargetsTeam = (effect, teamUsername) => {
+            if (!isHarmfulEffect(effect)) return false;
+            const scope = effect?.scope || 'target';
+            if (scope === 'self' || scope === 'all-allies') return actingUsername === teamUsername;
+            if (scope === 'all-units') return true;
+            if (['all-enemy', 'all-other-enemy', 'other-enemies', 'random-enemy',
+                'random-other-enemy', 'all-enemy-without-source-status',
+                'linked-enemy-other-than-target'].includes(scope)) {
+                return opponentUsername === teamUsername && opponentUnits.length > 0;
+            }
+            return selectedTargets.some((target) => target?.username === teamUsername);
+        };
+        const crystalBallSuppressionToConsume = new Set(
+            skillIsHarmful
+                ? crystalBallSuppressionStatuses.filter((status) =>
+                    effects.some((effect) => harmfulEffectTargetsTeam(effect, status.sourceUsername))
+                ).map((status) => status.id)
+                : []
+        );
+
         const pendingDamage = new Map();
+        const afflictionDamageRecipients = new Map();
+        const crystalBallReductionRemainingByRecipient = new Map();
         const deferredStatusRemovals = [];
         const evadedRecipients = new Set();
         const evadeDecisionByRecipient = new Map();
@@ -5609,11 +5675,43 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         afflictionDamage: Boolean(effect?.metadata?.afflictionDamage) ||
                             hasSkillClass(damageSkillClasses, 'affliction'),
                     });
-                    const totalAmount = Math.max(
-                        0,
+                    const afflictionDamage = Boolean(effect?.metadata?.afflictionDamage) ||
+                        hasSkillClass(damageSkillClasses, 'affliction');
+                    const recipientKey = `${recipient.username}:${recipient.slot}`;
+                    if (afflictionDamage && amount > 0 && !controlledSource) {
+                        afflictionDamageRecipients.set(recipientKey, recipient);
+                    }
+                    let additionalDamage = 0;
+                    if (!controlledSource && !afflictionDamage) {
+                        if (teamDefenseDamageBonus > 0 && hasDestructibleDefense() &&
+                            !teamDefenseBonusAppliedTo.has(recipientKey)) {
+                            additionalDamage += teamDefenseDamageBonus;
+                            teamDefenseBonusAppliedTo.add(recipientKey);
+                        }
+                        if (missionAssignmentBonus > 0 && !missionAssignmentBonusApplied &&
+                            (effect.scope || 'target') === 'target') {
+                            additionalDamage += missionAssignmentBonus;
+                            missionAssignmentBonusApplied = true;
+                        }
+                    }
+                    const rawAmount = Math.max(0,
                         amount + skillSpecificBonus + passiveBonus + samePreviousTargetBonus +
-                            targetSourceBonus + (controlledSource ? 0 : nextAttackBonus)
+                            targetSourceBonus + (controlledSource ? 0 : nextAttackBonus) + additionalDamage
                     );
+                    let crystalBallReduction = 0;
+                    if (!afflictionDamage && crystalBallSuppressionToConsume.size > 0) {
+                        const remaining = crystalBallReductionRemainingByRecipient.has(recipientKey)
+                            ? crystalBallReductionRemainingByRecipient.get(recipientKey)
+                            : crystalBallSuppressionStatuses.reduce((sum, status) =>
+                                sum + (crystalBallSuppressionToConsume.has(status.id) &&
+                                    status.sourceUsername === recipient.username
+                                    ? Math.max(0, Number(
+                                        status.metadata.firstHarmfulSkillAgainstSourceTeamNonAfflictionReductionFlat
+                                    ) || 0) : 0), 0);
+                        crystalBallReduction = Math.min(rawAmount, remaining);
+                        crystalBallReductionRemainingByRecipient.set(recipientKey, remaining - crystalBallReduction);
+                    }
+                    const totalAmount = rawAmount - crystalBallReduction;
                     queueDamage(recipient, totalAmount, effect, controlledSource);
                 });
                 return;
@@ -7091,6 +7189,36 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             }
         });
 
+        // An affliction-only skill still qualifies for bonuses described as extra
+        // non-affliction damage. Queue that extra damage separately so it uses normal
+        // defense and reduction rules instead of inheriting Affliction.
+        afflictionDamageRecipients.forEach((recipient, recipientKey) => {
+            if (skillCancelledByEvade) return;
+            let extraDamage = 0;
+            if (teamDefenseDamageBonus > 0 && hasDestructibleDefense() &&
+                !teamDefenseBonusAppliedTo.has(recipientKey)) {
+                extraDamage += teamDefenseDamageBonus;
+                teamDefenseBonusAppliedTo.add(recipientKey);
+            }
+            if (missionAssignmentBonus > 0 && !missionAssignmentBonusApplied) {
+                extraDamage += missionAssignmentBonus;
+                missionAssignmentBonusApplied = true;
+            }
+            if (extraDamage <= 0) return;
+            const remaining = crystalBallReductionRemainingByRecipient.has(recipientKey)
+                ? crystalBallReductionRemainingByRecipient.get(recipientKey)
+                : crystalBallSuppressionStatuses.reduce((sum, status) =>
+                    sum + (crystalBallSuppressionToConsume.has(status.id) &&
+                        status.sourceUsername === recipient.username
+                        ? Math.max(0, Number(
+                            status.metadata.firstHarmfulSkillAgainstSourceTeamNonAfflictionReductionFlat
+                        ) || 0) : 0), 0);
+            const reduction = Math.min(extraDamage, remaining);
+            crystalBallReductionRemainingByRecipient.set(recipientKey, remaining - reduction);
+            queueDamage(recipient, extraDamage - reduction,
+                { type: 'damage', amount: extraDamage, metadata: { skillClasses: [] } });
+        });
+
         pendingDamage.forEach((entry) => {
             if (!entry?.recipient?.unit || entry.recipient.unit.alive === false) return;
             const mitigationBudgetKey = `${entry.recipient.username || ''}:${
@@ -7156,6 +7284,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         });
         if (nextAttackStatuses.length > 0) {
             const consumed = new Set(nextAttackStatuses.map((status) => status.id));
+            actorState.statuses = actorState.statuses.filter((status) => !consumed.has(status.id));
+        }
+        if (missionAssignmentStatuses.length > 0 || crystalBallSuppressionToConsume.size > 0) {
+            const consumed = new Set([
+                ...missionAssignmentStatuses.map((status) => status.id),
+                ...crystalBallSuppressionToConsume,
+            ]);
             actorState.statuses = actorState.statuses.filter((status) => !consumed.has(status.id));
         }
 

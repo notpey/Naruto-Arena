@@ -11,6 +11,7 @@ const SAKURA_SASUKE_REWORK_MIGRATION_ID = 'team-7-sakura-sasuke-rework-2026-10-2
 const KAKASHI_IRUKA_REWORK_MIGRATION_ID = 'kakashi-iruka-rework-2026-10-24';
 const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
+const HOKAGE_HIRUZEN_REWORK_MIGRATION_ID = 'hokage-hiruzen-rework-2026-10-26';
 
 const STARTER_REBALANCE_CHARACTER_IDS = new Set([
     'uzumaki-naruto',
@@ -224,6 +225,7 @@ class CharacterService {
                     [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -277,6 +279,7 @@ class CharacterService {
                         [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },
@@ -298,6 +301,7 @@ class CharacterService {
         const shouldApplyKakashiIrukaRework = !completedMigrations[KAKASHI_IRUKA_REWORK_MIGRATION_ID];
         const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
         const shouldApplyDemonBrothersRework = !completedMigrations[DEMON_BROTHERS_REWORK_MIGRATION_ID];
+        const shouldApplyHokageHiruzenRework = !completedMigrations[HOKAGE_HIRUZEN_REWORK_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
             ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -306,6 +310,7 @@ class CharacterService {
             ...(shouldApplyKakashiIrukaRework ? ['hatake-kakashi', 'umino-iruka'] : []),
             ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
             ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
+            ...(shouldApplyHokageHiruzenRework ? ['sarutobi-hiruzen'] : []),
         ]);
         const defaultByCharacterId = new Map(
             defaultCharacters
@@ -375,6 +380,7 @@ class CharacterService {
                 if (shouldApplyKakashiIrukaRework && (characterId === 'hatake-kakashi' || characterId === 'umino-iruka')) return seedEntry;
                 if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
                 if (shouldApplyDemonBrothersRework && characterId === 'demon-brothers') return seedEntry;
+                if (shouldApplyHokageHiruzenRework && characterId === 'sarutobi-hiruzen') return seedEntry;
                 const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
                 const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
                 if (facePicture !== storedFace) {
@@ -431,6 +437,7 @@ class CharacterService {
             shouldApplyKakashiIrukaRework ||
             shouldApplyWavesAndMizukiRework ||
             shouldApplyDemonBrothersRework ||
+            shouldApplyHokageHiruzenRework ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
         ) {
@@ -452,6 +459,7 @@ class CharacterService {
                         [`completed.${KAKASHI_IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },

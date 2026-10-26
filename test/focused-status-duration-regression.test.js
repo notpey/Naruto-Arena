@@ -300,17 +300,19 @@ test('Iruka Sealed Bomb Square marks only the chosen enemy', () => {
     assert.equal(getStatus(match, 'p2', 1, 'iruka_sealed_bomb_trap'), undefined);
 });
 
-test('Hiruzen Dead Demon Consuming Seal ticks while Hiruzen is self-stunned', () => {
+test('Hokage Hiruzen Crystal Ball observation lasts two source turns', () => {
     const match = makeMatch([indexById['sarutobi-hiruzen']], [indexById.tenten]);
 
-    queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-
-    assert.equal(match.board.p2[0].hp, 60);
-    assert.equal(match.board.p1[0].hp, 80);
+    assert.ok(getStatus(match, 'p2', 0, 'sarutobi_hiruzen_crystal_ball_observation'));
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(getStatus(match, 'p2', 0, 'sarutobi_hiruzen_crystal_ball_observation'));
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(getStatus(match, 'p2', 0, 'sarutobi_hiruzen_crystal_ball_observation'), undefined);
 });
 
 test('Jiroubou Earth Prison drains chakra each source turn while it survives', () => {

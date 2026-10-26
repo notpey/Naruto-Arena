@@ -1,259 +1,88 @@
 module.exports = {
-    "id": "sarutobi-hiruzen",
-    "characterId": "sarutobi-hiruzen",
-    "name": "Sarutobi Hiruzen",
-    "facePicture": "https://i.imgur.com/OVXPrec.png",
-    "characterdeescription": "The third and most recent Hokage of the Hidden Leaf Village to die; Hiruzen, known as the God of Shinobi was considered to be one of the strongest ninja alive in his prime. While powerful using just his normal jutsu, Hiruzen is able to pull out a trump card when desperation strikes.",
-    "requiredMissionId": "the-god-of-the-shinobi",
-    "skills": [
+    id: 'sarutobi-hiruzen',
+    characterId: 'sarutobi-hiruzen',
+    name: 'Hokage Hiruzen',
+    facePicture: 'https://i.imgur.com/fxZCWtI.png',
+    characterdeescription: 'The Third Hokage of Konohagakure, Hiruzen Sarutobi is a respected village leader responsible for guiding its shinobi and overseeing their missions. Despite his advanced age and legendary reputation, Hiruzen spends much of his time attending to village affairs, observing Naruto\'s antics, and ensuring the next generation receives the guidance it needs.',
+    requiredMissionId: 'the-god-of-the-shinobi',
+    passive: {
+        name: 'Will of Fire',
+        icon: 'https://i.imgur.com/44tJLMZ.png',
+        description: "Hiruzen and his allies' damaging skills deal 5 additional non-affliction damage while they have destructible defense.",
+        teamNonAfflictionDamageBonusWhileDestructibleDefense: 5,
+    },
+    skills: [
         {
-            "id": "sarutobi-hiruzen-fire-dragon-flame-bullet",
-            "name": "Fire Dragon Flame Bullet",
-            "skillimage": "https://i.imgur.com/ljmijF8.png",
-            "skilldescription": "Sarutobi Hiruzen deals 30 affliction damage to one enemy. The following turn, that enemy will take 10 affliction damage.",
-            "energy": [
-                "Ninjutsu",
-                "Random"
+            id: 'sarutobi-hiruzen-crystal-ball-technique',
+            name: 'Crystal Ball Technique',
+            skillimage: 'https://i.imgur.com/yubcK01.png',
+            skilldescription: 'Hiruzen observes one enemy through his crystal ball for 2 turns, revealing their hidden skills. During this time, the first harmful skill that enemy uses against Hiruzen or his allies deals 10 less non-affliction damage, and Search Party deals 15 additional piercing damage to them.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: 'sarutobi_hiruzen_crystal_ball_observation',
+                    duration: 2, scope: 'target', metadata: {
+                        harmful: true, revealInvisibleSkillsToSourceTeam: true,
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'Hiruzen can see this character\'s hidden effects. Search Party deals 15 additional piercing damage to this character.',
+                    } },
+                { type: 'apply_status', statusId: 'sarutobi_hiruzen_crystal_ball_suppression',
+                    duration: 2, scope: 'target', metadata: {
+                        harmful: true, firstHarmfulSkillAgainstSourceTeamNonAfflictionReductionFlat: 10,
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'The first harmful skill this character uses against Hiruzen\'s team deals 10 less non-affliction damage.',
+                    } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Affliction",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 30,
-                    "scope": "target",
-                    "metadata": {
-                        "afflictionDamage": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_fire_dragon_dot",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "tooltipText": "This character will take 10 affliction damage next turn from Fire Dragon Flame Bullet.",
-                        "onExpireEffects": [
-                            {
-                                "type": "damage",
-                                "amount": 10,
-                                "metadata": {
-                                    "afflictionDamage": true
-                                }
-                            }
-                        ],
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
         {
-            "id": "sarutobi-hiruzen-dead-demon-consuming-seal",
-            "name": "Dead Demon Consuming Seal",
-            "skillimage": "https://i.imgur.com/HjM3iLD.png",
-            "skilldescription": "Permanently, one enemy takes 40 affliction damage, is stunned and cannot reduce damage or become invulnerable each turn. Sarutobi Hiruzen himself takes 20 affliction damage and is stunned each turn. This skill cannot be removed or ignored and will end when Sarutobi Hiruzen dies.",
-            "energy": [
-                "Random",
-                "Random",
-                "Random"
+            id: 'sarutobi-hiruzen-mission-assignment',
+            name: 'Mission Assignment',
+            skillimage: 'https://i.imgur.com/ABkaTAl.png',
+            skilldescription: 'Hiruzen assigns himself or one ally a mission, granting them 15 destructible defense for 2 turns. Their next single-target damaging skill during this time deals 10 additional non-affliction damage.',
+            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: 'sarutobi_hiruzen_mission_assignment_defense',
+                    duration: 2, scope: 'target', metadata: {
+                        helpful: true, destructibleDefensePoints: 15,
+                        tooltipTextTemplate: 'This character has {destructibleDefensePoints} destructible defense from Mission Assignment.',
+                    } },
+                { type: 'apply_status', statusId: 'sarutobi_hiruzen_mission_assignment_bonus',
+                    duration: 2, scope: 'target', metadata: {
+                        helpful: true, nextSingleTargetNonAfflictionDamageBonusFlat: 10,
+                        tooltipText: 'The next single-target damaging skill deals 10 additional non-affliction damage.',
+                    } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Affliction",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 40,
-                    "scope": "target",
-                    "metadata": {
-                        "afflictionDamage": true
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "self",
-                    "metadata": {
-                        "afflictionDamage": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_dead_demon_seal_enemy",
-                    "duration": 99,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "ongoingClass": "action",
-                        "ignoreOngoingSourceStun": true,
-                        "afflictionDamage": true,
-                        "cannotUseSkills": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "cannotBeCleansed": true,
-                        "turnEndDamage": 40,
-                        "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 40 affliction damage each turn, is stunned, and cannot reduce damage or become invulnerable. This effect cannot be removed or ignored and ends if Sarutobi Hiruzen dies."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_dead_demon_seal_self",
-                    "duration": 99,
-                    "scope": "self",
-                    "metadata": {
-                        "harmful": true,
-                        "ongoingClass": "action",
-                        "ignoreOngoingSourceStun": true,
-                        "afflictionDamage": true,
-                        "cannotUseSkills": true,
-                        "cannotBeCleansed": true,
-                        "turnEndDamage": 20,
-                        "turnEndTrigger": "source_turn",
-                        "tooltipText": "Sarutobi Hiruzen takes 20 affliction damage each turn and is stunned."
-                    }
-                }
-            ]
         },
         {
-            "id": "sarutobi-hiruzen-major-summoning-enma",
-            "name": "Major Summoning: Enma",
-            "skillimage": "https://i.imgur.com/O3lc03n.png",
-            "skilldescription": "Sarutobi Hiruzen and his team become invulnerable for 1 turn. For the rest of the game, Sarutobi Hiruzen will deal 5 damage to all enemies each turn, Sarutobi Hiruzen's team will gain 5 points of damage reduction, and this skill will be replaced by 'Adamantine Prison Wall'. This skill will end if Sarutobi Hiruzen dies.",
-            "energy": [
-                "Taijutsu",
-                "Ninjutsu",
-                "Genjutsu"
+            id: 'sarutobi-hiruzen-search-party',
+            name: 'Search Party',
+            skillimage: 'https://i.imgur.com/OdtmZna.png',
+            skilldescription: 'Hiruzen dispatches Leaf shinobi to attack one enemy, dealing 20 physical damage. If that enemy is affected by Crystal Ball Technique, this skill also deals 15 piercing damage.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 20, scope: 'target' },
+                { type: 'damage', amount: 15, scope: 'target',
+                    condition: { scope: 'target', statusId: 'sarutobi_hiruzen_crystal_ball_observation', statusFromActor: true },
+                    metadata: { ignoreDamageReduction: true, ignoreDestructibleDefense: true,
+                        skillClasses: ['Piercing'] } },
             ],
-            "target": "all-allies",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_enma_invuln",
-                    "duration": 1,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "helpful": true,
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_enma_dot",
-                    "duration": 99,
-                    "scope": "all-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "ongoingClass": "action",
-                        "turnEndDamage": 5,
-                        "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character takes 5 damage each turn from Major Summoning: Enma."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_enma_dr",
-                    "duration": 99,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "helpful": true,
-                        "ongoingClass": "action",
-                        "damageReductionFlat": 5,
-                        "tooltipText": "This character has 5 points of damage reduction from Major Summoning: Enma."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_enma_replace",
-                    "duration": 99,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "ongoingClass": "action",
-                        "skillReplacements": {
-                            "sarutobi-hiruzen-major-summoning-enma": "sarutobi-hiruzen-adamantine-prison-wall"
-                        },
-                        "tooltipText": "Major Summoning: Enma is replaced by Adamantine Prison Wall."
-                    }
-                }
-            ]
         },
         {
-            "id": "sarutobi-hiruzen-earth-style-wall",
-            "name": "Earth-Style Wall",
-            "skillimage": "https://i.imgur.com/w8Zg0Py.png",
-            "skilldescription": "This skill makes Sarutobi Hiruzen invulnerable for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'sarutobi-hiruzen-hokages-guard',
+            name: "Hokage's Guard",
+            skillimage: 'https://i.imgur.com/fJmy67o.png',
+            skilldescription: 'This skill makes Sarutobi Hiruzen invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: 'sarutobi_hiruzen_hokages_guard',
+                    duration: 1, scope: 'self', metadata: {
+                        helpful: true, invulnerable: true,
+                        tooltipText: 'Hokage Hiruzen is invulnerable.',
+                    } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_earth_style_wall",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
         },
-        {
-            "id": "sarutobi-hiruzen-adamantine-prison-wall",
-            "name": "Adamantine Prison Wall",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/O3lc03n.png",
-            "skilldescription": "For 1 turn, Sarutobi Hiruzen and his team will gain 20 points of unpierceable damage reduction and they cannot be killed.",
-            "energy": [
-                "Taijutsu"
-            ],
-            "target": "all-allies",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "sarutobi_hiruzen_adamantine_wall",
-                    "duration": 1,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "helpful": true,
-                        "unpierceableDamageReductionFlat": 20,
-                        "minimumHp": 1,
-                        "tooltipText": "This character has 20 points of unpierceable damage reduction and cannot be killed."
-                    }
-                }
-            ]
-        }
-    ]
+    ],
 };

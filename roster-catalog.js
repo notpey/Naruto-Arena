@@ -22,7 +22,7 @@ const NarutoRosterCatalog = (() => {
         ['yamanaka-ino', 'prologue'],
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
-        ['sarutobi-hiruzen', 'konoha-crush'],
+        ['sarutobi-hiruzen', 'land-of-waves'],
     ];
 
     const arcsById = new Map(arcs.map((arc) => [arc.id, arc]));

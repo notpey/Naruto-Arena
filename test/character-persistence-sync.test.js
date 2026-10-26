@@ -30,7 +30,7 @@ test('CharacterService serializes and syncs character data accurately', () => {
     assert.ok(dataFile.includes('module.exports = characters'), 'Must export array');
 });
 
-test('getStoredCharacters ensures official seed skills and effects take precedence over stale DB records', async () => {
+test('Hokage Hiruzen migration replaces the old stored character while keeping its ID', async () => {
     const staleHiruzen = {
         characterId: 'sarutobi-hiruzen',
         id: 'sarutobi-hiruzen',
@@ -64,15 +64,14 @@ test('getStoredCharacters ensures official seed skills and effects take preceden
     const hiruzen = stored.find((c) => c.characterId === 'sarutobi-hiruzen');
 
     assert.ok(hiruzen, 'Hiruzen should be present');
-    assert.equal(hiruzen.facePicture, 'https://example.com/custom-hiruzen.png', 'Custom face picture is preserved');
-    assert.equal(hiruzen.characterdeescription, 'Custom Admin Description', 'Custom description is preserved');
-
-    const seal = hiruzen.skills.find((s) => s.id === 'sarutobi-hiruzen-dead-demon-consuming-seal');
-    assert.ok(seal, 'Dead Demon Seal skill must be present');
-    assert.ok(seal.effects.length > 0, 'Dead Demon Seal effects must be synced from authoritative seed code');
-    const sealEnemyEffect = seal.effects.find((e) => e.statusId === 'sarutobi_hiruzen_dead_demon_seal_enemy');
-    assert.equal(sealEnemyEffect?.metadata?.turnEndDamage, 40, 'turnEndDamage 40 must be present');
-    assert.equal(sealEnemyEffect?.metadata?.ignoreOngoingSourceStun, true, 'ignoreOngoingSourceStun must be present');
+    assert.equal(hiruzen.name, 'Hokage Hiruzen');
+    assert.equal(hiruzen.facePicture, 'https://i.imgur.com/fxZCWtI.png');
+    assert.equal(hiruzen.requiredMissionId, 'the-god-of-the-shinobi');
+    assert.deepEqual(hiruzen.skills.map((skill) => skill.name), [
+        'Crystal Ball Technique', 'Mission Assignment', 'Search Party', "Hokage's Guard",
+    ]);
+    assert.equal(hiruzen.skills.some((skill) =>
+        skill.id === 'sarutobi-hiruzen-dead-demon-consuming-seal'), false);
 });
 
 test('Naruto rework replaces stale stored artwork and skills once', async () => {
