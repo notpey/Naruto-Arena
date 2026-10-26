@@ -609,6 +609,26 @@ test('Sasuke Sharingan visibly counters the first harmful Physical skill and the
     assert.equal(state.statuses.some(status => status.id === 'invulnerable' && status.metadata.invulnerable), true);
 });
 
+test('Sasuke Sharingan does not counter his own Physical skill', () => {
+    const match = makeMatch([2], [2]);
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    assert.equal(match.board.p2[0].hp, 80, 'Shadow Shuriken reaches the enemy');
+    assert.equal(match.board.p1[0].state.statuses.some(status =>
+        status.id === 'uchiha_sasuke_sharingan'), true, 'Sharingan remains ready for an enemy skill');
+    assert.equal(Boolean(match.combatEvents?.some(event => event.outcome === 'countered')), false);
+
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 100, 'the next enemy Physical skill is countered');
+    assert.equal(match.board.p1[0].state.statuses.some(status =>
+        status.id === 'uchiha_sasuke_sharingan'), false, 'enemy counter consumes Sharingan');
+});
+
 test('battleLogic resolves Kiba starter kit behavior used by the editor data', () => {
     const match = makeMatch([3], [1]);
 

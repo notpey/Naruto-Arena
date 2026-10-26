@@ -2597,6 +2597,8 @@ const maybeTriggerReactiveDefenses = ({
     }
     const trapIndex = statuses.findIndex((status) => {
         const remaining = Number(status?.remainingTurns) || 0;
+        // A counter placed by the acting team cannot counter that team's own skill.
+        if (status?.sourceUsername === actingUsername) return false;
         if (!skillIsHarmful && !Boolean(status?.metadata?.triggerOnOwnerHelpfulSkill)) return false;
         return (
             remaining > 0 &&
