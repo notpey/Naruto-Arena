@@ -220,6 +220,39 @@ test('BUG 2: Matching counter triggers, cancels incoming skill, inflicts counter
     assert.equal(evt.message, 'Spiral Web countered Sand Claw.');
 });
 
+test('a nonmatching counter does not prevent a later matching counter from triggering', () => {
+    const match = buildTestMatch();
+    const defender = match.board.p2[0];
+    defender.state.statuses.push(
+        {
+            id: 'mental_only_counter', remainingTurns: 2, sourceUsername: 'p2', sourceSlot: 0,
+            metadata: {
+                triggerOnEnemyHarmfulSkillClassesAny: ['mental'],
+                counterCancelsSkill: true,
+            },
+        },
+        {
+            id: 'physical_counter', remainingTurns: 2, sourceUsername: 'p2', sourceSlot: 0,
+            metadata: {
+                triggerOnEnemyHarmfulSkillClassesAny: ['physical'],
+                counterCancelsSkill: true,
+            },
+        }
+    );
+    match.pendingTurns = {
+        p1: { queueOrder: [0], queuedByActorSlot: {
+            0: { skillIndex: 0, targetSelection: [{ username: 'p2', slot: 0 }] },
+        } },
+    };
+
+    battleLogic.resolvePendingTurnSkills({ match, actingUsername: 'p1', characters: mockCharacters });
+
+    assert.equal(defender.hp, 100, 'the matching counter cancels the Physical attack');
+    assert.equal(defender.state.statuses.some(status => status.id === 'mental_only_counter'), true);
+    assert.equal(defender.state.statuses.some(status => status.id === 'physical_counter'), false);
+    assert.equal(match.combatEvents?.at(-1)?.counterEffectId, 'physical_counter');
+});
+
 test('BUG 2: Non-matching skill (Strategic class vs Non-Strategic trap) does not trigger counter', () => {
     const match = buildTestMatch();
     const attacker = match.board.p1[0];

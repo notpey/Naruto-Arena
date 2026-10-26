@@ -2599,40 +2599,32 @@ const maybeTriggerReactiveDefenses = ({
         const remaining = Number(status?.remainingTurns) || 0;
         // A counter placed by the acting team cannot counter that team's own skill.
         if (status?.sourceUsername === actingUsername) return false;
-        if (!skillIsHarmful && !Boolean(status?.metadata?.triggerOnOwnerHelpfulSkill)) return false;
+        const metadata = status?.metadata || {};
+        if (!skillIsHarmful && !Boolean(metadata.triggerOnOwnerHelpfulSkill)) return false;
+        if (metadata.triggerOnEnemyPhysicalOrStrategicSkill &&
+            !hasSkillClass(skillClasses, 'physical') && !hasSkillClass(skillClasses, 'strategic')) return false;
+        if (metadata.triggerOnEnemyHarmfulNonMental && hasSkillClass(skillClasses, 'mental')) return false;
+        if (metadata.triggerOnEnemyHarmfulNonStrategic && hasSkillClass(skillClasses, 'strategic')) return false;
+        if (Array.isArray(metadata.triggerOnEnemyHarmfulSkillClassesAny) &&
+            metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0 &&
+            !metadata.triggerOnEnemyHarmfulSkillClassesAny.some((entry) => hasSkillClass(skillClasses, entry))) return false;
         return (
             remaining > 0 &&
-            (!Boolean(status?.metadata?.triggerOnlyOnOwnerSkillUse) || isSelfTrapTrigger) &&
-            (Boolean(status?.metadata?.triggerOnEnemyHarmfulNonMental) ||
-                (Boolean(status?.metadata?.triggerOnOwnerHelpfulSkill) && isSelfTrapTrigger && !skillIsHarmful) ||
-                Boolean(status?.metadata?.triggerOnEnemyHarmfulSkill) ||
-                Boolean(status?.metadata?.triggerOnEnemyHarmfulNonStrategic) ||
-                Boolean(status?.metadata?.triggerOnEnemyPhysicalOrStrategicSkill) ||
-                Boolean(status?.metadata?.counterOnEnemySkillTargetingSelf) ||
-                (Array.isArray(status?.metadata?.triggerOnEnemyHarmfulSkillClassesAny) &&
-                    status.metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0))
+            (!Boolean(metadata.triggerOnlyOnOwnerSkillUse) || isSelfTrapTrigger) &&
+            (Boolean(metadata.triggerOnEnemyHarmfulNonMental) ||
+                (Boolean(metadata.triggerOnOwnerHelpfulSkill) && isSelfTrapTrigger && !skillIsHarmful) ||
+                Boolean(metadata.triggerOnEnemyHarmfulSkill) ||
+                Boolean(metadata.triggerOnEnemyHarmfulNonStrategic) ||
+                Boolean(metadata.triggerOnEnemyPhysicalOrStrategicSkill) ||
+                Boolean(metadata.counterOnEnemySkillTargetingSelf) ||
+                (Array.isArray(metadata.triggerOnEnemyHarmfulSkillClassesAny) &&
+                    metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0))
         );
     });
     if (trapIndex < 0) return false;
 
     const trapStatus = statuses[trapIndex];
     const trapMetadata = trapStatus?.metadata || {};
-    if (trapMetadata?.triggerOnEnemyPhysicalOrStrategicSkill && !hasSkillClass(skillClasses, 'physical') && !hasSkillClass(skillClasses, 'strategic')) {
-        return false;
-    }
-    if (trapMetadata?.triggerOnEnemyHarmfulNonMental && hasSkillClass(skillClasses, 'mental')) {
-        return false;
-    }
-    if (trapMetadata?.triggerOnEnemyHarmfulNonStrategic && hasSkillClass(skillClasses, 'strategic')) {
-        return false;
-    }
-    if (
-        Array.isArray(trapMetadata?.triggerOnEnemyHarmfulSkillClassesAny) &&
-        trapMetadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0 &&
-        !trapMetadata.triggerOnEnemyHarmfulSkillClassesAny.some((entry) => hasSkillClass(skillClasses, entry))
-    ) {
-        return false;
-    }
     const counterDamage = Math.max(0, Number(trapMetadata?.counterDamage) || 0);
     const counterDamageSkillClasses = Array.isArray(trapMetadata?.counterDamageSkillClasses)
         ? trapMetadata.counterDamageSkillClasses
