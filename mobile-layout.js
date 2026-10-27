@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     const stage = document.querySelector('.background, .backgroundingame');
     if (!stage) return;
+    const stageScroll = document.createElement('div');
+    stageScroll.className = 'game-stage-scroll';
     const movable = ['.selection-hub-nav', '.selection-hub-environment', '.academy-guide-overlay'];
     const entries = movable.map(selector => {
         const element = document.querySelector(selector);
@@ -15,9 +17,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const mobile = width < 1100;
         const battle = document.body.classList.contains('ingame-client-page');
         const compactSelectionNav = !battle && width < 760;
+        if (mobile && !stageScroll.isConnected) {
+            stage.before(stageScroll);
+            stageScroll.append(stage);
+        } else if (!mobile && stageScroll.isConnected) {
+            stageScroll.before(stage);
+            stageScroll.remove();
+        }
         for (const { element, marker } of entries) {
             const detached = element.matches('.selection-hub-nav') ? compactSelectionNav : mobile;
-            if (detached) stage.before(element);
+            if (detached) (mobile ? stageScroll : stage).before(element);
             else marker.after(element);
         }
         const height = document.documentElement.clientHeight;
