@@ -18,6 +18,8 @@ test('arc sorting changes display order without changing canonical roster indice
         ['zori-and-waraji', 'Zōri & Waraji'],
         ['sarutobi-hiruzen', 'Hokage Hiruzen'],
         ['yamanaka-ino', 'Yamanaka Ino'],
+        ['aburame-shino', 'Aburame Shino'],
+        ['hyuuga-hinata', 'Hyuuga Hinata'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
     ]);
@@ -32,7 +34,8 @@ test('arc sorting changes display order without changing canonical roster indice
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster).map((index) => roster[index].characterId), [
         'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura', 'hatake-kakashi',
-        'umino-iruka', 'mizuki', 'yamanaka-ino', 'sarutobi-konohamaru', 'ebisu',
+        'umino-iruka', 'mizuki', 'yamanaka-ino', 'aburame-shino', 'hyuuga-hinata',
+        'sarutobi-konohamaru', 'ebisu',
         'demon-brothers', 'momochi-zabuza', 'haku',
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
     ]);

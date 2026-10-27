@@ -16,6 +16,8 @@ const ACTIVE_ROSTER_IDS = [
     'yamanaka-ino',
     'sarutobi-konohamaru',
     'ebisu',
+    'aburame-shino',
+    'hyuuga-hinata',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

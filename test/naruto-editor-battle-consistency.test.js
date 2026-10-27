@@ -16,8 +16,10 @@ const {
     resolveEffectiveSkill,
     computeTargetOptions,
     applyDamageToUnit,
+    applyHealToUnit,
     computeEffectiveEnergyCost,
     tickStatusesForTurnEnd,
+    tickCooldownsForTurnEnd,
     isSkillIndexBlockedForActor,
 } = require('../battleLogic.js');
 
@@ -130,7 +132,7 @@ const collectCharacterStatusReferences = () => {
     const producedStatusIds = new Set(['invulnerable', 'stunned']);
     const referencedStatusIds = [];
     const isStatusProducerPath = (pathParts) =>
-        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense/i.test(pathParts.join('.'));
+        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense|awakening/i.test(pathParts.join('.'));
     const addReference = (statusId) => {
         if (typeof statusId === 'string' && statusId.trim()) {
             referencedStatusIds.push(statusId.trim());
@@ -178,7 +180,7 @@ const collectCharacterSkillReferences = () => {
 
     const referencedSkillIds = [];
     const referencesSkillId = (key) =>
-        /skillid|skillids|skillreplacements|bonusesbyskillid|skilldamagebonuses|skillcostoverridesbyskillid|skillcooldownincreasebyskillid|skilldurationbonuses|skilldamagecapbyskillid/i.test(
+        /skillid|skillids|skillreplacements|bonusesbyskillid|skilldamagebonuses|skillhealingbonuses|skillcostoverridesbyskillid|skillcooldownoverridesbyskillid|skillcooldownincreasebyskillid|skilldurationbonuses|skilldamagecapbyskillid/i.test(
             key
         );
     const addReference = (skillId) => {
@@ -692,89 +694,80 @@ test('battleLogic resolves Kiba starter kit behavior used by the editor data', (
     assert.equal(match.board.p2[0].hp, 55, 'Garouga should deal 35 during Double Headed Wolf to a Dynamic Marking target');
 });
 
-test('battleLogic resolves Shino starter kit behavior used by the editor data', () => {
-    const match = makeMatch([4], [1]);
+test('Shino starts Chakra Leech on cooldown and can steal after his first turn', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
     match.chakraPools.p2.taijutsu = 1;
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 90, 'Chakra Leach should deal 10 affliction damage');
-    assert.equal(match.chakraPools.p2.taijutsu, 0, 'Chakra Leach should steal a random chakra from the target');
-    assert.equal(match.chakraPools.p1.taijutsu, 1, 'Chakra Leach should give the stolen chakra to Shino');
-
-    match.board.p1[0].state.cooldowns = {};
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 75, 'Chakra Leach should gain 5 damage after each use');
-
+    match.chakraPools.p1.bloodline = 1;
+    assert.equal(match.board.p1[0].state.cooldowns['aburame-shino-chakra-leach'], 1);
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'aburame_shino_female_bug' &&
-                status.metadata.NonAfflictionDamageDebuff === 5
-        ),
-        true
-    );
-
-    queueSkill(match, 'p1', 2);
+    assert.equal(match.chakraPools.p2.taijutsu, 1);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickCooldownsForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p1[0].state.statuses.some(
-            (status) =>
-                status.id === 'aburame_shino_bug_wall' &&
-                status.metadata.destructibleDefensePoints === 20
-        ),
-        true
-    );
+    assert.equal(match.chakraPools.p2.taijutsu, 0);
+    assert.equal(match.chakraPools.p1.taijutsu, 1);
+    assert.equal(match.board.p2[0].hp, 100, 'Chakra Leech needs Infestation to deal damage');
 });
 
-test('battleLogic resolves Hinata starter kit behavior used by the editor data', () => {
-    const match = makeMatch([5], [1]);
-    match.chakraPools.p2.taijutsu = 1;
-
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    const hinataState = match.board.p1[0].state;
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 5,
-            skillIndex: 0,
-            actorState: hinataState,
-        }).id,
-        'hyuuga-hinata-hinata-gentle-fist'
-    );
-
+test('Shino Female Bug and Infestation work together without stacking marks', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')],
+        [getCharIndex('haruno-sakura'), getCharIndex('uzumaki-naruto')]);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'Byakugan Gentle Fist should deal 20 immediately');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'hyuuga_hinata_gentle_fist_cost' &&
-                status.remainingTurns === 2 &&
-                status.metadata.randomCostIncrease === 1
-        ),
-        true
-    );
-
-    queueSkill(match, 'p1', 1);
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'Protective Palms should no longer deal damage');
-    assert.equal(
-        match.board.p1[0].state.statuses.some(
-            (status) =>
-                status.id === 'hyuuga_hinata_protective_palms_defense' &&
-                status.remainingTurns === 2 &&
-                status.metadata.turnEndApplyStatusToSelf?.statusId ===
-                    'hyuuga_hinata_protective_palms_defense_refresh' &&
-                status.metadata.onBreakApplyStatusToSource?.statusId ===
-                    'hyuuga_hinata_protective_palms_cost'
-        ),
-        true
-    );
+    assert.ok(match.board.p2[0].state.statuses.some(status =>
+        status.id === 'aburame_shino_infestation_debuff'));
+    queueSkill(match, 'p2', 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p2[0].hp, 90, 'two chakra spent trigger 10 affliction damage');
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'aburame_shino_female_bug'), false);
+    assert.equal(match.board.p2[1].state.statuses.filter(status => status.id === 'aburame_shino_female_bug').length, 1);
+    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'aburame_shino_infestation_debuff'), false);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p2[0].hp, 85, 'Infestation continues after Female Bug moves');
+});
+
+test('Hinata awakens after four turns and Gentle Fist loses its cooldown', () => {
+    const hinataIndex = getCharIndex('hyuuga-hinata');
+    const match = makeMatch([hinataIndex], [getCharIndex('haruno-sakura')]);
+    const hinata = match.board.p1[0];
+    assert.deepEqual(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
+        skillIndex: 1, characters }).targets, []);
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[0].state.statuses.find(status =>
+        status.id === 'hyuuga_hinata_gentle_fist_debuff')?.metadata.nonAfflictionDamageDebuffFlat, 10);
+    assert.ok(hinata.state.cooldowns['hyuuga-hinata-hinata-gentle-fist'] > 0);
+    for (let turn = 1; turn <= 4; turn += 1) {
+        tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+        assert.equal(hinata.state.statuses.some(status =>
+            status.id === 'hyuuga_hinata_shy_byakugan_awakened'), turn === 4);
+    }
+    assert.equal(hinata.state.cooldowns['hyuuga-hinata-hinata-gentle-fist'], undefined);
+    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: hinataIndex,
+        skillIndex: 0, actorState: hinata.state }).cooldown, 0);
+    assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
+        skillIndex: 1, characters }).targets.length, 1);
+});
+
+test('Hinata awakens immediately when another ally falls below 50 health', () => {
+    const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
+        [getCharIndex('haruno-sakura')]);
+    applyDamageToUnit(match.board.p1[0], 51, { match, sourceUsername: 'p2',
+        targetUsername: 'p1', targetSlot: 0 });
+    assert.equal(match.board.p1[0].state.statuses.some(status =>
+        status.id === 'hyuuga_hinata_shy_byakugan_awakened'), false,
+    'Hinata herself is not another ally');
+    applyDamageToUnit(match.board.p1[1], 51, { match, sourceUsername: 'p2',
+        targetUsername: 'p1', targetSlot: 1 });
+    assert.equal(match.board.p1[0].state.statuses.some(status =>
+        status.id === 'hyuuga_hinata_shy_byakugan_awakened'), true);
 });
 
 test('battleLogic resolves Shikamaru starter kit behavior used by the editor data', () => {
@@ -1288,63 +1281,138 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
     );
 });
 
-test('Shino Leach keeps growing and Female Bug can refresh without stacking', () => {
+test('Shino reapplying Infestation refreshes it instead of stacking', () => {
     const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
-    const damage = [];
-    for (let use = 0; use < 3; use += 1) {
-        match.board.p1[0].state.cooldowns = {};
-        const previousHp = match.board.p2[0].hp;
-        queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-        damage.push(previousHp - match.board.p2[0].hp);
-    }
-    assert.deepEqual(damage, [10, 15, 20]);
-    assert.match(
-        match.board.p1[0].state.statuses.find((status) => status.id === 'aburame_shino_chakra_leach_growth')
-            ?.metadata.tooltipText || '',
-        /15 additional damage/
-    );
-
     for (let use = 0; use < 2; use += 1) {
         match.board.p1[0].state.cooldowns = {};
-        queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+        queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
         resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     }
-    const marks = match.board.p2[0].state.statuses.filter((status) => status.id === 'aburame_shino_female_bug');
-    assert.equal(marks.length, 1);
-    assert.equal(marks[0].remainingTurns, 3);
-    assert.equal(marks[0].metadata.bonusDamageFromSourceSkillsFlat, 5);
+    const infestation = match.board.p2[0].state.statuses.filter(status => status.id === 'aburame_shino_infestation');
+    assert.equal(infestation.length, 1);
+    assert.equal(infestation[0].remainingTurns, 99);
 });
 
-test('Byakugan Protective Palms grants one lasting refresh to each ally', () => {
-    const match = makeMatch(
-        [getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
-        [getCharIndex('haruno-sakura')]
-    );
-    const nextTurn = () => {
-        tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-        tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    };
-    queueSkill(match, 'p1', 2);
+test('Shino Chakra Leech gains its conditional effects from Female Bug and Infestation', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
+    match.chakraPools.p1.bloodline = 2;
+    match.chakraPools.p2.taijutsu = 2;
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    nextTurn();
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    tickCooldownsForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.chakraPools.p2.taijutsu, 1);
+    assert.equal(match.chakraPools.p1.taijutsu, 1);
+    assert.equal(match.board.p2[0].hp, 90);
+    const debuff = match.board.p2[0].state.statuses.find(status =>
+        status.id === 'aburame_shino_chakra_leech_debuff');
+    assert.equal(debuff?.metadata.nonAfflictionDamageDebuffFlat, 15);
+});
+
+test('Shino passive blocks targeted chakra removal and stealing', () => {
+    const match = makeMatch(
+        [getCharIndex('aburame-shino'), getCharIndex('uzumaki-naruto')],
+        [getCharIndex('shiore-orochimaru')]
+    );
+    match.chakraPools.p1.taijutsu = 2;
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.chakraPools.p1.taijutsu, 2, 'targeting Shino cannot remove chakra');
+    match.board.p1[0].state.statuses.push({ id: 'shiore_orochimaru_giant_snake_bind', remainingTurns: 1,
+        sourceUsername: 'p2', sourceSlot: 0, metadata: { harmful: true } });
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.chakraPools.p1.taijutsu, 2, 'targeting Shino cannot steal chakra');
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.chakraPools.p1.taijutsu, 1, 'the passive does not protect other allies');
+});
+
+test('Shino insect effects end when he dies', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    match.board.p1[0].alive = false;
+    match.board.p1[0].hp = 0;
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p2[0].state.statuses.some(status =>
+        status.id.startsWith('aburame_shino_')), false);
+});
+
+test('Shino Insect Clone grants one turn of invulnerability and a four turn cooldown', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
+    queueSkill(match, 'p1', 3);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    const shino = match.board.p1[0];
+    assert.equal(shino.state.cooldowns['aburame-shino-insect-clone'], 5);
+    const clone = shino.state.statuses.find(status => status.id === 'invulnerable');
+    assert.equal(clone?.remainingTurns, 1);
+    assert.equal(clone?.metadata.invulnerable, true);
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(shino.hp, 100);
+    tickCooldownsForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(shino.state.cooldowns['aburame-shino-insect-clone'], 4);
+});
+
+test('Hinata 64 Palms damages and weakens all enemies, heals allies, then gains a one-turn boost', () => {
+    const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
+        [getCharIndex('haruno-sakura'), getCharIndex('uchiha-sasuke')]);
+    applyDamageToUnit(match.board.p1[1], 60, { match, sourceUsername: 'p2',
+        targetUsername: 'p1', targetSlot: 1 });
+    match.board.p1[0].hp = 70;
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    nextTurn();
-    match.board.p1.forEach((unit) => {
-        assert.equal(unit.state.statuses.filter((status) => status.id.includes('protective_palms')).length, 1);
-    });
-    nextTurn();
-    match.board.p1.forEach((unit) => {
-        const defense = unit.state.statuses.filter((status) => status.id.includes('protective_palms'));
-        assert.equal(defense.length, 2);
-        assert.equal(defense.reduce((total, status) => total + status.metadata.destructibleDefensePoints, 0), 20);
-        assert.equal(defense.find((status) => status.id.endsWith('_refresh'))?.remainingTurns, 1);
-    });
-    nextTurn();
-    match.board.p1.forEach((unit) => {
-        assert.equal(unit.state.statuses.some((status) => status.id.includes('protective_palms')), false);
-    });
+    assert.deepEqual(match.board.p2.map(unit => unit.hp), [90, 90]);
+    assert.deepEqual(match.board.p1.map(unit => unit.hp), [80, 50]);
+    assert.equal(match.board.p2[0].state.statuses.find(status =>
+        status.id === 'hyuuga_hinata_64_palms_debuff')?.metadata.nonAfflictionDamageDebuffFlat, 5);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.deepEqual(match.board.p2.map(unit => unit.hp), [75, 75]);
+    assert.deepEqual(match.board.p1.map(unit => unit.hp), [95, 65]);
+});
+
+test('Hinata Secret Oinment heals four turns and boosts only other healing', () => {
+    const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
+        [getCharIndex('haruno-sakura')]);
+    const naruto = match.board.p1[1];
+    naruto.hp = 50;
+    queueSkill(match, 'p1', 2, [{ username: 'p1', slot: 1 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
+        skillIndex: 2, characters }).targets.some(target => target.slot === 1), false);
+    assert.equal(applyHealToUnit(naruto, 10), 15);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(naruto.hp, 65, 'ointment does not heal on its casting turn');
+    for (let turn = 0; turn < 4; turn += 1) {
+        tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+        tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    }
+    assert.equal(naruto.hp, 85, 'four ointment ticks heal 5 each');
+    assert.equal(naruto.state.statuses.some(status =>
+        status.id === 'hyuuga_hinata_secret_ointment'), false);
+    assert.equal(applyHealToUnit(naruto, 10), 10);
+});
+
+test('Hinata Block prevents an enemy attack for one turn', () => {
+    const match = makeMatch([getCharIndex('hyuuga-hinata')], [getCharIndex('haruno-sakura')]);
+    queueSkill(match, 'p1', 3);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p1[0].state.statuses.find(status =>
+        status.id === 'invulnerable')?.remainingTurns, 1);
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 100);
+    tickCooldownsForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p1[0].state.cooldowns['hyuuga-hinata-hinata-block'], 4);
 });
 
 test('Meditate can mark another enemy immediately and Water Assault costs only Ninjutsu', () => {

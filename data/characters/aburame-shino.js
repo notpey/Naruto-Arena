@@ -1,151 +1,80 @@
 module.exports = {
-    "id": "aburame-shino",
-    "characterId": "aburame-shino",
-    "name": "Aburame Shino",
-    "facePicture": "https://i.imgur.com/RPIy4uO.png",
-    "characterdeescription": "A Genin from Team 8, Shino is the successor of the Aburame clan, and a very reserved and tactical fighter. Using the bugs that live inside his body, Shino is able to leech the chakra off his enemies, or protect his entire team.",
-    "skills": [
+    id: 'aburame-shino', characterId: 'aburame-shino', name: 'Aburame Shino',
+    facePicture: 'https://i.imgur.com/DK29xuX.png',
+    characterdeescription: 'A quiet and observant genin of the Aburame clan, Shino fights alongside the parasitic kikaichū insects that inhabit his body and feed on chakra. His calculated approach to combat allows him to overwhelm opponents before they realize the danger they are in.',
+    passive: {
+        name: 'Kikaichu Insects', icon: 'https://i.imgur.com/DTkIRmc.png',
+        description: 'Shino is immune to chakra removal and stealing.',
+        immuneToChakraRemovalAndStealing: true,
+    },
+    skills: [
         {
-            "id": "aburame-shino-chakra-leach",
-            "name": "Chakra Leach",
-            "skillimage": "https://i.imgur.com/F9DLM31.png",
-            "skilldescription": "Aburame Shino deals 10 affliction damage to one enemy and steals 1 random chakra from them. This skill deals 5 additional damage with each use.",
-            "energy": [
-                "Bloodline"
+            id: 'aburame-shino-female-bug', name: 'Female Bug',
+            skillimage: 'https://i.imgur.com/NZvHesR.png',
+            skilldescription: 'Shino permanently marks one enemy with a female insect. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.',
+            energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Affliction', 'Instant'],
+            effects: [
+                { type: 'remove_status', statusId: 'aburame_shino_female_bug', scope: 'all-enemy',
+                    condition: { scope: 'target', statusId: 'aburame_shino_female_bug', statusFromActor: true } },
+                { type: 'remove_status', statusId: 'aburame_shino_infestation_debuff', scope: 'all-enemy',
+                    condition: { scope: 'target', statusId: 'aburame_shino_infestation_debuff', statusFromActor: true } },
+                { type: 'apply_status', statusId: 'aburame_shino_female_bug', duration: 99, scope: 'target',
+                    metadata: { harmful: true, removeOnSourceDeath: true,
+                        onOwnerUseChakraSpentAfflictionDamagePerChakra: 5,
+                        tooltipText: 'Each chakra spent on a skill deals 5 affliction damage. This mark ends when Shino dies.' } },
+                { type: 'apply_status', statusId: 'aburame_shino_infestation_debuff', duration: 99, scope: 'target',
+                    condition: { scope: 'target', statusId: 'aburame_shino_infestation', statusFromActor: true },
+                    metadata: { harmful: true, removeOnSourceDeath: true, nonAfflictionDamageDebuffFlat: 5,
+                        tooltipText: 'Infestation and Female Bug reduce this character’s non-affliction damage by 5.' } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Affliction",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target",
-                    "metadata": {
-                        "afflictionDamage": true,
-                        "ignoreDamageReduction": true,
-                        "ignoreDestructibleDefense": true
-                    }
-                },
-                {
-                    "type": "drain_chakra_random_from_target_to_self",
-                    "amount": 1,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "aburame_shino_chakra_leach_growth",
-                    "duration": 99,
-                    "scope": "self",
-                    "metadata": {
-                        "skillDamageBonuses": {
-                            "aburame-shino-chakra-leach": 5
-                        },
-                        "mergeSkillDamageBonuses": true,
-                        "stackMetadataKey": "chakraLeachBonus",
-                        "stackDelta": 5,
-                        "stackMax": 9999,
-                        "tooltipTextTemplate": "Chakra Leach deals {chakraLeachBonus} additional damage."
-                    }
-                }
-            ]
         },
         {
-            "id": "aburame-shino-female-bug",
-            "name": "Female Bug",
-            "skillimage": "https://i.imgur.com/QMWOMRt.png",
-            "skilldescription": "Aburame Shino targets one enemy. For 3 turns, their non-affliction damage will be reduced by 5. During this time, 'Chakra Leach' will deal 5 additional damage to them. Using Female Bug on them again refreshes its duration without stacking its effects.",
-            "energy": [],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Strategic",
-                "Instant"
+            id: 'aburame-shino-chakra-leach', name: 'Chakra Leech',
+            skillimage: 'https://i.imgur.com/uZIMY17.png',
+            skilldescription: 'This skill has a starting cooldown of 1. Shino steals 1 chakra from an enemy. If the target is affected by Female Bug, Shino also reduces their non-affliction damage by 15 for 1 turn. If the target is affected by Infestation, they also take 10 affliction damage.',
+            energy: ['Bloodline'], target: 'single-enemy', damage: 0, cooldown: 1,
+            startingCooldown: 1, classes: ['Affliction', 'Instant'],
+            effects: [
+                { type: 'drain_chakra_random_from_target_to_self', amount: 1, scope: 'target' },
+                { type: 'apply_status', statusId: 'aburame_shino_chakra_leech_debuff', duration: 1,
+                    scope: 'target', condition: { scope: 'target', statusId: 'aburame_shino_female_bug', statusFromActor: true },
+                    metadata: { harmful: true, nonAfflictionDamageDebuffFlat: 15,
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character deals 15 less non-affliction damage for 1 turn.' } },
+                { type: 'damage', amount: 10, scope: 'target',
+                    condition: { scope: 'target', statusId: 'aburame_shino_infestation', statusFromActor: true,
+                        requireMatch: true },
+                    metadata: { afflictionDamage: true, ignoreDamageReduction: true,
+                        ignoreDestructibleDefense: true } },
             ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "aburame_shino_female_bug",
-                    "duration": 3,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "NonAfflictionDamageDebuff": 5,
-                        "bonusDamageFromSourceSkillsFlat": 5,
-                        "bonusDamageFromSourceCharacterId": "aburame-shino",
-                        "bonusDamageAppliesToSkillIds": [
-                            "aburame-shino-chakra-leach"
-                        ],
-                        "tooltipText": "This character deals 5 less non-affliction damage and takes 5 additional damage from Chakra Leach."
-                    }
-                }
-            ]
         },
         {
-            "id": "aburame-shino-bug-wall",
-            "name": "Bug Wall",
-            "skillimage": "https://i.imgur.com/1Hqxi0m.png",
-            "skilldescription": "Aburame Shino grants his team 20 points of permanent destructible defense. This skill stacks.",
-            "energy": [
-                "Bloodline",
-                "Random"
+            id: 'aburame-shino-infestation', name: 'Infestation',
+            skillimage: 'https://i.imgur.com/vPf2DKk.png',
+            skilldescription: 'Shino infests an enemy with insects, dealing 5 affliction damage each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Affliction', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: 'aburame_shino_infestation', duration: 99, scope: 'target',
+                    metadata: { harmful: true, afflictionDamage: true, turnEndDamage: 5,
+                        turnEndTrigger: 'source_turn', removeOnSourceDeath: true,
+                        tooltipText: 'This character takes 5 affliction damage each turn until Shino dies.' } },
+                { type: 'apply_status', statusId: 'aburame_shino_infestation_debuff', duration: 99, scope: 'target',
+                    condition: { scope: 'target', statusId: 'aburame_shino_female_bug', statusFromActor: true },
+                    metadata: { harmful: true, removeOnSourceDeath: true, nonAfflictionDamageDebuffFlat: 5,
+                        tooltipText: 'Infestation and Female Bug reduce this character’s non-affliction damage by 5.' } },
             ],
-            "target": "all-allies",
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "aburame_shino_bug_wall",
-                    "duration": 99,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "helpful": true,
-                        "destructibleDefensePoints": 20,
-                        "mergeNumericAddKeys": [
-                            "destructibleDefensePoints"
-                        ],
-                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} points of permanent destructible defense from Bug Wall."
-                    }
-                }
-            ]
         },
         {
-            "id": "aburame-shino-shino-hide",
-            "name": "Shino Hide",
-            "skillimage": "https://i.imgur.com/BpembYr.png",
-            "skilldescription": "This skill makes Aburame Shino invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'aburame-shino-insect-clone', name: 'Insect Clone',
+            skillimage: 'https://i.imgur.com/O4Ar57o.png',
+            skilldescription: 'Shino becomes invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true,
+                    tooltipText: 'Shino is invulnerable.' } }],
+        },
+    ],
 };

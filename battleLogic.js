@@ -103,6 +103,9 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           damageTakenInTurn: passive.damageTakenInTurn || null,
                           bonusAgainstNonDamagingSkillUser:
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
+                          immuneToChakraRemovalAndStealing:
+                              Boolean(passive.immuneToChakraRemovalAndStealing),
+                          awakening: passive.awakening || null,
                       },
                   }
                 : null;
@@ -182,7 +185,12 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                             };
                         })
                         .filter(Boolean),
-                    cooldowns: {},
+                    cooldowns: Object.fromEntries(
+                        (Array.isArray(character?.skills) ? character.skills : [])
+                            .filter((skill) => typeof skill?.id === 'string' && skill.id &&
+                                Number.isInteger(skill.startingCooldown) && skill.startingCooldown > 0)
+                            .map((skill) => [skill.id, skill.startingCooldown])
+                    ),
                     skillUses: {},
                 },
             };
@@ -306,18 +314,24 @@ const resolveEffectiveSkill = ({ characters, rosterIndex, skillIndex, actorState
         resolvedSkill = replacementSkill;
     }
     const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    let effectiveSkill = resolvedSkill;
     for (const status of statuses) {
         const remaining = Number(status?.remainingTurns) || 0;
         if (remaining <= 0) continue;
         const targetOverrides = status?.metadata?.skillTargetOverrides;
-        if (!targetOverrides || typeof targetOverrides !== 'object') continue;
-        const targetOverride =
-            typeof targetOverrides[resolvedSkill?.id] === 'string' ? targetOverrides[resolvedSkill.id].trim() : '';
+        const targetOverride = targetOverrides && typeof targetOverrides === 'object' &&
+            typeof targetOverrides[resolvedSkill?.id] === 'string'
+            ? targetOverrides[resolvedSkill.id].trim() : '';
         if (targetOverride) {
-            return { ...resolvedSkill, target: targetOverride };
+            effectiveSkill = { ...effectiveSkill, target: targetOverride };
+        }
+        const cooldownOverrides = status?.metadata?.skillCooldownOverridesBySkillId;
+        const cooldownOverride = cooldownOverrides?.[resolvedSkill?.id];
+        if (Number.isFinite(cooldownOverride) && cooldownOverride >= 0) {
+            effectiveSkill = { ...effectiveSkill, cooldown: cooldownOverride };
         }
     }
-    return resolvedSkill || baseSkill;
+    return effectiveSkill || baseSkill;
 };
 
 const isStatusActiveForMetadata = (status, ownerUnit = null) => {
@@ -358,6 +372,7 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         nonAfflictionDamageTakenBonusFlat: 0,
         damageTakenMultiplier: 1,
         healReceivedMultiplier: 1,
+        healReceivedBonusFlat: 0,
         minimumHp: 0,
         randomCostReduction: 0,
         randomCostIncrease: 0,
@@ -398,6 +413,7 @@ const getStatusMetadataTotals = (actorState, ownerUnit = null) => {
         if (Number.isFinite(metadata.healReceivedMultiplier)) {
             statusHealReceivedMultiplier = Math.max(0, Number(metadata.healReceivedMultiplier));
         }
+        totals.healReceivedBonusFlat += Math.max(0, Number(metadata.healReceivedBonusFlat) || 0);
         const healMultiplierAtMostThreshold = Number(
             metadata.healReceivedMultiplierWhenOwnerCurrentHpAtMostThreshold
         );
@@ -1112,6 +1128,10 @@ const hasStatusMetadataFlag = (actorState, flagName) =>
         return isStatusActiveForMetadata(status) && Boolean(status?.metadata?.[flagName]);
     });
 
+const isUnitImmuneToChakraLoss = (unit) =>
+    Boolean(unit && unit.alive !== false &&
+        hasStatusMetadataFlag(ensureUnitStateShape(unit), 'immuneToChakraRemovalAndStealing'));
+
 const pickRandomEntry = (entries = []) => {
     if (!Array.isArray(entries) || !entries.length) return null;
     return entries[Math.floor(Math.random() * entries.length)] || null;
@@ -1609,6 +1629,39 @@ const applyStatus = ({
         }
     }
     refreshDerivedStatusTooltips(targetState);
+};
+
+const updateTeamPassiveAwakenings = ({ match, username, ownerTurnEnded = false }) => {
+    const units = Array.isArray(match?.board?.[username]) ? match.board[username] : [];
+    units.forEach((unit, slot) => {
+        if (!unit || unit.alive === false) return;
+        const state = ensureUnitStateShape(unit);
+        const passive = state.statuses.find((status) =>
+            status?.metadata?.passive === true && status?.metadata?.awakening?.statusId &&
+            (Number(status.remainingTurns) || 0) > 0);
+        const awakening = passive?.metadata?.awakening;
+        if (!awakening || hasStatus(state, awakening.statusId)) return;
+        if (ownerTurnEnded) {
+            passive.metadata._awakeningOwnerTurns =
+                Math.max(0, Number(passive.metadata._awakeningOwnerTurns) || 0) + 1;
+        }
+        const turnsReady = Math.max(0, Number(awakening.afterOwnerTurns) || 0) > 0 &&
+            passive.metadata._awakeningOwnerTurns >= awakening.afterOwnerTurns;
+        const allyHpBelow = Math.max(0, Number(awakening.allyHpBelow) || 0);
+        const allyReady = allyHpBelow > 0 && units.some((ally, allySlot) =>
+            allySlot !== slot && ally && Number(ally.hp) < allyHpBelow);
+        if (!turnsReady && !allyReady) return;
+        applyStatus({
+            targetState: state, statusId: awakening.statusId, duration: 99,
+            sourceUsername: username, sourceSlot: slot,
+            metadata: { helpful: true, permanent: true, statusIcon: passive.metadata.statusIcon || '',
+                ...(awakening.metadata || {}) }, fresh: false,
+        });
+        (Array.isArray(awakening.clearCooldownSkillIds) ? awakening.clearCooldownSkillIds : [])
+            .forEach((skillId) => {
+                if (typeof skillId === 'string' && skillId) delete state.cooldowns[skillId];
+            });
+    });
 };
 
 const applyExpireReplacementStatus = ({
@@ -2173,6 +2226,14 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
         const bonuses = status?.metadata?.skillDamageBonuses;
         if (!bonuses || typeof bonuses !== 'object') return sum;
         return sum + (Number(bonuses[skillId]) || 0);
+    }, 0);
+};
+
+const getSkillSpecificHealingBonus = (actorState, skillId) => {
+    if (!skillId) return 0;
+    return (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce((sum, status) => {
+        if ((Number(status?.remainingTurns) || 0) <= 0) return sum;
+        return sum + Math.max(0, Number(status?.metadata?.skillHealingBonuses?.[skillId]) || 0);
     }, 0);
 };
 
@@ -3275,6 +3336,9 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     }
     const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
     unit.hp = Math.max(contextualMinimumHp, (Number(unit.hp) || 0) - dealt);
+    if (dealt > 0 && context?.match && context?.targetUsername) {
+        updateTeamPassiveAwakenings({ match: context.match, username: context.targetUsername });
+    }
     if (dealt > 0 && unit.hp > 0 && context?.match && context?.targetUsername) {
         const rivalry = targetState.statuses.find((status) =>
             isStatusActiveForMetadata(status, unit) &&
@@ -3518,11 +3582,19 @@ const applyPassiveStunDamage = ({
     });
 };
 
-const applyHealToUnit = (unit, rawAmount) => {
+const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const targetState = ensureUnitStateShape(unit);
     const totals = getStatusMetadataTotals(targetState);
-    const heal = Math.max(0, Number(rawAmount) || 0) * Math.max(0, Number(totals.healReceivedMultiplier) || 0);
+    const baseHeal = Math.max(0, Number(rawAmount) || 0);
+    const excludedBonus = excludeStatusId
+        ? (targetState.statuses || []).reduce((sum, status) =>
+            sum + (status?.id === excludeStatusId && (Number(status?.remainingTurns) || 0) > 0
+                ? Math.max(0, Number(status?.metadata?.healReceivedBonusFlat) || 0) : 0), 0)
+        : 0;
+    const bonus = baseHeal > 0
+        ? Math.max(0, totals.healReceivedBonusFlat - excludedBonus) : 0;
+    const heal = (baseHeal + bonus) * Math.max(0, Number(totals.healReceivedMultiplier) || 0);
     const before = Number(unit.hp) || 0;
     const cap = Math.max(0, Number(unit?.hpCap) || DEFAULT_HP);
     unit.hp = Math.min(DEFAULT_HP, cap, before + heal);
@@ -3565,6 +3637,9 @@ const applyHealthLossToUnit = (unit, rawAmount, context = {}) => {
     const targetState = ensureUnitStateShape(unit);
     const contextualMinimumHp = getContextualMinimumHp(targetState, unit, context);
     unit.hp = Math.max(contextualMinimumHp, before - loss);
+    if (unit.hp < before && context?.match && context?.targetUsername) {
+        updateTeamPassiveAwakenings({ match: context.match, username: context.targetUsername });
+    }
     setLastDamageDebug(targetState, loss, context);
     if (unit.hp <= 0) {
         unit.alive = false;
@@ -3604,6 +3679,9 @@ const applyHealthCapLossToUnit = (unit, rawAmount, context = {}) => {
     const hpBeforeClamp = Math.max(0, Number(unit.hp) || 0);
     if (hpBeforeClamp > nextCap) {
         unit.hp = nextCap;
+        if (context?.match && context?.targetUsername) {
+            updateTeamPassiveAwakenings({ match: context.match, username: context.targetUsername });
+        }
         if (unit.hp <= 0) {
             unit.alive = false;
         }
@@ -4481,14 +4559,18 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             const ownerUseSkillSelfDamage = Math.max(
                 0,
                 Number(status?.metadata?.onOwnerUseSkillSelfDamage) || 0
+            ) + paidChakraCount * Math.max(
+                0, Number(status?.metadata?.onOwnerUseChakraSpentAfflictionDamagePerChakra) || 0
             );
             if (ownerUseSkillSelfDamage > 0) {
                 applyDamageToUnit(actorUnit, ownerUseSkillSelfDamage, {
                     match,
                     sourceUsername: status?.sourceUsername || null,
+                    sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
                     sourceSkillId: status?.sourceSkillId || null,
                     targetUsername: actingUsername,
                     damageDebugReason: 'owner-use self damage',
+                    afflictionDamage: Boolean(status?.metadata?.onOwnerUseChakraSpentAfflictionDamagePerChakra),
                     ignoreDamageReduction:
                         status?.metadata?.onOwnerUseSkillSelfDamageIgnoreDamageReduction === undefined
                             ? true
@@ -6282,7 +6364,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             effect,
                             actorUnit,
                             targetUnit: recipient.unit,
-                        })
+                        }) + getSkillSpecificHealingBonus(actorState, skill.id)
                     );
                 });
                 return;
@@ -6542,6 +6624,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (amount <= 0) return;
                 recipients.forEach((recipient) => {
                     if (!recipient?.username) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     const condition = effect?.condition;
                     if (condition) {
@@ -6805,6 +6888,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (maxAmount <= 0) return;
                 recipients.forEach((recipient) => {
                     if (!recipient?.username || recipient.username === actingUsername) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     if (
                         doesTargetIgnoreSkillByClass({
@@ -6861,6 +6945,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (maxAmount <= 0) return;
                 recipients.forEach((recipient) => {
                     if (!recipient?.username || recipient.username === actingUsername) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     if (
                         doesTargetIgnoreSkillByClass({
@@ -6919,6 +7004,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (maxAmount <= 0 || !chakraTypes.includes(drainType)) return;
                 recipients.forEach((recipient) => {
                     if (!recipient?.username || recipient.username === actingUsername) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     if (
                         doesTargetIgnoreSkillByClass({
@@ -7049,6 +7135,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 const amount = Math.max(0, Number(effect?.amount) || 1);
                 recipients.forEach((recipient) => {
                     if (!recipient?.username || recipient.username === actingUsername) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     const condition = effect?.condition;
                     if (condition && !doesEffectConditionMatch({
@@ -7082,6 +7169,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 const chakraType = typeof effect?.chakraType === 'string' ? effect.chakraType.trim().toLowerCase() : 'random';
                 recipients.forEach((recipient) => {
                     if (!recipient?.username) return;
+                    if (isUnitImmuneToChakraLoss(recipient.unit)) return;
                     const targetState = ensureUnitStateShape(recipient.unit);
                     const condition = effect?.condition;
                     if (condition && !doesEffectConditionMatch({
@@ -7975,7 +8063,8 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 if (
                     turnEndDrainNonBloodlineToSource > 0 &&
                     status?.sourceUsername &&
-                    status.sourceUsername !== username
+                    status.sourceUsername !== username &&
+                    !isUnitImmuneToChakraLoss(unit)
                 ) {
                     match.chakraPools = match.chakraPools || {};
                     const ownerPool = match.chakraPools[username] || createEmptyChakraCost();
@@ -7997,7 +8086,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     0,
                     Number(status?.metadata?.turnEndRemoveRandomChakra) || 0
                 );
-                if (turnEndRemoveRandomChakra > 0) {
+                if (turnEndRemoveRandomChakra > 0 && !isUnitImmuneToChakraLoss(unit)) {
                     removeRandomChakraFromMatch({
                         match,
                         username,
@@ -8013,7 +8102,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 }
                 const turnEndHealFlat = Math.max(0, Number(status?.metadata?.turnEndHealFlat) || 0);
                 if (turnEndHealFlat > 0) {
-                    applyHealToUnit(unit, turnEndHealFlat);
+                    applyHealToUnit(unit, turnEndHealFlat, { excludeStatusId: status.id });
                 }
                 const turnEndHealthLoss = Math.max(0, Number(status?.metadata?.turnEndHealthLoss) || 0);
                 if (turnEndHealthLoss > 0) {
@@ -8346,6 +8435,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
             refreshDerivedStatusTooltips(actorState);
         });
         if (username === endingUsername) {
+            updateTeamPassiveAwakenings({ match, username, ownerTurnEnded: true });
             units.forEach((unit) => {
                 if (!unit) return;
                 const actorState = ensureUnitStateShape(unit);

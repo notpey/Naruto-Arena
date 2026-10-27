@@ -1,211 +1,76 @@
 module.exports = {
-    "id": "hyuuga-hinata",
-    "characterId": "hyuuga-hinata",
-    "name": "Hyuuga Hinata",
-    "facePicture": "https://i.imgur.com/NWuk5fw.png",
-    "characterdeescription": "A Genin from Team 8, Hinata is the next in line in the Hyuuga clan, but she is shy and very withdrawn. Using the trademark Byakugan of the Hyuuga, Hinata is able to delicately target an enemy's Chakra Points while defending the team.",
-    "skills": [
+    id: 'hyuuga-hinata', characterId: 'hyuuga-hinata', name: 'Hyuuga Hinata',
+    facePicture: 'https://i.imgur.com/p06GvRH.png',
+    characterdeescription: 'A timid genin of the Hyuuga clan, Hinata possesses the powerful Byakugan but struggles with a lack of confidence in her own abilities. Inspired by Naruto\'s determination, she seeks to overcome her insecurities and prove herself worthy of her clan\'s legacy.',
+    passive: {
+        name: 'Shy Byakugan', icon: 'https://i.imgur.com/G3R99oG.png',
+        description: 'After 4 turns, Hinata awakens her Byakugan, permanently enhancing her skills. This effect activates early if an ally falls below 50 health.',
+        awakening: {
+            statusId: 'hyuuga_hinata_shy_byakugan_awakened', afterOwnerTurns: 4,
+            allyHpBelow: 50, clearCooldownSkillIds: ['hyuuga-hinata-hinata-gentle-fist'],
+            metadata: { helpful: true, permanent: true, cannotBeCleansed: true,
+                skillCooldownOverridesBySkillId: { 'hyuuga-hinata-hinata-gentle-fist': 0 },
+                tooltipText: 'Shy Byakugan has awakened. Hinata Gentle Fist has no cooldown and Eight Trigrams 64 Palms is available.' },
+        },
+    },
+    skills: [
         {
-            "id": "hyuuga-hinata-hinata-gentle-fist",
-            "name": "Hinata Gentle Fist",
-            "skillimage": "https://i.imgur.com/guOfm9P.png",
-            "skilldescription": "Hyuuga Hinata deals 20 damage to one enemy. For 1 turn, they will have their chakra costs increased by 1 random. During 'Byakugan', the cost increase lasts 1 additional turn and the target takes 20 damage each turn for 2 turns.",
-            "energy": [
-                "Taijutsu"
+            id: 'hyuuga-hinata-hinata-gentle-fist', name: 'Hinata Gentle Fist',
+            skillimage: 'https://i.imgur.com/ViRXQMp.png',
+            skilldescription: 'Hinata deals 15 physical damage to an enemy and reduces their non-affliction damage by 10 for 1 turn. While Shy Byakugan is active, this skill has no cooldown.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 15, scope: 'target' },
+                { type: 'apply_status', statusId: 'hyuuga_hinata_gentle_fist_debuff',
+                    duration: 1, scope: 'target', metadata: { harmful: true,
+                        nonAfflictionDamageDebuffFlat: 10, turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character deals 10 less non-affliction damage for 1 turn.' } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_gentle_fist_cost",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "randomCostIncrease": 1,
-                        "tooltipText": "This character's skills cost 1 additional random chakra.",
-                        "turnDurationAnchor": "source_turn"
-                    },
-                    "condition": {
-                        "scope": "self",
-                        "missingStatusId": "hyuuga_hinata_byakugan"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_gentle_fist_cost",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "randomCostIncrease": 1,
-                        "tooltipText": "This character's skills cost 1 additional random chakra."
-                    },
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "hyuuga_hinata_byakugan"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_gentle_fist_damage",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnEndDamage": 20,
-                        "turnEndTrigger": "source_turn",
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "This character takes 20 damage each turn from Hinata Gentle Fist."
-                    },
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "hyuuga_hinata_byakugan"
-                    }
-                }
-            ]
         },
         {
-            "id": "hyuuga-hinata-protective-eight-trigrams-sixty-four-palms",
-            "name": "Protective Eight Trigrams Sixty-Four Palms",
-            "skillimage": "https://i.imgur.com/CFkIcA6.png",
-            "skilldescription": "Hyuuga Hinata grants each ally 10 points of destructible defense for 1 turn. An enemy that breaks this defense has their chakra costs increased by 1 random for 1 turn. During 'Byakugan', the defense lasts 2 turns. On Hinata's next turn, each ally whose defense remains gains a separate 10 destructible defense for 1 turn. This happens once.",
-            "energy": [
-                "Ninjutsu"
+            id: 'hyuuga-hinata-eight-trigrams-64-palms', name: 'Eight Trigrams 64 Palms',
+            skillimage: 'https://i.imgur.com/ADoVhoI.png',
+            skilldescription: 'Requires Shy Byakugan. Hinata deals 10 physical damage to all enemies, heals all allies for 10 health, and reduces the non-affliction damage of all enemies by 5 for 1 turn. This skill\'s damage and healing are increased by 5 for 1 turn after use.',
+            energy: ['Ninjutsu'], target: 'all-enemy', damage: 0, cooldown: 0,
+            actorCondition: { statusId: 'hyuuga_hinata_shy_byakugan_awakened' },
+            classes: ['Physical', 'Instant'], effects: [
+                { type: 'damage', amount: 10, scope: 'all-enemy' },
+                { type: 'heal', amount: 10, scope: 'all-allies' },
+                { type: 'apply_status', statusId: 'hyuuga_hinata_64_palms_debuff',
+                    duration: 1, scope: 'all-enemy', metadata: { harmful: true,
+                        nonAfflictionDamageDebuffFlat: 5, turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character deals 5 less non-affliction damage for 1 turn.' } },
+                { type: 'apply_status', statusId: 'hyuuga_hinata_64_palms_boost',
+                    duration: 1, scope: 'self', metadata: { helpful: true,
+                        skillDamageBonuses: { 'hyuuga-hinata-eight-trigrams-64-palms': 5 },
+                        skillHealingBonuses: { 'hyuuga-hinata-eight-trigrams-64-palms': 5 },
+                        tooltipText: 'Eight Trigrams 64 Palms deals 5 more damage and heals 5 more health for 1 turn.' } },
             ],
-            "target": "all-allies",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_protective_palms_defense",
-                    "duration": 1,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "destructibleDefensePoints": 10,
-                        "onBreakApplyStatusToSource": {
-                            "statusId": "hyuuga_hinata_protective_palms_cost",
-                            "duration": 1,
-                            "metadata": {
-                                "harmful": true,
-                                "randomCostIncrease": 1,
-                                "tooltipText": "This character's skills cost 1 additional random chakra."
-                            }
-                        },
-                        "tooltipText": "This character has 10 destructible defense. An enemy that destroys it has their skill costs increased by 1 random chakra."
-                    },
-                    "condition": {
-                        "scope": "self",
-                        "missingStatusId": "hyuuga_hinata_byakugan"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_protective_palms_defense",
-                    "duration": 2,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "destructibleDefensePoints": 10,
-                        "_turnEndApplyStatusToSelfUsed": false,
-                        "turnEndApplyStatusToSelf": {
-                            "statusId": "hyuuga_hinata_protective_palms_defense_refresh",
-                            "duration": 1,
-                            "fresh": true,
-                            "once": true,
-                            "metadata": {
-                                "helpful": true,
-                                "destructibleDefensePoints": 10,
-                                "tooltipText": "This character has 10 refreshed destructible defense from Protective Eight Trigrams Sixty-Four Palms."
-                            }
-                        },
-                        "turnEndTrigger": "source_turn",
-                        "onBreakApplyStatusToSource": {
-                            "statusId": "hyuuga_hinata_protective_palms_cost",
-                            "duration": 1,
-                            "metadata": {
-                                "harmful": true,
-                                "randomCostIncrease": 1,
-                                "tooltipText": "This character's skills cost 1 additional random chakra."
-                            }
-                        },
-                        "tooltipText": "This character has 10 destructible defense. On Hinata's next turn, it grants another 10 destructible defense once if it remains. An enemy that destroys it has their skill costs increased by 1 random chakra."
-                    },
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "hyuuga_hinata_byakugan"
-                    }
-                }
-            ]
         },
         {
-            "id": "hyuuga-hinata-byakugan",
-            "name": "Byakugan",
-            "skillimage": "https://i.imgur.com/TcjSSGB.png",
-            "skilldescription": "Byakugan costs no chakra. Hinata gains 10 points of damage reduction for 3 turns. During this time, 'Hinata Gentle Fist' lasts 1 additional turn. 'Protective Eight Trigrams Sixty-Four Palms' lasts 1 additional turn and grants a one-time 10 destructible defense refresh on Hinata's next turn if its original defense remains.",
-            "energy": [],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Instant"
+            id: 'hyuuga-hinata-secret-ointment', name: 'Secret Oinment',
+            skillimage: 'https://i.imgur.com/8y7PIEz.png',
+            skilldescription: 'Hinata applies a healing ointment to herself or an ally, restoring 5 health each turn for 4 turns. During this time, all other healing received by the target is increased by 5. This effect cannot be reapplied while active.',
+            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
+            targetCondition: { missingStatusId: 'hyuuga_hinata_secret_ointment' },
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'hyuuga_hinata_secret_ointment',
+                    duration: 4, scope: 'target', metadata: { helpful: true,
+                        turnEndHealFlat: 5, turnEndTrigger: 'source_turn',
+                        healReceivedBonusFlat: 5,
+                        tooltipText: 'This character heals 5 health each turn for 4 turns and receives 5 additional health from other healing.' } },
             ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "hyuuga_hinata_byakugan",
-                    "duration": 3,
-                    "scope": "self",
-                    "metadata": {
-                        "damageReductionFlat": 10,
-                        "tooltipText": "Hinata has 10 damage reduction. Hinata Gentle Fist lasts 1 additional turn and Protective Eight Trigrams Sixty-Four Palms refreshes destructible defense once."
-                    }
-                }
-            ]
         },
         {
-            "id": "hyuuga-hinata-hinata-block",
-            "name": "Hinata Block",
-            "skillimage": "https://i.imgur.com/jRh5417.png",
-            "skilldescription": "This skill makes Hyuuga Hinata invulnerable for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'hyuuga-hinata-hinata-block', name: 'Hinata Block',
+            skillimage: 'https://i.imgur.com/ksxbj3P.png',
+            skilldescription: 'Hinata becomes invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',
+                    metadata: { helpful: true, invulnerable: true,
+                        tooltipText: 'Hinata is invulnerable.' } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+        },
+    ],
 };

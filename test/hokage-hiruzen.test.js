@@ -9,7 +9,7 @@ const indexOf = (id) => characters.findIndex((character) => character?.character
 const hiruzenIndex = indexOf('sarutobi-hiruzen');
 const sasukeIndex = indexOf('uchiha-sasuke');
 const sakuraIndex = indexOf('haruno-sakura');
-const shinoIndex = indexOf('aburame-shino');
+const ebisuIndex = indexOf('ebisu');
 
 function makeMatch(team1 = [hiruzenIndex, sasukeIndex], team2 = [sasukeIndex, sakuraIndex]) {
     const players = [{ username: 'p1', team: team1 }, { username: 'p2', team: team2 }];
@@ -158,25 +158,25 @@ test('Mission Assignment does not spend its bonus on a team-wide alternate attac
 });
 
 test('Will of Fire and Mission Assignment add non-affliction damage to an affliction-only skill', () => {
-    const match = makeMatch([hiruzenIndex, shinoIndex]);
+    const match = makeMatch([hiruzenIndex, ebisuIndex]);
     match.board.p2[0].state.statuses.push({
         id: 'reduction_test', remainingTurns: 2,
         metadata: { helpful: true, damageReductionFlat: 10 },
     });
     cast(match, 'p1', 0, 1, [{ username: 'p1', slot: 1 }]);
-    cast(match, 'p1', 1, 0, [{ username: 'p2', slot: 0 }]);
-    assert.equal(match.board.p2[0].hp, 85,
-        '10 affliction bypasses reduction while the 15 non-affliction bonus is reduced to 5');
+    cast(match, 'p1', 1, 2, [{ username: 'p2', slot: 0 }]);
+    assert.equal(match.board.p2[0].hp, 80,
+        '15 affliction bypasses reduction while the 15 non-affliction bonus is reduced to 5');
     assert.equal(has(match.board.p1[1], 'sarutobi_hiruzen_mission_assignment_bonus'), false);
 });
 
 test('Crystal Ball reduces non-affliction bonus damage on an affliction-only skill', () => {
-    const match = makeMatch([hiruzenIndex, shinoIndex], [hiruzenIndex, sasukeIndex]);
+    const match = makeMatch([hiruzenIndex, ebisuIndex], [hiruzenIndex, sasukeIndex]);
     cast(match, 'p1', 0, 1, [{ username: 'p1', slot: 1 }]);
     cast(match, 'p2', 0, 0, [{ username: 'p1', slot: 1 }]);
-    cast(match, 'p1', 1, 0, [{ username: 'p2', slot: 0 }]);
-    assert.equal(match.board.p2[0].hp, 85,
-        '10 affliction remains and the 15 non-affliction bonus loses 10');
+    cast(match, 'p1', 1, 2, [{ username: 'p2', slot: 0 }]);
+    assert.equal(match.board.p2[0].hp, 80,
+        '15 affliction remains and the 15 non-affliction bonus loses 10');
     assert.equal(has(match.board.p1[1], 'sarutobi_hiruzen_crystal_ball_suppression'), false);
 });
 

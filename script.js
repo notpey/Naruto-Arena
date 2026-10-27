@@ -1248,8 +1248,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resolvedSkill = replacementSkill;
             }
             const targetOverride = getSkillTargetOverrideFromUnit(unit, resolvedSkill?.id || '');
-            if (targetOverride) {
-                return { ...resolvedSkill, target: targetOverride };
+            const statuses = Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [];
+            const cooldownOverride = statuses.reduce((override, status) => {
+                if ((Number(status?.remainingTurns) || 0) <= 0) return override;
+                const value = status?.metadata?.skillCooldownOverridesBySkillId?.[resolvedSkill?.id];
+                return Number.isFinite(value) && value >= 0 ? value : override;
+            }, null);
+            if (targetOverride || cooldownOverride !== null) {
+                return { ...resolvedSkill,
+                    ...(targetOverride ? { target: targetOverride } : {}),
+                    ...(cooldownOverride !== null ? { cooldown: cooldownOverride } : {}),
+                };
             }
             return resolvedSkill || baseSkill;
         };

@@ -20,6 +20,8 @@ const NarutoRosterCatalog = (() => {
         ['gato', 'land-of-waves'],
         ['zori-and-waraji', 'land-of-waves'],
         ['yamanaka-ino', 'prologue'],
+        ['aburame-shino', 'prologue'],
+        ['hyuuga-hinata', 'prologue'],
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
         ['sarutobi-hiruzen', 'land-of-waves'],
