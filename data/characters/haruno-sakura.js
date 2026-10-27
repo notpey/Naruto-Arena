@@ -21,7 +21,7 @@ module.exports = {
             ],
             "target": "single-enemy",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Physical",
                 "Instant"
@@ -90,7 +90,7 @@ module.exports = {
             ],
             "target": "self-or-single-ally",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Strategic",
                 "Instant"

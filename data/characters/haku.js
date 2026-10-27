@@ -10,13 +10,14 @@ module.exports = {
         {
             id: 'haku-demonic-mirroring-ice-crystals', name: 'Demonic Mirroring Ice Crystals',
             skillimage: 'https://i.imgur.com/2sgPkS0.png',
-            skilldescription: 'Haku surrounds one enemy with demonic mirrors of ice for 4 turns, dealing 10 damage to that enemy each turn. During this time, Haku gains 30 points of destructible defense, and Flying Needles of Death and Acupuncture are improved. If Haku is stunned, this skill ends.',
+            skilldescription: 'Haku surrounds one enemy with demonic mirrors of ice for 4 turns, dealing 10 piercing damage to that enemy each turn. During this time, Haku gains 30 points of destructible defense, and Flying Needles of Death and Acupuncture are improved. If Haku is stunned, this skill ends.',
             energy: ['Bloodline', 'Random'], target: 'single-enemy', damage: 0, cooldown: 4,
             classes: ['Chakra', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'haku_mirror_target', duration: 4, scope: 'target',
                     metadata: { harmful: true, ongoingClass: 'control', turnEndDamage: 10,
+                        ignoreTargetDamageReduction: true,
                         turnEndTrigger: 'source_turn', turnDurationAnchor: 'source_turn', triggerOnApply: true,
-                        tooltipText: 'Haku deals 10 damage to this character each turn. The mirrors end if Haku is stunned.' } },
+                        tooltipText: 'Haku deals 10 piercing damage to this character each turn. The mirrors end if Haku is stunned.' } },
                 { type: 'apply_status', statusId: 'haku_mirror_guard', duration: 4, scope: 'self',
                     condition: { scope: 'target', statusId: 'haku_mirror_target', statusFromActor: true },
                     metadata: { helpful: true, destructibleDefensePoints: 30,

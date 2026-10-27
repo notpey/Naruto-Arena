@@ -8,9 +8,9 @@ module.exports = {
     passive: {
         name: 'Genin Promotion',
         icon: 'https://i.imgur.com/fo7qWJv.png',
-        description: 'When Iruka damages an enemy with one of his skills, the next damaging hit from another ally against that enemy deals 5 additional damage. This mark lasts 2 turns and does not stack.',
+        description: 'When Iruka damages an enemy with one of his skills, the next damaging hit from another ally against that enemy deals 10 additional damage. This mark lasts 2 turns and does not stack.',
         allyFollowupDamageMark: {
-            statusId: 'iruka_genin_promotion_mark', duration: 2, amount: 5,
+            statusId: 'iruka_genin_promotion_mark', duration: 2, amount: 10,
             skillIds: [
                 'umino-iruka-shuriken-throw',
                 'umino-iruka-academy-instruction',
@@ -29,7 +29,7 @@ module.exports = {
             effects: [
                 { type: 'damage', amount: 20, scope: 'target' },
                 {
-                    type: 'damage', amount: 25, scope: 'target',
+                    type: 'damage', amount: 30, scope: 'target',
                     metadata: { skillClasses: ['Chakra'] },
                     condition: { scope: 'target', statusId: 'iruka_sealed_bomb_trap', statusFromActor: true },
                 },
@@ -70,7 +70,7 @@ module.exports = {
             id: 'umino-iruka-sealed-bomb-square-release',
             name: 'Sealed Bomb Square Release',
             skillimage: 'https://i.imgur.com/TeDfWJB.png',
-            skilldescription: 'Iruka places an invisible explosive trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 25 damage and ends. Shuriken Throw can detonate it early.',
+            skilldescription: 'Iruka places an invisible explosive trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 30 damage and ends. Shuriken Throw can detonate it early.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Chakra', 'Instant'],
             effects: [{
@@ -79,9 +79,9 @@ module.exports = {
                     harmful: true, hideTooltipFromUnitOwner: true, triggerOnEnemyHarmfulSkill: true,
                     triggerOnlyOnOwnerSkillUse: true, counterDamageAttributedToStatusSource: true,
                     counterDamageRespectsInvulnerability: true,
-                    counterCancelsSkill: false, counterDamage: 25,
+                    counterCancelsSkill: false, counterDamage: 30,
                     counterDamageSkillClasses: ['Chakra'], turnDurationAnchor: 'source_turn',
-                    tooltipText: 'If this character uses a new harmful skill, Sealed Bomb Square Release deals 25 damage. Shuriken Throw can detonate the trap early.',
+                    tooltipText: 'If this character uses a new harmful skill, Sealed Bomb Square Release deals 30 damage. Shuriken Throw can detonate the trap early.',
                 },
             }],
         },

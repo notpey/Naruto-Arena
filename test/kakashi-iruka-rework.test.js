@@ -58,7 +58,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
     ]) {
         const match = makeMatch([index('hatake-kakashi')], [index('uzumaki-naruto')]);
         cast(match, 'p1', 0, slot, ['p2', 0]);
-        assert.equal(match.board.p2[0].hp, 85);
+        assert.equal(match.board.p2[0].hp, 80);
         assert.ok(status(match, 'p2', 0, expectedStun));
         const ready = resolveEffectiveSkill({
             characters, rosterIndex: index('hatake-kakashi'),
@@ -72,7 +72,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
         cast(match, 'p1', 0, slot, ['p2', 0]);
-        assert.equal(match.board.p2[0].hp, 40);
+        assert.equal(match.board.p2[0].hp, 35);
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         assert.equal(resolveEffectiveSkill({
             characters, rosterIndex: index('hatake-kakashi'),
@@ -87,6 +87,10 @@ test('Sharingan Insight reveals hidden traps and copies only eligible countered 
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
         .some((entry) => entry.id === 'iruka_sealed_bomb_trap'), false);
     cast(match, 'p1', 0, 0);
+    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses
+        .some((entry) => entry.id === 'kakashi_sharingan_insight'), false);
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
+        .some((entry) => entry.id === 'kakashi_sharingan_insight'), true);
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
         .some((entry) => entry.id === 'iruka_sealed_bomb_trap'), true);
     cast(match, 'p2', 1, 0, ['p1', 0]);
@@ -132,7 +136,7 @@ test('Iruka Genin Promotion marks once, rewards another ally, and never rewards 
     assert.equal(match.board.p2[0].hp, 60);
     assert.equal(match.board.p2[0].state.statuses.filter((entry) => entry.id === 'iruka_genin_promotion_mark').length, 1);
     cast(match, 'p1', 1, 0, ['p2', 0]);
-    assert.equal(match.board.p2[0].hp, 35, 'Naruto deals 20 plus 5 from Iruka');
+    assert.equal(match.board.p2[0].hp, 30, 'Naruto deals 20 plus 10 from Iruka');
     assert.equal(status(match, 'p2', 0, 'iruka_genin_promotion_mark'), undefined);
 });
 
@@ -140,13 +144,13 @@ test('Iruka trap detonates on a harmful skill or Shuriken without cancelling the
     const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
     cast(match, 'p1', 0, 2, ['p2', 0]);
     cast(match, 'p2', 0, 1, ['p1', 0]);
-    assert.equal(match.board.p2[0].hp, 75);
+    assert.equal(match.board.p2[0].hp, 70);
     assert.equal(match.board.p1[0].hp, 80);
     assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
     const early = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
     cast(early, 'p1', 0, 2, ['p2', 0]);
     cast(early, 'p1', 0, 0, ['p2', 0]);
-    assert.equal(early.board.p2[0].hp, 55);
+    assert.equal(early.board.p2[0].hp, 50);
     assert.equal(early.board.p1[0].hp, 100, 'attacking the trapped enemy does not spring the trap on Iruka');
     assert.equal(status(early, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
 });

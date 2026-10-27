@@ -29,7 +29,7 @@
             ],
             "target": "single-enemy",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Physical",
                 "Instant"
@@ -98,7 +98,7 @@
             ],
             "target": "self-or-single-ally",
             "damage": 0,
-            "cooldown": 0,
+            "cooldown": 1,
             "classes": [
                 "Strategic",
                 "Instant"

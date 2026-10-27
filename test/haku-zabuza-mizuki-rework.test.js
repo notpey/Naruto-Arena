@@ -1,7 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const characters = require('../data/characters');
-const { buildInitialBoard, resolvePendingTurnSkills, resolveEffectiveSkill, tickStatusesForTurnEnd } = require('../battleLogic');
+const { buildInitialBoard, resolvePendingTurnSkills, resolveEffectiveSkill, tickStatusesForTurnEnd,
+    computeEffectiveEnergyCost } = require('../battleLogic');
 
 const index = (id) => characters.findIndex((character) => character.characterId === id);
 const pool = () => ({ taijutsu: 20, ninjutsu: 20, bloodline: 20, genjutsu: 20 });
@@ -63,15 +64,29 @@ test('Haku mirrors damage and followups track only the mirrored enemy; stun bloc
     assert.equal(status(match, 'a', 0, 'haku_mirror_guard'), undefined);
 });
 
+test('Haku mirror damage pierces damage reduction each turn', () => {
+    const match = matchFor(['haku'], ['uzumaki-naruto']);
+    match.board.b[0].state.statuses.push({ id: 'test_damage_reduction', remainingTurns: 2,
+        metadata: { helpful: true, damageReductionFlat: 20 } });
+    cast(match, 'a', 0, 0, ['b', 0]);
+    tickStatusesForTurnEnd({ match, endingUsername: 'a' });
+    assert.equal(match.board.b[0].hp, 90);
+});
+
 test('Zabuza prison changes sword targets, mist buffs its damage, and clone counters once', () => {
     const match = matchFor(['momochi-zabuza', 'uzumaki-naruto'], ['haku', 'mizuki', 'umino-iruka']);
+    const prisonCost = computeEffectiveEnergyCost({
+        skill: effective(match, 'a', 0, 1), actorState: match.board.a[0].state,
+    });
+    assert.equal(prisonCost.reservedSpecific.ninjutsu, 1);
+    assert.equal(prisonCost.requiredRandom, 0);
     cast(match, 'a', 0, 1, ['b', 0]);
     assert.ok(status(match, 'b', 0, 'zabuza_water_prison'));
     assert.equal(effective(match, 'a', 0, 0).id, 'momochi-zabuza-kubikiribocho-clone');
     cast(match, 'a', 0, 0, ['b', 1]);
     assert.equal(match.board.b[0].hp, 100);
-    assert.equal(match.board.b[1].hp, 90);
-    assert.equal(match.board.b[2].hp, 90);
+    assert.equal(match.board.b[1].hp, 85);
+    assert.equal(match.board.b[2].hp, 85);
     cast(match, 'a', 0, 3, ['a', 1]);
     cast(match, 'b', 1, 0, ['a', 1]);
     assert.equal(match.board.a[1].hp, 100);
@@ -98,26 +113,27 @@ test('Hidden Mist charges enemy Physical and Chakra skills, then empowers Kubiki
     match.board.b[0].state.statuses.push({ id: 'test_invulnerable', remainingTurns: 1,
         metadata: { invulnerable: true } });
     cast(match, 'a', 0, 0, ['b', 0]);
-    assert.equal(match.board.b[0].hp, 70, 'Mist empowered sword deals 30 through invulnerability');
+    assert.equal(match.board.b[0].hp, 65, 'Mist empowered sword deals 35 through invulnerability');
 });
 
 test('Mizuki counters a helpful skill, gains damage after non-damaging use, and consumes Windmill', () => {
     const match = matchFor(['mizuki'], ['umino-iruka', 'uzumaki-naruto', 'haruno-sakura']);
+    assert.equal(effective(match, 'a', 0, 3).cooldown, 4);
     cast(match, 'a', 0, 0, ['b', 0]);
-    assert.equal(match.board.b[0].hp, 85);
+    assert.equal(match.board.b[0].hp, 80);
     cast(match, 'b', 0, 3, ['b', 0]);
     assert.equal(status(match, 'b', 0, 'mizuki_kunai_ambush_trap'), undefined);
     assert.equal(status(match, 'b', 0, 'invulnerable'), undefined);
     assert.ok(status(match, 'b', 0, 'mizuki_meld_in_the_shadows_mark'));
     cast(match, 'a', 0, 1, ['b', 0]);
-    assert.equal(match.board.b[0].hp, 50, 'Execution Shuriken deals 30 plus 5 passive damage');
+    assert.equal(match.board.b[0].hp, 45, 'Execution Shuriken deals 30 plus 5 passive damage');
     cast(match, 'a', 0, 2);
     assert.equal(effective(match, 'a', 0, 1).id, 'mizuki-execution-shuriken-windmill');
     match.board.a[0].state.cooldowns = {};
     cast(match, 'a', 0, 1, ['b', 1]);
-    assert.equal(match.board.b[0].hp, 25, 'marked enemy takes 20 plus 5');
-    assert.equal(match.board.b[1].hp, 80);
-    assert.equal(match.board.b[2].hp, 80);
+    assert.equal(match.board.b[0].hp, 15, 'marked enemy takes 25 plus 5');
+    assert.equal(match.board.b[1].hp, 75);
+    assert.equal(match.board.b[2].hp, 75);
     assert.equal(status(match, 'a', 0, 'mizuki_windmill'), undefined);
 });
 

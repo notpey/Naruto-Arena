@@ -8,15 +8,15 @@ module.exports = {
         {
             id: 'momochi-zabuza-kubikiribocho', name: 'Kubikiribōchō',
             skillimage: 'https://i.imgur.com/aZfxDVs.png',
-            skilldescription: 'Zabuza attacks one enemy with his enormous sword, dealing 20 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 10 physical damage to each.',
+            skilldescription: 'Zabuza attacks one enemy with his enormous sword, dealing 25 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 15 physical damage to each.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 20, scope: 'target' }],
+            classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 25, scope: 'target' }],
         },
         {
             id: 'momochi-zabuza-water-prison-technique', name: 'Water Prison Technique',
             skillimage: 'https://i.imgur.com/dT988nl.png',
             skilldescription: 'Zabuza traps one enemy inside a sphere of water for 2 turns, stunning their harmful skills during this time. If Zabuza is stunned, this skill ends.',
-            energy: ['Ninjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 3,
+            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 3,
             classes: ['Chakra', 'Control'], effects: [
                 { type: 'apply_status', statusId: 'zabuza_water_prison', duration: 2, scope: 'target',
                     metadata: { harmful: true, ongoingClass: 'control', cannotUseHarmfulSkills: true,
@@ -67,10 +67,10 @@ module.exports = {
         {
             id: 'momochi-zabuza-kubikiribocho-clone', baseSkillId: 'momochi-zabuza-kubikiribocho', useBaseSkillCooldown: true,
             hiddenFromSelectionViewer: true, name: 'Kubikiribōchō', skillimage: 'https://i.imgur.com/aZfxDVs.png',
-            skilldescription: 'A water clone deals 10 physical damage to each enemy outside Water Prison Technique.',
+            skilldescription: 'A water clone deals 15 physical damage to each enemy outside Water Prison Technique.',
             energy: ['Taijutsu'], target: 'all-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 10, scope: 'all-enemy-without-source-status',
+                { type: 'damage', amount: 15, scope: 'all-enemy-without-source-status',
                     metadata: { excludedStatusId: 'zabuza_water_prison' } },
             ],
         },

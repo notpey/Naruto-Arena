@@ -15,7 +15,7 @@ module.exports = {
             id: 'hatake-kakashi-sharingan-counter',
             name: 'Sharingan Insight',
             skillimage: 'https://i.imgur.com/wrowrxL.png',
-            skilldescription: 'Kakashi reveals hidden enemy effects for 1 turn and counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.',
+            skilldescription: 'Kakashi reveals hidden enemy effects for 1 turn and invisibly counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.',
             energy: ['Bloodline'], target: 'self', damage: 0, cooldown: 2,
             classes: ['Strategic', 'Instant', 'Unique'],
             effects: [
@@ -29,7 +29,8 @@ module.exports = {
                 {
                     type: 'apply_status', statusId: 'kakashi_sharingan_insight', duration: 1, scope: 'self',
                     metadata: {
-                        helpful: true, triggerOnEnemyHarmfulSkill: true,
+                        helpful: true, invisible: true, hideTooltipFromEnemy: true,
+                        triggerOnEnemyHarmfulSkill: true,
                         counterCancelsSkill: true,
                         counterCopySkillReplacementFor: 'hatake-kakashi-sharingan-counter',
                         counterCopySkillReplacementDuration: 1,
@@ -45,11 +46,11 @@ module.exports = {
             id: 'hatake-kakashi-summoning-ninja-dogs',
             name: 'Nin-Dogs Summoning',
             skillimage: 'https://i.imgur.com/PFMVHdp.png',
-            skilldescription: 'Kakashi summons tracking hounds to restrain one enemy, dealing 15 physical damage and stunning their Physical skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
+            skilldescription: 'Kakashi summons tracking hounds to restrain one enemy, dealing 20 physical damage and stunning their Physical skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Strategic', 'Instant'],
             effects: [
-                { type: 'damage', amount: 15, scope: 'target', metadata: { skillClasses: ['Physical'] } },
+                { type: 'damage', amount: 20, scope: 'target', metadata: { skillClasses: ['Physical'] } },
                 {
                     type: 'apply_status', statusId: 'kakashi_nin_dogs_stun', duration: 1, scope: 'target',
                     metadata: {
@@ -72,11 +73,11 @@ module.exports = {
             id: 'hatake-kakashi-earth-style-headhunter-jutsu',
             name: 'Earth Style: Headhunter Jutsu',
             skillimage: 'https://i.imgur.com/m9r8Dpo.png',
-            skilldescription: 'Kakashi drags one enemy underground, dealing 15 physical damage and stunning their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.',
+            skilldescription: 'Kakashi drags one enemy underground, dealing 20 physical damage and stunning their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Physical', 'Instant'],
             effects: [
-                { type: 'damage', amount: 15, scope: 'target' },
+                { type: 'damage', amount: 20, scope: 'target' },
                 {
                     type: 'apply_status', statusId: 'kakashi_headhunter_stun', duration: 1, scope: 'target',
                     metadata: {

@@ -168,7 +168,7 @@ const characters = [
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -237,7 +237,7 @@ const characters = [
                 ],
                 "target": "self-or-single-ally",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Strategic",
                     "Instant"

@@ -8,10 +8,10 @@ module.exports = {
     skills: [
         {
             id: 'mizuki-kunai-ambush', name: 'Kunai Ambush', skillimage: 'https://i.imgur.com/oTFkPZG.png',
-            skilldescription: 'Mizuki attacks one enemy with a barrage of kunai, dealing 15 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.',
+            skilldescription: 'Mizuki attacks one enemy with a barrage of kunai, dealing 20 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 15, scope: 'target' },
+                { type: 'damage', amount: 20, scope: 'target' },
                 { type: 'apply_status', statusId: 'mizuki_kunai_ambush_trap', duration: 1, scope: 'target',
                     metadata: { harmful: true, triggerOnOwnerHelpfulSkill: true,
                         counterCancelsSkill: true, turnDurationAnchor: 'source_turn',
@@ -21,7 +21,7 @@ module.exports = {
         {
             id: 'mizuki-execution-shuriken', name: 'Execution Shuriken',
             skillimage: 'https://i.imgur.com/O3Y4Q29.png',
-            skilldescription: 'Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.',
+            skilldescription: 'Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 25 physical damage to all enemies, and Windmill ends.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 30, scope: 'target' }],
         },
@@ -41,7 +41,7 @@ module.exports = {
             id: 'mizuki-effortless-side-step', name: 'Effortless Side-step',
             skillimage: 'https://i.imgur.com/jP0RmHY.png',
             skilldescription: 'Mizuki becomes invulnerable for 1 turn.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 0,
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'mizuki_effortless_side_step', duration: 1, scope: 'self',
                     metadata: { helpful: true, invulnerable: true, tooltipText: 'Mizuki is invulnerable.' } },
@@ -51,10 +51,10 @@ module.exports = {
             id: 'mizuki-execution-shuriken-windmill', baseSkillId: 'mizuki-execution-shuriken', useBaseSkillCooldown: true,
             hiddenFromSelectionViewer: true, name: 'Execution Shuriken',
             skillimage: 'https://i.imgur.com/O3Y4Q29.png',
-            skilldescription: 'Mizuki deals 20 physical damage to all enemies, ending Windmill.',
+            skilldescription: 'Mizuki deals 25 physical damage to all enemies, ending Windmill.',
             energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 20, scope: 'all-enemy' },
+                { type: 'damage', amount: 25, scope: 'all-enemy' },
                 { type: 'remove_status', statusId: 'mizuki_windmill', scope: 'self' },
             ],
         },

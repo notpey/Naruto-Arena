@@ -474,6 +474,8 @@ test('Naruto passive works with other helpful effects and ignores harmful effect
 
 test('Sakura rework keeps four skills and a visible passive that strengthens Guard Duty', () => {
     const sakura = getSakura();
+    assert.equal(sakura.skills[0].cooldown, 1);
+    assert.equal(sakura.skills[1].cooldown, 1);
     assert.deepEqual(sakura.skills.map(skill => skill.name), [
         'Kunai Interference', 'Guard Duty', 'Clone Technique', 'Sakura Hide',
     ]);
@@ -487,12 +489,14 @@ test('Sakura rework keeps four skills and a visible passive that strengthens Gua
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 85);
+    assert.ok(match.board.p1[0].state.cooldowns['haruno-sakura-kunai-interference'] > 0);
     assert.equal(match.board.p2[1].hp, 100);
     assert.equal(match.board.p2[0].state.statuses.find(status => status.id === 'haruno_sakura_kunai_interference')?.metadata.nonAfflictionDamageDebuffFlat, 10);
 
     queueSkill(match, 'p1', 1, [{ username: 'p1', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const guardDefense = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_defense');
+    assert.ok(match.board.p1[0].state.cooldowns['haruno-sakura-guard-duty'] > 0);
     const guardReduction = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_reduction');
     assert.equal(guardDefense.metadata.destructibleDefensePoints, 30, '25 base defense plus 5 from passive');
     assert.equal(guardReduction.metadata.damageReductionFlat, 10);
@@ -515,6 +519,8 @@ test('Sakura rework keeps four skills and a visible passive that strengthens Gua
     assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0, skillIndex: 1, characters }).mode, 'all');
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.find(status => status.id === clone.id).metadata.skillTargetOverrides['haruno-sakura-guard-duty'], 'all-allies');
 
+    delete sakuraState.cooldowns['haruno-sakura-kunai-interference'];
+    delete sakuraState.cooldowns['haruno-sakura-guard-duty'];
     queueSkill(match, 'p1', 0);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 75, 'Clone Kunai deals 10 instead of 15');
