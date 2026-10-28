@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="charactercreator.css">
   <script src="skill-description-format.js" defer></script>
   <script src="charactercreator.js" defer></script>
+  <script src="roster-catalog.js" defer></script>
+  <script src="character-tracker.js" defer></script>
 </head>
 <body>
   <div class="creator-shell">
@@ -47,6 +49,7 @@
           <button type="button" class="creator-tab active" data-view="edit" aria-current="page">Edit</button>
           <button type="button" class="creator-tab" data-view="preview">Preview</button>
           <button type="button" class="creator-tab" data-view="discussion">Discussion <span id="discussion-count" hidden></span></button>
+          <button type="button" class="creator-tab" data-view="tracker">Roster tracker</button>
         </nav>
 
         <div class="workspace">
@@ -92,6 +95,20 @@
                 <div class="comment-form-footer"><span id="comment-state" role="status" aria-live="polite"></span><button type="submit" class="button" id="post-comment">Post reply</button></div>
               </form>
             </div>
+          </section>
+
+          <section class="tracker view-panel" data-panel="tracker" aria-labelledby="tracker-title" hidden>
+            <div class="view-heading tracker-heading"><div><h2 id="tracker-title">Character roster tracker</h2><p>Plan and track characters by Naruto story arc. Changes save in this browser.</p></div><div class="tracker-actions"><button type="button" class="button secondary" id="tracker-import-button">Import JSON</button><button type="button" class="button secondary" id="tracker-export">Export JSON</button></div></div>
+            <input id="tracker-import" type="file" accept=".json,application/json" hidden aria-label="Import tracker JSON">
+            <div class="tracker-toolbar">
+              <label>Search <input id="tracker-search" type="search" placeholder="Character name or notes"></label>
+              <label>Story arc <select id="tracker-arc-filter"><option value="">All arcs</option></select></label>
+              <label>Status <select id="tracker-status-filter"><option value="">All statuses</option><option value="not-started">Not started</option><option value="kit-made">Kit made</option><option value="coded">Coded</option></select></label>
+            </div>
+            <p id="tracker-summary" class="tracker-summary" aria-live="polite"></p>
+            <div id="tracker-groups"></div>
+            <form id="tracker-add" class="tracker-add"><h3>Add a character</h3><div><label>Name <input name="name" maxlength="80" required placeholder="Character name"></label><label>Story arc <select name="arc" required></select></label><label>Priority <select name="priority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label><button type="submit" class="button">Add character</button></div></form>
+            <p id="tracker-message" class="tracker-message" role="status" aria-live="polite"></p>
           </section>
         </div>
       </main>

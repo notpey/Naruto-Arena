@@ -108,6 +108,7 @@
   }
   function setView(view) {
     activeView = view;
+    document.querySelector('.creator-shell').classList.toggle('tracker-mode', view === 'tracker');
     document.querySelectorAll('[data-view]').forEach(button => {
       const selected = button.dataset.view === view;
       button.classList.toggle('active', selected);
