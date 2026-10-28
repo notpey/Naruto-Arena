@@ -12,6 +12,8 @@ const KAKASHI_IRUKA_REWORK_MIGRATION_ID = 'kakashi-iruka-rework-2026-10-24';
 const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-2026-10-24';
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
 const HOKAGE_HIRUZEN_REWORK_MIGRATION_ID = 'hokage-hiruzen-rework-2026-10-26';
+const KIBA_REWORK_MIGRATION_ID = 'inuzuka-kiba-rework-2026-10-28';
+const GAARA_REWORK_MIGRATION_ID = 'gaara-of-the-desert-rework-2026-10-28';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -233,6 +235,8 @@ class CharacterService {
                     [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -288,6 +292,8 @@ class CharacterService {
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -311,6 +317,8 @@ class CharacterService {
         const shouldApplyWavesAndMizukiRework = !completedMigrations[WAVES_AND_MIZUKI_REWORK_MIGRATION_ID];
         const shouldApplyDemonBrothersRework = !completedMigrations[DEMON_BROTHERS_REWORK_MIGRATION_ID];
         const shouldApplyHokageHiruzenRework = !completedMigrations[HOKAGE_HIRUZEN_REWORK_MIGRATION_ID];
+        const shouldApplyKibaRework = !completedMigrations[KIBA_REWORK_MIGRATION_ID];
+        const shouldApplyGaaraRework = !completedMigrations[GAARA_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -321,6 +329,8 @@ class CharacterService {
             ...(shouldApplyWavesAndMizukiRework ? ['haku', 'momochi-zabuza', 'mizuki'] : []),
             ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
             ...(shouldApplyHokageHiruzenRework ? ['sarutobi-hiruzen'] : []),
+            ...(shouldApplyKibaRework ? ['inuzuka-kiba'] : []),
+            ...(shouldApplyGaaraRework ? ['gaara-of-the-desert'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -392,6 +402,8 @@ class CharacterService {
                 if (shouldApplyWavesAndMizukiRework && ['haku', 'momochi-zabuza', 'mizuki'].includes(characterId)) return seedEntry;
                 if (shouldApplyDemonBrothersRework && characterId === 'demon-brothers') return seedEntry;
                 if (shouldApplyHokageHiruzenRework && characterId === 'sarutobi-hiruzen') return seedEntry;
+                if (shouldApplyKibaRework && characterId === 'inuzuka-kiba') return seedEntry;
+                if (shouldApplyGaaraRework && characterId === 'gaara-of-the-desert') return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -452,6 +464,7 @@ class CharacterService {
             shouldApplyWavesAndMizukiRework ||
             shouldApplyDemonBrothersRework ||
             shouldApplyHokageHiruzenRework ||
+            shouldApplyKibaRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -475,6 +488,8 @@ class CharacterService {
                         [`completed.${WAVES_AND_MIZUKI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },

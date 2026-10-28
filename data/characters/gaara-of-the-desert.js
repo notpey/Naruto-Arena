@@ -1,187 +1,96 @@
+const SAND_FLOW = 'gaara_of_the_desert_sand_flow';
+const SPHERE = 'gaara_sand_sphere';
+
 module.exports = {
-    "id": "gaara-of-the-desert",
-    "characterId": "gaara-of-the-desert",
-    "name": "Gaara",
-    "facePicture": "https://i.imgur.com/mmAjCZ7.png",
-    "characterdeescription": "A Jinchuuriki from the Village of Sand, Gaara is an unstable ninja with the Shukaku, the one-tailed beast. With the Shukaku, and his own abilities, Gaara can manipulate the sand in his gourd to crush the enemy, or defend himself.",
-    "skills": [
+    id: 'gaara-of-the-desert',
+    characterId: 'gaara-of-the-desert',
+    name: 'Gaara of the Desert',
+    facePicture: 'https://i.imgur.com/IiEAyw6.png',
+    characterdeescription: 'A ruthless genin from the Hidden Sand Village, Gaara commands a seemingly endless supply of sand that protects him from harm and crushes his enemies. Feared for his merciless nature and mysterious abilities, he seeks to prove his existence through the lives of those who challenge him.',
+    passive: {
+        name: 'Sand Flow',
+        icon: 'https://i.imgur.com/qOFhrZc.png',
+        description: 'Gaara\'s sand grants him 5 damage reduction that cannot be pierced. Whenever Gaara takes damage, he gains 1 Sand Flow stack. For each turn he takes no damage, he gains 2 Sand Flow stacks.',
+        unpierceableDamageReductionFlat: 5,
+        onDamageStackMetadataKey: 'sandFlowStacks',
+        onDamageStackAmount: 1,
+        onUndamagedTurnStackMetadataKey: 'sandFlowStacks',
+        onUndamagedTurnStackAmount: 2,
+        sandFlowStacks: 0,
+        stackTooltipTextTemplate: 'Sand protects Gaara. 5 unpierceable damage reduction. Sand Flow stacks: {sandFlowStacks}.',
+    },
+    skills: [
         {
-            "id": "gaara-of-the-desert-sand-coffin",
-            "name": "Sand Coffin",
-            "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-            "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable.",
-            "energy": [
-                "Ninjutsu",
-                "Random"
+            id: 'gaara-of-the-desert-sand-binding-coffin',
+            name: 'Sand Binding Coffin',
+            skillimage: 'https://i.imgur.com/3aST3cX.png',
+            skilldescription: 'Gaara traps an enemy in sand, stunning them for 1 turn and gaining 2 Sand Flow stacks.',
+            energy: ['Ninjutsu'],
+            target: 'single-enemy',
+            damage: 0,
+            cooldown: 1,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: 'gaara_sand_binding_coffin_stun', duration: 1, scope: 'target',
+                    metadata: { harmful: true, cannotUseSkills: true,
+                        tooltipText: 'Stunned by Sand Binding Coffin.' } },
+                { type: 'apply_status', statusId: SAND_FLOW, duration: 99, scope: 'self',
+                    metadata: { stackMetadataKey: 'sandFlowStacks', stackDelta: 2,
+                        stackMax: 9999,
+                        tooltipTextTemplate: 'Sand protects Gaara. 5 unpierceable damage reduction. Sand Flow stacks: {sandFlowStacks}.' } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Strategic",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_coffin_stun",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "energy",
-                            "strategic",
-                            "ninjutsu"
-                        ],
-                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
-                        "ongoingClass": "control"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_coffin_crush",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable.",
-                        "ongoingClass": "control",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_coffin_ready",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "skillReplacements": {
-                            "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
-                        },
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Sand Coffin is replaced by Sand Burial.",
-                        "ongoingClass": "control"
-                    }
-                }
-            ]
         },
         {
-            "id": "gaara-of-the-desert-sand-burial",
-            "name": "Sand Burial",
-            "cannotBeCountered": true,
-            "cannotBeReflected": true,
-            "skillimage": "https://i.imgur.com/ljX9izT.png",
-            "skilldescription": "Gaara deals 30 piercing damage to one enemy and ignores helpful effects for 1 turn. If used 1 turn after 'Sand Coffin', this skill costs 1 ninjutsu and 1 bloodline chakra and deals 50 piercing damage instead.",
-            "energy": [
-                "Ninjutsu"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 30,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "missingStatusId": "gaara_sand_coffin_crush"
-                    },
-                    "metadata": {
-                        "ignoreDamageReduction": true
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 50,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "gaara_sand_coffin_crush"
-                    },
-                    "metadata": {
-                        "ignoreDamageReduction": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_sand_burial_ignore_helpful",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "This character ignores helpful effects for 1 turn."
-                    }
-                }
-            ]
+            id: 'gaara-of-the-desert-desert-funeral',
+            name: 'Desert Funeral',
+            skillimage: 'https://i.imgur.com/9do9XxC.png',
+            skilldescription: 'Gaara crushes an enemy with sand, dealing 30 piercing physical damage, increased by 5 for each Sand Flow stack. All Sand Flow stacks are consumed. If the enemy falls to 10 health or less, they are executed.',
+            energy: ['Bloodline', 'Random'],
+            target: 'single-enemy',
+            damage: 30,
+            cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [{ type: 'damage', amount: 30, scope: 'target',
+                metadata: { ignoreDamageReduction: true, executeBelowHpThreshold: 10,
+                    bonusPerStatusMetadata: { scope: 'self', statusId: SAND_FLOW,
+                        metadataKey: 'sandFlowStacks', multiplier: 5, consumeStacks: true } } }],
         },
         {
-            "id": "gaara-of-the-desert-armor-of-sand",
-            "name": "Armor of Sand",
-            "skillimage": "https://i.imgur.com/qfrA8gB.png",
-            "skilldescription": "Gaara gains 25 points of permanent destructible defense. This skill cannot be used again while it is still active.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "targetCondition": {
-                "missingStatusId": "gaara_armor_of_sand"
-            },
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "gaara_armor_of_sand",
-                    "duration": 99,
-                    "scope": "self",
-                    "metadata": {
-                        "destructibleDefensePoints": 25,
-                        "tooltipText": "Gaara has 25 points of permanent destructible defense from Armor of Sand."
-                    }
-                }
-            ]
+            id: 'gaara-of-the-desert-sand-sphere',
+            name: 'Sand Sphere',
+            skillimage: 'https://i.imgur.com/eUfA1nN.png',
+            skilldescription: 'Gaara surrounds himself with a sphere of sand, gaining 25 destructible defense for 3 turns, increased by 5 for each Sand Flow stack. During this time, enemies who use a skill on Gaara take 15 physical damage. This effect ends if Gaara uses another skill.',
+            energy: ['Ninjutsu', 'Random'],
+            target: 'self',
+            damage: 0,
+            cooldown: 5,
+            classes: ['Strategic', 'Physical*', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: SPHERE, duration: 3, scope: 'self',
+                metadata: { helpful: true, destructibleDefensePoints: 25,
+                    scaleFromSourceStatusMetadata: { statusId: SAND_FLOW, metadataKey: 'sandFlowStacks',
+                        multiplier: 5, targetKeys: ['destructibleDefensePoints'], addToTargetKeys: true },
+                    onEnemySkillTargetedDamageToSourceAmount: 15,
+                    onEnemySkillTargetedDamageToSourceSkillClasses: ['Physical'],
+                    onOwnerUseSkillTrigger: true,
+                    onOwnerUseSkillIdsAny: [
+                        'gaara-of-the-desert-sand-binding-coffin',
+                        'gaara-of-the-desert-desert-funeral',
+                        'gaara-of-the-desert-sand-shield',
+                    ],
+                    tooltipTextTemplate: 'Sand gathers around Gaara. {destructibleDefensePoints} destructible defense.' } }],
         },
         {
-            "id": "gaara-of-the-desert-shield-of-sand",
-            "name": "Shield of Sand",
-            "skillimage": "https://i.imgur.com/vL03kPm.png",
-            "skilldescription": "This skill makes Gaara invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'gaara-of-the-desert-sand-shield',
+            name: 'Sand Shield',
+            skillimage: 'https://i.imgur.com/2oNtSkX.png',
+            skilldescription: 'Gaara shields himself with sand, becoming invulnerable for 1 turn.',
+            energy: ['Random'],
+            target: 'self',
+            damage: 0,
+            cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'gaara_sand_shield', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true, tooltipText: 'Gaara is invulnerable.' } }],
+        },
+    ],
 };

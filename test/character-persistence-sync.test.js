@@ -280,3 +280,54 @@ test('Demon Brothers rework replaces the stored concept once', async () => {
         update.$set['completed.demon-brothers-rework-2026-10-25']));
 });
 
+test('Kiba rework replaces a stored legacy kit and records its migration', async () => {
+    const legacy = {
+        id: 'inuzuka-kiba', characterId: 'inuzuka-kiba', name: 'Inuzuka Kiba',
+        facePicture: 'https://example.com/old-kiba.png',
+        characterdeescription: 'Old description',
+        skills: [{ id: 'inuzuka-kiba-garouga', name: 'Old Garouga' }],
+    };
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [legacy] }
+            : { key, completed: {} },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const kiba = stored.find(character => character.characterId === 'inuzuka-kiba');
+    assert.equal(kiba.passive.name, 'Heightened Senses');
+    assert.equal(kiba.skills[0].name, 'Dynamic Air Marking');
+    assert.equal(kiba.skills[4].name, 'Double Garouga');
+    assert.notEqual(kiba.facePicture, legacy.facePicture);
+    assert.notEqual(kiba.characterdeescription, legacy.characterdeescription);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.inuzuka-kiba-rework-2026-10-28']));
+});
+
+test('Gaara rework replaces a stored legacy kit and records its migration', async () => {
+    const legacy = {
+        id: 'gaara-of-the-desert', characterId: 'gaara-of-the-desert', name: 'Gaara',
+        facePicture: 'https://example.com/old-gaara.png',
+        characterdeescription: 'Old description',
+        skills: [{ id: 'gaara-of-the-desert-sand-coffin', name: 'Sand Coffin' }],
+    };
+    const writes = [];
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [legacy] }
+            : { key, completed: {} },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const stored = await new CharacterService({ appStateCollection: mockCollection }).getStoredCharacters();
+    const gaara = stored.find(character => character.characterId === 'gaara-of-the-desert');
+    assert.equal(gaara.passive.name, 'Sand Flow');
+    assert.deepEqual(gaara.skills.map(skill => skill.name),
+        ['Sand Binding Coffin', 'Desert Funeral', 'Sand Sphere', 'Sand Shield']);
+    assert.notEqual(gaara.facePicture, legacy.facePicture);
+    assert.notEqual(gaara.characterdeescription, legacy.characterdeescription);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.gaara-of-the-desert-rework-2026-10-28']));
+});
+

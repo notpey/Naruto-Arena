@@ -4,7 +4,8 @@ const NarutoRosterCatalog = (() => {
     const arcs = [
         { id: 'prologue', series: 'Naruto', label: 'Prologue', order: 0 },
         { id: 'land-of-waves', series: 'Naruto', label: 'Land of Waves', order: 1 },
-        { id: 'konoha-crush', series: 'Naruto', label: 'Konoha Crush', order: 2 },
+        { id: 'chunin-exams', series: 'Naruto', label: 'Chūnin Exams', order: 2 },
+        { id: 'konoha-crush', series: 'Naruto', label: 'Konoha Crush', order: 3 },
     ];
 
     const characters = [
@@ -22,6 +23,8 @@ const NarutoRosterCatalog = (() => {
         ['yamanaka-ino', 'prologue'],
         ['aburame-shino', 'prologue'],
         ['hyuuga-hinata', 'prologue'],
+        ['inuzuka-kiba', 'chunin-exams'],
+        ['gaara-of-the-desert', 'chunin-exams'],
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
         ['sarutobi-hiruzen', 'land-of-waves'],

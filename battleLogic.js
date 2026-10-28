@@ -87,7 +87,9 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           cannotBeCleansed: true,
                           sourceSkillName: passive.name,
                           statusIcon: passive.icon || '',
-                          tooltipText: `${passive.description || ''}\nThis passive cannot be removed.`.trim(),
+                          tooltipText: passive.stackTooltipTextTemplate
+                              ? renderTooltipTemplate(passive.stackTooltipTextTemplate, passive)
+                              : `${passive.description || ''}\nThis passive cannot be removed.`.trim(),
                           physicalDamageBonusWhileHelpful:
                               Math.max(0, Number(passive.physicalDamageBonusWhileHelpful) || 0),
                           destructibleDefenseBonusGranted:
@@ -105,6 +107,18 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
                           immuneToChakraRemovalAndStealing:
                               Boolean(passive.immuneToChakraRemovalAndStealing),
+                          revealInvisibleSkills: Boolean(passive.revealInvisibleSkills),
+                          unpierceableDamageReductionFlat:
+                              Math.max(0, Number(passive.unpierceableDamageReductionFlat) || 0),
+                          onDamageStackMetadataKey: passive.onDamageStackMetadataKey || null,
+                          onDamageStackAmount: Math.max(0, Number(passive.onDamageStackAmount) || 0),
+                          onUndamagedTurnStackMetadataKey: passive.onUndamagedTurnStackMetadataKey || null,
+                          onUndamagedTurnStackAmount: Math.max(0, Number(passive.onUndamagedTurnStackAmount) || 0),
+                          ...(passive.onDamageStackMetadataKey ? {
+                              [passive.onDamageStackMetadataKey]:
+                                  Math.max(0, Number(passive[passive.onDamageStackMetadataKey]) || 0),
+                          } : {}),
+                          tooltipTextTemplate: passive.stackTooltipTextTemplate || null,
                           awakening: passive.awakening || null,
                       },
                   }
@@ -1215,6 +1229,16 @@ const renderTooltipTemplate = (template, metadata = {}) => {
     });
 };
 
+const changeStatusMetadataStack = (status, key, amount) => {
+    if (!status || typeof key !== 'string' || !key || !Number.isFinite(Number(amount))) return;
+    const metadata = status.metadata || {};
+    const current = Math.max(0, Number(metadata[key]) || 0);
+    status.metadata = { ...metadata, [key]: Math.max(0, current + Number(amount)) };
+    if (typeof status.metadata.tooltipTextTemplate === 'string' && status.metadata.tooltipTextTemplate) {
+        status.metadata.tooltipText = renderTooltipTemplate(status.metadata.tooltipTextTemplate, status.metadata);
+    }
+};
+
 const refreshDerivedStatusTooltips = (targetState) => {
     const statuses = Array.isArray(targetState?.statuses) ? targetState.statuses : [];
     if (!statuses.length) return;
@@ -1228,7 +1252,15 @@ const refreshDerivedStatusTooltips = (targetState) => {
             typeof metadata.tooltipAggregateMetadataKey === 'string' && metadata.tooltipAggregateMetadataKey
                 ? metadata.tooltipAggregateMetadataKey
                 : '';
-        if (!aggregateStatusIds.length || !aggregateMetadataKey) return;
+        if (!aggregateStatusIds.length || !aggregateMetadataKey) {
+            if (typeof metadata.tooltipTextTemplate === 'string' && metadata.tooltipTextTemplate) {
+                status.metadata = {
+                    ...metadata,
+                    tooltipText: renderTooltipTemplate(metadata.tooltipTextTemplate, metadata),
+                };
+            }
+            return;
+        }
         const aggregateSet = new Set(aggregateStatusIds);
         const total = activeStatuses.reduce((sum, entry) => {
             if (!aggregateSet.has(entry?.id)) return sum;
@@ -1814,6 +1846,9 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
             : null;
         const value = Math.max(0, Number(scopedStatus?.metadata?.[metadataKey]) || 0);
         nextAmount += value * multiplier;
+        if (Boolean(stackBonus.consumeStacks) && scopedStatus) {
+            changeStatusMetadataStack(scopedStatus, metadataKey, -value);
+        }
         if (Boolean(stackBonus.consumeStatus) && scopedStatus) {
             consumeStatus(scopedState, statusId);
         }
@@ -2656,6 +2691,7 @@ const maybeTriggerReactiveDefenses = ({
             );
         }
     }
+    if (hasStatusMetadataFlag(targetState, 'ignoreCounters')) return false;
     const trapIndex = statuses.findIndex((status) => {
         const remaining = Number(status?.remainingTurns) || 0;
         // A counter placed by the acting team cannot counter that team's own skill.
@@ -3081,6 +3117,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                 status.metadata.destructibleDefensePoints = 0;
             }
         });
+        refreshDerivedStatusTooltips(targetState);
     }
     const ignoreDestructibleDefense = Boolean(context?.ignoreDestructibleDefense) || afflictionDamage;
     if (!ignoreDestructibleDefense) {
@@ -3119,6 +3156,9 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                 }
             }
             status.metadata = nextMetadata;
+            if (typeof nextMetadata.tooltipTextTemplate === 'string' && nextMetadata.tooltipTextTemplate) {
+                status.metadata.tooltipText = renderTooltipTemplate(nextMetadata.tooltipTextTemplate, nextMetadata);
+            }
             if (remainingPoints <= 0) {
                 const removeStatusIdsOnBreak = Array.isArray(status?.metadata?.removeStatusIdsOnBreak)
                     ? status.metadata.removeStatusIdsOnBreak.filter((id) => typeof id === 'string' && id)
@@ -3336,6 +3376,15 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     }
     const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
     unit.hp = Math.max(contextualMinimumHp, (Number(unit.hp) || 0) - dealt);
+    if (dealt > 0) {
+        targetState.snapshots.tookDamageThisTurn = true;
+        (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
+            if (!isStatusActiveForMetadata(status, unit)) return;
+            const key = status?.metadata?.onDamageStackMetadataKey;
+            const amount = Math.max(0, Number(status?.metadata?.onDamageStackAmount) || 0);
+            if (key && amount > 0) changeStatusMetadataStack(status, key, amount);
+        });
+    }
     if (dealt > 0 && context?.match && context?.targetUsername) {
         updateTeamPassiveAwakenings({ match: context.match, username: context.targetUsername });
     }
@@ -3429,7 +3478,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             );
             refreshDerivedStatusTooltips(targetState);
         }
-        const executeThreshold = (Array.isArray(targetState.statuses) ? targetState.statuses : []).reduce(
+        const executeThresholdFromStatus = (Array.isArray(targetState.statuses) ? targetState.statuses : []).reduce(
             (lowest, status) => {
                 if (!isStatusActiveForMetadata(status, unit)) return lowest;
                 const threshold = Number(status?.metadata?.executeBelowHpThreshold);
@@ -3438,6 +3487,11 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             },
             null
         );
+        const executeThresholdFromHit = Number.isFinite(context?.executeBelowHpThreshold)
+            ? Math.max(0, Number(context.executeBelowHpThreshold)) : null;
+        const executeThreshold = executeThresholdFromHit === null ? executeThresholdFromStatus
+            : executeThresholdFromStatus === null ? executeThresholdFromHit
+            : Math.max(executeThresholdFromHit, executeThresholdFromStatus);
         if (executeThreshold !== null && unit.hp <= executeThreshold) {
             unit.hp = 0;
             unit.alive = false;
@@ -5409,6 +5463,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 effect?.type === 'health_steal_damage' || Boolean(effect?.metadata?.healthStealDamage) ? 1 : 0,
                 effectSkillClasses.slice().sort().join(','),
                 effect?.metadata?.onSuccessfulDamageApplyStatusToTarget?.statusId || '',
+                Number.isFinite(effect?.metadata?.executeBelowHpThreshold)
+                    ? Number(effect.metadata.executeBelowHpThreshold) : '',
                 damageSource?.username || '',
                 Number.isInteger(damageSource?.slot) ? damageSource.slot : '',
             ].join('|');
@@ -5432,6 +5488,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 damageDebugLabel: damageSource?.unit
                     ? characters?.[damageSource.unit.rosterIndex]?.name || null : null,
                 minimumHp: Math.max(0, Number(effect?.metadata?.minimumHp) || 0),
+                executeBelowHpThreshold: Number.isFinite(effect?.metadata?.executeBelowHpThreshold)
+                    ? Math.max(0, Number(effect.metadata.executeBelowHpThreshold)) : null,
                 onSuccessfulDamageApplyStatusToTarget:
                     effect?.metadata?.onSuccessfulDamageApplyStatusToTarget || null,
                 healthStealDamage:
@@ -5819,7 +5877,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         if (!rollPercentSuccess(activationChance)) return;
                     }
                     const targetState = ensureUnitStateShape(recipient.unit);
-                    const appliesToSelf = effect?.scope === 'self' && !(allSkillsBlind && confusedTarget);
+                    const appliesToSelf = (effect?.scope === 'self' || effect?.applyToSource === true) &&
+                        !(allSkillsBlind && confusedTarget);
                     const destinationState = appliesToSelf ? actorState : targetState;
                     if (
                         doesEffectTargetHelpfulRecipient({ effect, recipient, actingUsername }) &&
@@ -6154,7 +6213,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                                 ...(runtimeMetadata || {}),
                             };
                             targetKeys.forEach((key) => {
-                                nextMetadata[key] = sourceValue * multiplier;
+                                nextMetadata[key] = (scaleFromSourceStatusMetadata.addToTargetKeys
+                                    ? Math.max(0, Number(nextMetadata[key]) || 0) : 0) + sourceValue * multiplier;
                             });
                             runtimeMetadata = nextMetadata;
                         }
@@ -6199,7 +6259,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         sourceSlot: actorSlot,
                         metadata: runtimeMetadata,
                         fresh:
-                            recipient.username === actingUsername ||
+                            appliesToSelf || recipient.username === actingUsername ||
                             Boolean(runtimeMetadata?.freezeCooldowns) ||
                             (runtimeMetadata?.turnDurationAnchor === 'source_turn' &&
                                 !runtimeMetadata?.triggerOnApply),
@@ -7322,6 +7382,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         targetSlot: entry.recipient.slot,
                         sourceBaseDamage: entry.sourceBaseDamage,
                         minimumHp: Math.max(0, Number(entry.minimumHp) || 0),
+                        executeBelowHpThreshold: entry.executeBelowHpThreshold,
                         skillClasses: entry.skillClasses || skill.classes || [],
                         ignoreDamageReduction:
                             Boolean(entry.ignoreDamageReduction) || Boolean(entry.healthStealDamage),
@@ -8443,9 +8504,21 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
             });
         }
     });
-    Object.values(match.board || {}).forEach((units) => (Array.isArray(units) ? units : []).forEach((unit) => {
+    Object.entries(match.board || {}).forEach(([username, units]) => (Array.isArray(units) ? units : []).forEach((unit) => {
         if (!unit) return;
-        const snapshots = ensureUnitStateShape(unit).snapshots;
+        const unitState = ensureUnitStateShape(unit);
+        const snapshots = unitState.snapshots;
+        if (username === endingUsername) {
+            if (unit.alive !== false && !snapshots.tookDamageThisTurn) {
+                (Array.isArray(unitState.statuses) ? unitState.statuses : []).forEach((status) => {
+                    if (!isStatusActiveForMetadata(status, unit)) return;
+                    const key = status?.metadata?.onUndamagedTurnStackMetadataKey;
+                    const amount = Math.max(0, Number(status?.metadata?.onUndamagedTurnStackAmount) || 0);
+                    if (key && amount > 0) changeStatusMetadataStack(status, key, amount);
+                });
+            }
+            delete snapshots.tookDamageThisTurn;
+        }
         delete snapshots.damageTakenInTurn;
         delete snapshots.damageTakenInTurnTriggered;
     }));

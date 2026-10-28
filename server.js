@@ -82,6 +82,8 @@ const WAVES_AND_MIZUKI_REWORK_MIGRATION_ID = 'waves-haku-zabuza-mizuki-rework-20
 const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
 const INO_KONOHAMARU_REWORK_MIGRATION_ID = 'ino-konohamaru-rework-2026-10-25-v2';
 const HOKAGE_HIRUZEN_REWORK_MIGRATION_ID = 'hokage-hiruzen-rework-2026-10-26';
+const KIBA_REWORK_MIGRATION_ID = 'inuzuka-kiba-rework-2026-10-28';
+const GAARA_REWORK_MIGRATION_ID = 'gaara-of-the-desert-rework-2026-10-28';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -4228,6 +4230,8 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
@@ -4276,6 +4280,8 @@ const getStoredCharacters = async () => {
                     [`completed.${DEMON_BROTHERS_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${INO_KONOHAMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -4301,6 +4307,8 @@ const getStoredCharacters = async () => {
     const shouldApplyInoKonohamaruRework =
         !completedMigrations[INO_KONOHAMARU_REWORK_MIGRATION_ID];
     const shouldApplyHokageHiruzenRework = !completedMigrations[HOKAGE_HIRUZEN_REWORK_MIGRATION_ID];
+    const shouldApplyKibaRework = !completedMigrations[KIBA_REWORK_MIGRATION_ID];
+    const shouldApplyGaaraRework = !completedMigrations[GAARA_REWORK_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -4312,6 +4320,8 @@ const getStoredCharacters = async () => {
         ...(shouldApplyDemonBrothersRework ? ['demon-brothers'] : []),
         ...(shouldApplyInoKonohamaruRework ? ['yamanaka-ino', 'sarutobi-konohamaru'] : []),
         ...(shouldApplyHokageHiruzenRework ? ['sarutobi-hiruzen'] : []),
+        ...(shouldApplyKibaRework ? ['inuzuka-kiba'] : []),
+        ...(shouldApplyGaaraRework ? ['gaara-of-the-desert'] : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
     ]);
     const defaultByCharacterId = new Map(
@@ -4388,6 +4398,8 @@ const getStoredCharacters = async () => {
             if (shouldApplyInoKonohamaruRework &&
                 (characterId === 'yamanaka-ino' || characterId === 'sarutobi-konohamaru')) return seedEntry;
             if (shouldApplyHokageHiruzenRework && characterId === 'sarutobi-hiruzen') return seedEntry;
+            if (shouldApplyKibaRework && characterId === 'inuzuka-kiba') return seedEntry;
+            if (shouldApplyGaaraRework && characterId === 'gaara-of-the-desert') return seedEntry;
             if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
             }
@@ -4450,7 +4462,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyLaunchUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyLaunchUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -4479,6 +4491,12 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyHokageHiruzenRework) {
             completedMigrationUpdates[`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyKibaRework) {
+            completedMigrationUpdates[`completed.${KIBA_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyGaaraRework) {
+            completedMigrationUpdates[`completed.${GAARA_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;

@@ -57,7 +57,7 @@ test('all default mission rewards are reachable through earlier playable charact
     const missions = getDefaultMissionCatalog();
     const rewardIds = new Set(missions.map((mission) => mission.reward_character));
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
-        'aburame-shino', 'hyuuga-hinata']);
+        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'gaara-of-the-desert']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
     const remaining = new Map(missions.map((mission) => [mission.missionId, mission]));
@@ -77,7 +77,7 @@ test('all default mission rewards are reachable through earlier playable charact
     assert.deepEqual([...remaining.keys()], [], 'mission rewards must not have circular unlock dependencies');
 });
 
-test('new Members get Team 7, Shino, and Hinata; staff see and use all active characters', () => {
+test('new Members get Team 7, Shino, Hinata, Kiba, and Gaara; staff see and use all active characters', () => {
     const missions = getDefaultMissionCatalog();
     const lockedCharacterIds = new Set(missions.map((mission) => mission.reward_character));
     const profile = buildDefaultUserProfile({});
@@ -86,7 +86,7 @@ test('new Members get Team 7, Shino, and Hinata; staff see and use all active ch
         characterId, lockedCharacterIds,
     }).unlocked);
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
-        'aburame-shino', 'hyuuga-hinata']);
+        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'gaara-of-the-desert']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,
         characterId, lockedCharacterIds,

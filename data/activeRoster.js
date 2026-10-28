@@ -18,6 +18,8 @@ const ACTIVE_ROSTER_IDS = [
     'ebisu',
     'aburame-shino',
     'hyuuga-hinata',
+    'inuzuka-kiba',
+    'gaara-of-the-desert',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

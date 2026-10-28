@@ -64,22 +64,18 @@ const getStatus = (match, username, slot, statusId) =>
         (status) => status?.id === statusId && (Number(status?.remainingTurns) || 0) > 0
     );
 
-test('Gaara Sand Coffin stun decrements on target turns and expires', () => {
+test('Gaara Sand Binding Coffin stuns for one target turn', () => {
     const match = makeMatch([indexById['gaara-of-the-desert']], [indexById.tenten]);
 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
-    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_coffin_stun')?.remainingTurns, 2);
+    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_binding_coffin_stun')?.remainingTurns, 1);
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_coffin_stun')?.remainingTurns, 1);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_coffin_stun')?.remainingTurns, 1);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_coffin_stun'), undefined);
+    assert.equal(getStatus(match, 'p2', 0, 'gaara_sand_binding_coffin_stun'), undefined);
 });
 
-test('Gaara Sand Coffin remains replaced by Sand Burial on Gaara next turn', () => {
+test('Gaara Sand Binding Coffin adds two persistent Sand Flow stacks', () => {
     const match = makeMatch([indexById['gaara-of-the-desert']], [indexById.tenten]);
 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
@@ -87,15 +83,7 @@ test('Gaara Sand Coffin remains replaced by Sand Burial on Gaara next turn', () 
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
 
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: indexById['gaara-of-the-desert'],
-            skillIndex: 0,
-            actorState: match.board.p1[0].state,
-        }).id,
-        'gaara-of-the-desert-sand-burial'
-    );
+    assert.equal(getStatus(match, 'p1', 0, 'gaara_of_the_desert_sand_flow')?.metadata.sandFlowStacks, 4);
 });
 
 test('Tenten Twin Rising Dragons Trap debuff expires instead of freezing', () => {
@@ -118,12 +106,12 @@ test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[0].hp, 90);
     assert.equal(match.board.p2[1].hp, 90);
 
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70);
+    assert.equal(match.board.p2[0].hp, 80);
     assert.equal(match.board.p2[1].hp, 75);
 });
 
@@ -181,7 +169,7 @@ test('Temari Summoning Quick Beheading Dance damages all enemies on apply', () =
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
 
     assert.equal(match.board.p2[0].hp, 65);
-    assert.equal(match.board.p2[1].hp, 65);
+    assert.equal(match.board.p2[1].hp, 70);
     assert.equal(match.board.p2[2].hp, 65);
 });
 
@@ -208,7 +196,7 @@ test('Kakashi Nin-Dogs prepares Raikiri for his next turn', () => {
     }).id, 'hatake-kakashi-raikiri');
     queueSkill(match, 'p1', 0, 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(hpBefore - match.board.p2[0].hp, 45);
+    assert.equal(hpBefore - match.board.p2[0].hp, 40);
 });
 
 test('Asuma Sharpen Blades unlocks Flying Swallow and Finishing Blow cycles with Flying Kick', () => {
@@ -351,7 +339,7 @@ test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () 
     const hpBefore = match.board.p2[0].hp;
     queueSkill(match, 'p2', 0, 0, [{ username: 'p1', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(hpBefore - match.board.p2[0].hp, 30);
+    assert.equal(hpBefore - match.board.p2[0].hp, 25);
     assert.equal(match.board.p1[1].hp, 100);
 });
 

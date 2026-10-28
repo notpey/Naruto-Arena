@@ -637,61 +637,23 @@ test('Sasuke Sharingan does not counter his own Physical skill', () => {
         status.id === 'uchiha_sasuke_sharingan'), false, 'enemy counter consumes Sharingan');
 });
 
-test('battleLogic resolves Kiba starter kit behavior used by the editor data', () => {
-    const match = makeMatch([3], [1]);
-
-    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+test('battleLogic resolves Kiba draft mark, damage, and discount', () => {
+    const kibaIndex = getCharIndex('inuzuka-kiba');
+    const match = makeMatch([kibaIndex], [getCharIndex('haruno-sakura')]);
     const kibaState = match.board.p1[0].state;
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 3,
-            skillIndex: 0,
-            actorState: kibaState,
-        }).id,
-        'inuzuka-kiba-garouga'
-    );
-    assert.deepEqual(
-        computeEffectiveEnergyCost({
-            skill: characters[3].skills[0],
-            actorState: kibaState,
-        }),
-        {
-            reservedSpecific: {
-                taijutsu: 1,
-                ninjutsu: 0,
-                bloodline: 0,
-                genjutsu: 0,
-            },
-            requiredRandom: 1,
-        }
-    );
-    assert.equal(
-        kibaState.statuses.some(
-            (status) =>
-                status.id === 'inuzuka_kiba_double_headed_wolf_active' &&
-                status.metadata.damageReductionFlat === 15
-        ),
-        true
-    );
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 90, 'Double Headed Wolf should deal 10 to all enemies');
-
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'inuzuka_kiba_dynamic_marking' &&
-                status.metadata.cannotReduceDamage &&
-                status.metadata.cannotBecomeInvulnerable
-        ),
-        true
-    );
+    assert.equal(kibaState.statuses.some(status => status.metadata.revealInvisibleSkills), true);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55, 'Garouga should deal 35 during Double Headed Wolf to a Dynamic Marking target');
+    assert.equal(match.board.p2[0].state.statuses.some(status =>
+        status.id === 'inuzuka_kiba_dynamic_air_marking' && status.remainingTurns === 4), true);
+    assert.deepEqual(computeTargetOptions({
+        match, characters, actingUsername: 'p1', actorSlot: 0,
+        rosterIndex: kibaIndex, skillIndex: 0,
+    }).targets, []);
+    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 70);
+    assert.equal(computeEffectiveEnergyCost({ skill: characters[kibaIndex].skills[1], actorState: kibaState }).requiredRandom, 0);
 });
 
 test('Shino starts Chakra Leech on cooldown and can steal after his first turn', () => {
@@ -977,7 +939,7 @@ test('battleLogic resolves Neji starter kit behavior used by the editor data', (
     );
 });
 
-test('battleLogic resolves Gaara starter kit behavior used by the editor data', () => {
+test('battleLogic resolves Gaara Sand Binding Coffin from the editor data', () => {
     const match = makeMatch([getCharIndex('gaara-of-the-desert')], [1]);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
@@ -989,19 +951,17 @@ test('battleLogic resolves Gaara starter kit behavior used by the editor data', 
             skillIndex: 0,
             actorState: match.board.p1[0].state,
         }).id,
-        'gaara-of-the-desert-sand-burial'
+        'gaara-of-the-desert-sand-binding-coffin'
     );
     assert.equal(
         match.board.p2[0].state.statuses.some(
-            (status) => status.id === 'gaara_sand_coffin_crush' && status.metadata.cannotBecomeInvulnerable
+            (status) => status.id === 'gaara_sand_binding_coffin_stun' && status.metadata.cannotUseSkills
         ),
         true
     );
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].alive, true, 'Sand Burial should no longer instantly kill a Sand Coffin target');
-    assert.equal(match.board.p2[0].hp, 50, 'Sand Burial should deal 50 piercing damage');
+    assert.equal(match.board.p1[0].state.statuses.find(
+        (status) => status.id === 'gaara_of_the_desert_sand_flow'
+    ).metadata.sandFlowStacks, 2);
 });
 
 test('battleLogic resolves Kankuro starter kit behavior used by the editor data', () => {
