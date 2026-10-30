@@ -66,7 +66,7 @@ const buildTestMatch = () => ({
     combatEvents: [],
 });
 
-test('Universal Engine: Affliction damage naturally penetrates standard invulnerability', () => {
+test('Universal Engine: standard invulnerability blocks affliction skill targeting but not affliction damage', () => {
     const match = buildTestMatch();
     const defender = match.board.p2[0];
 
@@ -84,9 +84,46 @@ test('Universal Engine: Affliction damage naturally penetrates standard invulner
     assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Physical']), true);
     assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Ninjutsu']), true);
 
-    // Affliction skill check: Unit is NOT invulnerable to Affliction
-    assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Affliction']), false);
-    assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Affliction', 'Instant']), false);
+    assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Affliction']), true);
+    assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Affliction', 'Instant']), true);
+    assert.equal(battleLogic.isUnitInvulnerableForSkill(defender, ['Affliction'], { afflictionDamage: true }), false);
+
+    const characters = [{ id: 'poisoner', skills: [{ id: 'poison', target: 'single-enemy',
+        classes: ['Affliction', 'Instant'], energy: [], effects: [{ type: 'damage', amount: 10,
+            metadata: { afflictionDamage: true } }] }] }];
+    assert.deepEqual(battleLogic.computeTargetOptions({ match, actingUsername: 'p1',
+        actorSlot: 0, skillIndex: 0, characters }).targets,
+    [{ username: 'p2', slot: 1, rosterIndex: 1, alive: true },
+        { username: 'p2', slot: 2, rosterIndex: 2, alive: true }]);
+
+    battleLogic.applyDamageToUnit(defender, 10, { match, sourceUsername: 'p1',
+        targetUsername: 'p2', skillClasses: ['Affliction'], afflictionDamage: true });
+    assert.equal(defender.hp, 90);
+
+    defender.state.statuses.push({ id: 'existing_poison', remainingTurns: 2,
+        sourceUsername: 'p1', sourceSlot: 0, metadata: { harmful: true,
+            turnEndDamage: 5, afflictionDamage: true, turnEndSkillClasses: ['Affliction'] } });
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.equal(defender.hp, 85, 'an existing affliction DoT still damages an invulnerable target');
+});
+
+test('Universal Engine: a cannotBecomeInvulnerable mark keeps ongoing control active', () => {
+    const match = buildTestMatch();
+    const defender = match.board.p2[0];
+    const control = { id: 'ongoing_control', remainingTurns: 3, sourceUsername: 'p1',
+        sourceSlot: 0, metadata: { harmful: true, ongoingClass: 'control',
+            turnDurationAnchor: 'source_turn' } };
+    defender.state.statuses.push(control, { id: 'mark', remainingTurns: 3,
+        metadata: { harmful: true, cannotBecomeInvulnerable: true } },
+    { id: 'invulnerability', remainingTurns: 3, metadata: { helpful: true, invulnerable: true } });
+    battleLogic.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.ok(defender.state.statuses.some((status) => status.id === control.id));
+
+    const unmarked = buildTestMatch();
+    unmarked.board.p2[0].state.statuses.push({ ...control },
+        { id: 'invulnerability', remainingTurns: 3, metadata: { helpful: true, invulnerable: true } });
+    battleLogic.tickStatusesForTurnEnd({ match: unmarked, endingUsername: 'p2' });
+    assert.equal(unmarked.board.p2[0].state.statuses.some((status) => status.id === control.id), false);
 });
 
 test('Universal Engine: cannotBecomeInvulnerable disables all forms of invulnerability', () => {

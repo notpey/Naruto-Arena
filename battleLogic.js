@@ -592,6 +592,7 @@ const isActorUnableToUseSkills = (actorState) => getStatusMetadataTotals(actorSt
 const isUnitInvulnerable = (unit) => {
     if (!unit) return false;
     const state = ensureUnitStateShape(unit);
+    if (hasStatusMetadataFlag(state, 'cannotBecomeInvulnerable')) return false;
     return getStatusMetadataTotals(state).invulnerable;
 };
 
@@ -601,11 +602,12 @@ const skillHasAfflictionClass = (skillClasses = []) =>
         (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'affliction'
     );
 
-const isUnitInvulnerableForSkill = (unit, skillClasses = []) => {
+const isUnitInvulnerableForSkill = (unit, skillClasses = [], { afflictionDamage = false } = {}) => {
     if (!unit) return false;
     const state = ensureUnitStateShape(unit);
     const statuses = Array.isArray(state?.statuses) ? state.statuses : [];
-    const afflictionSkill = skillHasAfflictionClass(skillClasses);
+    // Affliction bypasses standard invulnerability only when damage resolves, not when choosing a skill target.
+    const afflictionSkill = afflictionDamage && skillHasAfflictionClass(skillClasses);
     const cannotBecomeInvulnerableActive = statuses.some((status) => {
         const remaining = Number(status?.remainingTurns) || 0;
         if (remaining <= 0) return false;
@@ -620,7 +622,7 @@ const isUnitInvulnerableForSkill = (unit, skillClasses = []) => {
         const metadata = status?.metadata || {};
         if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
         if (metadata.invulnerable && !afflictionSkill) return true;
-        if (metadata.invulnerableToNonAffliction && !afflictionSkill) return true;
+        if (metadata.invulnerableToNonAffliction && !skillHasAfflictionClass(skillClasses)) return true;
         if (
             Array.isArray(metadata.invulnerableToSkillClasses) &&
             metadata.invulnerableToSkillClasses.some((entry) => hasSkillClass(skillClasses, entry))
@@ -2735,7 +2737,7 @@ const maybeTriggerReactiveDefenses = ({
         : [];
     if (counterDamage > 0 && (
         !trapMetadata?.counterDamageRespectsInvulnerability ||
-        !isUnitInvulnerableForSkill(actorUnit, counterDamageSkillClasses)
+        !isUnitInvulnerableForSkill(actorUnit, counterDamageSkillClasses, { afflictionDamage: true })
     )) {
         const counterSourceUsername = trapMetadata?.counterDamageAttributedToStatusSource
             ? trapStatus?.sourceUsername || recipient.username
@@ -8001,7 +8003,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 if (sourceOutgoingCap !== null) {
                     turnEndDamage = Math.min(turnEndDamage, sourceOutgoingCap);
                 }
-                if (turnEndSkillClasses.length > 0 && isUnitInvulnerableForSkill(unit, turnEndSkillClasses)) {
+                if (turnEndSkillClasses.length > 0 && isUnitInvulnerableForSkill(unit, turnEndSkillClasses, { afflictionDamage: turnEndIsAffliction })) {
                     turnEndDamage = 0;
                 }
                 if (turnEndDamage > 0) {

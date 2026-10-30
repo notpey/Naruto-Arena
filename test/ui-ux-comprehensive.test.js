@@ -63,7 +63,6 @@ test('UI/UX Hardening - Client Targeting Logic Matches Engine Rules', () => {
     // Replicate isUnitInvulnerableForSkill pure logic as hardened in script.js
     const isUnitInvulnerableForSkill = (unit, skill) => {
         const skillClasses = (skill?.classes || []).map((c) => String(c).toLowerCase());
-        const isAffliction = skillClasses.includes('affliction');
         const liveStatuses = unit?.state?.statuses || [];
         if (liveStatuses.some((s) => Boolean(s?.metadata?.cannotBecomeInvulnerable))) {
             return false;
@@ -71,8 +70,8 @@ test('UI/UX Hardening - Client Targeting Logic Matches Engine Rules', () => {
         return liveStatuses.some((status) => {
             const metadata = status?.metadata || {};
             if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
-            if (metadata.invulnerable && !isAffliction) return true;
-            if (metadata.invulnerableToNonAffliction && !isAffliction) return true;
+            if (metadata.invulnerable) return true;
+            if (metadata.invulnerableToNonAffliction && !skillClasses.includes('affliction')) return true;
             const blockedClasses = Array.isArray(metadata.invulnerableToSkillClasses)
                 ? metadata.invulnerableToSkillClasses
                 : [];
@@ -96,8 +95,8 @@ test('UI/UX Hardening - Client Targeting Logic Matches Engine Rules', () => {
     );
     assert.equal(
         isUnitInvulnerableForSkill(invulnerableEnemy, afflictionSkill),
-        false,
-        'Affliction skill should NOT be blocked by standard invulnerability'
+        true,
+        'Affliction skill targeting is blocked by standard invulnerability'
     );
 
     const piercedEnemy = {

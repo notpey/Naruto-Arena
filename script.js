@@ -1656,15 +1656,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const isUnitInvulnerableForSkill = (unit, skill) => {
             const skillClasses = getNormalizedSkillClasses(skill);
-            const isAffliction = skillClasses.includes('affliction');
             if (getLiveStatuses(unit).some((s) => Boolean(s?.metadata?.cannotBecomeInvulnerable))) {
                 return false;
             }
             return getLiveStatuses(unit).some((status) => {
                 const metadata = status?.metadata || {};
                 if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
-                if (metadata.invulnerable && !isAffliction) return true;
-                if (metadata.invulnerableToNonAffliction && !isAffliction) return true;
+                if (metadata.invulnerable) return true;
+                if (metadata.invulnerableToNonAffliction && !skillClasses.includes('affliction')) return true;
                 const blockedClasses = Array.isArray(metadata.invulnerableToSkillClasses)
                     ? metadata.invulnerableToSkillClasses
                     : [];
