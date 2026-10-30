@@ -2235,76 +2235,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return null;
         };
 
-        const getAliveBoardTargets = (username) => {
-            const units = latestBoardState?.[username];
-            if (!username || !Array.isArray(units)) return [];
-            return units
-                .map((unit, slot) => {
-                    const hp = Number(unit?.hp);
-                    const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
-                    return unit && !dead ? { username, slot } : null;
-                })
-                .filter(Boolean);
-        };
-
-        const targetIsBlockedByInvulnerability = ({ username, slot, skill, actorSlot }) => {
-            const unit = latestBoardState?.[username]?.[slot];
-            if (!unit || username === currentPlayerUsername) return false;
-            const actorUnit = getActorUnitForSlot(currentPlayerUsername, actorSlot);
-            return (
-                isUnitInvulnerableForSkill(unit, skill) &&
-                !canActorIgnoreTargetInvulnerability({ actorUnit, skill, targetUnit: unit })
-            );
-        };
-
-        const mergeHighlightTargets = (baseTargets, extraTargets) => {
-            const byKey = new Map();
-            [...(baseTargets || []), ...(extraTargets || [])].forEach((target) => {
-                const slot = Number.parseInt(target?.slot, 10);
-                if (!target?.username || !Number.isInteger(slot)) return;
-                byKey.set(`${target.username}:${slot}`, { username: target.username, slot });
-            });
-            return Array.from(byKey.values());
-        };
-
-        const getEffectPreviewHighlightTargets = (skill) => {
-            if (!skill || !latestBoardState || typeof latestBoardState !== 'object') return [];
-            const actorSlot = Number.parseInt(activeCastingSkill?.actorSlot, 10);
-            const scopes = new Set(
-                (Array.isArray(skill.effects) ? skill.effects : [])
-                    .map((effect) => (typeof effect?.scope === 'string' ? effect.scope.trim().toLowerCase() : ''))
-                    .filter(Boolean)
-            );
-            let targets = [];
-            if (scopes.has('all-allies') || scopes.has('all-ally')) {
-                targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentPlayerUsername));
-            }
-            if (scopes.has('all-enemy') || scopes.has('all-other-enemy') || scopes.has('other-enemies')) {
-                targets = mergeHighlightTargets(targets, getAliveBoardTargets(currentOpponentUsername));
-            }
-            if (scopes.has('all-characters') || scopes.has('all-target')) {
-                targets = mergeHighlightTargets(
-                    targets,
-                    mergeHighlightTargets(
-                        getAliveBoardTargets(currentPlayerUsername),
-                        getAliveBoardTargets(currentOpponentUsername)
-                    )
-                );
-            }
-            return targets.filter((target) => {
-                const slot = Number.parseInt(target?.slot, 10);
-                if (!target?.username || !Number.isInteger(slot)) return false;
-                const unit = latestBoardState?.[target.username]?.[slot];
-                if (!doesUnitSatisfySkillTargetCondition(unit, skill)) return false;
-                return !targetIsBlockedByInvulnerability({
-                    username: target.username,
-                    slot,
-                    skill,
-                    actorSlot,
-                });
-            });
-        };
-
         const renderTargetHighlights = (options) => {
             clearTargetHighlights();
             const filteredOptions = filterTargetOptionsForCurrentBoard(options);
@@ -2312,11 +2242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeTargetOptions = filteredOptions;
             }
             if (!filteredOptions || !Array.isArray(filteredOptions.targets)) return;
-            const highlightTargets = mergeHighlightTargets(
-                filteredOptions.targets,
-                getEffectPreviewHighlightTargets(activeCastingSkill?.skill)
-            );
-            highlightTargets.forEach((target) => {
+            filteredOptions.targets.forEach((target) => {
                 const card = getCardByUsernameSlot(target.username, target.slot);
                 if (!card) return;
                 const face = card.querySelector('.character-face');
