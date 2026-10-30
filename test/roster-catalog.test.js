@@ -21,6 +21,8 @@ test('arc sorting changes display order without changing canonical roster indice
         ['aburame-shino', 'Aburame Shino'],
         ['hyuuga-hinata', 'Hyuuga Hinata'],
         ['inuzuka-kiba', 'Inuzuka Kiba'],
+        ['tenten', 'Tenten'],
+        ['neji-hyuuga', 'Hyuuga Neji'],
         ['gaara-of-the-desert', 'Gaara of the Desert'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
@@ -40,7 +42,7 @@ test('arc sorting changes display order without changing canonical roster indice
         'sarutobi-konohamaru', 'ebisu',
         'demon-brothers', 'momochi-zabuza', 'haku',
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
-        'inuzuka-kiba', 'gaara-of-the-desert',
+        'inuzuka-kiba', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
         'demon-brothers', 'momochi-zabuza', 'haku', 'gato', 'zori-and-waraji',
@@ -52,5 +54,7 @@ test('arc sorting changes display order without changing canonical roster indice
     assert.equal(catalog.filterRosterIndices(roster, { search: 'no match' }).length, 0);
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'sarutobi-hiruzen')).label, 'Land of Waves');
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'inuzuka-kiba')).label, 'Chūnin Exams');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'tenten')).label, 'Chūnin Exams');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'neji-hyuuga')).label, 'Chūnin Exams');
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'gaara-of-the-desert')).label, 'Chūnin Exams');
 });

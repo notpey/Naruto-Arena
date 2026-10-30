@@ -306,6 +306,78 @@ test('Kiba rework replaces a stored legacy kit and records its migration', async
         update.$set['completed.inuzuka-kiba-rework-2026-10-28']));
 });
 
+test('Neji draft migration replaces stored artwork and biography once', async () => {
+    const seed = require('../data/characters/neji-hyuuga');
+    let storedCharacters = [{
+        id: 'neji-hyuuga', characterId: 'neji-hyuuga', name: 'Hyuuga Neji',
+        facePicture: 'https://i.imgur.com/ExAFrus.png',
+        characterdeescription: 'Old Neji biography',
+        skills: [{ id: 'neji-hyuuga-eight-trigrams-revolving-heaven', name: 'Eight Trigrams Revolving Heaven' }],
+    }];
+    const completed = {};
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedCharacters }
+            : { key, completed },
+        updateOne: async ({ key }, update) => {
+            writes.push(key);
+            if (key === 'characters') storedCharacters = structuredClone(update.$set.characters);
+            if (key === 'character_migrations') {
+                for (const [field, value] of Object.entries(update.$set)) {
+                    if (field.startsWith('completed.')) completed[field.slice('completed.'.length)] = value;
+                }
+            }
+        },
+    };
+    const service = new CharacterService({ appStateCollection: collection });
+    const migrated = (await service.getStoredCharacters()).find((character) => character.id === 'neji-hyuuga');
+    assert.deepEqual(migrated, seed);
+    assert.ok(completed['neji-hyuuga-draft-2026-10-29']);
+
+    storedCharacters.find((character) => character.id === 'neji-hyuuga').characterdeescription = 'Edited later';
+    const writeCount = writes.length;
+    const reloaded = (await service.getStoredCharacters()).find((character) => character.id === 'neji-hyuuga');
+    assert.equal(reloaded.characterdeescription, 'Edited later');
+    assert.equal(writes.length, writeCount);
+});
+
+test('Tenten draft migration replaces stored artwork and biography once', async () => {
+    const seed = require('../data/characters/tenten');
+    let storedCharacters = [{
+        id: 'tenten', characterId: 'tenten', name: 'Tenten',
+        facePicture: 'https://i.imgur.com/xkYENuj.png',
+        characterdeescription: 'Old Tenten biography',
+        skills: [{ id: 'tenten-twin-rising-dragons-trap', name: 'Old Trap' }],
+    }];
+    const completed = {};
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedCharacters }
+            : { key, completed },
+        updateOne: async ({ key }, update) => {
+            writes.push(key);
+            if (key === 'characters') storedCharacters = structuredClone(update.$set.characters);
+            if (key === 'character_migrations') {
+                for (const [field, value] of Object.entries(update.$set)) {
+                    if (field.startsWith('completed.')) completed[field.slice('completed.'.length)] = value;
+                }
+            }
+        },
+    };
+    const service = new CharacterService({ appStateCollection: collection });
+    const migrated = (await service.getStoredCharacters()).find((character) => character.id === 'tenten');
+    assert.deepEqual(migrated, seed);
+    assert.ok(completed['tenten-draft-2026-10-29']);
+
+    storedCharacters.find((character) => character.id === 'tenten').characterdeescription = 'Edited later';
+    const writeCount = writes.length;
+    const reloaded = (await service.getStoredCharacters()).find((character) => character.id === 'tenten');
+    assert.equal(reloaded.characterdeescription, 'Edited later');
+    assert.equal(writes.length, writeCount);
+});
+
 test('Gaara rework replaces a stored legacy kit and records its migration', async () => {
     const legacy = {
         id: 'gaara-of-the-desert', characterId: 'gaara-of-the-desert', name: 'Gaara',

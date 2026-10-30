@@ -24,6 +24,8 @@ const NarutoRosterCatalog = (() => {
         ['aburame-shino', 'prologue'],
         ['hyuuga-hinata', 'prologue'],
         ['inuzuka-kiba', 'chunin-exams'],
+        ['tenten', 'chunin-exams'],
+        ['neji-hyuuga', 'chunin-exams'],
         ['gaara-of-the-desert', 'chunin-exams'],
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],

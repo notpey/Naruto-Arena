@@ -477,14 +477,24 @@
                 "id": "tenten",
                 "characterId": "tenten",
                 "name": "Tenten",
-                "facePicture": "https://i.imgur.com/xkYENuj.png",
-                "characterdeescription": "A member of team Gai, Tenten is a tomboyish weapon specialist who believes a kunoichi can be as strong as a male ninja. In battle, Tenten surrounds the battlefield in weapons, using them for damage and for disabling her opponents.",
+                "facePicture": "https://i.imgur.com/NHZg6gh.png",
+                "characterdeescription": "A hardworking genin of Team Guy, Tenten specializes in weapons combat, using summoning scrolls to unleash a vast arsenal of deadly projectiles. Determined to become a legendary kunoichi, she relies on precision, preparation, and relentless training to overcome her opponents.",
+                "passive": {
+                        "name": "Sharp Tools",
+                        "icon": "https://i.imgur.com/4KEJ94b.png",
+                        "description": "Tenten's arsenal punishes enemies who attack her. Enemies who use a damaging skill on Tenten take 5 physical damage.",
+                        "onEnemySkillTargetedDamageToSourceAmount": 5,
+                        "onEnemySkillTargetedDamageToSourceSkillClasses": [
+                                "Physical"
+                        ],
+                        "onEnemySkillTargetedDamagingOnly": true
+                },
                 "skills": [
                         {
                                 "id": "tenten-twin-rising-dragons",
                                 "name": "Twin Rising Dragons",
-                                "skillimage": "https://i.imgur.com/735M5GV.png",
-                                "skilldescription": "Tenten deals 15 damage to one enemy and 10 damage to all others. For 2 turns, all enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
+                                "skillimage": "https://i.imgur.com/g4ksO57.png",
+                                "skilldescription": "Tenten unleashes a barrage of summoned weapons, dealing 15 physical damage to an enemy and 10 physical damage to all other enemies.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -508,57 +518,42 @@
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
+                                                "statusId": "tenten_full_release_dragons_primary_repeat",
+                                                "duration": 1,
+                                                "scope": "target",
                                                 "condition": {
                                                         "scope": "self",
-                                                        "missingStatusId": "tenten_full_release_active"
+                                                        "statusId": "tenten_full_release_active"
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
+                                                        "turnEndDamage": 15,
+                                                        "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 10,
-                                                        "mergeNumericAddKeys": [
-                                                                "bonusDamageFromSourceSkillsFlat"
+                                                        "turnEndSkillClasses": [
+                                                                "Physical"
                                                         ],
-                                                        "bonusDamageFromSourceCharacterId": "tenten",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "tenten-twin-rising-dragons-trap"
-                                                        ],
-                                                        "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
+                                                        "tooltipText": "Takes 15 physical damage from Twin Rising Dragons on Tenten's next turn."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
+                                                "statusId": "tenten_full_release_dragons_other_repeat",
+                                                "duration": 1,
+                                                "scope": "all-other-enemy",
                                                 "condition": {
                                                         "scope": "self",
                                                         "statusId": "tenten_full_release_active"
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
+                                                        "turnEndDamage": 10,
+                                                        "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 20,
-                                                        "mergeNumericAddKeys": [
-                                                                "bonusDamageFromSourceSkillsFlat"
+                                                        "turnEndSkillClasses": [
+                                                                "Physical"
                                                         ],
-                                                        "bonusDamageFromSourceCharacterId": "tenten",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "tenten-twin-rising-dragons-trap"
-                                                        ],
-                                                        "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
-                                                }
-                                        },
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "self",
-                                                "statusId": "tenten_full_release_active",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
+                                                        "tooltipText": "Takes 10 physical damage from Twin Rising Dragons on Tenten's next turn."
                                                 }
                                         }
                                 ]
@@ -566,125 +561,65 @@
                         {
                                 "id": "tenten-twin-rising-dragons-trap",
                                 "name": "Twin Rising Dragons Trap",
-                                "skillimage": "https://i.imgur.com/pOsj115.png",
-                                "skilldescription": "Tenten deals 5 damage to all enemies. Enemies affected by 'Twin Rising Dragons' will have their physical and chakra skills stunned for 1 turn and will deal 10 less physical and chakra damage. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
+                                "skillimage": "https://i.imgur.com/LZze4F3.png",
+                                "skilldescription": "Tenten scatters concealed weapons, dealing 5 physical damage to all enemies and reducing their non-affliction damage by 5 for 1 turn. Affected enemies also suffer an additional 10 damage reduction until this skill is used again. This additional reduction stacks.",
                                 "energy": [
                                         "Random"
                                 ],
                                 "target": "all-enemy",
                                 "damage": 0,
-                                "cooldown": 2,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
+                                "cooldown": 0,
+                                "classes": [],
                                 "effects": [
                                         {
                                                 "type": "damage",
                                                 "amount": 5,
-                                                "scope": "all-enemy"
+                                                "scope": "all-enemy",
+                                                "metadata": {
+                                                        "skillClasses": [
+                                                                "Physical"
+                                                        ]
+                                                }
                                         },
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "tenten_twin_rising_dragons_trap_debuff",
                                                 "duration": 1,
                                                 "scope": "all-enemy",
-                                                "condition": {
-                                                        "all": [
-                                                                {
-                                                                        "scope": "target",
-                                                                        "statusId": "tenten_twin_rising_dragons_mark"
-                                                                },
-                                                                {
-                                                                        "scope": "self",
-                                                                        "missingStatusId": "tenten_full_release_active"
-                                                                }
-                                                        ]
-                                                },
                                                 "metadata": {
                                                         "harmful": true,
                                                         "turnDurationAnchor": "source_turn",
-                                                        "damageDebuffBySkillClass": {
-                                                                "physical": 10,
-                                                                "energy": 10
-                                                        },
-                                                        "tooltipText": "This character deals 10 less physical and chakra damage."
+                                                        "nonAfflictionDamageDebuffFlat": 5,
+                                                        "tooltipText": "This character deals 5 less non-affliction damage for 1 turn."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_trap_debuff",
-                                                "duration": 2,
+                                                "statusId": "tenten_twin_rising_dragons_trap_stack",
+                                                "duration": 99,
                                                 "scope": "all-enemy",
-                                                "condition": {
-                                                        "all": [
-                                                                {
-                                                                        "scope": "target",
-                                                                        "statusId": "tenten_twin_rising_dragons_mark"
-                                                                },
-                                                                {
-                                                                        "scope": "self",
-                                                                        "statusId": "tenten_full_release_active"
-                                                                }
-                                                        ]
-                                                },
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "damageDebuffBySkillClass": {
-                                                                "physical": 10,
-                                                                "energy": 10
-                                                        },
-                                                        "tooltipText": "This character deals 10 less physical and chakra damage."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_trap_skill_stun",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "tenten_twin_rising_dragons_mark"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "cannotUseSkillClasses": [
-                                                                "physical",
-                                                                "energy",
-                                                                "ninjutsu"
+                                                        "nonAfflictionDamageDebuffFlat": 10,
+                                                        "mergeNumericAddKeys": [
+                                                                "nonAfflictionDamageDebuffFlat"
                                                         ],
-                                                        "tooltipText": "This character's physical and chakra skills are stunned.",
-                                                        "turnDurationAnchor": "source_turn"
+                                                        "tooltipTextTemplate": "This character deals {nonAfflictionDamageDebuffFlat} less non-affliction damage from Twin Rising Dragons Trap stacks."
                                                 }
-                                        },
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "self",
-                                                "statusId": "tenten_full_release_active",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
-                                                }
-                                        },
-                                        {
-                                                "type": "cleanse_statuses",
-                                                "scope": "all-enemy",
-                                                "statusId": "tenten_twin_rising_dragons_mark"
                                         }
                                 ]
                         },
                         {
                                 "id": "tenten-twin-rising-dragons-full-release",
                                 "name": "Twin Rising Dragons Full Release",
-                                "skillimage": "https://i.imgur.com/5cUbYBW.png",
-                                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons marks will cause Twin Rising Dragons Trap to deal 20 additional damage, and Twin Rising Dragons Trap's damage reduction will last 1 additional turn.",
+                                "skillimage": "https://i.imgur.com/4KGkFYx.png",
+                                "skilldescription": "Tenten unleashes her full arsenal, becoming invulnerable to enemy physical skills for 1 turn. On the following turn, the effects of Twin Rising Dragons and Twin Rising Dragons Trap last 1 additional turn.",
                                 "energy": [
                                         "Random"
                                 ],
                                 "target": "self",
                                 "damage": 0,
-                                "cooldown": 2,
+                                "cooldown": 1,
                                 "classes": [
                                         "Strategic",
                                         "Instant"
@@ -696,27 +631,34 @@
                                                 "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "Tenten is invulnerable."
+                                                        "helpful": true,
+                                                        "invulnerableToSkillClasses": [
+                                                                "physical"
+                                                        ],
+                                                        "tooltipText": "Tenten is invulnerable to enemy Physical skills."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "tenten_full_release_active",
-                                                "duration": 99,
+                                                "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "consumeOnNextSkillUse": true,
-                                                        "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons marks will make Twin Rising Dragons Trap deal 20 additional damage. Twin Rising Dragons Trap's damage reduction will last 1 additional turn."
+                                                        "helpful": true,
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "skillDurationBonuses": {
+                                                                "tenten-twin-rising-dragons-trap": 1
+                                                        },
+                                                        "tooltipText": "On Tenten's following turn, Twin Rising Dragons deals its damage again on the next turn, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn."
                                                 }
                                         }
                                 ]
                         },
                         {
                                 "id": "tenten-spiked-boulder-wall",
-                                "name": "Spiked Boulder Wall",
-                                "skillimage": "https://i.imgur.com/45XopDc.png",
-                                "skilldescription": "This skill makes Tenten invulnerable for 1 turn.",
+                                "name": "Spike Boulder Shield",
+                                "skillimage": "https://i.imgur.com/WcN7LHU.png",
+                                "skilldescription": "Tenten shields herself behind a massive spiked boulder, becoming invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -734,8 +676,9 @@
                                                 "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
+                                                        "helpful": true,
                                                         "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
+                                                        "tooltipText": "Tenten is invulnerable."
                                                 }
                                         }
                                 ]
@@ -746,14 +689,19 @@
                 "id": "neji-hyuuga",
                 "characterId": "neji-hyuuga",
                 "name": "Hyuuga Neji",
-                "facePicture": "https://i.imgur.com/ExAFrus.png",
-                "characterdeescription": "A member of team Gai; Neji is the most talented member of the Hyuuga clan in both mind and body. Neji can use the most powerful techniques of his clan, shutting down an enemy's chakra or defending with an absolute defense.",
+                "facePicture": "https://i.imgur.com/j5onpzd.png",
+                "characterdeescription": "A gifted genin of the Hyuuga clan's branch family, Neji possesses exceptional mastery of the Byakugan and Gentle Fist fighting style. Cold and calculating, he believes that one's destiny is determined at birth and that no amount of effort can change it.",
+                "passive": {
+                        "name": "Neji's Byakugan",
+                        "icon": "https://i.imgur.com/ymCAsBc.png",
+                        "description": "Neji's Byakugan allows him to anticipate his opponents' movements. His skills cannot be countered."
+                },
                 "skills": [
                         {
                                 "id": "neji-hyuuga-neji-gentle-fist",
                                 "name": "Neji Gentle Fist",
-                                "skillimage": "https://i.imgur.com/q8jlVNU.png",
-                                "skilldescription": "Hyuuga Neji deals 20 damage to one enemy for 2 turns. During this time, this enemy's non-affliction damage will be lowered by 10.",
+                                "skillimage": "https://i.imgur.com/svJIAbh.png",
+                                "skilldescription": "Neji strikes an enemy's chakra points, dealing 20 physical damage for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
                                 "energy": [
                                         "Taijutsu",
                                         "Random"
@@ -761,6 +709,7 @@
                                 "target": "single-enemy",
                                 "damage": 0,
                                 "cooldown": 1,
+                                "cannotBeCountered": true,
                                 "classes": [
                                         "Physical",
                                         "Action"
@@ -778,50 +727,80 @@
                                                         "turnDurationAnchor": "source_turn",
                                                         "ongoingClass": "action",
                                                         "triggerOnApply": true,
-                                                        "NonAfflictionDamageDebuff": 10,
-                                                        "tooltipText": "This character takes 20 damage and deals 10 less non-affliction damage."
+                                                        "tooltipText": "This character takes 20 physical damage from Neji Gentle Fist each turn."
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "neji_hyuuga_gentle_fist_palm_cost",
+                                                "duration": 2,
+                                                "scope": "self",
+                                                "metadata": {
+                                                        "helpful": true,
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "ongoingClass": "action",
+                                                        "triggerOnApply": true,
+                                                        "skillCostOverridesBySkillId": {
+                                                                "neji-hyuuga-eight-trigrams-sixty-four-palms": {
+                                                                        "energy": [
+                                                                                "Taijutsu",
+                                                                                "Random"
+                                                                        ]
+                                                                }
+                                                        },
+                                                        "tooltipText": "Eight Trigram Sixty-Four Palm costs 1 Taijutsu and 1 Random chakra."
                                                 }
                                         }
                                 ]
                         },
                         {
                                 "id": "neji-hyuuga-eight-trigrams-revolving-heaven",
-                                "name": "Eight Trigrams Revolving Heaven",
-                                "skillimage": "https://i.imgur.com/o0ufVHY.png",
-                                "skilldescription": "Hyuuga Neji deals 10 damage to all enemies and becomes invulnerable for 1 turn.",
+                                "name": "Eight Trigram Heavenly Spin",
+                                "skillimage": "https://i.imgur.com/hB5n56N.png",
+                                "skilldescription": "Neji releases chakra in a defensive rotation, dealing 15 physical damage to all enemies and becoming invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
                                 "energy": [
                                         "Bloodline"
                                 ],
                                 "target": "all-enemy",
                                 "damage": 0,
-                                "cooldown": 1,
+                                "cooldown": 2,
+                                "cannotBeCountered": true,
                                 "classes": [
-                                        "Ninjutsu",
+                                        "Physical",
                                         "Instant"
                                 ],
                                 "effects": [
                                         {
                                                 "type": "damage",
-                                                "amount": 10,
+                                                "amount": 15,
                                                 "scope": "all-enemy"
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "invulnerable",
+                                                "statusId": "neji_hyuuga_heavenly_spin",
                                                 "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
+                                                        "helpful": true,
                                                         "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
+                                                        "skillCostOverridesBySkillId": {
+                                                                "neji-hyuuga-eight-trigrams-sixty-four-palms": {
+                                                                        "energy": [
+                                                                                "Bloodline",
+                                                                                "Random"
+                                                                        ]
+                                                                }
+                                                        },
+                                                        "tooltipText": "Neji is invulnerable. Eight Trigram Sixty-Four Palm costs 1 Bloodline and 1 Random chakra."
                                                 }
                                         }
                                 ]
                         },
                         {
                                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
-                                "name": "Eight Trigrams Sixty-Four Palms",
-                                "skillimage": "https://i.imgur.com/HsyJQsX.png",
-                                "skilldescription": "Hyuuga Neji deals 35 damage to one enemy and removes 1 random chakra from them.",
+                                "name": "Eight Trigram Sixty-Four Palm",
+                                "skillimage": "https://i.imgur.com/KgBRINj.png",
+                                "skilldescription": "Neji unleashes a rapid series of strikes, dealing 35 physical damage to an enemy and removing 1 chakra.",
                                 "energy": [
                                         "Taijutsu",
                                         "Bloodline"
@@ -829,6 +808,7 @@
                                 "target": "single-enemy",
                                 "damage": 0,
                                 "cooldown": 1,
+                                "cannotBeCountered": true,
                                 "classes": [
                                         "Physical",
                                         "Instant"
@@ -843,29 +823,21 @@
                                                 "type": "remove_random_chakra",
                                                 "amount": 1,
                                                 "scope": "target"
-                                        },
-                                        {
-                                                "type": "remove_random_chakra",
-                                                "amount": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "neji_hyuuga_neji_gentle_fist"
-                                                }
                                         }
                                 ]
                         },
                         {
                                 "id": "neji-hyuuga-byakugan-insight",
                                 "name": "Byakugan Insight",
-                                "skillimage": "https://i.imgur.com/2eXVucA.png",
-                                "skilldescription": "This skill makes Hyuuga Neji invulnerable for 1 turn.",
+                                "skillimage": "https://i.imgur.com/Yw9xYPS.png",
+                                "skilldescription": "Neji uses his Byakugan to anticipate incoming attacks, becoming invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
                                 "target": "self",
                                 "damage": 0,
                                 "cooldown": 4,
+                                "cannotBeCountered": true,
                                 "classes": [
                                         "Strategic",
                                         "Instant"

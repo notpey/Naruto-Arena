@@ -19,6 +19,8 @@ const ACTIVE_ROSTER_IDS = [
     'aburame-shino',
     'hyuuga-hinata',
     'inuzuka-kiba',
+    'tenten',
+    'neji-hyuuga',
     'gaara-of-the-desert',
 ];
 

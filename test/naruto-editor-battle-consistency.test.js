@@ -21,6 +21,7 @@ const {
     tickStatusesForTurnEnd,
     tickCooldownsForTurnEnd,
     isSkillIndexBlockedForActor,
+    isUnitInvulnerableForSkill,
 } = require('../battleLogic.js');
 
 const getCharIndex = (id) => characters.findIndex(c => (c && (c.id === id || c.characterId === id)));
@@ -851,92 +852,160 @@ test('battleLogic resolves Rock Lee starter kit behavior used by the editor data
     );
 });
 
-test('battleLogic resolves Tenten starter kit behavior used by the editor data', () => {
+test('battleLogic resolves Tenten draft damage, stacking reduction, and Full Release', () => {
     const match = makeMatch([getCharIndex('tenten')], [1, 2]);
+    const tenten = getCharacter('tenten');
+    const actor = match.board.p1[0];
+    const enemy = match.board.p2[0];
+    const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
+
+    assert.equal(tenten.passive.name, 'Sharp Tools');
+    assert.equal(status(actor, 'tenten_sharp_tools').metadata.passive, true);
+    assert.deepEqual(tenten.skills[1].classes, []);
+    assert.equal(tenten.skills[1].cooldown, 0);
+    assert.equal(tenten.skills[2].cooldown, 1);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 85, 'Twin Rising Dragons should deal 15 to the primary target');
     assert.equal(match.board.p2[1].hp, 90, 'Twin Rising Dragons should deal 10 to other enemies');
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_mark'), undefined);
 
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'Twin Rising Dragons Trap should gain bonus damage on marked targets');
-    assert.equal(match.board.p2[1].hp, 75, 'Twin Rising Dragons Trap should also hit other marked enemies');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'tenten_twin_rising_dragons_trap_skill_stun' &&
-                status.metadata.cannotUseSkillClasses.includes('physical') &&
-                status.metadata.cannotUseSkillClasses.includes('energy')
-        ),
-        true,
-        'Twin Rising Dragons Trap should stun marked enemies physical and chakra skills'
-    );
+    assert.equal(enemy.hp, 80, 'Trap deals 5 physical damage without a mark');
+    assert.equal(match.board.p2[1].hp, 85);
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_debuff').metadata.nonAfflictionDamageDebuffFlat, 5);
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 10);
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_skill_stun'), undefined);
+
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 20);
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: getCharIndex('tenten'),
-            skillIndex: 0,
-            actorState: match.board.p1[0].state,
-        }).id,
-        'tenten-twin-rising-dragons'
-    );
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    assert.equal(isUnitInvulnerableForSkill(actor, ['Physical']), true);
+    assert.equal(isUnitInvulnerableForSkill(actor, ['Chakra']), false);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.ok(status(actor, 'tenten_full_release_active'));
+    queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'tenten_twin_rising_dragons_mark' &&
-                status.metadata.bonusDamageFromSourceSkillsFlat === 20
-        ),
-        true,
-        'Full Release should improve Twin Rising Dragons without replacing the skill id'
-    );
-    assert.equal(
-        match.board.p1[0].state.statuses.some((status) => status.id === 'tenten_full_release_active'),
-        false,
-        'Full Release improvement should be consumed by the next harmful Tenten skill'
-    );
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_debuff').remainingTurns, 2,
+        'Full Release extends the following Trap debuff by 1 turn');
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 30);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(status(actor, 'tenten_full_release_active'), undefined);
 });
 
-test('battleLogic resolves Neji starter kit behavior used by the editor data', () => {
-    const match = makeMatch([getCharIndex('neji-hyuuga')], [1, 2]);
-    match.chakraPools.p2.taijutsu = 2;
+test('Full Release repeats Twin Rising Dragons damage once on the following Tenten turn', () => {
+    const match = makeMatch([getCharIndex('tenten')], [1, 2]);
+    const primary = match.board.p2[0];
+    const other = match.board.p2[1];
+    const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
+
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(primary.hp, 85);
+    assert.equal(other.hp, 90);
+    assert.ok(status(primary, 'tenten_full_release_dragons_primary_repeat'));
+    assert.ok(status(other, 'tenten_full_release_dragons_other_repeat'));
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(primary.hp, 85, 'the repeat does not fire on the cast turn');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.equal(primary.hp, 85, 'the repeat waits for Tenten');
+    other.state.statuses.push({ id: 'physical_only_guard', remainingTurns: 1,
+        metadata: { invulnerableToSkillClasses: ['physical'] } });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(primary.hp, 70, 'the selected enemy takes the second 15 damage');
+    assert.equal(other.hp, 90, 'Physical skill invulnerability blocks the second 10 damage');
+    assert.equal(status(primary, 'tenten_full_release_dragons_primary_repeat'), undefined);
+    assert.equal(status(other, 'tenten_full_release_dragons_other_repeat'), undefined);
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'neji_hyuuga_neji_gentle_fist' &&
-                status.metadata.NonAfflictionDamageDebuff === 10
-        ),
-        true,
-        'Gentle Fist should apply its stronger damage debuff'
-    );
+    assert.equal(status(primary, 'tenten_full_release_dragons_primary_repeat'), undefined,
+        'later Dragon casts do not inherit the expired Full Release');
+});
 
-    match.board.p1[0].state.cooldowns = {};
+test('Sharp Tools retaliates against damaging skills but not non-damaging marks', () => {
+    const match = makeMatch([getCharIndex('tenten')], [getCharIndex('inuzuka-kiba')]);
+    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p2[0].hp, 100);
+    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p2[0].hp, 95, 'Kiba takes 5 physical damage once for attacking Tenten');
+});
+
+test('Tenten Trap reductions lower a target’s next non-affliction attack', () => {
+    const match = makeMatch([getCharIndex('tenten')], [getCharIndex('inuzuka-kiba')]);
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 95);
+    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 85, '30 physical damage is reduced by 5 and the first 10-point stack');
+    assert.equal(match.board.p2[0].hp, 90, 'Sharp Tools retaliates against the attack');
+});
+
+test('battleLogic resolves Neji draft damage, chakra costs, and passive', () => {
+    const neji = getCharacter('neji-hyuuga');
+    const match = makeMatch([getCharIndex('neji-hyuuga')], [1, 2]);
+    const actor = match.board.p1[0];
+    const enemy = match.board.p2[0];
+    const palmCost = () => computeEffectiveEnergyCost({ skill: neji.skills[2], actorState: actor.state });
+    const hasStatus = (unit, id) => unit.state.statuses.some((status) => status.id === id && status.remainingTurns > 0);
+    match.chakraPools.p2.taijutsu = 2;
+
+    assert.equal(neji.passive.name, "Neji's Byakugan");
+    assert.equal(actor.state.statuses.some((status) => status.metadata.passive && status.metadata.sourceSkillName === neji.passive.name), true);
+    assert.equal(neji.skills.every((skill) => skill.cannotBeCountered), true);
+    assert.deepEqual(palmCost().reservedSpecific, { taijutsu: 1, ninjutsu: 0, bloodline: 1, genjutsu: 0 });
+    assert.equal(palmCost().requiredRandom, 0);
+
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(hasStatus(enemy, 'neji_hyuuga_neji_gentle_fist'), true);
+    assert.equal(hasStatus(actor, 'neji_hyuuga_gentle_fist_palm_cost'), true);
+    assert.equal(palmCost().reservedSpecific.taijutsu, 1);
+    assert.equal(palmCost().reservedSpecific.bloodline, 0);
+    assert.equal(palmCost().requiredRandom, 1);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(enemy.hp, 80, 'Gentle Fist deals the first 20 damage on the source turn');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    assert.equal(enemy.hp, 80, 'Gentle Fist does not tick on the enemy turn');
+
+    enemy.state.statuses.push({
+        id: 'neji_test_counter', remainingTurns: 2, sourceUsername: 'p2', sourceSlot: 0,
+        metadata: { triggerOnEnemyHarmfulSkill: true, counterCancelsSkill: true },
+    });
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 65, 'Eight Trigrams Sixty-Four Palms should deal 35 damage');
-    assert.equal(
-        match.chakraPools.p2.taijutsu,
-        0,
-        'Eight Trigrams Sixty-Four Palms should remove extra chakra from a Gentle Fist target'
-    );
+    assert.equal(enemy.hp, 45, 'Neji\'s passive lets Sixty-Four Palm deal 35 damage through a counter');
+    assert.equal(match.chakraPools.p2.taijutsu, 1, 'Sixty-Four Palm removes only 1 chakra');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(enemy.hp, 25, 'Gentle Fist deals the second 20 damage');
+    assert.equal(hasStatus(actor, 'neji_hyuuga_gentle_fist_palm_cost'), false);
+    assert.equal(palmCost().reservedSpecific.bloodline, 1, 'Palm returns to its base cost');
 
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55, 'Revolving Heaven should damage all enemies');
-    assert.equal(match.board.p2[1].hp, 90, 'Revolving Heaven should damage all enemies');
-    assert.equal(
-        match.board.p1[0].state.statuses.some((status) => status.id === 'invulnerable' && status.metadata.invulnerable),
-        true
-    );
+    assert.equal(enemy.hp, 10, 'Heavenly Spin deals 15 damage to the first enemy');
+    assert.equal(match.board.p2[1].hp, 85, 'Heavenly Spin deals 15 damage to the second enemy');
+    assert.equal(hasStatus(actor, 'neji_hyuuga_heavenly_spin'), true);
+    assert.equal(actor.state.statuses.find((status) => status.id === 'neji_hyuuga_heavenly_spin').metadata.invulnerable, true);
+    assert.equal(palmCost().reservedSpecific.bloodline, 1);
+    assert.equal(palmCost().reservedSpecific.taijutsu, 0);
+    assert.equal(palmCost().requiredRandom, 1);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(hasStatus(actor, 'neji_hyuuga_heavenly_spin'), true);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(hasStatus(actor, 'neji_hyuuga_heavenly_spin'), false);
+    assert.equal(palmCost().requiredRandom, 0);
 });
 
 test('battleLogic resolves Gaara Sand Binding Coffin from the editor data', () => {

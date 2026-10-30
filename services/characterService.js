@@ -14,6 +14,8 @@ const DEMON_BROTHERS_REWORK_MIGRATION_ID = 'demon-brothers-rework-2026-10-25';
 const HOKAGE_HIRUZEN_REWORK_MIGRATION_ID = 'hokage-hiruzen-rework-2026-10-26';
 const KIBA_REWORK_MIGRATION_ID = 'inuzuka-kiba-rework-2026-10-28';
 const GAARA_REWORK_MIGRATION_ID = 'gaara-of-the-desert-rework-2026-10-28';
+const NEJI_REWORK_MIGRATION_ID = 'neji-hyuuga-draft-2026-10-29';
+const TENTEN_REWORK_MIGRATION_ID = 'tenten-draft-2026-10-29';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -237,6 +239,8 @@ class CharacterService {
                     [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -294,6 +298,8 @@ class CharacterService {
                         [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -319,6 +325,8 @@ class CharacterService {
         const shouldApplyHokageHiruzenRework = !completedMigrations[HOKAGE_HIRUZEN_REWORK_MIGRATION_ID];
         const shouldApplyKibaRework = !completedMigrations[KIBA_REWORK_MIGRATION_ID];
         const shouldApplyGaaraRework = !completedMigrations[GAARA_REWORK_MIGRATION_ID];
+        const shouldApplyNejiRework = !completedMigrations[NEJI_REWORK_MIGRATION_ID];
+        const shouldApplyTentenRework = !completedMigrations[TENTEN_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -331,6 +339,8 @@ class CharacterService {
             ...(shouldApplyHokageHiruzenRework ? ['sarutobi-hiruzen'] : []),
             ...(shouldApplyKibaRework ? ['inuzuka-kiba'] : []),
             ...(shouldApplyGaaraRework ? ['gaara-of-the-desert'] : []),
+            ...(shouldApplyNejiRework ? ['neji-hyuuga'] : []),
+            ...(shouldApplyTentenRework ? ['tenten'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -404,6 +414,8 @@ class CharacterService {
                 if (shouldApplyHokageHiruzenRework && characterId === 'sarutobi-hiruzen') return seedEntry;
                 if (shouldApplyKibaRework && characterId === 'inuzuka-kiba') return seedEntry;
                 if (shouldApplyGaaraRework && characterId === 'gaara-of-the-desert') return seedEntry;
+                if (shouldApplyNejiRework && characterId === 'neji-hyuuga') return seedEntry;
+                if (shouldApplyTentenRework && characterId === 'tenten') return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -465,6 +477,8 @@ class CharacterService {
             shouldApplyDemonBrothersRework ||
             shouldApplyHokageHiruzenRework ||
             shouldApplyKibaRework ||
+            shouldApplyNejiRework ||
+            shouldApplyTentenRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -490,6 +504,8 @@ class CharacterService {
                         [`completed.${HOKAGE_HIRUZEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${KIBA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${GAARA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },

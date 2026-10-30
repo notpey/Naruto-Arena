@@ -105,6 +105,13 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           damageTakenInTurn: passive.damageTakenInTurn || null,
                           bonusAgainstNonDamagingSkillUser:
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
+                          onEnemySkillTargetedDamageToSourceAmount:
+                              Math.max(0, Number(passive.onEnemySkillTargetedDamageToSourceAmount) || 0),
+                          onEnemySkillTargetedDamageToSourceSkillClasses:
+                              Array.isArray(passive.onEnemySkillTargetedDamageToSourceSkillClasses)
+                                  ? passive.onEnemySkillTargetedDamageToSourceSkillClasses : [],
+                          onEnemySkillTargetedDamagingOnly:
+                              Boolean(passive.onEnemySkillTargetedDamagingOnly),
                           immuneToChakraRemovalAndStealing:
                               Boolean(passive.immuneToChakraRemovalAndStealing),
                           revealInvisibleSkills: Boolean(passive.revealInvisibleSkills),
@@ -4182,6 +4189,13 @@ const triggerOnEnemySkillTargetedBonuses = ({
         if (classFilter.length > 0 && !classFilter.some((entry) => hasSkillClass(skill?.classes || [], entry))) {
             return;
         }
+        if (metadata.onEnemySkillTargetedDamagingOnly &&
+            !(Array.isArray(skill?.effects) && skill.effects.some((effect) =>
+                effect?.type === 'damage' || effect?.type === 'health_steal_damage' ||
+                Math.max(0, Number(effect?.metadata?.turnEndDamage) || 0) > 0
+            ))) {
+            return;
+        }
         const retaliateDamage = Math.max(0, Number(metadata.onEnemySkillTargetedDamageToSourceAmount) || 0);
         const retaliationUsername = metadata.onEnemySkillTargetedUseStatusSource
             ? status?.sourceUsername : recipient.username;
@@ -7962,6 +7976,8 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 if (ongoingClass === 'action' && ((sourceStunned && !ignoreOngoingSourceStun) || targetInvulnerable)) return;
                 const baseTurnEndDamage = Math.max(0, Number(status?.metadata?.turnEndDamage) || 0);
                 let turnEndDamage = baseTurnEndDamage;
+                const turnEndSkillClasses = Array.isArray(status?.metadata?.turnEndSkillClasses)
+                    ? status.metadata.turnEndSkillClasses : [];
                 const turnEndIsAffliction = Boolean(status?.metadata?.afflictionDamage);
                 const ignoreSourceNonAfflictionDamageBonus = Boolean(
                     status?.metadata?.ignoreSourceNonAfflictionDamageBonus
@@ -7985,6 +8001,9 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 if (sourceOutgoingCap !== null) {
                     turnEndDamage = Math.min(turnEndDamage, sourceOutgoingCap);
                 }
+                if (turnEndSkillClasses.length > 0 && isUnitInvulnerableForSkill(unit, turnEndSkillClasses)) {
+                    turnEndDamage = 0;
+                }
                 if (turnEndDamage > 0) {
                     const affliction = turnEndIsAffliction;
                     const mitigationBudgetKey = `${username || ''}:${Number.isInteger(unitSlot) ? unitSlot : ''}`;
@@ -7995,6 +8014,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                         sourceSlot: Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null,
                         targetUsername: username,
                         afflictionDamage: affliction,
+                        skillClasses: turnEndSkillClasses,
                         damageDebugReason: 'turn end',
                         ignoreDamageReduction:
                             affliction || Boolean(status?.metadata?.ignoreTargetDamageReduction),

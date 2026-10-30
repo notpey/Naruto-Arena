@@ -111,22 +111,20 @@ test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
 
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80);
-    assert.equal(match.board.p2[1].hp, 75);
+    assert.equal(match.board.p2[0].hp, 90, 'Gaara reduces the 5 physical Trap damage to zero');
+    assert.equal(match.board.p2[1].hp, 85);
 });
 
-test('Tenten Twin Rising Dragons marks stack their Trap damage bonus', () => {
+test('Tenten Twin Rising Dragons Trap stacks its additional damage reduction', () => {
     const match = makeMatch([indexById.tenten], [indexById['gaara-of-the-desert']]);
 
-    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    match.board.p1[0].state.cooldowns = {};
-
-    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     assert.equal(
-        getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark')?.metadata?.bonusDamageFromSourceSkillsFlat,
+        getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_stack')?.metadata?.nonAfflictionDamageDebuffFlat,
         20
     );
 });

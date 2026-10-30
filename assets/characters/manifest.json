@@ -2374,5 +2374,53 @@
   "https://i.imgur.com/3aST3cX.png": {
     "local": "/assets/characters/3aST3cX.png",
     "sha256": "82a0fe8582fbcf3d811566de7547a13e9e437c767b80d214c4762c0a36bcc2fa"
+  },
+  "https://i.imgur.com/j5onpzd.png": {
+    "local": "/assets/characters/j5onpzd.png",
+    "sha256": "df0e33b2b7d9c5158df630a59d6e5d560bd7b4270cb341631935e897d13d8297"
+  },
+  "https://i.imgur.com/KgBRINj.png": {
+    "local": "/assets/characters/KgBRINj.png",
+    "sha256": "17f04d73d8dd55dded48a49d9925ac9e434e22b6439d7c9c0959c58c96d6f609"
+  },
+  "https://i.imgur.com/ymCAsBc.png": {
+    "local": "/assets/characters/ymCAsBc.png",
+    "sha256": "b2f587e62c45814e3f0094a7f24aa9aaa9f58421ee7591d4985fd04ec402221b"
+  },
+  "https://i.imgur.com/hB5n56N.png": {
+    "local": "/assets/characters/hB5n56N.png",
+    "sha256": "12d48c0b7565a6eef82085d79ab58745438743c8c70740e4e16983457ba13dfb"
+  },
+  "https://i.imgur.com/svJIAbh.png": {
+    "local": "/assets/characters/svJIAbh.png",
+    "sha256": "f072b8fe092f19fff075d44834bef9c25107746d446837afee08f4772e9ea3ba"
+  },
+  "https://i.imgur.com/Yw9xYPS.png": {
+    "local": "/assets/characters/Yw9xYPS.png",
+    "sha256": "32520ceec1ad615dbee2c0f672096b3a114483fc1e7e86c05769b706395e807c"
+  },
+  "https://i.imgur.com/4KGkFYx.png": {
+    "local": "/assets/characters/4KGkFYx.png",
+    "sha256": "98a1f885895e6e7d7a34071372b75fe7dbae02c512843414fcea98ab9825f1e3"
+  },
+  "https://i.imgur.com/NHZg6gh.png": {
+    "local": "/assets/characters/NHZg6gh.png",
+    "sha256": "e6c1b37f1fbb194233d8b5155502641622f0f3609a0a5e56ab096185c93accca"
+  },
+  "https://i.imgur.com/g4ksO57.png": {
+    "local": "/assets/characters/g4ksO57.png",
+    "sha256": "68abdd45953c57548a05874cdb7da50e0456a0436a4608ad2bdcc28777c584a3"
+  },
+  "https://i.imgur.com/4KEJ94b.png": {
+    "local": "/assets/characters/4KEJ94b.png",
+    "sha256": "1363638694c3a9faa774da2f046c7973f6314ce38e2a2a2634c91c1bb221e5b1"
+  },
+  "https://i.imgur.com/LZze4F3.png": {
+    "local": "/assets/characters/LZze4F3.png",
+    "sha256": "902ebf659f08fb9f8d835cb5875b3be6d8e3afcdabcbeffa774c7c5672b46c0e"
+  },
+  "https://i.imgur.com/WcN7LHU.png": {
+    "local": "/assets/characters/WcN7LHU.png",
+    "sha256": "ad39130b3afec5755594daa266be962429a0fff472358deb270d2cdaf95c5b34"
   }
 }
