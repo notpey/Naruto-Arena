@@ -3686,6 +3686,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             groupedStatuses.forEach((group, index) => {
                 const statusSkill = findSkillById(group?.sourceSkillId);
+                const polarityForStatus = (status) => {
+                    const metadata = status?.metadata || {};
+                    if (metadata.harmful === true) return 'harmful';
+                    if (metadata.helpful === true || metadata.passive === true) return 'helpful';
+                    const sourceEffect = statusSkill?.effects?.find((effect) =>
+                        effect?.type === 'apply_status' && effect?.statusId === status?.id
+                    );
+                    if (sourceEffect?.metadata?.harmful === true) return 'harmful';
+                    if (sourceEffect?.metadata?.helpful === true) return 'helpful';
+                    if (status?.sourceUsername && unitUsername) {
+                        return status.sourceUsername === unitUsername ? 'helpful' : 'harmful';
+                    }
+                    return '';
+                };
+                const polarities = group.statuses.map(polarityForStatus);
+                const polarity = polarities.includes('harmful')
+                    ? 'harmful'
+                    : polarities.includes('helpful') ? 'helpful' : '';
                 const iconEl =
                     index === 0 ? tooltipImgTemplate : tooltipImgTemplate.cloneNode(true);
                 if (index > 0) {
@@ -3694,6 +3712,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     iconEl.classList.remove('dynamic-status-icon');
                 }
+                iconEl.classList.toggle('status-helpful', polarity === 'helpful');
+                iconEl.classList.toggle('status-harmful', polarity === 'harmful');
+                iconEl.alt = `${statusSkill?.name || group.statuses[0]?.metadata?.sourceSkillName || 'Status'}${polarity ? ` (${polarity})` : ''}`;
                 iconEl.style.display = 'block';
                 iconEl.removeAttribute('title');
                 const iconSrc = resolveStatusIconSrc(group, statusSkill);
@@ -4033,12 +4054,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     tooltipWrap.style.visibility = 'visible';
                     entries.forEach((entry) => {
                         const iconEl = tooltipImgTemplate.cloneNode(true);
-                        iconEl.classList.remove('status-icon-template', 'dynamic-status-icon');
+                        iconEl.classList.remove('status-icon-template', 'dynamic-status-icon', 'status-helpful', 'status-harmful');
                         iconEl.classList.add('dynamic-queued-target-icon');
                         iconEl.style.display = 'block';
                         if (entry.iconSrc) {
                             iconEl.src = entry.iconSrc;
                         }
+                        iconEl.alt = `Targeted by ${entry.skillName}`;
                         iconEl.title = `Targeted by: ${entry.skillName}`;
                         tooltipWrap.appendChild(iconEl);
                     });

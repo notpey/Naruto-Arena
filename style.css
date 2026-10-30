@@ -5662,6 +5662,16 @@ text-transform: uppercase;
     cursor: help;
 }
 
+.skilltooltipimage.status-helpful {
+    border-color: #58b97b;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.65);
+}
+
+.skilltooltipimage.status-harmful {
+    border-color: #d9665c;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.65);
+}
+
 .status-tooltip-content {
     display: none;
     position: absolute;
