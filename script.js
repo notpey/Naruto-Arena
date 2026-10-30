@@ -1004,6 +1004,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let queuedSkillKeySet = new Set();
         let draggingQueueActorSlot = null;
         let latestBoardState = null;
+        let selectedPlayerSkill = null;
         let globalStatusTooltipEl = null;
         let globalStatusTooltipHideTimer = null;
         const INGAME_PERF_WARN_MS = 16;
@@ -1278,6 +1279,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             return { specific, random };
         };
 
+        const getStatusCostMetadata = (status) => {
+            const metadata = status?.metadata || {};
+            if (!status?.sourceSkillId || !status?.id) return metadata;
+            const sourceSkill = (getRosterData() || [])
+                .flatMap((character) => character?.skills || [])
+                .find((skill) => skill?.id === status.sourceSkillId);
+            const sourceEffect = sourceSkill?.effects?.find((effect) =>
+                effect?.type === 'apply_status' && effect?.statusId === status.id
+            );
+            // Some cost modifiers are omitted from the client status payload.
+            // Use the source skill for display, with server-returned values taking precedence.
+            return { ...(sourceEffect?.metadata || {}), ...metadata };
+        };
+
         const getActorCostReductions = (actorSlot) => {
             if (!Number.isInteger(actorSlot) || actorSlot < 0) {
                 return { taijutsu: 0, ninjutsu: 0, bloodline: 0, genjutsu: 0, random: 0 };
@@ -1287,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return statuses.reduce(
                 (totals, status) => {
                     if ((Number(status?.remainingTurns) || 0) <= 0) return totals;
-                    const metadata = status?.metadata || {};
+                    const metadata = getStatusCostMetadata(status);
                     const classScopedMap =
                         metadata.randomCostIncreaseForSkillClasses &&
                         typeof metadata.randomCostIncreaseForSkillClasses === 'object'
@@ -1311,6 +1326,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         nonMentalRandomIncrease:
                             totals.nonMentalRandomIncrease +
                             (Number(metadata.nonMentalRandomCostIncrease) || 0),
+                        harmfulRandomIncrease:
+                            totals.harmfulRandomIncrease +
+                            Math.max(0, Number(metadata.randomCostIncreaseForHarmfulSkills) || 0),
                         classScopedRandomIncreaseMaps: classScopedMap
                             ? [...totals.classScopedRandomIncreaseMaps, classScopedMap]
                             : totals.classScopedRandomIncreaseMaps,
@@ -1328,6 +1346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     random: 0,
                     randomIncrease: 0,
                     nonMentalRandomIncrease: 0,
+                    harmfulRandomIncrease: 0,
                     classScopedRandomIncreaseMaps: [],
                 }
             );
@@ -1385,6 +1404,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .filter(Boolean)
                 : [];
             const skillIsMental = skillClasses.includes('mental');
+            const skillIsHarmful = (Array.isArray(skill?.effects) ? skill.effects : []).some((effect) => {
+                if (['damage', 'health_steal_damage', 'execute_below_hp', 'destroy_destructible_defense'].includes(effect?.type)) return true;
+                if (effect?.type === 'modify_cooldowns') {
+                    return (Number(effect.amount) || 0) > 0 || Boolean(effect?.metadata?.harmful);
+                }
+                if (effect?.type !== 'apply_status') return false;
+                const metadata = effect?.metadata || {};
+                return Boolean(
+                    metadata.harmful || metadata.cannotUseSkills || metadata.cannotUseHelpfulSkills ||
+                    metadata.cannotUseHarmfulSkills || metadata.cannotUseNonMentalSkills ||
+                    metadata.useChosenSkillClassForCannotUseSkillClasses ||
+                    (Array.isArray(metadata.cannotUseSkillClasses) && metadata.cannotUseSkillClasses.length > 0) ||
+                    metadata.cannotReduceDamage || metadata.cannotBecomeInvulnerable || metadata.taunt
+                );
+            });
             const classScopedIncrease = (reductions.classScopedRandomIncreaseMaps || []).reduce(
                 (sum, map) => {
                     let statusIncrease = 0;
@@ -1402,6 +1436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const randomIncrease =
                 Math.max(0, reductions.randomIncrease) +
                 (skillIsMental ? 0 : Math.max(0, reductions.nonMentalRandomIncrease)) +
+                (skillIsHarmful ? reductions.harmfulRandomIncrease : 0) +
                 classScopedIncrease;
             const effective = [];
             chakraTypes.forEach((type) => {
@@ -3834,6 +3869,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pool = data.chakraPools?.[currentPlayerUsername] || playerPoolState || emptyPool();
             renderChakra(pool);
             renderBoardHealth(data);
+            if (selectedPlayerSkill) {
+                const selectedSkill = getEffectiveSkillForActorSlot(
+                    selectedPlayerSkill.actorSlot, selectedPlayerSkill.skillIdx
+                );
+                if (selectedSkill) {
+                    renderSkillEnergyCost(selectedSkill, selectedPlayerSkill.actorSlot);
+                }
+            }
             renderBoardStatuses(data);
             renderSkillCooldownBadges(data);
             pendingTurnState = normalizePendingTurn(data.pendingTurn);
@@ -4068,8 +4111,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
+        const renderSkillEnergyCost = (skill, actorSlot = null) => {
+            if (!skillInfo.energyEl) return;
+            skillInfo.energyEl.innerHTML = '';
+            const effectiveEnergy = getEffectiveEnergyList(skill.energy || [], actorSlot, skill);
+            if (!effectiveEnergy.length) {
+                const noneText = document.createElement('span');
+                noneText.className = 'energy-none';
+                noneText.textContent = ' none';
+                skillInfo.energyEl.appendChild(noneText);
+                return;
+            }
+            effectiveEnergy.forEach((type) => {
+                const box = document.createElement('span');
+                const normalized = typeof type === 'string' ? type.trim().toLowerCase() : '';
+                const cls = energyClassMap[normalized];
+                box.className = ['chakra-box', cls].filter(Boolean).join(' ');
+                if (!cls) {
+                    box.style.backgroundColor = '#000';
+                }
+                skillInfo.energyEl.appendChild(box);
+            });
+        };
+
         const renderSkillInfo = (character, skill, actorSlot = null, skillIdx = null, isBrowseNavCall = false) => {
             if (!skill || !character) return;
+            selectedPlayerSkill = Number.isInteger(actorSlot) && Number.isInteger(skillIdx)
+                ? { actorSlot, skillIdx }
+                : null;
             if (!isBrowseNavCall && enemySkillBrowseState) {
                 enemySkillBrowseState = null;
                 if (skillInfo.browseNavEl) skillInfo.browseNavEl.style.display = 'none';
@@ -4157,27 +4226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     };
                 }
             }
-            if (skillInfo.energyEl) {
-                skillInfo.energyEl.innerHTML = '';
-                const effectiveEnergy = getEffectiveEnergyList(skill.energy || [], actorSlot, skill);
-                if (!effectiveEnergy.length) {
-                    const noneText = document.createElement('span');
-                    noneText.className = 'energy-none';
-                    noneText.textContent = ' none';
-                    skillInfo.energyEl.appendChild(noneText);
-                    return;
-                }
-                effectiveEnergy.forEach((type) => {
-                    const box = document.createElement('span');
-                    const normalized = typeof type === 'string' ? type.trim().toLowerCase() : '';
-                    const cls = energyClassMap[normalized];
-                    box.className = ['chakra-box', cls].filter(Boolean).join(' ');
-                    if (!cls) {
-                        box.style.backgroundColor = '#000';
-                    }
-                    skillInfo.energyEl.appendChild(box);
-                });
-            }
+            renderSkillEnergyCost(skill, actorSlot);
         };
 
         let enemySkillBrowseState = null; // { side: 'opponent' | 'player', charSlot: 0..2, skillIdx: 0..3 }

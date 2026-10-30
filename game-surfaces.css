@@ -1605,9 +1605,19 @@
     border: 1px solid #82969d;
     border-radius: 2px;
     background: #101b22;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, .35);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, .5);
 }
 .game-remaster .skilltooltipimage:hover { border-color: #efc28e; }
+.game-remaster .skilltooltipimage.status-helpful {
+    border-width: 2px;
+    border-color: #42c969;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 6px rgba(0, 0, 0, .55);
+}
+.game-remaster .skilltooltipimage.status-harmful {
+    border-width: 2px;
+    border-color: #e94e4e;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 6px rgba(0, 0, 0, .55);
+}
 .game-remaster .global-status-tooltip,
 .game-remaster .status-tooltip-content {
     box-sizing: border-box;

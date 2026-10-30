@@ -388,11 +388,12 @@
                     "id": "aburame-shino-infestation",
                     "name": "Infestation",
                     "skillimage": "https://i.imgur.com/vPf2DKk.png",
-                    "skilldescription": "Shino deals 5 affliction damage to one enemy each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.",
+                    "skilldescription": "Shino infests one enemy who is not already affected by Infestation. That enemy takes 5 affliction damage each turn until Shino dies. If they are affected by Female Bug, they also deal 5 less non-affliction damage.",
                     "energy": [
                         "Random"
                     ],
                     "target": "single-enemy",
+                    "targetCondition": { "missingStatusId": "aburame_shino_infestation" },
                     "damage": 0,
                     "cooldown": 1,
                     "classes": [

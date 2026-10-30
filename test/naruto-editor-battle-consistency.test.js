@@ -15,6 +15,7 @@ const {
     resolvePendingTurnSkills,
     resolveEffectiveSkill,
     computeTargetOptions,
+    validateTargetSelection,
     applyDamageToUnit,
     applyHealToUnit,
     computeEffectiveEnergyCost,
@@ -1310,16 +1311,20 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
     );
 });
 
-test('Shino reapplying Infestation refreshes it instead of stacking', () => {
-    const match = makeMatch([getCharIndex('aburame-shino')], [getCharIndex('haruno-sakura')]);
-    for (let use = 0; use < 2; use += 1) {
-        match.board.p1[0].state.cooldowns = {};
-        queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
-        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    }
-    const infestation = match.board.p2[0].state.statuses.filter(status => status.id === 'aburame_shino_infestation');
-    assert.equal(infestation.length, 1);
-    assert.equal(infestation[0].remainingTurns, 99);
+test('Shino Infestation cannot target an already infested enemy', () => {
+    const match = makeMatch([getCharIndex('aburame-shino')],
+        [getCharIndex('haruno-sakura'), getCharIndex('uchiha-sasuke')]);
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+
+    const options = computeTargetOptions({
+        match, actingUsername: 'p1', actorSlot: 0, skillIndex: 2, characters,
+    });
+    assert.deepEqual(options.targets.map((target) => target.slot), [1]);
+    assert.equal(validateTargetSelection(options, [{ username: 'p2', slot: 0 }]), false);
+    assert.equal(validateTargetSelection(options, [{ username: 'p2', slot: 1 }]), true);
+    assert.match(characters[getCharIndex('aburame-shino')].skills[2].skilldescription,
+        /not already affected by Infestation/);
 });
 
 test('Shino Chakra Leech gains its conditional effects from Female Bug and Infestation', () => {
