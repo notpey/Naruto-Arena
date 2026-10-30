@@ -171,7 +171,7 @@ module.exports = {
             "id": "kankuro-puppet-replacement-technique",
             "name": "Puppet Replacement Technique",
             "skillimage": "https://i.imgur.com/P2K3Uue.png",
-            "skilldescription": "This skill makes Kankuro invulnerable for 1 turn.",
+            "skilldescription": "Kankuro becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

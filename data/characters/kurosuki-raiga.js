@@ -141,7 +141,7 @@ module.exports = {
             "id": "kurosuki-raiga-lightning-strike-armor",
             "name": "Lightning Strike Armor",
             "skillimage": "https://i.imgur.com/xJZHpqR.png",
-            "skilldescription": "This skill makes Kurosuki Raiga invulnerable for 1 turn.",
+            "skilldescription": "Kurosuki Raiga becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

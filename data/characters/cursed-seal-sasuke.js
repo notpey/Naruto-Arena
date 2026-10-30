@@ -179,7 +179,7 @@ module.exports = {
             "id": "cursed-seal-sasuke-sharingan-evasion",
             "name": "Sharingan Evasion",
             "skillimage": "https://i.imgur.com/gz8961h.png",
-            "skilldescription": "This skill makes Cursed Seal Sasuke invulnerable for 1 turn.",
+            "skilldescription": "Cursed Seal Sasuke becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

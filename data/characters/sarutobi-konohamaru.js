@@ -26,13 +26,13 @@ module.exports = {
                             metadata: { harmful: true, cannotUseSkillClasses: ['physical'],
                                 tooltipText: 'Physical skills are stunned by Konohamaru.' },
                         },
-                        tooltipText: 'Ignores all damage. When targeted, Konohamaru deals 15 damage to the attacker and stuns their Physical skills.' } },
+                        tooltipText: 'This character ignores all damage. When targeted, Konohamaru deals 15 damage to the attacker and stuns their Physical skills.' } },
             ],
         },
         { id: 'sarutobi-konohamaru-sexy-jutsu-konohamaru-style',
             name: 'Sexy Jutsu: Konohamaru Style',
             skillimage: 'https://i.imgur.com/VJeRkMO.png',
-            skilldescription: "Konohamaru transforms into a clumsy, scantily-clad woman to distract the enemy.  Causing the target to be confused, for 1 turn that enemy's skills will target a random enemy.",
+            skilldescription: "Konohamaru makes one enemy's skills target a random enemy for 1 turn.",
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Chakra', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'konohamaru_sexy_jutsu_confusion', duration: 1, scope: 'target',
@@ -43,7 +43,7 @@ module.exports = {
         { id: 'sarutobi-konohamaru-shuriken-and-trap-ambush',
             name: 'Shuriken & Trap Ambush',
             skillimage: 'https://i.imgur.com/9eeMP2A.png',
-            skilldescription: 'Konohamaru throws a barrage of clumsy shuriken and triggers tripwires. Deals 20 damage to one enemy and 10 piercing damage to all other enemies. If Konohamaru is targeted next turn, the attacker takes 10 counter damage.',
+            skilldescription: 'Konohamaru deals 20 damage to one enemy and 10 piercing damage to all other enemies. If an enemy targets him next turn, the attacker takes 10 counter damage.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
                 { type: 'damage', amount: 20, scope: 'target' },
@@ -56,7 +56,7 @@ module.exports = {
         },
         { id: 'sarutobi-konohamaru-replacement-technique', name: 'Replacement Technique',
             skillimage: 'https://i.imgur.com/kYdI5MF.png',
-            skilldescription: 'This skill makes Konohamaru invulnerable for 1 turn.',
+            skilldescription: 'Konohamaru becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Chakra', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'konohamaru_replacement', duration: 1, scope: 'self',

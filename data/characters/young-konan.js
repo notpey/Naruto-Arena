@@ -104,7 +104,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "This character has 35 points of permanent destructible defense."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 }
             ]
@@ -113,7 +113,7 @@ module.exports = {
             "id": "young-konan-in-the-shadows",
             "name": "In the Shadows",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Konan invulnerable for 1 turn.",
+            "skilldescription": "Young Konan becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

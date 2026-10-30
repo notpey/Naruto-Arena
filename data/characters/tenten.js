@@ -7,7 +7,7 @@ module.exports = {
     passive: {
         name: 'Sharp Tools',
         icon: 'https://i.imgur.com/4KEJ94b.png',
-        description: "Tenten's arsenal punishes enemies who attack her. Enemies who use a damaging skill on Tenten take 5 physical damage.",
+        description: 'Enemies who use a damaging skill on Tenten take 5 physical damage.',
         onEnemySkillTargetedDamageToSourceAmount: 5,
         onEnemySkillTargetedDamageToSourceSkillClasses: ['Physical'],
         onEnemySkillTargetedDamagingOnly: true,
@@ -17,7 +17,7 @@ module.exports = {
             id: 'tenten-twin-rising-dragons',
             name: 'Twin Rising Dragons',
             skillimage: 'https://i.imgur.com/g4ksO57.png',
-            skilldescription: 'Tenten unleashes a barrage of summoned weapons, dealing 15 physical damage to an enemy and 10 physical damage to all other enemies.',
+            skilldescription: 'Tenten deals 15 physical damage to one enemy and 10 physical damage to all other enemies.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -29,7 +29,7 @@ module.exports = {
                     metadata: {
                         harmful: true, turnEndDamage: 15, turnEndTrigger: 'source_turn',
                         turnDurationAnchor: 'source_turn', turnEndSkillClasses: ['Physical'],
-                        tooltipText: 'Takes 15 physical damage from Twin Rising Dragons on Tenten\'s next turn.',
+                        tooltipText: 'This character takes 15 physical damage on Tenten\'s next turn.',
                     } },
                 { type: 'apply_status', statusId: 'tenten_full_release_dragons_other_repeat',
                     duration: 1, scope: 'all-other-enemy',
@@ -37,7 +37,7 @@ module.exports = {
                     metadata: {
                         harmful: true, turnEndDamage: 10, turnEndTrigger: 'source_turn',
                         turnDurationAnchor: 'source_turn', turnEndSkillClasses: ['Physical'],
-                        tooltipText: 'Takes 10 physical damage from Twin Rising Dragons on Tenten\'s next turn.',
+                        tooltipText: 'This character takes 10 physical damage on Tenten\'s next turn.',
                     } },
             ],
         },
@@ -45,7 +45,7 @@ module.exports = {
             id: 'tenten-twin-rising-dragons-trap',
             name: 'Twin Rising Dragons Trap',
             skillimage: 'https://i.imgur.com/LZze4F3.png',
-            skilldescription: 'Tenten scatters concealed weapons, dealing 5 physical damage to all enemies and reducing their non-affliction damage by 5 for 1 turn. Affected enemies also suffer an additional 10 damage reduction until this skill is used again. This additional reduction stacks.',
+            skilldescription: 'Tenten deals 5 physical damage to all enemies and makes them deal 5 less non-affliction damage for 1 turn. Each use also adds a stacking 10-point non-affliction damage penalty.',
             energy: ['Random'], target: 'all-enemy', damage: 0, cooldown: 0,
             classes: [],
             effects: [
@@ -68,14 +68,14 @@ module.exports = {
             id: 'tenten-twin-rising-dragons-full-release',
             name: 'Twin Rising Dragons Full Release',
             skillimage: 'https://i.imgur.com/4KGkFYx.png',
-            skilldescription: 'Tenten unleashes her full arsenal, becoming invulnerable to enemy physical skills for 1 turn. On the following turn, the effects of Twin Rising Dragons and Twin Rising Dragons Trap last 1 additional turn.',
+            skilldescription: "Tenten becomes invulnerable to enemy Physical skills for 1 turn. On her next turn, Twin Rising Dragons repeats its damage on the following turn and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
             energy: ['Random'], target: 'self', damage: 0, cooldown: 1,
             classes: ['Strategic', 'Instant'],
             effects: [
                 { type: 'apply_status', statusId: 'tenten_full_release_invulnerability',
                     duration: 1, scope: 'self', metadata: {
                         helpful: true, invulnerableToSkillClasses: ['physical'],
-                        tooltipText: 'Tenten is invulnerable to enemy Physical skills.',
+                        tooltipText: 'This character is invulnerable to enemy Physical skills.',
                     } },
                 { type: 'apply_status', statusId: 'tenten_full_release_active',
                     duration: 1, scope: 'self', metadata: {
@@ -83,7 +83,7 @@ module.exports = {
                         skillDurationBonuses: {
                             'tenten-twin-rising-dragons-trap': 1,
                         },
-                        tooltipText: 'On Tenten\'s following turn, Twin Rising Dragons deals its damage again on the next turn, and Twin Rising Dragons Trap\'s damage reduction lasts 1 additional turn.',
+                        tooltipText: 'On Tenten\'s next turn, Twin Rising Dragons repeats its damage on the following turn, and Twin Rising Dragons Trap lasts 1 additional turn.',
                     } },
             ],
         },
@@ -97,7 +97,7 @@ module.exports = {
             effects: [{ type: 'apply_status', statusId: 'invulnerable',
                 duration: 1, scope: 'self', metadata: {
                     helpful: true, invulnerable: true,
-                    tooltipText: 'Tenten is invulnerable.',
+                    tooltipText: 'This character is invulnerable.',
                 } }],
         },
     ],

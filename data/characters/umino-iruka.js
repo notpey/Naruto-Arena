@@ -23,7 +23,7 @@ module.exports = {
             id: 'umino-iruka-shuriken-throw',
             name: 'Shuriken Throw',
             skillimage: 'https://i.imgur.com/LmS1XVp.png',
-            skilldescription: 'Iruka throws shuriken at one enemy, dealing 20 physical damage. If they are affected by his Sealed Bomb Square Release, the trap detonates immediately.',
+            skilldescription: 'Iruka deals 20 physical damage to one enemy. If they are affected by his Sealed Bomb Square Release, the trap detonates immediately.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -43,7 +43,7 @@ module.exports = {
             id: 'umino-iruka-academy-instruction',
             name: 'Academy Instruction',
             skillimage: 'https://i.imgur.com/NJMON6n.png',
-            skilldescription: 'Iruka prepares himself or one ally to defend, granting 15 destructible defense for 2 turns. For 1 turn, the first enemy to use a new harmful skill on that ally takes 10 physical damage.',
+            skilldescription: 'Iruka grants himself or one ally 15 destructible defense for 2 turns. For 1 turn, the first enemy to use a new harmful skill on that ally takes 10 physical damage.',
             energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 3,
             classes: ['Strategic', 'Instant', 'Physical*'],
             effects: [
@@ -70,7 +70,7 @@ module.exports = {
             id: 'umino-iruka-sealed-bomb-square-release',
             name: 'Sealed Bomb Square Release',
             skillimage: 'https://i.imgur.com/TeDfWJB.png',
-            skilldescription: 'Iruka places an invisible explosive trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 30 damage and ends. Shuriken Throw can detonate it early.',
+            skilldescription: 'Iruka places an invisible trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 30 damage and ends. Shuriken Throw can detonate it early.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Chakra', 'Instant'],
             effects: [{

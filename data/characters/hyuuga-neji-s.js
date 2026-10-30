@@ -89,7 +89,7 @@ module.exports = {
                         "harmful": true,
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
-                        "tooltipText": "Cannot reduce damage or become invulnerable for 2 turns."
+                        "tooltipText": "This character cannot reduce damage or become invulnerable."
                     }
                 },
                 {
@@ -126,7 +126,7 @@ module.exports = {
             "id": "hyuuga-neji-s-byakugan-defense",
             "name": "Byakugan Defense",
             "skillimage": "https://i.imgur.com/FXM6jYa.png",
-            "skilldescription": "This skill makes Hyuuga Neji (S) invulnerable for 1 turn.",
+            "skilldescription": "Hyuuga Neji (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -154,7 +154,7 @@ module.exports = {
             "id": "hyuuga-neji-s-pressure-point-strike",
             "name": "Pressure Point Strike",
             "skillimage": "https://i.imgur.com/QTNMUo0.png",
-            "skilldescription": "Hyuuga Neji (S) attacks one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
+            "skilldescription": "Hyuuga Neji (S) targets one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
             "energy": [
                 "Random"
             ],

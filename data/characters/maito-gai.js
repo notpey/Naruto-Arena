@@ -117,7 +117,7 @@ module.exports = {
             "id": "maito-gai-gai-dodge",
             "name": "Gai Dodge",
             "skillimage": "https://i.imgur.com/GtBoCxV.png",
-            "skilldescription": "This skill makes Maito Gai invulnerable for 1 turn.",
+            "skilldescription": "Maito Gai becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

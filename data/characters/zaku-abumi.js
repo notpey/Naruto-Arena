@@ -100,7 +100,7 @@ module.exports = {
             "id": "zaku-abumi-airwave-deflection",
             "name": "Airwave Deflection",
             "skillimage": "https://i.imgur.com/yszdsLO.png",
-            "skilldescription": "This skill makes Abumi Zaku invulnerable for 1 turn.",
+            "skilldescription": "Abumi Zaku becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

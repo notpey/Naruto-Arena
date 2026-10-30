@@ -44,7 +44,7 @@ module.exports = {
                         "afflictionDamage": true,
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
-                        "tooltipText": "Taking 5 affliction damage each turn permanently."
+                        "tooltipText": "This character takes 5 affliction damage each turn."
                     }
                 }
             ]
@@ -88,7 +88,7 @@ module.exports = {
                             "ignoreDestructibleDefense": true,
                             "tooltipText": "Taking 10 permanent affliction damage per turn."
                         },
-                        "tooltipText": "Ignores enemy damage for 1 turn and poisons attackers for 10 instant damage and 10 permanent damage."
+                        "tooltipText": "This character ignores enemy damage and poisons attackers for 10 instant damage and 10 permanent damage."
                     }
                 }
             ]
@@ -139,7 +139,7 @@ module.exports = {
             "id": "hiruko-sasori-tail-deflection",
             "name": "Tail Deflection",
             "skillimage": "https://i.imgur.com/KdJD3ve.png",
-            "skilldescription": "This skill makes Hiruko Sasori invulnerable for 1 turn.",
+            "skilldescription": "Hiruko Sasori becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -200,7 +200,7 @@ module.exports = {
                         "afflictionDamage": true,
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
-                        "tooltipText": "Taking 5 affliction damage each turn permanently."
+                        "tooltipText": "This character takes 5 affliction damage each turn."
                     }
                 }
             ]
@@ -254,7 +254,7 @@ module.exports = {
                                 }
                             }
                         ],
-                        "tooltipText": "Taking 5 piercing damage and 5 affliction damage per turn for 3 turns."
+                        "tooltipText": "This character takes 5 piercing damage and 5 affliction damage each turn."
                     }
                 }
             ]

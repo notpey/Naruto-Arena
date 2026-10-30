@@ -9,7 +9,7 @@ module.exports = {
             "id": "temari-cutting-whirlwind",
             "name": "Cutting Whirlwind",
             "skillimage": "https://i.imgur.com/VU7HluY.png",
-            "skilldescription": "Temari creates a razor sharp wind, dealing 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
+            "skilldescription": "Temari deals 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
             "energy": [
                 "Ninjutsu"
             ],
@@ -66,7 +66,7 @@ module.exports = {
             "id": "temari-summoning-quick-beheading-dance",
             "name": "Summoning Quick Beheading Dance",
             "skillimage": "https://i.imgur.com/9VRqsM7.png",
-            "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies. If used one turn after 'Cutting Whirlwind', this skill will cost 1 less random chakra.",
+            "skilldescription": "Temari deals 35 damage to all enemies. If used one turn after Cutting Whirlwind, this skill costs 1 less random chakra.",
             "energy": [
                 "Ninjutsu",
                 "Random",
@@ -162,7 +162,7 @@ module.exports = {
             "id": "temari-fan-defence-technique",
             "name": "Fan Defence Technique",
             "skillimage": "https://i.imgur.com/nnNAsmM.png",
-            "skilldescription": "This skill makes Temari invulnerable for 1 turn.",
+            "skilldescription": "Temari becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

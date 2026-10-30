@@ -37,7 +37,7 @@ module.exports = {
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
                         "invulnerableToFriendlySkills": true,
-                        "tooltipText": "Taking 15 affliction damage each turn and invulnerable to friendly skills."
+                        "tooltipText": "This character takes 15 affliction damage each turn and is invulnerable to friendly skills."
                     }
                 },
                 {
@@ -146,7 +146,7 @@ module.exports = {
             "id": "aburame-shino-s-insect-cocoon",
             "name": "Insect Cocoon",
             "skillimage": "https://i.imgur.com/s9ukg3d.png",
-            "skilldescription": "This skill makes Aburame Shino (S) invulnerable for 1 turn.",
+            "skilldescription": "Aburame Shino (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -207,7 +207,7 @@ module.exports = {
                         "bonusDamageAppliesToSkillIds": [
                             "aburame-shino-s-insect-swarm"
                         ],
-                        "tooltipText": "Takes 5 additional damage from Insect Swarm this turn."
+                        "tooltipText": "This character takes 5 additional damage from Insect Swarm this turn."
                     }
                 }
             ]

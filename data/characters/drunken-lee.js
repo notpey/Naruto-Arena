@@ -129,7 +129,7 @@ module.exports = {
             "id": "drunken-lee-drunken-leap",
             "name": "Drunken Leap",
             "skillimage": "https://i.imgur.com/rXB5r9a.png",
-            "skilldescription": "This skill makes Drunken Lee invulnerable for 1 turn.",
+            "skilldescription": "Drunken Lee becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

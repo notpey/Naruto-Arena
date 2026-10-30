@@ -18,7 +18,7 @@ module.exports = {
             "id": "uchiha-sasuke-shadow-shuriken-technique",
             "name": "Shadow Shuriken Technique",
             "skillimage": "https://i.imgur.com/ynDNiUT.png",
-            "skilldescription": "Sasuke throws shuriken at one enemy, dealing 20 physical damage. If that enemy is affected by his Fireball Jutsu, this skill also stuns their Physical skills for 1 turn and ends Fireball Jutsu's remaining effect.",
+            "skilldescription": "Sasuke deals 20 physical damage to one enemy. If that enemy is affected by his Fireball Jutsu, this skill also stuns their Physical skills for 1 turn and ends Fireball Jutsu's remaining effect.",
             "energy": [
                 "Ninjutsu"
             ],
@@ -70,7 +70,7 @@ module.exports = {
             "id": "uchiha-sasuke-great-fireball-jutsu",
             "name": "Fire Style: Great Fireball Jutsu",
             "skillimage": "https://i.imgur.com/60VDgWY.png",
-            "skilldescription": "Sasuke unleashes a massive fireball at one enemy, dealing 20 chakra damage and 5 affliction damage* for 3 turns.",
+            "skilldescription": "Sasuke deals 20 chakra damage to one enemy and 5 affliction damage* for 3 turns.",
             "energy": [
                 "Bloodline"
             ],
@@ -144,7 +144,7 @@ module.exports = {
             "id": "uchiha-sasuke-stealth",
             "name": "Stealth",
             "skillimage": "https://i.imgur.com/dC3c6Vs.png",
-            "skilldescription": "This skill makes Sasuke Uchiha invulnerable for 1 turn.",
+            "skilldescription": "Sasuke Uchiha becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

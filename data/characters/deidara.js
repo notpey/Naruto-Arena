@@ -37,7 +37,7 @@ module.exports = {
                         "skillClassDamageDealtModifiers": {
                             "energy": -10
                         },
-                        "tooltipText": "Taking 10 piercing damage per turn and energy skills deal 10 less damage."
+                        "tooltipText": "This character takes 10 piercing damage each turn, and their Energy skills deal 10 less damage."
                     }
                 },
                 {
@@ -49,7 +49,7 @@ module.exports = {
                         "helpful": true,
                         "ongoingClass": "action",
                         "invulnerableToMentalSkills": true,
-                        "tooltipText": "Invulnerable to mental skills."
+                        "tooltipText": "This character is invulnerable to Mental skills."
                     }
                 },
                 {
@@ -101,7 +101,7 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "invulnerableToEnergySkills": true,
-                        "tooltipText": "Invulnerable to energy skills for 1 turn."
+                        "tooltipText": "This character is invulnerable to Energy skills."
                     }
                 },
                 {
@@ -232,7 +232,7 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "invulnerableToPhysicalSkills": true,
-                        "tooltipText": "Invulnerable to physical skills for 1 turn."
+                        "tooltipText": "This character is invulnerable to Physical skills."
                     }
                 },
                 {
@@ -293,7 +293,7 @@ module.exports = {
                         "damageTakenFromSkillClassModifiers": {
                             "energy": 5
                         },
-                        "tooltipText": "Takes 10 piercing damage when using a skill and +5 damage from energy skills."
+                        "tooltipText": "This character takes 10 piercing damage when using a skill and 5 additional damage from Energy skills."
                     }
                 },
                 {

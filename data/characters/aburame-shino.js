@@ -11,7 +11,7 @@ module.exports = {
         {
             id: 'aburame-shino-female-bug', name: 'Female Bug',
             skillimage: 'https://i.imgur.com/NZvHesR.png',
-            skilldescription: 'Shino permanently marks one enemy with a female insect. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.',
+            skilldescription: 'Shino permanently marks one enemy. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.',
             energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Affliction', 'Instant'],
             effects: [
@@ -52,7 +52,7 @@ module.exports = {
         {
             id: 'aburame-shino-infestation', name: 'Infestation',
             skillimage: 'https://i.imgur.com/vPf2DKk.png',
-            skilldescription: 'Shino infests an enemy with insects, dealing 5 affliction damage each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.',
+            skilldescription: 'Shino deals 5 affliction damage to one enemy each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Affliction', 'Instant'],
             effects: [

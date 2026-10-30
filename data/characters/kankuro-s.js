@@ -40,7 +40,7 @@ module.exports = {
                             ],
                             "tooltipText": "Takes 100% more damage from Karasu Knives."
                         },
-                        "tooltipText": "Subject to Kuroari Trap: next harmful skill will be countered, increasing Karasu Knives damage by 100%."
+                        "tooltipText": "The next harmful skill this character uses is countered, increasing Karasu Knives damage by 100%."
                     }
                 }
             ]
@@ -119,7 +119,7 @@ module.exports = {
                         "helpful": true,
                         "damageReductionFlat": 10,
                         "immuneToNonConditionalAfflictionDamage": true,
-                        "tooltipText": "Has 10 damage reduction and ignores non-conditional affliction damage."
+                        "tooltipText": "This character has 10 damage reduction and ignores non-conditional affliction damage."
                     }
                 },
                 {
@@ -141,7 +141,7 @@ module.exports = {
             "id": "kankuro-s-puppet-distraction",
             "name": "Puppet Distraction",
             "skillimage": "https://i.imgur.com/CSxXuFZ.png",
-            "skilldescription": "This skill makes Kankuro (S) invulnerable for 1 turn.",
+            "skilldescription": "Kankuro (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

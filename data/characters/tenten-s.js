@@ -65,7 +65,7 @@ module.exports = {
                     "scope": "all-ally",
                     "metadata": {
                         "invulnerableToNonStrategicSkills": true,
-                        "tooltipText": "Invulnerable to non-strategic skills for 1 turn."
+                        "tooltipText": "This character is invulnerable to non-Strategic skills."
                     }
                 }
             ]
@@ -103,7 +103,7 @@ module.exports = {
             "id": "tenten-s-leaping-dodge",
             "name": "Leaping Dodge",
             "skillimage": "https://i.imgur.com/qM4w2Qr.png",
-            "skilldescription": "This skill makes Tenten (S) invulnerable for 1 turn.",
+            "skilldescription": "Tenten (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -180,7 +180,7 @@ module.exports = {
                         "invulnerableToPhysicalSkills": true,
                         "destructibleDefensePoints": 20,
                         "destructibleDefensePermanent": true,
-                        "tooltipText": "Invulnerable to physical skills for 1 turn and gained 20 permanent destructible defense."
+                        "tooltipText": "This character is invulnerable to Physical skills and has 20 permanent destructible defense."
                     }
                 }
             ]
@@ -210,7 +210,7 @@ module.exports = {
                     "metadata": {
                         "invisible": true,
                         "reflectOnEnemyHarmfulNonMental": true,
-                        "tooltipText": "Reflects enemy non-mental skills next turn."
+                        "tooltipText": "This character reflects enemy non-Mental skills next turn."
                     }
                 }
             ]
@@ -259,7 +259,7 @@ module.exports = {
                         "afflictionDamage": true,
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
-                        "tooltipText": "Taking 5 affliction damage per turn."
+                        "tooltipText": "This character takes 5 affliction damage each turn."
                     }
                 }
             ]

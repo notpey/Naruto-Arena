@@ -138,7 +138,7 @@ module.exports = {
             "id": "nara-shikamaru-s-panicked-dodge",
             "name": "Panicked Dodge",
             "skillimage": "https://i.imgur.com/mEXRLAE.png",
-            "skilldescription": "This skill makes Nara Shikamaru (S) invulnerable for 1 turn.",
+            "skilldescription": "Nara Shikamaru (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

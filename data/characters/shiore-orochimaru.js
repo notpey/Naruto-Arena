@@ -175,7 +175,7 @@ module.exports = {
             "id": "shiore-orochimaru-snake-body-retreat",
             "name": "Snake Body Retreat",
             "skillimage": "https://i.imgur.com/B5p2YML.png",
-            "skilldescription": "This skill makes Snake invulnerable for 1 turn.",
+            "skilldescription": "Shiore Orochimaru becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

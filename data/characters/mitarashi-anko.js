@@ -157,7 +157,7 @@ module.exports = {
             "id": "mitarashi-anko-quick-reflexes",
             "name": "Quick Reflexes",
             "skillimage": "https://i.imgur.com/jOjcH7H.png",
-            "skilldescription": "This skill makes Mitarashi Anko invulnerable for 1 turn.",
+            "skilldescription": "Mitarashi Anko becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

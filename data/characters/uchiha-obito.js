@@ -136,7 +136,7 @@ module.exports = {
             "id": "uchiha-obito-flee",
             "name": "Obito Flee",
             "skillimage": "https://i.imgur.com/WJAbDGt.png",
-            "skilldescription": "This skill makes Uchiha Obito invulnerable for 1 turn.",
+            "skilldescription": "Uchiha Obito becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

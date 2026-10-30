@@ -142,7 +142,7 @@ module.exports = {
             "id": "inuzuka-kiba-s-hide-in-the-shade",
             "name": "Hide in the Shade",
             "skillimage": "https://i.imgur.com/2NGDdwF.png",
-            "skilldescription": "This skill makes Inuzuka Kiba (S) invulnerable for 1 turn.",
+            "skilldescription": "Inuzuka Kiba (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -124,7 +124,7 @@ module.exports = {
             "id": "hoshigaki-kisame-samehada-scale-block",
             "name": "Samehada Scale Block",
             "skillimage": "https://i.imgur.com/mSXuepK.png",
-            "skilldescription": "This skill makes Hoshigaki Kisame invulnerable for 1 turn.",
+            "skilldescription": "Hoshigaki Kisame becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

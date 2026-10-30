@@ -108,7 +108,7 @@ module.exports = {
             "id": "young-itachi-expert-retreat",
             "name": "Expert Retreat",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Itachi invulnerable for 1 turn.",
+            "skilldescription": "Young Itachi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

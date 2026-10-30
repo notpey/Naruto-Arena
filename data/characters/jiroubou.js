@@ -161,7 +161,7 @@ module.exports = {
             "id": "jiroubou-terra-shield",
             "name": "Terra Shield",
             "skillimage": "https://i.imgur.com/gdsdurL.png",
-            "skilldescription": "This skill makes Jiroubou invulnerable for 1 turn.",
+            "skilldescription": "Jiroubou becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

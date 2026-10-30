@@ -2998,6 +2998,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             return null;
         };
 
+        const findCurrentStatusCopy = (status, unit) => {
+            const metadata = status?.metadata || {};
+            if (metadata.passive) {
+                const character = getRosterData()?.[unit?.rosterIndex];
+                const passive = character?.passive;
+                if (passive?.name === metadata.sourceSkillName) {
+                    return {
+                        text: passive.description || '',
+                        template: passive.stackTooltipTextTemplate || '',
+                    };
+                }
+            }
+            const sourceSkill = findSkillById(status?.sourceSkillId);
+            const effect = sourceSkill?.effects?.find((entry) =>
+                entry?.type === 'apply_status' && entry?.statusId === status?.id
+            );
+            if (!effect) return null;
+            return {
+                text: effect.metadata?.tooltipText || '',
+                template: effect.metadata?.tooltipTextTemplate || '',
+            };
+        };
+
         const escapeHtml = (value) =>
             String(value ?? '')
                 .replaceAll('#&39;', "'")
@@ -3469,15 +3492,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const textRows = [];
                 groupStatuses.forEach((status) => {
                     const statusMetadata = status?.metadata || {};
+                    const currentCopy = findCurrentStatusCopy(status, unit);
                     let text =
+                        currentCopy?.text ||
                         statusMetadata?.tooltipText ||
                         findTooltipTextByStatusId(status?.id) ||
                         status?.id ||
                         'Status effect';
                     const tooltipTemplate =
-                        typeof statusMetadata?.tooltipTextTemplate === 'string'
+                        currentCopy?.template ||
+                        (typeof statusMetadata?.tooltipTextTemplate === 'string'
                             ? statusMetadata.tooltipTextTemplate
-                            : '';
+                            : '');
                     const pendingRestoreTooltipTemplate =
                         typeof statusMetadata?.destructibleDefenseRestore?.pendingTooltipTextTemplate === 'string'
                             ? statusMetadata.destructibleDefenseRestore.pendingTooltipTextTemplate
@@ -3564,23 +3590,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 return `${bonusSkillName} deals ${bonus} additional damage.`;
                             })
                             .filter(Boolean);
-                        if (bonusLines.length > 0) {
+                        if (bonusLines.length > 0 && !hasCustomTooltipText) {
                             text = bonusLines.join(' ');
                         }
-                    }
-                    const ongoingClass =
-                        typeof statusMetadata?.ongoingClass === 'string'
-                            ? statusMetadata.ongoingClass.trim().toLowerCase()
-                            : '';
-                    if (
-                        (ongoingClass === 'action' || ongoingClass === 'control') &&
-                        !/\b(ends?|cancel(?:led|s)?|stunned|invulnerable)\b/i.test(text)
-                    ) {
-                        const cancelLine =
-                            ongoingClass === 'control'
-                                ? 'This control effect ends if the user is stunned or the target becomes invulnerable.'
-                                : 'This action effect ends if the user is stunned or the target becomes invulnerable.';
-                        text = `${text}\n${cancelLine}`;
                     }
                     const byRemaining = status?.metadata?.skillReplacementsByRemainingTurns;
                     if (byRemaining && typeof byRemaining === 'object') {
@@ -5795,14 +5807,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         skillDetailCardEl?.classList.remove('is-empty', 'is-passive');
         skillDetailCardEl?.classList.add('is-biography');
         if (skillDetailKindEl) {
-            skillDetailKindEl.textContent = 'Biography';
+            skillDetailKindEl.textContent = 'Character';
             skillDetailKindEl.hidden = false;
         }
         if (portraitButtonEl) portraitButtonEl.setAttribute('aria-pressed', 'true');
         if (passiveEl) passiveEl.setAttribute('aria-pressed', 'false');
         if (skillNameEl) skillNameEl.textContent = character.name || 'Character';
         if (skillDescEl) {
-            skillDescEl.textContent = character.characterdescription || character.characterdeescription || 'No biography available.';
+            const skillNames = (character.skills || []).map((skill) => skill?.name).filter(Boolean);
+            skillDescEl.textContent = [
+                character.passive?.name ? `Passive: ${character.passive.name}.` : '',
+                skillNames.length ? `Skills: ${skillNames.join(', ')}.` : '',
+            ].filter(Boolean).join(' ');
             skillDescEl.scrollTop = 0;
         }
         if (skillDetailImageEl) {

@@ -89,7 +89,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           statusIcon: passive.icon || '',
                           tooltipText: passive.stackTooltipTextTemplate
                               ? renderTooltipTemplate(passive.stackTooltipTextTemplate, passive)
-                              : `${passive.description || ''}\nThis passive cannot be removed.`.trim(),
+                              : (passive.description || '').trim(),
                           physicalDamageBonusWhileHelpful:
                               Math.max(0, Number(passive.physicalDamageBonusWhileHelpful) || 0),
                           destructibleDefenseBonusGranted:

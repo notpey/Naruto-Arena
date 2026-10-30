@@ -127,7 +127,7 @@ module.exports = {
             "id": "orochimaru-s-ground-mobility",
             "name": "Ground Mobility",
             "skillimage": "https://i.imgur.com/RWYh63j.png",
-            "skilldescription": "This skill makes Orochimaru (S) invulnerable for 1 turn.",
+            "skilldescription": "Orochimaru (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -179,7 +179,7 @@ module.exports = {
                         "cannotBeCountered": true,
                         "cannotBeReflected": true,
                         "invulnerableToHarmfulSkills": true,
-                        "tooltipText": "Invulnerable to harmful skills for 2 turns."
+                        "tooltipText": "This character is invulnerable to harmful skills."
                     }
                 },
                 {
@@ -193,7 +193,7 @@ module.exports = {
                         "cannotBeReflected": true,
                         "invulnerableToHarmfulSkills": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Invulnerable to harmful skills for 1 turn."
+                        "tooltipText": "This character is invulnerable to harmful skills."
                     }
                 }
             ]

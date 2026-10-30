@@ -129,7 +129,7 @@ module.exports = {
             "id": "shigure-umbrella-block",
             "name": "Umbrella Block",
             "skillimage": "https://i.imgur.com/D1BTZbK.png",
-            "skilldescription": "This skill makes Umbrella invulnerable for 1 turn.",
+            "skilldescription": "Shigure becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -155,7 +155,7 @@ module.exports = {
             "id": "cursed-seal-lv1-sasuke-dark-aura",
             "name": "Dark Aura",
             "skillimage": "https://i.imgur.com/WQWQgc5.png",
-            "skilldescription": "This skill makes Cursed Seal Lv1 Sasuke invulnerable for 1 turn.",
+            "skilldescription": "Cursed Seal Lv1 Sasuke becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -12,7 +12,7 @@ module.exports = {
     skills: [
         { id: 'yamanaka-ino-mind-transfer-feint', name: 'Mind Transfer Feint',
             skillimage: 'https://i.imgur.com/1RddcCQ.png',
-            skilldescription: 'Ino deceives one enemy with a feigned Mind Body Switch before striking them, dealing 20 physical damage. If that enemy is stunned, this skill deals 10 additional damage.',
+            skilldescription: 'Ino deals 20 physical damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Chakra', 'Instant'],
             effects: [
@@ -22,7 +22,7 @@ module.exports = {
         },
         { id: 'yamanaka-ino-mind-body-switch', name: 'Mind Body Switch',
             skillimage: 'https://i.imgur.com/cKdM0Dy.png',
-            skilldescription: 'Ino transfers her consciousness into one enemy for 2 turns, stunning their harmful skills. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.',
+            skilldescription: 'Ino stuns one enemy’s harmful skills for 2 turns. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.',
             energy: ['Genjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Chakra', 'Control'], effects: [
                 { type: 'apply_status', statusId: 'ino_mind_body_switch_target', duration: 2, scope: 'target',
@@ -35,7 +35,7 @@ module.exports = {
                     metadata: { harmful: true, cannotReduceDamage: true, cannotBecomeInvulnerable: true,
                         ongoingClass: 'control',
                         turnDurationAnchor: 'source_turn',
-                        tooltipText: 'Cannot reduce damage or become invulnerable.' } },
+                        tooltipText: 'This character cannot reduce damage or become invulnerable.' } },
                 { type: 'remove_status', statusId: 'ino_hair_strand_trap', scope: 'target',
                     condition: { scope: 'target', statusId: 'ino_hair_strand_trap', statusFromActor: true } },
                 { type: 'apply_status', statusId: 'ino_mind_body_switch_active', duration: 2, scope: 'self',
@@ -48,7 +48,7 @@ module.exports = {
         },
         { id: 'yamanaka-ino-chakra-hair-strand-trap', name: 'Chakra Hair Strand Trap',
             skillimage: 'https://i.imgur.com/7m4IPdu.png',
-            skilldescription: 'Ino places an invisible trap of chakra-infused hair on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends. If Ino uses Mind Body Switch on that enemy while the trap is active, they also become unable to reduce damage or become invulnerable for 1 turn, and the trap ends.',
+            skilldescription: 'Ino places an invisible trap on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends. If Ino uses Mind Body Switch on that enemy while the trap is active, they also become unable to reduce damage or become invulnerable for 1 turn, and the trap ends.',
             energy: ['Genjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'ino_hair_strand_trap', duration: 2, scope: 'target',
@@ -66,7 +66,7 @@ module.exports = {
         },
         { id: 'yamanaka-ino-ino-block', name: 'Ino Block',
             skillimage: 'https://i.imgur.com/bgwFeRq.png',
-            skilldescription: 'This skill makes Yamanaka Ino invulnerable for 1 turn.',
+            skilldescription: 'Yamanaka Ino becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'ino_block', duration: 1, scope: 'self',
@@ -75,7 +75,7 @@ module.exports = {
         },
         { id: 'yamanaka-ino-forced-betrayal', name: 'Forced Betrayal', hiddenFromSelectionViewer: true,
             skillimage: 'https://i.imgur.com/TX3m6tw.png',
-            skilldescription: 'Ino forces the enemy affected by Mind Body Switch to attack one enemy, dealing 30 physical damage.',
+            skilldescription: 'Ino deals 30 physical damage to one enemy through Mind Body Switch.',
             energy: ['Random'], target: 'single-enemy',
             targetCondition: { statusId: 'ino_mind_body_switch_target', statusFromActor: true },
             damage: 0, cooldown: 0,

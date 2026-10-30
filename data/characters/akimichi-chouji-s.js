@@ -169,7 +169,7 @@ module.exports = {
             "id": "akimichi-chouji-s-effortful-block",
             "name": "Effortful Block",
             "skillimage": "https://i.imgur.com/9h6FhK5.png",
-            "skilldescription": "This skill makes Akimichi Chouji (S) invulnerable for 1 turn.",
+            "skilldescription": "Akimichi Chouji (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

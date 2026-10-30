@@ -152,7 +152,7 @@ module.exports = {
             "id": "yuhi-kurenai-vanishing-illusion",
             "name": "Vanishing Illusion",
             "skillimage": "https://i.imgur.com/W2xhlma.png",
-            "skilldescription": "This skill makes Yuhi Kurenai invulnerable for 1 turn.",
+            "skilldescription": "Yuhi Kurenai becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

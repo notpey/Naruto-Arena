@@ -73,6 +73,7 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
+                        "hideTooltip": true,
                         "turnDurationAnchor": "source_turn"
                     }
                 }
@@ -124,6 +125,7 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
+                        "hideTooltip": true,
                         "turnDurationAnchor": "source_turn"
                     }
                 }
@@ -133,7 +135,7 @@ module.exports = {
             "id": "young-kushina-skilled-landing",
             "name": "Skilled Landing",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Kushina invulnerable for 1 turn.",
+            "skilldescription": "Young Kushina becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

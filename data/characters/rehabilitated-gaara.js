@@ -49,7 +49,7 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "destructibleDefensePoints": 35,
-                        "tooltipText": "Rehabilitated Gaara has 35 points of permanent destructible defense from Sand Mastery.",
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense.",
                         "ongoingClass": "action"
                     }
                 }
@@ -142,7 +142,7 @@ module.exports = {
             "id": "rehabilitated-gaara-shield-of-shukaku",
             "name": "Shield of Shukaku",
             "skillimage": "https://i.imgur.com/Kr87iAU.png",
-            "skilldescription": "This skill makes Rehabilitated Gaara invulnerable for 1 turn.",
+            "skilldescription": "Rehabilitated Gaara becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -40,7 +40,7 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Marked by Flamethrower."
+                        "tooltipText": "Water Stream Shooters stuns this character for 1 turn if used next turn."
                     }
                 },
                 {
@@ -93,7 +93,7 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Marked by Water Stream Shooters."
+                        "tooltipText": "Flamethrower reduces this character's non-affliction damage by 10 for 1 turn if used next turn."
                     }
                 },
                 {
@@ -155,7 +155,7 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "damageOnHarmfulSkillUsePiercing": 5,
-                        "tooltipText": "Takes 5 piercing damage when using a harmful skill."
+                        "tooltipText": "This character takes 5 piercing damage when using a harmful skill."
                     }
                 }
             ]
@@ -164,7 +164,7 @@ module.exports = {
             "id": "puppet-sasori-living-core",
             "name": "Living Core",
             "skillimage": "https://i.imgur.com/r9oI8D1.png",
-            "skilldescription": "This skill makes Puppet Sasori invulnerable for 1 turn.",
+            "skilldescription": "Puppet Sasori becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

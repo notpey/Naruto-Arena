@@ -116,7 +116,7 @@ module.exports = {
             "id": "four-tails-kyuubi-naruto-skin-of-chakra",
             "name": "Skin of Chakra",
             "skillimage": "https://i.imgur.com/BRrJuMb.png",
-            "skilldescription": "This skill makes Four Tails Kyuubi Naruto invulnerable for 1 turn.",
+            "skilldescription": "Four Tails Kyuubi Naruto becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

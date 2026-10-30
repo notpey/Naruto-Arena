@@ -124,7 +124,7 @@ module.exports = {
             "id": "orochimaru-earth-clone-technique",
             "name": "Earth Clone Technique",
             "skillimage": "https://i.imgur.com/yqkQKWQ.png",
-            "skilldescription": "This skill makes Orochimaru invulnerable for 1 turn.",
+            "skilldescription": "Orochimaru becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

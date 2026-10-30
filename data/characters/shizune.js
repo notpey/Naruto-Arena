@@ -10,7 +10,7 @@ module.exports = {
             "id": "shizune-prepared-needle-shot",
             "name": "Prepared Needle Shot",
             "skillimage": "https://i.imgur.com/eOiK0aq.png",
-            "skilldescription": "Shizune deals 15 damage to one enemy and prepares a needle for 1 turn. If this enemy is affected by 'Poison Mist', this skill deals 10 additional damage.",
+            "skilldescription": "Shizune deals 15 damage to one enemy and gains a prepared needle for 1 turn. If this enemy is affected by 'Poison Mist', this skill deals 10 additional damage.",
             "energy": [
                 "Random"
             ],
@@ -121,7 +121,7 @@ module.exports = {
             "id": "shizune-shizune-dodge",
             "name": "Shizune Dodge",
             "skillimage": "https://i.imgur.com/9fjcyuQ.png",
-            "skilldescription": "This skill makes Shizune invulnerable for 1 turn.",
+            "skilldescription": "Shizune becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

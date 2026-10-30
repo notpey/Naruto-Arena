@@ -117,7 +117,7 @@ module.exports = {
             "id": "sai-ink-clone",
             "name": "Ink Clone",
             "skillimage": "https://i.imgur.com/ExEgRJl.png",
-            "skilldescription": "This skill makes Sai invulnerable for 1 turn.",
+            "skilldescription": "Sai becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -6,7 +6,7 @@ module.exports = {
     characterdeescription: 'A headstrong and competitive genin of Team 8, Kiba relies on the Inuzuka clan\'s heightened senses and ferocious fighting techniques to overwhelm his opponents. Confident in his abilities and eager to prove his strength, he charges into battle with reckless enthusiasm.',
     passive: {
         name: 'Heightened Senses', icon: 'https://i.imgur.com/0ctBe2q.png',
-        description: "Kiba's heightened senses allow him to see invisible enemy skills.",
+        description: 'Kiba can see invisible enemy skills.',
         revealInvisibleSkills: true,
     },
     skills: [
@@ -29,7 +29,7 @@ module.exports = {
         {
             id: 'inuzuka-kiba-garouga', name: 'Garouga',
             skillimage: 'https://i.imgur.com/2zAwPJv.png',
-            skilldescription: 'Kiba launches a spinning assault, dealing 30 physical damage to an enemy. If the target is affected by Dynamic Air Marking, this skill costs 1 less random chakra for 1 turn.',
+            skilldescription: 'Kiba deals 30 physical damage to one enemy. If they are affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -50,7 +50,7 @@ module.exports = {
         {
             id: 'inuzuka-kiba-double-headed-wolf', name: 'Double Headed Wolf',
             skillimage: 'https://i.imgur.com/rfOPouH.png',
-            skilldescription: 'Kiba transforms into a two-headed wolf, making himself and all allies invulnerable to enemy physical skills for 1 turn. The following turn, Garouga is replaced by Double Garouga.',
+            skilldescription: 'Kiba and all allies become invulnerable to enemy physical skills for 1 turn. The following turn, Garouga is replaced by Double Garouga.',
             energy: ['Bloodline'], target: 'all-allies', damage: 0, cooldown: 3,
             classes: ['Strategic', 'Instant'],
             effects: [
@@ -75,7 +75,7 @@ module.exports = {
         {
             id: 'inuzuka-kiba-smoke-bomb', name: 'Smoke Bomb',
             skillimage: 'https://i.imgur.com/DHgVzdv.png',
-            skilldescription: 'Kiba conceals himself with a smoke bomb, becoming invulnerable for 1 turn.',
+            skilldescription: 'Kiba becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'],
             effects: [{
@@ -87,7 +87,7 @@ module.exports = {
         {
             id: 'inuzuka-kiba-double-garouga', name: 'Double Garouga',
             skillimage: 'https://i.imgur.com/jLD3s0g.png',
-            skilldescription: 'Kiba unleashes a ferocious spinning attack, dealing 30 physical damage to an enemy and 30 physical damage to a different random enemy. If either target is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.',
+            skilldescription: 'Kiba deals 30 physical damage to one enemy and 30 physical damage to a different random enemy. If either is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [

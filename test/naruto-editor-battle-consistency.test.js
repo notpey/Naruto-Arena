@@ -378,7 +378,7 @@ test('Naruto passive is a permanent visible match effect, outside the skill tray
     assert.equal(passive.metadata.sourceSkillName, 'Unpredictable Ninja');
     assert.equal(passive.metadata.statusIcon, getNaruto().passive.icon);
     assert.ok(passive.metadata.tooltipText.startsWith(getNaruto().passive.description));
-    assert.match(passive.metadata.tooltipText, /This passive cannot be removed/);
+    assert.equal(passive.metadata.tooltipText, getNaruto().passive.description);
     assert.equal(getNaruto().skills.length, 4, 'passive does not occupy a skill slot');
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });

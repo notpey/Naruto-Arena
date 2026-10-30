@@ -122,7 +122,7 @@ module.exports = {
             "id": "oboro-hiding-tactics",
             "name": "Oboro Hiding Tactics",
             "skillimage": "https://i.imgur.com/VEOVr6w.png",
-            "skilldescription": "This skill makes Oboro invulnerable for 1 turn.",
+            "skilldescription": "Oboro becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -141,7 +141,7 @@ module.exports = {
             "id": "young-kakashi-sword-parry",
             "name": "Sword Parry",
             "skillimage": "https://i.imgur.com/V9vfQQQ.png",
-            "skilldescription": "This skill makes Young Kakashi invulnerable for 1 turn.",
+            "skilldescription": "Young Kakashi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

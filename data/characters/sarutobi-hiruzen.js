@@ -16,7 +16,7 @@ module.exports = {
             id: 'sarutobi-hiruzen-crystal-ball-technique',
             name: 'Crystal Ball Technique',
             skillimage: 'https://i.imgur.com/yubcK01.png',
-            skilldescription: 'Hiruzen observes one enemy through his crystal ball for 2 turns, revealing their hidden skills. During this time, the first harmful skill that enemy uses against Hiruzen or his allies deals 10 less non-affliction damage, and Search Party deals 15 additional piercing damage to them.',
+            skilldescription: 'Hiruzen reveals one enemy’s hidden skills for 2 turns. During this time, the first harmful skill that enemy uses against Hiruzen or his allies deals 10 less non-affliction damage, and Search Party deals 15 additional piercing damage to them.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Strategic', 'Instant'],
             effects: [
@@ -38,7 +38,7 @@ module.exports = {
             id: 'sarutobi-hiruzen-mission-assignment',
             name: 'Mission Assignment',
             skillimage: 'https://i.imgur.com/ABkaTAl.png',
-            skilldescription: 'Hiruzen assigns himself or one ally a mission, granting them 15 destructible defense for 2 turns. Their next single-target damaging skill during this time deals 10 additional non-affliction damage.',
+            skilldescription: 'Hiruzen grants himself or one ally 15 destructible defense for 2 turns. Their next single-target damaging skill during this time deals 10 additional non-affliction damage.',
             energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
             classes: ['Strategic', 'Instant'],
             effects: [
@@ -58,7 +58,7 @@ module.exports = {
             id: 'sarutobi-hiruzen-search-party',
             name: 'Search Party',
             skillimage: 'https://i.imgur.com/OdtmZna.png',
-            skilldescription: 'Hiruzen dispatches Leaf shinobi to attack one enemy, dealing 20 physical damage. If that enemy is affected by Crystal Ball Technique, this skill also deals 15 piercing damage.',
+            skilldescription: 'Hiruzen deals 20 physical damage to one enemy. If that enemy is affected by Crystal Ball Technique, this skill also deals 15 piercing damage.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -73,7 +73,7 @@ module.exports = {
             id: 'sarutobi-hiruzen-hokages-guard',
             name: "Hokage's Guard",
             skillimage: 'https://i.imgur.com/fJmy67o.png',
-            skilldescription: 'This skill makes Sarutobi Hiruzen invulnerable for 1 turn.',
+            skilldescription: 'Sarutobi Hiruzen becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'],
             effects: [

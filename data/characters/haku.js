@@ -10,7 +10,7 @@ module.exports = {
         {
             id: 'haku-demonic-mirroring-ice-crystals', name: 'Demonic Mirroring Ice Crystals',
             skillimage: 'https://i.imgur.com/2sgPkS0.png',
-            skilldescription: 'Haku surrounds one enemy with demonic mirrors of ice for 4 turns, dealing 10 piercing damage to that enemy each turn. During this time, Haku gains 30 points of destructible defense, and Flying Needles of Death and Acupuncture are improved. If Haku is stunned, this skill ends.',
+            skilldescription: 'Haku deals 10 piercing damage to one enemy each turn for 4 turns and gains 30 destructible defense. Flying Needles of Death and Acupuncture are improved while the mirrors remain.',
             energy: ['Bloodline', 'Random'], target: 'single-enemy', damage: 0, cooldown: 4,
             classes: ['Chakra', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'haku_mirror_target', duration: 4, scope: 'target',
@@ -31,14 +31,14 @@ module.exports = {
         {
             id: 'haku-flying-needles-of-death', name: 'Flying Needles of Death',
             skillimage: 'https://i.imgur.com/1wG05K5.png',
-            skilldescription: 'Haku launches a volley of water needles at one enemy, dealing 20 piercing damage. During Demonic Mirroring Ice Crystals, this skill also deals 10 piercing damage to the target of Demonic Mirroring Ice Crystals, unless they are the original target.',
+            skilldescription: 'Haku deals 20 piercing damage to one enemy. During Demonic Mirroring Ice Crystals, the enemy trapped in the mirrors takes 10 piercing damage unless already targeted by this skill.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Chakra', 'Instant'],
             effects: [{ type: 'damage', amount: 20, scope: 'target', metadata: { ignoreDamageReduction: true } }],
         },
         {
             id: 'haku-acupuncture', name: 'Acupuncture', skillimage: 'https://i.imgur.com/dDxetJr.png',
-            skilldescription: "Haku strikes one enemy's pressure points with senbon, stunning their Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
+            skilldescription: "Haku stuns the Physical and Chakra skills of one enemy for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
             energy: ['Bloodline'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [{ type: 'apply_status', statusId: 'haku_acupuncture_stun', duration: 1, scope: 'target',

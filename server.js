@@ -4462,7 +4462,8 @@ const getStoredCharacters = async () => {
     const sortedStoredCharacters = sortBySeedOrder(migratedStoredCharacters);
     const orderChanged = JSON.stringify(storedState.characters.map(c => c.characterId || c.id)) !== JSON.stringify(sortedStoredCharacters.map(c => c.characterId || c.id));
 
-    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages && !orderChanged) {
+    const seedContentChanged = JSON.stringify(migratedStoredCharacters) !== JSON.stringify(activeStoredCharacters);
+    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages && !orderChanged && !seedContentChanged) {
         return storedState.characters;
     }
 

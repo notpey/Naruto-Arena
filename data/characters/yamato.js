@@ -37,7 +37,7 @@ module.exports = {
                         "harmful": true,
                         "ignoreHelpfulNonEnergyEffects": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                        "tooltipText": "This character ignores helpful effects except energy cost changes."
                     }
                 }
             ]
@@ -143,7 +143,7 @@ module.exports = {
             "id": "yamato-wood-release-wood-shelter",
             "name": "Wood Release: Wood Shelter",
             "skillimage": "https://i.imgur.com/UudEEcp.png",
-            "skilldescription": "This skill makes Yamato invulnerable for 1 turn.",
+            "skilldescription": "Yamato becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

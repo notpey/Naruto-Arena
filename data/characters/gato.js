@@ -15,7 +15,7 @@ module.exports = {
             id: 'gato-hired-help',
             name: 'Hired Help',
             skillimage: 'https://i.imgur.com/5ceH3VV.png',
-            skilldescription: 'Gatō orders his bodyguards to attack one enemy, dealing 20 physical damage. If that enemy is affected by Bounty Contract, this skill instead deals 25 physical damage and stuns their Strategic skills for 1 turn.',
+            skilldescription: 'Gatō deals 20 physical damage to one enemy. If that enemy is affected by Bounty Contract, this skill instead deals 25 physical damage and stuns their Strategic skills for 1 turn.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -49,7 +49,7 @@ module.exports = {
             id: 'gato-no-loose-ends',
             name: 'No Loose Ends',
             skillimage: 'https://i.imgur.com/OoFNLHy.png',
-            skilldescription: 'Gatō orders his mercenaries to attack all enemies, dealing 15 physical damage to each. If an enemy is affected by Bounty Contract, that enemy also takes 15 piercing damage and Bounty Contract ends.',
+            skilldescription: 'Gatō deals 15 physical damage to all enemies. If an enemy is affected by Bounty Contract, that enemy also takes 15 piercing damage and Bounty Contract ends.',
             energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -66,7 +66,7 @@ module.exports = {
             id: 'gato-hide-behind-the-help',
             name: 'Hide Behind the Help',
             skillimage: 'https://i.imgur.com/ypTuQ0e.png',
-            skilldescription: 'This skill makes Gatō invulnerable for 1 turn.',
+            skilldescription: 'Gatō becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'],
             effects: [{ type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',

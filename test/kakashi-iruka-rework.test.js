@@ -89,8 +89,12 @@ test('Sharingan Insight reveals hidden traps and copies only eligible countered 
     cast(match, 'p1', 0, 0);
     assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses
         .some((entry) => entry.id === 'kakashi_sharingan_insight'), false);
+    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses
+        .some((entry) => entry.id === 'kakashi_sharingan_reveal'), false);
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
         .some((entry) => entry.id === 'kakashi_sharingan_insight'), true);
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
+        .some((entry) => entry.id === 'kakashi_sharingan_reveal'), true);
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
         .some((entry) => entry.id === 'iruka_sealed_bomb_trap'), true);
     cast(match, 'p2', 1, 0, ['p1', 0]);

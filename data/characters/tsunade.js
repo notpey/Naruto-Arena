@@ -131,7 +131,7 @@ module.exports = {
             "id": "tsunade-elbow-block",
             "name": "Elbow Block",
             "skillimage": "https://i.imgur.com/wS89CFy.png",
-            "skilldescription": "This skill makes Tsunade invulnerable for 1 turn.",
+            "skilldescription": "Tsunade becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -188,7 +188,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "This character has 10 points of permanent destructible defense from Slug Division."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 }
             ]

@@ -15,7 +15,7 @@ module.exports = {
         {
             id: 'ebisu-water-walking', name: 'Water Walking',
             skillimage: 'https://i.imgur.com/NdSN8te.png',
-            skilldescription: 'Ebisu teaches himself or one ally to control their chakra more efficiently, granting them 10 destructible defense for 2 turns. During this time, the next skill they use costs 1 less Random chakra.',
+            skilldescription: 'Ebisu grants himself or one ally 10 destructible defense for 2 turns. During this time, the next skill they use costs 1 less Random chakra.',
             energy: ['Ninjutsu'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'ebisu_water_walking_defense', duration: 2,
@@ -30,7 +30,7 @@ module.exports = {
         {
             id: 'ebisu-textbook-taijutsu', name: 'Textbook Taijutsu',
             skillimage: 'https://i.imgur.com/OHP9ulW.png',
-            skilldescription: 'Ebisu attacks one enemy with a precise strike, dealing 20 physical damage. For 1 turn, the next harmful Physical skill that enemy uses will be countered, dealing 10 physical damage to them.',
+            skilldescription: 'Ebisu deals 20 physical damage to one enemy. For 1 turn, the next harmful Physical skill that enemy uses will be countered, dealing 10 physical damage to them.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
                 { type: 'damage', amount: 20, scope: 'target' },
@@ -48,7 +48,7 @@ module.exports = {
         {
             id: 'ebisu-strict-discipline', name: 'Strict Discipline',
             skillimage: 'https://i.imgur.com/AVnlbkW.png',
-            skilldescription: "Ebisu punishes one enemy's poor technique, dealing 15 affliction damage. For 2 turns, that enemy's harmful skills cost 1 additional Random chakra. This effect cannot stack.",
+            skilldescription: "Ebisu deals 15 affliction damage to one enemy. For 2 turns, that enemy's harmful skills cost 1 additional Random chakra. This effect cannot stack.",
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Affliction', 'Action'], effects: [
                 { type: 'damage', amount: 15, scope: 'target',
@@ -64,7 +64,7 @@ module.exports = {
         {
             id: 'ebisu-to-the-skies', name: 'To The Skies',
             skillimage: 'https://i.imgur.com/P0U83h1.png',
-            skilldescription: 'This skill makes Ebisu invulnerable for 1 turn.',
+            skilldescription: 'Ebisu becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'ebisu_to_the_skies', duration: 1,

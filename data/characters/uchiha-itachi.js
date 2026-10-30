@@ -162,7 +162,7 @@ module.exports = {
             "id": "uchiha-itachi-sharingan-insight",
             "name": "Sharingan Insight",
             "skillimage": "https://i.imgur.com/u3zgHCh.png",
-            "skilldescription": "This skill makes Uchiha Itachi invulnerable for 1 turn.",
+            "skilldescription": "Uchiha Itachi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -119,7 +119,7 @@ module.exports = {
             "id": "tayuya-insight",
             "name": "Insight",
             "skillimage": "https://i.imgur.com/sSjvCQK.png",
-            "skilldescription": "This skill makes Tayuya invulnerable for 1 turn.",
+            "skilldescription": "Tayuya becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

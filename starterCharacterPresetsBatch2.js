@@ -28,7 +28,7 @@
                                 "id": "yamanaka-ino-mind-transfer-feint",
                                 "name": "Mind Transfer Feint",
                                 "skillimage": "https://i.imgur.com/1RddcCQ.png",
-                                "skilldescription": "Ino deceives one enemy with a feigned Mind Body Switch before striking them, dealing 20 physical damage. If that enemy is stunned, this skill deals 10 additional damage.",
+                                "skilldescription": "Ino deals 20 physical damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -57,7 +57,7 @@
                                 "id": "yamanaka-ino-mind-body-switch",
                                 "name": "Mind Body Switch",
                                 "skillimage": "https://i.imgur.com/cKdM0Dy.png",
-                                "skilldescription": "Ino transfers her consciousness into one enemy for 2 turns, stunning their harmful skills. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.",
+                                "skilldescription": "Ino stuns one enemy’s harmful skills for 2 turns. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.",
                                 "energy": [
                                         "Genjutsu",
                                         "Random"
@@ -100,7 +100,7 @@
                                                         "cannotBecomeInvulnerable": true,
                                                         "ongoingClass": "control",
                                                         "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "Cannot reduce damage or become invulnerable."
+                                                        "tooltipText": "This character cannot reduce damage or become invulnerable."
                                                 }
                                         },
                                         {
@@ -143,7 +143,7 @@
                                 "id": "yamanaka-ino-chakra-hair-strand-trap",
                                 "name": "Chakra Hair Strand Trap",
                                 "skillimage": "https://i.imgur.com/7m4IPdu.png",
-                                "skilldescription": "Ino places an invisible trap of chakra-infused hair on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends. If Ino uses Mind Body Switch on that enemy while the trap is active, they also become unable to reduce damage or become invulnerable for 1 turn, and the trap ends.",
+                                "skilldescription": "Ino places an invisible trap on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends. If Ino uses Mind Body Switch on that enemy while the trap is active, they also become unable to reduce damage or become invulnerable for 1 turn, and the trap ends.",
                                 "energy": [
                                         "Genjutsu"
                                 ],
@@ -193,7 +193,7 @@
                                 "id": "yamanaka-ino-ino-block",
                                 "name": "Ino Block",
                                 "skillimage": "https://i.imgur.com/bgwFeRq.png",
-                                "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
+                                "skilldescription": "Yamanaka Ino becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -223,7 +223,7 @@
                                 "name": "Forced Betrayal",
                                 "hiddenFromSelectionViewer": true,
                                 "skillimage": "https://i.imgur.com/TX3m6tw.png",
-                                "skilldescription": "Ino forces the enemy affected by Mind Body Switch to attack one enemy, dealing 30 physical damage.",
+                                "skilldescription": "Ino deals 30 physical damage to one enemy through Mind Body Switch.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -382,7 +382,7 @@
                                 "id": "rock-lee-lee-block",
                                 "name": "Lee Block",
                                 "skillimage": "https://i.imgur.com/qgiODIf.png",
-                                "skilldescription": "This skill makes Rock Lee invulnerable for 1 turn.",
+                                "skilldescription": "Rock Lee becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -482,7 +482,7 @@
                 "passive": {
                         "name": "Sharp Tools",
                         "icon": "https://i.imgur.com/4KEJ94b.png",
-                        "description": "Tenten's arsenal punishes enemies who attack her. Enemies who use a damaging skill on Tenten take 5 physical damage.",
+                        "description": "Enemies who use a damaging skill on Tenten take 5 physical damage.",
                         "onEnemySkillTargetedDamageToSourceAmount": 5,
                         "onEnemySkillTargetedDamageToSourceSkillClasses": [
                                 "Physical"
@@ -494,7 +494,7 @@
                                 "id": "tenten-twin-rising-dragons",
                                 "name": "Twin Rising Dragons",
                                 "skillimage": "https://i.imgur.com/g4ksO57.png",
-                                "skilldescription": "Tenten unleashes a barrage of summoned weapons, dealing 15 physical damage to an enemy and 10 physical damage to all other enemies.",
+                                "skilldescription": "Tenten deals 15 physical damage to one enemy and 10 physical damage to all other enemies.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -533,7 +533,7 @@
                                                         "turnEndSkillClasses": [
                                                                 "Physical"
                                                         ],
-                                                        "tooltipText": "Takes 15 physical damage from Twin Rising Dragons on Tenten's next turn."
+                                                        "tooltipText": "This character takes 15 physical damage on Tenten's next turn."
                                                 }
                                         },
                                         {
@@ -553,7 +553,7 @@
                                                         "turnEndSkillClasses": [
                                                                 "Physical"
                                                         ],
-                                                        "tooltipText": "Takes 10 physical damage from Twin Rising Dragons on Tenten's next turn."
+                                                        "tooltipText": "This character takes 10 physical damage on Tenten's next turn."
                                                 }
                                         }
                                 ]
@@ -562,7 +562,7 @@
                                 "id": "tenten-twin-rising-dragons-trap",
                                 "name": "Twin Rising Dragons Trap",
                                 "skillimage": "https://i.imgur.com/LZze4F3.png",
-                                "skilldescription": "Tenten scatters concealed weapons, dealing 5 physical damage to all enemies and reducing their non-affliction damage by 5 for 1 turn. Affected enemies also suffer an additional 10 damage reduction until this skill is used again. This additional reduction stacks.",
+                        "skilldescription": "Tenten deals 5 physical damage to all enemies and makes them deal 5 less non-affliction damage for 1 turn. Each use also adds a stacking 10-point non-affliction damage penalty.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -613,7 +613,7 @@
                                 "id": "tenten-twin-rising-dragons-full-release",
                                 "name": "Twin Rising Dragons Full Release",
                                 "skillimage": "https://i.imgur.com/4KGkFYx.png",
-                                "skilldescription": "Tenten unleashes her full arsenal, becoming invulnerable to enemy physical skills for 1 turn. On the following turn, the effects of Twin Rising Dragons and Twin Rising Dragons Trap last 1 additional turn.",
+                                "skilldescription": "Tenten becomes invulnerable to enemy Physical skills for 1 turn. On her next turn, Twin Rising Dragons repeats its damage on the following turn and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -635,7 +635,7 @@
                                                         "invulnerableToSkillClasses": [
                                                                 "physical"
                                                         ],
-                                                        "tooltipText": "Tenten is invulnerable to enemy Physical skills."
+                                                        "tooltipText": "This character is invulnerable to enemy Physical skills."
                                                 }
                                         },
                                         {
@@ -649,7 +649,7 @@
                                                         "skillDurationBonuses": {
                                                                 "tenten-twin-rising-dragons-trap": 1
                                                         },
-                                                        "tooltipText": "On Tenten's following turn, Twin Rising Dragons deals its damage again on the next turn, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn."
+                                                        "tooltipText": "On Tenten's next turn, Twin Rising Dragons repeats its damage on the following turn, and Twin Rising Dragons Trap lasts 1 additional turn."
                                                 }
                                         }
                                 ]
@@ -678,7 +678,7 @@
                                                 "metadata": {
                                                         "helpful": true,
                                                         "invulnerable": true,
-                                                        "tooltipText": "Tenten is invulnerable."
+                                                        "tooltipText": "This character is invulnerable."
                                                 }
                                         }
                                 ]
@@ -694,14 +694,14 @@
                 "passive": {
                         "name": "Neji's Byakugan",
                         "icon": "https://i.imgur.com/ymCAsBc.png",
-                        "description": "Neji's Byakugan allows him to anticipate his opponents' movements. His skills cannot be countered."
+                        "description": "Neji's skills cannot be countered."
                 },
                 "skills": [
                         {
                                 "id": "neji-hyuuga-neji-gentle-fist",
                                 "name": "Neji Gentle Fist",
                                 "skillimage": "https://i.imgur.com/svJIAbh.png",
-                                "skilldescription": "Neji strikes an enemy's chakra points, dealing 20 physical damage for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
+                                "skilldescription": "Neji deals 20 physical damage to one enemy for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
                                 "energy": [
                                         "Taijutsu",
                                         "Random"
@@ -757,7 +757,7 @@
                                 "id": "neji-hyuuga-eight-trigrams-revolving-heaven",
                                 "name": "Eight Trigram Heavenly Spin",
                                 "skillimage": "https://i.imgur.com/hB5n56N.png",
-                                "skilldescription": "Neji releases chakra in a defensive rotation, dealing 15 physical damage to all enemies and becoming invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
+                                "skilldescription": "Neji deals 15 physical damage to all enemies and becomes invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
                                 "energy": [
                                         "Bloodline"
                                 ],
@@ -800,7 +800,7 @@
                                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                                 "name": "Eight Trigram Sixty-Four Palm",
                                 "skillimage": "https://i.imgur.com/KgBRINj.png",
-                                "skilldescription": "Neji unleashes a rapid series of strikes, dealing 35 physical damage to an enemy and removing 1 chakra.",
+                                "skilldescription": "Neji deals 35 physical damage to one enemy and removes 1 random chakra.",
                                 "energy": [
                                         "Taijutsu",
                                         "Bloodline"
@@ -830,7 +830,7 @@
                                 "id": "neji-hyuuga-byakugan-insight",
                                 "name": "Byakugan Insight",
                                 "skillimage": "https://i.imgur.com/Yw9xYPS.png",
-                                "skilldescription": "Neji uses his Byakugan to anticipate incoming attacks, becoming invulnerable for 1 turn.",
+                                "skilldescription": "Neji becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -866,21 +866,21 @@
             "passive": {
                 "name": "Sand Flow",
                 "icon": "https://i.imgur.com/qOFhrZc.png",
-                "description": "Gaara's sand grants him 5 damage reduction that cannot be pierced. Whenever Gaara takes damage, he gains 1 Sand Flow stack. For each turn he takes no damage, he gains 2 Sand Flow stacks.",
+                "description": "Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage.",
                 "unpierceableDamageReductionFlat": 5,
                 "onDamageStackMetadataKey": "sandFlowStacks",
                 "onDamageStackAmount": 1,
                 "onUndamagedTurnStackMetadataKey": "sandFlowStacks",
                 "onUndamagedTurnStackAmount": 2,
                 "sandFlowStacks": 0,
-                "stackTooltipTextTemplate": "Sand protects Gaara. 5 unpierceable damage reduction. Sand Flow stacks: {sandFlowStacks}."
+                "stackTooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
             },
             "skills": [
                 {
                     "id": "gaara-of-the-desert-sand-binding-coffin",
                     "name": "Sand Binding Coffin",
                         "skillimage": "https://i.imgur.com/3aST3cX.png",
-                    "skilldescription": "Gaara traps an enemy in sand, stunning them for 1 turn and gaining 2 Sand Flow stacks.",
+                    "skilldescription": "Gaara stuns one enemy for 1 turn and gains 2 Sand Flow stacks.",
                     "energy": [
                         "Ninjutsu"
                     ],
@@ -900,7 +900,7 @@
                             "metadata": {
                                 "harmful": true,
                                 "cannotUseSkills": true,
-                                "tooltipText": "Stunned by Sand Binding Coffin."
+                                "tooltipText": "This character is stunned."
                             }
                         },
                         {
@@ -912,7 +912,7 @@
                                 "stackMetadataKey": "sandFlowStacks",
                                 "stackDelta": 2,
                                 "stackMax": 9999,
-                                "tooltipTextTemplate": "Sand protects Gaara. 5 unpierceable damage reduction. Sand Flow stacks: {sandFlowStacks}."
+                                "tooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
                             }
                         }
                     ]
@@ -921,7 +921,7 @@
                     "id": "gaara-of-the-desert-desert-funeral",
                     "name": "Desert Funeral",
                     "skillimage": "https://i.imgur.com/9do9XxC.png",
-                    "skilldescription": "Gaara crushes an enemy with sand, dealing 30 piercing physical damage, increased by 5 for each Sand Flow stack. All Sand Flow stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
+                    "skilldescription": "Gaara deals 30 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
                     "energy": [
                         "Bloodline",
                         "Random"
@@ -956,7 +956,7 @@
                     "id": "gaara-of-the-desert-sand-sphere",
                     "name": "Sand Sphere",
                         "skillimage": "https://i.imgur.com/eUfA1nN.png",
-                    "skilldescription": "Gaara surrounds himself with a sphere of sand, gaining 25 destructible defense for 3 turns, increased by 5 for each Sand Flow stack. During this time, enemies who use a skill on Gaara take 15 physical damage. This effect ends if Gaara uses another skill.",
+                    "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                     "energy": [
                         "Ninjutsu",
                         "Random"
@@ -997,7 +997,7 @@
                                     "gaara-of-the-desert-desert-funeral",
                                     "gaara-of-the-desert-sand-shield"
                                 ],
-                                "tooltipTextTemplate": "Sand gathers around Gaara. {destructibleDefensePoints} destructible defense."
+                                "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill."
                             }
                         }
                     ]
@@ -1006,7 +1006,7 @@
                     "id": "gaara-of-the-desert-sand-shield",
                     "name": "Sand Shield",
                         "skillimage": "https://i.imgur.com/2oNtSkX.png",
-                    "skilldescription": "Gaara shields himself with sand, becoming invulnerable for 1 turn.",
+                    "skilldescription": "Gaara becomes invulnerable for 1 turn.",
                     "energy": [
                         "Random"
                     ],
@@ -1026,7 +1026,7 @@
                             "metadata": {
                                 "helpful": true,
                                 "invulnerable": true,
-                                "tooltipText": "Gaara is invulnerable."
+                                "tooltipText": "This character is invulnerable."
                             }
                         }
                     ]
@@ -1206,7 +1206,7 @@
                                 "id": "kankuro-puppet-replacement-technique",
                                 "name": "Puppet Replacement Technique",
                                 "skillimage": "https://i.imgur.com/P2K3Uue.png",
-                                "skilldescription": "This skill makes Kankuro invulnerable for 1 turn.",
+                                "skilldescription": "Kankuro becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -1243,7 +1243,7 @@
                                 "id": "temari-cutting-whirlwind",
                                 "name": "Cutting Whirlwind",
                                 "skillimage": "https://i.imgur.com/VU7HluY.png",
-                                "skilldescription": "Temari creates a razor sharp wind, dealing 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
+                                "skilldescription": "Temari deals 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
                                 "energy": [
                                         "Ninjutsu"
                                 ],
@@ -1300,7 +1300,7 @@
                                 "id": "temari-summoning-quick-beheading-dance",
                                 "name": "Summoning Quick Beheading Dance",
                                 "skillimage": "https://i.imgur.com/9VRqsM7.png",
-                                "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies. If used one turn after 'Cutting Whirlwind', this skill will cost 1 less random chakra.",
+                                "skilldescription": "Temari deals 35 damage to all enemies. If used one turn after Cutting Whirlwind, this skill costs 1 less random chakra.",
                                 "energy": [
                                         "Ninjutsu",
                                         "Random",
@@ -1396,7 +1396,7 @@
                                 "id": "temari-fan-defence-technique",
                                 "name": "Fan Defence Technique",
                                 "skillimage": "https://i.imgur.com/nnNAsmM.png",
-                                "skilldescription": "This skill makes Temari invulnerable for 1 turn.",
+                                "skilldescription": "Temari becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],

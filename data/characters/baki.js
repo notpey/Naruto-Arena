@@ -106,7 +106,7 @@ module.exports = {
             "id": "baki-baki-teleportation",
             "name": "Baki Teleportation",
             "skillimage": "https://i.imgur.com/cMOrPng.png",
-            "skilldescription": "This skill makes Baki invulnerable for 1 turn.",
+            "skilldescription": "Baki becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

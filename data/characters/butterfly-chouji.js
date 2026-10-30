@@ -45,7 +45,7 @@ module.exports = {
                                 "max": 50
                             }
                         ],
-                        "tooltipText": "Butterfly Chouji has 10 points of damage reduction and 10 points of destructible defense.\nButterfly Chouji takes 5 affliction damage each turn.\nButterfly Chouji's skills deal 5 additional damage, increasing by 5 each turn up to 50 additional damage."
+                        "tooltipTextTemplate": "This character has 10 damage reduction and {destructibleDefensePoints} destructible defense.\nThey take 5 affliction damage each turn.\nTheir skills deal {damageBonusFlat} additional damage, increasing by 5 each turn up to 50."
                     }
                 }
             ]
@@ -137,7 +137,7 @@ module.exports = {
             "id": "butterfly-chouji-effortless-block",
             "name": "Effortless Block",
             "skillimage": "https://i.imgur.com/csCBOSU.png",
-            "skilldescription": "This skill makes Butterfly Chouji invulnerable for 1 turn.",
+            "skilldescription": "Butterfly Chouji becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -7,14 +7,14 @@ module.exports = {
     "passive": {
         "name": "Neji's Byakugan",
         "icon": "https://i.imgur.com/ymCAsBc.png",
-        "description": "Neji's Byakugan allows him to anticipate his opponents' movements. His skills cannot be countered."
+        "description": "Neji's skills cannot be countered."
     },
     "skills": [
         {
             "id": "neji-hyuuga-neji-gentle-fist",
             "name": "Neji Gentle Fist",
             "skillimage": "https://i.imgur.com/svJIAbh.png",
-            "skilldescription": "Neji strikes an enemy's chakra points, dealing 20 physical damage for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
+            "skilldescription": "Neji deals 20 physical damage to one enemy for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
             "energy": [
                 "Taijutsu",
                 "Random"
@@ -67,7 +67,7 @@ module.exports = {
             "id": "neji-hyuuga-eight-trigrams-revolving-heaven",
             "name": "Eight Trigram Heavenly Spin",
             "skillimage": "https://i.imgur.com/hB5n56N.png",
-            "skilldescription": "Neji releases chakra in a defensive rotation, dealing 15 physical damage to all enemies and becoming invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
+            "skilldescription": "Neji deals 15 physical damage to all enemies and becomes invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
             "energy": [
                 "Bloodline"
             ],
@@ -107,7 +107,7 @@ module.exports = {
             "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
             "name": "Eight Trigram Sixty-Four Palm",
             "skillimage": "https://i.imgur.com/KgBRINj.png",
-            "skilldescription": "Neji unleashes a rapid series of strikes, dealing 35 physical damage to an enemy and removing 1 chakra.",
+            "skilldescription": "Neji deals 35 physical damage to one enemy and removes 1 random chakra.",
             "energy": [
                 "Taijutsu",
                 "Bloodline"
@@ -137,7 +137,7 @@ module.exports = {
             "id": "neji-hyuuga-byakugan-insight",
             "name": "Byakugan Insight",
             "skillimage": "https://i.imgur.com/Yw9xYPS.png",
-            "skilldescription": "Neji uses his Byakugan to anticipate incoming attacks, becoming invulnerable for 1 turn.",
+            "skilldescription": "Neji becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

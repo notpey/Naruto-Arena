@@ -56,7 +56,7 @@ module.exports = {
             "id": "hyuuga-hinata-s-gentle-step-twin-lion-fists",
             "name": "Gentle Step Twin Lion Fists",
             "skillimage": "https://i.imgur.com/48pvYwu.png",
-            "skilldescription": "This skill deals 30 damage to one enemy and removes 1 random energy from them. This skill will deal 5 additional damage for each 'Pressure Point Closure' stack. Once used, this skill removes all stacks of 'Pressure Point Closure' from the targeted enemy.",
+            "skilldescription": "Hyuuga Hinata (S) deals 30 damage to one enemy and removes 1 random chakra. This deals 5 additional damage per Pressure Point Closure stack, then removes all stacks from that enemy.",
             "energy": [
                 "Ninjutsu",
                 "Random"
@@ -119,7 +119,7 @@ module.exports = {
             "id": "hyuuga-hinata-s-byakugan-sight",
             "name": "Byakugan Sight",
             "skillimage": "https://i.imgur.com/hPD2pLH.png",
-            "skilldescription": "This skill makes Hyuuga Hinata (S) invulnerable for 1 turn.",
+            "skilldescription": "Hyuuga Hinata (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

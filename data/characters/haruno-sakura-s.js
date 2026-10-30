@@ -129,7 +129,7 @@ module.exports = {
             "id": "haruno-sakura-s-insightful-dodge",
             "name": "Insightful Dodge",
             "skillimage": "https://i.imgur.com/H1t6mfB.png",
-            "skilldescription": "This skill makes Haruno Sakura (S) invulnerable for 1 turn.",
+            "skilldescription": "Haruno Sakura (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -148,7 +148,7 @@ module.exports = {
             "id": "kimimaro-bone-defense",
             "name": "Bone Defense",
             "skillimage": "https://i.imgur.com/NgObkLl.png",
-            "skilldescription": "This skill makes Kimimaro invulnerable for 1 turn.",
+            "skilldescription": "Kimimaro becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

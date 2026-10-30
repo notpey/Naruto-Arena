@@ -88,7 +88,7 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "stackable": true,
-                        "tooltipText": "Desert Charge active."
+                        "tooltipText": "This character has a Desert Charge. Desert Missile consumes all charges to extend its damage reduction effect by 1 turn per charge."
                     }
                 }
             ]
@@ -122,7 +122,7 @@ module.exports = {
                             "kazekage-gaara-desert-missile": 5,
                             "kazekage-gaara-desert-prison": 5
                         },
-                        "tooltipText": "Gaara gains 5 damage reduction and +5 skill damage."
+                        "tooltipText": "This character has 5 damage reduction. Desert Missile and Desert Prison each deal 5 additional damage."
                     }
                 },
                 {
@@ -133,7 +133,7 @@ module.exports = {
                     "metadata": {
                         "helpful": true,
                         "stackable": true,
-                        "tooltipText": "Desert Charge active."
+                        "tooltipText": "This character has a Desert Charge. Desert Missile consumes all charges to extend its damage reduction effect by 1 turn per charge."
                     }
                 },
                 {
@@ -145,7 +145,7 @@ module.exports = {
                         "helpful": true,
                         "destructibleDefensePoints": 10,
                         "destructibleDefensePermanent": true,
-                        "tooltipText": "Protected by Sand Summoning (10 permanent Destructible Defense)."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 }
             ]
@@ -154,7 +154,7 @@ module.exports = {
             "id": "kazekage-gaara-sand-sphere",
             "name": "Sand Sphere",
             "skillimage": "https://i.imgur.com/ISeDMEa.png",
-            "skilldescription": "This skill makes Kazekage Gaara invulnerable for 1 turn.",
+            "skilldescription": "Kazekage Gaara becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

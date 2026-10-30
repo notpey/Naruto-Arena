@@ -126,7 +126,7 @@ module.exports = {
             "id": "nohara-rin-flee",
             "name": "Flee",
             "skillimage": "https://i.imgur.com/10ydruj.png",
-            "skilldescription": "This skill makes Nohara Rin invulnerable for 1 turn.",
+            "skilldescription": "Nohara Rin becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

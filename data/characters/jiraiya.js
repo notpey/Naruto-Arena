@@ -149,7 +149,7 @@ module.exports = {
             "id": "jiraiya-spiked-budda",
             "name": "Spiked Budda",
             "skillimage": "https://i.imgur.com/0Lw6GVr.png",
-            "skilldescription": "This skill makes Jiraiya invulnerable for 1 turn.",
+            "skilldescription": "Jiraiya becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

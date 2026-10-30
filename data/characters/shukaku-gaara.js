@@ -39,7 +39,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "This character has 10 points of permanent destructible defense from Sand Claw."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 }
             ]
@@ -111,7 +111,7 @@ module.exports = {
                                 "max": 40
                             }
                         ],
-                        "tooltipText": "This character has 10 points of destructible defense from Sand Transformation. This grows by 10 each turn, up to 40.",
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense. This grows by 10 each turn, up to 40.",
                         "onExpireEffects": [
                             {
                                 "type": "apply_status",
@@ -142,7 +142,7 @@ module.exports = {
             "id": "shukaku-gaara-thick-sand-coat",
             "name": "Thick Sand Coat",
             "skillimage": "https://i.imgur.com/1zFEDxZ.png",
-            "skilldescription": "This skill makes Shukaku Gaara invulnerable for 1 turn.",
+            "skilldescription": "Shukaku Gaara becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

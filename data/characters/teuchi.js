@@ -96,7 +96,7 @@ module.exports = {
             "id": "teuchi-ramen-ichiraku-closed",
             "name": "Ramen Ichiraku: Closed",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Teuchi invulnerable for 1 turn, heals him for 35 health and ends 'Ramen Ichiraku: Open' on his team.",
+            "skilldescription": "Teuchi becomes invulnerable for 1 turn, heals himself for 35 health, and ends Ramen Ichiraku: Open on his team.",
             "energy": [
                 "Random"
             ],

@@ -100,12 +100,12 @@ test('Sand Sphere scales defense, retaliates once per targeted skill, and ends o
     cast(match, 'p1', 2);
     assert.equal(status(match.board.p1[0], 'gaara_sand_sphere').metadata.destructibleDefensePoints, 35);
     assert.equal(status(match.board.p1[0], 'gaara_sand_sphere').metadata.tooltipText,
-        'Sand gathers around Gaara. 35 destructible defense.');
+        'This character has 35 destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill.');
     cast(match, 'p2', 0, target('p1'));
     assert.equal(match.board.p2[0].hp, 85, 'Sasuke takes 15 physical retaliation');
     assert.equal(status(match.board.p1[0], 'gaara_sand_sphere').metadata.destructibleDefensePoints, 15);
     assert.equal(status(match.board.p1[0], 'gaara_sand_sphere').metadata.tooltipText,
-        'Sand gathers around Gaara. 15 destructible defense.');
+        'This character has 15 destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill.');
     cast(match, 'p1', 3);
     assert.equal(status(match.board.p1[0], 'gaara_sand_sphere'), undefined);
     assert.equal(battle.isUnitInvulnerableForSkill(match.board.p1[0], ['Physical']), true);

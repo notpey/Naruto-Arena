@@ -183,7 +183,7 @@ module.exports = {
             "id": "yakushi-kabuto-dead-soul-technique",
             "name": "Dead Soul Technique",
             "skillimage": "https://i.imgur.com/f88Jtva.png",
-            "skilldescription": "This skill makes Yakushi Kabuto invulnerable for 1 turn.",
+            "skilldescription": "Yakushi Kabuto becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

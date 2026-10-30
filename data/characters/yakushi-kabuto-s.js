@@ -36,7 +36,7 @@ module.exports = {
                         "harmful": true,
                         "ignoreHelpfulNonEnergyEffects": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                        "tooltipText": "This character ignores helpful effects except energy cost changes."
                     }
                 }
             ]
@@ -114,7 +114,7 @@ module.exports = {
             "id": "yakushi-kabuto-s-precise-evasion",
             "name": "Precise Evasion",
             "skillimage": "https://i.imgur.com/WaHCzhg.png",
-            "skilldescription": "This skill makes Yakushi Kabuto (S) invulnerable for 1 turn.",
+            "skilldescription": "Yakushi Kabuto (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

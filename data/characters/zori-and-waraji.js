@@ -14,7 +14,7 @@ module.exports = {
         {
             id: 'zori-and-waraji-iaido', name: 'Iaidō (Zōri)',
             skillimage: 'https://i.imgur.com/ghsKrge.png',
-            skilldescription: 'Zōri quickly draws his sword and strikes one enemy, dealing 20 piercing damage.',
+            skilldescription: 'Zōri deals 20 piercing damage to one enemy.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -28,7 +28,7 @@ module.exports = {
         {
             id: 'zori-and-waraji-savage-slash', name: 'Savage Slash (Waraji)',
             skillimage: 'https://i.imgur.com/yDtMIqS.png',
-            skilldescription: 'Waraji attacks one enemy with a brutal sword slash, dealing 25 physical damage.',
+            skilldescription: 'Waraji deals 25 physical damage to one enemy.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -53,7 +53,7 @@ module.exports = {
         {
             id: 'zori-and-waraji-take-cover', name: 'Take Cover',
             skillimage: 'https://i.imgur.com/q8dKy5X.png',
-            skilldescription: 'This skill makes Zōri & Waraji invulnerable for 1 turn.',
+            skilldescription: 'Zōri & Waraji becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'],
             effects: [{ type: 'apply_status', statusId: 'invulnerable', duration: 1, scope: 'self',

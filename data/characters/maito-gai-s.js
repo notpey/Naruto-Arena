@@ -33,7 +33,7 @@ module.exports = {
                         "action": true,
                         "ongoingClass": "action",
                         "damagePerTurn": 10,
-                        "tooltipText": "Taking 10 physical damage per turn from Nunchaku Taijutsu."
+                        "tooltipText": "This character takes 10 physical damage each turn from Nunchaku Taijutsu."
                     }
                 },
                 {
@@ -45,7 +45,7 @@ module.exports = {
                         "helpful": true,
                         "ongoingClass": "action",
                         "retaliateOnIncomingHarmfulPhysicalDamage": 10,
-                        "tooltipText": "Deals 10 damage back when hit by an enemy physical skill."
+                        "tooltipText": "This character deals 10 damage to enemies who hit them with a Physical skill."
                     }
                 }
             ]
@@ -136,7 +136,7 @@ module.exports = {
             "id": "maito-gai-s-muscle-block",
             "name": "Muscle Block",
             "skillimage": "https://i.imgur.com/KgkDleV.png",
-            "skilldescription": "This skill makes Maito Gai (S) invulnerable for 1 turn.",
+            "skilldescription": "Maito Gai (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

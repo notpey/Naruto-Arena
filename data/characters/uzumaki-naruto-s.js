@@ -135,7 +135,7 @@ module.exports = {
             "id": "uzumaki-naruto-s-shadow-clone-save",
             "name": "Shadow Clone Save",
             "skillimage": "https://i.imgur.com/xw8NvvK.png",
-            "skilldescription": "This skill makes Uzumaki Naruto (S) invulnerable for 1 turn.",
+            "skilldescription": "Uzumaki Naruto (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -97,7 +97,7 @@ module.exports = {
             "id": "temari-s-fan-offensive-defense",
             "name": "Fan Offensive Defense",
             "skillimage": "https://i.imgur.com/zAC9lgX.png",
-            "skilldescription": "This skill makes Temari (S) invulnerable for 1 turn.",
+            "skilldescription": "Temari (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -192,7 +192,7 @@ module.exports = {
                         "harmful": true,
                         "damageDealtFlatModifier": -5,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Deals 5 less damage for 1 turn."
+                        "tooltipText": "This character deals 5 less damage."
                     }
                 }
             ]

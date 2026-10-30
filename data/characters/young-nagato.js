@@ -108,7 +108,7 @@ module.exports = {
             "id": "young-nagato-in-the-shadows",
             "name": "In the Shadows",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Nagato invulnerable for 1 turn.",
+            "skilldescription": "Young Nagato becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

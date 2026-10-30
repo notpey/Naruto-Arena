@@ -38,7 +38,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "This character has 5 points of permanent destructible defense from Tree Wave Destruction."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 }
             ]
@@ -134,7 +134,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "This character has 30 points of permanent destructible defense from A World of Trees."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 },
                 {
@@ -194,7 +194,7 @@ module.exports = {
             "id": "edo-tensei-hashirama-deflection",
             "name": "Deflection",
             "skillimage": "https://i.imgur.com/GKhZ1S9.png",
-            "skilldescription": "This skill makes Edo Tensei Hashirama invulnerable for 1 turn.",
+            "skilldescription": "Edo Tensei Hashirama becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

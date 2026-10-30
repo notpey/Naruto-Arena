@@ -116,7 +116,7 @@ module.exports = {
             "id": "akimichi-chouji-effortless-block",
             "name": "Effortless Block",
             "skillimage": "https://i.imgur.com/9ZNpEEN.png",
-            "skilldescription": "This skill makes Akimichi Chouji invulnerable for 1 turn.",
+            "skilldescription": "Akimichi Chouji becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

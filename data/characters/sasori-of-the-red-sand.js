@@ -37,7 +37,7 @@ module.exports = {
                         "bonusDamageAppliesToSkillIds": [
                             "sasori-of-the-red-sand-poison-gas"
                         ],
-                        "tooltipText": "Taking 10 physical damage per turn and takes +5 damage from Poison Gas."
+                        "tooltipText": "This character takes 10 physical damage each turn and 5 additional damage from Poison Gas."
                     }
                 },
                 {
@@ -89,7 +89,7 @@ module.exports = {
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
                         "damageOnSkillUseAffliction": 5,
-                        "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                        "tooltipText": "This character takes 10 affliction damage each turn and 5 affliction damage when using a skill."
                     }
                 },
                 {
@@ -109,7 +109,7 @@ module.exports = {
                         "ignoreDamageReduction": true,
                         "ignoreDestructibleDefense": true,
                         "damageOnSkillUseAffliction": 5,
-                        "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                        "tooltipText": "This character takes 10 affliction damage each turn and 5 affliction damage when using a skill."
                     }
                 },
                 {
@@ -165,7 +165,7 @@ module.exports = {
             "id": "sasori-of-the-red-sand-puppet-protection",
             "name": "Puppet Protection",
             "skillimage": "https://i.imgur.com/067sl2R.png",
-            "skilldescription": "This skill makes Sasori of the Red Sand invulnerable for 1 turn.",
+            "skilldescription": "Sasori of the Red Sand becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -224,7 +224,7 @@ module.exports = {
                         "cannotReduceDamage": true,
                         "cannotBecomeInvulnerable": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Cannot reduce damage or become invulnerable for 1 turn."
+                        "tooltipText": "This character cannot reduce damage or become invulnerable."
                     }
                 },
                 {
@@ -236,7 +236,7 @@ module.exports = {
                         "helpful": true,
                         "destructibleDefensePoints": 15,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Has 15 destructible defense for 1 turn."
+                        "tooltipText": "This character has 15 destructible defense."
                     }
                 }
             ]

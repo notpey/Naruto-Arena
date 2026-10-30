@@ -146,7 +146,7 @@ module.exports = {
                         "action": true,
                         "ongoingClass": "action",
                         "damagePerTurn": 25,
-                        "tooltipText": "Taking 25 energy damage per turn."
+                        "tooltipText": "This character takes 25 Energy damage each turn."
                     }
                 }
             ]
@@ -155,7 +155,7 @@ module.exports = {
             "id": "kisame-body-double-samehada-block",
             "name": "Samehada Block",
             "skillimage": "https://i.imgur.com/Yu8K5hE.png",
-            "skilldescription": "This skill makes Kisame Body Double invulnerable for 1 turn.",
+            "skilldescription": "Kisame Body Double becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

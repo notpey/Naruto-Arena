@@ -42,7 +42,7 @@ module.exports = {
                                 "scope": "target"
                             }
                         ],
-                        "tooltipText": "Subject to Mind Body Switch: will take 15 damage and have their next harmful skill countered and copied."
+                        "tooltipText": "This character will take 15 damage, and their next harmful skill is countered and copied."
                     }
                 }
             ]
@@ -74,7 +74,7 @@ module.exports = {
                         "cannotBeReflected": true,
                         "damageOnSkillUsePiercing": 5,
                         "revealInvisibleSkills": true,
-                        "tooltipText": "Takes 5 piercing damage on skill use and invisible skills are revealed."
+                        "tooltipText": "This character takes 5 piercing damage when using a skill, and their invisible skills are revealed."
                     }
                 }
             ]
@@ -105,7 +105,7 @@ module.exports = {
                         "helpful": true,
                         "invisible": true,
                         "ignoreHarmfulNonDamageEffects": true,
-                        "tooltipText": "Ignores all harmful non-damage and non-energy effects."
+                        "tooltipText": "This character ignores harmful effects other than damage and energy effects."
                     }
                 }
             ]
@@ -114,7 +114,7 @@ module.exports = {
             "id": "yamanaka-ino-s-hide",
             "name": "Hide",
             "skillimage": "https://i.imgur.com/TrPzpBy.png",
-            "skilldescription": "This skill makes Yamanaka Ino (S) invulnerable for 1 turn.",
+            "skilldescription": "Yamanaka Ino (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

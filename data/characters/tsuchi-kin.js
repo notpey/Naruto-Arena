@@ -109,7 +109,7 @@ module.exports = {
             "id": "tsuchi-kin-kin-substitution",
             "name": "Kin Substitution",
             "skillimage": "https://i.imgur.com/XVx6f4x.png",
-            "skilldescription": "This skill makes Tsuchi Kin invulnerable for 1 turn.",
+            "skilldescription": "Tsuchi Kin becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

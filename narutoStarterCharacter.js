@@ -23,7 +23,7 @@
             "id": "uzumaki-naruto-shadow-clone-assault",
             "name": "Shadow Clone Assault",
             "skillimage": "https://i.imgur.com/VrsLUU6.png",
-            "skilldescription": "Naruto attacks one enemy with his shadow clones, dealing 20 physical damage. During Shadow Clone Technique, this skill deals 10 additional damage.",
+            "skilldescription": "Naruto deals 20 physical damage to one enemy. During Shadow Clone Technique, this skill deals 10 additional damage.",
             "energy": [
                 "Taijutsu"
             ],
@@ -46,7 +46,7 @@
             "id": "uzumaki-naruto-shadow-clone-technique",
             "name": "Shadow Clone Technique",
             "skillimage": "https://i.imgur.com/5QFHIrv.png",
-            "skilldescription": "Naruto creates numerous shadow clones, gaining 15 damage reduction for 3 turns. During this time, Shadow Clone Assault and Demon Wind Shuriken Feint are empowered.",
+            "skilldescription": "Naruto gains 15 damage reduction for 3 turns. During this time, Shadow Clone Assault and Demon Wind Shuriken Feint are empowered.",
             "energy": [
                 "Random"
             ],
@@ -79,7 +79,7 @@
             "id": "uzumaki-naruto-demon-wind-shuriken-feint",
             "name": "Demon Wind Shuriken Feint",
             "skillimage": "https://i.imgur.com/F2Jw7I4.png",
-            "skilldescription": "Naruto surprises one enemy with a transformed shuriken, dealing 25 physical damage and stunning their Physical skills for 1 turn. During Shadow Clone Technique, this skill deals 15 additional damage and ends Shadow Clone Technique.",
+            "skilldescription": "Naruto deals 25 physical damage to one enemy and stuns their Physical skills for 1 turn. During Shadow Clone Technique, this skill deals 15 additional damage and ends Shadow Clone Technique.",
             "energy": [
                 "Taijutsu",
                 "Random"
@@ -125,7 +125,7 @@
             "id": "uzumaki-naruto-sexy-technique",
             "name": "Sexy Technique",
             "skillimage": "https://i.imgur.com/lopF3Mp.png",
-            "skilldescription": "This skill makes Naruto Uzumaki invulnerable for 1 turn.",
+            "skilldescription": "Naruto Uzumaki becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

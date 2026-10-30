@@ -133,7 +133,7 @@ module.exports = {
             "id": "dosu-kinuta-agile-leap",
             "name": "Agile Leap",
             "skillimage": "https://i.imgur.com/Irubt1X.png",
-            "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
+            "skilldescription": "Kinuta Dosu becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

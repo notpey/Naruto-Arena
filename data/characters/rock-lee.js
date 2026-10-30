@@ -129,7 +129,7 @@ module.exports = {
             "id": "rock-lee-lee-block",
             "name": "Lee Block",
             "skillimage": "https://i.imgur.com/qgiODIf.png",
-            "skilldescription": "This skill makes Rock Lee invulnerable for 1 turn.",
+            "skilldescription": "Rock Lee becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -23,7 +23,7 @@
             "id": "haruno-sakura-kunai-interference",
             "name": "Kunai Interference",
             "skillimage": "https://i.imgur.com/Y4iU5Lv.png",
-            "skilldescription": "Sakura attacks one enemy with a kunai, dealing 15 physical damage and causing their harmful skills to deal 10 less non-affliction damage for 1 turn. During Clone Technique, this skill instead affects all enemies, dealing 10 physical damage and reducing their non-affliction damage by 5 for 1 turn.",
+            "skilldescription": "Sakura deals 15 physical damage to one enemy and makes their harmful skills deal 10 less non-affliction damage for 1 turn. During Clone Technique, this skill instead affects all enemies, dealing 10 physical damage and reducing their non-affliction damage by 5 for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -91,7 +91,7 @@
             "id": "haruno-sakura-guard-duty",
             "name": "Guard Duty",
             "skillimage": "https://i.imgur.com/t4I45Ck.png",
-            "skilldescription": "Sakura protects herself or one ally, granting them 25 destructible defense and 10 damage reduction for 2 turns. During Clone Technique, this skill instead grants all allies 15 destructible defense and 5 damage reduction for 2 turns.",
+            "skilldescription": "Sakura grants herself or one ally 25 destructible defense and 10 damage reduction for 2 turns. During Clone Technique, this skill instead grants all allies 15 destructible defense and 5 damage reduction for 2 turns.",
             "energy": [
                 "Random",
                 "Random"
@@ -172,7 +172,7 @@
             "id": "haruno-sakura-clone-technique",
             "name": "Clone Technique",
             "skillimage": "https://i.imgur.com/6GrbwOM.png",
-            "skilldescription": "Sakura creates illusionary clones for 3 turns, gaining 10 damage reduction. During this time, Kunai Interference and Guard Duty affect all eligible targets instead of one.",
+            "skilldescription": "Sakura gains 10 damage reduction. During this time, Kunai Interference and Guard Duty affect all eligible targets instead of one.",
             "energy": [
                 "Genjutsu"
             ],
@@ -205,7 +205,7 @@
             "id": "haruno-sakura-sakura-hide",
             "name": "Sakura Hide",
             "skillimage": "https://i.imgur.com/MJNI438.png",
-            "skilldescription": "This skill makes Sakura Haruno invulnerable for 1 turn.",
+            "skilldescription": "Sakura Haruno becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

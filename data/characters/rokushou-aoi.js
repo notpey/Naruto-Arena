@@ -159,7 +159,7 @@ module.exports = {
             "id": "rokushou-aoi-umbrella-shield",
             "name": "Umbrella Shield",
             "skillimage": "https://i.imgur.com/zxodmCK.png",
-            "skilldescription": "This skill makes Rokushou Aoi invulnerable for 1 turn.",
+            "skilldescription": "Rokushou Aoi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

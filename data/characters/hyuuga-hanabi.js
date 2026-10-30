@@ -144,7 +144,7 @@ module.exports = {
             "id": "hyuuga-hanabi-byakugan",
             "name": "Hanabi Byakugan",
             "skillimage": "https://i.imgur.com/BEe5lIp.png",
-            "skilldescription": "This skill makes Hyuuga Hanabi invulnerable for 1 turn.",
+            "skilldescription": "Hyuuga Hanabi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

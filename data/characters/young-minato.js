@@ -127,7 +127,7 @@ module.exports = {
             "id": "young-minato-highground-watcher",
             "name": "Highground Watcher",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Minato invulnerable for 1 turn.",
+            "skilldescription": "Young Minato becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -156,6 +156,7 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
+                        "hideTooltip": true,
                         "turnDurationAnchor": "source_turn"
                     }
                 }

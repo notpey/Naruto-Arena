@@ -112,7 +112,7 @@ module.exports = {
             "id": "young-yahiko-in-the-shadows",
             "name": "In the Shadows",
             "skillimage": "deadcharacter-remaster.png?v=2",
-            "skilldescription": "This skill makes Young Yahiko invulnerable for 1 turn.",
+            "skilldescription": "Young Yahiko becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

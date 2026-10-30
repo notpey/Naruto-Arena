@@ -123,7 +123,7 @@ module.exports = {
             "id": "nara-shikamaru-shikamaru-hide",
             "name": "Shikamaru Hide",
             "skillimage": "https://i.imgur.com/NF4jrLc.png",
-            "skilldescription": "This skill makes Nara Shikamaru invulnerable for 1 turn.",
+            "skilldescription": "Nara Shikamaru becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

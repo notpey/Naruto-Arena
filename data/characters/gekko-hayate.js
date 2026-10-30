@@ -126,7 +126,7 @@ module.exports = {
             "id": "gekko-hayate-backflip-dodge",
             "name": "Backflip Dodge",
             "skillimage": "https://i.imgur.com/Kxa0NCU.png",
-            "skilldescription": "This skill makes Gekko Hayate invulnerable for 1 turn.",
+            "skilldescription": "Gekko Hayate becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

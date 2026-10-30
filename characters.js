@@ -16,7 +16,7 @@ const characters = [
                 "id": "uzumaki-naruto-shadow-clone-assault",
                 "name": "Shadow Clone Assault",
                 "skillimage": "https://i.imgur.com/VrsLUU6.png",
-                "skilldescription": "Naruto attacks one enemy with his shadow clones, dealing 20 physical damage. During Shadow Clone Technique, this skill deals 10 additional damage.",
+                "skilldescription": "Naruto deals 20 physical damage to one enemy. During Shadow Clone Technique, this skill deals 10 additional damage.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -39,7 +39,7 @@ const characters = [
                 "id": "uzumaki-naruto-shadow-clone-technique",
                 "name": "Shadow Clone Technique",
                 "skillimage": "https://i.imgur.com/5QFHIrv.png",
-                "skilldescription": "Naruto creates numerous shadow clones, gaining 15 damage reduction for 3 turns. During this time, Shadow Clone Assault and Demon Wind Shuriken Feint are empowered.",
+                "skilldescription": "Naruto gains 15 damage reduction for 3 turns. During this time, Shadow Clone Assault and Demon Wind Shuriken Feint are empowered.",
                 "energy": [
                     "Random"
                 ],
@@ -72,7 +72,7 @@ const characters = [
                 "id": "uzumaki-naruto-demon-wind-shuriken-feint",
                 "name": "Demon Wind Shuriken Feint",
                 "skillimage": "https://i.imgur.com/F2Jw7I4.png",
-                "skilldescription": "Naruto surprises one enemy with a transformed shuriken, dealing 25 physical damage and stunning their Physical skills for 1 turn. During Shadow Clone Technique, this skill deals 15 additional damage and ends Shadow Clone Technique.",
+                "skilldescription": "Naruto deals 25 physical damage to one enemy and stuns their Physical skills for 1 turn. During Shadow Clone Technique, this skill deals 15 additional damage and ends Shadow Clone Technique.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -118,7 +118,7 @@ const characters = [
                 "id": "uzumaki-naruto-sexy-technique",
                 "name": "Sexy Technique",
                 "skillimage": "https://i.imgur.com/lopF3Mp.png",
-                "skilldescription": "This skill makes Naruto Uzumaki invulnerable for 1 turn.",
+                "skilldescription": "Naruto Uzumaki becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -162,7 +162,7 @@ const characters = [
                 "id": "haruno-sakura-kunai-interference",
                 "name": "Kunai Interference",
                 "skillimage": "https://i.imgur.com/Y4iU5Lv.png",
-                "skilldescription": "Sakura attacks one enemy with a kunai, dealing 15 physical damage and causing their harmful skills to deal 10 less non-affliction damage for 1 turn. During Clone Technique, this skill instead affects all enemies, dealing 10 physical damage and reducing their non-affliction damage by 5 for 1 turn.",
+                "skilldescription": "Sakura deals 15 physical damage to one enemy and makes their harmful skills deal 10 less non-affliction damage for 1 turn. During Clone Technique, this skill instead affects all enemies, dealing 10 physical damage and reducing their non-affliction damage by 5 for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -230,7 +230,7 @@ const characters = [
                 "id": "haruno-sakura-guard-duty",
                 "name": "Guard Duty",
                 "skillimage": "https://i.imgur.com/t4I45Ck.png",
-                "skilldescription": "Sakura protects herself or one ally, granting them 25 destructible defense and 10 damage reduction for 2 turns. During Clone Technique, this skill instead grants all allies 15 destructible defense and 5 damage reduction for 2 turns.",
+                "skilldescription": "Sakura grants herself or one ally 25 destructible defense and 10 damage reduction for 2 turns. During Clone Technique, this skill instead grants all allies 15 destructible defense and 5 damage reduction for 2 turns.",
                 "energy": [
                     "Random",
                     "Random"
@@ -311,7 +311,7 @@ const characters = [
                 "id": "haruno-sakura-clone-technique",
                 "name": "Clone Technique",
                 "skillimage": "https://i.imgur.com/6GrbwOM.png",
-                "skilldescription": "Sakura creates illusionary clones for 3 turns, gaining 10 damage reduction. During this time, Kunai Interference and Guard Duty affect all eligible targets instead of one.",
+                "skilldescription": "Sakura gains 10 damage reduction. During this time, Kunai Interference and Guard Duty affect all eligible targets instead of one.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -344,7 +344,7 @@ const characters = [
                 "id": "haruno-sakura-sakura-hide",
                 "name": "Sakura Hide",
                 "skillimage": "https://i.imgur.com/MJNI438.png",
-                "skilldescription": "This skill makes Sakura Haruno invulnerable for 1 turn.",
+                "skilldescription": "Sakura Haruno becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -391,7 +391,7 @@ const characters = [
                 "id": "uchiha-sasuke-shadow-shuriken-technique",
                 "name": "Shadow Shuriken Technique",
                 "skillimage": "https://i.imgur.com/ynDNiUT.png",
-                "skilldescription": "Sasuke throws shuriken at one enemy, dealing 20 physical damage. If that enemy is affected by his Fireball Jutsu, this skill also stuns their Physical skills for 1 turn and ends Fireball Jutsu's remaining effect.",
+                "skilldescription": "Sasuke deals 20 physical damage to one enemy. If that enemy is affected by his Fireball Jutsu, this skill also stuns their Physical skills for 1 turn and ends Fireball Jutsu's remaining effect.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -443,7 +443,7 @@ const characters = [
                 "id": "uchiha-sasuke-great-fireball-jutsu",
                 "name": "Fire Style: Great Fireball Jutsu",
                 "skillimage": "https://i.imgur.com/60VDgWY.png",
-                "skilldescription": "Sasuke unleashes a massive fireball at one enemy, dealing 20 chakra damage and 5 affliction damage* for 3 turns.",
+                "skilldescription": "Sasuke deals 20 chakra damage to one enemy and 5 affliction damage* for 3 turns.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -517,7 +517,7 @@ const characters = [
                 "id": "uchiha-sasuke-stealth",
                 "name": "Stealth",
                 "skillimage": "https://i.imgur.com/dC3c6Vs.png",
-                "skilldescription": "This skill makes Sasuke Uchiha invulnerable for 1 turn.",
+                "skilldescription": "Sasuke Uchiha becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -674,7 +674,7 @@ const characters = [
                 "id": "inuzuka-kiba-smoke-bomb",
                 "name": "Smoke Bomb",
                 "skillimage": "https://i.imgur.com/CwFqO2U.png",
-                "skilldescription": "This skill makes Inuzuka Kiba invulnerable for 1 turn.",
+                "skilldescription": "Inuzuka Kiba becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -717,7 +717,7 @@ const characters = [
                 "id": "aburame-shino-female-bug",
                 "name": "Female Bug",
                 "skillimage": "https://i.imgur.com/NZvHesR.png",
-                "skilldescription": "Shino permanently marks one enemy with a female insect. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
+                "skilldescription": "Shino permanently marks one enemy. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
                 "energy": [],
                 "target": "single-enemy",
                 "damage": 0,
@@ -839,7 +839,7 @@ const characters = [
                 "id": "aburame-shino-infestation",
                 "name": "Infestation",
                 "skillimage": "https://i.imgur.com/vPf2DKk.png",
-                "skilldescription": "Shino infests an enemy with insects, dealing 5 affliction damage each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.",
+                "skilldescription": "Shino deals 5 affliction damage to one enemy each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.",
                 "energy": [
                     "Random"
                 ],
@@ -1228,7 +1228,7 @@ const characters = [
                 "id": "nara-shikamaru-shikamaru-hide",
                 "name": "Shikamaru Hide",
                 "skillimage": "https://i.imgur.com/NF4jrLc.png",
-                "skilldescription": "This skill makes Nara Shikamaru invulnerable for 1 turn.",
+                "skilldescription": "Nara Shikamaru becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -1372,7 +1372,7 @@ const characters = [
                 "id": "akimichi-chouji-effortless-block",
                 "name": "Effortless Block",
                 "skillimage": "https://i.imgur.com/9ZNpEEN.png",
-                "skilldescription": "This skill makes Akimichi Chouji invulnerable for 1 turn.",
+                "skilldescription": "Akimichi Chouji becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -1580,7 +1580,7 @@ const characters = [
                 "id": "yamanaka-ino-ino-block",
                 "name": "Ino Block",
                 "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
-                "skilldescription": "This skill makes Yamanaka Ino invulnerable for 1 turn.",
+                "skilldescription": "Yamanaka Ino becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -1778,7 +1778,7 @@ const characters = [
                 "id": "rock-lee-lee-block",
                 "name": "Lee Block",
                 "skillimage": "https://i.imgur.com/qgiODIf.png",
-                "skilldescription": "This skill makes Rock Lee invulnerable for 1 turn.",
+                "skilldescription": "Rock Lee becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2112,7 +2112,7 @@ const characters = [
                 "id": "tenten-spiked-boulder-wall",
                 "name": "Spiked Boulder Wall",
                 "skillimage": "https://i.imgur.com/45XopDc.png",
-                "skilldescription": "This skill makes Tenten invulnerable for 1 turn.",
+                "skilldescription": "Tenten becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2255,7 +2255,7 @@ const characters = [
                 "id": "neji-hyuuga-byakugan-insight",
                 "name": "Byakugan Insight",
                 "skillimage": "https://i.imgur.com/2eXVucA.png",
-                "skilldescription": "This skill makes Hyuuga Neji invulnerable for 1 turn.",
+                "skilldescription": "Hyuuga Neji becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2442,7 +2442,7 @@ const characters = [
                 "id": "gaara-of-the-desert-shield-of-sand",
                 "name": "Shield of Sand",
                 "skillimage": "https://i.imgur.com/vL03kPm.png",
-                "skilldescription": "This skill makes Gaara invulnerable for 1 turn.",
+                "skilldescription": "Gaara becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2641,7 +2641,7 @@ const characters = [
                 "id": "kankuro-puppet-replacement-technique",
                 "name": "Puppet Replacement Technique",
                 "skillimage": "https://i.imgur.com/P2K3Uue.png",
-                "skilldescription": "This skill makes Kankuro invulnerable for 1 turn.",
+                "skilldescription": "Kankuro becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2678,7 +2678,7 @@ const characters = [
                 "id": "temari-cutting-whirlwind",
                 "name": "Cutting Whirlwind",
                 "skillimage": "https://i.imgur.com/VU7HluY.png",
-                "skilldescription": "Temari creates a razor sharp wind, dealing 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
+                "skilldescription": "Temari deals 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -2735,7 +2735,7 @@ const characters = [
                 "id": "temari-summoning-quick-beheading-dance",
                 "name": "Summoning Quick Beheading Dance",
                 "skillimage": "https://i.imgur.com/9VRqsM7.png",
-                "skilldescription": "Temari summons the wind weasel Kamatari in the battlefield, dealing 35 damage to all enemies. If used one turn after 'Cutting Whirlwind', this skill will cost 1 less random chakra.",
+                "skilldescription": "Temari deals 35 damage to all enemies. If used one turn after Cutting Whirlwind, this skill costs 1 less random chakra.",
                 "energy": [
                     "Ninjutsu",
                     "Random",
@@ -2831,7 +2831,7 @@ const characters = [
                 "id": "temari-fan-defence-technique",
                 "name": "Fan Defence Technique",
                 "skillimage": "https://i.imgur.com/nnNAsmM.png",
-                "skilldescription": "This skill makes Temari invulnerable for 1 turn.",
+                "skilldescription": "Temari becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2992,7 +2992,7 @@ const characters = [
                 "id": "dosu-kinuta-agile-leap",
                 "name": "Agile Leap",
                 "skillimage": "https://i.imgur.com/Irubt1X.png",
-                "skilldescription": "This skill makes Kinuta Dosu invulnerable for 1 turn.",
+                "skilldescription": "Kinuta Dosu becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3226,7 +3226,7 @@ const characters = [
                 "id": "tsuchi-kin-kin-substitution",
                 "name": "Kin Substitution",
                 "skillimage": "https://i.imgur.com/XVx6f4x.png",
-                "skilldescription": "This skill makes Tsuchi Kin invulnerable for 1 turn.",
+                "skilldescription": "Tsuchi Kin becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3354,7 +3354,7 @@ const characters = [
                 "id": "zaku-abumi-airwave-deflection",
                 "name": "Airwave Deflection",
                 "skillimage": "https://i.imgur.com/yszdsLO.png",
-                "skilldescription": "This skill makes Abumi Zaku invulnerable for 1 turn.",
+                "skilldescription": "Abumi Zaku becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3552,7 +3552,7 @@ const characters = [
                 "id": "young-kakashi-sword-parry",
                 "name": "Sword Parry",
                 "skillimage": "https://i.imgur.com/V9vfQQQ.png",
-                "skilldescription": "This skill makes Young Kakashi invulnerable for 1 turn.",
+                "skilldescription": "Young Kakashi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3717,7 +3717,7 @@ const characters = [
                 "id": "uchiha-obito-flee",
                 "name": "Obito Flee",
                 "skillimage": "https://i.imgur.com/WJAbDGt.png",
-                "skilldescription": "This skill makes Uchiha Obito invulnerable for 1 turn.",
+                "skilldescription": "Uchiha Obito becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3903,7 +3903,7 @@ const characters = [
                 "id": "nohara-rin-flee",
                 "name": "Flee",
                 "skillimage": "https://i.imgur.com/10ydruj.png",
-                "skilldescription": "This skill makes Nohara Rin invulnerable for 1 turn.",
+                "skilldescription": "Nohara Rin becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4076,7 +4076,7 @@ const characters = [
                 "id": "hyuuga-hanabi-byakugan",
                 "name": "Hanabi Byakugan",
                 "skillimage": "https://i.imgur.com/BEe5lIp.png",
-                "skilldescription": "This skill makes Hyuuga Hanabi invulnerable for 1 turn.",
+                "skilldescription": "Hyuuga Hanabi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4201,7 +4201,7 @@ const characters = [
                 "id": "teuchi-ramen-ichiraku-closed",
                 "name": "Ramen Ichiraku: Closed",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Teuchi invulnerable for 1 turn, heals him for 35 health and ends 'Ramen Ichiraku: Open' on his team.",
+                "skilldescription": "Teuchi becomes invulnerable for 1 turn, heals himself for 35 health, and ends Ramen Ichiraku: Open on his team.",
                 "energy": [
                     "Random"
                 ],
@@ -4366,7 +4366,7 @@ const characters = [
                 "id": "young-minato-highground-watcher",
                 "name": "Highground Watcher",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Minato invulnerable for 1 turn.",
+                "skilldescription": "Young Minato becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4395,6 +4395,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltip": true,
                             "turnDurationAnchor": "source_turn"
                         }
                     }
@@ -4477,6 +4478,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltip": true,
                             "turnDurationAnchor": "source_turn"
                         }
                     }
@@ -4528,6 +4530,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "hideTooltip": true,
                             "turnDurationAnchor": "source_turn"
                         }
                     }
@@ -4537,7 +4540,7 @@ const characters = [
                 "id": "young-kushina-skilled-landing",
                 "name": "Skilled Landing",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Kushina invulnerable for 1 turn.",
+                "skilldescription": "Young Kushina becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4673,7 +4676,7 @@ const characters = [
                 "id": "young-itachi-expert-retreat",
                 "name": "Expert Retreat",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Itachi invulnerable for 1 turn.",
+                "skilldescription": "Young Itachi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4813,7 +4816,7 @@ const characters = [
                 "id": "young-yahiko-in-the-shadows",
                 "name": "In the Shadows",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Yahiko invulnerable for 1 turn.",
+                "skilldescription": "Young Yahiko becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4981,7 +4984,7 @@ const characters = [
                 "id": "young-konan-in-the-shadows",
                 "name": "In the Shadows",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Konan invulnerable for 1 turn.",
+                "skilldescription": "Young Konan becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5144,7 +5147,7 @@ const characters = [
                 "id": "young-nagato-in-the-shadows",
                 "name": "In the Shadows",
                 "skillimage": "deadcharacter-remaster.png?v=2",
-                "skilldescription": "This skill makes Young Nagato invulnerable for 1 turn.",
+                "skilldescription": "Young Nagato becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5224,7 +5227,7 @@ const characters = [
                 "id": "umino-iruka-shuriken-throw",
                 "name": "Shuriken Throw",
                 "skillimage": "https://i.imgur.com/LmS1XVp.png",
-                "skilldescription": "Iruka throws shuriken at one enemy, dealing 20 physical damage. If they are affected by his Sealed Bomb Square Release, the trap detonates immediately.",
+                "skilldescription": "Iruka deals 20 physical damage to one enemy. If they are affected by his Sealed Bomb Square Release, the trap detonates immediately.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -5272,7 +5275,7 @@ const characters = [
                 "id": "umino-iruka-academy-instruction",
                 "name": "Academy Instruction",
                 "skillimage": "https://i.imgur.com/NJMON6n.png",
-                "skilldescription": "Iruka prepares himself or one ally to defend, granting 15 destructible defense for 2 turns. For 1 turn, the first enemy to use a new harmful skill on that ally takes 10 physical damage.",
+                "skilldescription": "Iruka grants himself or one ally 15 destructible defense for 2 turns. For 1 turn, the first enemy to use a new harmful skill on that ally takes 10 physical damage.",
                 "energy": [
                     "Random"
                 ],
@@ -5320,7 +5323,7 @@ const characters = [
                 "id": "umino-iruka-sealed-bomb-square-release",
                 "name": "Sealed Bomb Square Release",
                 "skillimage": "https://i.imgur.com/TeDfWJB.png",
-                "skilldescription": "Iruka places an invisible explosive trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 25 damage and ends. Shuriken Throw can detonate it early.",
+                "skilldescription": "Iruka places an invisible trap on one enemy for 2 turns. The first time they use a new harmful skill, it detonates for 25 damage and ends. Shuriken Throw can detonate it early.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -5440,7 +5443,7 @@ const characters = [
                 "id": "mizuki-execution-shuriken",
                 "name": "Execution Shuriken",
                 "skillimage": "https://i.imgur.com/O3Y4Q29.png",
-                "skilldescription": "Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.",
+                "skilldescription": "Mizuki deals 30 physical damage to one enemy. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -5464,7 +5467,7 @@ const characters = [
                 "id": "mizuki-windmill",
                 "name": "Windmill",
                 "skillimage": "https://i.imgur.com/jETOs8w.png",
-                "skilldescription": "Mizuki prepares his giant shuriken for a sweeping attack. For 2 turns, his next Execution Shuriken affects all enemies.",
+                "skilldescription": "For 2 turns, Mizuki’s next Execution Shuriken affects all enemies.",
                 "energy": [
                     "Random"
                 ],
@@ -5575,7 +5578,7 @@ const characters = [
                 "id": "demon-brothers-chain-wrap",
                 "name": "Chain Wrap",
                 "skillimage": "https://i.imgur.com/qm5cAjZ.png",
-                "skilldescription": "Demon Brothers wrap one enemy in their shuriken chain, dealing 15 physical damage and stunning their Physical skills for 1 turn. For 2 turns, this skill is replaced by Chain Shred, which can only target that enemy. If Demon Brothers are stunned, Chain Wrap ends.",
+                "skilldescription": "Demon Brothers deal 15 physical damage to one enemy and stun their Physical skills for 1 turn. For 2 turns, this skill is replaced by Chain Shred, which can only target that enemy. If Demon Brothers are stunned, Chain Wrap ends.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -5662,7 +5665,7 @@ const characters = [
                 "id": "demon-brothers-bladed-gauntlet",
                 "name": "Bladed Gauntlet",
                 "skillimage": "https://i.imgur.com/SjVUKDT.png",
-                "skilldescription": "Demon Brothers slash one enemy with their poisoned claws, dealing 20 physical damage and 5 affliction damage* for 2 turns. Repeated use refreshes the poison's duration rather than stacking its damage.",
+                "skilldescription": "Demon Brothers deal 20 physical damage to one enemy and 5 affliction damage* for 2 turns. Repeated use refreshes the poison's duration rather than stacking its damage.",
                 "energy": [
                     "Random"
                 ],
@@ -5751,7 +5754,7 @@ const characters = [
                 "id": "demon-brothers-vanish",
                 "name": "Vanish",
                 "skillimage": "https://i.imgur.com/1LmsPwX.png",
-                "skilldescription": "This skill makes Demon Brothers invulnerable for 1 turn.",
+                "skilldescription": "Demon Brothers becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5945,7 +5948,7 @@ const characters = [
                 "id": "haku-flying-needles-of-death",
                 "name": "Flying Needles of Death",
                 "skillimage": "https://i.imgur.com/1wG05K5.png",
-                "skilldescription": "Haku launches a volley of water needles at one enemy, dealing 20 piercing damage. During Demonic Mirroring Ice Crystals, this skill also deals 10 piercing damage to the target of Demonic Mirroring Ice Crystals, unless they are the original target.",
+                "skilldescription": "Haku deals 20 piercing damage to one enemy. During Demonic Mirroring Ice Crystals, the enemy trapped in the mirrors takes 10 piercing damage unless already targeted by this skill.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -5971,7 +5974,7 @@ const characters = [
                 "id": "haku-acupuncture",
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku strikes one enemy's pressure points with senbon, stunning their Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
+                "skilldescription": "Haku stuns the Physical and Chakra skills of one enemy for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -6160,7 +6163,7 @@ const characters = [
                 "id": "momochi-zabuza-water-prison-technique",
                 "name": "Water Prison Technique",
                 "skillimage": "https://i.imgur.com/dT988nl.png",
-                "skilldescription": "Zabuza traps one enemy inside a sphere of water for 2 turns, stunning their harmful skills during this time. If Zabuza is stunned, this skill ends.",
+                "skilldescription": "Zabuza stuns one enemy's harmful skills for 2 turns.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -6183,7 +6186,7 @@ const characters = [
                             "ongoingClass": "control",
                             "cannotUseHarmfulSkills": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character cannot use harmful skills while Water Prison Technique is active. The prison ends if Zabuza is stunned."
+                            "tooltipText": "This character cannot use harmful skills."
                         }
                     },
                     {
@@ -6206,7 +6209,7 @@ const characters = [
                             "skillReplacements": {
                                 "momochi-zabuza-kubikiribocho": "momochi-zabuza-kubikiribocho-clone"
                             },
-                            "tooltipText": "A water clone attacks the enemies outside Zabuza’s Water Prison."
+                            "tooltipText": "Enemies outside Water Prison take damage from Zabuza."
                         }
                     }
                 ]
@@ -6277,7 +6280,7 @@ const characters = [
                 "id": "momochi-zabuza-water-clone-technique",
                 "name": "Water Clone Technique",
                 "skillimage": "https://i.imgur.com/m1hfJAx.png",
-                "skilldescription": "Zabuza creates a water clone to defend himself or one ally for 1 turn. The first enemy harmful Physical skill used against that character is countered, destroying the clone.",
+                "skilldescription": "Zabuza counters the first harmful Physical skill used on himself or one ally for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -6470,7 +6473,7 @@ const characters = [
                 "id": "oboro-hiding-tactics",
                 "name": "Oboro Hiding Tactics",
                 "skillimage": "https://i.imgur.com/VEOVr6w.png",
-                "skilldescription": "This skill makes Oboro invulnerable for 1 turn.",
+                "skilldescription": "Oboro becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -6719,7 +6722,7 @@ const characters = [
                 "id": "shigure-umbrella-block",
                 "name": "Umbrella Block",
                 "skillimage": "https://i.imgur.com/D1BTZbK.png",
-                "skilldescription": "This skill makes Umbrella invulnerable for 1 turn.",
+                "skilldescription": "Shigure becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -6922,7 +6925,7 @@ const characters = [
                 "id": "shiore-orochimaru-snake-body-retreat",
                 "name": "Snake Body Retreat",
                 "skillimage": "https://i.imgur.com/B5p2YML.png",
-                "skilldescription": "This skill makes Snake invulnerable for 1 turn.",
+                "skilldescription": "Shiore Orochimaru becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7123,7 +7126,7 @@ const characters = [
                 "id": "akadou-yoroi-chakra-block",
                 "name": "Chakra Block",
                 "skillimage": "https://i.imgur.com/ubYpqC3.png",
-                "skilldescription": "This skill makes Chakra invulnerable for 1 turn.",
+                "skilldescription": "Akadou Yoroi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7339,7 +7342,7 @@ const characters = [
                 "id": "tsurugi-misumi-misumi-block",
                 "name": "Misumi Block",
                 "skillimage": "https://i.imgur.com/LJMVcjB.png",
-                "skilldescription": "This skill makes Misumi invulnerable for 1 turn.",
+                "skilldescription": "Misumi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7528,7 +7531,7 @@ const characters = [
                 "id": "jiroubou-terra-shield",
                 "name": "Terra Shield",
                 "skillimage": "https://i.imgur.com/gdsdurL.png",
-                "skilldescription": "This skill makes Jiroubou invulnerable for 1 turn.",
+                "skilldescription": "Jiroubou becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7669,7 +7672,7 @@ const characters = [
                 "id": "kidoumaru-golden-armor",
                 "name": "Golden Armor",
                 "skillimage": "https://i.imgur.com/RdMruyD.png",
-                "skilldescription": "This skill makes Kidoumaru invulnerable for 1 turn.",
+                "skilldescription": "Kidoumaru becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7816,7 +7819,7 @@ const characters = [
                 "id": "tayuya-insight",
                 "name": "Insight",
                 "skillimage": "https://i.imgur.com/sSjvCQK.png",
-                "skilldescription": "This skill makes Tayuya invulnerable for 1 turn.",
+                "skilldescription": "Tayuya becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7977,7 +7980,7 @@ const characters = [
                 "id": "sakon-and-ukon-summoning-rashoumon",
                 "name": "Summoning: Rashoumon",
                 "skillimage": "https://i.imgur.com/Py47f2p.png",
-                "skilldescription": "This skill makes Sakon and Ukon invulnerable for 1 turn. If 'Parasite Demon Demolition' is active, it will end.",
+                "skilldescription": "Sakon and Ukon becomes invulnerable for 1 turn. If 'Parasite Demon Demolition' is active, it will end.",
                 "energy": [
                     "Random"
                 ],
@@ -8165,7 +8168,7 @@ const characters = [
                 "id": "kimimaro-bone-defense",
                 "name": "Bone Defense",
                 "skillimage": "https://i.imgur.com/NgObkLl.png",
-                "skilldescription": "This skill makes Kimimaro invulnerable for 1 turn.",
+                "skilldescription": "Kimimaro becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -8350,7 +8353,7 @@ const characters = [
                 "id": "mitarashi-anko-quick-reflexes",
                 "name": "Quick Reflexes",
                 "skillimage": "https://i.imgur.com/jOjcH7H.png",
-                "skilldescription": "This skill makes Mitarashi Anko invulnerable for 1 turn.",
+                "skilldescription": "Mitarashi Anko becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -8552,7 +8555,7 @@ const characters = [
                 "id": "gekko-hayate-backflip-dodge",
                 "name": "Backflip Dodge",
                 "skillimage": "https://i.imgur.com/Kxa0NCU.png",
-                "skilldescription": "This skill makes Gekko Hayate invulnerable for 1 turn.",
+                "skilldescription": "Gekko Hayate becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -8590,7 +8593,7 @@ const characters = [
                 "id": "shizune-prepared-needle-shot",
                 "name": "Prepared Needle Shot",
                 "skillimage": "https://i.imgur.com/eOiK0aq.png",
-                "skilldescription": "Shizune deals 15 damage to one enemy and prepares a needle for 1 turn. If this enemy is affected by 'Poison Mist', this skill deals 10 additional damage.",
+                "skilldescription": "Shizune deals 15 damage to one enemy and gains a prepared needle for 1 turn. If this enemy is affected by 'Poison Mist', this skill deals 10 additional damage.",
                 "energy": [
                     "Random"
                 ],
@@ -8701,7 +8704,7 @@ const characters = [
                 "id": "shizune-shizune-dodge",
                 "name": "Shizune Dodge",
                 "skillimage": "https://i.imgur.com/9fjcyuQ.png",
-                "skilldescription": "This skill makes Shizune invulnerable for 1 turn.",
+                "skilldescription": "Shizune becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -8946,7 +8949,7 @@ const characters = [
                 "id": "hatake-kakashi-raikiri",
                 "name": "Raikiri",
                 "skillimage": "https://i.imgur.com/CVE7tBQ.png",
-                "skilldescription": "Kakashi charges one enemy with lightning chakra, dealing 45 piercing damage.",
+                "skilldescription": "Kakashi deals 45 piercing damage to one enemy.",
                 "energy": [
                     "Ninjutsu",
                     "Taijutsu"
@@ -9127,7 +9130,7 @@ const characters = [
                 "id": "yuhi-kurenai-vanishing-illusion",
                 "name": "Vanishing Illusion",
                 "skillimage": "https://i.imgur.com/W2xhlma.png",
-                "skilldescription": "This skill makes Yuhi Kurenai invulnerable for 1 turn.",
+                "skilldescription": "Yuhi Kurenai becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -9312,7 +9315,7 @@ const characters = [
                 "id": "sarutobi-asuma-knife-block",
                 "name": "Knife Block",
                 "skillimage": "https://i.imgur.com/e4dn075.png",
-                "skilldescription": "This skill makes Sarutobi Asuma invulnerable for 1 turn.",
+                "skilldescription": "Sarutobi Asuma becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -9367,7 +9370,7 @@ const characters = [
                             "turnDurationAnchor": "source_turn",
                             "ongoingClass": "action",
                             "triggerOnApply": true,
-                            "tooltipText": "This character takes 10 damage from Flying Swallow. This action ends if Asuma is stunned or the target becomes invulnerable."
+                            "tooltipText": "This character takes 10 damage from Flying Swallow."
                         }
                     },
                     {
@@ -9571,7 +9574,7 @@ const characters = [
                 "id": "maito-gai-gai-dodge",
                 "name": "Gai Dodge",
                 "skillimage": "https://i.imgur.com/GtBoCxV.png",
-                "skilldescription": "This skill makes Maito Gai invulnerable for 1 turn.",
+                "skilldescription": "Maito Gai becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -9770,7 +9773,7 @@ const characters = [
                 "id": "baki-baki-teleportation",
                 "name": "Baki Teleportation",
                 "skillimage": "https://i.imgur.com/cMOrPng.png",
-                "skilldescription": "This skill makes Baki invulnerable for 1 turn.",
+                "skilldescription": "Baki becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -9981,7 +9984,7 @@ const characters = [
                 "id": "yakushi-kabuto-dead-soul-technique",
                 "name": "Dead Soul Technique",
                 "skillimage": "https://i.imgur.com/f88Jtva.png",
-                "skilldescription": "This skill makes Yakushi Kabuto invulnerable for 1 turn.",
+                "skilldescription": "Yakushi Kabuto becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10164,7 +10167,7 @@ const characters = [
                 "id": "tsunade-elbow-block",
                 "name": "Elbow Block",
                 "skillimage": "https://i.imgur.com/wS89CFy.png",
-                "skilldescription": "This skill makes Tsunade invulnerable for 1 turn.",
+                "skilldescription": "Tsunade becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10379,7 +10382,7 @@ const characters = [
                 "id": "jiraiya-spiked-budda",
                 "name": "Spiked Budda",
                 "skillimage": "https://i.imgur.com/0Lw6GVr.png",
-                "skilldescription": "This skill makes Jiraiya invulnerable for 1 turn.",
+                "skilldescription": "Jiraiya becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10565,7 +10568,7 @@ const characters = [
                 "id": "orochimaru-earth-clone-technique",
                 "name": "Earth Clone Technique",
                 "skillimage": "https://i.imgur.com/yqkQKWQ.png",
-                "skilldescription": "This skill makes Orochimaru invulnerable for 1 turn.",
+                "skilldescription": "Orochimaru becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10826,7 +10829,7 @@ const characters = [
                 "id": "edo-tensei-hashirama-deflection",
                 "name": "Deflection",
                 "skillimage": "https://i.imgur.com/GKhZ1S9.png",
-                "skilldescription": "This skill makes Edo Tensei Hashirama invulnerable for 1 turn.",
+                "skilldescription": "Edo Tensei Hashirama becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10982,7 +10985,7 @@ const characters = [
                 "id": "edo-tensei-tobirama-water-encampment-wall",
                 "name": "Water Encampment Wall",
                 "skillimage": "https://i.imgur.com/3rOMjSA.png",
-                "skilldescription": "This skill makes Edo Tensei Tobirama invulnerable for 1 turn.",
+                "skilldescription": "Edo Tensei Tobirama becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -11210,7 +11213,7 @@ const characters = [
                 "id": "sarutobi-hiruzen-earth-style-wall",
                 "name": "Earth-Style Wall",
                 "skillimage": "https://i.imgur.com/w8Zg0Py.png",
-                "skilldescription": "This skill makes Sarutobi Hiruzen invulnerable for 1 turn.",
+                "skilldescription": "Sarutobi Hiruzen becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -11411,7 +11414,7 @@ const characters = [
                 "id": "kyuubi-naruto-kyuubi-dodge",
                 "name": "Kyuubi Dodge",
                 "skillimage": "https://i.imgur.com/4ZFrdfW.png",
-                "skilldescription": "This skill makes Kyuubi Naruto invulnerable for 1 turn.",
+                "skilldescription": "Kyuubi Naruto becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -11595,7 +11598,7 @@ const characters = [
                 "id": "cursed-seal-lv1-sasuke-dark-aura",
                 "name": "Dark Aura",
                 "skillimage": "https://i.imgur.com/WQWQgc5.png",
-                "skilldescription": "This skill makes Cursed Seal Lv1 Sasuke invulnerable for 1 turn.",
+                "skilldescription": "Cursed Seal Lv1 Sasuke becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -11803,7 +11806,7 @@ const characters = [
                 "id": "cursed-seal-sasuke-sharingan-evasion",
                 "name": "Sharingan Evasion",
                 "skillimage": "https://i.imgur.com/gz8961h.png",
-                "skilldescription": "This skill makes Cursed Seal Sasuke invulnerable for 1 turn.",
+                "skilldescription": "Cursed Seal Sasuke becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -11969,7 +11972,7 @@ const characters = [
                 "id": "butterfly-chouji-effortless-block",
                 "name": "Effortless Block",
                 "skillimage": "https://i.imgur.com/csCBOSU.png",
-                "skilldescription": "This skill makes Butterfly Chouji invulnerable for 1 turn.",
+                "skilldescription": "Butterfly Chouji becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -12127,7 +12130,7 @@ const characters = [
                 "id": "drunken-lee-drunken-leap",
                 "name": "Drunken Leap",
                 "skillimage": "https://i.imgur.com/rXB5r9a.png",
-                "skilldescription": "This skill makes Drunken Lee invulnerable for 1 turn.",
+                "skilldescription": "Drunken Lee becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -12298,7 +12301,7 @@ const characters = [
                 "id": "shukaku-gaara-thick-sand-coat",
                 "name": "Thick Sand Coat",
                 "skillimage": "https://i.imgur.com/1zFEDxZ.png",
-                "skilldescription": "This skill makes Shukaku Gaara invulnerable for 1 turn.",
+                "skilldescription": "Shukaku Gaara becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -12538,7 +12541,7 @@ const characters = [
                 "id": "rehabilitated-gaara-shield-of-shukaku",
                 "name": "Shield of Shukaku",
                 "skillimage": "https://i.imgur.com/Kr87iAU.png",
-                "skilldescription": "This skill makes Rehabilitated Gaara invulnerable for 1 turn.",
+                "skilldescription": "Rehabilitated Gaara becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -12727,7 +12730,7 @@ const characters = [
                 "id": "hoshigaki-kisame-samehada-scale-block",
                 "name": "Samehada Scale Block",
                 "skillimage": "https://i.imgur.com/mSXuepK.png",
-                "skilldescription": "This skill makes Hoshigaki Kisame invulnerable for 1 turn.",
+                "skilldescription": "Hoshigaki Kisame becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -12918,7 +12921,7 @@ const characters = [
                 "id": "uchiha-itachi-sharingan-insight",
                 "name": "Sharingan Insight",
                 "skillimage": "https://i.imgur.com/u3zgHCh.png",
-                "skilldescription": "This skill makes Uchiha Itachi invulnerable for 1 turn.",
+                "skilldescription": "Uchiha Itachi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -13106,7 +13109,7 @@ const characters = [
                 "id": "rokushou-aoi-umbrella-shield",
                 "name": "Umbrella Shield",
                 "skillimage": "https://i.imgur.com/zxodmCK.png",
-                "skilldescription": "This skill makes Rokushou Aoi invulnerable for 1 turn.",
+                "skilldescription": "Rokushou Aoi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -13366,7 +13369,7 @@ const characters = [
                 "id": "kurosuki-raiga-lightning-strike-armor",
                 "name": "Lightning Strike Armor",
                 "skillimage": "https://i.imgur.com/xJZHpqR.png",
-                "skilldescription": "This skill makes Kurosuki Raiga invulnerable for 1 turn.",
+                "skilldescription": "Kurosuki Raiga becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -13713,7 +13716,7 @@ const characters = [
                 "id": "uzumaki-naruto-s-shadow-clone-save",
                 "name": "Shadow Clone Save",
                 "skillimage": "https://i.imgur.com/xw8NvvK.png",
-                "skilldescription": "This skill makes Uzumaki Naruto (S) invulnerable for 1 turn.",
+                "skilldescription": "Uzumaki Naruto (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -13912,7 +13915,7 @@ const characters = [
                 "id": "haruno-sakura-s-insightful-dodge",
                 "name": "Insightful Dodge",
                 "skillimage": "https://i.imgur.com/H1t6mfB.png",
-                "skilldescription": "This skill makes Haruno Sakura (S) invulnerable for 1 turn.",
+                "skilldescription": "Haruno Sakura (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -14085,7 +14088,7 @@ const characters = [
                 "id": "sai-ink-clone",
                 "name": "Ink Clone",
                 "skillimage": "https://i.imgur.com/ExEgRJl.png",
-                "skilldescription": "This skill makes Sai invulnerable for 1 turn.",
+                "skilldescription": "Sai becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -14294,7 +14297,7 @@ const characters = [
                 "id": "inuzuka-kiba-s-hide-in-the-shade",
                 "name": "Hide in the Shade",
                 "skillimage": "https://i.imgur.com/2NGDdwF.png",
-                "skilldescription": "This skill makes Inuzuka Kiba (S) invulnerable for 1 turn.",
+                "skilldescription": "Inuzuka Kiba (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -14396,7 +14399,7 @@ const characters = [
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
                             "invulnerableToFriendlySkills": true,
-                            "tooltipText": "Taking 15 affliction damage each turn and invulnerable to friendly skills."
+                            "tooltipText": "This character takes 15 affliction damage each turn and is invulnerable to friendly skills."
                         }
                     },
                     {
@@ -14505,7 +14508,7 @@ const characters = [
                 "id": "aburame-shino-s-insect-cocoon",
                 "name": "Insect Cocoon",
                 "skillimage": "https://i.imgur.com/s9ukg3d.png",
-                "skilldescription": "This skill makes Aburame Shino (S) invulnerable for 1 turn.",
+                "skilldescription": "Aburame Shino (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -14566,7 +14569,7 @@ const characters = [
                             "bonusDamageAppliesToSkillIds": [
                                 "aburame-shino-s-insect-swarm"
                             ],
-                            "tooltipText": "Takes 5 additional damage from Insect Swarm this turn."
+                            "tooltipText": "This character takes 5 additional damage from Insect Swarm this turn."
                         }
                     }
                 ]
@@ -14631,7 +14634,7 @@ const characters = [
                 "id": "hyuuga-hinata-s-gentle-step-twin-lion-fists",
                 "name": "Gentle Step Twin Lion Fists",
                 "skillimage": "https://i.imgur.com/48pvYwu.png",
-                "skilldescription": "This skill deals 30 damage to one enemy and removes 1 random energy from them. This skill will deal 5 additional damage for each 'Pressure Point Closure' stack. Once used, this skill removes all stacks of 'Pressure Point Closure' from the targeted enemy.",
+                "skilldescription": "Hyuuga Hinata (S) deals 30 damage to one enemy and removes 1 random chakra. This deals 5 additional damage per Pressure Point Closure stack, then removes all stacks from that enemy.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -14694,7 +14697,7 @@ const characters = [
                 "id": "hyuuga-hinata-s-byakugan-sight",
                 "name": "Byakugan Sight",
                 "skillimage": "https://i.imgur.com/hPD2pLH.png",
-                "skilldescription": "This skill makes Hyuuga Hinata (S) invulnerable for 1 turn.",
+                "skilldescription": "Hyuuga Hinata (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -14860,7 +14863,7 @@ const characters = [
                 "id": "nara-shikamaru-s-panicked-dodge",
                 "name": "Panicked Dodge",
                 "skillimage": "https://i.imgur.com/mEXRLAE.png",
-                "skilldescription": "This skill makes Nara Shikamaru (S) invulnerable for 1 turn.",
+                "skilldescription": "Nara Shikamaru (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15057,7 +15060,7 @@ const characters = [
                 "id": "akimichi-chouji-s-effortful-block",
                 "name": "Effortful Block",
                 "skillimage": "https://i.imgur.com/9h6FhK5.png",
-                "skilldescription": "This skill makes Akimichi Chouji (S) invulnerable for 1 turn.",
+                "skilldescription": "Akimichi Chouji (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15127,7 +15130,7 @@ const characters = [
                                     "scope": "target"
                                 }
                             ],
-                            "tooltipText": "Subject to Mind Body Switch: will take 15 damage and have their next harmful skill countered and copied."
+                            "tooltipText": "This character will take 15 damage, and their next harmful skill is countered and copied."
                         }
                     }
                 ]
@@ -15159,7 +15162,7 @@ const characters = [
                             "cannotBeReflected": true,
                             "damageOnSkillUsePiercing": 5,
                             "revealInvisibleSkills": true,
-                            "tooltipText": "Takes 5 piercing damage on skill use and invisible skills are revealed."
+                            "tooltipText": "This character takes 5 piercing damage when using a skill, and their invisible skills are revealed."
                         }
                     }
                 ]
@@ -15190,7 +15193,7 @@ const characters = [
                             "helpful": true,
                             "invisible": true,
                             "ignoreHarmfulNonDamageEffects": true,
-                            "tooltipText": "Ignores all harmful non-damage and non-energy effects."
+                            "tooltipText": "This character ignores harmful effects other than damage and energy effects."
                         }
                     }
                 ]
@@ -15199,7 +15202,7 @@ const characters = [
                 "id": "yamanaka-ino-s-hide",
                 "name": "Hide",
                 "skillimage": "https://i.imgur.com/TrPzpBy.png",
-                "skilldescription": "This skill makes Yamanaka Ino (S) invulnerable for 1 turn.",
+                "skilldescription": "Yamanaka Ino (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15373,7 +15376,7 @@ const characters = [
                 "id": "rock-lee-s-jumping-dodge",
                 "name": "Jumping Dodge",
                 "skillimage": "https://i.imgur.com/y6PYTiZ.png",
-                "skilldescription": "This skill makes Rock Lee (S) invulnerable for 1 turn.",
+                "skilldescription": "Rock Lee (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15466,7 +15469,7 @@ const characters = [
                         "scope": "all-ally",
                         "metadata": {
                             "invulnerableToNonStrategicSkills": true,
-                            "tooltipText": "Invulnerable to non-strategic skills for 1 turn."
+                            "tooltipText": "This character is invulnerable to non-Strategic skills."
                         }
                     }
                 ]
@@ -15504,7 +15507,7 @@ const characters = [
                 "id": "tenten-s-leaping-dodge",
                 "name": "Leaping Dodge",
                 "skillimage": "https://i.imgur.com/qM4w2Qr.png",
-                "skilldescription": "This skill makes Tenten (S) invulnerable for 1 turn.",
+                "skilldescription": "Tenten (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15581,7 +15584,7 @@ const characters = [
                             "invulnerableToPhysicalSkills": true,
                             "destructibleDefensePoints": 20,
                             "destructibleDefensePermanent": true,
-                            "tooltipText": "Invulnerable to physical skills for 1 turn and gained 20 permanent destructible defense."
+                            "tooltipText": "This character is invulnerable to Physical skills and has 20 permanent destructible defense."
                         }
                     }
                 ]
@@ -15611,7 +15614,7 @@ const characters = [
                         "metadata": {
                             "invisible": true,
                             "reflectOnEnemyHarmfulNonMental": true,
-                            "tooltipText": "Reflects enemy non-mental skills next turn."
+                            "tooltipText": "This character reflects enemy non-Mental skills next turn."
                         }
                     }
                 ]
@@ -15660,7 +15663,7 @@ const characters = [
                             "afflictionDamage": true,
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
-                            "tooltipText": "Taking 5 affliction damage per turn."
+                            "tooltipText": "This character takes 5 affliction damage each turn."
                         }
                     }
                 ]
@@ -15758,7 +15761,7 @@ const characters = [
                             "harmful": true,
                             "cannotReduceDamage": true,
                             "cannotBecomeInvulnerable": true,
-                            "tooltipText": "Cannot reduce damage or become invulnerable for 2 turns."
+                            "tooltipText": "This character cannot reduce damage or become invulnerable."
                         }
                     },
                     {
@@ -15795,7 +15798,7 @@ const characters = [
                 "id": "hyuuga-neji-s-byakugan-defense",
                 "name": "Byakugan Defense",
                 "skillimage": "https://i.imgur.com/FXM6jYa.png",
-                "skilldescription": "This skill makes Hyuuga Neji (S) invulnerable for 1 turn.",
+                "skilldescription": "Hyuuga Neji (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -15823,7 +15826,7 @@ const characters = [
                 "id": "hyuuga-neji-s-pressure-point-strike",
                 "name": "Pressure Point Strike",
                 "skillimage": "https://i.imgur.com/QTNMUo0.png",
-                "skilldescription": "Hyuuga Neji (S) attacks one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
+                "skilldescription": "Hyuuga Neji (S) targets one enemy countered by 'Byakugan - Eight Trigrams Field' or this skill, dealing 5 damage and removing 1 random energy from them. The following turn this skill will deal 5 additional damage and will remain replaced. This effect stacks and is cumulative until Hyuuga Neji (S) stops using this skill.",
                 "energy": [
                     "Random"
                 ],
@@ -15921,7 +15924,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Marked by Lightning Beast Fang."
+                            "tooltipText": "Finishing Raikiri deals 10 additional piercing damage to this character."
                         }
                     },
                     {
@@ -16048,7 +16051,7 @@ const characters = [
                             "triggerOnEnemyHarmfulSkill": true,
                             "counterCopySkillReplacementFor": "hatake-kakashi-s-team-tactics",
                             "counterCopySkillReplacementDuration": 1,
-                            "tooltipText": "Allies cooldowns reduced by 1."
+                            "tooltipText": "This character has 1 less cooldown on their skills."
                         }
                     }
                 ]
@@ -16057,7 +16060,7 @@ const characters = [
                 "id": "hatake-kakashi-s-bunshin-stand-in",
                 "name": "Bunshin Stand-in",
                 "skillimage": "https://i.imgur.com/lp2Q1v2.png",
-                "skilldescription": "This skill makes Hatake Kakashi (S) invulnerable for 1 turn.",
+                "skilldescription": "Hatake Kakashi (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -16164,7 +16167,7 @@ const characters = [
                             "harmful": true,
                             "ignoreHelpfulNonEnergyEffects": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                            "tooltipText": "This character ignores helpful effects except energy cost changes."
                         }
                     }
                 ]
@@ -16270,7 +16273,7 @@ const characters = [
                 "id": "yamato-wood-release-wood-shelter",
                 "name": "Wood Release: Wood Shelter",
                 "skillimage": "https://i.imgur.com/UudEEcp.png",
-                "skilldescription": "This skill makes Yamato invulnerable for 1 turn.",
+                "skilldescription": "Yamato becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -16331,7 +16334,7 @@ const characters = [
                             "action": true,
                             "ongoingClass": "action",
                             "damagePerTurn": 10,
-                            "tooltipText": "Taking 10 physical damage per turn from Nunchaku Taijutsu."
+                            "tooltipText": "This character takes 10 physical damage each turn from Nunchaku Taijutsu."
                         }
                     },
                     {
@@ -16343,7 +16346,7 @@ const characters = [
                             "helpful": true,
                             "ongoingClass": "action",
                             "retaliateOnIncomingHarmfulPhysicalDamage": 10,
-                            "tooltipText": "Deals 10 damage back when hit by an enemy physical skill."
+                            "tooltipText": "This character deals 10 damage to enemies who hit them with a Physical skill."
                         }
                     }
                 ]
@@ -16434,7 +16437,7 @@ const characters = [
                 "id": "maito-gai-s-muscle-block",
                 "name": "Muscle Block",
                 "skillimage": "https://i.imgur.com/KgkDleV.png",
-                "skilldescription": "This skill makes Maito Gai (S) invulnerable for 1 turn.",
+                "skilldescription": "Maito Gai (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -16562,7 +16565,7 @@ const characters = [
                                 ],
                                 "tooltipText": "Takes 100% more damage from Karasu Knives."
                             },
-                            "tooltipText": "Subject to Kuroari Trap: next harmful skill will be countered, increasing Karasu Knives damage by 100%."
+                            "tooltipText": "The next harmful skill this character uses is countered, increasing Karasu Knives damage by 100%."
                         }
                     }
                 ]
@@ -16641,7 +16644,7 @@ const characters = [
                             "helpful": true,
                             "damageReductionFlat": 10,
                             "immuneToNonConditionalAfflictionDamage": true,
-                            "tooltipText": "Has 10 damage reduction and ignores non-conditional affliction damage."
+                            "tooltipText": "This character has 10 damage reduction and ignores non-conditional affliction damage."
                         }
                     },
                     {
@@ -16663,7 +16666,7 @@ const characters = [
                 "id": "kankuro-s-puppet-distraction",
                 "name": "Puppet Distraction",
                 "skillimage": "https://i.imgur.com/CSxXuFZ.png",
-                "skilldescription": "This skill makes Kankuro (S) invulnerable for 1 turn.",
+                "skilldescription": "Kankuro (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -16816,7 +16819,7 @@ const characters = [
                 "id": "temari-s-fan-offensive-defense",
                 "name": "Fan Offensive Defense",
                 "skillimage": "https://i.imgur.com/zAC9lgX.png",
-                "skilldescription": "This skill makes Temari (S) invulnerable for 1 turn.",
+                "skilldescription": "Temari (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -16911,7 +16914,7 @@ const characters = [
                             "harmful": true,
                             "damageDealtFlatModifier": -5,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Deals 5 less damage for 1 turn."
+                            "tooltipText": "This character deals 5 less damage."
                         }
                     }
                 ]
@@ -17074,7 +17077,7 @@ const characters = [
                 "id": "kazekage-gaara-sand-sphere",
                 "name": "Sand Sphere",
                 "skillimage": "https://i.imgur.com/ISeDMEa.png",
-                "skilldescription": "This skill makes Kazekage Gaara invulnerable for 1 turn.",
+                "skilldescription": "Kazekage Gaara becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -17138,7 +17141,7 @@ const characters = [
                             "harmful": true,
                             "ignoreHelpfulNonEnergyEffects": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Ignores all helpful effects except energy cost changes for 1 turn."
+                            "tooltipText": "This character ignores helpful effects except energy cost changes."
                         }
                     }
                 ]
@@ -17216,7 +17219,7 @@ const characters = [
                 "id": "yakushi-kabuto-s-precise-evasion",
                 "name": "Precise Evasion",
                 "skillimage": "https://i.imgur.com/WaHCzhg.png",
-                "skilldescription": "This skill makes Yakushi Kabuto (S) invulnerable for 1 turn.",
+                "skilldescription": "Yakushi Kabuto (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -17371,7 +17374,7 @@ const characters = [
                 "id": "orochimaru-s-ground-mobility",
                 "name": "Ground Mobility",
                 "skillimage": "https://i.imgur.com/RWYh63j.png",
-                "skilldescription": "This skill makes Orochimaru (S) invulnerable for 1 turn.",
+                "skilldescription": "Orochimaru (S) becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -17423,7 +17426,7 @@ const characters = [
                             "cannotBeCountered": true,
                             "cannotBeReflected": true,
                             "invulnerableToHarmfulSkills": true,
-                            "tooltipText": "Invulnerable to harmful skills for 2 turns."
+                            "tooltipText": "This character is invulnerable to harmful skills."
                         }
                     },
                     {
@@ -17437,7 +17440,7 @@ const characters = [
                             "cannotBeReflected": true,
                             "invulnerableToHarmfulSkills": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Invulnerable to harmful skills for 1 turn."
+                            "tooltipText": "This character is invulnerable to harmful skills."
                         }
                     }
                 ]
@@ -17562,7 +17565,7 @@ const characters = [
                 "id": "four-tails-kyuubi-naruto-skin-of-chakra",
                 "name": "Skin of Chakra",
                 "skillimage": "https://i.imgur.com/BRrJuMb.png",
-                "skilldescription": "This skill makes Four Tails Kyuubi Naruto invulnerable for 1 turn.",
+                "skilldescription": "Four Tails Kyuubi Naruto becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -17784,7 +17787,7 @@ const characters = [
                             "action": true,
                             "ongoingClass": "action",
                             "damagePerTurn": 25,
-                            "tooltipText": "Taking 25 energy damage per turn."
+                            "tooltipText": "This character takes 25 Energy damage each turn."
                         }
                     }
                 ]
@@ -17793,7 +17796,7 @@ const characters = [
                 "id": "kisame-body-double-samehada-block",
                 "name": "Samehada Block",
                 "skillimage": "https://i.imgur.com/Yu8K5hE.png",
-                "skilldescription": "This skill makes Kisame Body Double invulnerable for 1 turn.",
+                "skilldescription": "Kisame Body Double becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -17904,7 +17907,7 @@ const characters = [
                                     }
                                 }
                             },
-                            "tooltipText": "Under Finger Genjutsu: next harmful skill will be countered for 10 damage and 1 genjutsu chakra."
+                            "tooltipText": "The next harmful skill this character uses is countered for 10 damage and 1 Genjutsu chakra."
                         }
                     }
                 ]
@@ -17934,7 +17937,7 @@ const characters = [
                         "metadata": {
                             "invisible": true,
                             "reflectOnEnemyHarmfulNonMental": true,
-                            "tooltipText": "Reflects non-mental skills back to the attacker for 2 turns."
+                            "tooltipText": "This character reflects non-Mental skills back to the attacker."
                         }
                     }
                 ]
@@ -17943,7 +17946,7 @@ const characters = [
                 "id": "itachi-body-double-fire-release-fireball",
                 "name": "Fire Release: Fireball",
                 "skillimage": "https://i.imgur.com/rIju3Zc.png",
-                "skilldescription": "Itachi Body Double attacks, dealing 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
+                "skilldescription": "Itachi Body Double deals 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -17990,7 +17993,7 @@ const characters = [
                 "id": "itachi-body-double-illusionary-raven-bunshin",
                 "name": "Illusionary Raven Bunshin",
                 "skillimage": "https://i.imgur.com/RuNxccO.png",
-                "skilldescription": "This skill makes Itachi Body Double invulnerable for 1 turn.",
+                "skilldescription": "Itachi Body Double becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -18055,7 +18058,7 @@ const characters = [
                             "skillClassDamageDealtModifiers": {
                                 "energy": -10
                             },
-                            "tooltipText": "Taking 10 piercing damage per turn and energy skills deal 10 less damage."
+                            "tooltipText": "This character takes 10 piercing damage each turn, and their Energy skills deal 10 less damage."
                         }
                     },
                     {
@@ -18067,7 +18070,7 @@ const characters = [
                             "helpful": true,
                             "ongoingClass": "action",
                             "invulnerableToMentalSkills": true,
-                            "tooltipText": "Invulnerable to mental skills."
+                            "tooltipText": "This character is invulnerable to Mental skills."
                         }
                     },
                     {
@@ -18119,7 +18122,7 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "invulnerableToEnergySkills": true,
-                            "tooltipText": "Invulnerable to energy skills for 1 turn."
+                            "tooltipText": "This character is invulnerable to Energy skills."
                         }
                     },
                     {
@@ -18250,7 +18253,7 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "invulnerableToPhysicalSkills": true,
-                            "tooltipText": "Invulnerable to physical skills for 1 turn."
+                            "tooltipText": "This character is invulnerable to Physical skills."
                         }
                     },
                     {
@@ -18311,7 +18314,7 @@ const characters = [
                             "damageTakenFromSkillClassModifiers": {
                                 "energy": 5
                             },
-                            "tooltipText": "Takes 10 piercing damage when using a skill and +5 damage from energy skills."
+                            "tooltipText": "This character takes 10 piercing damage when using a skill and 5 additional damage from Energy skills."
                         }
                     },
                     {
@@ -18375,7 +18378,7 @@ const characters = [
                             "afflictionDamage": true,
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
-                            "tooltipText": "Taking 5 affliction damage each turn permanently."
+                            "tooltipText": "This character takes 5 affliction damage each turn."
                         }
                     }
                 ]
@@ -18419,7 +18422,7 @@ const characters = [
                                 "ignoreDestructibleDefense": true,
                                 "tooltipText": "Taking 10 permanent affliction damage per turn."
                             },
-                            "tooltipText": "Ignores enemy damage for 1 turn and poisons attackers for 10 instant damage and 10 permanent damage."
+                            "tooltipText": "This character ignores enemy damage and poisons attackers for 10 instant damage and 10 permanent damage."
                         }
                     }
                 ]
@@ -18470,7 +18473,7 @@ const characters = [
                 "id": "hiruko-sasori-tail-deflection",
                 "name": "Tail Deflection",
                 "skillimage": "https://i.imgur.com/KdJD3ve.png",
-                "skilldescription": "This skill makes Hiruko Sasori invulnerable for 1 turn.",
+                "skilldescription": "Hiruko Sasori becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -18531,7 +18534,7 @@ const characters = [
                             "afflictionDamage": true,
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
-                            "tooltipText": "Taking 5 affliction damage each turn permanently."
+                            "tooltipText": "This character takes 5 affliction damage each turn."
                         }
                     }
                 ]
@@ -18585,7 +18588,7 @@ const characters = [
                                     }
                                 }
                             ],
-                            "tooltipText": "Taking 5 piercing damage and 5 affliction damage per turn for 3 turns."
+                            "tooltipText": "This character takes 5 piercing damage and 5 affliction damage each turn."
                         }
                     }
                 ]
@@ -18631,7 +18634,7 @@ const characters = [
                             "bonusDamageAppliesToSkillIds": [
                                 "sasori-of-the-red-sand-poison-gas"
                             ],
-                            "tooltipText": "Taking 10 physical damage per turn and takes +5 damage from Poison Gas."
+                            "tooltipText": "This character takes 10 physical damage each turn and 5 additional damage from Poison Gas."
                         }
                     },
                     {
@@ -18683,7 +18686,7 @@ const characters = [
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
                             "damageOnSkillUseAffliction": 5,
-                            "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                            "tooltipText": "This character takes 10 affliction damage each turn and 5 affliction damage when using a skill."
                         }
                     },
                     {
@@ -18703,7 +18706,7 @@ const characters = [
                             "ignoreDamageReduction": true,
                             "ignoreDestructibleDefense": true,
                             "damageOnSkillUseAffliction": 5,
-                            "tooltipText": "Taking 10 affliction damage per turn and 5 affliction damage on skill use."
+                            "tooltipText": "This character takes 10 affliction damage each turn and 5 affliction damage when using a skill."
                         }
                     },
                     {
@@ -18759,7 +18762,7 @@ const characters = [
                 "id": "sasori-of-the-red-sand-puppet-protection",
                 "name": "Puppet Protection",
                 "skillimage": "https://i.imgur.com/067sl2R.png",
-                "skilldescription": "This skill makes Sasori of the Red Sand invulnerable for 1 turn.",
+                "skilldescription": "Sasori of the Red Sand becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -18818,7 +18821,7 @@ const characters = [
                             "cannotReduceDamage": true,
                             "cannotBecomeInvulnerable": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Cannot reduce damage or become invulnerable for 1 turn."
+                            "tooltipText": "This character cannot reduce damage or become invulnerable."
                         }
                     },
                     {
@@ -18830,7 +18833,7 @@ const characters = [
                             "helpful": true,
                             "destructibleDefensePoints": 15,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Has 15 destructible defense for 1 turn."
+                            "tooltipText": "This character has 15 destructible defense."
                         }
                     }
                 ]
@@ -18914,7 +18917,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Marked by Flamethrower."
+                            "tooltipText": "Water Stream Shooters stuns this character for 1 turn if used next turn."
                         }
                     },
                     {
@@ -18967,7 +18970,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Marked by Water Stream Shooters."
+                            "tooltipText": "Flamethrower reduces this character's non-affliction damage by 10 for 1 turn if used next turn."
                         }
                     },
                     {
@@ -19029,7 +19032,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "damageOnHarmfulSkillUsePiercing": 5,
-                            "tooltipText": "Takes 5 piercing damage when using a harmful skill."
+                            "tooltipText": "This character takes 5 piercing damage when using a harmful skill."
                         }
                     }
                 ]
@@ -19038,7 +19041,7 @@ const characters = [
                 "id": "puppet-sasori-living-core",
                 "name": "Living Core",
                 "skillimage": "https://i.imgur.com/r9oI8D1.png",
-                "skilldescription": "This skill makes Puppet Sasori invulnerable for 1 turn.",
+                "skilldescription": "Puppet Sasori becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],

@@ -141,7 +141,7 @@ module.exports = {
             "id": "kyuubi-naruto-kyuubi-dodge",
             "name": "Kyuubi Dodge",
             "skillimage": "https://i.imgur.com/4ZFrdfW.png",
-            "skilldescription": "This skill makes Kyuubi Naruto invulnerable for 1 turn.",
+            "skilldescription": "Kyuubi Naruto becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

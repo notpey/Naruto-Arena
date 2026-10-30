@@ -126,7 +126,7 @@ module.exports = {
             "id": "edo-tensei-tobirama-water-encampment-wall",
             "name": "Water Encampment Wall",
             "skillimage": "https://i.imgur.com/3rOMjSA.png",
-            "skilldescription": "This skill makes Edo Tensei Tobirama invulnerable for 1 turn.",
+            "skilldescription": "Edo Tensei Tobirama becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -113,7 +113,7 @@ module.exports = {
             "id": "kidoumaru-golden-armor",
             "name": "Golden Armor",
             "skillimage": "https://i.imgur.com/RdMruyD.png",
-            "skilldescription": "This skill makes Kidoumaru invulnerable for 1 turn.",
+            "skilldescription": "Kidoumaru becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

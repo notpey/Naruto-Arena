@@ -8,7 +8,7 @@ module.exports = {
     skills: [
         {
             id: 'mizuki-kunai-ambush', name: 'Kunai Ambush', skillimage: 'https://i.imgur.com/oTFkPZG.png',
-            skilldescription: 'Mizuki attacks one enemy with a barrage of kunai, dealing 20 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.',
+            skilldescription: 'Mizuki deals 20 physical damage to one enemy. Their next helpful skill is countered for 1 turn.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [
                 { type: 'damage', amount: 20, scope: 'target' },
@@ -21,13 +21,13 @@ module.exports = {
         {
             id: 'mizuki-execution-shuriken', name: 'Execution Shuriken',
             skillimage: 'https://i.imgur.com/O3Y4Q29.png',
-            skilldescription: 'Mizuki hurls a giant shuriken at one enemy, dealing 30 physical damage. During Windmill, this skill instead deals 25 physical damage to all enemies, and Windmill ends.',
+            skilldescription: 'Mizuki deals 30 physical damage to one enemy. During Windmill, this skill instead deals 25 physical damage to all enemies, and Windmill ends.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 30, scope: 'target' }],
         },
         {
             id: 'mizuki-windmill', name: 'Windmill', skillimage: 'https://i.imgur.com/jETOs8w.png',
-            skilldescription: 'Mizuki prepares his giant shuriken for a sweeping attack. For 2 turns, his next Execution Shuriken affects all enemies.',
+            skilldescription: 'For 2 turns, Mizuki’s next Execution Shuriken affects all enemies.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 2,
             classes: ['Strategic', 'Instant', 'Physical*'], effects: [
                 { type: 'apply_status', statusId: 'mizuki_windmill', duration: 2, scope: 'self',

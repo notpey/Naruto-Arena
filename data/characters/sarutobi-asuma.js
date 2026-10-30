@@ -127,7 +127,7 @@ module.exports = {
             "id": "sarutobi-asuma-knife-block",
             "name": "Knife Block",
             "skillimage": "https://i.imgur.com/e4dn075.png",
-            "skilldescription": "This skill makes Sarutobi Asuma invulnerable for 1 turn.",
+            "skilldescription": "Sarutobi Asuma becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -182,7 +182,7 @@ module.exports = {
                         "turnDurationAnchor": "source_turn",
                         "ongoingClass": "action",
                         "triggerOnApply": true,
-                        "tooltipText": "This character takes 10 damage from Flying Swallow. This action ends if Asuma is stunned or the target becomes invulnerable."
+                        "tooltipText": "This character takes 10 damage from Flying Swallow."
                     }
                 },
                 {

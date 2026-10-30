@@ -8,26 +8,26 @@ module.exports = {
         {
             id: 'momochi-zabuza-kubikiribocho', name: 'Kubikiribōchō',
             skillimage: 'https://i.imgur.com/aZfxDVs.png',
-            skilldescription: 'Zabuza attacks one enemy with his enormous sword, dealing 25 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 15 physical damage to each.',
+            skilldescription: 'Zabuza deals 25 physical damage to one enemy. During Water Prison Technique, this skill instead deals 15 physical damage to all enemies outside the prison.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 25, scope: 'target' }],
         },
         {
             id: 'momochi-zabuza-water-prison-technique', name: 'Water Prison Technique',
             skillimage: 'https://i.imgur.com/dT988nl.png',
-            skilldescription: 'Zabuza traps one enemy inside a sphere of water for 2 turns, stunning their harmful skills during this time. If Zabuza is stunned, this skill ends.',
+            skilldescription: 'Zabuza stuns one enemy\'s harmful skills for 2 turns.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 3,
             classes: ['Chakra', 'Control'], effects: [
                 { type: 'apply_status', statusId: 'zabuza_water_prison', duration: 2, scope: 'target',
                     metadata: { harmful: true, ongoingClass: 'control', cannotUseHarmfulSkills: true,
                         turnDurationAnchor: 'source_turn',
-                        tooltipText: 'This character cannot use harmful skills while Water Prison Technique is active. The prison ends if Zabuza is stunned.' } },
+                        tooltipText: 'This character cannot use harmful skills.' } },
                 { type: 'apply_status', statusId: 'zabuza_water_prison_link', duration: 2, scope: 'self',
                     condition: { scope: 'target', statusId: 'zabuza_water_prison', statusFromActor: true },
                     metadata: { helpful: true, ongoingClass: 'control', linkedTargetStatusId: 'zabuza_water_prison',
                         copyTargetKeyToKeys: ['linkedTargetKey'],
                         skillReplacements: { 'momochi-zabuza-kubikiribocho': 'momochi-zabuza-kubikiribocho-clone' },
-                        tooltipText: 'A water clone attacks the enemies outside Zabuza’s Water Prison.' } },
+                        tooltipText: 'Enemies outside Water Prison take damage from Zabuza.' } },
             ],
         },
         {
@@ -52,7 +52,7 @@ module.exports = {
         {
             id: 'momochi-zabuza-water-clone-technique', name: 'Water Clone Technique',
             skillimage: 'https://i.imgur.com/m1hfJAx.png',
-            skilldescription: 'Zabuza creates a water clone to defend himself or one ally for 1 turn. The first enemy harmful Physical skill used against that character is countered, destroying the clone.',
+            skilldescription: 'Zabuza counters the first harmful Physical skill used on himself or one ally for 1 turn.',
             energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'zabuza_water_clone', duration: 1, scope: 'target',

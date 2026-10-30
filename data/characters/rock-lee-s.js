@@ -146,7 +146,7 @@ module.exports = {
             "id": "rock-lee-s-jumping-dodge",
             "name": "Jumping Dodge",
             "skillimage": "https://i.imgur.com/y6PYTiZ.png",
-            "skilldescription": "This skill makes Rock Lee (S) invulnerable for 1 turn.",
+            "skilldescription": "Rock Lee (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -145,7 +145,7 @@ module.exports = {
                         "mergeNumericAddKeys": [
                             "destructibleDefensePoints"
                         ],
-                        "tooltipText": "Misumi has 15 points of permanent destructible defense from Tighten Joints."
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
                     }
                 },
                 {
@@ -188,7 +188,7 @@ module.exports = {
             "id": "tsurugi-misumi-misumi-block",
             "name": "Misumi Block",
             "skillimage": "https://i.imgur.com/LJMVcjB.png",
-            "skilldescription": "This skill makes Misumi invulnerable for 1 turn.",
+            "skilldescription": "Misumi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -133,7 +133,7 @@ module.exports = {
             "id": "sakon-and-ukon-summoning-rashoumon",
             "name": "Summoning: Rashoumon",
             "skillimage": "https://i.imgur.com/Py47f2p.png",
-            "skilldescription": "This skill makes Sakon and Ukon invulnerable for 1 turn. If 'Parasite Demon Demolition' is active, it will end.",
+            "skilldescription": "Sakon and Ukon becomes invulnerable for 1 turn. If 'Parasite Demon Demolition' is active, it will end.",
             "energy": [
                 "Random"
             ],

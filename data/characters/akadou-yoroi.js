@@ -173,7 +173,7 @@ module.exports = {
             "id": "akadou-yoroi-chakra-block",
             "name": "Chakra Block",
             "skillimage": "https://i.imgur.com/ubYpqC3.png",
-            "skilldescription": "This skill makes Chakra invulnerable for 1 turn.",
+            "skilldescription": "Akadou Yoroi becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

@@ -51,7 +51,7 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Marked by Lightning Beast Fang."
+                        "tooltipText": "Finishing Raikiri deals 10 additional piercing damage to this character."
                     }
                 },
                 {
@@ -178,7 +178,7 @@ module.exports = {
                         "triggerOnEnemyHarmfulSkill": true,
                         "counterCopySkillReplacementFor": "hatake-kakashi-s-team-tactics",
                         "counterCopySkillReplacementDuration": 1,
-                        "tooltipText": "Allies cooldowns reduced by 1."
+                        "tooltipText": "This character has 1 less cooldown on their skills."
                     }
                 }
             ]
@@ -187,7 +187,7 @@ module.exports = {
             "id": "hatake-kakashi-s-bunshin-stand-in",
             "name": "Bunshin Stand-in",
             "skillimage": "https://i.imgur.com/lp2Q1v2.png",
-            "skilldescription": "This skill makes Hatake Kakashi (S) invulnerable for 1 turn.",
+            "skilldescription": "Hatake Kakashi (S) becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

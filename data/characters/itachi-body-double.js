@@ -41,7 +41,7 @@ module.exports = {
                                 }
                             }
                         },
-                        "tooltipText": "Under Finger Genjutsu: next harmful skill will be countered for 10 damage and 1 genjutsu chakra."
+                        "tooltipText": "The next harmful skill this character uses is countered for 10 damage and 1 Genjutsu chakra."
                     }
                 }
             ]
@@ -71,7 +71,7 @@ module.exports = {
                     "metadata": {
                         "invisible": true,
                         "reflectOnEnemyHarmfulNonMental": true,
-                        "tooltipText": "Reflects non-mental skills back to the attacker for 2 turns."
+                        "tooltipText": "This character reflects non-Mental skills back to the attacker."
                     }
                 }
             ]
@@ -80,7 +80,7 @@ module.exports = {
             "id": "itachi-body-double-fire-release-fireball",
             "name": "Fire Release: Fireball",
             "skillimage": "https://i.imgur.com/rIju3Zc.png",
-            "skilldescription": "Itachi Body Double attacks, dealing 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
+            "skilldescription": "Itachi Body Double deals 20 damage to one enemy. The following turn, all enemies take an additional 10 affliction damage.*",
             "energy": [
                 "Ninjutsu"
             ],
@@ -127,7 +127,7 @@ module.exports = {
             "id": "itachi-body-double-illusionary-raven-bunshin",
             "name": "Illusionary Raven Bunshin",
             "skillimage": "https://i.imgur.com/RuNxccO.png",
-            "skilldescription": "This skill makes Itachi Body Double invulnerable for 1 turn.",
+            "skilldescription": "Itachi Body Double becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],

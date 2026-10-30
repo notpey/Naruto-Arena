@@ -16,7 +16,7 @@
     "passive": {
         "name": "Heightened Senses",
         "icon": "https://i.imgur.com/0ctBe2q.png",
-        "description": "Kiba's heightened senses allow him to see invisible enemy skills.",
+        "description": "Kiba can see invisible enemy skills.",
         "revealInvisibleSkills": true
     },
     "skills": [
@@ -57,7 +57,7 @@
             "id": "inuzuka-kiba-garouga",
             "name": "Garouga",
             "skillimage": "https://i.imgur.com/2zAwPJv.png",
-            "skilldescription": "Kiba launches a spinning assault, dealing 30 physical damage to an enemy. If the target is affected by Dynamic Air Marking, this skill costs 1 less random chakra for 1 turn.",
+            "skilldescription": "Kiba deals 30 physical damage to one enemy. If they are affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.",
             "energy": [
                 "Taijutsu",
                 "Random"
@@ -102,7 +102,7 @@
             "id": "inuzuka-kiba-double-headed-wolf",
             "name": "Double Headed Wolf",
             "skillimage": "https://i.imgur.com/rfOPouH.png",
-            "skilldescription": "Kiba transforms into a two-headed wolf, making himself and all allies invulnerable to enemy physical skills for 1 turn. The following turn, Garouga is replaced by Double Garouga.",
+            "skilldescription": "Kiba and all allies become invulnerable to enemy physical skills for 1 turn. The following turn, Garouga is replaced by Double Garouga.",
             "energy": [
                 "Bloodline"
             ],
@@ -146,7 +146,7 @@
             "id": "inuzuka-kiba-smoke-bomb",
             "name": "Smoke Bomb",
             "skillimage": "https://i.imgur.com/DHgVzdv.png",
-            "skilldescription": "Kiba conceals himself with a smoke bomb, becoming invulnerable for 1 turn.",
+            "skilldescription": "Kiba becomes invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -175,7 +175,7 @@
             "id": "inuzuka-kiba-double-garouga",
             "name": "Double Garouga",
             "skillimage": "https://i.imgur.com/jLD3s0g.png",
-            "skilldescription": "Kiba unleashes a ferocious spinning attack, dealing 30 physical damage to an enemy and 30 physical damage to a different random enemy. If either target is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.",
+            "skilldescription": "Kiba deals 30 physical damage to one enemy and 30 physical damage to a different random enemy. If either is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.",
             "energy": [
                 "Taijutsu",
                 "Random"
@@ -266,7 +266,7 @@
                     "id": "aburame-shino-female-bug",
                     "name": "Female Bug",
                     "skillimage": "https://i.imgur.com/NZvHesR.png",
-                    "skilldescription": "Shino permanently marks one enemy with a female insect. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
+                    "skilldescription": "Shino permanently marks one enemy. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
                     "energy": [],
                     "target": "single-enemy",
                     "damage": 0,
@@ -388,7 +388,7 @@
                     "id": "aburame-shino-infestation",
                     "name": "Infestation",
                     "skillimage": "https://i.imgur.com/vPf2DKk.png",
-                    "skilldescription": "Shino infests an enemy with insects, dealing 5 affliction damage each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.",
+                    "skilldescription": "Shino deals 5 affliction damage to one enemy each turn permanently. If the target is affected by Female Bug, they also deal 5 less non-affliction damage. This effect does not stack and ends when Shino dies.",
                     "energy": [
                         "Random"
                     ],
@@ -777,7 +777,7 @@
                                 "id": "nara-shikamaru-shikamaru-hide",
                                 "name": "Shikamaru Hide",
                                 "skillimage": "https://i.imgur.com/NF4jrLc.png",
-                                "skilldescription": "This skill makes Nara Shikamaru invulnerable for 1 turn.",
+                                "skilldescription": "Nara Shikamaru becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -921,7 +921,7 @@
                                 "id": "akimichi-chouji-effortless-block",
                                 "name": "Effortless Block",
                                 "skillimage": "https://i.imgur.com/9ZNpEEN.png",
-                                "skilldescription": "This skill makes Akimichi Chouji invulnerable for 1 turn.",
+                                "skilldescription": "Akimichi Chouji becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
