@@ -390,9 +390,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     let pageCharacterRoster = getStaticCharacterRoster();
+    let ingameRosterReady = Promise.resolve();
     if (pageName === 'ingame.html') {
         attachGameImageFallbacks();
-        loadCharacterRoster().then((liveRoster) => {
+        ingameRosterReady = loadCharacterRoster().then((liveRoster) => {
             if (Array.isArray(liveRoster) && liveRoster.length > 0) {
                 pageCharacterRoster = liveRoster;
             }
@@ -4616,6 +4617,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 );
                 const data = await response.json();
                 if (!data?.ok) return;
+                await ingameRosterReady;
 
                 const playerCardsLocal = Array.from(document.querySelectorAll('.player-characters .character-card'));
                 const enemyCardsLocal = Array.from(document.querySelectorAll('.enemy-characters .character-card'));
