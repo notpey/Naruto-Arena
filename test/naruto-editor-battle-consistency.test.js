@@ -134,7 +134,7 @@ const collectCharacterStatusReferences = () => {
     const producedStatusIds = new Set(['invulnerable', 'stunned']);
     const referencedStatusIds = [];
     const isStatusProducerPath = (pathParts) =>
-        /applystatus|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense|awakening/i.test(pathParts.join('.'));
+        /applystatus|startstatuses|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense|awakening/i.test(pathParts.join('.'));
     const addReference = (statusId) => {
         if (typeof statusId === 'string' && statusId.trim()) {
             referencedStatusIds.push(statusId.trim());
@@ -1050,91 +1050,6 @@ test('battleLogic resolves Gaara Sand Binding Coffin from the editor data', () =
     ).metadata.sandFlowStacks, 2);
 });
 
-test('battleLogic resolves Kankuro starter kit behavior used by the editor data', () => {
-    const match = makeMatch([getCharIndex('kankuro')], [1]);
-
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 90, 'Poison Bomb should deal 10 affliction damage');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'kankuro_poison_bomb_mark' &&
-                status.metadata.tooltipText ===
-                    'This character takes 5 additional damage from Black Secret Machine One Shot.'
-        ),
-        true,
-        'Poison Bomb mark tooltip should include the additional damage value'
-    );
-
-    match.board.p1[0].state.cooldowns = {};
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55, 'Black Secret Machine One Shot should deal 35 to a Poison Bomb target');
-    assert.equal(
-        match.board.p2[0].state.statuses.some(
-            (status) =>
-                status.id === 'kankuro_black_secret_machine_one_shot_mark' &&
-                status.metadata.tooltipText === 'This character takes 5 additional damage from Poison Bomb.'
-        ),
-        true,
-        'Black Secret Machine One Shot mark tooltip should include the additional damage value'
-    );
-
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        match.board.p1[0].state.statuses.some(
-            (status) =>
-                status.id === 'kankuro_puppet_preparation_defense' &&
-                status.metadata.destructibleDefensePoints === 10 &&
-                status.metadata.tooltipText ===
-                    'Kankuro has 10 points of permanent destructible defense from Puppet Preparation.'
-        ),
-        true
-    );
-});
-
-test('Kankuro Poison Bomb resolves correctly after Puppet Preparation', () => {
-    const match = makeMatch([getCharIndex('kankuro')], [1, 2, 3]);
-
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-
-    assert.equal(
-        match.board.p1[0].state.statuses.some(
-            (status) =>
-                status.id === 'kankuro_puppet_preparation_bonus' &&
-                status.metadata.skillDamageBonuses?.['kankuro-poison-bomb'] === 10
-        ),
-        true,
-        'Puppet Preparation should grant Poison Bomb its damage bonus'
-    );
-
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.deepEqual(
-        match.board.p2.map((unit) => unit.hp),
-        [80, 80, 80],
-        'Prepared Poison Bomb should damage all enemies for 20'
-    );
-    assert.equal(
-        match.board.p2.every((unit) =>
-            unit.state.statuses.some(
-                (status) =>
-                    status.id === 'kankuro_poison_bomb_mark' &&
-                    status.remainingTurns === 2 &&
-                    status.metadata.tooltipText ===
-                        'This character takes 5 additional damage from Black Secret Machine One Shot.'
-            )
-        ),
-        true,
-        'Prepared Poison Bomb should apply its extended Black Secret Machine One Shot mark'
-    );
-});
-
 test('Hayate Meld into Shadows lets Crescent Moon Slash hit invulnerable enemies', () => {
     const hayateIndex = characters.findIndex((character) => character?.characterId === 'gekko-hayate');
     assert.ok(hayateIndex >= 0, 'Gekko Hayate must exist in characters.js');
@@ -1164,38 +1079,6 @@ test('Hayate Meld into Shadows lets Crescent Moon Slash hit invulnerable enemies
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     assert.equal(target.hp, 65, 'Crescent Moon Slash should deal 20 plus 15 through invulnerability');
-});
-
-test('Akadou Yoroi Chakra Focus steals exactly one random chakra and is consumed', () => {
-    const yoroiIndex = characters.findIndex((character) => character?.characterId === 'akadou-yoroi');
-    assert.ok(yoroiIndex >= 0, 'Akadou Yoroi must exist in characters.js');
-    const match = makeMatch([yoroiIndex], [1]);
-    const yoroi = match.board.p1[0];
-    yoroi.state.statuses.push({
-        id: 'akadou_yoroi_chakra_focus',
-        remainingTurns: 3,
-        metadata: {
-            helpful: true,
-        },
-    });
-    match.chakraPools.p1 = emptyPool();
-    match.chakraPools.p2 = {
-        taijutsu: 1,
-        ninjutsu: 0,
-        bloodline: 0,
-        genjutsu: 0,
-    };
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.equal(chakraTotal(match.chakraPools.p2), 0, 'target should lose exactly one chakra');
-    assert.equal(chakraTotal(match.chakraPools.p1), 1, 'Yoroi should gain exactly one chakra');
-    assert.equal(
-        yoroi.state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus' && status.remainingTurns > 0),
-        false,
-        'Chakra Focus should be consumed after the steal'
-    );
 });
 
 test('Tayuya Summoning Doki description matches its damage reduction value', () => {
@@ -1269,23 +1152,6 @@ test('Shigure Sprinkling Needles description matches its turn damage value', () 
     assert.match(damageStatus.metadata.tooltipText, /10 piercing damage/);
 });
 
-test('Akadou Yoroi Draining Assault description matches its health steal values', () => {
-    const yoroi = getCharacter('akadou-yoroi');
-    const drainingAssault = yoroi.skills.find((skill) => skill.id === 'akadou-yoroi-draining-assault');
-    const damageStatus = drainingAssault.effects.find(
-        (effect) => effect.statusId === 'akadou_yoroi_draining_assault_dot'
-    );
-    const healStatus = drainingAssault.effects.find(
-        (effect) => effect.statusId === 'akadou_yoroi_draining_assault_heal'
-    );
-
-    assert.equal(damageStatus.metadata.turnEndDamage, 15);
-    assert.equal(healStatus.metadata.turnEndHealFlat, 15);
-    assert.match(drainingAssault.skilldescription, /steals 15 health/);
-    assert.match(damageStatus.metadata.tooltipText, /15 health/);
-    assert.match(healStatus.metadata.tooltipText, /15 health/);
-});
-
 test('battleLogic resolves Temari starter kit behavior used by the editor data', () => {
     const match = makeMatch([getCharIndex('temari')], [1, 2]);
     const temari = getCharacter('temari');
@@ -1299,8 +1165,8 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'Cutting Whirlwind should deal 20 piercing damage to target');
-    assert.equal(match.board.p2[1].hp, 90, 'Cutting Whirlwind should deal 10 piercing damage to other enemies');
+    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 165,
+        'Cutting Whirlwind deals 20 and 10 piercing damage, plus one 5-damage Phantom Gale hit');
     assert.equal(
         resolveEffectiveSkill({
             characters,
@@ -1507,20 +1373,4 @@ test('Young Kakashi removes chakra and stuns chakra skills for one turn', () => 
     queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
     assert.equal(match.board.p1[0].hp, 85, 'Water Assault should be usable after the stun');
-});
-
-test('Yoroi keeps Chakra Focus when there is no chakra to steal', () => {
-    const match = makeMatch([getCharIndex('akadou-yoroi')], [getCharIndex('haruno-sakura')]);
-    match.board.p1[0].state.statuses.push({
-        id: 'akadou_yoroi_chakra_focus', remainingTurns: 3, metadata: { helpful: true },
-    });
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus'), true);
-    match.chakraPools.p2.taijutsu = 1;
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.chakraPools.p2.taijutsu, 0);
-    assert.equal(match.chakraPools.p1.taijutsu, 1);
-    assert.equal(match.board.p1[0].state.statuses.some((status) => status.id === 'akadou_yoroi_chakra_focus'), false);
 });

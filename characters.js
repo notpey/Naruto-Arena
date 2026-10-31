@@ -2473,21 +2473,42 @@ const characters = [
         "id": "kankuro",
         "characterId": "kankuro",
         "name": "Kankuro",
-        "facePicture": "https://i.imgur.com/GN0osit.png",
-        "characterdeescription": "The brother of Gaara, and a master puppeteer, Kankuro is one of the three sand siblings. With his puppets, Kankuro is able to use the varied abilities hidden inside them to attack his enemies, or even protect himself.",
+        "facePicture": "https://i.imgur.com/5uxGoSN.png",
+        "characterdeescription": "A cunning genin of the Hidden Sand Village and older brother of Gaara, Kankuro specializes in controlling deadly puppets equipped with concealed weapons and traps. His deceptive fighting style allows him to outmaneuver opponents while keeping himself safely out of reach.",
+        "passive": {
+            "name": "Puppet Preparation",
+            "icon": "https://i.imgur.com/Kya84CC.png",
+            "description": "Kankuro begins the battle with 15 destructible defense. Whenever an enemy's skill is countered, this defense is renewed.",
+            "onEnemySkillCounteredDefense": {
+                "statusId": "kankuro_puppet_preparation_defense",
+                "points": 15
+            }
+        },
+        "startStatuses": [
+            {
+                "statusId": "kankuro_puppet_preparation_defense",
+                "duration": 99,
+                "metadata": {
+                    "helpful": true,
+                    "permanent": true,
+                    "destructibleDefensePoints": 15,
+                    "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation."
+                }
+            }
+        ],
         "skills": [
             {
                 "id": "kankuro-black-secret-machine-one-shot",
                 "name": "Black Secret Machine One Shot",
-                "skillimage": "https://i.imgur.com/wjpmZQI.png",
-                "skilldescription": "Kankuro deals 30 piercing damage to one enemy. For 1 turn, this enemy will take 5 additional damage from 'Poison Bomb'.",
+                "skillimage": "https://i.imgur.com/dHWzRYI.png",
+                "skilldescription": "Kankuro unleashes his puppet's hidden weaponry, dealing 30 physical damage to an enemy. If the target is affected by Puppet Trap, this skill deals 15 additional damage.",
                 "energy": [
                     "Random",
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 0,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -2496,40 +2517,21 @@ const characters = [
                     {
                         "type": "damage",
                         "amount": 30,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "kankuro_black_secret_machine_one_shot_mark",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 5,
-                            "bonusDamageFromSourceCharacterId": "kankuro",
-                            "bonusDamageAppliesToSkillIds": [
-                                "kankuro-poison-bomb"
-                            ],
-                            "tooltipText": "This character takes 5 additional damage from Poison Bomb."
-                        }
+                        "scope": "target"
                     }
                 ]
             },
             {
                 "id": "kankuro-poison-bomb",
                 "name": "Poison Bomb",
-                "skillimage": "https://i.imgur.com/3MFMSHu.png",
-                "skilldescription": "Kankuro deals 10 affliction damage to all enemies. For 1 turn, these enemies will take 5 additional damage from 'Black Secret Machine One Shot'. If Kankuro has 'Puppet Preparation', this effect will last 2 turns.",
+                "skillimage": "https://i.imgur.com/vJFqLIY.png",
+                "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Affliction",
                     "Instant"
@@ -2547,55 +2549,29 @@ const characters = [
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "kankuro_poison_bomb_mark",
+                        "statusId": "kankuro_poison_bomb_no_heal",
                         "duration": 1,
                         "scope": "all-enemy",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "kankuro_puppet_preparation_bonus"
-                        },
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 5,
-                            "bonusDamageFromSourceCharacterId": "kankuro",
-                            "bonusDamageAppliesToSkillIds": [
-                                "kankuro-black-secret-machine-one-shot"
-                            ],
-                            "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "kankuro_poison_bomb_mark",
-                        "duration": 2,
-                        "scope": "all-enemy",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "kankuro_puppet_preparation_bonus"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 5,
-                            "bonusDamageFromSourceCharacterId": "kankuro",
-                            "bonusDamageAppliesToSkillIds": [
-                                "kankuro-black-secret-machine-one-shot"
-                            ],
-                            "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
+                            "healReceivedMultiplier": 0,
+                            "tooltipText": "This character ignores healing effects."
                         }
                     }
                 ]
             },
             {
-                "id": "kankuro-puppet-preparation",
-                "name": "Puppet Preparation",
-                "skillimage": "https://i.imgur.com/ghx3V0n.png",
-                "skilldescription": "Kankuro gains 10 points of permanent destructible defense. His next 'Black Secret Machine One Shot' or 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
-                "energy": [],
-                "target": "self",
+                "id": "kankuro-puppet-trap",
+                "name": "Puppet Trap",
+                "skillimage": "/assets/characters/kankuro-puppet-trap.jpg",
+                "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -2603,37 +2579,35 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "kankuro_puppet_preparation_defense",
-                        "duration": 99,
-                        "scope": "self",
+                        "statusId": "kankuro_puppet_trap",
+                        "duration": 1,
+                        "scope": "target",
                         "metadata": {
-                            "destructibleDefensePoints": 10,
-                            "mergeNumericAddKeys": [
-                                "destructibleDefensePoints"
+                            "harmful": true,
+                            "invisible": true,
+                            "turnDurationAnchor": "source_turn",
+                            "bonusDamageFromSourceSkillsFlat": 15,
+                            "bonusDamageFromSourceCharacterId": "kankuro",
+                            "bonusDamageAppliesToSkillIds": [
+                                "kankuro-black-secret-machine-one-shot"
                             ],
-                            "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} points of permanent destructible defense from Puppet Preparation."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "kankuro_puppet_preparation_bonus",
-                        "duration": 99,
-                        "scope": "self",
-                        "metadata": {
-                            "skillDamageBonuses": {
-                                "kankuro-black-secret-machine-one-shot": 10,
-                                "kankuro-poison-bomb": 10
+                            "triggerOnlyOnOwnerSkillUse": true,
+                            "triggerOnOwnerHelpfulSkill": true,
+                            "triggerOnEnemyHarmfulSkillClassesAny": [
+                                "strategic"
+                            ],
+                            "counterCancelsSkill": true,
+                            "counterStatusId": "kankuro_puppet_trap_stun",
+                            "counterStatusDuration": 1,
+                            "counterStatusMetadata": {
+                                "harmful": true,
+                                "cannotUseSkillClasses": [
+                                    "physical",
+                                    "strategic"
+                                ],
+                                "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
                             },
-                            "removeSelfOnSkillUseSkillIds": [
-                                "kankuro-black-secret-machine-one-shot",
-                                "kankuro-poison-bomb"
-                            ],
-                            "onOwnerUseSkillIdsAny": [
-                                "kankuro-black-secret-machine-one-shot",
-                                "kankuro-poison-bomb"
-                            ],
-                            "replaceSkillDamageBonuses": true,
-                            "tooltipText": "Kankuro's next Black Secret Machine One Shot or Poison Bomb deals 10 additional damage."
+                            "tooltipText": "The next Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
                         }
                     }
                 ]
@@ -2641,8 +2615,8 @@ const characters = [
             {
                 "id": "kankuro-puppet-replacement-technique",
                 "name": "Puppet Replacement Technique",
-                "skillimage": "https://i.imgur.com/P2K3Uue.png",
-                "skilldescription": "Kankuro becomes invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/mpGOYy6.png",
+                "skilldescription": "Kankuro uses a puppet to evade incoming attacks, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2656,12 +2630,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "kankuro_puppet_replacement_invulnerable",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Kankuro is invulnerable."
                         }
                     }
                 ]
@@ -2672,14 +2647,23 @@ const characters = [
         "id": "temari",
         "characterId": "temari",
         "name": "Temari",
-        "facePicture": "https://i.imgur.com/a3la0h5.png",
-        "characterdeescription": "The elder sister of Gaara and Kankuro, Temari is a somewhat cruel and blunt ninja that fights using the wind at her side. With her fan, Temari can create powerful gusts of wind that she can manipulate at her desire.",
+        "facePicture": "https://i.imgur.com/z5lW2jl.png",
+        "characterdeescription": "A confident and sharp-tongued genin of the Hidden Sand Village, Temari wields an enormous iron fan to unleash powerful wind techniques against her opponents. As the eldest of the three Sand siblings, she combines her tactical instincts with overwhelming force to control the battlefield.",
+        "passive": {
+            "name": "Phantom Gale",
+            "icon": "https://i.imgur.com/74m04BG.png",
+            "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 piercing damage.",
+            "onSkillUseRandomEnemyPiercingDamage": {
+                "amount": 5,
+                "extraTriggersStatusId": "temari_phantom_gale_growth"
+            }
+        },
         "skills": [
             {
                 "id": "temari-cutting-whirlwind",
                 "name": "Cutting Whirlwind",
-                "skillimage": "https://i.imgur.com/VU7HluY.png",
-                "skilldescription": "Temari deals 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
+                "skillimage": "https://i.imgur.com/TceZL1M.png",
+                "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 20 piercing damage to an enemy and 10 piercing damage to all other enemies. Temari also becomes invulnerable to non-mental skills for 1 turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -2713,6 +2697,7 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerableToSkillClasses": [
                                 "physical",
                                 "energy",
@@ -2727,16 +2712,16 @@ const characters = [
                                     ]
                                 }
                             },
-                            "tooltipText": "Temari is invulnerable to non-mental skills. Summoning Quick Beheading Dance costs 1 less random chakra."
+                            "tooltipText": "Temari is invulnerable to non-mental skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
                         }
                     }
                 ]
             },
             {
                 "id": "temari-summoning-quick-beheading-dance",
-                "name": "Summoning Quick Beheading Dance",
-                "skillimage": "https://i.imgur.com/9VRqsM7.png",
-                "skilldescription": "Temari deals 35 damage to all enemies. If used one turn after Cutting Whirlwind, this skill costs 1 less random chakra.",
+                "name": "Summoning: Quick Beheading Dance",
+                "skillimage": "https://i.imgur.com/cvblibj.png",
+                "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 35 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
                 "energy": [
                     "Ninjutsu",
                     "Random",
@@ -2751,18 +2736,22 @@ const characters = [
                 ],
                 "effects": [
                     {
+                        "type": "damage",
+                        "amount": 35,
+                        "scope": "all-enemy"
+                    },
+                    {
                         "type": "apply_status",
-                        "statusId": "temari_summoning_quick_beheading_dance",
-                        "duration": 1,
-                        "scope": "all-enemy",
+                        "statusId": "temari_phantom_gale_growth",
+                        "duration": 99,
+                        "scope": "self",
                         "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 35,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
+                            "helpful": true,
+                            "permanent": true,
+                            "stackMetadataKey": "extraTriggers",
+                            "stackDelta": 1,
+                            "stackMax": 9999,
+                            "tooltipTextTemplate": "Phantom Gale triggers {extraTriggers} additional times whenever Temari uses a skill."
                         }
                     }
                 ]
@@ -2770,18 +2759,17 @@ const characters = [
             {
                 "id": "temari-dust-wind",
                 "name": "Dust Wind",
-                "skillimage": "https://i.imgur.com/oBQQWNM.png",
-                "skilldescription": "Temari kicks up dust, making herself invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
+                "skillimage": "https://i.imgur.com/O7YnMRH.png",
+                "skilldescription": "Temari kicks up a cloud of dust, making herself and all allies invulnerable for 1 turn. If enemies can be targeted, their non-affliction damage is also reduced by 20 for 1 turn. If used the turn after Cutting Whirlwind, this reduction lasts 2 turns instead.",
                 "energy": [
                     "Ninjutsu",
-                    "Random"
+                    "Ninjutsu"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
                     "Strategic",
-                    "Physical",
                     "Instant"
                 ],
                 "effects": [
@@ -2789,10 +2777,11 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "temari_dust_wind_invulnerable",
                         "duration": 1,
-                        "scope": "self",
+                        "scope": "all-allies",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "This character is invulnerable for 1 turn."
                         }
                     },
                     {
@@ -2807,8 +2796,8 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "NonAfflictionDamageDebuff": 20,
-                            "tooltipText": "This character deals 20 less non-affliction damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 20 less non-affliction damage for 1 turn."
                         }
                     },
                     {
@@ -2823,16 +2812,17 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "NonAfflictionDamageDebuff": 20,
-                            "tooltipText": "This character deals 20 less non-affliction damage."
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character deals 20 less non-affliction damage for 2 turns."
                         }
                     }
                 ]
             },
             {
-                "id": "temari-fan-defence-technique",
-                "name": "Fan Defence Technique",
-                "skillimage": "https://i.imgur.com/nnNAsmM.png",
-                "skilldescription": "Temari becomes invulnerable for 1 turn.",
+                "id": "temari-backflip",
+                "name": "Backflip",
+                "skillimage": "https://i.imgur.com/lnhXY2D.png",
+                "skilldescription": "Temari evades incoming attacks, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2846,12 +2836,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "temari_backflip_invulnerable",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Temari is invulnerable for 1 turn."
                         }
                     }
                 ]
@@ -6957,52 +6948,62 @@ const characters = [
         "characterId": "akadou-yoroi",
         "name": "Akadou Yoroi",
         "facePicture": "https://i.imgur.com/U0Ziv1r.png",
-        "characterdeescription": "A sound village genin that infiltrated Konoha as a spy, Yoroi is a capable, but brash ninja who likes to toy with his enemies. Yoroi is capable of absorbing the strength of his enemies, and make it his own in more than one way.",
-        "requiredMissionId": "the-sounds-amongst-the-leaves",
+        "characterdeescription": "A mysterious genin assigned to Kabuto's team during the Chuunin Exams, Yoroi secretly serves as a spy for Orochimaru. Specializing in close-range combat, he possesses the ability to absorb his opponents' chakra, gradually draining their strength while sustaining his own.",
+        "passive": {
+            "name": "Close Quarters",
+            "icon": "https://i.imgur.com/MUx03Dx.png",
+            "description": "Yoroi's chakra-absorbing abilities grant him Lifesteal: he recovers health equal to the health damage his skills deal.",
+            "lifestealPercent": 100
+        },
         "skills": [
+            {
+                "id": "akadou-yoroi-chakra-and-life-absorption",
+                "name": "Chakra and Life Absorption",
+                "skillimage": "https://i.imgur.com/0qvKdhQ.png",
+                "skilldescription": "Yoroi concentrates his chakra-absorbing abilities, enhancing Energy Drain and Draining Assault for 3 turns.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 3,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "akadou_yoroi_chakra_and_life_absorption",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Energy Drain steals 1 chakra on use. Draining Assault steals 1 chakra from its target each turn."
+                        }
+                    }
+                ]
+            },
             {
                 "id": "akadou-yoroi-energy-drain",
                 "name": "Energy Drain",
-                "skillimage": "https://i.imgur.com/93Ubu8K.png",
-                "skilldescription": "Akadou Yoroi steals 20 health from one enemy then lowers their non-affliction damage by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills.",
+                "skillimage": "https://i.imgur.com/5WXWl5W.png",
+                "skilldescription": "Yoroi strikes an enemy, dealing 20 physical damage. While enhanced by Chakra and Life Absorption, this skill also steals 1 chakra from the target.",
                 "energy": [
-                    "Taijutsu",
-                    "Random"
+                    "Taijutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Ninjutsu",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "health_steal_damage",
+                        "type": "damage",
                         "amount": 20,
                         "scope": "target"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_drain_debuff",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less non-affliction damage."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_empowered",
-                        "duration": 2,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "damageBonusFlat": 5,
-                            "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills."
-                        }
                     },
                     {
                         "type": "drain_chakra_random_from_target_to_self",
@@ -7010,8 +7011,7 @@ const characters = [
                         "scope": "target",
                         "condition": {
                             "scope": "self",
-                            "statusId": "akadou_yoroi_chakra_focus",
-                            "consumeOnMatch": true
+                            "statusId": "akadou_yoroi_chakra_and_life_absorption"
                         }
                     }
                 ]
@@ -7019,8 +7019,8 @@ const characters = [
             {
                 "id": "akadou-yoroi-draining-assault",
                 "name": "Draining Assault",
-                "skillimage": "https://i.imgur.com/zBoZAxl.png",
-                "skilldescription": "For 3 turns, Akadou Yoroi steals 15 health from one enemy each turn. Their non-affliction damage will be lowered by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills. During 'Chakra Focus', this skill also steals 1 random chakra on use.",
+                "skillimage": "https://i.imgur.com/F4ymMEe.png",
+                "skilldescription": "Yoroi continuously drains an enemy, dealing 15 physical damage each turn for 3 turns. While enhanced by Chakra and Life Absorption, this skill also steals 1 chakra from the target each turn.",
                 "energy": [
                     "Taijutsu",
                     "Random",
@@ -7030,7 +7030,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 3,
                 "classes": [
-                    "Ninjutsu",
+                    "Physical",
                     "Action"
                 ],
                 "effects": [
@@ -7042,83 +7042,16 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "turnEndDamage": 15,
+                            "turnEndSkillClasses": [
+                                "Physical"
+                            ],
                             "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character loses 15 health each turn to Draining Assault.",
-                            "ongoingClass": "action"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_draining_assault_heal",
-                        "duration": 3,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "turnEndHealFlat": 15,
-                            "tooltipText": "Akadou Yoroi heals 15 health each turn from Draining Assault.",
-                            "ongoingClass": "action"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_drain_debuff",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less non-affliction damage.",
-                            "ongoingClass": "action"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_empowered",
-                        "duration": 2,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "damageBonusFlat": 5,
-                            "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills.",
-                            "ongoingClass": "action"
-                        }
-                    },
-                    {
-                        "type": "drain_chakra_random_from_target_to_self",
-                        "amount": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "akadou_yoroi_chakra_focus",
-                            "consumeOnMatch": true
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "akadou-yoroi-chakra-focus",
-                "name": "Chakra Focus",
-                "skillimage": "https://i.imgur.com/8oUT5Mk.png",
-                "skilldescription": "For 3 turns, if 'Energy Drain' or 'Draining Assault' are used, they will also steal 1 random chakra. This effect is consumed when triggered.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 2,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "akadou_yoroi_chakra_focus",
-                        "duration": 3,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "tooltipText": "Energy Drain or Draining Assault will also steal 1 random chakra."
+                            "turnDurationAnchor": "source_turn",
+                            "ongoingClass": "action",
+                            "triggerOnApply": true,
+                            "turnEndDrainRandomToSource": 1,
+                            "turnEndDrainRandomToSourceRequiresSourceStatusId": "akadou_yoroi_chakra_and_life_absorption",
+                            "tooltipText": "This character takes 15 physical damage each turn for 3 turns. While Yoroi has Chakra and Life Absorption, 1 chakra is also stolen each turn."
                         }
                     }
                 ]
@@ -7126,8 +7059,8 @@ const characters = [
             {
                 "id": "akadou-yoroi-chakra-block",
                 "name": "Chakra Block",
-                "skillimage": "https://i.imgur.com/ubYpqC3.png",
-                "skilldescription": "Akadou Yoroi becomes invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/MNnA4mF.png",
+                "skilldescription": "Yoroi uses his chakra to defend himself, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7141,12 +7074,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "akadou_yoroi_chakra_block",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Yoroi is invulnerable for 1 turn."
                         }
                     }
                 ]

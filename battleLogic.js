@@ -107,6 +107,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                               passive.allyFollowupDamageMark || null,
                           healingBlockOnStun: passive.healingBlockOnStun || null,
                           piercingDamageOnStun: Math.max(0, Number(passive.piercingDamageOnStun) || 0),
+                          lifestealPercent: Math.max(0, Number(passive.lifestealPercent) || 0),
                           piercingDamageOnStunSkillIds: Array.isArray(passive.piercingDamageOnStunSkillIds)
                               ? passive.piercingDamageOnStunSkillIds : [],
                           damageTakenInTurn: passive.damageTakenInTurn || null,
@@ -3014,6 +3015,30 @@ const maybeTriggerReactiveDefenses = ({
         }
     }
 
+    const counterOwnerUsername = trapStatus?.sourceUsername ||
+        (recipient.username !== actingUsername ? recipient.username : null);
+    if (counterOwnerUsername && counterOwnerUsername !== actingUsername) {
+        (match?.board?.[counterOwnerUsername] || []).forEach((unit, slot) => {
+            if (!unit || unit.alive === false) return;
+            const character = characters?.[unit.rosterIndex];
+            const renewal = character?.passive?.onEnemySkillCounteredDefense;
+            const statusId = renewal?.statusId;
+            const points = Math.max(0, Number(renewal?.points) || 0);
+            const startingStatus = character?.startStatuses?.find((entry) => entry?.statusId === statusId);
+            if (!statusId || !points || !startingStatus) return;
+            applyStatus({
+                targetState: ensureUnitStateShape(unit),
+                statusId,
+                duration: startingStatus.duration,
+                sourceSkillId: null,
+                sourceUsername: counterOwnerUsername,
+                sourceSlot: slot,
+                metadata: { ...startingStatus.metadata, destructibleDefensePoints: points },
+                fresh: false,
+            });
+        });
+    }
+
     const removeStatusGroupIdsOnTrigger = [
         ...(typeof trapMetadata?.removeStatusGroupIdOnTrigger === 'string' && trapMetadata.removeStatusGroupIdOnTrigger
             ? [trapMetadata.removeStatusGroupIdOnTrigger]
@@ -3399,7 +3424,9 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         appliedUnpierceableMitigation = Math.min(baseUnpierceableMitigation, postStandardMitigation);
     }
     const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
-    unit.hp = Math.max(contextualMinimumHp, (Number(unit.hp) || 0) - dealt);
+    const hpBeforeDamage = Math.max(0, Number(unit.hp) || 0);
+    unit.hp = Math.max(contextualMinimumHp, hpBeforeDamage - dealt);
+    const healthDamage = Math.max(0, hpBeforeDamage - unit.hp);
     if (dealt > 0) {
         targetState.snapshots.tookDamageThisTurn = true;
         (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
@@ -3625,6 +3652,20 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             sourceSlot: context?.sourceSlot ?? null,
             afflictionDamage: Boolean(context?.afflictionDamage),
         });
+    }
+    if (healthDamage > 0 && context?.match && context?.sourceUsername &&
+        context.sourceUsername !== context?.targetUsername &&
+        Number.isInteger(context?.sourceSlot) && context?.damageDebugReason !== 'reflect') {
+        const sourceUnit = context.match.board?.[context.sourceUsername]?.[context.sourceSlot];
+        if (sourceUnit && sourceUnit.alive !== false) {
+            const sourceState = ensureUnitStateShape(sourceUnit);
+            const lifestealPercent = sourceState.statuses.reduce((sum, status) =>
+                sum + (status?.metadata?.passive === true && (Number(status?.remainingTurns) || 0) > 0
+                    ? Math.max(0, Number(status.metadata.lifestealPercent) || 0) : 0), 0);
+            if (lifestealPercent > 0) {
+                applyDirectHpGainToUnit(sourceUnit, (healthDamage * lifestealPercent) / 100);
+            }
+        }
     }
     return dealt;
 };
@@ -4783,6 +4824,34 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     !ownerUseSkillTriggeredStatusIds.has(status?.id) ||
                     Boolean(status?.metadata?.preserveOnOwnerUseSkillTrigger)
             );
+        }
+
+        const skillUsePassive = characters?.[actorUnit?.rosterIndex]?.passive;
+        const randomPiercing = skillUsePassive?.onSkillUseRandomEnemyPiercingDamage;
+        const randomPiercingAmount = Math.max(0, Number(randomPiercing?.amount) || 0);
+        if (randomPiercingAmount > 0 && actorUnit.alive !== false &&
+            actorState.statuses.some((status) => status?.metadata?.passive === true &&
+                status?.metadata?.sourceSkillName === skillUsePassive.name &&
+                (Number(status?.remainingTurns) || 0) > 0)) {
+            const growth = actorState.statuses.find((status) =>
+                status?.id === randomPiercing.extraTriggersStatusId &&
+                (Number(status?.remainingTurns) || 0) > 0);
+            const extraTriggers = Math.max(0, Number(growth?.metadata?.extraTriggers) || 0);
+            const enemyUsername = (match.players || []).find((player) =>
+                player?.username && player.username !== actingUsername)?.username;
+            for (let trigger = 0; trigger < 1 + extraTriggers; trigger += 1) {
+                const enemies = (match.board?.[enemyUsername] || []).filter((unit) =>
+                    unit && unit.alive !== false && !isUnitBanished(unit));
+                if (enemies.length === 0) break;
+                const enemy = enemies[Math.floor(Math.random() * enemies.length)];
+                if (isUnitInvulnerableForSkill(enemy, ['Physical'])) continue;
+                applyDamageToUnit(enemy, randomPiercingAmount, {
+                    match, sourceUsername: actingUsername, sourceSlot: actorSlot,
+                    sourceSkillId: null, targetUsername: enemyUsername,
+                    skillClasses: ['Physical'], ignoreDamageReduction: true,
+                    damageDebugReason: 'passive',
+                });
+            }
         }
 
         applyOnTeamMemberUseSkillBonuses({
@@ -5954,6 +6023,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             skillClasses: skill.classes || [],
                             skillIsHarmful: skillHasHarmfulEffects(skill),
                             sourceSkillId: skill.id || null,
+                            skill,
+                            characters,
                         });
                         if (counterCancelled) {
                             skillCancelledByEvade = true;
@@ -8201,6 +8272,30 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                         sourcePool[picked] = (Number(sourcePool[picked]) || 0) + 1;
                     }
                     match.chakraPools[username] = ownerPool;
+                    match.chakraPools[status.sourceUsername] = sourcePool;
+                }
+
+                const turnEndDrainRandomToSource = Math.max(
+                    0, Number(status?.metadata?.turnEndDrainRandomToSource) || 0
+                );
+                const requiredSourceStatusId = status?.metadata?.turnEndDrainRandomToSourceRequiresSourceStatusId;
+                const drainSource = status?.sourceUsername && Number.isInteger(status?.sourceSlot)
+                    ? match.board?.[status.sourceUsername]?.[status.sourceSlot] : null;
+                if (turnEndDrainRandomToSource > 0 && drainSource && drainSource.alive !== false &&
+                    status?.sourceUsername !== username && !isUnitImmuneToChakraLoss(unit) &&
+                    (!requiredSourceStatusId || ensureUnitStateShape(drainSource).statuses.some((entry) =>
+                        entry?.id === requiredSourceStatusId && (Number(entry?.remainingTurns) || 0) > 0))) {
+                    match.chakraPools = match.chakraPools || {};
+                    const targetPool = match.chakraPools[username] || createEmptyChakraCost();
+                    const sourcePool = match.chakraPools[status.sourceUsername] || createEmptyChakraCost();
+                    for (let i = 0; i < turnEndDrainRandomToSource; i += 1) {
+                        const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
+                        if (!available.length) break;
+                        const picked = available[Math.floor(Math.random() * available.length)];
+                        targetPool[picked] = Math.max(0, (Number(targetPool[picked]) || 0) - 1);
+                        sourcePool[picked] = (Number(sourcePool[picked]) || 0) + 1;
+                    }
+                    match.chakraPools[username] = targetPool;
                     match.chakraPools[status.sourceUsername] = sourcePool;
                 }
 

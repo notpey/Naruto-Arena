@@ -168,9 +168,11 @@ test('Temari Summoning Quick Beheading Dance damages all enemies on apply', () =
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
 
-    assert.equal(match.board.p2[0].hp, 65);
+    assert.ok([60, 65].includes(match.board.p2[0].hp));
     assert.equal(match.board.p2[1].hp, 70);
-    assert.equal(match.board.p2[2].hp, 65);
+    assert.ok([60, 65].includes(match.board.p2[2].hp));
+    assert.ok(match.board.p2[0].hp + match.board.p2[2].hp >= 125,
+        'Phantom Gale adds at most one 5-damage hit to the immediate area damage');
 });
 
 test('Kakashi Nin-Dogs prepares Raikiri for his next turn', () => {

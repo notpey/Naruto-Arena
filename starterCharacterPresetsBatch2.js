@@ -1059,393 +1059,384 @@
             ]
         },
         "kankuro": {
-                "id": "kankuro",
-                "characterId": "kankuro",
-                "name": "Kankuro",
-                "facePicture": "https://i.imgur.com/GN0osit.png",
-                "characterdeescription": "The brother of Gaara, and a master puppeteer, Kankuro is one of the three sand siblings. With his puppets, Kankuro is able to use the varied abilities hidden inside them to attack his enemies, or even protect himself.",
-                "skills": [
+            "id": "kankuro",
+            "characterId": "kankuro",
+            "name": "Kankuro",
+            "facePicture": "https://i.imgur.com/5uxGoSN.png",
+            "characterdeescription": "A cunning genin of the Hidden Sand Village and older brother of Gaara, Kankuro specializes in controlling deadly puppets equipped with concealed weapons and traps. His deceptive fighting style allows him to outmaneuver opponents while keeping himself safely out of reach.",
+            "passive": {
+                "name": "Puppet Preparation",
+                "icon": "https://i.imgur.com/Kya84CC.png",
+                "description": "Kankuro begins the battle with 15 destructible defense. Whenever an enemy's skill is countered, this defense is renewed.",
+                "onEnemySkillCounteredDefense": {
+                    "statusId": "kankuro_puppet_preparation_defense",
+                    "points": 15
+                }
+            },
+            "startStatuses": [
+                {
+                    "statusId": "kankuro_puppet_preparation_defense",
+                    "duration": 99,
+                    "metadata": {
+                        "helpful": true,
+                        "permanent": true,
+                        "destructibleDefensePoints": 15,
+                        "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation."
+                    }
+                }
+            ],
+            "skills": [
+                {
+                    "id": "kankuro-black-secret-machine-one-shot",
+                    "name": "Black Secret Machine One Shot",
+                    "skillimage": "https://i.imgur.com/dHWzRYI.png",
+                    "skilldescription": "Kankuro unleashes his puppet's hidden weaponry, dealing 30 physical damage to an enemy. If the target is affected by Puppet Trap, this skill deals 15 additional damage.",
+                    "energy": [
+                        "Random",
+                        "Random"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
                         {
-                                "id": "kankuro-black-secret-machine-one-shot",
-                                "name": "Black Secret Machine One Shot",
-                                "skillimage": "https://i.imgur.com/wjpmZQI.png",
-                                "skilldescription": "Kankuro deals 30 piercing damage to one enemy. For 1 turn, this enemy will take 5 additional damage from 'Poison Bomb'.",
-                                "energy": [
-                                        "Random",
-                                        "Random"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 30,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "ignoreDamageReduction": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "kankuro_black_secret_machine_one_shot_mark",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 5,
-                                                        "bonusDamageFromSourceCharacterId": "kankuro",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "kankuro-poison-bomb"
-                                                        ],
-                                                        "tooltipText": "This character takes 5 additional damage from Poison Bomb."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "kankuro-poison-bomb",
-                                "name": "Poison Bomb",
-                                "skillimage": "https://i.imgur.com/3MFMSHu.png",
-                                "skilldescription": "Kankuro deals 10 affliction damage to all enemies. For 1 turn, these enemies will take 5 additional damage from 'Black Secret Machine One Shot'. If Kankuro has 'Puppet Preparation', this effect will last 2 turns.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "all-enemy",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Affliction",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 10,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "afflictionDamage": true,
-                                                        "ignoreDamageReduction": true,
-                                                        "ignoreDestructibleDefense": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "kankuro_poison_bomb_mark",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "missingStatusId": "kankuro_puppet_preparation_bonus"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 5,
-                                                        "bonusDamageFromSourceCharacterId": "kankuro",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "kankuro-black-secret-machine-one-shot"
-                                                        ],
-                                                        "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "kankuro_poison_bomb_mark",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "kankuro_puppet_preparation_bonus"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 5,
-                                                        "bonusDamageFromSourceCharacterId": "kankuro",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "kankuro-black-secret-machine-one-shot"
-                                                        ],
-                                                        "tooltipText": "This character takes 5 additional damage from Black Secret Machine One Shot."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "kankuro-puppet-preparation",
-                                "name": "Puppet Preparation",
-                                "skillimage": "https://i.imgur.com/ghx3V0n.png",
-                                "skilldescription": "Kankuro gains 10 points of permanent destructible defense. His next 'Black Secret Machine One Shot' or 'Poison Bomb' will deal 10 additional damage. This damage bonus does not stack.",
-                                "energy": [],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "kankuro_puppet_preparation_defense",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "destructibleDefensePoints": 10,
-                                                        "mergeNumericAddKeys": [
-                                                                "destructibleDefensePoints"
-                                                        ],
-                                                        "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} points of permanent destructible defense from Puppet Preparation."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "kankuro_puppet_preparation_bonus",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "skillDamageBonuses": {
-                                                                "kankuro-black-secret-machine-one-shot": 10,
-                                                                "kankuro-poison-bomb": 10
-                                                        },
-                                                        "removeSelfOnSkillUseSkillIds": [
-                                                                "kankuro-black-secret-machine-one-shot",
-                                                                "kankuro-poison-bomb"
-                                                        ],
-                                                        "onOwnerUseSkillIdsAny": [
-                                                                "kankuro-black-secret-machine-one-shot",
-                                                                "kankuro-poison-bomb"
-                                                        ],
-                                                        "replaceSkillDamageBonuses": true,
-                                                        "tooltipText": "Kankuro's next Black Secret Machine One Shot or Poison Bomb deals 10 additional damage."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "kankuro-puppet-replacement-technique",
-                                "name": "Puppet Replacement Technique",
-                                "skillimage": "https://i.imgur.com/P2K3Uue.png",
-                                "skilldescription": "Kankuro becomes invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
+                            "type": "damage",
+                            "amount": 30,
+                            "scope": "target"
                         }
-                ]
+                    ]
+                },
+                {
+                    "id": "kankuro-poison-bomb",
+                    "name": "Poison Bomb",
+                    "skillimage": "https://i.imgur.com/vJFqLIY.png",
+                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "all-enemy",
+                    "damage": 0,
+                    "cooldown": 2,
+                    "classes": [
+                        "Affliction",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "damage",
+                            "amount": 10,
+                            "scope": "all-enemy",
+                            "metadata": {
+                                "afflictionDamage": true,
+                                "ignoreDamageReduction": true,
+                                "ignoreDestructibleDefense": true
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "kankuro_poison_bomb_no_heal",
+                            "duration": 1,
+                            "scope": "all-enemy",
+                            "metadata": {
+                                "harmful": true,
+                                "turnDurationAnchor": "source_turn",
+                                "healReceivedMultiplier": 0,
+                                "tooltipText": "This character ignores healing effects."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "kankuro-puppet-trap",
+                    "name": "Puppet Trap",
+                    "skillimage": "/assets/characters/kankuro-puppet-trap.jpg",
+                    "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 2,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "kankuro_puppet_trap",
+                            "duration": 1,
+                            "scope": "target",
+                            "metadata": {
+                                "harmful": true,
+                                "invisible": true,
+                                "turnDurationAnchor": "source_turn",
+                                "bonusDamageFromSourceSkillsFlat": 15,
+                                "bonusDamageFromSourceCharacterId": "kankuro",
+                                "bonusDamageAppliesToSkillIds": [
+                                    "kankuro-black-secret-machine-one-shot"
+                                ],
+                                "triggerOnlyOnOwnerSkillUse": true,
+                                "triggerOnOwnerHelpfulSkill": true,
+                                "triggerOnEnemyHarmfulSkillClassesAny": [
+                                    "strategic"
+                                ],
+                                "counterCancelsSkill": true,
+                                "counterStatusId": "kankuro_puppet_trap_stun",
+                                "counterStatusDuration": 1,
+                                "counterStatusMetadata": {
+                                    "harmful": true,
+                                    "cannotUseSkillClasses": [
+                                        "physical",
+                                        "strategic"
+                                    ],
+                                    "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
+                                },
+                                "tooltipText": "The next Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "kankuro-puppet-replacement-technique",
+                    "name": "Puppet Replacement Technique",
+                    "skillimage": "https://i.imgur.com/mpGOYy6.png",
+                    "skilldescription": "Kankuro uses a puppet to evade incoming attacks, becoming invulnerable for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "self",
+                    "damage": 0,
+                    "cooldown": 4,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "kankuro_puppet_replacement_invulnerable",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerable": true,
+                                "tooltipText": "Kankuro is invulnerable."
+                            }
+                        }
+                    ]
+                }
+            ]
         },
         "temari": {
-                "id": "temari",
-                "characterId": "temari",
-                "name": "Temari",
-                "facePicture": "https://i.imgur.com/a3la0h5.png",
-                "characterdeescription": "The elder sister of Gaara and Kankuro, Temari is a somewhat cruel and blunt ninja that fights using the wind at her side. With her fan, Temari can create powerful gusts of wind that she can manipulate at her desire.",
-                "skills": [
+            "id": "temari",
+            "characterId": "temari",
+            "name": "Temari",
+            "facePicture": "https://i.imgur.com/z5lW2jl.png",
+            "characterdeescription": "A confident and sharp-tongued genin of the Hidden Sand Village, Temari wields an enormous iron fan to unleash powerful wind techniques against her opponents. As the eldest of the three Sand siblings, she combines her tactical instincts with overwhelming force to control the battlefield.",
+            "passive": {
+                "name": "Phantom Gale",
+                "icon": "https://i.imgur.com/74m04BG.png",
+                "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 piercing damage.",
+                "onSkillUseRandomEnemyPiercingDamage": {
+                    "amount": 5,
+                    "extraTriggersStatusId": "temari_phantom_gale_growth"
+                }
+            },
+            "skills": [
+                {
+                    "id": "temari-cutting-whirlwind",
+                    "name": "Cutting Whirlwind",
+                    "skillimage": "https://i.imgur.com/TceZL1M.png",
+                    "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 20 piercing damage to an enemy and 10 piercing damage to all other enemies. Temari also becomes invulnerable to non-mental skills for 1 turn.",
+                    "energy": [
+                        "Ninjutsu"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
                         {
-                                "id": "temari-cutting-whirlwind",
-                                "name": "Cutting Whirlwind",
-                                "skillimage": "https://i.imgur.com/VU7HluY.png",
-                                "skilldescription": "Temari deals 20 piercing damage to one enemy and 10 piercing damage to all other enemies. For 1 turn, Temari becomes invulnerable to non-mental skills.",
-                                "energy": [
-                                        "Ninjutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "ignoreDamageReduction": true
-                                                }
-                                        },
-                                        {
-                                                "type": "damage",
-                                                "amount": 10,
-                                                "scope": "all-other-enemy",
-                                                "metadata": {
-                                                        "ignoreDamageReduction": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "temari_cutting_whirlwind_active",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerableToSkillClasses": [
-                                                                "physical",
-                                                                "energy",
-                                                                "strategic",
-                                                                "affliction"
-                                                        ],
-                                                        "skillCostOverridesBySkillId": {
-                                                                "temari-summoning-quick-beheading-dance": {
-                                                                        "energy": [
-                                                                                "Ninjutsu",
-                                                                                "Random"
-                                                                        ]
-                                                                }
-                                                        },
-                                                        "tooltipText": "Temari is invulnerable to non-mental skills. Summoning Quick Beheading Dance costs 1 less random chakra."
-                                                }
-                                        }
-                                ]
+                            "type": "damage",
+                            "amount": 20,
+                            "scope": "target",
+                            "metadata": {
+                                "ignoreDamageReduction": true
+                            }
                         },
                         {
-                                "id": "temari-summoning-quick-beheading-dance",
-                                "name": "Summoning Quick Beheading Dance",
-                                "skillimage": "https://i.imgur.com/9VRqsM7.png",
-                                "skilldescription": "Temari deals 35 damage to all enemies. If used one turn after Cutting Whirlwind, this skill costs 1 less random chakra.",
-                                "energy": [
-                                        "Ninjutsu",
-                                        "Random",
-                                        "Random"
-                                ],
-                                "target": "all-enemy",
-                                "damage": 0,
-                                "cooldown": 2,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "temari_summoning_quick_beheading_dance",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnEndDamage": 35,
-                                                        "turnEndTrigger": "source_turn",
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "ongoingClass": "action",
-                                                        "triggerOnApply": true,
-                                                        "tooltipText": "This character will take 35 damage from Summoning Quick Beheading Dance."
-                                                }
-                                        }
-                                ]
+                            "type": "damage",
+                            "amount": 10,
+                            "scope": "all-other-enemy",
+                            "metadata": {
+                                "ignoreDamageReduction": true
+                            }
                         },
                         {
-                                "id": "temari-dust-wind",
-                                "name": "Dust Wind",
-                                "skillimage": "https://i.imgur.com/oBQQWNM.png",
-                                "skilldescription": "Temari kicks up dust, making herself invulnerable for 1 turn. If targetable, all enemies will deal 20 less non-affliction damage for 1 turn. If used one turn after 'Cutting Whirlwind', this skill will decrease damage for 2 turns instead.",
-                                "energy": [
-                                        "Ninjutsu",
-                                        "Random"
+                            "type": "apply_status",
+                            "statusId": "temari_cutting_whirlwind_active",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerableToSkillClasses": [
+                                    "physical",
+                                    "energy",
+                                    "strategic",
+                                    "affliction"
                                 ],
-                                "target": "all-enemy",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "temari_dust_wind_invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "temari_dust_wind_debuff",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "missingStatusId": "temari_cutting_whirlwind_active"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "NonAfflictionDamageDebuff": 20,
-                                                        "tooltipText": "This character deals 20 less non-affliction damage.",
-                                                        "turnDurationAnchor": "source_turn"
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "temari_dust_wind_debuff",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "temari_cutting_whirlwind_active"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "NonAfflictionDamageDebuff": 20,
-                                                        "tooltipText": "This character deals 20 less non-affliction damage."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "temari-fan-defence-technique",
-                                "name": "Fan Defence Technique",
-                                "skillimage": "https://i.imgur.com/nnNAsmM.png",
-                                "skilldescription": "Temari becomes invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
+                                "skillCostOverridesBySkillId": {
+                                    "temari-summoning-quick-beheading-dance": {
+                                        "energy": [
+                                            "Ninjutsu",
+                                            "Random"
+                                        ]
+                                    }
+                                },
+                                "tooltipText": "Temari is invulnerable to non-mental skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
+                            }
                         }
-                ]
+                    ]
+                },
+                {
+                    "id": "temari-summoning-quick-beheading-dance",
+                    "name": "Summoning: Quick Beheading Dance",
+                    "skillimage": "https://i.imgur.com/cvblibj.png",
+                    "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 35 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+                    "energy": [
+                        "Ninjutsu",
+                        "Random",
+                        "Random"
+                    ],
+                    "target": "all-enemy",
+                    "damage": 0,
+                    "cooldown": 2,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "damage",
+                            "amount": 35,
+                            "scope": "all-enemy"
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "temari_phantom_gale_growth",
+                            "duration": 99,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "permanent": true,
+                                "stackMetadataKey": "extraTriggers",
+                                "stackDelta": 1,
+                                "stackMax": 9999,
+                                "tooltipTextTemplate": "Phantom Gale triggers {extraTriggers} additional times whenever Temari uses a skill."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "temari-dust-wind",
+                    "name": "Dust Wind",
+                    "skillimage": "https://i.imgur.com/O7YnMRH.png",
+                    "skilldescription": "Temari kicks up a cloud of dust, making herself and all allies invulnerable for 1 turn. If enemies can be targeted, their non-affliction damage is also reduced by 20 for 1 turn. If used the turn after Cutting Whirlwind, this reduction lasts 2 turns instead.",
+                    "energy": [
+                        "Ninjutsu",
+                        "Ninjutsu"
+                    ],
+                    "target": "all-enemy",
+                    "damage": 0,
+                    "cooldown": 4,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "temari_dust_wind_invulnerable",
+                            "duration": 1,
+                            "scope": "all-allies",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerable": true,
+                                "tooltipText": "This character is invulnerable for 1 turn."
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "temari_dust_wind_debuff",
+                            "duration": 1,
+                            "scope": "all-enemy",
+                            "condition": {
+                                "scope": "self",
+                                "missingStatusId": "temari_cutting_whirlwind_active"
+                            },
+                            "metadata": {
+                                "harmful": true,
+                                "NonAfflictionDamageDebuff": 20,
+                                "turnDurationAnchor": "source_turn",
+                                "tooltipText": "This character deals 20 less non-affliction damage for 1 turn."
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "temari_dust_wind_debuff",
+                            "duration": 2,
+                            "scope": "all-enemy",
+                            "condition": {
+                                "scope": "self",
+                                "statusId": "temari_cutting_whirlwind_active"
+                            },
+                            "metadata": {
+                                "harmful": true,
+                                "NonAfflictionDamageDebuff": 20,
+                                "turnDurationAnchor": "source_turn",
+                                "tooltipText": "This character deals 20 less non-affliction damage for 2 turns."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "temari-backflip",
+                    "name": "Backflip",
+                    "skillimage": "https://i.imgur.com/lnhXY2D.png",
+                    "skilldescription": "Temari evades incoming attacks, becoming invulnerable for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "self",
+                    "damage": 0,
+                    "cooldown": 4,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "temari_backflip_invulnerable",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerable": true,
+                                "tooltipText": "Temari is invulnerable for 1 turn."
+                            }
+                        }
+                    ]
+                }
+            ]
         }
 };
 });

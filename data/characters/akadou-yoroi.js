@@ -3,52 +3,62 @@ module.exports = {
     "characterId": "akadou-yoroi",
     "name": "Akadou Yoroi",
     "facePicture": "https://i.imgur.com/U0Ziv1r.png",
-    "characterdeescription": "A sound village genin that infiltrated Konoha as a spy, Yoroi is a capable, but brash ninja who likes to toy with his enemies. Yoroi is capable of absorbing the strength of his enemies, and make it his own in more than one way.",
-    "requiredMissionId": "the-sounds-amongst-the-leaves",
+    "characterdeescription": "A mysterious genin assigned to Kabuto's team during the Chuunin Exams, Yoroi secretly serves as a spy for Orochimaru. Specializing in close-range combat, he possesses the ability to absorb his opponents' chakra, gradually draining their strength while sustaining his own.",
+    "passive": {
+        "name": "Close Quarters",
+        "icon": "https://i.imgur.com/MUx03Dx.png",
+        "description": "Yoroi's chakra-absorbing abilities grant him Lifesteal: he recovers health equal to the health damage his skills deal.",
+        "lifestealPercent": 100
+    },
     "skills": [
+        {
+            "id": "akadou-yoroi-chakra-and-life-absorption",
+            "name": "Chakra and Life Absorption",
+            "skillimage": "https://i.imgur.com/0qvKdhQ.png",
+            "skilldescription": "Yoroi concentrates his chakra-absorbing abilities, enhancing Energy Drain and Draining Assault for 3 turns.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 3,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "akadou_yoroi_chakra_and_life_absorption",
+                    "duration": 3,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "tooltipText": "Energy Drain steals 1 chakra on use. Draining Assault steals 1 chakra from its target each turn."
+                    }
+                }
+            ]
+        },
         {
             "id": "akadou-yoroi-energy-drain",
             "name": "Energy Drain",
-            "skillimage": "https://i.imgur.com/93Ubu8K.png",
-            "skilldescription": "Akadou Yoroi steals 20 health from one enemy then lowers their non-affliction damage by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills.",
+            "skillimage": "https://i.imgur.com/5WXWl5W.png",
+            "skilldescription": "Yoroi strikes an enemy, dealing 20 physical damage. While enhanced by Chakra and Life Absorption, this skill also steals 1 chakra from the target.",
             "energy": [
-                "Taijutsu",
-                "Random"
+                "Taijutsu"
             ],
             "target": "single-enemy",
             "damage": 0,
             "cooldown": 0,
             "classes": [
-                "Ninjutsu",
+                "Physical",
                 "Instant"
             ],
             "effects": [
                 {
-                    "type": "health_steal_damage",
+                    "type": "damage",
                     "amount": 20,
                     "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_drain_debuff",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_empowered",
-                    "duration": 2,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "damageBonusFlat": 5,
-                        "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills."
-                    }
                 },
                 {
                     "type": "drain_chakra_random_from_target_to_self",
@@ -56,8 +66,7 @@ module.exports = {
                     "scope": "target",
                     "condition": {
                         "scope": "self",
-                        "statusId": "akadou_yoroi_chakra_focus",
-                        "consumeOnSuccessfulTransfer": true
+                        "statusId": "akadou_yoroi_chakra_and_life_absorption"
                     }
                 }
             ]
@@ -65,8 +74,8 @@ module.exports = {
         {
             "id": "akadou-yoroi-draining-assault",
             "name": "Draining Assault",
-            "skillimage": "https://i.imgur.com/zBoZAxl.png",
-            "skilldescription": "For 3 turns, Akadou Yoroi steals 15 health from one enemy each turn. Their non-affliction damage will be lowered by 5 for 2 turns. The following 2 turns, Akadou Yoroi will deal 5 additional damage with his skills. During 'Chakra Focus', this skill also steals 1 random chakra on use.",
+            "skillimage": "https://i.imgur.com/F4ymMEe.png",
+            "skilldescription": "Yoroi continuously drains an enemy, dealing 15 physical damage each turn for 3 turns. While enhanced by Chakra and Life Absorption, this skill also steals 1 chakra from the target each turn.",
             "energy": [
                 "Taijutsu",
                 "Random",
@@ -76,7 +85,7 @@ module.exports = {
             "damage": 0,
             "cooldown": 3,
             "classes": [
-                "Ninjutsu",
+                "Physical",
                 "Action"
             ],
             "effects": [
@@ -88,83 +97,16 @@ module.exports = {
                     "metadata": {
                         "harmful": true,
                         "turnEndDamage": 15,
+                        "turnEndSkillClasses": [
+                            "Physical"
+                        ],
                         "turnEndTrigger": "source_turn",
-                        "tooltipText": "This character loses 15 health each turn to Draining Assault.",
-                        "ongoingClass": "action"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_draining_assault_heal",
-                    "duration": 3,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "turnEndHealFlat": 15,
-                        "tooltipText": "Akadou Yoroi heals 15 health each turn from Draining Assault.",
-                        "ongoingClass": "action"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_drain_debuff",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character deals 5 less non-affliction damage.",
-                        "ongoingClass": "action"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_empowered",
-                    "duration": 2,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "damageBonusFlat": 5,
-                        "tooltipText": "Akadou Yoroi deals 5 additional damage with his skills.",
-                        "ongoingClass": "action"
-                    }
-                },
-                {
-                    "type": "drain_chakra_random_from_target_to_self",
-                    "amount": 1,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "akadou_yoroi_chakra_focus",
-                        "consumeOnSuccessfulTransfer": true
-                    }
-                }
-            ]
-        },
-        {
-            "id": "akadou-yoroi-chakra-focus",
-            "name": "Chakra Focus",
-            "skillimage": "https://i.imgur.com/8oUT5Mk.png",
-            "skilldescription": "For 3 turns, the next use of 'Energy Drain' or 'Draining Assault' against an enemy with chakra also steals 1 random chakra, then ends Chakra Focus. If the enemy has no chakra to steal, Chakra Focus remains active.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 2,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "akadou_yoroi_chakra_focus",
-                    "duration": 3,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "tooltipText": "Energy Drain or Draining Assault will also steal 1 random chakra."
+                        "turnDurationAnchor": "source_turn",
+                        "ongoingClass": "action",
+                        "triggerOnApply": true,
+                        "turnEndDrainRandomToSource": 1,
+                        "turnEndDrainRandomToSourceRequiresSourceStatusId": "akadou_yoroi_chakra_and_life_absorption",
+                        "tooltipText": "This character takes 15 physical damage each turn for 3 turns. While Yoroi has Chakra and Life Absorption, 1 chakra is also stolen each turn."
                     }
                 }
             ]
@@ -172,8 +114,8 @@ module.exports = {
         {
             "id": "akadou-yoroi-chakra-block",
             "name": "Chakra Block",
-            "skillimage": "https://i.imgur.com/ubYpqC3.png",
-            "skilldescription": "Akadou Yoroi becomes invulnerable for 1 turn.",
+            "skillimage": "https://i.imgur.com/MNnA4mF.png",
+            "skilldescription": "Yoroi uses his chakra to defend himself, becoming invulnerable for 1 turn.",
             "energy": [
                 "Random"
             ],
@@ -187,12 +129,13 @@ module.exports = {
             "effects": [
                 {
                     "type": "apply_status",
-                    "statusId": "invulnerable",
+                    "statusId": "akadou_yoroi_chakra_block",
                     "duration": 1,
                     "scope": "self",
                     "metadata": {
+                        "helpful": true,
                         "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
+                        "tooltipText": "Yoroi is invulnerable for 1 turn."
                     }
                 }
             ]
