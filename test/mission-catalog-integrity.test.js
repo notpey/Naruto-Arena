@@ -57,7 +57,8 @@ test('all default mission rewards are reachable through earlier playable charact
     const missions = getDefaultMissionCatalog();
     const rewardIds = new Set(missions.map((mission) => mission.reward_character));
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
-        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert']);
+        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'tenten', 'neji-hyuuga',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
     const remaining = new Map(missions.map((mission) => [mission.missionId, mission]));
@@ -86,7 +87,8 @@ test('new Members get the mission-free roster; staff see and use all active char
         characterId, lockedCharacterIds,
     }).unlocked);
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
-        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert']);
+        'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'tenten', 'neji-hyuuga',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,
         characterId, lockedCharacterIds,

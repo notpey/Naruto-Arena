@@ -24,6 +24,9 @@ test('arc sorting changes display order without changing canonical roster indice
         ['tenten', 'Tenten'],
         ['neji-hyuuga', 'Hyuuga Neji'],
         ['gaara-of-the-desert', 'Gaara of the Desert'],
+        ['kankuro', 'Kankuro'],
+        ['temari', 'Temari'],
+        ['akadou-yoroi', 'Akadou Yoroi'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
     ]);
@@ -43,6 +46,7 @@ test('arc sorting changes display order without changing canonical roster indice
         'demon-brothers', 'momochi-zabuza', 'haku',
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
         'inuzuka-kiba', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert',
+        'kankuro', 'temari', 'akadou-yoroi',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
         'demon-brothers', 'momochi-zabuza', 'haku', 'gato', 'zori-and-waraji',

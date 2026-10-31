@@ -22,6 +22,9 @@ const ACTIVE_ROSTER_IDS = [
     'tenten',
     'neji-hyuuga',
     'gaara-of-the-desert',
+    'kankuro',
+    'temari',
+    'akadou-yoroi',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);
