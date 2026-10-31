@@ -102,24 +102,6 @@
             if (dummyBtn) {
                 dummyBtn.addEventListener("click", function() {
                     if (settingsModal) settingsModal.classList.add("hidden");
-                    var raw = window.ArenaSession.storage.getItem("narutoSelectedTeam");
-                    var team = null;
-                    try {
-                        team = JSON.parse(raw);
-                    } catch (e) {}
-                    window.ArenaSession.fetch("/api/admin/training-dummy/start", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ team: Array.isArray(team) && team.length === 3 ? team : undefined })
-                    }).then(function(r) { return r.json(); }).then(function(data) {
-                        if (data && data.matchId) {
-                            window.location.href = "ingame.html?matchId=" + encodeURIComponent(data.matchId);
-                        } else {
-                            alert((data && data.error) || "Could not start training dummy match. Admin access required.");
-                        }
-                    }).catch(function() {
-                        alert("Could not start training dummy match.");
-                    });
                 });
             }
 

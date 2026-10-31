@@ -2422,5 +2422,9 @@
   "https://i.imgur.com/WcN7LHU.png": {
     "local": "/assets/characters/WcN7LHU.png",
     "sha256": "ad39130b3afec5755594daa266be962429a0fff472358deb270d2cdaf95c5b34"
+  },
+  "https://i.imgur.com/ZRDdP9S.png": {
+    "local": "/assets/characters/ZRDdP9S.png",
+    "sha256": "86d7a810609168cca74b164804b9ffb9c30714d1113b759ed151d2468ba70f06"
   }
 }

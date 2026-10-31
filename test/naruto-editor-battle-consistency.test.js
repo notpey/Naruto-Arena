@@ -680,6 +680,9 @@ test('Shino Female Bug and Infestation work together without stacking marks', ()
         [getCharIndex('haruno-sakura'), getCharIndex('uzumaki-naruto')]);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.deepEqual(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
+        skillIndex: 0, characters }).targets.map(target => target.slot), [1],
+    'Female Bug cannot target its current victim');
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.ok(match.board.p2[0].state.statuses.some(status =>
@@ -853,83 +856,82 @@ test('battleLogic resolves Rock Lee starter kit behavior used by the editor data
     );
 });
 
-test('battleLogic resolves Tenten draft damage, stacking reduction, and Full Release', () => {
+test('Tenten Dragons stacks Trap marks, and Trap consumes them after damage and class debuffs', () => {
     const match = makeMatch([getCharIndex('tenten')], [1, 2]);
     const tenten = getCharacter('tenten');
-    const actor = match.board.p1[0];
-    const enemy = match.board.p2[0];
-    const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
-
-    assert.equal(tenten.passive.name, 'Sharp Tools');
-    assert.equal(status(actor, 'tenten_sharp_tools').metadata.passive, true);
-    assert.deepEqual(tenten.skills[1].classes, []);
-    assert.equal(tenten.skills[1].cooldown, 0);
-    assert.equal(tenten.skills[2].cooldown, 1);
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 85, 'Twin Rising Dragons should deal 15 to the primary target');
-    assert.equal(match.board.p2[1].hp, 90, 'Twin Rising Dragons should deal 10 to other enemies');
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_mark'), undefined);
-
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(enemy.hp, 80, 'Trap deals 5 physical damage without a mark');
-    assert.equal(match.board.p2[1].hp, 85);
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_debuff').metadata.nonAfflictionDamageDebuffFlat, 5);
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 10);
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_skill_stun'), undefined);
-
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 20);
-
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(isUnitInvulnerableForSkill(actor, ['Physical']), true);
-    assert.equal(isUnitInvulnerableForSkill(actor, ['Chakra']), false);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.ok(status(actor, 'tenten_full_release_active'));
-    queueSkill(match, 'p1', 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_debuff').remainingTurns, 2,
-        'Full Release extends the following Trap debuff by 1 turn');
-    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_stack').metadata.nonAfflictionDamageDebuffFlat, 30);
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(status(actor, 'tenten_full_release_active'), undefined);
-});
-
-test('Full Release repeats Twin Rising Dragons damage once on the following Tenten turn', () => {
-    const match = makeMatch([getCharIndex('tenten')], [1, 2]);
     const primary = match.board.p2[0];
     const other = match.board.p2[1];
     const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
 
+    assert.deepEqual(tenten.skills[1].classes, ['Physical', 'Instant']);
+    assert.equal(tenten.skills[1].cooldown, 0);
+    assert.equal(tenten.skills[2].cooldown, 1);
+    assert.equal(tenten.skills[3].name, 'Spiked Boulder Wall');
+    for (let castCount = 0; castCount < 2; castCount += 1) {
+        queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    }
+    assert.equal(primary.hp, 60);
+    assert.equal(other.hp, 80);
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
+    assert.equal(status(other, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(primary.hp, 35, 'Trap deals 5 plus 20 from two marks');
+    assert.equal(other.hp, 55);
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark'), undefined);
+    assert.equal(status(other, 'tenten_twin_rising_dragons_mark'), undefined);
+    assert.deepEqual(status(primary, 'tenten_twin_rising_dragons_trap_debuff').metadata.damageDebuffBySkillClass,
+        { physical: 25, chakra: 25 });
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(primary.hp, 30, 'a second Trap has no consumed mark bonus');
+    assert.deepEqual(status(primary, 'tenten_twin_rising_dragons_trap_debuff').metadata.damageDebuffBySkillClass,
+        { physical: 5, chakra: 5 });
+});
+
+test('Tenten Full Release protects against non-Strategic skills and enhances one harmful skill', () => {
+    const match = makeMatch([getCharIndex('tenten')], [1, 2]);
+    const actor = match.board.p1[0];
+    const primary = match.board.p2[0];
+    const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
+
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(isUnitInvulnerableForSkill(actor, ['Physical']), true);
+    assert.equal(isUnitInvulnerableForSkill(actor, ['Chakra']), true);
+    assert.equal(isUnitInvulnerableForSkill(actor, ['Strategic']), false);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(primary.hp, 85);
-    assert.equal(other.hp, 90);
-    assert.ok(status(primary, 'tenten_full_release_dragons_primary_repeat'));
-    assert.ok(status(other, 'tenten_full_release_dragons_other_repeat'));
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(primary.hp, 85, 'the repeat does not fire on the cast turn');
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(primary.hp, 85, 'the repeat waits for Tenten');
-    other.state.statuses.push({ id: 'physical_only_guard', remainingTurns: 1,
-        metadata: { invulnerableToSkillClasses: ['physical'] } });
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(primary.hp, 70, 'the selected enemy takes the second 15 damage');
-    assert.equal(other.hp, 90, 'Physical skill invulnerability blocks the second 10 damage');
-    assert.equal(status(primary, 'tenten_full_release_dragons_primary_repeat'), undefined);
-    assert.equal(status(other, 'tenten_full_release_dragons_other_repeat'), undefined);
-
+    assert.ok(status(actor, 'tenten_full_release_active'), 'the enhancement waits for a harmful skill');
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(status(primary, 'tenten_full_release_dragons_primary_repeat'), undefined,
-        'later Dragon casts do not inherit the expired Full Release');
+    assert.equal(primary.hp, 80, 'Full Release does not repeat damage');
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
+    assert.equal(status(actor, 'tenten_full_release_active'), undefined);
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(primary.hp, 55);
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_trap_debuff').remainingTurns, 1);
+});
+
+test('Tenten Full Release extends the next Trap debuff once without stacking', () => {
+    const match = makeMatch([getCharIndex('tenten')], [1, 2]);
+    const actor = match.board.p1[0];
+    const enemy = match.board.p2[0];
+    const status = (unit, id) => unit.state.statuses.find((entry) => entry.id === id && entry.remainingTurns > 0);
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    actor.state.cooldowns = {};
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(actor.state.statuses.filter((entry) => entry.id === 'tenten_full_release_active').length, 1);
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(status(enemy, 'tenten_twin_rising_dragons_trap_debuff').remainingTurns, 2);
+    assert.equal(status(actor, 'tenten_full_release_active'), undefined);
+    assert.equal(enemy.hp, 95);
 });
 
 test('Sharp Tools retaliates against damaging skills but not non-damaging marks', () => {
@@ -949,8 +951,22 @@ test('Tenten Trap reductions lower a target’s next non-affliction attack', () 
     assert.equal(match.board.p2[0].hp, 95);
     queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 85, '30 physical damage is reduced by 5 and the first 10-point stack');
+    assert.equal(match.board.p1[0].hp, 75, '30 physical damage is reduced by the 5-point Trap debuff');
     assert.equal(match.board.p2[0].hp, 90, 'Sharp Tools retaliates against the attack');
+});
+
+test('Tenten Trap also reduces Chakra damage by its base value plus Dragon marks', () => {
+    const match = makeMatch([getCharIndex('tenten')], [getCharIndex('uchiha-sasuke')]);
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    queueSkill(match, 'p1', 1);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    const debuff = match.board.p2[0].state.statuses.find((entry) =>
+        entry.id === 'tenten_twin_rising_dragons_trap_debuff');
+    assert.deepEqual(debuff.metadata.damageDebuffBySkillClass, { physical: 15, chakra: 15 });
+    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+    assert.equal(match.board.p1[0].hp, 95, 'Sasuke Fireball deals 20 minus 15 Chakra damage');
 });
 
 test('battleLogic resolves Neji draft damage, chakra costs, and passive', () => {

@@ -37,6 +37,10 @@ test('Kiba draft is on the playable roster and Heightened Senses is permanent', 
     assert.equal(kiba.skills.length, 5);
     assert.deepEqual(kiba.skills.slice(0, 4).map(skill => skill.name),
         ['Dynamic Air Marking', 'Garouga', 'Double Headed Wolf', 'Smoke Bomb']);
+    assert.equal(kiba.skills[4].hiddenFromSelectionViewer, true);
+    const unprepared = makeMatch();
+    cast(unprepared, 'p1', 0, 4, target('p2', 0));
+    assert.equal(unprepared.board.p2[0].hp, 100, 'Double Garouga cannot be cast from its hidden slot');
     const unit = makeMatch().board.p1[0];
     assert.equal(status(unit, 'inuzuka_kiba_heightened_senses').metadata.revealInvisibleSkills, true);
     const match = makeMatch();

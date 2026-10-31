@@ -104,4 +104,19 @@ const rawCharacters = [
     require('./puppet-sasori')
 ];
 
-module.exports = sortCharactersByRosterOrder(rawCharacters);
+// Internal roster classification for team passives. This is not a display label.
+const konohaGeninIds = new Set([
+    'uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke',
+    'inuzuka-kiba', 'aburame-shino', 'hyuuga-hinata',
+    'nara-shikamaru', 'akimichi-chouji', 'yamanaka-ino',
+    'rock-lee', 'tenten', 'neji-hyuuga',
+    'kyuubi-naruto', 'cursed-seal-lv1-sasuke', 'cursed-seal-sasuke',
+    'butterfly-chouji', 'drunken-lee', 'uzumaki-naruto-s',
+    'four-tails-kyuubi-naruto',
+]);
+
+module.exports = sortCharactersByRosterOrder(rawCharacters.map((character) =>
+    konohaGeninIds.has(character.characterId)
+        ? { ...character, tags: [...new Set([...(character.tags || []), 'konoha-genin'])] }
+        : character
+));

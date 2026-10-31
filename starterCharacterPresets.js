@@ -1,5 +1,6 @@
 (function (root, factory) {
     const presets = factory();
+    Object.values(presets).forEach((character) => { character.tags = ['konoha-genin']; });
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = presets;
     } else {
@@ -174,6 +175,7 @@
         {
             "id": "inuzuka-kiba-double-garouga",
             "name": "Double Garouga",
+            "hiddenFromSelectionViewer": true,
             "skillimage": "https://i.imgur.com/jLD3s0g.png",
             "skilldescription": "Kiba deals 30 physical damage to one enemy and 30 physical damage to a different random enemy. If either is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.",
             "energy": [
@@ -266,9 +268,10 @@
                     "id": "aburame-shino-female-bug",
                     "name": "Female Bug",
                     "skillimage": "https://i.imgur.com/NZvHesR.png",
-                    "skilldescription": "Shino permanently marks one enemy. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
+                    "skilldescription": "Shino permanently marks one enemy not already affected by Female Bug. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.",
                     "energy": [],
                     "target": "single-enemy",
+                    "targetCondition": { "missingStatusId": "aburame_shino_female_bug" },
                     "damage": 0,
                     "cooldown": 0,
                     "classes": [

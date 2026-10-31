@@ -222,7 +222,7 @@ module.exports = function(context) {
             if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
                 return res.status(403).json({ error: 'Admin access required.' });
             }
-            const { error: validationError, value } = teamSchema.validate(req.body?.team);
+            const { error: validationError, value } = teamSchema.required().validate(req.body?.team);
             if (validationError) {
                 return res.status(400).json({ error: 'A valid three-character team is required.' });
             }

@@ -1,5 +1,8 @@
 (function (root, factory) {
     const presets = factory();
+    ['yamanaka-ino', 'rock-lee', 'tenten', 'neji-hyuuga'].forEach((id) => {
+        if (presets[id]) presets[id].tags = ['konoha-genin'];
+    });
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = presets;
     } else {
@@ -494,7 +497,7 @@
                                 "id": "tenten-twin-rising-dragons",
                                 "name": "Twin Rising Dragons",
                                 "skillimage": "https://i.imgur.com/g4ksO57.png",
-                                "skilldescription": "Tenten deals 15 physical damage to one enemy and 10 physical damage to all other enemies.",
+                                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 10 additional points from it.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -508,7 +511,7 @@
                                 "effects": [
                                         {
                                                 "type": "damage",
-                                                "amount": 15,
+                                                "amount": 20,
                                                 "scope": "target"
                                         },
                                         {
@@ -518,42 +521,53 @@
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "tenten_full_release_dragons_primary_repeat",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
-                                                },
+                                                "statusId": "tenten_twin_rising_dragons_mark",
+                                                "duration": 2,
+                                                "scope": "all-enemy",
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnEndDamage": 15,
-                                                        "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
-                                                        "turnEndSkillClasses": [
-                                                                "Physical"
+                                                        "bonusDamageFromSourceSkillsFlat": 10,
+                                                        "mergeNumericAddKeys": [
+                                                                "bonusDamageFromSourceSkillsFlat"
                                                         ],
-                                                        "tooltipText": "This character takes 15 physical damage on Tenten's next turn."
+                                                        "bonusDamageFromSourceCharacterId": "tenten",
+                                                        "bonusDamageAppliesToSkillIds": [
+                                                                "tenten-twin-rising-dragons-trap"
+                                                        ],
+                                                        "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "tenten_full_release_dragons_other_repeat",
-                                                "duration": 1,
-                                                "scope": "all-other-enemy",
+                                                "statusId": "tenten_twin_rising_dragons_mark",
+                                                "duration": 2,
+                                                "scope": "all-enemy",
                                                 "condition": {
                                                         "scope": "self",
                                                         "statusId": "tenten_full_release_active"
                                                 },
                                                 "metadata": {
                                                         "harmful": true,
-                                                        "turnEndDamage": 10,
-                                                        "turnEndTrigger": "source_turn",
                                                         "turnDurationAnchor": "source_turn",
-                                                        "turnEndSkillClasses": [
-                                                                "Physical"
+                                                        "bonusDamageFromSourceSkillsFlat": 10,
+                                                        "mergeNumericAddKeys": [
+                                                                "bonusDamageFromSourceSkillsFlat"
                                                         ],
-                                                        "tooltipText": "This character takes 10 physical damage on Tenten's next turn."
+                                                        "bonusDamageFromSourceCharacterId": "tenten",
+                                                        "bonusDamageAppliesToSkillIds": [
+                                                                "tenten-twin-rising-dragons-trap"
+                                                        ],
+                                                        "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
+                                                }
+                                        },
+                                        {
+                                                "type": "remove_status",
+                                                "statusId": "tenten_full_release_active",
+                                                "scope": "self",
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "statusId": "tenten_full_release_active"
                                                 }
                                         }
                                 ]
@@ -562,24 +576,22 @@
                                 "id": "tenten-twin-rising-dragons-trap",
                                 "name": "Twin Rising Dragons Trap",
                                 "skillimage": "https://i.imgur.com/LZze4F3.png",
-                        "skilldescription": "Tenten deals 5 physical damage to all enemies and makes them deal 5 less non-affliction damage for 1 turn. Each use also adds a stacking 10-point non-affliction damage penalty.",
+                                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their Physical and Chakra damage is lowered by 5. All stacks of 'Twin Rising Dragons' are removed afterwards.",
                                 "energy": [
                                         "Random"
                                 ],
                                 "target": "all-enemy",
                                 "damage": 0,
                                 "cooldown": 0,
-                                "classes": [],
+                                "classes": [
+                                        "Physical",
+                                        "Instant"
+                                ],
                                 "effects": [
                                         {
                                                 "type": "damage",
                                                 "amount": 5,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "skillClasses": [
-                                                                "Physical"
-                                                        ]
-                                                }
+                                                "scope": "all-enemy"
                                         },
                                         {
                                                 "type": "apply_status",
@@ -589,22 +601,38 @@
                                                 "metadata": {
                                                         "harmful": true,
                                                         "turnDurationAnchor": "source_turn",
-                                                        "nonAfflictionDamageDebuffFlat": 5,
-                                                        "tooltipText": "This character deals 5 less non-affliction damage for 1 turn."
+                                                        "damageDebuffBySkillClass": {
+                                                                "physical": 5,
+                                                                "chakra": 5
+                                                        },
+                                                        "damageDebuffBySkillClassFromTargetStatus": {
+                                                                "statusId": "tenten_twin_rising_dragons_mark",
+                                                                "metadataKey": "bonusDamageFromSourceSkillsFlat",
+                                                                "classes": [
+                                                                        "physical",
+                                                                        "chakra"
+                                                                ]
+                                                        },
+                                                        "tooltipText": "This character deals 5 less Physical and Chakra damage for 1 turn."
                                                 }
                                         },
                                         {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_trap_stack",
-                                                "duration": 99,
+                                                "type": "remove_status",
+                                                "statusId": "tenten_twin_rising_dragons_mark",
                                                 "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "nonAfflictionDamageDebuffFlat": 10,
-                                                        "mergeNumericAddKeys": [
-                                                                "nonAfflictionDamageDebuffFlat"
-                                                        ],
-                                                        "tooltipTextTemplate": "This character deals {nonAfflictionDamageDebuffFlat} less non-affliction damage from Twin Rising Dragons Trap stacks."
+                                                "condition": {
+                                                        "scope": "target",
+                                                        "statusId": "tenten_twin_rising_dragons_mark",
+                                                        "statusFromActor": true
+                                                }
+                                        },
+                                        {
+                                                "type": "remove_status",
+                                                "statusId": "tenten_full_release_active",
+                                                "scope": "self",
+                                                "condition": {
+                                                        "scope": "self",
+                                                        "statusId": "tenten_full_release_active"
                                                 }
                                         }
                                 ]
@@ -613,7 +641,7 @@
                                 "id": "tenten-twin-rising-dragons-full-release",
                                 "name": "Twin Rising Dragons Full Release",
                                 "skillimage": "https://i.imgur.com/4KGkFYx.png",
-                                "skilldescription": "Tenten becomes invulnerable to enemy Physical skills for 1 turn. On her next turn, Twin Rising Dragons repeats its damage on the following turn and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
+                                "skilldescription": "Tenten becomes invulnerable to non-Strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons applies its non-damage effect twice, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -632,33 +660,30 @@
                                                 "scope": "self",
                                                 "metadata": {
                                                         "helpful": true,
-                                                        "invulnerableToSkillClasses": [
-                                                                "physical"
-                                                        ],
-                                                        "tooltipText": "This character is invulnerable to enemy Physical skills."
+                                                        "invulnerableToNonStrategicSkills": true,
+                                                        "tooltipText": "This character is invulnerable to non-Strategic skills."
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
                                                 "statusId": "tenten_full_release_active",
-                                                "duration": 1,
+                                                "duration": 99,
                                                 "scope": "self",
                                                 "metadata": {
                                                         "helpful": true,
-                                                        "turnDurationAnchor": "source_turn",
                                                         "skillDurationBonuses": {
                                                                 "tenten-twin-rising-dragons-trap": 1
                                                         },
-                                                        "tooltipText": "On Tenten's next turn, Twin Rising Dragons repeats its damage on the following turn, and Twin Rising Dragons Trap lasts 1 additional turn."
+                                                        "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons applies its mark twice, or Twin Rising Dragons Trap lowers Physical and Chakra damage for 1 additional turn."
                                                 }
                                         }
                                 ]
                         },
                         {
                                 "id": "tenten-spiked-boulder-wall",
-                                "name": "Spike Boulder Shield",
+                                "name": "Spiked Boulder Wall",
                                 "skillimage": "https://i.imgur.com/WcN7LHU.png",
-                                "skilldescription": "Tenten shields herself behind a massive spiked boulder, becoming invulnerable for 1 turn.",
+                                "skilldescription": "Tenten becomes invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],

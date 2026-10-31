@@ -106,27 +106,29 @@ test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 90);
+    assert.equal(match.board.p2[0].hp, 85);
     assert.equal(match.board.p2[1].hp, 90);
 
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 90, 'Gaara reduces the 5 physical Trap damage to zero');
-    assert.equal(match.board.p2[1].hp, 85);
+    assert.equal(match.board.p2[0].hp, 75, 'Gaara reduces the marked 15 physical Trap damage');
+    assert.equal(match.board.p2[1].hp, 75);
 });
 
-test('Tenten Twin Rising Dragons Trap stacks its additional damage reduction', () => {
+test('Tenten Twin Rising Dragons marks stack, then Trap removes every mark', () => {
     const match = makeMatch([indexById.tenten], [indexById['gaara-of-the-desert']]);
 
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark')
+        ?.metadata?.bonusDamageFromSourceSkillsFlat, 20);
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    queueSkill(match, 'p1', 0, 1);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.equal(
-        getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_stack')?.metadata?.nonAfflictionDamageDebuffFlat,
-        20
-    );
+    assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark'), undefined);
+    assert.deepEqual(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff')
+        ?.metadata?.damageDebuffBySkillClass, { physical: 25, chakra: 25 });
 });
 
 test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {

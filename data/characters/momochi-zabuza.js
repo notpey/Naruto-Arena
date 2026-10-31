@@ -33,7 +33,7 @@ module.exports = {
         {
             id: 'momochi-zabuza-hidden-mist-technique', name: 'Hidden Mist Technique',
             skillimage: 'https://i.imgur.com/IkZwEbi.png',
-            skilldescription: "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability. This skill ignores invulnerability.",
+            skilldescription: "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra, Zabuza gains 5 damage reduction, and Kubikiribōchō ignores invulnerability. For the following 2 turns, Kubikiribōchō deals 10 additional damage and still ignores invulnerability. This skill ignores invulnerability.",
             energy: ['Ninjutsu'], target: 'self', damage: 0, cooldown: 3, ignoreInvulnerability: true,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'zabuza_hidden_mist_cost', duration: 2, scope: 'all-enemy',
@@ -41,12 +41,13 @@ module.exports = {
                         tooltipText: 'Physical and Chakra skills cost 1 additional random chakra from Hidden Mist Technique.' } },
                 { type: 'apply_status', statusId: 'zabuza_hidden_mist_defense', duration: 2, scope: 'self',
                     metadata: { helpful: true, damageReductionFlat: 5,
+                        ignoreInvulnerabilityForSkillIds: ['momochi-zabuza-kubikiribocho', 'momochi-zabuza-kubikiribocho-clone'],
                         onExpireApplyStatusToSelf: { statusId: 'zabuza_hidden_mist_attack', duration: 2,
                             metadata: { helpful: true,
                                 skillDamageBonuses: { 'momochi-zabuza-kubikiribocho': 10, 'momochi-zabuza-kubikiribocho-clone': 10 },
                                 ignoreInvulnerabilityForSkillIds: ['momochi-zabuza-kubikiribocho', 'momochi-zabuza-kubikiribocho-clone'],
                                 tooltipText: 'Kubikiribōchō deals 10 additional damage and ignores invulnerability.' } },
-                        tooltipText: 'Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability.' } },
+                        tooltipText: 'Zabuza has 5 damage reduction and Kubikiribōchō ignores invulnerability for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage and still ignores invulnerability.' } },
             ],
         },
         {

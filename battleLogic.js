@@ -1,6 +1,7 @@
 const defaultCharacters = require("./data/characters/index.js");
 
 const DEFAULT_HP = 100;
+const getUnitMaxHp = (unit) => Math.max(1, Number(unit?.hpCap) || DEFAULT_HP);
 const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];
 
 const createEmptyChakraCost = () => ({
@@ -71,8 +72,14 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
     const board = {};
     players.forEach((player) => {
         const team = Array.isArray(player.team) ? player.team : [];
+        const alliedHealthBonuses = team.map((rosterIndex) =>
+            characters?.[rosterIndex]?.passive?.alliedCharacterTagMaxHealthBonus
+        ).filter((bonus) => bonus && typeof bonus.tag === 'string' && Number(bonus.amount) > 0);
         board[player.username] = team.map((rosterIndex, slot) => {
             const character = Array.isArray(characters) ? characters[rosterIndex] : null;
+            const hpCap = DEFAULT_HP + alliedHealthBonuses.reduce((total, bonus) =>
+                total + (Array.isArray(character?.tags) && character.tags.includes(bonus.tag)
+                    ? Math.max(0, Number(bonus.amount) || 0) : 0), 0);
             const passive = character?.passive;
             const passiveStatus = passive?.name
                 ? {
@@ -138,7 +145,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                 slot,
                 rosterIndex,
                 alive: true,
-                hp: DEFAULT_HP,
+                hp: hpCap,
+                hpCap,
                 state: {
                     statuses: startStatuses
                         .map((status) => {
@@ -621,6 +629,7 @@ const isUnitInvulnerableForSkill = (unit, skillClasses = [], { afflictionDamage 
         if (remaining <= 0) continue;
         const metadata = status?.metadata || {};
         if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
+        if (metadata.invulnerableToNonStrategicSkills && !hasSkillClass(skillClasses, 'strategic')) return true;
         if (metadata.invulnerable && !afflictionSkill) return true;
         if (metadata.invulnerableToNonAffliction && !skillHasAfflictionClass(skillClasses)) return true;
         if (
@@ -1786,11 +1795,11 @@ const resolveScalarEffectAmount = ({ effect, actorUnit, targetUnit = null }) => 
         amount += Math.max(0, Number(actorUnit?.hp) || 0);
     }
     if (Boolean(effect?.metadata?.amountFromSourceMissingHp)) {
-        amount += Math.max(0, DEFAULT_HP - Math.max(0, Number(actorUnit?.hp) || 0));
+        amount += Math.max(0, getUnitMaxHp(actorUnit) - Math.max(0, Number(actorUnit?.hp) || 0));
     }
     if (Number.isFinite(effect?.metadata?.amountPerSourceMissingHpStep)) {
         const step = Math.max(1, Number(effect?.metadata?.sourceMissingHpStep) || 1);
-        const missingHp = Math.max(0, DEFAULT_HP - Math.max(0, Number(actorUnit?.hp) || 0));
+        const missingHp = Math.max(0, getUnitMaxHp(actorUnit) - Math.max(0, Number(actorUnit?.hp) || 0));
         amount +=
             Math.floor(missingHp / step) *
             Math.max(0, Number(effect.metadata.amountPerSourceMissingHpStep) || 0);
@@ -1871,7 +1880,7 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
         }
         if (Boolean(effect?.metadata?.amountFromSourceMissingHp)) {
             const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-            resolvedAmount += Math.max(0, DEFAULT_HP - currentHp);
+            resolvedAmount += Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
         }
         if (Boolean(effect?.metadata?.amountFromSourceCurrentHp)) {
             resolvedAmount += Math.max(0, Number(actorUnit?.hp) || 0);
@@ -1880,14 +1889,14 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
         const unconditionalMissingHpDivisor = Math.max(1, Number(effect?.metadata?.amountFromSourceMissingHpDivisor) || 0);
         if (unconditionalMissingHpStep > 0 && unconditionalMissingHpDivisor > 0) {
             const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-            const missingHp = Math.max(0, DEFAULT_HP - currentHp);
+            const missingHp = Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
             resolvedAmount += Math.floor(missingHp / unconditionalMissingHpDivisor) * unconditionalMissingHpStep;
         }
         const unconditionalTargetMissingHpStep = Math.max(0, Number(effect?.metadata?.amountFromTargetMissingHpStep) || 0);
         const unconditionalTargetMissingHpDivisor = Math.max(1, Number(effect?.metadata?.amountFromTargetMissingHpDivisor) || 0);
         if (unconditionalTargetMissingHpStep > 0 && unconditionalTargetMissingHpDivisor > 0) {
             const targetCurrentHp = Math.max(0, Number(targetUnit?.hp) || 0);
-            const targetMissingHp = Math.max(0, DEFAULT_HP - targetCurrentHp);
+            const targetMissingHp = Math.max(0, getUnitMaxHp(targetUnit) - targetCurrentHp);
             resolvedAmount +=
                 Math.floor(targetMissingHp / unconditionalTargetMissingHpDivisor) * unconditionalTargetMissingHpStep;
         }
@@ -1905,7 +1914,7 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
         let resolvedAmount = applyStackBonus(amount);
         if (Boolean(effect?.metadata?.amountFromSourceMissingHp)) {
             const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-            resolvedAmount += Math.max(0, DEFAULT_HP - currentHp);
+            resolvedAmount += Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
         }
         if (Boolean(effect?.metadata?.amountFromSourceCurrentHp)) {
             resolvedAmount += Math.max(0, Number(actorUnit?.hp) || 0);
@@ -1921,7 +1930,7 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
     let resolvedAmount = applyStackBonus(amount);
     if (Boolean(effect?.metadata?.amountFromSourceMissingHp)) {
         const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-        resolvedAmount += Math.max(0, DEFAULT_HP - currentHp);
+        resolvedAmount += Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
     }
     if (Boolean(effect?.metadata?.amountFromSourceCurrentHp)) {
         resolvedAmount += Math.max(0, Number(actorUnit?.hp) || 0);
@@ -1930,7 +1939,7 @@ const resolveEffectDamageAmount = ({ effect, actorState, actorUnit, targetState,
     const missingHpDivisor = Math.max(1, Number(effect?.metadata?.amountFromSourceMissingHpDivisor) || 0);
     if (missingHpStep > 0 && missingHpDivisor > 0) {
         const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-        const missingHp = Math.max(0, DEFAULT_HP - currentHp);
+        const missingHp = Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
         resolvedAmount += Math.floor(missingHp / missingHpDivisor) * missingHpStep;
     }
     const outgoingCap = getOutgoingDamageCap(actorState, actorUnit);
@@ -2711,6 +2720,9 @@ const maybeTriggerReactiveDefenses = ({
             !hasSkillClass(skillClasses, 'physical') && !hasSkillClass(skillClasses, 'strategic')) return false;
         if (metadata.triggerOnEnemyHarmfulNonMental && hasSkillClass(skillClasses, 'mental')) return false;
         if (metadata.triggerOnEnemyHarmfulNonStrategic && hasSkillClass(skillClasses, 'strategic')) return false;
+        if (metadata.triggerOnlyOnDamagingSkill && !(Array.isArray(skill?.effects) && skill.effects.some((effect) =>
+            effect?.type === 'damage' || effect?.type === 'health_steal_damage' ||
+            Math.max(0, Number(effect?.metadata?.turnEndDamage) || 0) > 0))) return false;
         if (Array.isArray(metadata.triggerOnEnemyHarmfulSkillClassesAny) &&
             metadata.triggerOnEnemyHarmfulSkillClassesAny.length > 0 &&
             !metadata.triggerOnEnemyHarmfulSkillClassesAny.some((entry) => hasSkillClass(skillClasses, entry))) return false;
@@ -2759,7 +2771,10 @@ const maybeTriggerReactiveDefenses = ({
         });
     }
 
-    if (trapMetadata?.counterStatusId) {
+    if (trapMetadata?.counterStatusId && (
+        !Number.isFinite(Number(trapMetadata?.counterStatusApplyIfTargetHpAtMost)) ||
+        (Number(actorUnit?.hp) || 0) <= Number(trapMetadata.counterStatusApplyIfTargetHpAtMost)
+    )) {
         const actorState = ensureUnitStateShape(actorUnit);
         const counterStatusMetadata =
             trapMetadata?.counterStatusMetadata && typeof trapMetadata.counterStatusMetadata === 'object'
@@ -3660,7 +3675,7 @@ const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
     const heal = (baseHeal + bonus) * Math.max(0, Number(totals.healReceivedMultiplier) || 0);
     const before = Number(unit.hp) || 0;
     const cap = Math.max(0, Number(unit?.hpCap) || DEFAULT_HP);
-    unit.hp = Math.min(DEFAULT_HP, cap, before + heal);
+    unit.hp = Math.min(cap, before + heal);
     return Math.max(0, unit.hp - before);
 };
 
@@ -3670,7 +3685,7 @@ const applyDirectHpGainToUnit = (unit, rawAmount) => {
     if (gain <= 0) return 0;
     const before = Number(unit.hp) || 0;
     const cap = Math.max(0, Number(unit?.hpCap) || DEFAULT_HP);
-    unit.hp = Math.min(DEFAULT_HP, cap, before + gain);
+    unit.hp = Math.min(cap, before + gain);
     return Math.max(0, unit.hp - before);
 };
 
@@ -4241,9 +4256,9 @@ const reviveUnitToHp = (unit, rawAmount) => {
     if (!unit) return 0;
     const before = Math.max(0, Number(unit.hp) || 0);
     const cap = Math.max(1, Number(unit?.hpCap) || DEFAULT_HP);
-    const amount = Math.max(1, Math.min(DEFAULT_HP, Number(rawAmount) || 0));
+    const amount = Math.max(1, Number(rawAmount) || 0);
     unit.alive = true;
-    unit.hp = Math.min(DEFAULT_HP, cap, amount);
+    unit.hp = Math.min(cap, amount);
     return Math.max(0, unit.hp - before);
 };
 
@@ -6057,6 +6072,24 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             });
                         }
                     }
+                    const targetStatusClassDebuff = runtimeMetadata?.damageDebuffBySkillClassFromTargetStatus;
+                    if (targetStatusClassDebuff?.statusId && targetStatusClassDebuff?.metadataKey) {
+                        const matchedStatus = (targetState.statuses || []).find((entry) =>
+                            entry?.id === targetStatusClassDebuff.statusId &&
+                            (Number(entry.remainingTurns) || 0) > 0 &&
+                            entry.sourceUsername === actingUsername && entry.sourceSlot === actorSlot
+                        );
+                        const bonus = Math.max(0, Number(matchedStatus?.metadata?.[targetStatusClassDebuff.metadataKey]) || 0);
+                        if (bonus > 0) {
+                            const classDebuffs = { ...(runtimeMetadata.damageDebuffBySkillClass || {}) };
+                            (targetStatusClassDebuff.classes || []).forEach((className) => {
+                                classDebuffs[className] = Math.max(0, Number(classDebuffs[className]) || 0) + bonus;
+                            });
+                            runtimeMetadata = { ...runtimeMetadata, damageDebuffBySkillClass: classDebuffs,
+                                tooltipText: `This character deals ${Math.max(0, Number(runtimeMetadata.damageDebuffBySkillClass?.physical) || 0) + bonus} less Physical and Chakra damage.`,
+                            };
+                        }
+                    }
                     const extraDuration = getAdditionalIncomingStatusDuration({
                         targetState: destinationState,
                         incomingStatusId: runtimeStatusId,
@@ -7137,7 +7170,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         })
                     ) return;
                     const currentHp = Math.max(0, Number(recipient.unit.hp) || 0);
-                    const missingHp = Math.max(0, DEFAULT_HP - currentHp);
+                    const missingHp = Math.max(0, getUnitMaxHp(recipient.unit) - currentHp);
                     const healAmount = Math.round(missingHp * (percent / 100));
                     if (healAmount > 0) {
                         applyHealToUnit(recipient.unit, healAmount);
@@ -7155,7 +7188,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     if (effect?.isHealingEffect && hasStatusMetadataFlag(targetState, 'ignoreHealing')) {
                         return;
                     }
-                    recipient.unit.hp = Math.min(DEFAULT_HP, targetHp);
+                    recipient.unit.hp = Math.min(getUnitMaxHp(recipient.unit), targetHp);
                 });
                 return;
             }
@@ -7267,7 +7300,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             }
 
             if (effectType === 'remove_status') {
-                const recipients = resolveRecipients(effect);
+                // A mark being moved must be removed from its old owner even when
+                // targetCondition excludes that owner from the new cast's targets.
+                const recipients = effect?.scope === 'all-enemy' && effect?.condition?.statusFromActor
+                    ? (match.board?.[opponentUsername] || []).map((unit, slot) => ({
+                        username: opponentUsername, slot, unit,
+                    }))
+                    : resolveRecipients(effect);
                 const targetStatusId = effect?.statusId;
                 const afflictionOnly = Boolean(effect?.metadata?.afflictionOnly);
                 const harmfulOnly = Boolean(effect?.metadata?.harmfulOnly);
@@ -7325,7 +7364,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 const threshold = Math.max(1, Number(effect?.threshold) || 30);
                 const amountPer = Math.max(0, Number(effect?.amountPerThreshold) || 0);
                 const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
-                const lostHp = Math.max(0, DEFAULT_HP - currentHp);
+                const lostHp = Math.max(0, getUnitMaxHp(actorUnit) - currentHp);
                 const steps = Math.floor(lostHp / threshold);
                 const totalAmount = steps * amountPer;
                 if (totalAmount > 0) {

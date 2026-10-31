@@ -86,6 +86,7 @@ const KIBA_REWORK_MIGRATION_ID = 'inuzuka-kiba-rework-2026-10-28';
 const GAARA_REWORK_MIGRATION_ID = 'gaara-of-the-desert-rework-2026-10-28';
 const NEJI_REWORK_MIGRATION_ID = 'neji-hyuuga-draft-2026-10-29';
 const TENTEN_REWORK_MIGRATION_ID = 'tenten-draft-2026-10-29';
+const IRUKA_REWORK_MIGRATION_ID = 'umino-iruka-rw-draft-2026-10-31';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -3722,7 +3723,7 @@ const applyGauntletProgressForUsers = async (match, winnerUsername, endedAt) => 
     activeRun.teamHp = activeRun.team.map((_, index) => {
         const unit = humanUnits[index];
         if (!unit) return 0;
-        return Math.max(0, Math.min(battleLogic.DEFAULT_HP, Math.round(Number(unit.hp) || 0)));
+        return Math.max(0, Math.min(Number(unit.hpCap) || battleLogic.DEFAULT_HP, Math.round(Number(unit.hp) || 0)));
     });
 
     const didWin = Boolean(winnerUsername) && winnerUsername === humanPlayer.username;
@@ -4317,6 +4318,7 @@ const getStoredCharacters = async () => {
     const shouldApplyGaaraRework = !completedMigrations[GAARA_REWORK_MIGRATION_ID];
     const shouldApplyNejiRework = !completedMigrations[NEJI_REWORK_MIGRATION_ID];
     const shouldApplyTentenRework = !completedMigrations[TENTEN_REWORK_MIGRATION_ID];
+    const shouldApplyIrukaRework = !completedMigrations[IRUKA_REWORK_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -4332,6 +4334,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyGaaraRework ? ['gaara-of-the-desert'] : []),
         ...(shouldApplyNejiRework ? ['neji-hyuuga'] : []),
         ...(shouldApplyTentenRework ? ['tenten'] : []),
+        ...(shouldApplyIrukaRework ? ['umino-iruka'] : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
     ]);
     const defaultByCharacterId = new Map(
@@ -4412,6 +4415,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyGaaraRework && characterId === 'gaara-of-the-desert') return seedEntry;
             if (shouldApplyNejiRework && characterId === 'neji-hyuuga') return seedEntry;
             if (shouldApplyTentenRework && characterId === 'tenten') return seedEntry;
+            if (shouldApplyIrukaRework && characterId === 'umino-iruka') return seedEntry;
             if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
             }
@@ -4475,7 +4479,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyLaunchUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyLaunchUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -4516,6 +4520,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyTentenRework) {
             completedMigrationUpdates[`completed.${TENTEN_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyIrukaRework) {
+            completedMigrationUpdates[`completed.${IRUKA_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
@@ -5594,7 +5601,18 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'genjutsuCostReduction',
     'harmful',
     'helpful',
+    'ignoreEnemyInvulnerability',
+    'ignoreInvulnerabilityForSkillIds',
+    'ignoreInvulnerabilityFromSourceCharacterId',
+    'ignoreInvulnerabilityFromSourceSkillIdsAny',
     'ignoreOngoingSourceStun',
+    'invulnerable',
+    'invulnerableToAffliction',
+    'invulnerableToAllSkills',
+    'invulnerableToHelpfulSkills',
+    'invulnerableToNonAffliction',
+    'invulnerableToNonStrategicSkills',
+    'invulnerableToSkillClasses',
     'NonAfflictionDamageDebuff',
     'ninjutsuCostIncrease',
     'ninjutsuCostReduction',
@@ -5674,6 +5692,8 @@ const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername, revealI
         id: typeof status.id === 'string' ? status.id : '',
         remainingTurns: Math.max(0, Number(status.remainingTurns) || 0),
         sourceSkillId: typeof status.sourceSkillId === 'string' ? status.sourceSkillId : null,
+        sourceUsername: typeof status.sourceUsername === 'string' ? status.sourceUsername : null,
+        sourceSlot: Number.isInteger(status.sourceSlot) ? status.sourceSlot : null,
         metadata: sanitizeStatusMetadataForClient(status.metadata),
     };
 };
@@ -5716,6 +5736,7 @@ const sanitizeBoardForViewer = (board, viewerUsername) => {
                       rosterIndex: Number.isInteger(unit?.rosterIndex) ? unit.rosterIndex : null,
                       alive: unit?.alive !== false,
                       hp: Number.isFinite(Number(unit?.hp)) ? Number(unit.hp) : 0,
+                      hpCap: Math.max(1, Number(unit?.hpCap) || battleLogic.DEFAULT_HP),
                       state: sanitizeUnitStateForViewer({
                           unit, unitUsername, viewerUsername,
                           revealInvisibleSkills: revealInvisibleSkills ||
@@ -6505,10 +6526,18 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
 };
 
 const buildTrainingDummyMatch = async ({ username, team }) => {
+    if (!Array.isArray(team) || team.length !== 3 ||
+        team.some((rosterIndex) => !Number.isInteger(rosterIndex) || !charactersData[rosterIndex])) {
+        throw new Error('A valid three-character team is required for training.');
+    }
     const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const dummyTeam = buildBattleBotTeam();
+    if (dummyTeam.length !== 3) {
+        throw new Error('Training dummy team could not be created.');
+    }
     const botPlayer = createBattleBotPlayer({
         matchId,
-        team: buildBattleBotTeam(),
+        team: dummyTeam,
         ladderLevel: 1,
         displayName: TRAINING_DUMMY_DISPLAY_NAME,
     });
@@ -6516,7 +6545,6 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
         [username]: Array.isArray(team) ? team.length : 3,
         [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
     };
-    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
     const playerDocs = [
         {
             username,
@@ -6526,6 +6554,10 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
         botPlayer,
     ];
     const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
+    if (board[username]?.length !== 3 || board[botPlayer.username]?.length !== 3) {
+        throw new Error('Training match could not initialize both teams.');
+    }
+    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
 
     if (built.currentTurn !== username) {
         built.turnOrder = [username, botPlayer.username];
@@ -6699,7 +6731,8 @@ const buildGauntletBattleBotMatch = async ({ username, runState, node }) => {
     playerUnits.forEach((unit, index) => {
         if (!unit) return;
         const hp = Number(Array.isArray(runState?.teamHp) ? runState.teamHp[index] : battleLogic.DEFAULT_HP);
-        unit.hp = Math.max(1, Math.min(battleLogic.DEFAULT_HP, Number.isFinite(hp) ? Math.round(hp) : battleLogic.DEFAULT_HP));
+        const hpCap = Number(unit.hpCap) || battleLogic.DEFAULT_HP;
+        unit.hp = Math.max(1, Math.min(hpCap, Number.isFinite(hp) ? Math.round(hp) : hpCap));
         unit.alive = unit.hp > 0;
     });
     const matchDocument = {

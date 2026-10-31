@@ -86,6 +86,7 @@ module.exports = {
         },
         {
             id: 'inuzuka-kiba-double-garouga', name: 'Double Garouga',
+            hiddenFromSelectionViewer: true,
             skillimage: 'https://i.imgur.com/jLD3s0g.png',
             skilldescription: 'Kiba deals 30 physical damage to one enemy and 30 physical damage to a different random enemy. If either is affected by Dynamic Air Marking, Garouga costs 1 less random chakra for 1 turn.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,

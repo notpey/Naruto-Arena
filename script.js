@@ -1244,6 +1244,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const replacementId = replacementMap[resolvedSkill.id];
                 const replacementSkill = (Array.isArray(character?.skills) ? character.skills : []).find(
                     (skill) => skill?.id === replacementId
+                ) || (getRosterData() || []).flatMap((entry) => entry?.skills || []).find(
+                    (skill) => skill?.id === replacementId
                 );
                 if (!replacementSkill) break;
                 resolvedSkill = replacementSkill;
@@ -1697,7 +1699,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return getLiveStatuses(unit).some((status) => {
                 const metadata = status?.metadata || {};
                 if (metadata.invulnerableToAllSkills || metadata.invulnerableToAffliction) return true;
-                if (metadata.invulnerable) return true;
+                if (metadata.invulnerableToNonStrategicSkills && !skillClasses.includes('strategic')) return true;
+                if (metadata.invulnerable && !skillClasses.includes('affliction')) return true;
                 if (metadata.invulnerableToNonAffliction && !skillClasses.includes('affliction')) return true;
                 const blockedClasses = Array.isArray(metadata.invulnerableToSkillClasses)
                     ? metadata.invulnerableToSkillClasses
@@ -2885,23 +2888,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const healthBar = card.querySelector('.health-bar');
             const healthText = card.querySelector('.health-text');
             if (!healthBar || !healthText) return;
+            const maxHp = Math.max(1, Number(unit?.hpCap) || MAX_HP);
             const rawHp = Number(unit?.hp);
-            const hp = Math.max(0, Math.min(MAX_HP, Number.isFinite(rawHp) ? rawHp : MAX_HP));
+            const hp = Math.max(0, Math.min(maxHp, Number.isFinite(rawHp) ? rawHp : maxHp));
             const previousHp = card.dataset.lastKnownHp !== undefined ? Number(card.dataset.lastKnownHp) : hp;
             if (Number.isFinite(previousHp) && hp < previousHp) {
                 triggerHitFeedback(card);
             }
             card.dataset.lastKnownHp = String(hp);
-            const ratio = hp / MAX_HP;
+            const ratio = hp / maxHp;
             const width = Math.max(0, Math.round(getHealthBarMaxWidth(healthBar) * ratio));
             healthBar.style.width = `${width}px`;
             healthBar.classList.remove('hp-mid', 'hp-low');
-            if (hp <= 30) {
+            if (ratio <= 0.3) {
                 healthBar.classList.add('hp-low');
-            } else if (hp <= 60) {
+            } else if (ratio <= 0.6) {
                 healthBar.classList.add('hp-mid');
             }
-            healthText.textContent = `${hp}/${MAX_HP}`;
+            healthText.textContent = `${hp}/${maxHp}`;
             const face = card.querySelector('.character-face');
             const dead = unit?.alive === false || hp <= 0;
             if (face) {
@@ -3300,6 +3304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statuses.map((status) => ({
                     id: status?.id || '',
                     sourceSkillId: status?.sourceSkillId || '',
+                    sourceUsername: status?.sourceUsername || '',
                     remainingTurns: Math.max(0, Number(status?.remainingTurns) || 0),
                     metadata: status?.metadata || {},
                 }))
@@ -3324,7 +3329,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const groupedStatuses = [];
             const groupByKey = new Map();
             statuses.forEach((status, index) => {
-                const key = status?.sourceSkillId ? `skill:${status.sourceSkillId}` : `status:${status?.id}:${index}`;
+                const sourceKey = `${status?.sourceUsername || unitUsername}:${status?.sourceSlot ?? ''}`;
+                const key = status?.sourceSkillId ? `skill:${sourceKey}:${status.sourceSkillId}` : `status:${status?.id}:${index}`;
                 if (!groupByKey.has(key)) {
                     const group = {
                         key,
@@ -3721,24 +3727,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             groupedStatuses.forEach((group, index) => {
                 const statusSkill = findSkillById(group?.sourceSkillId);
-                const polarityForStatus = (status) => {
-                    const metadata = status?.metadata || {};
-                    if (metadata.harmful === true) return 'harmful';
-                    if (metadata.helpful === true || metadata.passive === true) return 'helpful';
-                    const sourceEffect = statusSkill?.effects?.find((effect) =>
-                        effect?.type === 'apply_status' && effect?.statusId === status?.id
-                    );
-                    if (sourceEffect?.metadata?.harmful === true) return 'harmful';
-                    if (sourceEffect?.metadata?.helpful === true) return 'helpful';
-                    if (status?.sourceUsername && unitUsername) {
-                        return status.sourceUsername === unitUsername ? 'helpful' : 'harmful';
-                    }
-                    return '';
-                };
-                const polarities = group.statuses.map(polarityForStatus);
-                const polarity = polarities.includes('harmful')
-                    ? 'harmful'
-                    : polarities.includes('helpful') ? 'helpful' : '';
+                const sources = group.statuses.map((status) => status?.sourceUsername || unitUsername);
+                const allegiance = sources.some((username) => username && username !== currentPlayerUsername)
+                    ? 'enemy'
+                    : sources.some((username) => username === currentPlayerUsername) ? 'ally' : '';
                 const iconEl =
                     index === 0 ? tooltipImgTemplate : tooltipImgTemplate.cloneNode(true);
                 if (index > 0) {
@@ -3747,9 +3739,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     iconEl.classList.remove('dynamic-status-icon');
                 }
-                iconEl.classList.toggle('status-helpful', polarity === 'helpful');
-                iconEl.classList.toggle('status-harmful', polarity === 'harmful');
-                iconEl.alt = `${statusSkill?.name || group.statuses[0]?.metadata?.sourceSkillName || 'Status'}${polarity ? ` (${polarity})` : ''}`;
+                iconEl.classList.toggle('status-helpful', allegiance === 'ally');
+                iconEl.classList.toggle('status-harmful', allegiance === 'enemy');
+                iconEl.alt = `${statusSkill?.name || group.statuses[0]?.metadata?.sourceSkillName || 'Status'}${allegiance ? ` (${allegiance} skill)` : ''}`;
                 iconEl.style.display = 'block';
                 iconEl.removeAttribute('title');
                 const iconSrc = resolveStatusIconSrc(group, statusSkill);
@@ -5270,6 +5262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ladderButton = document.querySelector('.ladder-button');
     const privateButton = document.querySelector('.private-button');
     const trainingDummyButton = document.querySelector('.training-dummy-button');
+    const settingsTrainingDummyButton = document.getElementById('modal-training-dummy-btn');
     const searchingBackdrop = document.querySelector('.searching-backdrop');
     const searchingOverlay = document.querySelector('.searchingscroll');
     const searchingMessage = document.querySelector('.searching');
@@ -5527,7 +5520,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const startTrainingDummyMatch = async () => {
-        if (isSearching || !isCurrentUserAdmin()) return;
+        if (isSearching) return;
+        if (!isCurrentUserAdmin()) {
+            showGameToast('Training Dummy is available to admins only.', 'warning');
+            return;
+        }
         const team = getTeamIndices();
         if (team.length !== 3) {
             showGameToast('Select 3 characters to form your team before starting training dummy battle!', 'warning');
@@ -5605,6 +5602,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (trainingDummyButton) {
         trainingDummyButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            startTrainingDummyMatch();
+        });
+    }
+    if (settingsTrainingDummyButton) {
+        settingsTrainingDummyButton.addEventListener('click', (event) => {
             event.preventDefault();
             startTrainingDummyMatch();
         });

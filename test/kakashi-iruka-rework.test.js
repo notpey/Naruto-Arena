@@ -8,6 +8,7 @@ const {
     resolvePendingTurnSkills,
     computeEffectiveEnergyCost,
     tickStatusesForTurnEnd,
+    applyHealToUnit,
 } = require('../battleLogic');
 
 const index = (id) => characters.findIndex((character) => character.characterId === id);
@@ -46,9 +47,9 @@ test('Kakashi and Iruka have four active skills and separate permanent passives'
     cast(match, 'p1', 0, 4, ['p2', 0]);
     assert.equal(match.board.p2[0].hp, 100, 'Raikiri cannot be cast directly from its alternate index');
     assert.deepEqual(iruka.skills.map((skill) => skill.name),
-        ['Shuriken Throw', 'Academy Instruction', 'Sealed Bomb Square Release', 'Ally Shield']);
+        ['Shuriken Throw', 'Sacrifice', 'Sealed Bomb Square Release', 'Kunai Parry']);
     assert.equal(status(match, 'p1', 0, 'hatake_kakashi_copy_ninja').metadata.passive, true);
-    assert.equal(status(match, 'p1', 1, 'umino_iruka_genin_promotion').metadata.passive, true);
+    assert.equal(status(match, 'p1', 1, 'umino_iruka_beloved_sensei').metadata.passive, true);
 });
 
 test('Kakashi prepares Raikiri from either skill with the right cost and 45 piercing damage', () => {
@@ -131,57 +132,63 @@ test('Copy Ninja still counters Unique and preparation skills without copying th
     }
 });
 
-test('Iruka Genin Promotion marks once, rewards another ally, and never rewards Iruka himself', () => {
+test('Beloved Sensei grants allied Konoha Genin 10 maximum health and healing respects it', () => {
+    const match = makeMatch([index('umino-iruka'), index('uzumaki-naruto'), index('hatake-kakashi')],
+        [index('uchiha-sasuke')]);
+    assert.equal(match.board.p1[0].hpCap, 100);
+    assert.equal(match.board.p1[1].hpCap, 110);
+    assert.equal(match.board.p1[1].hp, 110);
+    assert.equal(match.board.p1[2].hpCap, 100);
+    assert.equal(match.board.p2[0].hpCap, 100);
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[1].hpCap, 110);
+    assert.equal(characters[index('uzumaki-naruto')].tags.includes('konoha-genin'), true);
+    assert.equal(characters[index('hatake-kakashi')].tags?.includes('konoha-genin') || false, false);
+    match.board.p1[1].hp = 90;
+    assert.equal(applyHealToUnit(match.board.p1[1], 30), 20);
+    assert.equal(match.board.p1[1].hp, 110);
+});
+
+test('Shuriken Throw gains 10 damage at 50 HP and the protection skills use their intended targets', () => {
     const match = makeMatch([index('umino-iruka'), index('uzumaki-naruto')], [index('uchiha-sasuke')]);
     cast(match, 'p1', 0, 0, ['p2', 0]);
     assert.equal(match.board.p2[0].hp, 80);
-    assert.equal(status(match, 'p2', 0, 'iruka_genin_promotion_mark').remainingTurns, 2);
-    cast(match, 'p1', 0, 0, ['p2', 0]);
-    assert.equal(match.board.p2[0].hp, 60);
-    assert.equal(match.board.p2[0].state.statuses.filter((entry) => entry.id === 'iruka_genin_promotion_mark').length, 1);
-    cast(match, 'p1', 1, 0, ['p2', 0]);
-    assert.equal(match.board.p2[0].hp, 30, 'Naruto deals 20 plus 10 from Iruka');
-    assert.equal(status(match, 'p2', 0, 'iruka_genin_promotion_mark'), undefined);
-});
-
-test('Iruka trap detonates on a harmful skill or Shuriken without cancelling the enemy skill', () => {
-    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
-    cast(match, 'p1', 0, 2, ['p2', 0]);
-    cast(match, 'p2', 0, 1, ['p1', 0]);
-    assert.equal(match.board.p2[0].hp, 70);
-    assert.equal(match.board.p1[0].hp, 80);
-    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
-    const early = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
-    cast(early, 'p1', 0, 2, ['p2', 0]);
-    cast(early, 'p1', 0, 0, ['p2', 0]);
-    assert.equal(early.board.p2[0].hp, 50);
-    assert.equal(early.board.p1[0].hp, 100, 'attacking the trapped enemy does not spring the trap on Iruka');
-    assert.equal(status(early, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
-});
-
-test('Sealed Bomb Square respects invulnerability without cancelling the enemy skill', () => {
-    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
-    cast(match, 'p1', 0, 2, ['p2', 0]);
-    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap').remainingTurns, 2);
-    match.board.p2[0].state.statuses.push({
-        id: 'test_invulnerability', remainingTurns: 1,
-        metadata: { helpful: true, invulnerable: true },
-    });
-    cast(match, 'p2', 0, 1, ['p1', 0]);
-    assert.equal(match.board.p2[0].hp, 100, 'the trap detonates without damaging an invulnerable target');
-    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
-    assert.equal(match.board.p1[0].hp, 80, 'the enemy skill still resolves');
-});
-
-test('Academy Instruction shields an ally and retaliates once while Ally Shield can protect self', () => {
-    const match = makeMatch([index('umino-iruka'), index('uzumaki-naruto')], [index('uchiha-sasuke')]);
+    const wounded = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    wounded.board.p1[0].hp = 50;
+    cast(wounded, 'p1', 0, 0, ['p2', 0]);
+    assert.equal(wounded.board.p2[0].hp, 70);
     cast(match, 'p1', 0, 1, ['p1', 1]);
-    assert.equal(status(match, 'p1', 1, 'iruka_academy_instruction_defense').metadata.destructibleDefensePoints, 15);
-    cast(match, 'p2', 0, 0, ['p1', 1]);
-    assert.equal(match.board.p2[0].hp, 90);
-    assert.equal(match.board.p1[1].hp, 95);
-    assert.equal(status(match, 'p1', 1, 'iruka_academy_instruction_trap'), undefined);
-    assert.ok(status(match, 'p2', 0, 'iruka_genin_promotion_mark'));
+    assert.equal(status(match, 'p1', 1, 'invulnerable').metadata.invulnerable, true);
     cast(match, 'p1', 0, 3, ['p1', 0]);
     assert.equal(status(match, 'p1', 0, 'invulnerable').metadata.invulnerable, true);
+});
+
+test('Sealed Bomb Square triggers on damaging skills, deals 20 affliction, and stuns at 50 HP', () => {
+    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    cast(match, 'p1', 0, 2, ['p2', 0]);
+    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap').remainingTurns, 1);
+    cast(match, 'p2', 0, 1, ['p1', 0]);
+    assert.equal(match.board.p2[0].hp, 80);
+    assert.equal(match.board.p1[0].hp, 80);
+    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
+    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_stun'), undefined);
+
+    const low = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    low.board.p2[0].hp = 70;
+    cast(low, 'p1', 0, 2, ['p2', 0]);
+    cast(low, 'p2', 0, 1, ['p1', 0]);
+    assert.equal(low.board.p2[0].hp, 50);
+    assert.ok(status(low, 'p2', 0, 'iruka_sealed_bomb_stun'));
+});
+
+test('Sealed Bomb Square respects invulnerability without cancelling the triggering skill', () => {
+    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    cast(match, 'p1', 0, 2, ['p2', 0]);
+    match.board.p2[0].state.statuses.push({
+        id: 'test_invulnerability', remainingTurns: 1,
+        metadata: { helpful: true, invulnerable: true, invulnerableToAffliction: true },
+    });
+    cast(match, 'p2', 0, 1, ['p1', 0]);
+    assert.equal(match.board.p2[0].hp, 100);
+    assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
+    assert.equal(match.board.p1[0].hp, 80);
 });

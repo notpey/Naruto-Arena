@@ -1,11 +1,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const test = require('node:test');
+const Joi = require('joi');
 
 const serverSource = fs.readFileSync('server.js', 'utf8');
 const selectionSource = fs.readFileSync('selection.html', 'utf8');
 const scriptSource = fs.readFileSync('script.js', 'utf8');
 const adminSource = fs.readFileSync('routes/admin.js', 'utf8');
+const selectionRewardsSource = fs.readFileSync('selectionRewards.js', 'utf8');
 
 test('Admin training dummy integration', (t) => {
     // 1. Verify server endpoint exists
@@ -23,6 +25,40 @@ test('training matches do not grant normal match rewards', () => {
 test('selection screen exposes training dummy modal control', () => {
     assert.match(selectionSource, /id="modal-training-dummy-btn"/);
     assert.match(adminSource, /\/training-dummy\/start/);
+    assert.match(scriptSource, /settingsTrainingDummyButton\.addEventListener\('click'/);
+    assert.doesNotMatch(selectionRewardsSource, /\/api\/admin\/training-dummy\/start/);
+});
+
+test('training endpoint rejects a missing team and forwards a selected team', async () => {
+    const calls = [];
+    const router = require('../routes/admin.js')({
+        requireSession: (_req, _res, next) => next(),
+        teamSchema: Joi.array().items(Joi.number().integer().min(0)).length(3),
+        userToMatch: new Map(),
+        matchesCollection: { findOne: async () => null },
+        usersCollection: { findOne: async () => ({ role: 'admin' }) },
+        normalizeUserProfile: () => ({}),
+        assertTeamCanBeUsed: async () => {},
+        buildTrainingDummyMatch: async (input) => {
+            calls.push(input);
+            return { matchId: 'training-test', mode: 'training' };
+        },
+        buildMatchPayloadForUser: () => ({ ok: true, matchId: 'training-test' }),
+    });
+    const handler = router.stack.find((layer) => layer.route?.path === '/training-dummy/start')
+        .route.stack.at(-1).handle;
+    const invoke = async (body) => {
+        const response = { statusCode: 200, status(code) { this.statusCode = code; return this; },
+            json(payload) { this.payload = payload; return this; } };
+        await handler({ authUser: { username: 'admin', role: 'admin' }, body }, response);
+        return response;
+    };
+    const missing = await invoke({});
+    assert.equal(missing.statusCode, 400);
+    assert.equal(calls.length, 0);
+    const valid = await invoke({ team: [0, 1, 2] });
+    assert.equal(valid.statusCode, 200);
+    assert.deepEqual(calls, [{ username: 'admin', team: [0, 1, 2] }]);
 });
 
 test('Admin mission and story catalog methods are properly injected into admin router', () => {

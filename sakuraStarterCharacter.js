@@ -1,5 +1,6 @@
 (function (root, factory) {
     const character = factory();
+    character.tags = ['konoha-genin'];
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = character;
     } else {

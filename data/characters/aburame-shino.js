@@ -11,8 +11,8 @@ module.exports = {
         {
             id: 'aburame-shino-female-bug', name: 'Female Bug',
             skillimage: 'https://i.imgur.com/NZvHesR.png',
-            skilldescription: 'Shino permanently marks one enemy. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.',
-            energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
+            skilldescription: 'Shino permanently marks one enemy not already affected by Female Bug. Whenever that enemy uses a skill that costs chakra, they take 5 affliction damage for each chakra spent. Only one enemy can be marked at a time. This effect ends when Shino dies.',
+            energy: [], target: 'single-enemy', targetCondition: { missingStatusId: 'aburame_shino_female_bug' }, damage: 0, cooldown: 0,
             classes: ['Affliction', 'Instant'],
             effects: [
                 { type: 'remove_status', statusId: 'aburame_shino_female_bug', scope: 'all-enemy',

@@ -208,10 +208,32 @@ test('Kakashi and Iruka rework replaces stale stored kits once', async () => {
     assert.equal(kakashi.passive.name, 'Copy Ninja');
     assert.equal(kakashi.skills[0].name, 'Sharingan Insight');
     assert.equal(kakashi.skills[4].name, 'Raikiri');
-    assert.equal(iruka.passive.name, 'Genin Promotion');
-    assert.equal(iruka.skills[1].name, 'Academy Instruction');
+    assert.equal(iruka.passive.name, 'Beloved Sensei');
+    assert.equal(iruka.skills[1].name, 'Sacrifice');
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.kakashi-iruka-rework-2026-10-24']));
+});
+
+test('new Iruka draft replaces a stored kit after the older rework was completed', async () => {
+    const oldIruka = {
+        id: 'umino-iruka', characterId: 'umino-iruka', name: 'Umino Iruka',
+        passive: { name: 'Genin Promotion' }, skills: [{ id: 'umino-iruka-academy-instruction' }],
+    };
+    const completed = { 'kakashi-iruka-rework-2026-10-24': new Date() };
+    const writes = [];
+    const appStateCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldIruka] } : { key, completed },
+        updateOne: async ({ key }, update) => { writes.push({ key, update }); },
+    };
+    const service = new CharacterService({ appStateCollection });
+    const stored = await service.getStoredCharacters();
+    const iruka = stored.find((character) => character.id === 'umino-iruka');
+    assert.equal(iruka.passive.name, 'Beloved Sensei');
+    assert.deepEqual(iruka.skills.map((skill) => skill.name),
+        ['Shuriken Throw', 'Sacrifice', 'Sealed Bomb Square Release', 'Kunai Parry']);
+    assert.ok(writes.some(({ key, update }) => key === 'character_migrations' &&
+        update.$set['completed.umino-iruka-rw-draft-2026-10-31']));
 });
 
 test('Haku, Zabuza, and Mizuki rework replaces stored concepts once', async () => {
@@ -307,7 +329,7 @@ test('Kiba rework replaces a stored legacy kit and records its migration', async
 });
 
 test('Neji draft migration replaces stored artwork and biography once', async () => {
-    const seed = require('../data/characters/neji-hyuuga');
+    const seed = require('../data/characters').find((character) => character.id === 'neji-hyuuga');
     let storedCharacters = [{
         id: 'neji-hyuuga', characterId: 'neji-hyuuga', name: 'Hyuuga Neji',
         facePicture: 'https://i.imgur.com/ExAFrus.png',
@@ -343,7 +365,7 @@ test('Neji draft migration replaces stored artwork and biography once', async ()
 });
 
 test('Tenten draft migration replaces stored artwork and biography once', async () => {
-    const seed = require('../data/characters/tenten');
+    const seed = require('../data/characters').find((character) => character.id === 'tenten');
     let storedCharacters = [{
         id: 'tenten', characterId: 'tenten', name: 'Tenten',
         facePicture: 'https://i.imgur.com/xkYENuj.png',

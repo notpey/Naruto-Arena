@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const characters = require('../data/characters');
 const { buildInitialBoard, resolvePendingTurnSkills, resolveEffectiveSkill, tickStatusesForTurnEnd,
-    computeEffectiveEnergyCost } = require('../battleLogic');
+    computeEffectiveEnergyCost, computeTargetOptions } = require('../battleLogic');
 
 const index = (id) => characters.findIndex((character) => character.characterId === id);
 const pool = () => ({ taijutsu: 20, ninjutsu: 20, bloodline: 20, genjutsu: 20 });
@@ -100,6 +100,14 @@ test('Zabuza prison changes sword targets, mist buffs its damage, and clone coun
 });
 
 test('Hidden Mist charges enemy Physical and Chakra skills, then empowers Kubikiribōchō', () => {
+    const during = matchFor(['momochi-zabuza'], ['uzumaki-naruto']);
+    cast(during, 'a', 0, 2);
+    during.board.b[0].state.statuses.push({ id: 'mist_test_invulnerability', remainingTurns: 2,
+        metadata: { invulnerable: true } });
+    assert.equal(computeTargetOptions({ match: during, actingUsername: 'a', actorSlot: 0,
+        skillIndex: 0, characters }).targets.length, 1);
+    cast(during, 'a', 0, 0, ['b', 0]);
+    assert.equal(during.board.b[0].hp, 75, 'sword bypasses invulnerability during Hidden Mist');
     const match = matchFor(['momochi-zabuza'], ['uzumaki-naruto']);
     cast(match, 'a', 0, 2);
     assert.ok(status(match, 'b', 0, 'zabuza_hidden_mist_cost'));
@@ -132,8 +140,8 @@ test('Mizuki counters a helpful skill, gains damage after non-damaging use, and 
     match.board.a[0].state.cooldowns = {};
     cast(match, 'a', 0, 1, ['b', 1]);
     assert.equal(match.board.b[0].hp, 15, 'marked enemy takes 25 plus 5');
-    assert.equal(match.board.b[1].hp, 75);
-    assert.equal(match.board.b[2].hp, 75);
+    assert.equal(match.board.b[1].hp, 85, 'Iruka raises Naruto\'s maximum health to 110');
+    assert.equal(match.board.b[2].hp, 85, 'Iruka raises Sakura\'s maximum health to 110');
     assert.equal(status(match, 'a', 0, 'mizuki_windmill'), undefined);
 });
 
