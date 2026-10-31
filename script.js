@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    if (/\/(selection|ingame)\.html$/.test(location.pathname) && !await window.ArenaSession.ready) return;
+    const protectedPage = /\/(selection|ingame)\.html$/.test(location.pathname);
+    const verifiedUser = protectedPage ? await window.ArenaSession.ready : null;
+    if (protectedPage && !verifiedUser) return;
     initBugReporter();
     const pageName = window.location.pathname.split('/').pop().toLowerCase();
     const shouldUseCustomCursor = pageName === 'ingame.html' || pageName === 'selection.html';
@@ -297,6 +299,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         `${window.location.protocol}//${window.location.hostname}${
             window.location.port ? `:${window.location.port}` : ''
         }`;
+    const initialMatchStatusPromise = pageName === 'selection.html'
+        ? window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' })
+            .then((response) => response.ok ? response.json() : null)
+            .catch((error) => {
+                console.warn('Failed to check active match.', error);
+                return null;
+            })
+        : null;
     const REMASTER_ASSETS = {
         characterFallback: 'deadcharacter-remaster.png?v=2',
         skillFallback: 'skillqqueue-remaster.png?v=2',
@@ -485,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const teamStorageKey = 'narutoSelectedTeam';
     const defaultProfileAvatar = 'found-remaster.png';
     const defaultLadderRankHat = 'hats/academy.png';
-    let profileCache = null;
+    let profileCache = verifiedUser;
     const publicProfileCacheByUsername = new Map();
     let selectionClickTimer = null;
     // Manual double-tap detection (used instead of the native `dblclick` event)
@@ -753,40 +763,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         return null;
     };
 
-    const hydratePlayerIdentity = async () => {
-        const cachedUser = readCachedUser();
-        applyCustomBackgrounds(cachedUser);
-        if (cachedUser?.username) {
-            applyPlayerIdentity({
-                name: cachedUser.username,
-                avatarUrl: cachedUser.avatarUrl || defaultProfileAvatar,
-                clanAbbreviation: cachedUser.clanAbbreviation || 'None',
-                ladder: cachedUser.ladder,
-            });
-        } else {
-            applyPlayerIdentity({
-                avatarUrl: defaultProfileAvatar,
-                clanAbbreviation: 'None',
-                ladder: null,
-            });
+    const hydratePlayerIdentity = async (initialUser = null) => {
+        if (!initialUser?.username) {
+            const cachedUser = readCachedUser();
+            applyCustomBackgrounds(cachedUser);
+            if (cachedUser?.username) {
+                applyPlayerIdentity({
+                    name: cachedUser.username,
+                    avatarUrl: cachedUser.avatarUrl || defaultProfileAvatar,
+                    clanAbbreviation: cachedUser.clanAbbreviation || 'None',
+                    ladder: cachedUser.ladder,
+                });
+            } else {
+                applyPlayerIdentity({
+                    avatarUrl: defaultProfileAvatar,
+                    clanAbbreviation: 'None',
+                    ladder: null,
+                });
+            }
         }
 
-        const checkActiveMatchOnHubLoad = async () => {
-            if (!slotList) return;
-            try {
-                const res = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, { credentials: 'include' });
-                if (!res.ok) return;
-                const data = await res.json();
-                if (data && data.ok && data.matchFound && data.matchId) {
-                    window.location.replace(`ingame.html?matchId=${encodeURIComponent(data.matchId)}`);
-                }
-            } catch (err) {
-                console.warn('Unable to check active match status:', err);
-            }
-        };
-
-        const apiUser = await fetchProfile();
+        const apiUser = initialUser?.username ? initialUser : await fetchProfile();
         if (apiUser?.username) {
+            profileCache = apiUser;
+            writeCachedUser(apiUser);
             applyPlayerIdentity({
                 name: apiUser.username,
                 avatarUrl: apiUser.profile?.avatarUrl || defaultProfileAvatar,
@@ -795,7 +795,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             applyCustomBackgrounds(apiUser);
         }
-        checkActiveMatchOnHubLoad();
     };
 
     const fetchPublicProfile = async (username) => {
@@ -1189,7 +1188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return units[actorSlot] || null;
         };
 
-        await hydratePlayerIdentity();
+        await hydratePlayerIdentity(verifiedUser);
 
         const getSkillReplacementMapFromUnit = (unit) => {
             const map = {};
@@ -4832,6 +4831,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 applyMatchState(data);
                 renderDynamicSkillIcons();
+                window.ArenaSession.markStartup('battle-ready');
             } catch (error) {
                 console.warn('Failed to load match data.', error);
             }
@@ -5255,7 +5255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    await hydratePlayerIdentity();
+    await hydratePlayerIdentity(verifiedUser);
 
     const logoutButton = document.querySelector('.logout-button');
     const quickButton = document.querySelector('.quick-button');
@@ -5425,10 +5425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const resumeMatchIfActive = async () => {
         try {
-            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/match/status`, {
-                credentials: 'include',
-            });
-            const data = await response.json();
+            const data = await initialMatchStatusPromise;
             if (data?.matchFound && data.matchId) {
                 handleMatchFound(data);
             }
@@ -5440,6 +5437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const redirectToMatch = (matchId) => {
         window.location.href = `ingame.html?matchId=${encodeURIComponent(matchId)}`;
     };
+    resumeMatchIfActive();
 
     const startPollingMatch = () => {
         if (matchmakingPoll) return;
@@ -6582,10 +6580,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderRosterPage();
+    window.ArenaSession.markStartup('roster-ready');
     updateGameButtons();
     persistTeamSelection();
     applySavedTeam();
-    resumeMatchIfActive();
     initBugReporter();
 });
 

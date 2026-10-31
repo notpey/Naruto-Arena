@@ -6,6 +6,27 @@
         setItem(key, value) { try { localStorage.setItem(key, value); } catch {} },
         removeItem(key) { try { localStorage.removeItem(key); } catch {} },
     };
+    const startupLogging = location.search.includes('perf=1') || storage.getItem('naPerf') === '1';
+    function markStartup(stage) {
+        const elapsed = performance.now();
+        performance.mark(`na:${stage}`);
+        if (startupLogging) console.info(`[NA load] ${stage}: ${elapsed.toFixed(1)}ms`);
+    }
+    function paintCachedIdentity() {
+        if (!protectedPage) return;
+        let cached;
+        try { cached = JSON.parse(storage.getItem('narutoUser') || 'null'); } catch { return; }
+        if (!cached || typeof cached.username !== 'string' || !cached.username.trim()) return;
+        document.querySelectorAll('.player-nameselection, .player-left .player-name').forEach(element => {
+            element.textContent = cached.username;
+        });
+        if (typeof cached.avatarUrl === 'string' && cached.avatarUrl) {
+            document.querySelectorAll('.player-avatar, .player-avatar-left').forEach(element => {
+                element.src = cached.avatarUrl;
+            });
+        }
+        markStartup('cached-identity');
+    }
     let dialog;
     let sessionCheck;
     let lastCheckAt = 0;
@@ -44,6 +65,7 @@
         if (sessionCheck) return sessionCheck;
         lastCheckAt = Date.now();
         sessionCheck = (async () => {
+            if (initial) markStartup('session-check-start');
             const loadingTimer = initial ? setTimeout(() => {
                 showState('Checking your account...', 'loading');
             }, 700) : null;
@@ -54,6 +76,7 @@
                 const data = await response.json();
                 if (!data.user?.username) throw new Error('Incomplete session response');
                 if (dialog?.open) dialog.close();
+                if (initial) markStartup('session-verified');
                 return data.user;
             } catch {
                 showState('We could not reach the game. Check your connection, then retry. Your account has not been signed out.', 'offline');
@@ -65,10 +88,9 @@
         })();
         return sessionCheck;
     }
-    const ready = protectedPage ? new Promise(resolve => {
-        document.addEventListener('DOMContentLoaded', () => checkSession(true).then(resolve), { once: true });
-    }) : Promise.resolve(null);
-    window.ArenaSession = { fetch: request, storage, ready };
+    paintCachedIdentity();
+    const ready = protectedPage ? checkSession(true) : Promise.resolve(null);
+    window.ArenaSession = { fetch: request, storage, ready, markStartup };
     // Mobile browsers suspend tabs. Recheck the cookie when returning to the game.
     if (protectedPage) {
         const recheckSession = () => {
