@@ -5857,7 +5857,7 @@ text-transform: uppercase;
     position: absolute;
     left: -22px;
     top: -22px;
-    z-index: 10;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -5870,7 +5870,6 @@ text-transform: uppercase;
 .rank-hat[data-hat="academy"] {
     top: -40px;
     left: -16px;
-    z-index: 10;
     transform: none;
 }
 
@@ -5878,7 +5877,6 @@ text-transform: uppercase;
 .rank-hat[data-hat="genin"] {
     top: -36px;
     left: -26px;
-    z-index: 10;
     transform: none;
 }
 
@@ -5886,7 +5884,6 @@ text-transform: uppercase;
 .rank-hat[data-hat="chunin"] {
     top: -38px;
     left: -45px;
-    z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: none;
 }
 
@@ -5894,7 +5891,6 @@ text-transform: uppercase;
 .rank-hat[data-hat="jounin"] {
     top: -40px;
     left: -48px;
-    z-index: 1; /* BEHIND character face (face is z-index 2) */
     transform: scaleX(-1);
 }
 
@@ -6063,15 +6059,13 @@ text-transform: uppercase;
 .rank-hat[data-hat="anbu"] {
     top: -42px;
     left: -32px;
-    z-index: 10;
     transform: none;
 }
 
-/* --- Right Team (Enemy) Rank Hats - Rendered behind character portraits --- */
+/* --- Right Team (Enemy) Rank Hats --- */
 .enemy-characters .rank-hat {
     left: -32px;
     right: auto;
-    z-index: 1;
     transform: none;
 }
 
@@ -6080,7 +6074,6 @@ text-transform: uppercase;
     top: -48px;
     left: -34px;
     right: auto;
-    z-index: 1;
     transform: none;
 }
 
@@ -6089,7 +6082,6 @@ text-transform: uppercase;
     top: -45px;
     left: -32px;
     right: auto;
-    z-index: 1;
     transform: none;
 }
 
@@ -6098,7 +6090,6 @@ text-transform: uppercase;
     top: -38px;
     left: -45px;
     right: auto;
-    z-index: 1; /* BEHIND character face */
     transform: none;
 }
 
@@ -6107,7 +6098,6 @@ text-transform: uppercase;
     top: -40px;
     left: -48px;
     right: auto;
-    z-index: 1; /* BEHIND character face */
     transform: none;
 }
 
@@ -6116,7 +6106,6 @@ text-transform: uppercase;
     top: -40px;
     left: -38px;
     right: auto;
-    z-index: 1; /* BEHIND character face */
     transform: none;
 }
 

@@ -115,16 +115,21 @@ test('UI/UX Hardening - Client Targeting Logic Matches Engine Rules', () => {
     );
 });
 
-test('UI/UX Hardening - Enemy Rank Hat Layering & Queue Visual Preservation', () => {
+test('UI/UX Hardening - Rank Hats Stay Behind Both Teams’ Portraits & Queue Visual Preservation', () => {
     const cssPath = path.join(__dirname, '..', 'style.css');
     const cssContent = fs.readFileSync(cssPath, 'utf8').replace(/\r\n/g, '\n');
 
-    // Verify enemy anbu rank hat has z-index: 1 (behind character portrait)
-    assert.ok(
-        cssContent.includes('.enemy-characters .rank-hat-anbu,\n.enemy-characters .rank-hat[data-hat="anbu"]') &&
-        cssContent.includes('z-index: 1; /* BEHIND character face */'),
-        'style.css renders enemy anbu rank hat behind character face with z-index: 1'
-    );
+    const hatRules = [...cssContent.matchAll(/([^{}]*\.rank-hat[^{}]*)\{([^{}]*)\}/g)];
+    const baseHat = hatRules.find(([, selector]) => selector.trim() === '.rank-hat');
+    assert.match(baseHat[2], /z-index:\s*1\s*;/, 'all hats share a layer below the face');
+    assert.match(cssContent.match(/\.character-face\s*\{([^{}]*)\}/)[1], /z-index:\s*2\s*;/,
+        'character faces sit above hats');
+    for (const [, selector, declarations] of hatRules) {
+        if (selector.trim() !== '.rank-hat') {
+            assert.doesNotMatch(declarations, /z-index\s*:/,
+                `${selector.trim()} does not override the shared hat layer`);
+        }
+    }
 
     const scriptPath = path.join(__dirname, '..', 'script.js');
     const scriptContent = fs.readFileSync(scriptPath, 'utf8');
