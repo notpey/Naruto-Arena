@@ -215,10 +215,9 @@ body.selection-client-page.game-remaster :is(.hub-store, .hub-profile) :is(butto
     border: 1px solid #71858e;
     border-radius: 5px;
     background: #0e1a22;
-    overflow: hidden;
     box-sizing: border-box;
 }
-.loadout-avatar-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.loadout-avatar-img { display: block; width: 100%; height: 100%; border-radius: 4px; object-fit: cover; }
 .loadout-avatar-border { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .loadout-avatar.is-tile { width: 64px; height: 64px; }
 .loadout-avatar.is-preview { width: 96px; height: 96px; box-shadow: 0 8px 20px rgba(0, 0, 0, .35); }

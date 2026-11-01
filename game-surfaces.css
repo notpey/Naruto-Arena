@@ -1817,3 +1817,7 @@
 .battle-avatar-frame > img:first-child { display: block; }
 .battle-avatar-border { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .game-remaster .player-status.is-equipped-title { color: #f0b866; }
+
+/* Borders are frames: let them hang past the avatar instead of being clipped. */
+.player-avatar-frame { overflow: visible !important; }
+.player-avatar-border-overlay, .battle-avatar-border { z-index: 3; }
