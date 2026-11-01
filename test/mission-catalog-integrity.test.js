@@ -59,7 +59,7 @@ test('all default mission rewards are reachable through earlier playable charact
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
         'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
-        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi',
+        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru',
         'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
@@ -91,7 +91,7 @@ test('new Members get the mission-free roster; staff see and use all active char
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
         'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
-        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi',
+        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru',
         'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,

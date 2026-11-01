@@ -7394,71 +7394,40 @@ const characters = [
         "id": "shiore-orochimaru",
         "characterId": "shiore-orochimaru",
         "name": "Shiore Orochimaru",
-        "facePicture": "https://i.imgur.com/SSVCMic.png",
-        "characterdeescription": "Shiore was a genin from the Hidden Grass Village that was killed by Orochimaru before the Chuunin Exams. He had his identity stolen by him afterwards. ORIGINAL DESIGN: AnteMito",
-        "requiredMissionId": "a-new-find-skin",
+        "facePicture": "https://i.imgur.com/fC4xg6L.png",
+        "characterdeescription": "Disguised as a genin of the Hidden Grass Village, Orochimaru infiltrates the Chuunin Exams after murdering Shiore and assuming her identity. Obsessed with acquiring powerful techniques, he sets his sights on Sasuke Uchiha as a potential vessel for his forbidden ambitions.",
+        "requiredMissionId": null,
+        "passive": {
+            "name": "Cursed Seal",
+            "icon": "https://i.imgur.com/YC4ewK4.png",
+            "description": "Enemies struck by Cursed Seal Bite are permanently marked. Whenever a marked enemy ends an action with no remaining chakra, they take 5 affliction damage. This effect does not stack and cannot be removed, even after Orochimaru dies."
+        },
         "skills": [
             {
                 "id": "shiore-orochimaru-five-elements-seal",
                 "name": "Five Elements Seal",
-                "skillimage": "https://i.imgur.com/c7GzZkw.png",
-                "skilldescription": "Shiore Orochimaru targets one enemy, removing 1 random chakra from them and making their skills cost 1 additional random chakra for 1 turn. If this skill is used on an enemy affected by 'Giant Snake Bind', this enemy will have 1 random chakra stolen instead and the chakra cost increase effect will last 2 turns.",
+                "skillimage": "https://i.imgur.com/SZOdcEy.png",
+                "skilldescription": "Orochimaru disrupts an enemy's chakra flow, increasing the cost of their skills by 1 random chakra for 3 turns.",
                 "energy": [
-                    "Ninjutsu"
+                    "Ninjutsu",
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 3,
                 "classes": [
-                    "Strategic",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "remove_random_chakra",
-                        "amount": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "missingStatusId": "shiore_orochimaru_giant_snake_bind"
-                        }
-                    },
-                    {
-                        "type": "drain_chakra_random_from_target_to_self",
-                        "amount": 1,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "shiore_orochimaru_giant_snake_bind"
-                        }
-                    },
-                    {
                         "type": "apply_status",
-                        "statusId": "shiore_orochimaru_five_elements_seal_cost",
-                        "duration": 1,
+                        "statusId": "shiore_orochimaru_five_elements_seal",
+                        "duration": 3,
                         "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "missingStatusId": "shiore_orochimaru_giant_snake_bind"
-                        },
                         "metadata": {
                             "harmful": true,
-                            "randomCostIncrease": 1,
-                            "tooltipText": "This character's skills cost 1 additional random chakra.",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "shiore_orochimaru_five_elements_seal_cost",
-                        "duration": 2,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "shiore_orochimaru_giant_snake_bind"
-                        },
-                        "metadata": {
-                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
                             "randomCostIncrease": 1,
                             "tooltipText": "This character's skills cost 1 additional random chakra."
                         }
@@ -7466,108 +7435,138 @@ const characters = [
                 ]
             },
             {
-                "id": "shiore-orochimaru-fire-release-fire-ball",
-                "name": "Fire Release: Fire Ball",
-                "skillimage": "https://i.imgur.com/rbD0Uyi.png",
-                "skilldescription": "Shiore Orochimaru deals 15 affliction damage to one enemy for 2 turns. This skill cannot be used on an enemy already affected by it and cannot be ignored or removed.",
+                "id": "shiore-orochimaru-devour",
+                "name": "Devour",
+                "skillimage": "https://i.imgur.com/Jp5mx0x.png",
+                "skilldescription": "Orochimaru marks an enemy for 3 turns. When this effect ends, the target takes 20 affliction damage, increased by 5 for each turn it remained active, and has their physical skills stunned for 1 turn. During this time, Orochimaru gains 10 damage reduction, and this skill cannot be used again.",
                 "energy": [
-                    "Ninjutsu"
-                ],
-                "target": "single-enemy",
-                "targetCondition": {
-                    "missingStatusId": "shiore_orochimaru_fireball_dot"
-                },
-                "damage": 0,
-                "cooldown": 0,
-                "cannotBeCountered": true,
-                "classes": [
-                    "Affliction",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "shiore_orochimaru_fireball_dot",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "afflictionDamage": true,
-                            "cannotBeCleansed": true,
-                            "cannotBeEvaded": true,
-                            "turnEndDamage": 15,
-                            "turnEndTrigger": "source_turn",
-                            "tooltipText": "This character takes 15 affliction damage from Fire Release: Fire Ball."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "shiore-orochimaru-giant-snake-bind",
-                "name": "Giant Snake Bind",
-                "skillimage": "https://i.imgur.com/8NjKcaE.png",
-                "skilldescription": "Shiore Orochimaru stuns one enemy for 1 turn. For 1 turn, this skill can be used for no cost to deal 25 damage to the enemy affected by it.",
-                "energy": [
-                    "Taijutsu",
+                    "Bloodline",
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 0,
+                "actorCondition": {
+                    "missingStatusId": "shiore_orochimaru_devour_guard"
+                },
                 "classes": [
                     "Physical",
-                    "Action"
+                    "Affliction",
+                    "Control"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "shiore_orochimaru_giant_snake_bind",
-                        "duration": 1,
+                        "statusId": "shiore_orochimaru_devour",
+                        "duration": 3,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkills": true,
-                            "tooltipText": "This character is stunned by Giant Snake Bind.",
-                            "ongoingClass": "action",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 25,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "shiore_orochimaru_giant_snake_bind_followup"
+                            "ongoingClass": "control",
+                            "turnDurationAnchor": "source_turn",
+                            "turnEndTrigger": "source_turn",
+                            "growPerTurn": [
+                                {
+                                    "key": "devourBonus",
+                                    "amount": 5
+                                }
+                            ],
+                            "expireEffectsOnEarlyEnd": true,
+                            "endSourceStatusIdsOnExpire": [
+                                "shiore_orochimaru_devour_guard"
+                            ],
+                            "onExpireEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 20,
+                                    "metadata": {
+                                        "afflictionDamage": true,
+                                        "skillClasses": [
+                                            "Affliction"
+                                        ],
+                                        "bonusFromStatusMetadataKey": "devourBonus"
+                                    }
+                                },
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "shiore_orochimaru_devour_stun",
+                                    "duration": 1,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "cannotUseSkillClasses": [
+                                            "physical"
+                                        ],
+                                        "tooltipText": "This character's physical skills are stunned."
+                                    }
+                                }
+                            ],
+                            "tooltipText": "When Devour ends, this character takes 20 affliction damage, increased by 5 for each turn it remained active, and has their physical skills stunned for 1 turn."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "shiore_orochimaru_giant_snake_bind_followup",
-                        "duration": 1,
+                        "statusId": "shiore_orochimaru_devour_guard",
+                        "duration": 3,
                         "scope": "self",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "shiore_orochimaru_giant_snake_bind_followup"
-                        },
                         "metadata": {
                             "helpful": true,
-                            "skillCostOverridesBySkillId": {
-                                "shiore-orochimaru-giant-snake-bind": {
-                                    "energy": []
-                                }
-                            },
-                            "tooltipText": "Giant Snake Bind may be used for no cost to deal 25 damage.",
-                            "ongoingClass": "action"
+                            "ongoingClass": "control",
+                            "controlIgnoresOwnerInvulnerability": true,
+                            "damageReductionFlat": 10,
+                            "tooltipText": "Orochimaru has 10 damage reduction while Devour is active, and Devour cannot be used again."
                         }
                     }
                 ]
             },
             {
-                "id": "shiore-orochimaru-snake-body-retreat",
-                "name": "Snake Body Retreat",
-                "skillimage": "https://i.imgur.com/B5p2YML.png",
-                "skilldescription": "Shiore Orochimaru becomes invulnerable for 1 turn.",
+                "id": "shiore-orochimaru-cursed-seal-bite",
+                "name": "Cursed Seal Bite",
+                "skillimage": "https://i.imgur.com/LWpHTiQ.png",
+                "skilldescription": "Orochimaru bites an enemy, dealing 10 affliction damage with Lifesteal and applying Cursed Seal.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Affliction",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "health_steal_damage",
+                        "amount": 10,
+                        "scope": "target",
+                        "metadata": {
+                            "afflictionDamage": true
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "shiore_orochimaru_cursed_seal",
+                        "duration": 99,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "permanent": true,
+                            "cannotBeCleansed": true,
+                            "afflictionDamage": true,
+                            "turnEndDamage": 5,
+                            "turnEndDamageRequiresNoTeamChakra": true,
+                            "statusIcon": "https://i.imgur.com/YC4ewK4.png",
+                            "sourceSkillName": "Cursed Seal",
+                            "tooltipText": "Cursed Seal: if this character's team has no chakra at the end of their turn, they take 5 affliction damage."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "shiore-orochimaru-skin-shed",
+                "name": "Skin Shed",
+                "skillimage": "https://i.imgur.com/wQEugXY.png",
+                "skilldescription": "Orochimaru sheds his skin to evade incoming attacks, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -7581,12 +7580,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "shiore_orochimaru_skin_shed",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Orochimaru is invulnerable."
                         }
                     }
                 ]

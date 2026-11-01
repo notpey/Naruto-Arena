@@ -1253,6 +1253,7 @@ const isUnitImmuneToChakraLoss = (unit) => {
 // Metadata a harmful status keeps when its owner ignores enemy non-damage effects.
 const DAMAGE_ONLY_STATUS_KEYS = [
     'harmful', 'afflictionDamage', 'turnEndDamage', 'turnEndTrigger', 'turnEndSkillClasses',
+    'turnEndDamageRequiresNoTeamChakra',
     'turnDurationAnchor', 'ongoingClass', 'removeOnSourceDeath', 'endsOnSourceDeath', 'triggerOnApply',
     'invisible', 'hideTooltipFromEnemy', 'onOwnerUseSkillTrigger', 'ownerUseTriggerRequiresLivingSource',
     'sharedFirstTriggerUnlessSourceStatusId', 'statusIcon', 'sourceSkillName',
@@ -8194,6 +8195,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
         const actorState = ensureUnitStateShape(unit);
         const endedOngoingStatuses = new Set();
         const pendingExpireStatuses = [];
+        const earlyEndedStatusesWithEffects = [];
         actorState.statuses.forEach((status) => {
                 if (!status || (status.remainingTurns || 0) <= 0) return;
                 if (status.fresh && !Boolean(status?.metadata?.triggerOnApply)) return;
@@ -8236,9 +8238,15 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     return;
                 }
                 const ignoreOngoingSourceStun = Boolean(status?.metadata?.ignoreOngoingSourceStun);
-                if (ongoingClass === 'control' && ((sourceStunned && !ignoreOngoingSourceStun) || targetInvulnerable)) {
+                const brokenByInvulnerability = targetInvulnerable &&
+                    !Boolean(status?.metadata?.controlIgnoresOwnerInvulnerability);
+                if (ongoingClass === 'control' &&
+                    ((sourceStunned && !ignoreOngoingSourceStun) || brokenByInvulnerability)) {
                     if (status?.id) {
                         endedOngoingStatuses.add(status.id);
+                        if (status?.metadata?.expireEffectsOnEarlyEnd) {
+                            earlyEndedStatusesWithEffects.push(status);
+                        }
                     }
                     return;
                 }
@@ -8554,6 +8562,11 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     turnEndDamage = Math.min(turnEndDamage, sourceOutgoingCap);
                 }
                 if (turnEndSkillClasses.length > 0 && isUnitInvulnerableForSkill(unit, turnEndSkillClasses, { afflictionDamage: turnEndIsAffliction })) {
+                    turnEndDamage = 0;
+                }
+                if (Boolean(status?.metadata?.turnEndDamageRequiresNoTeamChakra) &&
+                    Object.values(match.chakraPools?.[username] || {})
+                        .some((amount) => (Number(amount) || 0) > 0)) {
                     turnEndDamage = 0;
                 }
                 if (turnEndDamage > 0) {
@@ -9086,6 +9099,18 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     return { ...status, remainingTurns: nextRemaining };
                 })
                 .filter((status) => status && (status.remainingTurns || 0) > 0);
+            // Control effects broken by a stun or invulnerability still resolve their payoff.
+            earlyEndedStatusesWithEffects.forEach((status) => {
+                triggerStoredStatusEffects({
+                    match,
+                    status,
+                    targetUnit: unit,
+                    targetState: actorState,
+                    targetUsername: username,
+                    targetSlot: unitSlot,
+                    pendingStatuses: pendingExpireStatuses,
+                });
+            });
             if (pendingExpireStatuses.length > 0) {
                 actorState.statuses.push(...pendingExpireStatuses);
             }
@@ -9502,7 +9527,10 @@ const applyTriggeredEffectsFromStatus = ({
             const bonus = bonusConfig?.statusId && (targetState.statuses || []).some((entry) =>
                 entry?.id === bonusConfig.statusId && (Number(entry?.remainingTurns) || 0) > 0
             ) ? Math.max(0, Number(bonusConfig.amount) || 0) : 0;
-            const amount = Math.max(0, Number(effect?.amount) || 0) + bonus;
+            const statusMetadataKey = effect?.metadata?.bonusFromStatusMetadataKey;
+            const statusBonus = statusMetadataKey
+                ? Math.max(0, Number(status?.metadata?.[statusMetadataKey]) || 0) : 0;
+            const amount = Math.max(0, Number(effect?.amount) || 0) + bonus + statusBonus;
             if (amount <= 0) return;
             const sourceUsername = status?.sourceUsername || null;
             const sourceSlot = Number.isInteger(status?.sourceSlot) ? status.sourceSlot : null;
@@ -9774,6 +9802,14 @@ const triggerStoredStatusEffects = ({
     pendingStatuses = null,
 }) => {
     if (!status || !match || !targetUnit || !targetState) return;
+    const endSourceStatusIds = Array.isArray(status?.metadata?.endSourceStatusIdsOnExpire)
+        ? status.metadata.endSourceStatusIdsOnExpire : [];
+    const expiringSourceUnit = status?.sourceUsername && Number.isInteger(status?.sourceSlot)
+        ? match.board?.[status.sourceUsername]?.[status.sourceSlot] : null;
+    if (endSourceStatusIds.length > 0 && expiringSourceUnit) {
+        const sourceState = ensureUnitStateShape(expiringSourceUnit);
+        sourceState.statuses = sourceState.statuses.filter((entry) => !endSourceStatusIds.includes(entry?.id));
+    }
     const selfEffects = Array.isArray(status?.metadata?.onExpireEffects) ? status.metadata.onExpireEffects : [];
     if (selfEffects.length > 0) {
         applyTriggeredEffectsFromStatus({

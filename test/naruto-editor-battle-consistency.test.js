@@ -1210,43 +1210,6 @@ test('Zabuza Hidden Mist description matches its damage reduction value', () => 
     assert.match(defenseStatus.metadata.tooltipText, /5 damage reduction/);
 });
 
-test('Shiore Five Elements Seal steals chakra from Giant Snake Bind targets', () => {
-    const shioreIndex = characters.findIndex((character) => character?.characterId === 'shiore-orochimaru');
-    assert.ok(shioreIndex >= 0, 'Shiore Orochimaru must exist in characters.js');
-    const match = makeMatch([shioreIndex], [1]);
-    const target = match.board.p2[0];
-    target.state.statuses.push({
-        id: 'shiore_orochimaru_giant_snake_bind',
-        remainingTurns: 1,
-        metadata: {
-            harmful: true,
-        },
-    });
-    match.chakraPools.p1 = emptyPool();
-    match.chakraPools.p2 = {
-        taijutsu: 1,
-        ninjutsu: 0,
-        bloodline: 0,
-        genjutsu: 0,
-    };
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.equal(chakraTotal(match.chakraPools.p2), 0, 'bound target should lose one chakra');
-    assert.equal(chakraTotal(match.chakraPools.p1), 1, 'Shiore should gain the stolen chakra');
-    assert.equal(
-        target.state.statuses.some(
-            (status) =>
-                status.id === 'shiore_orochimaru_five_elements_seal_cost' &&
-                status.remainingTurns === 2 &&
-                status.metadata.randomCostIncrease === 1
-        ),
-        true,
-        'bound target should receive the extended chakra cost increase'
-    );
-});
-
 test('Shigure Sprinkling Needles description matches its turn damage value', () => {
     const shigure = getCharacter('shigure');
     const sprinklingNeedles = shigure.skills.find((skill) => skill.id === 'shigure-sprinkling-needles');
@@ -1336,22 +1299,25 @@ test('Shino Chakra Leech gains its conditional effects from Female Bug and Infes
 });
 
 test('Shino passive blocks targeted chakra removal and stealing', () => {
-    const match = makeMatch(
-        [getCharIndex('aburame-shino'), getCharIndex('uzumaki-naruto')],
-        [getCharIndex('shiore-orochimaru')]
-    );
+    const team = [getCharIndex('aburame-shino'), getCharIndex('uzumaki-naruto')];
+    const palms = 2;
+    const match = makeMatch(team, [getCharIndex('neji-hyuuga')]);
     match.chakraPools.p1.taijutsu = 2;
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
+    queueSkill(match, 'p2', palms, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
     assert.equal(match.chakraPools.p1.taijutsu, 2, 'targeting Shino cannot remove chakra');
-    match.board.p1[0].state.statuses.push({ id: 'shiore_orochimaru_giant_snake_bind', remainingTurns: 1,
-        sourceUsername: 'p2', sourceSlot: 0, metadata: { harmful: true } });
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.chakraPools.p1.taijutsu, 2, 'targeting Shino cannot steal chakra');
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 1 }]);
+    match.board.p2[0].state.cooldowns = {};
+    queueSkill(match, 'p2', palms, [{ username: 'p1', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
     assert.equal(match.chakraPools.p1.taijutsu, 1, 'the passive does not protect other allies');
+
+    const stealMatch = makeMatch(team, [getCharIndex('aburame-shino-s')]);
+    stealMatch.chakraPools.p1.taijutsu = 2;
+    stealMatch.board.p1[0].state.statuses.push({ id: 'aburame_shino_s_insect_swarm_dot', remainingTurns: 1,
+        sourceUsername: 'p2', sourceSlot: 0, metadata: { harmful: true } });
+    queueSkill(stealMatch, 'p2', 4, [{ username: 'p1', slot: 0 }]);
+    resolvePendingTurnSkills({ match: stealMatch, actingUsername: 'p2', characters });
+    assert.equal(stealMatch.chakraPools.p1.taijutsu, 2, 'targeting Shino cannot steal chakra');
 });
 
 test('Shino insect effects end when he dies', () => {
