@@ -98,13 +98,15 @@
           </section>
 
           <section class="tracker view-panel" data-panel="tracker" aria-labelledby="tracker-title" hidden>
-            <div class="view-heading tracker-heading"><div><h2 id="tracker-title">Character roster tracker</h2><p>Plan and track characters by Naruto story arc. Changes save in this browser.</p></div><div class="tracker-actions"><button type="button" class="button secondary" id="tracker-import-button">Import JSON</button><button type="button" class="button secondary" id="tracker-export">Export JSON</button></div></div>
+            <div class="view-heading tracker-heading"><div><h2 id="tracker-title">Character roster tracker</h2><p>Plan and track characters by Naruto story arc, including how each one unlocks. Characters already in the game show their live unlock mission. Changes save in this browser.</p></div><div class="tracker-actions"><button type="button" class="button secondary" id="tracker-import-button">Import JSON</button><button type="button" class="button secondary" id="tracker-export">Export JSON</button></div></div>
             <input id="tracker-import" type="file" accept=".json,application/json" hidden aria-label="Import tracker JSON">
             <div class="tracker-toolbar">
               <label>Search <input id="tracker-search" type="search" placeholder="Character name or notes"></label>
               <label>Story arc <select id="tracker-arc-filter"><option value="">All arcs</option></select></label>
               <label>Status <select id="tracker-status-filter"><option value="">All statuses</option><option value="not-started">Not started</option><option value="kit-made">Kit made</option><option value="coded">Coded</option></select></label>
+              <label>Unlock <select id="tracker-unlock-filter"><option value="">All unlocks</option><option value="starter">Starter</option><option value="mission">Mission</option><option value="undecided">Undecided</option></select></label>
             </div>
+            <datalist id="tracker-rank-options"></datalist>
             <p id="tracker-summary" class="tracker-summary" aria-live="polite"></p>
             <div id="tracker-groups"></div>
             <form id="tracker-add" class="tracker-add"><h3>Add a character</h3><div><label>Name <input name="name" maxlength="80" required placeholder="Character name"></label><label>Story arc <select name="arc" required></select></label><label>Priority <select name="priority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label><button type="submit" class="button">Add character</button></div></form>

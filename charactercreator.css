@@ -212,23 +212,37 @@ h1 { margin: 9px 0 2px; font-size: clamp(27px, 3vw, 39px); line-height: 1.1; tex
 .tracker-group h3 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 9px; color: #f1b06b; font-size: 18px; text-transform: uppercase; }
 .tracker-group h3 span { color: #bac3d0; font-size: 12px; font-variant-numeric: tabular-nums; }
 .tracker-table-wrap { overflow-x: auto; border: 1px solid #344052; background: #171e2a; }
-.tracker table { width: 100%; min-width: 900px; border-collapse: collapse; text-align: left; }
+.tracker table { width: 100%; min-width: 1240px; border-collapse: collapse; text-align: left; }
 .tracker thead { background: #242e3c; }
 .tracker th, .tracker td { padding: 9px 12px; border-bottom: 1px solid #344052; vertical-align: middle; }
 .tracker thead th { color: #d4dce7; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
-.tracker tbody th { width: 21%; color: #f2eadd; font-weight: 700; }
+.tracker tbody th { width: 16%; color: #f2eadd; font-weight: 700; }
 .tracker tbody tr:last-child > * { border-bottom: 0; }
 .tracker tbody tr:hover { background: #202a39; }
 .tracker td:nth-child(2) { width: 190px; }
-.tracker td:nth-child(3), .tracker td:nth-child(4) { width: 125px; }
-.tracker td:nth-child(5) { width: 29%; }
+.tracker td:nth-child(3), .tracker td:nth-child(4) { width: 145px; }
+.tracker td:nth-child(5) { width: 28%; vertical-align: top; }
+.tracker td:nth-child(6) { width: 20%; }
 .tracker td:last-child { width: 70px; text-align: right; }
-.tracker td input, .tracker td select { width: 100%; min-height: 34px; border: 1px solid #566171; border-radius: 3px; padding: 5px 8px; background: #10151e; color: #eee9e2; }
+.tracker td input, .tracker td select, .tracker td textarea { width: 100%; min-height: 34px; border: 1px solid #566171; border-radius: 3px; padding: 5px 8px; background: #10151e; color: #eee9e2; }
 .tracker td input::placeholder { color: #aeb7c4; }
 .tracker td select { font-weight: 700; }
 .tracker td .tracker-priority { color: #cde8ae; }
 .tracker td .tracker-status.kit-made { color: #f5ba80; }
 .tracker td .tracker-status.coded { color: #91ddba; }
+.tracker td textarea { min-height: 52px; resize: vertical; font: inherit; font-size: 13px; }
+.tracker td .tracker-unlock.starter { color: #91ddba; }
+.tracker td .tracker-unlock.mission { color: #f5ba80; }
+.tracker-unlock-plan { display: grid; gap: 6px; }
+.tracker-unlock-live { display: grid; justify-items: start; gap: 4px; color: #e4ddd2; font-size: 13px; }
+.tracker-unlock-live strong { color: #f3eadb; }
+.tracker-unlock-live ul { margin: 0; padding-left: 18px; color: #d2cabf; }
+.tracker-unlock-live small { color: #9aa6b6; font-size: 11px; }
+.tracker-badge { padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.tracker-badge.starter { background: #1f4536; color: #a9ecc9; }
+.tracker-badge.mission { background: #4d3420; color: #f8c896; }
+.tracker-rank { color: #f1b06b; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tracker-access { color: #f0a4a4; font-size: 12px; font-weight: 700; }
 .tracker-add { margin-top: 30px; padding: 19px; border: 1px solid #344052; background: #171e2a; }
 .tracker-add h3 { margin: 0 0 14px; color: #f3eadb; font-size: 16px; text-transform: uppercase; }
 .tracker-add > div { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
@@ -246,13 +260,14 @@ h1 { margin: 9px 0 2px; font-size: clamp(27px, 3vw, 39px); line-height: 1.1; tex
   .tracker tbody { display: grid; gap: 9px; padding: 9px; }
   .tracker tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; padding: 12px; border: 1px solid #344052; background: #1b2431; }
   .tracker tbody th, .tracker tbody td { display: block; width: auto !important; min-width: 0; padding: 0; border: 0; }
-  .tracker tbody th, .tracker tbody td:nth-child(2), .tracker tbody td:nth-child(5) { grid-column: 1 / -1; }
+  .tracker tbody th, .tracker tbody td:nth-child(2), .tracker tbody td:nth-child(5), .tracker tbody td:nth-child(6) { grid-column: 1 / -1; }
   .tracker tbody th { font-size: 15px; }
-  .tracker tbody td:nth-child(2)::before, .tracker tbody td:nth-child(3)::before, .tracker tbody td:nth-child(4)::before, .tracker tbody td:nth-child(5)::before { display: block; margin-bottom: 3px; color: #c8d2df; font-size: 10px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+  .tracker tbody td:nth-child(2)::before, .tracker tbody td:nth-child(3)::before, .tracker tbody td:nth-child(4)::before, .tracker tbody td:nth-child(5)::before, .tracker tbody td:nth-child(6)::before { display: block; margin-bottom: 3px; color: #c8d2df; font-size: 10px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
   .tracker tbody td:nth-child(2)::before { content: 'Story arc'; }
   .tracker tbody td:nth-child(3)::before { content: 'Priority'; }
   .tracker tbody td:nth-child(4)::before { content: 'Status'; }
-  .tracker tbody td:nth-child(5)::before { content: 'Notes'; }
+  .tracker tbody td:nth-child(5)::before { content: 'Unlock'; }
+  .tracker tbody td:nth-child(6)::before { content: 'Notes'; }
   .tracker tbody td:last-child { grid-column: 1 / -1; text-align: left; }
 }
 
