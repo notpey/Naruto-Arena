@@ -3079,8 +3079,26 @@ const maybeTriggerReactiveDefenses = ({
     return Boolean(trapMetadata?.counterCancelsSkill ?? true);
 };
 
+const turnMitigationByMatch = new WeakMap();
+
+const createTurnMitigation = () => ({
+    standard: new Map(),
+    unpierceable: new Map(),
+    unitKeys: new WeakMap(),
+    nextUnitKey: 0,
+});
+
+const getTurnMitigationKey = (mitigation, unit) => {
+    if (!mitigation.unitKeys.has(unit)) {
+        mitigation.unitKeys.set(unit, `unit:${mitigation.nextUnitKey++}`);
+    }
+    return mitigation.unitKeys.get(unit);
+};
+
 const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
+    const turnMitigation = context?.match ? turnMitigationByMatch.get(context.match) : null;
+    const turnMitigationKey = turnMitigation ? getTurnMitigationKey(turnMitigation, unit) : null;
     const targetState = ensureUnitStateShape(unit);
     if (hasStatusMetadataFlag(targetState, 'ignoreAllDamage')) return 0;
     applyOnOwnerDamagedByBaseDamageBonuses({
@@ -3383,8 +3401,8 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             : Math.max(0, Number(totals.physicalDamageReductionFlat) || 0);
     let appliedGeneralMitigation = baseGeneralMitigation;
     let appliedPhysicalMitigation = basePhysicalMitigation;
-    const standardBudgetMap = context?.standardMitigationBudgetMap;
-    const standardBudgetKey = context?.standardMitigationBudgetKey;
+    const standardBudgetMap = turnMitigation?.standard || context?.standardMitigationBudgetMap;
+    const standardBudgetKey = turnMitigationKey || context?.standardMitigationBudgetKey;
     if (standardBudgetMap instanceof Map && standardBudgetKey && !ignoreDamageReduction && !cannotReduceDamage) {
         const generalKey = `g:${standardBudgetKey}`;
         const physicalKey = `p:${standardBudgetKey}`;
@@ -3412,8 +3430,8 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         ? 0
         : Math.max(0, Number(totals.unpierceableDamageReductionFlat) || 0);
     let appliedUnpierceableMitigation = baseUnpierceableMitigation;
-    const budgetMap = context?.unpierceableBudgetMap;
-    const budgetKey = context?.unpierceableBudgetKey;
+    const budgetMap = turnMitigation?.unpierceable || context?.unpierceableBudgetMap;
+    const budgetKey = turnMitigationKey || context?.unpierceableBudgetKey;
     if (budgetMap instanceof Map && budgetKey) {
         const currentBudget = budgetMap.has(budgetKey)
             ? Math.max(0, Number(budgetMap.get(budgetKey)) || 0)
@@ -4599,8 +4617,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
     });
     const turnMarker = `${actingUsername}:${Number(match?.economy?.turnCounts?.[actingUsername]) || 0}`;
 
-    const turnUnpierceableBudgetByRecipient = new Map();
-    const turnStandardMitigationBudgetByRecipient = new Map();
+    const turnMitigation = createTurnMitigation();
+    turnMitigationByMatch.set(match, turnMitigation);
+    const turnUnpierceableBudgetByRecipient = turnMitigation.unpierceable;
+    const turnStandardMitigationBudgetByRecipient = turnMitigation.standard;
     const turnPercentMitigationStateByRecipient = new Map();
 
     for (let queueIndex = 0; queueIndex < queuedActions.length; queueIndex += 1) {
@@ -7709,8 +7729,10 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
     if (!match || !endingUsername) return;
     syncLinkedStatuses(match);
     const players = Array.isArray(match.players) ? match.players : [];
-    const turnEndUnpierceableBudgetByRecipient = new Map();
-    const turnEndStandardMitigationBudgetByRecipient = new Map();
+    const turnMitigation = turnMitigationByMatch.get(match) || createTurnMitigation();
+    turnMitigationByMatch.set(match, turnMitigation);
+    const turnEndUnpierceableBudgetByRecipient = turnMitigation.unpierceable;
+    const turnEndStandardMitigationBudgetByRecipient = turnMitigation.standard;
     const turnEndPercentMitigationStateByRecipient = new Map();
     const triggerSuperMultiSizeBurst = ({ status, actorState, sourceUsername, sourceSlot }) => {
         const burstStatusId =
@@ -8679,6 +8701,7 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
         delete snapshots.damageTakenInTurnTriggered;
     }));
     syncLinkedStatuses(match);
+    turnMitigationByMatch.delete(match);
 };
 
 const applyOnTeamMemberUseSkillBonuses = ({ match, actorState, actingUsername, skill, skillIsMental }) => {
