@@ -199,8 +199,9 @@ body.selection-client-page.game-remaster .mission-workspace .selection-hub-missi
 .mission-detail-note:last-child { margin-bottom: 0; }
 .mission-goal-track { overflow: hidden; height: 5px; border-radius: 2px; background: #40545c; }
 .mission-goal-fill { display: block; height: 100%; background: #e3ad68; }
-.mission-reward-row { display: flex; align-items: center; gap: 10px; }
+.mission-reward-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .mission-reward-row img { width: 38px; height: 38px; border: 1px solid #687983; border-radius: 3px; object-fit: cover; }
+.mission-reward-portraits { display: flex; flex: 0 0 auto; gap: 5px; }
 .mission-reward-name { color: #f2c58b; font-size: 13px; }
 body.selection-client-page.game-remaster .mission-workspace .selection-hub-env-empty { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 50px 18px; color: #c8d5d7 !important; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
 .mission-clear-filters { min-height: 34px; padding: 0 15px; border: 1px solid #b98d54; border-radius: 4px; background: #31404a; color: #f2c58b; font: 700 11px 'Libre Franklin', sans-serif; cursor: pointer; }

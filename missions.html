@@ -183,6 +183,8 @@
     .ms-col-sub { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(208, 200, 184, 0.14); }
     .ms-reward-char { margin-top: 8px; }
     .ms-reward-char img { width: 96px; height: 96px; object-fit: cover; background: #0b0e14; border: 1px solid #ffae42; border-radius: 6px; display: block; margin-bottom: 9px; }
+    .ms-reward-portraits { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 9px; }
+    .ms-reward-portraits img { width: 64px; height: 64px; margin-bottom: 0; }
     .ms-reward-name { font-size: 14px; font-weight: 800; color: #fbe9b8; }
 
     /* Footer */
@@ -479,7 +481,8 @@
 
       // Default mission sort mirrors the character roster order (characters.js
       // array order), keyed by each mission's reward_character.
-      var characterRoster = Array.isArray(window.characters) ? window.characters : [];
+      var characterRoster = Array.isArray(window.characters)
+        ? window.characters : (typeof characters !== "undefined" ? characters : []);
       var rosterIndexByCharacterId = new Map();
       characterRoster.forEach(function (c, index) {
         var id = String((c && (c.characterId || c.id)) || "").trim().toLowerCase();
@@ -861,7 +864,18 @@
         if (rcn) {
           var rc = document.createElement("div"); rc.className = "ms-reward-char";
           var rcLabel = document.createElement("p"); rcLabel.className = "ms-col-line"; rcLabel.textContent = multipleRewards ? "Characters unlocked:" : "Character unlocked:"; rewardCol.appendChild(rcLabel);
-          if (mission.portrait && !multipleRewards) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
+          if (multipleRewards) {
+            var portraits = document.createElement("div"); portraits.className = "ms-reward-portraits";
+            mission.reward_characters.forEach(function (characterId) {
+              var character = characterRoster.find(function (entry) { return entry && entry.characterId === characterId; });
+              if (!character || !character.facePicture) return;
+              var image = document.createElement("img"); image.src = character.facePicture;
+              image.alt = character.name || characterId;
+              image.addEventListener("error", function () { image.remove(); });
+              portraits.appendChild(image);
+            });
+            rc.appendChild(portraits);
+          } else if (mission.portrait) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
           var rname = document.createElement("div"); rname.className = "ms-reward-name"; rname.textContent = rcn; rc.appendChild(rname);
           rewardCol.appendChild(rc);
           var completionBonus = document.createElement("p");

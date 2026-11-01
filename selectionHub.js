@@ -699,7 +699,20 @@
                 : String(mission.reward_character_name || mission.reward_character || "").trim();
             if (rewardName) {
                 var rewardRow = missionNode("div", "mission-reward-row");
-                if (mission.portrait && !multipleRewards && !/deadcharacter/i.test(mission.portrait)) {
+                if (multipleRewards) {
+                    var rewardPortraits = missionNode("div", "mission-reward-portraits");
+                    mission.reward_characters.forEach(function (characterId) {
+                        var character = findCharacterById(characterId);
+                        var face = character && character.facePicture;
+                        if (!face) return;
+                        var image = document.createElement("img");
+                        image.src = face;
+                        image.alt = character.name || characterId;
+                        image.addEventListener("error", function () { image.remove(); });
+                        rewardPortraits.appendChild(image);
+                    });
+                    rewardRow.appendChild(rewardPortraits);
+                } else if (mission.portrait && !/deadcharacter/i.test(mission.portrait)) {
                     var portrait = document.createElement("img");
                     portrait.src = mission.portrait;
                     portrait.alt = rewardName;
