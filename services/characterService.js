@@ -22,6 +22,7 @@ const SOUND_GENIN_REWORK_MIGRATION_ID = 'sound-genin-drafts-2026-11-01';
 const CHOUJI_REWORK_MIGRATION_ID = 'akimichi-chouji-draft-2026-11-01';
 const SHIKAMARU_REWORK_MIGRATION_ID = 'nara-shikamaru-draft-2026-11-01';
 const OBORO_AMBUSH_REWORK_MIGRATION_ID = 'oboro-ambush-visibility-2026-11-01';
+const SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID = 'nara-shikamaru-mark-icon-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -253,6 +254,7 @@ class CharacterService {
                     [`completed.${CHOUJI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -318,6 +320,7 @@ class CharacterService {
                         [`completed.${CHOUJI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -351,6 +354,7 @@ class CharacterService {
         const shouldApplyChoujiRework = !completedMigrations[CHOUJI_REWORK_MIGRATION_ID];
         const shouldApplyShikamaruRework = !completedMigrations[SHIKAMARU_REWORK_MIGRATION_ID];
         const shouldApplyOboroAmbushRework = !completedMigrations[OBORO_AMBUSH_REWORK_MIGRATION_ID];
+        const shouldApplyShikamaruMarkIconRework = !completedMigrations[SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -371,6 +375,7 @@ class CharacterService {
             ...(shouldApplyChoujiRework ? ['akimichi-chouji'] : []),
             ...(shouldApplyShikamaruRework ? ['nara-shikamaru'] : []),
             ...(shouldApplyOboroAmbushRework ? ['oboro'] : []),
+            ...(shouldApplyShikamaruMarkIconRework ? ['nara-shikamaru'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -452,6 +457,7 @@ class CharacterService {
                 if (shouldApplyChoujiRework && ['akimichi-chouji'].includes(characterId)) return seedEntry;
                 if (shouldApplyShikamaruRework && ['nara-shikamaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyOboroAmbushRework && ['oboro'].includes(characterId)) return seedEntry;
+                if (shouldApplyShikamaruMarkIconRework && ['nara-shikamaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -521,6 +527,7 @@ class CharacterService {
             shouldApplyChoujiRework ||
             shouldApplyShikamaruRework ||
             shouldApplyOboroAmbushRework ||
+            shouldApplyShikamaruMarkIconRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -554,6 +561,7 @@ class CharacterService {
                         [`completed.${CHOUJI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },

@@ -63,6 +63,9 @@ test('the passive secretly marks exactly one random enemy at battle start', () =
         const mark = status(match.board.p2[markedSlots(match)[0]], MARK);
         assert.equal(mark.sourceUsername, 'p1');
         assert.equal(mark.metadata.hideTooltipFromUnitOwner, true);
+        assert.equal(mark.metadata.statusIcon, characters[indexOf('nara-shikamaru')].passive.icon,
+            'the mark shows the passive icon rather than a skill icon');
+        assert.equal(mark.metadata.sourceSkillName, 'Ninja Tactics, for Dummies');
     }
     const match = matchFor(['haruno-sakura'], ['tenten']);
     assert.equal(markedSlots(match).length, 0, 'teams without Shikamaru mark no one');

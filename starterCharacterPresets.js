@@ -676,6 +676,8 @@
                                         "harmful": true,
                                         "permanent": true,
                                         "hideTooltipFromUnitOwner": true,
+                                        "statusIcon": "https://i.imgur.com/e7udnLJ.png",
+                                        "sourceSkillName": "Ninja Tactics, for Dummies",
                                         "tooltipText": "Shikamaru has secretly marked this character. Shadow-Neck Bind and Shadow Imitation affect them."
                                 }
                         }
