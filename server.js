@@ -6328,7 +6328,7 @@ const getTurnDurationMsForUser = (match, username) => {
     return Math.max(10000, TURN_DURATION_MS + bonusMs - penaltyMs);
 };
 
-const initializeEconomyState = (players, currentTurn, aliveLookup = {}) => {
+const initializeEconomyState = (players, currentTurn) => {
     const chakraPools = {};
     const economy = {
         turnCounts: {},
@@ -6344,8 +6344,7 @@ const initializeEconomyState = (players, currentTurn, aliveLookup = {}) => {
     });
 
     if (currentTurn && chakraPools[currentTurn]) {
-        const openingGainCount = Math.max(1, Number(aliveLookup?.[currentTurn]) || 1);
-        const gains = generateRandomChakra(openingGainCount, chakraPools[currentTurn]);
+        const gains = generateRandomChakra(1, chakraPools[currentTurn]);
         chakraPools[currentTurn] = applyChakraGain(chakraPools[currentTurn], gains);
         economy.startGranted[currentTurn] = true;
         economy.lastChakraGain[currentTurn] = gains;
@@ -6364,8 +6363,7 @@ const buildMatch = (players, aliveLookup = {}, options = {}) => {
     const matchStartsAt = new Date(Date.now() + MATCH_FOUND_HOLD_MS);
     const { chakraPools, economy, turnExpiresAt } = initializeEconomyState(
         players,
-        currentTurn,
-        aliveLookup
+        currentTurn
     );
     const delayedTurnExpiry = turnExpiresAt
         ? new Date(new Date(turnExpiresAt).getTime() + MATCH_FOUND_HOLD_MS)
@@ -6562,7 +6560,7 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
     if (built.currentTurn !== username) {
         built.turnOrder = [username, botPlayer.username];
         built.currentTurn = username;
-        const initialized = initializeEconomyState(built.turnOrder, username, aliveLookup);
+        const initialized = initializeEconomyState(built.turnOrder, username);
         built.chakraPools = initialized.chakraPools;
         built.economy = initialized.economy;
         built.turnExpiresAt = initialized.turnExpiresAt
@@ -7004,8 +7002,7 @@ const ensureMatchEconomy = async (match) => {
         !match.economy.startGranted[current] &&
         match.economy.turnCounts[current] === 0
     ) {
-        const openingGainCount = Math.max(1, getAliveCountForUser(match, current));
-        const gains = generateRandomChakra(openingGainCount, match.chakraPools[current]);
+        const gains = generateRandomChakra(1, match.chakraPools[current]);
         match.chakraPools[current] = applyChakraGain(match.chakraPools[current], gains);
         match.economy.startGranted[current] = true;
         match.economy.lastChakraGain[current] = gains;
@@ -12193,6 +12190,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+    initializeEconomyState,
     buildMatchPayloadForUser,
     getDefaultMissionCatalog,
     resolveMissionCatalogState,
