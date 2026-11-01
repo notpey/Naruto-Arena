@@ -5335,7 +5335,9 @@ app.get('/characters.js', (req, res) => {
 app.use(express.static(path.join(__dirname), {
     setHeaders(res, filePath) {
         if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
-            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            // Always revalidate so deploys apply immediately, but let unchanged files answer
+            // with a small 304 instead of a full re-download.
+            res.set('Cache-Control', 'no-cache, private');
         }
     },
 }));

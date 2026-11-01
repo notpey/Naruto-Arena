@@ -43,8 +43,8 @@
     /* Live aliases always point at the remaster stage. */
     --game-stage-w: var(--game-remaster-stage-w);
     --game-stage-h: var(--game-remaster-stage-h);
-    --selection-bg-image: url("selectionbg-remaster.png?v=2");
-    --ingame-bg-image: url("ingamebg-remaster.png?v=2");
+    --selection-bg-image: url("selectionbg-remaster.jpg?v=3");
+    --ingame-bg-image: url("ingamebg-remaster.jpg?v=3");
 
     /* Future Remaster Asset Slots
        These filenames are placeholders for later Photoshop/export
@@ -52,8 +52,8 @@
        selectors, so missing remaster files do not affect the 770x560
        client.
     */
-    --selection-bg-remaster-image: url("selectionbg-remaster.png?v=2");
-    --ingame-bg-remaster-image: url("ingamebg-remaster.png?v=2");
+    --selection-bg-remaster-image: url("selectionbg-remaster.jpg?v=3");
+    --ingame-bg-remaster-image: url("ingamebg-remaster.jpg?v=3");
     --login-panel-remaster-image: url("loginscroll-remaster.png?v=2");
     --selection-panel-remaster-image: url("selectionpage-remaster.png?v=2");
     --selection-skill-panel-remaster-image: url("skillpage-remaster.png?v=2");

@@ -253,8 +253,8 @@ Completed on 2026-06-29:
 
 | CSS variable | Proposed file | Recommended export size |
 | --- | --- | ---: |
-| `--selection-bg-remaster-image` | `selectionbg-remaster.png` | `1280x800` full window or `1100x800` centered stage background |
-| `--ingame-bg-remaster-image` | `ingamebg-remaster.png` | `1280x800` full window or `1100x800` centered stage background |
+| `--selection-bg-remaster-image` | `selectionbg-remaster.jpg` | `1280x800` full window or `1100x800` centered stage background |
+| `--ingame-bg-remaster-image` | `ingamebg-remaster.jpg` | `1280x800` full window or `1100x800` centered stage background |
 | `--selection-panel-remaster-image` | `selectionpage-remaster.png` | `1000x320` |
 | `--selection-skill-panel-remaster-image` | `skillpage-remaster.png` | `760x320` |
 | `--modal-panel-remaster-image` | `searchingscroll-remaster.png` | `560x416` |
@@ -292,14 +292,14 @@ Completed on 2026-06-29:
 
 - Remaster PNG assets were detected and dimension-audited.
 - `style.css` remaster variables now point to the real remaster filenames.
-- `.game-remaster` scoped swaps were added only for the two full-stage backgrounds, because `selectionbg-remaster.png` and `ingamebg-remaster.png` match the disabled `1100x800` remaster stage.
+- `.game-remaster` scoped swaps were added only for the two full-stage backgrounds, because `selectionbg-remaster.jpg` and `ingamebg-remaster.jpg` match the disabled `1100x800` remaster stage.
 - Live/default selectors still use the legacy asset variables and remain `770x560`.
 - Larger panel, button, icon, and modal assets were mapped as variables but not applied yet because they require the layout phase to avoid cropping or distortion.
 
 | Remaster asset | Dimensions | Legacy asset | Legacy dimensions | Status |
 | --- | ---: | --- | ---: | --- |
-| `selectionbg-remaster.png` | `1100x800` | `selectionbg.png` | `770x560` | Wired behind `.game-remaster .background`. |
-| `ingamebg-remaster.png` | `1100x800` | `ingamebg.png` | `770x560` | Wired behind `.game-remaster .backgroundingame`. |
+| `selectionbg-remaster.jpg` | `1100x800` | `selectionbg.png` | `770x560` | Wired behind `.game-remaster .background`. |
+| `ingamebg-remaster.jpg` | `1100x800` | `ingamebg.png` | `770x560` | Wired behind `.game-remaster .backgroundingame`. |
 | `selectionpage-remaster.png` | `997x317` | `selectionpage.png` | `697x222` | Mapped only; requires selection layout phase. Legacy file is JPEG-encoded despite `.png` extension. |
 | `skillpage-remaster.png` | `997x317` | `skillpage.png` | `697x222` | Mapped only; requires selection skill-panel layout phase. Legacy file is JPEG-encoded despite `.png` extension. |
 | `searchingscroll-remaster.png` | `559x415` | `searchingscroll.png` | `391x290` | Mapped only; modal layout phase required. |
@@ -368,7 +368,7 @@ Selection elements with remaster-scoped CSS:
 
 | Element | Remaster asset/size | Position/notes |
 | --- | --- | --- |
-| `.background` | `selectionbg-remaster.png`, `1100x800` | Uses the existing remaster stage variables only under `.game-remaster`. |
+| `.background` | `selectionbg-remaster.jpg`, `1100x800` | Uses the existing remaster stage variables only under `.game-remaster`. |
 | `.selectionpage` | `selectionpage-remaster.png`, `997x317` | Positioned at `left: 52px`, `top: 448px` in the `1100x800` stage. |
 | `.selectionscroll` | `selectionscroll-remaster.png`, `66x342` | Positioned to align with the larger roster panel. |
 | `.slot-list` / `.slot-item` | `72x72` roster slots, 7 columns | Increased spacing and slot size under `.game-remaster` only. |
@@ -669,7 +669,7 @@ Completed on 2026-06-29:
 
 ### Remaster assets wired in Phase 6A
 
-`ingamebg-remaster.png` (via Phase 4B variable, stage background), `ingamescrollbehind-remaster.png`, `ingameskillscroll-remaster.png`, `ingamebottomscroll-remaster.png`, `optionscroll-remaster.png`, `endscroll-remaster.png`, `render-remaster.png`, `surrenderimage-remaster.png`, `searchingscroll-remaster.png` (modal panels).
+`ingamebg-remaster.jpg` (via Phase 4B variable, stage background), `ingamescrollbehind-remaster.png`, `ingameskillscroll-remaster.png`, `ingamebottomscroll-remaster.png`, `optionscroll-remaster.png`, `endscroll-remaster.png`, `render-remaster.png`, `surrenderimage-remaster.png`, `searchingscroll-remaster.png` (modal panels).
 
 Not yet wired: `deadcharacter-remaster.png`, `win-remaster.png`, `lose-remaster.png`, `skillqqueue-remaster.png` (deferred — see below).
 

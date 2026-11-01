@@ -363,9 +363,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return [];
     };
+    // Pages that do not bundle characters.js fetch it only when the live roster is unavailable.
+    const loadBundledCharacterRoster = () => new Promise((resolve) => {
+        if (getStaticCharacterRoster().length > 0) {
+            resolve(getStaticCharacterRoster());
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'characters.js?v=44';
+        script.onload = () => resolve(getStaticCharacterRoster());
+        script.onerror = () => resolve([]);
+        document.head.appendChild(script);
+    });
     let loadedRosterRyoBalance = 0;
     const loadCharacterRoster = async () => {
-        const fallbackRoster = getStaticCharacterRoster();
         try {
             const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters`, {
                 credentials: 'include',
@@ -385,6 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return data.characters;
         } catch (error) {
             console.warn('Using bundled character data because live character data could not be loaded.', error);
+            const fallbackRoster = await loadBundledCharacterRoster();
             window.characters = fallbackRoster;
             return fallbackRoster;
         }
@@ -704,7 +716,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const SELECTION_BACKGROUND_POOL = [
         'selectionbg_1.jpg',
         'selectionbg_2.jpg',
-        'selectionbg-remaster.png?v=2',
+        'selectionbg-remaster.jpg?v=3',
     ];
 
     const INGAME_BACKGROUND_POOL = [
@@ -4634,6 +4646,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const loadMatchForIngame = async () => {
             const matchId = matchIdFromUrl;
+            await ingameRosterReady;
             if (!matchId || !Array.isArray(getRosterData()) || getRosterData().length === 0) return;
             try {
                 const response = await window.ArenaSession.fetch(
@@ -4997,8 +5010,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1500);
         };
 
-        startMatchPoll();
-        connectBattleWebSocket();
+        // Match updates name and draw characters, so they wait for the live roster.
+        ingameRosterReady.then(() => {
+            startMatchPoll();
+            connectBattleWebSocket();
+        });
         const surrenderButton = document.querySelector('.surrenderbutton');
         const handleReadySectionClick = async () => {
             if (!currentPlayerUsername || !currentTurnUsername) return;
