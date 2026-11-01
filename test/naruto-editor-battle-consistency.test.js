@@ -768,31 +768,30 @@ test('battleLogic resolves Shikamaru starter kit behavior used by the editor dat
     );
 });
 
-test('battleLogic resolves Chouji starter kit behavior used by the editor data', () => {
-    const match = makeMatch([7], [1]);
+test('battleLogic resolves Chouji draft kit behavior used by the editor data', () => {
+    const choujiIndex = getCharIndex('akimichi-chouji');
+    const match = makeMatch([choujiIndex], [1]);
+    const usePill = () => {
+        match.board.p1[0].state.cooldowns = {};
+        queueSkill(match, 'p1', 2);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    };
 
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 80, 'Akimichi Pills should cost Chouji 20 health');
+    usePill();
+    assert.equal(match.board.p1[0].hp, 85, 'Akimichi Pills should cost Chouji 15 affliction health');
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 60, 'Partial Double Size should deal 40 after one pill');
+    assert.equal(match.board.p2[0].hp, 70, 'Partial Double Size should deal 30 after one pill');
 
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 40, 'Akimichi Pills should be usable three times');
-    assert.equal(
-        match.board.p1[0].state.statuses.find((status) => status.id === 'akimichi_chouji_akimichi_pills')
-            ?.metadata.skillDamageBonuses?.['akimichi-chouji-partial-double-size'],
-        60
-    );
+    usePill();
+    usePill();
+    assert.equal(match.board.p1[0].hp, 55, 'Akimichi Pills should be usable three times');
+    assert.ok(match.board.p1[0].state.statuses.some((status) =>
+        status.id === 'akimichi_chouji_butterfly_mode_active'));
 
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 40, 'Akimichi Pills should stop after three uses');
+    usePill();
+    assert.equal(match.board.p1[0].hp, 55, 'Akimichi Pills should stop after three uses');
 });
 
 test('battleLogic resolves Ino starter kit behavior used by the editor data', () => {

@@ -403,8 +403,10 @@ test('Rock Lee, Oboro, and Shigure drafts replace stored kits and obsolete locks
     assert.equal(writes.length, writeCount);
 });
 
-test('Sound genin drafts replace stored kits once', async () => {
-    const ids = ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'];
+for (const [label, ids, migrationId] of [
+    ['Sound genin drafts', ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'], 'sound-genin-drafts-2026-11-01'],
+    ['Chouji draft', ['akimichi-chouji'], 'akimichi-chouji-draft-2026-11-01'],
+]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({
         id, characterId: id, name: id, facePicture: `https://example.com/old-${id}.png`,
@@ -433,12 +435,12 @@ test('Sound genin drafts replace stored kits once', async () => {
         assert.deepEqual(migrated.find((character) => character.id === id),
             seeds.find((character) => character.id === id));
     }
-    assert.ok(completed['sound-genin-drafts-2026-11-01']);
+    assert.ok(completed[migrationId]);
 
-    storedCharacters.find((character) => character.id === 'tsuchi-kin').characterdeescription = 'Edited later';
+    storedCharacters.find((character) => character.id === ids[0]).characterdeescription = 'Edited later';
     const writeCount = writes.length;
     const reloaded = await service.getStoredCharacters();
-    assert.equal(reloaded.find((character) => character.id === 'tsuchi-kin').characterdeescription, 'Edited later');
+    assert.equal(reloaded.find((character) => character.id === ids[0]).characterdeescription, 'Edited later');
     assert.equal(writes.length, writeCount);
 });
 

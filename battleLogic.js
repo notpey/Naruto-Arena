@@ -1222,9 +1222,55 @@ const hasStatusMetadataFlag = (actorState, flagName) =>
         return isStatusActiveForMetadata(status) && Boolean(status?.metadata?.[flagName]);
     });
 
-const isUnitImmuneToChakraLoss = (unit) =>
-    Boolean(unit && unit.alive !== false &&
-        hasStatusMetadataFlag(ensureUnitStateShape(unit), 'immuneToChakraRemovalAndStealing'));
+const isUnitImmuneToChakraLoss = (unit) => {
+    if (!unit || unit.alive === false) return false;
+    const state = ensureUnitStateShape(unit);
+    return hasStatusMetadataFlag(state, 'immuneToChakraRemovalAndStealing') ||
+        hasStatusMetadataFlag(state, 'ignoreHarmfulNonDamageEffects');
+};
+
+// Metadata a harmful status keeps when its owner ignores enemy non-damage effects.
+const DAMAGE_ONLY_STATUS_KEYS = [
+    'harmful', 'afflictionDamage', 'turnEndDamage', 'turnEndTrigger', 'turnEndSkillClasses',
+    'turnDurationAnchor', 'ongoingClass', 'removeOnSourceDeath', 'endsOnSourceDeath', 'triggerOnApply',
+    'invisible', 'hideTooltipFromEnemy', 'onOwnerUseSkillTrigger', 'ownerUseTriggerRequiresLivingSource',
+    'sharedFirstTriggerUnlessSourceStatusId', 'statusIcon', 'sourceSkillName',
+];
+
+const getIgnoreNonDamageOwnerUsername = (state) => {
+    const status = (Array.isArray(state?.statuses) ? state.statuses : []).find((entry) =>
+        isStatusActiveForMetadata(entry) && entry?.metadata?.ignoreHarmfulNonDamageEffects);
+    return status ? status.sourceUsername || null : undefined;
+};
+
+const ignoresNonDamageEffectsFrom = (state, sourceUsername) => {
+    const ownerUsername = getIgnoreNonDamageOwnerUsername(state);
+    return ownerUsername !== undefined && Boolean(sourceUsername) && sourceUsername !== ownerUsername;
+};
+
+// Returns the damage-only part of an enemy status, or null when nothing damaging remains.
+const toDamageOnlyStatusMetadata = (metadata = {}) => {
+    const turnEndDamage = Math.max(0, Number(metadata.turnEndDamage) || 0);
+    const ownerUseDamage = (Array.isArray(metadata.onOwnerUseSkillEffects) ? metadata.onOwnerUseSkillEffects : [])
+        .filter((effect) => effect?.type === 'damage');
+    if (turnEndDamage <= 0 && ownerUseDamage.length === 0) return null;
+    const kept = Object.fromEntries(DAMAGE_ONLY_STATUS_KEYS
+        .filter((key) => metadata[key] !== undefined).map((key) => [key, metadata[key]]));
+    if (ownerUseDamage.length > 0) kept.onOwnerUseSkillEffects = ownerUseDamage;
+    const amount = turnEndDamage || Math.max(0, Number(ownerUseDamage[0]?.amount) || 0);
+    kept.tooltipText = `This character takes ${amount} damage from this effect. Its other effects are ignored.`;
+    return kept;
+};
+
+const ignoreExistingEnemyNonDamageStatuses = (state, ownerUsername) => {
+    state.statuses = (Array.isArray(state.statuses) ? state.statuses : []).flatMap((status) => {
+        if (!status?.metadata?.harmful || !status.sourceUsername || status.sourceUsername === ownerUsername) {
+            return [status];
+        }
+        const metadata = toDamageOnlyStatusMetadata(status.metadata);
+        return metadata ? [{ ...status, metadata }] : [];
+    });
+};
 
 const pickRandomEntry = (entries = []) => {
     if (!Array.isArray(entries) || !entries.length) return null;
@@ -1539,6 +1585,13 @@ const applyStatus = ({
     if (!targetState || !statusId) return;
     if (metadata?.cannotUseSkills && getStatusMetadataTotals(targetState).stunImmune) {
         return;
+    }
+    if (metadata?.harmful && ignoresNonDamageEffectsFrom(targetState, sourceUsername)) {
+        metadata = toDamageOnlyStatusMetadata(metadata);
+        if (!metadata) return;
+    }
+    if (metadata?.ignoreHarmfulNonDamageEffects) {
+        ignoreExistingEnemyNonDamageStatuses(targetState, sourceUsername);
     }
     const applyStackDerivedNumericKeys = (nextMetadata) => {
         if (!nextMetadata || typeof nextMetadata !== 'object') return nextMetadata;
@@ -7190,6 +7243,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             isEnemySkill: appliesToSelf ? false : recipient.username !== actingUsername,
                         })
                     ) {
+                        return;
+                    }
+                    if (!appliesToSelf && (operation === 'set' || amount > 0) &&
+                        ignoresNonDamageEffectsFrom(targetState, actingUsername)) {
                         return;
                     }
                     if (

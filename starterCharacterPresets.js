@@ -813,14 +813,20 @@
                 "id": "akimichi-chouji",
                 "characterId": "akimichi-chouji",
                 "name": "Akimichi Chouji",
-                "facePicture": "https://i.imgur.com/QicD98O.png",
-                "characterdeescription": "A Genin from Team 10, Chouji is a member of the Akimichi clan, a large eater, and a close friend to his allies. While innately strong, Chouji is able to sacrifice his own life using special pills from his clan to become insanely powerful.",
+                "facePicture": "https://i.imgur.com/5xdU5aU.png",
+                "characterdeescription": "A kindhearted genin of Team 10, Chouji belongs to the Akimichi clan, whose secret techniques allow him to transform his body into a powerful weapon. Fiercely loyal to his friends, he is willing to risk his own life to unleash the devastating strength hidden within him.",
+                "requiredMissionId": null,
+                "passive": {
+                        "name": "Butterfly Mode",
+                        "icon": "https://i.imgur.com/wP5h73A.png",
+                        "description": "After consuming all 3 Akimichi Pills, Chouji enters Butterfly Mode, permanently replacing his skills. During this time, he ignores enemy non-damage effects and gains 10 damage reduction that cannot be pierced."
+                },
                 "skills": [
                         {
                                 "id": "akimichi-chouji-partial-double-size",
                                 "name": "Partial Double Size",
-                                "skillimage": "https://i.imgur.com/7iQlK0v.png",
-                                "skilldescription": "Akimichi Chouji deals 20 damage to one enemy.",
+                                "skillimage": "https://i.imgur.com/l3hKVGM.png",
+                                "skilldescription": "Chouji enlarges his arm to strike an enemy, dealing 20 physical damage, increased by 10 for each Akimichi Pill consumed.",
                                 "energy": [
                                         "Taijutsu"
                                 ],
@@ -835,51 +841,59 @@
                                         {
                                                 "type": "damage",
                                                 "amount": 20,
-                                                "scope": "target"
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "bonusPerStatusMetadata": {
+                                                                "scope": "self",
+                                                                "statusId": "akimichi_chouji_akimichi_pills",
+                                                                "metadataKey": "pillCount",
+                                                                "multiplier": 10
+                                                        }
+                                                }
                                         }
                                 ]
                         },
                         {
                                 "id": "akimichi-chouji-meat-tank",
                                 "name": "Meat Tank",
-                                "skillimage": "https://i.imgur.com/Iwup0It.png",
-                                "skilldescription": "Akimichi Chouji deals 10 damage to one enemy for 2 turns, becomes invulnerable for 2 turns, and ignores all healing effects while active.",
+                                "skillimage": "https://i.imgur.com/ste25Hm.png",
+                                "skilldescription": "Chouji transforms into a massive rolling ball, dealing 20 physical damage to a random enemy and becoming invulnerable to physical and chakra skills for 1 turn. This skill deals 10 additional damage for each Akimichi Pill consumed.",
                                 "energy": [
                                         "Bloodline"
                                 ],
-                                "target": "single-enemy",
+                                "target": "self",
                                 "damage": 0,
-                                "cooldown": 2,
+                                "cooldown": 1,
                                 "classes": [
                                         "Physical",
-                                        "Action"
+                                        "Instant"
                                 ],
                                 "effects": [
                                         {
-                                                "type": "apply_status",
-                                                "statusId": "akimichi_chouji_meat_tank_damage",
-                                                "duration": 2,
-                                                "scope": "target",
+                                                "type": "damage",
+                                                "amount": 20,
+                                                "scope": "random-enemy",
                                                 "metadata": {
-                                                        "harmful": true,
-                                                        "turnEndDamage": 10,
-                                                        "turnEndTrigger": "source_turn",
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "ongoingClass": "action",
-                                                        "triggerOnApply": true,
-                                                        "tooltipText": "This character takes 10 damage from Meat Tank."
+                                                        "bonusPerStatusMetadata": {
+                                                                "scope": "self",
+                                                                "statusId": "akimichi_chouji_akimichi_pills",
+                                                                "metadataKey": "pillCount",
+                                                                "multiplier": 10
+                                                        }
                                                 }
                                         },
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "akimichi_chouji_meat_tank_invulnerable",
-                                                "duration": 2,
+                                                "statusId": "akimichi_chouji_meat_tank",
+                                                "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "invulnerable": true,
-                                                        "tooltipText": "Chouji is invulnerable and ignores healing effects.",
-                                                        "healReceivedMultiplier": 0,
-                                                        "ongoingClass": "action"
+                                                        "helpful": true,
+                                                        "invulnerableToSkillClasses": [
+                                                                "physical",
+                                                                "chakra"
+                                                        ],
+                                                        "tooltipText": "Chouji is invulnerable to physical and chakra skills."
                                                 }
                                         }
                                 ]
@@ -887,19 +901,16 @@
                         {
                                 "id": "akimichi-chouji-akimichi-pills",
                                 "name": "Akimichi Pills",
-                                "maxUses": 3,
-                                "skillimage": "https://i.imgur.com/xva0CTn.png",
-                                "skilldescription": "For the rest of the game, 'Partial Double Size' will deal 20 additional damage and 'Meat Tank' will deal 10 additional damage. Akimichi Chouji takes 20 damage. This skill can only be used three times.",
-                                "energy": [
-                                        "Random"
-                                ],
+                                "skillimage": "https://i.imgur.com/rAb2LpB.png",
+                                "skilldescription": "Chouji consumes one of his 3 Akimichi Pills, taking 15 affliction damage and permanently enhancing his other skills. Upon consuming his third pill, Chouji enters Butterfly Mode.",
+                                "energy": [],
                                 "target": "self",
                                 "damage": 0,
-                                "cooldown": 0,
+                                "cooldown": 1,
+                                "maxUses": 3,
                                 "classes": [
                                         "Strategic",
-                                        "Instant",
-                                        "Affliction"
+                                        "Instant"
                                 ],
                                 "effects": [
                                         {
@@ -908,26 +919,60 @@
                                                 "duration": 99,
                                                 "scope": "self",
                                                 "metadata": {
-                                                        "mergeSkillDamageBonuses": true,
-                                                        "skillDamageBonuses": {
-                                                                "akimichi-chouji-partial-double-size": 20,
-                                                                "akimichi-chouji-meat-tank": 10
+                                                        "helpful": true,
+                                                        "permanent": true,
+                                                        "cannotBeCleansed": true,
+                                                        "stackMetadataKey": "pillCount",
+                                                        "stackDelta": 1,
+                                                        "stackMax": 3,
+                                                        "stackDerivedNumericKeys": {
+                                                                "pillDamageBonus": 10
                                                         },
-                                                        "tooltipText": "Partial Double Size deals 20 additional damage.\nMeat Tank deals 10 additional damage."
+                                                        "tooltipTextTemplate": "Chouji has consumed {pillCount} Akimichi Pills. Partial Double Size and Meat Tank deal {pillDamageBonus} additional damage.",
+                                                        "applyStatusAtStack": {
+                                                                "metadataKey": "pillCount",
+                                                                "value": 3,
+                                                                "statusId": "akimichi_chouji_butterfly_mode_active",
+                                                                "duration": 99,
+                                                                "metadata": {
+                                                                        "helpful": true,
+                                                                        "permanent": true,
+                                                                        "cannotBeCleansed": true,
+                                                                        "ignoreHarmfulNonDamageEffects": true,
+                                                                        "unpierceableDamageReductionFlat": 10,
+                                                                        "facePictureOverride": "https://i.imgur.com/8560MPe.png",
+                                                                        "skillReplacements": {
+                                                                                "akimichi-chouji-partial-double-size": "akimichi-chouji-butterfly-finale",
+                                                                                "akimichi-chouji-meat-tank": "akimichi-chouji-butterfly-reflexes"
+                                                                        },
+                                                                        "onOwnerKillSourceSkillIdsAny": [
+                                                                                "akimichi-chouji-butterfly-finale"
+                                                                        ],
+                                                                        "onOwnerKillTargetRelation": "enemy",
+                                                                        "onOwnerKillHealSelfAmount": 10,
+                                                                        "tooltipText": "Butterfly Mode (3 Akimichi Pills consumed): Chouji ignores enemy non-damage effects and has 10 damage reduction that cannot be pierced. Butterfly Finale heals him 10 health when it kills."
+                                                                }
+                                                        }
                                                 }
                                         },
                                         {
-                                                "type": "HealthLoss",
-                                                "amount": 20,
-                                                "scope": "self"
+                                                "type": "damage",
+                                                "amount": 15,
+                                                "scope": "self",
+                                                "metadata": {
+                                                        "afflictionDamage": true,
+                                                        "skillClasses": [
+                                                                "Affliction"
+                                                        ]
+                                                }
                                         }
                                 ]
                         },
                         {
-                                "id": "akimichi-chouji-effortless-block",
-                                "name": "Effortless Block",
-                                "skillimage": "https://i.imgur.com/9ZNpEEN.png",
-                                "skilldescription": "Akimichi Chouji becomes invulnerable for 1 turn.",
+                                "id": "akimichi-chouji-snack-time",
+                                "name": "Snack Time!",
+                                "skillimage": "https://i.imgur.com/VilAysj.png",
+                                "skilldescription": "Chouji takes a moment to enjoy his favorite snacks, becoming invulnerable for 1 turn.",
                                 "energy": [
                                         "Random"
                                 ],
@@ -941,16 +986,97 @@
                                 "effects": [
                                         {
                                                 "type": "apply_status",
-                                                "statusId": "invulnerable",
+                                                "statusId": "akimichi_chouji_snack_time",
                                                 "duration": 1,
                                                 "scope": "self",
                                                 "metadata": {
+                                                        "helpful": true,
                                                         "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
+                                                        "tooltipText": "Chouji is invulnerable."
+                                                }
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "akimichi-chouji-butterfly-finale",
+                                "name": "Butterfly Finale",
+                                "hiddenFromSelectionViewer": true,
+                                "useBaseSkillCooldown": true,
+                                "skillimage": "https://i.imgur.com/moJAxL6.png",
+                                "skilldescription": "Chouji concentrates his strength into a devastating strike, dealing 50 physical damage to an enemy. If this skill kills the target, Chouji heals 10 health.",
+                                "energy": [
+                                        "Taijutsu"
+                                ],
+                                "target": "single-enemy",
+                                "damage": 0,
+                                "cooldown": 0,
+                                "classes": [
+                                        "Physical",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "damage",
+                                                "amount": 50,
+                                                "scope": "target"
+                                        }
+                                ]
+                        },
+                        {
+                                "id": "akimichi-chouji-butterfly-reflexes",
+                                "name": "Butterfly Reflexes",
+                                "hiddenFromSelectionViewer": true,
+                                "useBaseSkillCooldown": true,
+                                "skillimage": "https://i.imgur.com/xnrPRos.png",
+                                "skilldescription": "Chouji moves with incredible speed, dealing 40 physical damage to an enemy and becoming invulnerable for 1 turn. For 1 turn, Butterfly Finale deals 10 additional damage to that enemy.",
+                                "energy": [
+                                        "Bloodline"
+                                ],
+                                "target": "single-enemy",
+                                "damage": 0,
+                                "cooldown": 1,
+                                "classes": [
+                                        "Physical",
+                                        "Instant"
+                                ],
+                                "effects": [
+                                        {
+                                                "type": "damage",
+                                                "amount": 40,
+                                                "scope": "target"
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "akimichi_chouji_butterfly_reflexes_mark",
+                                                "duration": 1,
+                                                "scope": "target",
+                                                "metadata": {
+                                                        "harmful": true,
+                                                        "turnDurationAnchor": "source_turn",
+                                                        "bonusDamageFromSourceSkillsFlat": 10,
+                                                        "bonusDamageFromSourceCharacterId": "akimichi-chouji",
+                                                        "bonusDamageAppliesToSkillIds": [
+                                                                "akimichi-chouji-butterfly-finale"
+                                                        ],
+                                                        "tooltipText": "Butterfly Finale deals 10 additional damage to this character."
+                                                }
+                                        },
+                                        {
+                                                "type": "apply_status",
+                                                "statusId": "akimichi_chouji_butterfly_reflexes",
+                                                "duration": 1,
+                                                "scope": "self",
+                                                "metadata": {
+                                                        "helpful": true,
+                                                        "invulnerable": true,
+                                                        "tooltipText": "Chouji is invulnerable."
                                                 }
                                         }
                                 ]
                         }
+                ],
+                "tags": [
+                        "konoha-genin"
                 ]
         }
 };
