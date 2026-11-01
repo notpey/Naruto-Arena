@@ -25,6 +25,9 @@ const ACTIVE_ROSTER_IDS = [
     'kankuro',
     'temari',
     'akadou-yoroi',
+    'fern',
+    'lissandra-the-ice-witch',
+    'ahri-the-nine-tailed-fox',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

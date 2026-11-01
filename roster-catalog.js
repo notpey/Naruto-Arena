@@ -6,6 +6,9 @@ const NarutoRosterCatalog = (() => {
         { id: 'land-of-waves', series: 'Naruto', label: 'Land of Waves', order: 1 },
         { id: 'chunin-exams', series: 'Naruto', label: 'Chūnin Exams', order: 2 },
         { id: 'konoha-crush', series: 'Naruto', label: 'Konoha Crush', order: 3 },
+        { id: 'frieren', series: 'Frieren', label: 'Frieren', order: 4 },
+        { id: 'freljord', series: 'League of Legends', label: 'Freljord', order: 5 },
+        { id: 'ionia', series: 'League of Legends', label: 'Ionia', order: 6 },
     ];
 
     const characters = [
@@ -33,6 +36,9 @@ const NarutoRosterCatalog = (() => {
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
         ['sarutobi-hiruzen', 'land-of-waves'],
+        ['fern', 'frieren'],
+        ['lissandra-the-ice-witch', 'freljord'],
+        ['ahri-the-nine-tailed-fox', 'ionia'],
     ];
 
     const arcsById = new Map(arcs.map((arc) => [arc.id, arc]));

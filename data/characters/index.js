@@ -101,7 +101,10 @@ const rawCharacters = [
     require('./deidara'),
     require('./hiruko-sasori'),
     require('./sasori-of-the-red-sand'),
-    require('./puppet-sasori')
+    require('./puppet-sasori'),
+    require('./fern'),
+    require('./lissandra-the-ice-witch'),
+    require('./ahri-the-nine-tailed-fox')
 ];
 
 // Internal roster classification for team passives. This is not a display label.

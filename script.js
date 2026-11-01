@@ -1372,7 +1372,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const getEffectiveEnergyList = (energy = [], actorSlot = null, skill = null) => {
-            const normalizedEnergy = (Array.isArray(energy) ? energy : []).filter((entry) => {
+            const tierConfig = skill?.energyBySourceStatusMetadata;
+            const actorUnit = Number.isInteger(actorSlot) && actorSlot >= 0
+                ? latestBoardState?.[currentPlayerUsername]?.[actorSlot] : null;
+            const tierStatus = tierConfig?.statusId && (actorUnit?.state?.statuses || []).find((status) =>
+                status?.id === tierConfig.statusId && (Number(status?.remainingTurns) || 0) > 0
+            );
+            const tierValue = Math.max(0, Number(tierStatus?.metadata?.[tierConfig?.metadataKey]) || 0);
+            const tier = Array.isArray(tierConfig?.tiers)
+                ? [...tierConfig.tiers].sort((a, b) => Number(b?.min) - Number(a?.min))
+                    .find((entry) => tierValue >= Math.max(0, Number(entry?.min) || 0))
+                : null;
+            const normalizedEnergy = (Array.isArray(tier?.energy) ? tier.energy : Array.isArray(energy) ? energy : []).filter((entry) => {
                 const normalized = typeof entry === 'string' ? entry.trim().toLowerCase() : '';
                 return normalized && normalized !== 'none' && normalized !== 'non';
             });
@@ -1894,6 +1905,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     isValidUnitTarget(unit, opponentUsername, slot, true)
                 );
                 return allyValid || enemyValid;
+            }
+
+            if (targetType === 'self-or-single-enemy') {
+                const selfValid = isValidUnitTarget(playerUnits[actorSlot], currentPlayerUsername, actorSlot, false);
+                const enemyValid = opponentUnits.some((unit, slot) =>
+                    isValidUnitTarget(unit, opponentUsername, slot, true)
+                );
+                return selfValid || enemyValid;
             }
 
             if (targetType === 'single-target' || targetType === 'all-characters' || targetType === 'all-target') {

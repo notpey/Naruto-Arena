@@ -29,6 +29,9 @@ test('arc sorting changes display order without changing canonical roster indice
         ['akadou-yoroi', 'Akadou Yoroi'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
+        ['fern', 'Fern'],
+        ['lissandra-the-ice-witch', 'Lissandra, the Ice Witch'],
+        ['ahri-the-nine-tailed-fox', 'Ahri, the Nine-Tailed Fox'],
     ]);
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({
         characterId,
@@ -37,7 +40,7 @@ test('arc sorting changes display order without changing canonical roster indice
     }));
 
     assert.deepEqual(catalog.listAvailableArcs(roster).map((arc) => arc.label), [
-        'Prologue', 'Land of Waves', 'Chūnin Exams',
+        'Prologue', 'Land of Waves', 'Chūnin Exams', 'Frieren', 'Freljord', 'Ionia',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster).map((index) => roster[index].characterId), [
         'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura', 'hatake-kakashi',
@@ -46,7 +49,7 @@ test('arc sorting changes display order without changing canonical roster indice
         'demon-brothers', 'momochi-zabuza', 'haku',
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
         'inuzuka-kiba', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert',
-        'kankuro', 'temari', 'akadou-yoroi',
+        'kankuro', 'temari', 'akadou-yoroi', 'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
         'demon-brothers', 'momochi-zabuza', 'haku', 'gato', 'zori-and-waraji',
@@ -61,4 +64,7 @@ test('arc sorting changes display order without changing canonical roster indice
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'tenten')).label, 'Chūnin Exams');
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'neji-hyuuga')).label, 'Chūnin Exams');
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'gaara-of-the-desert')).label, 'Chūnin Exams');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'fern')).label, 'Frieren');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'lissandra-the-ice-witch')).label, 'Freljord');
+    assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'ahri-the-nine-tailed-fox')).label, 'Ionia');
 });

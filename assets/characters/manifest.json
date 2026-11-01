@@ -2490,5 +2490,81 @@
   "https://i.imgur.com/MUx03Dx.png": {
     "local": "/assets/characters/MUx03Dx.png",
     "sha256": "7fd73b6d756ba0445e41183a78ff984264c26de8ed91a2f4d1eb71da61b976f8"
+  },
+  "https://i.imgur.com/QlVdeAA.png": {
+    "local": "/assets/characters/QlVdeAA.png",
+    "sha256": "b5a347aa940b19514dba6c652ac04a0757cea0e5c20202756a092fabf8f06d26"
+  },
+  "https://i.imgur.com/jGNhYNJ.png": {
+    "local": "/assets/characters/jGNhYNJ.png",
+    "sha256": "5d81a3209a4043af05183f9cbd819b1a7d4d37466588ab6555a1bf51e32c3f18"
+  },
+  "https://i.imgur.com/aFBoFrH.png": {
+    "local": "/assets/characters/aFBoFrH.png",
+    "sha256": "ea920cdbc0304b2ffd994dbece5ceb71c03aebf465dba42068d5e331b1d0e26c"
+  },
+  "https://i.imgur.com/dzAWLyg.png": {
+    "local": "/assets/characters/dzAWLyg.png",
+    "sha256": "5e8bfc9437124be87bebc32d1b12748c39f4d54997101836e074b2bd2c49c5bb"
+  },
+  "https://i.imgur.com/P0k4y6B.png": {
+    "local": "/assets/characters/P0k4y6B.png",
+    "sha256": "2c4a0e665736e1cb2213e44245f5c729803a19bb6db897ded504f19a1d3bd686"
+  },
+  "https://i.imgur.com/55OkCpY.png": {
+    "local": "/assets/characters/55OkCpY.png",
+    "sha256": "8df7e2b636af56c19b0905aadd3ab65804d27285e7f192355d505f6b6236dd11"
+  },
+  "https://i.imgur.com/0qUWHlN.png": {
+    "local": "/assets/characters/0qUWHlN.png",
+    "sha256": "83e7b6486f73a1eda51a6e43055dc53e209e1cae653c28df0353699cb20d7044"
+  },
+  "https://i.imgur.com/X0gYDa4.png": {
+    "local": "/assets/characters/X0gYDa4.png",
+    "sha256": "1e43cfeb95aed49d7473ebb4161bf68643f3656f2964f6c4fbfb7c010fe85778"
+  },
+  "https://i.imgur.com/C1YROzJ.png": {
+    "local": "/assets/characters/C1YROzJ.png",
+    "sha256": "ed1e7a752f63b1ee63eed25bfa23e35ffe1e4da1331790fb130a3862155a89e4"
+  },
+  "https://i.imgur.com/esD6Gvw.png": {
+    "local": "/assets/characters/esD6Gvw.png",
+    "sha256": "16f42a68c162278ef6fa045237b3aa35a5deb4f9f96b30413b1499fbaf568616"
+  },
+  "https://i.imgur.com/7RrJhx3.png": {
+    "local": "/assets/characters/7RrJhx3.png",
+    "sha256": "5209f163f7df0d5bd5eb1c710774b35a5182d409de51ed2e1f0ad86b7c9e6c75"
+  },
+  "https://i.imgur.com/82b1hBw.png": {
+    "local": "/assets/characters/82b1hBw.png",
+    "sha256": "9688424c42a512581ff694b15fe781b759a4b031ce69fab467df0f2f72b01e63"
+  },
+  "https://i.imgur.com/Cjpj2hb.png": {
+    "local": "/assets/characters/Cjpj2hb.png",
+    "sha256": "48a11afcafe1eafbac28591c983f5cf946a63d66c1cac038eaf9b5865bdb52a5"
+  },
+  "https://i.imgur.com/K7OxawM.png": {
+    "local": "/assets/characters/K7OxawM.png",
+    "sha256": "e5868cbb8d005986199e2f29037e36671538c21a2f3790f81f980e7e957b3895"
+  },
+  "https://i.imgur.com/T9EtzHn.png": {
+    "local": "/assets/characters/T9EtzHn.png",
+    "sha256": "7df25f6fffe981a788f680c6ccdc495c9590253870192dd154eaebdc09cc16ab"
+  },
+  "https://i.imgur.com/kXFWkRA.png": {
+    "local": "/assets/characters/kXFWkRA.png",
+    "sha256": "0e9a1daa635d544b33ca886108bb92f5b8c0e8debf558e43ca0ab2fdb46a7c87"
+  },
+  "https://i.imgur.com/k8je7nT.png": {
+    "local": "/assets/characters/k8je7nT.png",
+    "sha256": "c5b23c8e98be059febb056ce3de8393c141dcad444c931071a81b89d8b6dd98b"
+  },
+  "https://i.imgur.com/nyjiefn.png": {
+    "local": "/assets/characters/nyjiefn.png",
+    "sha256": "f982c9efa2f80dc9e2ae860dcb4119f7fd0e2944bc15f5e0e81c09ffd1ff3390"
+  },
+  "https://i.imgur.com/WV9cmsA.png": {
+    "local": "/assets/characters/WV9cmsA.png",
+    "sha256": "1c1f02dbe19ca87295c9c35247c87ad4217195008be39058fa6524f6e099655e"
   }
 }
