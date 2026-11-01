@@ -738,8 +738,13 @@ test('Hinata awakens immediately when another ally falls below 50 health', () =>
         status.id === 'hyuuga_hinata_shy_byakugan_awakened'), true);
 });
 
-test('battleLogic resolves Shikamaru starter kit behavior used by the editor data', () => {
-    const match = makeMatch([6], [1, 2]);
+test('battleLogic resolves Shikamaru draft kit behavior used by the editor data', () => {
+    const match = makeMatch([getCharIndex('nara-shikamaru')], [1, 2]);
+    // Clear the passive's random secret mark so only Meditate decides the targets.
+    match.board.p2.forEach((unit) => {
+        unit.state.statuses = unit.state.statuses.filter((status) =>
+            status.id !== 'nara_shikamaru_ninja_tactics_mark');
+    });
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });

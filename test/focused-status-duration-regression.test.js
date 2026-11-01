@@ -345,6 +345,11 @@ test('Gai Morning Peacock Feint protects an ally during Sixth Gate Opening', () 
 
 test('Shikamaru Shadow Imitation and Shadow-Neck Bind target options filter only enemies affected by Meditate', () => {
     const match = makeMatch([indexById['nara-shikamaru']], [indexById.tenten, indexById['gaara-of-the-desert']]);
+    // Clear the passive's random secret mark so only Meditate decides the targets.
+    match.board.p2.forEach((unit) => {
+        unit.state.statuses = unit.state.statuses.filter((status) =>
+            status.id !== 'nara_shikamaru_ninja_tactics_mark');
+    });
 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });

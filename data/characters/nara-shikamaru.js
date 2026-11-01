@@ -1,151 +1,71 @@
+const TACTICS_MARK = 'nara_shikamaru_ninja_tactics_mark';
+const MEDITATE = 'nara_shikamaru_meditate';
+const markedEnemies = { statusIdsAny: [TACTICS_MARK, MEDITATE] };
+
 module.exports = {
-    "id": "nara-shikamaru",
-    "characterId": "nara-shikamaru",
-    "name": "Nara Shikamaru",
-    "facePicture": "https://i.imgur.com/KbecCsk.png",
-    "characterdeescription": "A Genin from Team 10, a member of the Nara clan, Shikamaru is considered to be the smartest Genin of all the Konoha 11. Using his bloodline, Shikamaru can manipulate the shadows in the battlefield to disable and attack his enemies.",
-    "skills": [
+    id: 'nara-shikamaru', characterId: 'nara-shikamaru', name: 'Nara Shikamaru',
+    facePicture: 'https://i.imgur.com/4Pwe4ro.png',
+    characterdeescription: "A brilliant yet notoriously lazy genin of Team 10, Shikamaru possesses an exceptional intellect and mastery of the Nara clan's shadow techniques. Despite his carefree attitude, his cunning strategies allow him to outwit opponents and turn even the most unfavorable battles to his advantage.",
+    requiredMissionId: null,
+    passive: {
+        name: 'Ninja Tactics, for Dummies', icon: 'https://i.imgur.com/e7udnLJ.png',
+        description: 'At the start of the battle, Shikamaru secretly marks a random enemy. Shadow-Neck Bind and Shadow Imitation affect all enemies marked by this passive or Meditate.',
+        startApplyStatusToRandomEnemy: {
+            statusId: TACTICS_MARK, duration: 99,
+            metadata: { harmful: true, permanent: true, hideTooltipFromUnitOwner: true,
+                tooltipText: 'Shikamaru has secretly marked this character. Shadow-Neck Bind and Shadow Imitation affect them.' },
+        },
+    },
+    skills: [
         {
-            "id": "nara-shikamaru-meditate",
-            "name": "Meditate",
-            "cannotBeCountered": true,
-            "cannotBeReflected": true,
-            "skillimage": "https://i.imgur.com/s3o4f1D.png",
-            "skilldescription": "Nara Shikamaru targets one enemy permanently. During this time 'Shadow-Neck Bind' and 'Shadow Imitation' can be used on them. This skill ignores invulnerability and cannot be countered or reflected.",
-            "energy": [],
-            "target": "single-enemy",
-            "targetCondition": {
-                "missingStatusId": "nara_shikamaru_meditate"
-            },
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nara_shikamaru_meditate",
-                    "duration": 99,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "tooltipText": "Shadow-Neck Bind and Shadow Imitation can be used on this character."
-                    }
-                }
-            ],
-            "ignoreInvulnerability": true
+            id: 'nara-shikamaru-meditate', name: 'Meditate',
+            skillimage: 'https://i.imgur.com/fglmxM1.png',
+            skilldescription: "Shikamaru studies an enemy's movements, marking them with Meditate for 5 turns. This skill cannot be used on an enemy already affected by it, and the effect ends if Shikamaru dies.",
+            energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
+            targetCondition: { missingStatusId: MEDITATE },
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: MEDITATE, duration: 5, scope: 'target',
+                metadata: { harmful: true, turnDurationAnchor: 'source_turn', removeOnSourceDeath: true,
+                    tooltipText: 'Shadow-Neck Bind and Shadow Imitation affect this character.' } }],
         },
         {
-            "id": "nara-shikamaru-shadow-neck-bind",
-            "name": "Shadow-Neck Bind",
-            "skillimage": "https://i.imgur.com/qrtbpQH.png",
-            "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies are unable to reduce damage or become invulnerable and take 15 damage for 2 turns.",
-            "energy": [
-                "Genjutsu"
-            ],
-            "target": "all-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Ninjutsu",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nara_shikamaru_shadow_neck_bind",
-                    "duration": 2,
-                    "scope": "all-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "turnEndDamage": 15,
-                        "turnEndTrigger": "source_turn",
-                        "turnDurationAnchor": "source_turn",
-                        "ongoingClass": "control",
-                        "triggerOnApply": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable and takes 15 damage."
-                    }
-                }
-            ],
-            "targetCondition": {
-                "statusId": "nara_shikamaru_meditate"
-            }
+            id: 'nara-shikamaru-shadow-neck-bind', name: 'Shadow-Neck Bind',
+            skillimage: 'https://i.imgur.com/ZQXKyPQ.png',
+            skilldescription: 'Shikamaru constricts his enemies with shadows, dealing 15 physical damage to all marked enemies each turn for 2 turns. During this time, affected enemies cannot reduce incoming damage or become invulnerable.',
+            energy: ['Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 0,
+            targetCondition: markedEnemies,
+            classes: ['Physical', 'Control'],
+            effects: [{ type: 'apply_status', statusId: 'nara_shikamaru_shadow_neck_bind', duration: 2,
+                scope: 'all-enemy', metadata: {
+                    harmful: true, ongoingClass: 'control',
+                    cannotReduceDamage: true, cannotBecomeInvulnerable: true,
+                    turnEndDamage: 15, turnEndTrigger: 'source_turn', turnEndSkillClasses: ['Physical'],
+                    turnDurationAnchor: 'source_turn', triggerOnApply: true,
+                    tooltipText: 'This character takes 15 physical damage each turn and cannot reduce damage or become invulnerable.',
+                } }],
         },
         {
-            "id": "nara-shikamaru-shadow-imitation",
-            "name": "Shadow Imitation",
-            "skillimage": "https://i.imgur.com/Hip2U8C.png",
-            "skilldescription": "Nara Shikamaru can only use this skill on enemies affected by 'Meditate'. Affected enemies' physical, chakra, and strategic skills are stunned for 2 turns.",
-            "energy": [
-                "Genjutsu",
-                "Random"
-            ],
-            "target": "all-enemy",
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nara_shikamaru_shadow_imitation",
-                    "duration": 2,
-                    "scope": "all-enemy",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "energy",
-                            "strategic",
-                            "ninjutsu"
-                        ],
-                        "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
-                        "ongoingClass": "control"
-                    }
-                },
-                {
-                    "type": "cleanse_statuses",
-                    "statusId": "nara_shikamaru_meditate",
-                    "scope": "all-enemy"
-                }
-            ],
-            "targetCondition": {
-                "statusId": "nara_shikamaru_meditate"
-            }
+            id: 'nara-shikamaru-shadow-imitation', name: 'Shadow Imitation',
+            skillimage: 'https://i.imgur.com/jlKHCbs.png',
+            skilldescription: 'Shikamaru binds his enemies with their own shadows, stunning the physical and chakra skills of all marked enemies for 2 turns.',
+            energy: ['Bloodline', 'Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
+            targetCondition: markedEnemies,
+            classes: ['Chakra', 'Control'],
+            effects: [{ type: 'apply_status', statusId: 'nara_shikamaru_shadow_imitation', duration: 2,
+                scope: 'all-enemy', metadata: {
+                    harmful: true, ongoingClass: 'control', turnDurationAnchor: 'source_turn',
+                    cannotUseSkillClasses: ['physical', 'chakra'],
+                    tooltipText: "This character's physical and chakra skills are stunned.",
+                } }],
         },
         {
-            "id": "nara-shikamaru-shikamaru-hide",
-            "name": "Shikamaru Hide",
-            "skillimage": "https://i.imgur.com/NF4jrLc.png",
-            "skilldescription": "Nara Shikamaru becomes invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'nara-shikamaru-shikamaru-hide', name: 'Shikamaru Hide',
+            skillimage: 'https://i.imgur.com/eAbeTyw.png',
+            skilldescription: 'Shikamaru conceals himself in the shadows, becoming invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'nara_shikamaru_shikamaru_hide', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true, tooltipText: 'Shikamaru is invulnerable.' } }],
+        },
+    ],
 };

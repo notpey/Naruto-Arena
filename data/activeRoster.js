@@ -32,6 +32,7 @@ const ACTIVE_ROSTER_IDS = [
     'tsuchi-kin',
     'zaku-abumi',
     'akimichi-chouji',
+    'nara-shikamaru',
     'fern',
     'lissandra-the-ice-witch',
     'ahri-the-nine-tailed-fox',

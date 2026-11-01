@@ -406,6 +406,7 @@ test('Rock Lee, Oboro, and Shigure drafts replace stored kits and obsolete locks
 for (const [label, ids, migrationId] of [
     ['Sound genin drafts', ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'], 'sound-genin-drafts-2026-11-01'],
     ['Chouji draft', ['akimichi-chouji'], 'akimichi-chouji-draft-2026-11-01'],
+    ['Shikamaru draft', ['nara-shikamaru'], 'nara-shikamaru-draft-2026-11-01'],
 ]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({

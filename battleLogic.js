@@ -244,6 +244,27 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
             };
         });
     });
+    Object.entries(board).forEach(([username, units]) => {
+        units.forEach((unit, slot) => {
+            const config = characters?.[unit.rosterIndex]?.passive?.startApplyStatusToRandomEnemy;
+            if (!config?.statusId) return;
+            const enemies = Object.entries(board)
+                .filter(([enemyUsername]) => enemyUsername !== username)
+                .flatMap(([, enemyUnits]) => enemyUnits);
+            const enemy = pickRandomEntry(enemies);
+            if (!enemy) return;
+            applyStatus({
+                targetState: enemy.state,
+                statusId: config.statusId,
+                duration: config.duration,
+                sourceSkillId: null,
+                sourceUsername: username,
+                sourceSlot: slot,
+                metadata: config.metadata || {},
+                fresh: false,
+            });
+        });
+    });
     return board;
 };
 
