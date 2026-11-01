@@ -411,6 +411,7 @@ for (const [label, ids, migrationId] of [
     ['Shikamaru mark icon fix', ['nara-shikamaru'], 'nara-shikamaru-mark-icon-2026-11-01'],
     ['Misumi draft', ['tsurugi-misumi'], 'tsurugi-misumi-draft-2026-11-01'],
     ['Shiore Orochimaru draft', ['shiore-orochimaru'], 'shiore-orochimaru-draft-2026-11-01'],
+    ['Baki draft', ['baki'], 'baki-draft-2026-11-01'],
 ]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({

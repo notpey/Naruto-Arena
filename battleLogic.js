@@ -416,6 +416,9 @@ const isStatusActiveForMetadata = (status, ownerUnit = null) => {
     const remaining = Number(status?.remainingTurns) || 0;
     if (remaining <= 0) return false;
     const metadata = status?.metadata || {};
+    if (metadata.activeOnlyWithDestructibleDefense && !(Number(metadata.destructibleDefensePoints) > 0)) {
+        return false;
+    }
     if (ownerUnit) {
         const currentHp = Math.max(0, Number(ownerUnit?.hp) || 0);
         const hpAtLeast = Number(metadata?.activeWhileOwnerCurrentHpAtLeast);
@@ -429,6 +432,14 @@ const isStatusActiveForMetadata = (status, ownerUnit = null) => {
     }
     return true;
 };
+
+// Extra execute threshold a unit carries against hits from one specific caster.
+const getExecuteThresholdBonusForSource = (unit, sourceUsername, sourceSlot) =>
+    (ensureUnitStateShape(unit).statuses || []).reduce((sum, status) =>
+        isStatusActiveForMetadata(status, unit) && status.sourceUsername === sourceUsername &&
+        status.sourceSlot === sourceSlot
+            ? sum + Math.max(0, Number(status?.metadata?.executeThresholdBonusForSource) || 0)
+            : sum, 0);
 
 const isUnitBanished = (unit) => {
     if (!unit || typeof unit !== 'object') return false;
@@ -5962,7 +5973,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     ? characters?.[damageSource.unit.rosterIndex]?.name || null : null,
                 minimumHp: Math.max(0, Number(effect?.metadata?.minimumHp) || 0),
                 executeBelowHpThreshold: Number.isFinite(effect?.metadata?.executeBelowHpThreshold)
-                    ? Math.max(0, Number(effect.metadata.executeBelowHpThreshold)) : null,
+                    ? Math.max(0, Number(effect.metadata.executeBelowHpThreshold)) +
+                        getExecuteThresholdBonusForSource(recipient.unit, actingUsername, actorSlot)
+                    : null,
                 onSuccessfulDamageApplyStatusToTarget:
                     effect?.metadata?.onSuccessfulDamageApplyStatusToTarget || null,
                 healthStealDamage:

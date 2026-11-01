@@ -10257,15 +10257,20 @@ const characters = [
         "id": "baki",
         "characterId": "baki",
         "name": "Baki",
-        "facePicture": "https://i.imgur.com/pjjdWz8.png",
-        "characterdeescription": "A Jounin of the Sand Village, and the leader of Gaara's team; Baki is cruel and ruthless, despite his normally calm nature. Baki fights using both taijutsu and ninjutsu together with top of the line Sand Village branded Flak Jackets.",
-        "requiredMissionId": "sand-siblings-at-war",
+        "facePicture": "https://i.imgur.com/6LazJdG.png",
+        "characterdeescription": "A seasoned jonin of the Hidden Sand Village, Baki serves as the instructor of Gaara, Temari, and Kankuro during the Chuunin Exams. Cold and calculating, he specializes in deadly Wind Release techniques and carries out his village's secret missions with ruthless efficiency.",
+        "requiredMissionId": null,
+        "passive": {
+            "name": "No Witnesses",
+            "icon": "https://i.imgur.com/Y7oszT6.png",
+            "description": "Baki's damaging skills execute enemies who fall to 5 health or less."
+        },
         "skills": [
             {
                 "id": "baki-sudden-strike",
                 "name": "Sudden Strike",
-                "skillimage": "https://i.imgur.com/tCTh2Ce.png",
-                "skilldescription": "Baki destroys one enemy's destructible defense and then deals 20 piercing damage to them.",
+                "skillimage": "https://i.imgur.com/FPdqxJa.png",
+                "skilldescription": "Baki catches an enemy off guard, dealing 20 piercing chakra damage.",
                 "energy": [
                     "Genjutsu"
                 ],
@@ -10273,20 +10278,17 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Physical",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
-                    {
-                        "type": "destroy_destructible_defense",
-                        "scope": "target"
-                    },
                     {
                         "type": "damage",
                         "amount": 20,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDamageReduction": true
+                            "ignoreDamageReduction": true,
+                            "executeBelowHpThreshold": 5
                         }
                     }
                 ]
@@ -10294,8 +10296,8 @@ const characters = [
             {
                 "id": "baki-wind-blade",
                 "name": "Wind Blade",
-                "skillimage": "https://i.imgur.com/yw1nPc2.png",
-                "skilldescription": "Baki destroys one enemy's destructible defense and then deals 40 piercing damage to them.",
+                "skillimage": "https://i.imgur.com/f5uPqEh.png",
+                "skilldescription": "Baki unleashes a razor-sharp blade of wind, dealing 40 piercing chakra damage to an enemy.",
                 "energy": [
                     "Ninjutsu",
                     "Genjutsu"
@@ -10304,20 +10306,17 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Physical",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
-                    {
-                        "type": "destroy_destructible_defense",
-                        "scope": "target"
-                    },
                     {
                         "type": "damage",
                         "amount": 40,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDamageReduction": true
+                            "ignoreDamageReduction": true,
+                            "executeBelowHpThreshold": 5
                         }
                     }
                 ]
@@ -10325,13 +10324,13 @@ const characters = [
             {
                 "id": "baki-flak-jacket",
                 "name": "Flak Jacket",
-                "skillimage": "https://i.imgur.com/4i77YrB.png",
-                "skilldescription": "Baki targets himself or an ally, granting this character 45 points of destructible defense for 4 turns. During this time, they will ignore enemy stun effects and affliction damage. This skill ends if the destructible defense is destroyed.",
+                "skillimage": "https://i.imgur.com/LLtxU8O.png",
+                "skilldescription": "Baki reinforces his defenses, gaining 50 destructible defense for 4 turns. While this defense remains, he ignores enemy non-damage effects. Enemies who use a physical or chakra skill on Baki during this time permanently have the execution threshold of No Witnesses increased by 5 against them.",
                 "energy": [
                     "Random",
                     "Random"
                 ],
-                "target": "self-or-single-ally",
+                "target": "self",
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
@@ -10343,16 +10342,34 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "baki_flak_jacket",
                         "duration": 4,
-                        "scope": "target",
+                        "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "destructibleDefensePoints": 45,
-                            "cannotBeStunned": true,
-                            "stunImmune": true,
-                            "invulnerableToSkillClasses": [
-                                "affliction"
+                            "destructibleDefensePoints": 50,
+                            "activeOnlyWithDestructibleDefense": true,
+                            "ignoreHarmfulNonDamageEffects": true,
+                            "onEnemySkillTargetedHarmfulOnly": true,
+                            "onEnemySkillTargetedSkillClassesAny": [
+                                "Physical",
+                                "Chakra"
                             ],
-                            "tooltipText": "This character has 45 points of destructible defense from Flak Jacket, ignores stun effects, and is immune to affliction damage."
+                            "onEnemySkillTargetedApplyStatusToSource": {
+                                "statusId": "baki_no_witnesses_threshold",
+                                "duration": 99,
+                                "metadata": {
+                                    "harmful": true,
+                                    "permanent": true,
+                                    "cannotBeCleansed": true,
+                                    "executeThresholdBonusForSource": 5,
+                                    "mergeNumericAddKeys": [
+                                        "executeThresholdBonusForSource"
+                                    ],
+                                    "statusIcon": "https://i.imgur.com/Y7oszT6.png",
+                                    "sourceSkillName": "No Witnesses",
+                                    "tooltipText": "Baki's No Witnesses executes this character at 5 more health for each physical or chakra skill they used on him during Flak Jacket."
+                                }
+                            },
+                            "tooltipText": "Baki has 50 destructible defense. While it remains, he ignores enemy non-damage effects, and enemies who use physical or chakra skills on him become easier to execute."
                         }
                     }
                 ]
@@ -10360,8 +10377,8 @@ const characters = [
             {
                 "id": "baki-baki-teleportation",
                 "name": "Baki Teleportation",
-                "skillimage": "https://i.imgur.com/cMOrPng.png",
-                "skilldescription": "Baki becomes invulnerable for 1 turn.",
+                "skillimage": "https://i.imgur.com/UxdiVF7.png",
+                "skilldescription": "Baki swiftly evades incoming attacks, becoming invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -10375,12 +10392,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "baki_teleportation",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Baki is invulnerable."
                         }
                     }
                 ]
