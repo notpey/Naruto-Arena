@@ -43,7 +43,7 @@ test('Baki draft kit matches names, costs, cooldowns, and roster', () => {
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('baki'));
     assert.ok(isActiveCharacter(baki));
-    assert.ok(!baki.requiredMissionId);
+    assert.equal(baki.requiredMissionId, 'sand-siblings-at-war');
 });
 
 test('Sudden Strike and Wind Blade pierce damage reduction', () => {

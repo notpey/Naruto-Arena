@@ -1,6 +1,7 @@
 module.exports = {
     "id": "akadou-yoroi",
     "characterId": "akadou-yoroi",
+    "requiredMissionId": "the-sounds-amongst-the-leaves",
     "name": "Akadou Yoroi",
     "facePicture": "https://i.imgur.com/U0Ziv1r.png",
     "characterdeescription": "A mysterious genin assigned to Kabuto's team during the Chuunin Exams, Yoroi secretly serves as a spy for Orochimaru. Specializing in close-range combat, he possesses the ability to absorb his opponents' chakra, gradually draining their strength while sustaining his own.",

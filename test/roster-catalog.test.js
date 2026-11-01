@@ -84,7 +84,7 @@ test('arc sorting changes display order without changing canonical roster indice
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'ahri-the-nine-tailed-fox')).label, 'Ionia');
 });
 
-test('roster order puts starters first in team groups, then mission unlocks', () => {
+test('roster order preserves team groups as new mission rewards are added', () => {
     const { getDefaultMissionCatalog } = require('../server.js');
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({ characterId, name: characterId }));
     const order = catalog.filterRosterIndices(roster, { sort: 'roster' })
@@ -108,8 +108,8 @@ test('roster order puts starters first in team groups, then mission unlocks', ()
     ]);
     assert.equal(new Set(order).size, ACTIVE_ROSTER_IDS.length, 'every active character has a roster position');
 
-    const missionRewards = new Set(getDefaultMissionCatalog().map((mission) => mission.reward_character));
-    const firstMissionIndex = order.findIndex((id) => missionRewards.has(id));
-    assert.ok(order.slice(firstMissionIndex).every((id) => missionRewards.has(id)),
-        'all starters come before every mission unlock');
+    const missionRewards = new Set(getDefaultMissionCatalog().flatMap((mission) =>
+        mission.reward_characters || [mission.reward_character]));
+    assert.ok([...missionRewards].every((id) => order.includes(id)),
+        'each mission reward retains a roster position');
 });

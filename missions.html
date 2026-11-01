@@ -191,7 +191,8 @@
     .ms-footer-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--ca-orange), var(--ca-violet)); color: #000; font-weight: 900; font-size: 16px; }
     .ms-footer-links { display: flex; justify-content: center; gap: 30px; margin-bottom: 24px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ca-parchment); }
     .ms-footer-links sup { font-size: 8px; color: var(--ca-dust); }
-    .ms-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.06em; }
+    .ms-footer-copy { font-size: 11px; font-style: italic; color: var(--ca-orange); letter-spacing: 0.02em; }
+    .ca-hero-tagline { font-size: 11px; }
 
     @media (max-width: 980px) {
       .ms-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -568,6 +569,7 @@
             mission_rank: String(src.mission_rank || "").toLowerCase(),
             mode_restriction: { allowed_modes: allowed.filter(function (m) { return m === "quick" || m === "ladder"; }) },
             reward_character: String(src.reward_character || src.rewardCharacter || "").trim(),
+            reward_characters: Array.isArray(src.reward_characters) ? src.reward_characters.map(String) : [],
             reward_character_name: String(src.reward_character_name || src.rewardCharacterName || "").trim(),
             reward: String(src.reward || "").trim(),
             win_streak: {
@@ -663,6 +665,7 @@
         return lines;
       }
       function getRewardText(m) {
+        if (m && m.reward_characters && m.reward_characters.length > 1) return m.reward || "";
         var rcn = String((m && m.reward_character_name) || (m && m.reward_character) || "").trim();
         if (rcn) return "Unlock " + rcn + ".";
         return String(m && m.reward ? m.reward : "").trim();
@@ -851,11 +854,14 @@
         var rewardCol = document.createElement("div");
         rewardCol.className = "ms-detail-reward";
         var rewardHead = document.createElement("div"); rewardHead.className = "ms-col-head reward"; rewardHead.textContent = "› Reward"; rewardCol.appendChild(rewardHead);
-        var rcn = String((mission.reward_character_name) || (mission.reward_character) || "").trim();
+        var multipleRewards = mission.reward_characters && mission.reward_characters.length > 1;
+        var rcn = multipleRewards
+          ? getRewardText(mission).replace(/^Unlock\s+/i, "").replace(/\.$/, "")
+          : String((mission.reward_character_name) || (mission.reward_character) || "").trim();
         if (rcn) {
           var rc = document.createElement("div"); rc.className = "ms-reward-char";
-          var rcLabel = document.createElement("p"); rcLabel.className = "ms-col-line"; rcLabel.textContent = "Character unlocked:"; rewardCol.appendChild(rcLabel);
-          if (mission.portrait) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
+          var rcLabel = document.createElement("p"); rcLabel.className = "ms-col-line"; rcLabel.textContent = multipleRewards ? "Characters unlocked:" : "Character unlocked:"; rewardCol.appendChild(rcLabel);
+          if (mission.portrait && !multipleRewards) { var rimg = document.createElement("img"); rimg.src = mission.portrait; rimg.alt = rcn; rc.appendChild(rimg); }
           var rname = document.createElement("div"); rname.className = "ms-reward-name"; rname.textContent = rcn; rc.appendChild(rname);
           rewardCol.appendChild(rc);
           var completionBonus = document.createElement("p");

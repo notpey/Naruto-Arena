@@ -9,7 +9,8 @@ test('Rock Lee, Oboro, and Shigure are included in the playable roster', () => {
     for (const id of ['rock-lee', 'oboro', 'shigure']) {
         assert.ok(ACTIVE_ROSTER_IDS.includes(id), `${id} is active`);
         assert.ok(isActiveCharacter(characters[indexOf(id)]), `${id} is present in the character seed`);
-        assert.ok(!characters[indexOf(id)].requiredMissionId, `${id} has no obsolete mission lock`);
+        const missions = { oboro: 'double-lucky', shigure: 'a-rare-opportunity' };
+        assert.equal(characters[indexOf(id)].requiredMissionId || null, missions[id] || null);
     }
 });
 const pool = () => ({ taijutsu: 10, ninjutsu: 10, bloodline: 10, genjutsu: 10 });

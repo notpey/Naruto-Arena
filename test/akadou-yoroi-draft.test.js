@@ -37,7 +37,7 @@ test('Yoroi lifesteals the health damage Energy Drain deals', () => {
     cast(match, 1, true);
     assert.equal(match.board.p2[0].hp, 80);
     assert.equal(yoroi.hp, 70);
-    assert.equal(characters[indexOf('akadou-yoroi')].requiredMissionId, undefined);
+    assert.equal(characters[indexOf('akadou-yoroi')].requiredMissionId, 'the-sounds-amongst-the-leaves');
 });
 
 test('Close Quarters does not heal when defense absorbs all skill damage', () => {

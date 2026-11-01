@@ -47,8 +47,12 @@ module.exports = function(context) {
                     ? characterEntry.requiredMissionId.trim()
                     : '';
             const missionCatalog = await getStoredMissionCatalog();
-            const price = requiredMissionId
-                ? getCharacterPriceForMissionId(requiredMissionId, missionCatalog)
+            const rewardMissionId = requiredMissionId || (Array.isArray(missionCatalog)
+                ? missionCatalog.find((mission) => [mission?.reward_character,
+                    ...(Array.isArray(mission?.reward_characters) ? mission.reward_characters : [])]
+                    .some((id) => normalizeCharacterId(id) === characterId))?.missionId : '');
+            const price = rewardMissionId
+                ? getCharacterPriceForMissionId(rewardMissionId, missionCatalog)
                 : 1000;
 
             const profile = normalizeUserProfile(user);

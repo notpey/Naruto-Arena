@@ -30,6 +30,12 @@ const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
 const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const MITARASHI_ANKO_REWORK_MIGRATION_ID = 'mitarashi-anko-draft-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
+const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
+const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
+    'oboro', 'shigure', 'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
+    'akadou-yoroi', 'tsurugi-misumi', 'baki', 'gekko-hayate',
+    'mitarashi-anko', 'shiore-orochimaru',
+]);
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
     'sarutobi-konohamaru', 'umino-iruka', 'mizuki', 'ebisu',
@@ -268,6 +274,7 @@ class CharacterService {
                     [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
+                    [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -340,6 +347,7 @@ class CharacterService {
                         [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
+                        [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },
@@ -381,6 +389,7 @@ class CharacterService {
         const shouldApplyGekkoHayateRework = !completedMigrations[GEKKO_HAYATE_REWORK_MIGRATION_ID];
         const shouldApplyMitarashiAnkoRework = !completedMigrations[MITARASHI_ANKO_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
+        const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
             ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -408,6 +417,7 @@ class CharacterService {
             ...(shouldApplyGekkoHayateRework ? ['gekko-hayate'] : []),
             ...(shouldApplyMitarashiAnkoRework ? ['mitarashi-anko'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
+            ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
             defaultCharacters
@@ -496,7 +506,8 @@ class CharacterService {
                 if (shouldApplyBakiRework && ['baki'].includes(characterId)) return seedEntry;
                 if (shouldApplyGekkoHayateRework && ['gekko-hayate'].includes(characterId)) return seedEntry;
                 if (shouldApplyMitarashiAnkoRework && ['mitarashi-anko'].includes(characterId)) return seedEntry;
-                if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
+                if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
+                    (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
                 const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
@@ -573,6 +584,7 @@ class CharacterService {
             shouldApplyGekkoHayateRework ||
             shouldApplyMitarashiAnkoRework ||
             shouldApplyLaunchUnlocks ||
+            shouldApplyNewMissionUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
         ) {
@@ -613,6 +625,7 @@ class CharacterService {
                         [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
+                        [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
                 },

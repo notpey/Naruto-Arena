@@ -47,7 +47,7 @@ test('Misumi draft kit matches names, costs, cooldowns, and roster', () => {
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('tsurugi-misumi'));
     assert.ok(isActiveCharacter(misumi));
-    assert.ok(!misumi.requiredMissionId);
+    assert.equal(misumi.requiredMissionId, 'twisting-sound');
 });
 
 test('Flexible Twisting Joints deals 15 and prepares only its target for Tighten Joints', () => {

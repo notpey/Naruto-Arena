@@ -9,7 +9,7 @@ module.exports = {
     id: 'baki', characterId: 'baki', name: 'Baki',
     facePicture: 'https://i.imgur.com/6LazJdG.png',
     characterdeescription: "A seasoned jonin of the Hidden Sand Village, Baki serves as the instructor of Gaara, Temari, and Kankuro during the Chuunin Exams. Cold and calculating, he specializes in deadly Wind Release techniques and carries out his village's secret missions with ruthless efficiency.",
-    requiredMissionId: null,
+    requiredMissionId: 'sand-siblings-at-war',
     passive: {
         name: 'No Witnesses', icon: PASSIVE_ICON,
         description: "Baki's damaging skills execute enemies who fall to 5 health or less.",

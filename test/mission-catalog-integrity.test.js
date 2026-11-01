@@ -18,6 +18,14 @@ const trackedTypes = new Set([
 ]);
 
 function goalCanUseRoster(goal, available) {
+    if (goal.type === 'win_matches_all_team_tag') {
+        return characters.filter((character) => available.has(character.characterId) &&
+            getMissionCharacterTags(character).has(goal.character_tag)).length >= 3;
+    }
+    if (goal.type === 'win_matches_tag') {
+        return characters.some((character) => available.has(character.characterId) &&
+            getMissionCharacterTags(character).has(goal.character_tag));
+    }
     if (goal.type === 'win_matches_any' || goal.type === 'win_streak_any') {
         return goal.character_ids.some((id) => available.has(id));
     }
@@ -30,14 +38,18 @@ function goalCanUseRoster(goal, available) {
 test('every default mission has valid, trackable goals and a distinct character reward', () => {
     const missions = getDefaultMissionCatalog();
     const rewardIds = new Set();
-    assert.equal(missions.length, 11);
+    assert.equal(missions.length, 20);
     assert.deepEqual(missions.map((mission) => mission.level_requirement),
-        [1, 1, 1, 1, 6, 6, 11, 6, 6, 16, 11]);
+        [1, 1, 1, 1, 6, 6, 11, 6, 6, 16, 11,
+            6, 6, 11, 11, 11, 11, 11, 11, 16]);
 
     for (const mission of missions) {
-        assert.ok(characterIds.has(mission.reward_character), `${mission.missionId}: unknown reward`);
-        assert.ok(!rewardIds.has(mission.reward_character), `${mission.missionId}: duplicate reward`);
-        rewardIds.add(mission.reward_character);
+        const rewards = mission.reward_characters || [mission.reward_character];
+        for (const id of rewards) {
+            assert.ok(characterIds.has(id), `${mission.missionId}: unknown reward ${id}`);
+            assert.ok(!rewardIds.has(id), `${mission.missionId}: duplicate reward ${id}`);
+            rewardIds.add(id);
+        }
         assert.ok(mission.goals.length > 0, `${mission.missionId}: no goals`);
         assert.ok(mission.mode_restriction.allowed_modes.some((mode) => mode === 'quick' || mode === 'ladder'), `${mission.missionId}: no playable mode`);
 
@@ -52,7 +64,7 @@ test('every default mission has valid, trackable goals and a distinct character 
             const references = [goal.character_id, ...(goal.character_ids || [])].filter(Boolean);
             for (const id of references) {
                 assert.ok(characterIds.has(id), `${mission.missionId}: unknown goal character ${id}`);
-                assert.notEqual(id, mission.reward_character, `${mission.missionId}: requires its own reward`);
+                assert.ok(!rewards.includes(id), `${mission.missionId}: requires its own reward`);
             }
             if (goal.type.endsWith('_any') || goal.type === 'win_matches_same_team') {
                 assert.ok(goal.character_ids.length >= 2, `${mission.missionId}: group goal needs two characters`);
@@ -61,13 +73,12 @@ test('every default mission has valid, trackable goals and a distinct character 
     }
 });
 
-test('all default mission rewards are reachable through earlier playable characters', () => {
+test('mission rewards are reachable except the Forest of Death team requiring hidden Ino', () => {
     const missions = getDefaultMissionCatalog();
-    const rewardIds = new Set(missions.map((mission) => mission.reward_character));
+    const rewardIds = new Set(missions.flatMap((mission) => mission.reward_characters || [mission.reward_character]));
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
-        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate', 'mitarashi-anko',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
         'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
@@ -78,19 +89,20 @@ test('all default mission rewards are reachable through earlier playable charact
         changed = false;
         for (const [id, mission] of remaining) {
             if (mission.goals.every((goal) => goalCanUseRoster(goal, available))) {
-                available.add(mission.reward_character);
+                (mission.reward_characters || [mission.reward_character]).forEach((id) => available.add(id));
                 remaining.delete(id);
                 changed = true;
             }
         }
     } while (changed);
 
-    assert.deepEqual([...remaining.keys()], [], 'mission rewards must not have circular unlock dependencies');
+    assert.deepEqual([...remaining.keys()], ['chuunin-exam-the-forest-of-death'],
+        'the Team 9 objective remains gated while Ino is hidden from Members');
 });
 
 test('new Members get the mission-free roster; staff see and use all active characters', () => {
     const missions = getDefaultMissionCatalog();
-    const lockedCharacterIds = new Set(missions.map((mission) => mission.reward_character));
+    const lockedCharacterIds = new Set(missions.flatMap((mission) => mission.reward_characters || [mission.reward_character]));
     const profile = buildDefaultUserProfile({});
     const member = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: { role: 'player' }, profile,
@@ -98,8 +110,7 @@ test('new Members get the mission-free roster; staff see and use all active char
     }).unlocked);
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
-        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate', 'mitarashi-anko',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
         'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,
@@ -133,14 +144,16 @@ test('launch migration replaces the old mission catalog once and preserves later
         { missionId: 'old-mission', title: 'Old Mission', reward_character: 'rock-lee' },
     ] });
     assert.equal(old.migrate, true);
-    assert.equal(old.missions.length, 11);
+    assert.equal(old.missions.length, 20);
     const edited = resolveMissionCatalogState({ catalogVersion: 2, missions: [
         { missionId: 'edited', title: 'Edited', reward_character: 'ebisu',
             goals: [{ type: 'win_matches', character_id: 'uzumaki-naruto', wins: 2 }] },
     ] });
     assert.equal(edited.migrate, true);
     assert.equal(edited.missions[0].missionId, 'edited');
-    assert.equal(resolveMissionCatalogState({ catalogVersion: 3, missions: edited.missions }).migrate, false);
+    const latest = resolveMissionCatalogState({ catalogVersion: 4, missions: edited.missions });
+    assert.equal(latest.migrate, false);
+    assert.equal(edited.missions.length, 10, 'version 2 adds only the nine new missions');
 
     const previous = getDefaultMissionCatalog();
     const customized = previous.map((mission) => ({ ...mission }));
@@ -165,6 +178,35 @@ test('revised launch missions keep their requested ranks and goal counts', () =>
     assert.equal(missions.get('the-god-of-the-shinobi').goals[0].wins, 30);
 });
 
+test('new missions preserve all rewards, ranks, and full team requirements', () => {
+    const missions = new Map(getDefaultMissionCatalog().map((mission) => [mission.missionId, mission]));
+    const forest = missions.get('chuunin-exam-the-forest-of-death');
+    assert.deepEqual(forest.reward_characters, ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin']);
+    assert.deepEqual(forest.goals.map((goal) => [goal.type, goal.wins, goal.character_tag]), [
+        ['win_matches_all_team_tag', 3, 'exam-team-7'],
+        ['win_matches_all_team_tag', 3, 'exam-team-8'],
+        ['win_matches_all_team_tag', 3, 'exam-team-9'],
+        ['win_matches_all_team_tag', 3, 'exam-team-10'],
+    ]);
+    assert.equal(forest.mission_rank, 'dc');
+    assert.equal(forest.level_requirement, 11);
+    assert.deepEqual(missions.get('double-lucky').goals.map((goal) => goal.type),
+        ['win_streak', 'win_streak', 'win_streak']);
+    assert.equal(missions.get('hostile-takeover').level_requirement, 16);
+    assert.equal(missions.get('hostile-takeover').mission_rank, 'b');
+    for (const id of ['double-lucky', 'a-rare-opportunity', 'the-sounds-amongst-the-leaves',
+        'twisting-sound', 'sand-siblings-at-war', 'the-moonlight-of-the-leaf',
+        'the-survivor-of-the-seal', 'hostile-takeover']) {
+        assert.equal(missions.get(id).image, '', `${id}: image left for editor`);
+    }
+    const profile = { ryo: 0 };
+    const unlocked = new Set();
+    forest.reward_characters.forEach((id, index) =>
+        awardMissionCompletion(profile, id, unlocked, index > 0));
+    assert.deepEqual([...unlocked], forest.reward_characters);
+    assert.equal(profile.ryo, 250, 'the shared mission gives its Ryo bonus once');
+});
+
 test('tag goals count opponent genin, full Team 7 teams, and each Konoha teammate', () => {
     assert.equal(getMissionCharacterTags(characters.find((character) =>
         character.characterId === 'kyuubi-naruto')).has('team-7'), true);
@@ -187,6 +229,14 @@ test('tag goals count opponent genin, full Team 7 teams, and each Konoha teammat
     assert.equal(getMissionTagGoalIncrement(match, 'winner', members), 2);
     match.players[0].team = team('umino-iruka', 'uzumaki-naruto', 'kankuro');
     assert.equal(getMissionTagGoalIncrement(match, 'winner', members), 2);
+    match.players[0].team = team('inuzuka-kiba', 'aburame-shino', 'hyuuga-hinata');
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', {
+        type: 'win_matches_all_team_tag', character_tag: 'exam-team-8',
+    }), 1);
+    match.players[1].team = team('gaara-of-the-desert', 'kankuro', 'temari');
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', {
+        type: 'win_matches_against_tag', character_tag: 'sound-or-sand-ninja',
+    }), 1);
 });
 
 test('redesigned objectives reset partial progress but keep completed mission unlocks', () => {

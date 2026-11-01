@@ -47,7 +47,7 @@ test('Hayate draft kit matches names, costs, cooldowns, and roster', () => {
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('gekko-hayate'));
     assert.ok(isActiveCharacter(hayate));
-    assert.ok(!hayate.requiredMissionId);
+    assert.equal(hayate.requiredMissionId, 'the-moonlight-of-the-leaf');
 });
 
 test('Fair Fight marks the enemy in the same slot as Hayate', () => {

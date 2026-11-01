@@ -4,7 +4,7 @@ module.exports = {
     id: 'zaku-abumi', characterId: 'zaku-abumi', name: 'Abumi Zaku',
     facePicture: 'https://i.imgur.com/1hP3uis.png',
     characterdeescription: 'Abumi Zaku is one of the three sound genin sent to the chuunin exams. He was surgically altered with hollow tubes in his arms, allowing him to create waves of compressed air.',
-    requiredMissionId: null,
+    requiredMissionId: 'chuunin-exam-the-forest-of-death',
     passive: {
         name: 'Sound Trio',
         icon: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg',

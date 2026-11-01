@@ -6,7 +6,7 @@ module.exports = {
     id: 'mitarashi-anko', characterId: 'mitarashi-anko', name: 'Mitarashi Anko',
     facePicture: 'https://i.imgur.com/98lWH8z.png',
     characterdeescription: 'A fearless special jonin of the Hidden Leaf Village, Anko serves as a proctor during the Chuunin Exams. Once a student of Orochimaru, she bears the Cursed Seal of Heaven and uses the forbidden techniques of her former master against her enemies.',
-    requiredMissionId: null,
+    requiredMissionId: 'the-survivor-of-the-seal',
     passive: {
         name: "Anko's Cursed Seal", icon: 'https://i.imgur.com/tuJRWvE.png',
         description: 'When Anko dies, her team gains 1 chakra.',

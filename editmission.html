@@ -344,9 +344,7 @@
     }
 
     .editor-stage {
-      padding: 22px 24px;
-      border: var(--border-smoke);
-      background: var(--ca-ash);
+      padding: 22px 0;
     }
 
     .editor-topline {
@@ -620,6 +618,8 @@
       background: var(--ca-ash);
       border-radius: 4px;
     }
+
+    .ca-hero-tagline { font-size: 11px; }
 
     .mission-panel-title {
       margin: 0 0 8px;
@@ -1439,6 +1439,11 @@
                 <select id="mission-reward-character"></select>
                 <span class="mission-field-help">Character unlocked when the mission is completed.</span>
               </label>
+              <label class="mission-field">
+                All Reward Character IDs
+                <input type="text" id="mission-reward-characters" placeholder="dosu-kinuta, zaku-abumi, tsuchi-kin" />
+                <span class="mission-field-help">Optional comma-separated list for missions that unlock multiple characters.</span>
+              </label>
               <label class="mission-field" style="grid-column:span 2;">
                 Mission Artwork
                 <div style="display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;margin-top:2px;">
@@ -1535,7 +1540,7 @@
             </label>
             <label class="mission-field" id="mission-goal-tag-field" hidden>
               Character Tag
-              <select id="mission-goal-tag"><option value="konoha-genin">Konoha genin</option><option value="konoha-ninja">Konoha ninja</option><option value="team-7">Team 7</option></select>
+              <select id="mission-goal-tag"><option value="konoha-genin">Konoha genin</option><option value="konoha-ninja">Konoha ninja</option><option value="team-7">Team 7</option><option value="exam-team-7">Exam Team 7</option><option value="exam-team-8">Exam Team 8</option><option value="exam-team-9">Exam Team 9</option><option value="exam-team-10">Exam Team 10</option><option value="sound-or-sand-ninja">Sound or Sand ninja</option></select>
             </label>
             <label class="mission-field" id="mission-goal-tag-label-field" hidden>
               Display Name
@@ -1575,6 +1580,7 @@
         missionRank: document.getElementById("mission-rank"),
         reward: document.getElementById("mission-reward"),
         rewardCharacter: document.getElementById("mission-reward-character"),
+        rewardCharacters: document.getElementById("mission-reward-characters"),
         modeQuick: document.getElementById("mission-mode-quick"),
         modeLadder: document.getElementById("mission-mode-ladder"),
         image: document.getElementById("mission-image"),
@@ -2066,6 +2072,7 @@
           rank: levelRequirement ? String(levelRequirement) : "",
           reward: String(m.reward || "").trim(),
           reward_character: rewardCharacter,
+          reward_characters: Array.isArray(m.reward_characters) ? m.reward_characters.map(normalizeCharacterId).filter(Boolean) : [],
           win_streak: {
             character_id: streakCharacter,
             wins: Number(winStreak.wins || 0) || 0,
@@ -2101,6 +2108,7 @@
         fields.missionRank.value = m.mission_rank || "";
         fields.reward.value = m.reward || "";
         refreshCharacterSelects(m);
+        fields.rewardCharacters.value = (m.reward_characters || []).join(", ");
         const allowedModes = Array.isArray(m.mode_restriction && m.mode_restriction.allowed_modes)
           ? m.mode_restriction.allowed_modes
           : [];
@@ -2126,6 +2134,7 @@
           revision: Number(missions.find((mission) => mission.missionId === selectedId)?.revision) || 0,
           reward: fields.reward.value,
           reward_character: fields.rewardCharacter.value,
+          reward_characters: fields.rewardCharacters.value.split(",").map(normalizeCharacterId).filter(Boolean),
           win_streak: {
             character_id: String(winStreakGoal && winStreakGoal.character_id ? winStreakGoal.character_id : "").trim(),
             wins: Number(winStreakGoal && winStreakGoal.wins ? winStreakGoal.wins : 0) || 0,

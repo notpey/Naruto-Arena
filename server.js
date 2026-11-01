@@ -73,7 +73,7 @@ const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
 const DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const LEGACY_DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
-const LAUNCH_MISSION_CATALOG_VERSION = 3;
+const LAUNCH_MISSION_CATALOG_VERSION = 4;
 let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
@@ -104,6 +104,12 @@ const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
 const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const MITARASHI_ANKO_REWORK_MIGRATION_ID = 'mitarashi-anko-draft-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
+const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
+const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
+    'oboro', 'shigure', 'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
+    'akadou-yoroi', 'tsurugi-misumi', 'baki', 'gekko-hayate',
+    'mitarashi-anko', 'shiore-orochimaru',
+]);
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
     'sarutobi-konohamaru', 'umino-iruka', 'mizuki', 'ebisu',
@@ -1849,6 +1855,10 @@ const normalizeMissionCatalogEntry = (mission = {}, index = 0) => {
             source.rewardCharacterId ??
             source.reward_character_id
     );
+    const rewardCharacterIds = Array.from(new Set([
+        rewardCharacterId,
+        ...(Array.isArray(source.reward_characters) ? source.reward_characters : []),
+    ].map((id) => normalizeCharacterId(id)).filter(Boolean)));
     const winStreakCharacterId = normalizeCharacterId(
         source.win_streak?.character_id ??
             source.winStreak?.characterId ??
@@ -1903,6 +1913,7 @@ const normalizeMissionCatalogEntry = (mission = {}, index = 0) => {
             ? String(source.mission_rank).toLowerCase() : '',
         rank: levelRequirement ? String(levelRequirement) : '',
         reward_character: rewardCharacterId,
+        reward_characters: rewardCharacterIds,
         reward_character_name: getCharacterDisplayNameById(rewardCharacterId),
         reward: typeof source.reward === 'string' ? source.reward.trim() : '',
         mode_restriction: modeRestriction,
@@ -2019,6 +2030,13 @@ const cloneMissionCatalog = (missions = []) =>
     );
 
 const getDefaultMissionCatalog = () => cloneMissionCatalog(DEFAULT_MISSION_CATALOG);
+const getMissionRewardCharacterIds = (mission) => Array.from(new Set([
+    mission?.reward_character,
+    ...(Array.isArray(mission?.reward_characters) ? mission.reward_characters : []),
+].map((id) => normalizeCharacterId(id)).filter(Boolean)));
+const getMissionForRewardCharacterId = (catalog, characterId) =>
+    (Array.isArray(catalog) ? catalog : []).find((mission) =>
+        getMissionRewardCharacterIds(mission).includes(characterId));
 
 const resolveMissionCatalogState = (storedState, defaultCatalog = getDefaultMissionCatalog()) => {
     if (!storedState || !Array.isArray(storedState.missions)) {
@@ -2027,14 +2045,15 @@ const resolveMissionCatalogState = (storedState, defaultCatalog = getDefaultMiss
     if (!(Number(storedState.catalogVersion) >= 2)) {
         return { missions: defaultCatalog, migrate: true };
     }
-    if (!(Number(storedState.catalogVersion) >= LAUNCH_MISSION_CATALOG_VERSION)) {
+    let catalog = normalizeMissionCatalog(storedState.missions);
+    if (!(Number(storedState.catalogVersion) >= 3)) {
         const changedIds = new Set([
             'duty-of-a-sensei', 'a-dishonored-shinobi', 'hidden-hunter',
             'devotion', 'the-shipping-magnate', 'team-7-fights-as-a-team',
             'the-god-of-the-shinobi',
         ]);
         const defaultsById = new Map(defaultCatalog.map((mission) => [mission.missionId, mission]));
-        const migrated = normalizeMissionCatalog(storedState.missions).map((mission) => {
+        catalog = catalog.map((mission) => {
             if (!changedIds.has(mission.missionId)) return mission;
             const updated = defaultsById.get(mission.missionId);
             if (!updated) return mission;
@@ -2046,9 +2065,14 @@ const resolveMissionCatalogState = (storedState, defaultCatalog = getDefaultMiss
                 revision: updated.revision,
             };
         });
-        return { missions: migrated, migrate: true };
     }
-    return { missions: normalizeMissionCatalog(storedState.missions), migrate: false };
+    if (!(Number(storedState.catalogVersion) >= LAUNCH_MISSION_CATALOG_VERSION)) {
+        const known = new Set(catalog.map((mission) => mission.missionId));
+        catalog.push(...defaultCatalog.filter((mission) => !known.has(mission.missionId) &&
+            mission.sortOrder > 11));
+        return { missions: catalog, migrate: true };
+    }
+    return { missions: catalog, migrate: false };
 };
 
 const getStoredMissionCatalog = async () => {
@@ -2346,11 +2370,8 @@ const getMissionLockedCharacterIds = async () => {
     const storyCatalog = storyCatalogCache && Array.isArray(storyCatalogCache)
         ? storyCatalogCache
         : await getStoredStoryCatalog();
-    const locked = new Set(
-        (Array.isArray(catalog) ? catalog : [])
-            .map((mission) => normalizeCharacterId(mission.reward_character))
-            .filter(Boolean)
-    );
+    const locked = new Set((Array.isArray(catalog) ? catalog : [])
+        .flatMap(getMissionRewardCharacterIds));
     (Array.isArray(storyCatalog) ? storyCatalog : []).forEach((chapter) => {
         (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
             const id = normalizeCharacterId(node.reward_character);
@@ -3170,7 +3191,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     continue;
                 }
 
-                const rewardCharacterId = normalizeCharacterId(mission.reward_character);
+                const rewardCharacterIds = getMissionRewardCharacterIds(mission);
                 const missionGoals = normalizeMissionGoalList(mission.goals || []);
                 const trackedGoals = missionGoals;
                 const existingProgress = getProgressForMissionRevision(
@@ -3180,7 +3201,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                 const existingGoalProgressByIndex = {
                     ...(existingProgress.goalProgressByIndex || existingProgress.goalProgress || {}),
                 };
-                if (rewardCharacterId && unlockedIds.has(rewardCharacterId)) {
+                if (rewardCharacterIds.length && rewardCharacterIds.every((id) => unlockedIds.has(id))) {
                     if (!alreadyCompleted) {
                         progressByMissionId[mission.missionId] = normalizeMissionProgressEntry({
                             ...existingProgress,
@@ -3343,10 +3364,15 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     if (!alreadyCompleted) {
                         completedMissionIds.push(mission.missionId);
                     }
-                    const newlyUnlockedCharacterId = awardMissionCompletion(
-                        profile, rewardCharacterId, unlockedIds, alreadyCompleted
-                    );
-                    if (newlyUnlockedCharacterId) unlockedCharacterIds.push(newlyUnlockedCharacterId);
+                    rewardCharacterIds.forEach((id, rewardIndex) => {
+                        const newlyUnlockedCharacterId = awardMissionCompletion(
+                            profile, id, unlockedIds, alreadyCompleted || rewardIndex > 0
+                        );
+                        if (newlyUnlockedCharacterId) {
+                            unlockedCharacterIds.push(newlyUnlockedCharacterId);
+                            mutated = true;
+                        }
+                    });
                 }
 
                 const progressChanged =
@@ -3355,13 +3381,17 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                     progressByMissionId[mission.missionId] = nextProgress;
                     mutated = true;
                 } else if (
-                    rewardCharacterId &&
+                    rewardCharacterIds.length > 0 &&
                     hasTrackableGoals &&
                     allTrackableGoalsComplete &&
-                    !unlockedIds.has(rewardCharacterId)
+                    rewardCharacterIds.some((id) => !unlockedIds.has(id))
                 ) {
-                    unlockedIds.add(rewardCharacterId);
-                    unlockedCharacterIds.push(rewardCharacterId);
+                    rewardCharacterIds.forEach((id) => {
+                        if (!unlockedIds.has(id)) {
+                            unlockedIds.add(id);
+                            unlockedCharacterIds.push(id);
+                        }
+                    });
                     mutated = true;
                 }
             }
@@ -4347,6 +4377,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
+                [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
         },
@@ -4411,6 +4442,7 @@ const getStoredCharacters = async () => {
                     [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
+                    [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -4454,6 +4486,7 @@ const getStoredCharacters = async () => {
     const shouldApplyGekkoHayateRework = !completedMigrations[GEKKO_HAYATE_REWORK_MIGRATION_ID];
     const shouldApplyMitarashiAnkoRework = !completedMigrations[MITARASHI_ANKO_REWORK_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
+    const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -4482,6 +4515,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyGekkoHayateRework ? ['gekko-hayate'] : []),
         ...(shouldApplyMitarashiAnkoRework ? ['mitarashi-anko'] : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
+        ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
     const defaultByCharacterId = new Map(
         defaultCharacters
@@ -4575,7 +4609,8 @@ const getStoredCharacters = async () => {
             if (shouldApplyBakiRework && ['baki'].includes(characterId)) return seedEntry;
             if (shouldApplyGekkoHayateRework && ['gekko-hayate'].includes(characterId)) return seedEntry;
             if (shouldApplyMitarashiAnkoRework && ['mitarashi-anko'].includes(characterId)) return seedEntry;
-            if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
+            if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
+                (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
             }
             const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
@@ -4638,7 +4673,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyLaunchUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -4721,6 +4756,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyNewMissionUnlocks) {
+            completedMigrationUpdates[`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
@@ -10177,8 +10215,8 @@ app.get('/api/news', async (req, res) => {
 app.get('/api/missions', async (req, res) => {
     try {
         const missions = (await getStoredMissionCatalog()).filter((mission) => {
-            const rewardCharacterId = normalizeCharacterId(mission?.reward_character);
-            return !rewardCharacterId || activeRosterOrder.has(rewardCharacterId);
+            const rewardCharacterIds = getMissionRewardCharacterIds(mission);
+            return rewardCharacterIds.every((id) => activeRosterOrder.has(id));
         });
         let missionState = createDefaultMissionState();
         try {
@@ -10270,15 +10308,18 @@ app.get('/api/characters', async (req, res) => {
             ryo: profile ? profile.ryo : 0,
             characters: characterList.map((character) => {
                 const characterId = normalizeCharacterId(character?.characterId);
+                const rewardMission = getMissionForRewardCharacterId(missionCatalog, characterId);
+                const requiredMissionId = character.requiredMissionId || rewardMission?.missionId || null;
                 const access = getCharacterAvailability({
                     policies, user: authUser, profile, characterId, lockedCharacterIds,
                 });
                 return {
                     ...localizeArtwork(character),
+                    requiredMissionId,
                     unlocked: access.unlocked,
                     hidden: access.hidden,
-                    purchasePrice: character.requiredMissionId
-                        ? getCharacterPriceForMissionId(character.requiredMissionId, missionCatalog)
+                    purchasePrice: requiredMissionId
+                        ? getCharacterPriceForMissionId(requiredMissionId, missionCatalog)
                         : 1000,
                 };
             }),

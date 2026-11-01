@@ -4,7 +4,7 @@ module.exports = {
     id: 'shigure', characterId: 'shigure', name: 'Shigure',
     facePicture: 'https://i.imgur.com/VCQKYxx.png',
     characterdeescription: 'A genin of the Hidden Rain Village, Shigure specializes in manipulating concealed senbon needles using his chakra. Armed with a collection of deadly umbrellas, he overwhelms his opponents with relentless showers of precisely controlled projectiles.',
-    requiredMissionId: null,
+    requiredMissionId: 'a-rare-opportunity',
     passive: {
         name: 'Needle Curtain', icon: 'https://i.imgur.com/fudCwzE.png',
         description: 'While Sprinkling Needles is active, any enemy that uses a new harmful skill on Shigure or his allies will receive 5 damage.',

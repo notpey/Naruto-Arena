@@ -12,7 +12,7 @@ module.exports = {
     id: 'gekko-hayate', characterId: 'gekko-hayate', name: 'Gekko Hayate',
     facePicture: 'https://i.imgur.com/xVcPeeU.png',
     characterdeescription: 'A skilled swordsman and special jonin of the Hidden Leaf Village, Hayate serves as a proctor during the Chuunin Exams. Despite his sickly appearance, he possesses remarkable speed and mastery of the Dance of the Crescent Moon, using deceptive sword techniques to overwhelm his opponents.',
-    requiredMissionId: null,
+    requiredMissionId: 'the-moonlight-of-the-leaf',
     passive: {
         name: 'Fair Fight', icon: PASSIVE_ICON,
         description: 'Hayate deals 5 additional damage and ignores invulnerability when attacking the enemy directly opposite him on the battlefield.',

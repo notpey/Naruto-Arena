@@ -16,7 +16,7 @@ module.exports = {
     id: 'dosu-kinuta', characterId: 'dosu-kinuta', name: 'Kinuta Dosu',
     facePicture: 'https://i.imgur.com/d5yZAyK.png',
     characterdeescription: 'Perhaps the strongest of the three sound genin, Kinuta Dosu uses his implanted Melody Arm to amplify sound waves and increase the power of his taijutsu.',
-    requiredMissionId: null,
+    requiredMissionId: 'chuunin-exam-the-forest-of-death',
     passive: {
         name: 'Sound Trio',
         icon: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg',

@@ -471,6 +471,7 @@
         }
 
         function getRewardText(mission) {
+            if (mission && mission.reward_characters && mission.reward_characters.length > 1) return mission.reward || "";
             var rcn = String((mission && mission.reward_character_name) || (mission && mission.reward_character) || "").trim();
             if (rcn) return "Unlock " + rcn + ".";
             return String(mission && mission.reward ? mission.reward : "").trim();
@@ -484,8 +485,10 @@
                 missionId: id,
                 title: String(src.title || src.name || "Mission " + (index + 1)).trim(),
                 level_requirement: Number(src.level_requirement != null ? src.level_requirement : (src.levelRequirement || src.rank || 0)) || 0,
+                mission_rank: String(src.mission_rank || "").toLowerCase(),
                 mode_restriction: { allowed_modes: allowedModes.filter(function (m) { return m === "quick" || m === "ladder"; }) },
                 reward_character: String(src.reward_character || src.rewardCharacter || "").trim(),
+                reward_characters: Array.isArray(src.reward_characters) ? src.reward_characters.map(String) : [],
                 reward_character_name: String(src.reward_character_name || src.rewardCharacterName || "").trim(),
                 reward: String(src.reward || "").trim(),
                 win_streak: {
@@ -690,10 +693,13 @@
 
             var rewardSection = missionNode("section", "mission-detail-section mission-detail-reward-section");
             rewardSection.appendChild(missionNode("h3", "mission-detail-section-title", "Reward"));
-            var rewardName = String(mission.reward_character_name || mission.reward_character || "").trim();
+            var multipleRewards = mission.reward_characters && mission.reward_characters.length > 1;
+            var rewardName = multipleRewards
+                ? getRewardText(mission).replace(/^Unlock\s+/i, "").replace(/\.$/, "")
+                : String(mission.reward_character_name || mission.reward_character || "").trim();
             if (rewardName) {
                 var rewardRow = missionNode("div", "mission-reward-row");
-                if (mission.portrait && !/deadcharacter/i.test(mission.portrait)) {
+                if (mission.portrait && !multipleRewards && !/deadcharacter/i.test(mission.portrait)) {
                     var portrait = document.createElement("img");
                     portrait.src = mission.portrait;
                     portrait.alt = rewardName;

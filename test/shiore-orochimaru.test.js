@@ -47,7 +47,7 @@ test('Shiore Orochimaru draft kit matches names, costs, cooldowns, and roster', 
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('shiore-orochimaru'));
     assert.ok(isActiveCharacter(orochimaru));
-    assert.ok(!orochimaru.requiredMissionId);
+    assert.equal(orochimaru.requiredMissionId, 'hostile-takeover');
 });
 
 test('Five Elements Seal raises all enemy skill costs by 1 random chakra', () => {

@@ -7,7 +7,7 @@ module.exports = {
     id: 'tsurugi-misumi', characterId: 'tsurugi-misumi', name: 'Tsurugi Misumi',
     facePicture: 'https://i.imgur.com/gI96GYe.png',
     characterdeescription: 'A deceptive genin of the Hidden Sound Village, Misumi possesses an unusually flexible body that allows him to twist and contort his limbs at will. Using his unnatural physique to entangle opponents and redirect incoming attacks, he specializes in immobilizing enemies before they can fight back.',
-    requiredMissionId: null,
+    requiredMissionId: 'twisting-sound',
     passive: {
         name: 'Twisted Advantage', icon: PASSIVE_ICON,
         description: "Whenever Misumi reflects an enemy's physical skill with Soft Physique Modification, he gains 1 random chakra.",

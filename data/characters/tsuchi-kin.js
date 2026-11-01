@@ -4,7 +4,7 @@ module.exports = {
     id: 'tsuchi-kin', characterId: 'tsuchi-kin', name: 'Tsuchi Kin',
     facePicture: 'https://i.imgur.com/aSPsypU.png',
     characterdeescription: 'One of the three sound genin; Kin is a confident ninja that likes to toy with her enemies before finishing them off. Using a set of needles and bells, Kin has a number of different effects she can create to attack her enemies.',
-    requiredMissionId: null,
+    requiredMissionId: 'chuunin-exam-the-forest-of-death',
     passive: {
         name: 'Sound Trio',
         icon: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg',

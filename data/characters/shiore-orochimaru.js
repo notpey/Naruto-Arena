@@ -7,7 +7,7 @@ module.exports = {
     id: 'shiore-orochimaru', characterId: 'shiore-orochimaru', name: 'Shiore Orochimaru',
     facePicture: 'https://i.imgur.com/fC4xg6L.png',
     characterdeescription: 'Disguised as a genin of the Hidden Grass Village, Orochimaru infiltrates the Chuunin Exams after murdering Shiore and assuming her identity. Obsessed with acquiring powerful techniques, he sets his sights on Sasuke Uchiha as a potential vessel for his forbidden ambitions.',
-    requiredMissionId: null,
+    requiredMissionId: 'hostile-takeover',
     passive: {
         name: 'Cursed Seal', icon: PASSIVE_ICON,
         description: 'Enemies struck by Cursed Seal Bite are permanently marked. Whenever a marked enemy ends an action with no remaining chakra, they take 5 affliction damage. This effect does not stack and cannot be removed, even after Orochimaru dies.',

@@ -3532,7 +3532,7 @@ const characters = [
         "name": "Kinuta Dosu",
         "facePicture": "https://i.imgur.com/d5yZAyK.png",
         "characterdeescription": "Perhaps the strongest of the three sound genin, Kinuta Dosu uses his implanted Melody Arm to amplify sound waves and increase the power of his taijutsu.",
-        "requiredMissionId": null,
+        "requiredMissionId": "chuunin-exam-the-forest-of-death",
         "passive": {
             "name": "Sound Trio",
             "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
@@ -3795,7 +3795,7 @@ const characters = [
         "name": "Tsuchi Kin",
         "facePicture": "https://i.imgur.com/aSPsypU.png",
         "characterdeescription": "One of the three sound genin; Kin is a confident ninja that likes to toy with her enemies before finishing them off. Using a set of needles and bells, Kin has a number of different effects she can create to attack her enemies.",
-        "requiredMissionId": null,
+        "requiredMissionId": "chuunin-exam-the-forest-of-death",
         "passive": {
             "name": "Sound Trio",
             "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
@@ -3966,7 +3966,7 @@ const characters = [
         "name": "Abumi Zaku",
         "facePicture": "https://i.imgur.com/1hP3uis.png",
         "characterdeescription": "Abumi Zaku is one of the three sound genin sent to the chuunin exams. He was surgically altered with hollow tubes in his arms, allowing him to create waves of compressed air.",
-        "requiredMissionId": null,
+        "requiredMissionId": "chuunin-exam-the-forest-of-death",
         "passive": {
             "name": "Sound Trio",
             "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
@@ -7021,7 +7021,7 @@ const characters = [
         "name": "Oboro",
         "facePicture": "https://i.imgur.com/5Sw5ij0.png",
         "characterdeescription": "A cunning genin of the Hidden Rain Village, Oboro specializes in using illusory clones and underground ambushes to deceive his opponents. Relying on misdirection and surprise attacks, he strikes when his enemies least expect it.",
-        "requiredMissionId": null,
+        "requiredMissionId": "double-lucky",
         "passive": {
             "name": "False Opening",
             "icon": "https://i.imgur.com/2Ne6VxL.png",
@@ -7400,7 +7400,7 @@ const characters = [
         "name": "Shiore Orochimaru",
         "facePicture": "https://i.imgur.com/fC4xg6L.png",
         "characterdeescription": "Disguised as a genin of the Hidden Grass Village, Orochimaru infiltrates the Chuunin Exams after murdering Shiore and assuming her identity. Obsessed with acquiring powerful techniques, he sets his sights on Sasuke Uchiha as a potential vessel for his forbidden ambitions.",
-        "requiredMissionId": null,
+        "requiredMissionId": "hostile-takeover",
         "passive": {
             "name": "Cursed Seal",
             "icon": "https://i.imgur.com/YC4ewK4.png",
@@ -7600,6 +7600,7 @@ const characters = [
     {
         "id": "akadou-yoroi",
         "characterId": "akadou-yoroi",
+        "requiredMissionId": "the-sounds-amongst-the-leaves",
         "name": "Akadou Yoroi",
         "facePicture": "https://i.imgur.com/U0Ziv1r.png",
         "characterdeescription": "A mysterious genin assigned to Kabuto's team during the Chuunin Exams, Yoroi secretly serves as a spy for Orochimaru. Specializing in close-range combat, he possesses the ability to absorb his opponents' chakra, gradually draining their strength while sustaining his own.",
@@ -7747,7 +7748,7 @@ const characters = [
         "name": "Tsurugi Misumi",
         "facePicture": "https://i.imgur.com/gI96GYe.png",
         "characterdeescription": "A deceptive genin of the Hidden Sound Village, Misumi possesses an unusually flexible body that allows him to twist and contort his limbs at will. Using his unnatural physique to entangle opponents and redirect incoming attacks, he specializes in immobilizing enemies before they can fight back.",
-        "requiredMissionId": null,
+        "requiredMissionId": "twisting-sound",
         "passive": {
             "name": "Twisted Advantage",
             "icon": "https://i.imgur.com/XAt3Ht4.png",
@@ -8788,7 +8789,7 @@ const characters = [
         "name": "Mitarashi Anko",
         "facePicture": "https://i.imgur.com/98lWH8z.png",
         "characterdeescription": "A fearless special jonin of the Hidden Leaf Village, Anko serves as a proctor during the Chuunin Exams. Once a student of Orochimaru, she bears the Cursed Seal of Heaven and uses the forbidden techniques of her former master against her enemies.",
-        "requiredMissionId": null,
+        "requiredMissionId": "the-survivor-of-the-seal",
         "passive": {
             "name": "Anko's Cursed Seal",
             "icon": "https://i.imgur.com/tuJRWvE.png",
@@ -8999,7 +9000,7 @@ const characters = [
         "name": "Gekko Hayate",
         "facePicture": "https://i.imgur.com/xVcPeeU.png",
         "characterdeescription": "A skilled swordsman and special jonin of the Hidden Leaf Village, Hayate serves as a proctor during the Chuunin Exams. Despite his sickly appearance, he possesses remarkable speed and mastery of the Dance of the Crescent Moon, using deceptive sword techniques to overwhelm his opponents.",
-        "requiredMissionId": null,
+        "requiredMissionId": "the-moonlight-of-the-leaf",
         "passive": {
             "name": "Fair Fight",
             "icon": "https://i.imgur.com/71oZt5q.png",
@@ -10280,7 +10281,7 @@ const characters = [
         "name": "Baki",
         "facePicture": "https://i.imgur.com/6LazJdG.png",
         "characterdeescription": "A seasoned jonin of the Hidden Sand Village, Baki serves as the instructor of Gaara, Temari, and Kankuro during the Chuunin Exams. Cold and calculating, he specializes in deadly Wind Release techniques and carries out his village's secret missions with ruthless efficiency.",
-        "requiredMissionId": null,
+        "requiredMissionId": "sand-siblings-at-war",
         "passive": {
             "name": "No Witnesses",
             "icon": "https://i.imgur.com/Y7oszT6.png",

@@ -48,7 +48,7 @@ test('Anko draft kit matches names, costs, cooldowns, and roster', () => {
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('mitarashi-anko'));
     assert.ok(isActiveCharacter(anko));
-    assert.ok(!anko.requiredMissionId);
+    assert.equal(anko.requiredMissionId, 'the-survivor-of-the-seal');
 });
 
 test('Dual Pin pierces, strips defenses, amplifies affliction, and unlocks Twin Snakes for 1 turn', () => {

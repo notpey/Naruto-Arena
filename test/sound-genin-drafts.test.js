@@ -217,6 +217,7 @@ test('sound genin are included in the playable roster', () => {
     for (const id of ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi']) {
         assert.ok(ACTIVE_ROSTER_IDS.includes(id), `${id} is active`);
         assert.ok(isActiveCharacter(characters[indexOf(id)]), `${id} is present in the character seed`);
-        assert.ok(!characters[indexOf(id)].requiredMissionId, `${id} has no mission lock`);
+        assert.equal(characters[indexOf(id)].requiredMissionId,
+            'chuunin-exam-the-forest-of-death');
     }
 });
