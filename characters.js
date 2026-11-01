@@ -1629,96 +1629,433 @@ const characters = [
         "id": "rock-lee",
         "characterId": "rock-lee",
         "name": "Rock Lee",
-        "facePicture": "https://i.imgur.com/DuPEnHb.png",
-        "characterdeescription": "A member of team Gai; Lee is a genin with no talent at all in ninjutsu or genjutsu, so he has focused his life all on taijutsu. With his powerful hand to hand techniques, Lee can crush any defense with his immense power.",
+        "facePicture": "https://i.imgur.com/LUA3QK2.jpg",
+        "characterdeescription": "A hardworking genin of Team Guy, Rock Lee lacks the ability to use ninjutsu or genjutsu and has devoted himself entirely to mastering taijutsu. Through relentless training and unwavering determination, he seeks to prove that hard work can overcome natural talent.",
+        "passive": {
+            "name": "Gate Opening",
+            "icon": "https://i.imgur.com/P9VlwlX.jpg",
+            "description": "Whenever Lee uses a physical skill, he opens 1 Gate, up to 5 times. Each Gate Opening increases his physical damage by 5. Upon opening his fifth Gate, Lee cleanses himself, gains 1 taijutsu chakra, takes 50 affliction damage that cannot kill him, and becomes invulnerable for 1 turn."
+        },
+        "startStatuses": [
+            {
+                "statusId": "rock_lee_gate_opening_trigger",
+                "duration": 99,
+                "metadata": {
+                    "permanent": true,
+                    "cannotBeCleansed": true,
+                    "onOwnerUseSkillTrigger": true,
+                    "preserveOnOwnerUseSkillTrigger": true,
+                    "onOwnerUseSkillClassesAny": [
+                        "Physical"
+                    ],
+                    "onOwnerUseSkillApplyStatusToOwner": {
+                        "statusId": "rock_lee_gate_openings",
+                        "duration": 99,
+                        "metadata": {
+                            "helpful": true,
+                            "cannotBeCleansed": true,
+                            "stackMetadataKey": "gateCount",
+                            "stackDelta": 1,
+                            "stackMax": 5,
+                            "stackDerivedNumericKeys": {
+                                "gateDamageBonus": 5
+                            },
+                            "tooltipTextTemplate": "Lee has opened {gateCount} Gates and deals {gateDamageBonus} additional physical damage.",
+                            "applyStatusAtStack": {
+                                "metadataKey": "gateCount",
+                                "value": 5,
+                                "statusId": "rock_lee_fifth_gate_skills",
+                                "duration": 99,
+                                "metadata": {
+                                    "helpful": true,
+                                    "cannotBeCleansed": true,
+                                    "onOwnerKillSourceSkillIdsAny": [
+                                        "rock-lee-final-lotus"
+                                    ],
+                                    "onOwnerKillTargetRelation": "enemy",
+                                    "onOwnerKillGainChakra": {
+                                        "chakraType": "taijutsu",
+                                        "amount": 1
+                                    },
+                                    "onOwnerKillApplyStatusToSelf": {
+                                        "statusId": "rock_lee_final_lotus_immortal",
+                                        "duration": 1,
+                                        "metadata": {
+                                            "helpful": true,
+                                            "minimumHp": 1,
+                                            "tooltipText": "Lee cannot be killed for 1 turn."
+                                        }
+                                    },
+                                    "skillCooldownOverridesBySkillId": {
+                                        "rock-lee-high-speed-taijutsu": 0,
+                                        "rock-lee-front-lotus": 0
+                                    },
+                                    "skillReplacements": {
+                                        "rock-lee-remove-training-weights": "rock-lee-final-lotus"
+                                    },
+                                    "tooltipText": "High Speed Taijutsu and Front Lotus have no cooldown. Remove Training Weights is replaced by Final Lotus."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
         "skills": [
             {
                 "id": "rock-lee-high-speed-taijutsu",
                 "name": "High Speed Taijutsu",
-                "skillimage": "https://i.imgur.com/f59XWBW.png",
-                "skilldescription": "Rock Lee deals 25 piercing damage to one enemy. This skill requires 'Fifth Gate Opening'.",
+                "skillimage": "https://i.imgur.com/roHIgPj.jpg",
+                "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
                 "energy": [
-                    "Taijutsu"
+                    "Taijutsu",
+                    "Random"
                 ],
-                "target": "single-enemy",
-                "actorCondition": {
-                    "statusId": "rock_lee_fifth_gate_opening"
+                "energyBySourceStatusMetadata": {
+                    "statusId": "rock_lee_gate_openings",
+                    "metadataKey": "gateCount",
+                    "tiers": [
+                        {
+                            "min": 3,
+                            "energy": [
+                                "Taijutsu"
+                            ]
+                        }
+                    ]
                 },
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 2,
                 "classes": [
                     "Physical",
-                    "Taijutsu",
                     "Instant"
                 ],
                 "effects": [
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "harmfulOnly": true,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "gain_chakra",
+                        "scope": "self",
+                        "chakraType": "taijutsu",
+                        "amount": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "scope": "self",
+                        "amount": 50,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "minimumHp": 1,
+                            "skillClasses": [
+                                "Affliction"
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_invulnerable",
+                        "duration": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Lee is invulnerable for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_used",
+                        "duration": 99,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Lee has opened his fifth Gate."
+                        }
+                    },
                     {
                         "type": "damage",
                         "amount": 25,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDamageReduction": true
+                            "bonusPerStatusMetadata": {
+                                "scope": "self",
+                                "statusId": "rock_lee_gate_openings",
+                                "metadataKey": "gateCount",
+                                "multiplier": 5
+                            }
                         }
                     },
                     {
-                        "type": "HealthLoss",
-                        "amount": 5,
-                        "scope": "self"
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_high_speed_physical_invulnerable",
+                        "duration": 1,
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToPhysicalSkills": true,
+                            "tooltipText": "Lee is invulnerable to physical skills."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_high_speed_follow_up",
+                        "duration": 1,
+                        "metadata": {
+                            "helpful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "skillReplacements": {
+                                "rock-lee-high-speed-taijutsu": "rock-lee-high-speed-follow-up"
+                            },
+                            "tooltipText": "High Speed Taijutsu can be used again next turn for 1 random chakra."
+                        }
                     }
                 ]
             },
             {
                 "id": "rock-lee-front-lotus",
                 "name": "Front Lotus",
-                "skillimage": "https://i.imgur.com/4boHWJ0.png",
-                "skilldescription": "Rock Lee deals 35 piercing damage to one enemy. For 1 turn, this skill is replaced by 'Final Lotus'. This skill requires 'Fifth Gate Opening'.",
+                "skillimage": "https://i.imgur.com/xTW0rSg.jpg",
+                "skilldescription": "Lee deals 45 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
                 "energy": [
                     "Taijutsu",
-                    "Random"
+                    "Taijutsu"
                 ],
-                "target": "single-enemy",
-                "actorCondition": {
-                    "statusId": "rock_lee_fifth_gate_opening"
+                "energyBySourceStatusMetadata": {
+                    "statusId": "rock_lee_gate_openings",
+                    "metadataKey": "gateCount",
+                    "tiers": [
+                        {
+                            "min": 3,
+                            "energy": [
+                                "Taijutsu",
+                                "Random"
+                            ]
+                        }
+                    ]
                 },
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Physical",
-                    "Taijutsu",
                     "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "harmfulOnly": true,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "gain_chakra",
+                        "scope": "self",
+                        "chakraType": "taijutsu",
+                        "amount": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
                         "type": "damage",
-                        "amount": 35,
-                        "scope": "target",
+                        "scope": "self",
+                        "amount": 50,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
                         "metadata": {
-                            "ignoreDamageReduction": true
+                            "afflictionDamage": true,
+                            "minimumHp": 1,
+                            "skillClasses": [
+                                "Affliction"
+                            ]
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "rock_lee_front_lotus_final_lotus",
-                        "duration": 1,
                         "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_invulnerable",
+                        "duration": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
                         "metadata": {
-                            "skillReplacements": {
-                                "rock-lee-front-lotus": "rock-lee-final-lotus"
-                            },
-                            "tooltipText": "Front Lotus is replaced by Final Lotus."
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Lee is invulnerable for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_used",
+                        "duration": 99,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Lee has opened his fifth Gate."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "target",
+                        "metadata": {
+                            "bonusPerStatusMetadata": {
+                                "scope": "self",
+                                "statusId": "rock_lee_gate_openings",
+                                "metadataKey": "gateCount",
+                                "multiplier": 5
+                            }
                         }
                     }
                 ]
             },
             {
-                "id": "rock-lee-fifth-gate-opening",
-                "name": "Fifth Gate Opening",
-                "skillimage": "https://i.imgur.com/OvlloQo.png",
-                "skilldescription": "Rock Lee opens five of his chakra gates. Permanently, 'High Speed Taijutsu' and 'Front Lotus' may be used. During this time, Lee's harmful skills deal 5 additional damage each time he is damaged by an enemy skill. This skill is replaced by 'Fiery Spirit'.",
+                "id": "rock-lee-remove-training-weights",
+                "name": "Remove Training Weights",
+                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-048-gaara-vs-rock-lee-the-power-of-youth-explodes_/cap_13-42_678c.jpg",
+                "skilldescription": "Lee removes his training weights, causing his physical skills to deal 10 less damage but ignore counters, reflects, and invulnerability for the rest of the battle. Lee also gains 1 taijutsu chakra. This skill cannot be used while active. At 5 Gate Openings, this skill is replaced by Final Lotus.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
                 "cooldown": 0,
+                "actorCondition": {
+                    "missingStatusId": "rock_lee_training_weights_removed"
+                },
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -1726,37 +2063,49 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "rock_lee_fifth_gate_opening",
-                        "duration": 99,
                         "scope": "self",
+                        "statusId": "rock_lee_training_weights_removed",
+                        "duration": 99,
                         "metadata": {
-                            "onOwnerDamagedByBaseDamageAtLeastApplyStatusToOwner": {
-                                "threshold": 1,
-                                "enemyOnly": true,
-                                "duration": 99,
-                                "statusId": "rock_lee_fifth_gate_damage_growth",
-                                "metadata": {
-                                    "skillDamageBonuses": {
-                                        "rock-lee-high-speed-taijutsu": 5,
-                                        "rock-lee-front-lotus": 5,
-                                        "rock-lee-final-lotus": 5
-                                    },
-                                    "tooltipText": "Rock Lee's harmful skills deal 5 additional damage."
-                                }
+                            "helpful": true,
+                            "permanent": true,
+                            "damageDebuffBySkillClass": {
+                                "physical": 10
                             },
-                            "skillReplacements": {
-                                "rock-lee-fifth-gate-opening": "rock-lee-fiery-spirit"
-                            },
-                            "tooltipText": "Fifth Gate is open. Lee gains damage each time he is damaged by an enemy skill and Fifth Gate Opening is replaced by Fiery Spirit."
+                            "uncounterableSkillIds": [
+                                "rock-lee-high-speed-taijutsu",
+                                "rock-lee-high-speed-follow-up",
+                                "rock-lee-front-lotus",
+                                "rock-lee-final-lotus"
+                            ],
+                            "unreflectableSkillIds": [
+                                "rock-lee-high-speed-taijutsu",
+                                "rock-lee-high-speed-follow-up",
+                                "rock-lee-front-lotus",
+                                "rock-lee-final-lotus"
+                            ],
+                            "ignoreInvulnerabilityForSkillIds": [
+                                "rock-lee-high-speed-taijutsu",
+                                "rock-lee-high-speed-follow-up",
+                                "rock-lee-front-lotus",
+                                "rock-lee-final-lotus"
+                            ],
+                            "tooltipText": "Lee deals 10 less physical damage and ignores counters, reflects, and invulnerability with his physical skills."
                         }
+                    },
+                    {
+                        "type": "gain_chakra",
+                        "scope": "self",
+                        "chakraType": "taijutsu",
+                        "amount": 1
                     }
                 ]
             },
             {
-                "id": "rock-lee-lee-block",
-                "name": "Lee Block",
-                "skillimage": "https://i.imgur.com/qgiODIf.png",
-                "skilldescription": "Rock Lee becomes invulnerable for 1 turn.",
+                "id": "rock-lee-lee-dodge",
+                "name": "Lee Dodge",
+                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-048-gaara-vs-rock-lee-the-power-of-youth-explodes_/cap_12-21_5fa6.jpg",
+                "skilldescription": "Lee becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -1770,12 +2119,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
-                        "duration": 1,
                         "scope": "self",
+                        "statusId": "rock_lee_dodge",
+                        "duration": 1,
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Lee is invulnerable."
                         }
                     }
                 ]
@@ -1784,67 +2134,310 @@ const characters = [
                 "id": "rock-lee-final-lotus",
                 "name": "Final Lotus",
                 "hiddenFromSelectionViewer": true,
-                "useBaseSkillCooldown": true,
-                "skillimage": "https://i.imgur.com/h658CGb.png",
-                "skilldescription": "Rock Lee deals 50 piercing damage to one enemy. This skill cannot be countered.",
+                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-050-the-fifth-gate-a-splendid-ninja-is-born/cap_04-41_363a.jpg",
+                "skilldescription": "Lee executes one enemy. If successful, he gains 1 taijutsu chakra and becomes immortal for 1 turn.",
                 "energy": [
                     "Taijutsu",
+                    "Taijutsu",
                     "Taijutsu"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "harmfulOnly": true,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "gain_chakra",
+                        "scope": "self",
+                        "chakraType": "taijutsu",
+                        "amount": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "scope": "self",
+                        "amount": 50,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "afflictionDamage": true,
+                            "minimumHp": 1,
+                            "skillClasses": [
+                                "Affliction"
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_invulnerable",
+                        "duration": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Lee is invulnerable for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_used",
+                        "duration": 99,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Lee has opened his fifth Gate."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 9999,
+                        "scope": "target",
+                        "metadata": {
+                            "bonusPerStatusMetadata": {
+                                "scope": "self",
+                                "statusId": "rock_lee_gate_openings",
+                                "metadataKey": "gateCount",
+                                "multiplier": 5
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "rock-lee-high-speed-follow-up",
+                "name": "High Speed Taijutsu",
+                "hiddenFromSelectionViewer": true,
+                "skillimage": "https://i.imgur.com/roHIgPj.jpg",
+                "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
+                "energy": [
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
                     "Physical",
-                    "Taijutsu",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "damage",
-                        "amount": 50,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
+                        "type": "cleanse_statuses",
+                        "scope": "self",
+                        "harmfulOnly": true,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
                         }
-                    }
-                ],
-                "cannotBeCountered": true
-            },
-            {
-                "id": "rock-lee-fiery-spirit",
-                "name": "Fiery Spirit",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/OvlloQo.png",
-                "skilldescription": "Rock Lee gains 1 taijutsu chakra and heals 10 health plus an additional 10 health for each 25 health he has lost.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "self",
-                "damage": 0,
-                "cooldown": 2,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "gain_chakra",
-                        "chakraType": "taijutsu",
-                        "amount": 1,
-                        "scope": "self"
                     },
                     {
-                        "type": "heal",
-                        "amount": 10,
+                        "type": "gain_chakra",
                         "scope": "self",
+                        "chakraType": "taijutsu",
+                        "amount": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "scope": "self",
+                        "amount": 50,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
                         "metadata": {
-                            "amountPerSourceMissingHpStep": 10,
-                            "sourceMissingHpStep": 25
+                            "afflictionDamage": true,
+                            "minimumHp": 1,
+                            "skillClasses": [
+                                "Affliction"
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_invulnerable",
+                        "duration": 1,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "tooltipText": "Lee is invulnerable for 1 turn."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_fifth_gate_used",
+                        "duration": 99,
+                        "condition": {
+                            "all": [
+                                {
+                                    "statusMetadataAtLeast": {
+                                        "statusId": "rock_lee_gate_openings",
+                                        "metadataKey": "gateCount",
+                                        "value": 5
+                                    }
+                                },
+                                {
+                                    "missingStatusId": "rock_lee_fifth_gate_used"
+                                }
+                            ]
+                        },
+                        "metadata": {
+                            "helpful": true,
+                            "tooltipText": "Lee has opened his fifth Gate."
+                        }
+                    },
+                    {
+                        "type": "damage",
+                        "amount": 25,
+                        "scope": "target",
+                        "metadata": {
+                            "bonusPerStatusMetadata": {
+                                "scope": "self",
+                                "statusId": "rock_lee_gate_openings",
+                                "metadataKey": "gateCount",
+                                "multiplier": 5
+                            }
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "scope": "self",
+                        "statusId": "rock_lee_high_speed_physical_invulnerable",
+                        "duration": 1,
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerableToPhysicalSkills": true,
+                            "tooltipText": "Lee is invulnerable to physical skills."
                         }
                     }
                 ]
             }
+        ],
+        "tags": [
+            "konoha-genin"
         ]
     },
     {
@@ -6224,17 +6817,23 @@ const characters = [
         "id": "oboro",
         "characterId": "oboro",
         "name": "Oboro",
-        "facePicture": "https://i.imgur.com/q3FfmTs.png",
-        "characterdeescription": "A Rain Genin in the Chuunin exams, Oboro is vindictive ninja that specializes in genjutsu. Using the various illusions that Oboro creates, he is able to hide his true self while attacking from below.",
+        "facePicture": "https://i.imgur.com/5Sw5ij0.png",
+        "characterdeescription": "A cunning genin of the Hidden Rain Village, Oboro specializes in using illusory clones and underground ambushes to deceive his opponents. Relying on misdirection and surprise attacks, he strikes when his enemies least expect it.",
         "requiredMissionId": "yellow-flash",
+        "passive": {
+            "name": "False Opening",
+            "icon": "https://i.imgur.com/2Ne6VxL.png",
+            "description": "Oboro takes 10 less non-affliction damage from the first damaging enemy skill used on him each turn.",
+            "firstEnemyDamagingSkillReductionFlat": 10
+        },
         "skills": [
             {
-                "id": "oboro-exploding-kunai",
-                "name": "Exploding Kunai",
-                "skillimage": "https://i.imgur.com/fo853Ic.png",
-                "skilldescription": "Oboro deals 15 damage to all enemies and reduces their damage by 5 for 1 turn. During 'Haze Clone', this skill has no cooldown.",
+                "id": "oboro-underground-ambush",
+                "name": "Underground Ambush",
+                "skillimage": "https://i.imgur.com/vKrmQQx.png",
+                "skilldescription": "Oboro sets an invisible ambush against all enemies for 1 turn. The first enemy to use a skill takes 20 physical damage and has their physical skills stunned for 1 turn. During Haze Clones, this effect triggers against every enemy who uses a skill. This effect ends if Oboro dies.",
                 "energy": [
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
@@ -6245,79 +6844,104 @@ const characters = [
                 ],
                 "effects": [
                     {
-                        "type": "damage",
-                        "amount": 15,
-                        "scope": "all-enemy"
-                    },
-                    {
                         "type": "apply_status",
-                        "statusId": "oboro_exploding_kunai_debuff",
+                        "statusId": "oboro_underground_ambush",
                         "duration": 1,
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "invisible": true,
+                            "hideTooltipFromEnemy": true,
                             "turnDurationAnchor": "source_turn",
-                            "damageDebuffFlat": 5,
-                            "mergeNumericAddKeys": [
-                                "damageDebuffFlat"
+                            "removeOnSourceDeath": true,
+                            "onOwnerUseSkillTrigger": true,
+                            "ownerUseTriggerRequiresLivingSource": true,
+                            "sharedFirstTriggerUnlessSourceStatusId": "oboro_haze_clones",
+                            "onOwnerUseSkillEffects": [
+                                {
+                                    "type": "damage",
+                                    "amount": 20,
+                                    "metadata": {
+                                        "skillClasses": [
+                                            "Physical"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "oboro_underground_ambush_stun",
+                                    "duration": 1,
+                                    "fresh": true,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "cannotUseSkillClasses": [
+                                            "physical"
+                                        ],
+                                        "turnDurationAnchor": "source_turn",
+                                        "tooltipText": "This character cannot use Physical skills for 1 turn."
+                                    }
+                                }
                             ],
-                            "tooltipText": "This character deals 5 less damage from Exploding Kunai."
+                            "tooltipText": "The next skill this character uses triggers a 20 physical damage ambush and a 1-turn Physical skill stun."
                         }
                     }
                 ]
             },
             {
-                "id": "oboro-earth-swim",
-                "name": "Earth Swim",
-                "skillimage": "https://i.imgur.com/8iLEEf6.png",
-                "skilldescription": "Oboro deals 20 damage to one enemy and stuns their physical, chakra and affliction skills for 1 turn. During 'Haze Clone', this skill will target all enemies and will cost 1 less random chakra.",
+                "id": "oboro-exploding-kunais",
+                "name": "Exploding Kunais",
+                "skillimage": "https://i.imgur.com/gnjpskq.png",
+                "skilldescription": "Oboro deals 10 physical damage to one enemy and 10 affliction damage the following turn. During Haze Clones, this skill targets all enemies.",
                 "energy": [
-                    "Genjutsu",
                     "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
+                    "Affliction",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
+                        "amount": 10,
+                        "scope": "target",
+                        "metadata": {
+                            "skillClasses": [
+                                "Physical"
+                            ]
+                        }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "oboro_earth_swim_stun",
+                        "statusId": "oboro_exploding_kunais_affliction",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "affliction",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's physical, chakra and affliction skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "afflictionDamage": true,
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "removeOnSourceDeath": true,
+                            "tooltipText": "This character takes 10 affliction damage on Oboro's following turn."
                         }
                     }
                 ]
             },
             {
-                "id": "oboro-haze-clone",
-                "name": "Haze Clone",
-                "skillimage": "https://i.imgur.com/6zjMsdw.png",
-                "skilldescription": "Oboro gains 25 points of destructible defense for 2 turns. During this time, 'Exploding Kunai' has no cooldown and 'Earth Swim' will target all enemies.",
+                "id": "oboro-haze-clones",
+                "name": "Haze Clones",
+                "skillimage": "https://i.imgur.com/o0DKaNj.png",
+                "skilldescription": "Oboro gains 30 destructible defense for 4 turns. During this time, Underground Ambush and Exploding Kunais are enhanced.",
                 "energy": [
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 4,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -6325,25 +6949,24 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "oboro_haze_clone",
-                        "duration": 2,
+                        "statusId": "oboro_haze_clones",
+                        "duration": 4,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "destructibleDefensePoints": 25,
+                            "destructibleDefensePoints": 30,
                             "skillReplacements": {
-                                "oboro-exploding-kunai": "oboro-exploding-kunai-empowered",
-                                "oboro-earth-swim": "oboro-earth-swim-empowered"
+                                "oboro-exploding-kunais": "oboro-exploding-kunais-haze"
                             },
-                            "tooltipText": "Oboro has 25 destructible defense. 'Exploding Kunai' has no cooldown and 'Earth Swim' is improved."
+                            "tooltipText": "Oboro has 30 destructible defense. Underground Ambush triggers for every enemy, and Exploding Kunais targets all enemies."
                         }
                     }
                 ]
             },
             {
-                "id": "oboro-hiding-tactics",
-                "name": "Oboro Hiding Tactics",
-                "skillimage": "https://i.imgur.com/VEOVr6w.png",
+                "id": "oboro-fleet-of-foot",
+                "name": "Fleet of Foot",
+                "skillimage": "https://i.imgur.com/kUC4WTS.png",
                 "skilldescription": "Oboro becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -6358,104 +6981,58 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "oboro_fleet_of_foot",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Oboro is invulnerable."
                         }
                     }
                 ]
             },
             {
-                "id": "oboro-exploding-kunai-empowered",
-                "name": "Exploding Kunai",
+                "id": "oboro-exploding-kunais-haze",
+                "name": "Exploding Kunais",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "deadcharacter.png",
-                "skilldescription": "Oboro deals 25 damage to all enemies and reduces their damage by 5 for 1 turn during 'Haze Clone'.",
+                "skillimage": "https://i.imgur.com/gnjpskq.png",
+                "skilldescription": "Oboro deals 10 physical damage to all enemies and 10 affliction damage to each the following turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
+                    "Affliction",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25,
-                        "scope": "all-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "oboro_exploding_kunai_debuff",
-                        "duration": 1,
+                        "amount": 10,
                         "scope": "all-enemy",
                         "metadata": {
-                            "harmful": true,
-                            "damageDebuffFlat": 5,
-                            "mergeNumericAddKeys": [
-                                "damageDebuffFlat"
-                            ],
-                            "tooltipText": "This character deals 5 less damage from Exploding Kunai.",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "oboro-earth-swim-empowered",
-                "name": "Earth Swim",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "deadcharacter.png",
-                "skilldescription": "Oboro deals 20 damage to all enemies, stuns their physical, chakra and affliction skills for 1 turn, and lowers their damage by 5 for 1 turn during 'Haze Clone'.",
-                "energy": [
-                    "Genjutsu"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "all-enemy"
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "oboro_earth_swim_stun",
-                        "duration": 1,
-                        "scope": "all-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "affliction",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's physical, chakra and affliction skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "skillClasses": [
+                                "Physical"
+                            ]
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "oboro_earth_swim_damage_debuff",
+                        "statusId": "oboro_exploding_kunais_affliction",
                         "duration": 1,
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
-                            "damageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "afflictionDamage": true,
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "removeOnSourceDeath": true,
+                            "tooltipText": "This character takes 10 affliction damage on Oboro's following turn."
                         }
                     }
                 ]
@@ -6466,21 +7043,26 @@ const characters = [
         "id": "shigure",
         "characterId": "shigure",
         "name": "Shigure",
-        "facePicture": "https://i.imgur.com/n72OXiY.png",
-        "characterdeescription": "A genin from the village of rain, Shigure is a strong, but arrogant ninja. Using a number of Umbrellas, Shigure is able to attack all enemies with sharp senbon needles, or focus everything to one enemy.",
+        "facePicture": "https://i.imgur.com/VCQKYxx.png",
+        "characterdeescription": "A genin of the Hidden Rain Village, Shigure specializes in manipulating concealed senbon needles using his chakra. Armed with a collection of deadly umbrellas, he overwhelms his opponents with relentless showers of precisely controlled projectiles.",
         "requiredMissionId": "a-rare-opportunity",
+        "passive": {
+            "name": "Needle Curtain",
+            "icon": "https://i.imgur.com/fudCwzE.png",
+            "description": "While Sprinkling Needles is active, any enemy that uses a new harmful skill on Shigure or his allies will receive 5 damage."
+        },
         "skills": [
             {
                 "id": "shigure-umbrella-toss",
                 "name": "Umbrella Toss",
-                "skillimage": "https://i.imgur.com/miNRsh2.png",
-                "skilldescription": "For 4 turns, Shigure will have 5 points of damage reduction. During this time, his next 'Needle Barrage' will not consume 'Needle Field'. This skill does not stack.",
+                "skillimage": "https://i.imgur.com/sFY25u2.png",
+                "skilldescription": "Shigure launches his umbrella into the air, increasing the damage of his skills by 5 for 3 turns.",
                 "energy": [
                     "Random"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 3,
+                "cooldown": 2,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -6489,57 +7071,12 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "shigure_umbrella_toss_active",
-                        "duration": 4,
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "damageReductionFlat": 5,
-                            "replaceSkillDamageBonuses": true,
-                            "tooltipText": "Shigure has 5 damage reduction and his next Needle Barrage will not consume Needle Field."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "shigure-needle-barrage",
-                "name": "Needle Barrage",
-                "skillimage": "https://i.imgur.com/IonrXRg.png",
-                "skilldescription": "Shigure deals 25 damage to one enemy affected by 'Needle Field'. This skill deals 10 additional damage to that target and consumes 'Needle Field' unless 'Umbrella Toss' is active.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "targetCondition": {
-                    "statusId": "shigure_needle_field"
-                },
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 25,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "shigure_needle_field"
-                        }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "target",
-                        "statusId": "shigure_needle_field",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "shigure_umbrella_toss_active"
+                            "damageBonusFlat": 5,
+                            "tooltipText": "Shigure deals 5 additional damage with his skills."
                         }
                     }
                 ]
@@ -6547,8 +7084,8 @@ const characters = [
             {
                 "id": "shigure-sprinkling-needles",
                 "name": "Sprinkling Needles",
-                "skillimage": "https://i.imgur.com/LOYbNWz.png",
-                "skilldescription": "Shigure deals 10 piercing damage to all enemies for 3 turns and applies 'Needle Field' to them. During this time, 'Needle Barrage' can be used on them. This skill cannot be countered.",
+                "skillimage": "https://i.imgur.com/2OSrQPb.png",
+                "skilldescription": "Shigure deals 10 physical damage to all enemies each turn for 3 turns. Needle Barrage can be used during this time.",
                 "energy": [
                     "Random",
                     "Random"
@@ -6556,7 +7093,6 @@ const characters = [
                 "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 2,
-                "cannotBeCountered": true,
                 "classes": [
                     "Physical",
                     "Action"
@@ -6564,35 +7100,71 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "shigure_sprinkling_needles_mark",
+                        "statusId": "shigure_sprinkling_needles",
                         "duration": 3,
                         "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
+                            "ongoingClass": "action",
                             "turnEndDamage": 10,
                             "turnEndTrigger": "source_turn",
-                            "ignoreTargetDamageReduction": true,
-                            "tooltipText": "This character takes 10 piercing damage each turn from Sprinkling Needles and can be targeted by Needle Barrage.",
-                            "ongoingClass": "action"
+                            "turnEndSkillClasses": [
+                                "Physical"
+                            ],
+                            "tooltipText": "This character takes 10 physical damage each turn from Sprinkling Needles and can be targeted by Needle Barrage."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "shigure_needle_field",
+                        "statusId": "shigure_needle_curtain",
                         "duration": 3,
-                        "scope": "all-enemy",
+                        "scope": "all-allies",
                         "metadata": {
-                            "harmful": true,
-                            "tooltipText": "This character is caught in Needle Field.",
-                            "ongoingClass": "action"
+                            "helpful": true,
+                            "ongoingClass": "action",
+                            "removeOnSourceDeath": true,
+                            "onEnemySkillTargetedHarmfulOnly": true,
+                            "onEnemySkillTargetedUseStatusSource": true,
+                            "onEnemySkillTargetedOncePerCastGroup": "shigure_needle_curtain",
+                            "onEnemySkillTargetedDamageToSourceAmount": 5,
+                            "onEnemySkillTargetedDamageToSourceSkillClasses": [
+                                "Physical"
+                            ],
+                            "tooltipText": "Enemies who use a harmful skill on this team take 5 physical damage while Sprinkling Needles is active."
                         }
+                    }
+                ]
+            },
+            {
+                "id": "shigure-needle-barrage",
+                "name": "Needle Barrage",
+                "skillimage": "https://i.imgur.com/2UNieZ7.png",
+                "skilldescription": "Shigure deals 20 physical damage to one enemy affected by Sprinkling Needles.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "targetCondition": {
+                    "statusId": "shigure_sprinkling_needles"
+                },
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 20,
+                        "scope": "target"
                     }
                 ]
             },
             {
                 "id": "shigure-umbrella-block",
                 "name": "Umbrella Block",
-                "skillimage": "https://i.imgur.com/D1BTZbK.png",
+                "skillimage": "https://i.imgur.com/PO7MINf.png",
                 "skilldescription": "Shigure becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -6607,12 +7179,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "shigure_umbrella_block",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Shigure is invulnerable."
                         }
                     }
                 ]

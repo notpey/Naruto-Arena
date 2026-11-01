@@ -498,7 +498,7 @@ test('Audit Fixes: 1-Turn enemy debuffs specify turnDurationAnchor = source_turn
     const ankoDebuff = ankoPin.effects.find((e) => e.statusId === 'mitarashi_anko_dual_pin_debuff');
     assert.equal(ankoDebuff.metadata.turnDurationAnchor, 'source_turn');
 
-    const oboroKunai = oboroChar.skills.find((s) => s.id === 'oboro-exploding-kunai');
-    const oboroDebuff = oboroKunai.effects.find((e) => e.statusId === 'oboro_exploding_kunai_debuff');
-    assert.equal(oboroDebuff.metadata.turnDurationAnchor, 'source_turn');
+    const oboroKunai = oboroChar.skills.find((s) => s.id === 'oboro-exploding-kunais');
+    const oboroAffliction = oboroKunai.effects.find((e) => e.statusId === 'oboro_exploding_kunais_affliction');
+    assert.equal(oboroAffliction.metadata.turnDurationAnchor, 'source_turn');
 });

@@ -819,42 +819,132 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
     assert.equal(match.board.p2[0].hp, 100, 'Art of the Valentine prepares the next Feint');
 });
 
-test('battleLogic resolves Rock Lee starter kit behavior used by the editor data', () => {
-    let match = makeMatch([9], [1]);
+test('Rock Lee draft opens Gates on physical skills and changes costs and skills at thresholds', () => {
+    const leeIndex = getCharIndex('rock-lee');
+    const lee = getCharacter('rock-lee');
+    const match = makeMatch([leeIndex], [1, 2, 3]);
+    const actor = match.board.p1[0];
+    const gate = () => actor.state.statuses.find((status) => status.id === 'rock_lee_gate_openings');
+    const effective = (index) => resolveEffectiveSkill({
+        characters, rosterIndex: leeIndex, skillIndex: index, actorState: actor.state,
+    });
+    assert.equal(lee.passive.name, 'Gate Opening');
+    assert.deepEqual(lee.skills.slice(0, 4).map((skill) => skill.name), [
+        'High Speed Taijutsu', 'Front Lotus', 'Remove Training Weights', 'Lee Dodge',
+    ]);
+    assert.equal(gate(), undefined);
 
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(gate(), undefined, 'the strategic weights skill does not open a Gate');
+    assert.equal(match.chakraPools.p1.taijutsu, 1);
+    queueSkill(match, 'p1', 2);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.chakraPools.p1.taijutsu, 1,
+        'training weights cannot be removed twice');
 
+    for (let count = 1; count <= 5; count += 1) {
+        if (count > 1) {
+            actor.state.cooldowns = {};
+        }
+        queueSkill(match, 'p1', 1, [{ username: 'p2', slot: count % 3 }]);
+        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+        assert.equal(gate()?.metadata.gateCount, count);
+        if (count === 3) {
+            assert.deepEqual(computeEffectiveEnergyCost({
+                skill: effective(0), actorState: actor.state,
+            }), { reservedSpecific: { bloodline: 0, ninjutsu: 0, taijutsu: 1, genjutsu: 0 },
+                requiredRandom: 0 });
+        }
+    }
+    assert.equal(effective(0).cooldown, 0);
+    assert.equal(effective(1).cooldown, 0);
+    assert.equal(effective(2).id, 'rock-lee-final-lotus');
+    assert.equal(actor.hp, 50, 'opening the fifth Gate costs 50 nonlethal affliction damage');
+    assert.ok(actor.state.statuses.some((status) =>
+        status.id === 'rock_lee_fifth_gate_invulnerable'));
+    const chakraBeforeLotus = match.chakraPools.p1.taijutsu;
+    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].alive, false);
+    assert.equal(match.chakraPools.p1.taijutsu, chakraBeforeLotus + 2,
+        'the turn grant and successful Final Lotus each add one taijutsu');
+    assert.ok(actor.state.statuses.some((status) =>
+        status.id === 'rock_lee_final_lotus_immortal'));
+});
+
+test('Rock Lee High Speed Taijutsu uses the first Gate and offers its random chakra follow-up', () => {
+    const leeIndex = getCharIndex('rock-lee');
+    const match = makeMatch([leeIndex], [1]);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p1[0].hp, 95, 'High Speed Taijutsu should cost Lee 5 health');
-    assert.equal(match.board.p2[0].hp, 75, 'High Speed Taijutsu should deal 25 piercing damage immediately');
-
-    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    assert.equal(match.board.p2[0].hp, 70, 'the first Gate adds 5 to the 25 physical damage');
+    assert.equal(resolveEffectiveSkill({
+        characters, rosterIndex: leeIndex, skillIndex: 0,
+        actorState: match.board.p1[0].state,
+    }).id, 'rock-lee-high-speed-follow-up');
+    assert.ok(match.board.p1[0].state.statuses.some((status) =>
+        status.id === 'rock_lee_high_speed_physical_invulnerable'));
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 40, 'Front Lotus should deal 35 piercing damage');
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 9,
-            skillIndex: 1,
-            actorState: match.board.p1[0].state,
-        }).id,
-        'rock-lee-final-lotus'
-    );
+    assert.equal(match.board.p2[0].hp, 35,
+        'the next-turn follow-up deals 25 plus the second Gate bonus');
+    assert.equal(match.board.p1[0].state.statuses.find((status) =>
+        status.id === 'rock_lee_gate_openings').metadata.gateCount, 2);
+});
 
-    match = makeMatch([9], [1]);
+test('Remove Training Weights reduces Lee physical damage without reducing fifth Gate self damage', () => {
+    const leeIndex = getCharIndex('rock-lee');
+    const match = makeMatch([leeIndex], [1, 2, 3]);
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(
-        resolveEffectiveSkill({
-            characters,
-            rosterIndex: 9,
-            skillIndex: 2,
-            actorState: match.board.p1[0].state,
-        }).id,
-        'rock-lee-fiery-spirit'
-    );
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 80, '25 base plus 5 Gate damage minus 10 from weights');
+    match.board.p2[0].state.statuses.push({
+        id: 'test_invulnerable', remainingTurns: 1,
+        sourceUsername: 'p2', sourceSlot: 0, metadata: { invulnerable: true },
+    });
+    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[0].hp, 35,
+        'Front Lotus ignores invulnerability after weights are removed');
+});
+
+test('Remove Training Weights bypasses counters and both forms of reflection', () => {
+    const leeIndex = getCharIndex('rock-lee');
+    const makeDefendedMatch = () => {
+        const match = makeMatch([leeIndex], [1]);
+        match.board.p2[0].state.statuses.push({
+            id: 'test_reflecting_counter', remainingTurns: 3,
+            sourceUsername: 'p2', sourceSlot: 0,
+            metadata: {
+                triggerOnEnemyHarmfulSkill: true, counterCancelsSkill: true,
+                counterDamage: 20, reflectNextIncomingSkill: true,
+                reflectBackToCaster: true, reflectDamagePercent: 100,
+            },
+        });
+        return match;
+    };
+    const withoutWeights = makeDefendedMatch();
+    queueSkill(withoutWeights, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match: withoutWeights, actingUsername: 'p1', characters });
+    assert.equal(withoutWeights.board.p2[0].hp, 100);
+
+    const withWeights = makeDefendedMatch();
+    queueSkill(withWeights, 'p1', 2);
+    resolvePendingTurnSkills({ match: withWeights, actingUsername: 'p1', characters });
+    const weightedSkill = resolveEffectiveSkill({
+        characters, rosterIndex: leeIndex, skillIndex: 0,
+        actorState: withWeights.board.p1[0].state,
+    });
+    assert.equal(weightedSkill.cannotBeCountered, true);
+    assert.equal(weightedSkill.cannotBeReflected, true);
+    queueSkill(withWeights, 'p1', 0, [{ username: 'p2', slot: 0 }]);
+    resolvePendingTurnSkills({ match: withWeights, actingUsername: 'p1', characters });
+    assert.equal(withWeights.board.p2[0].hp, 80);
+    assert.equal(withWeights.board.p1[0].hp, 100);
 });
 
 test('Tenten Dragons stacks Trap marks, and Trap consumes them after damage and class debuffs', () => {
@@ -1145,12 +1235,12 @@ test('Shigure Sprinkling Needles description matches its turn damage value', () 
     const shigure = getCharacter('shigure');
     const sprinklingNeedles = shigure.skills.find((skill) => skill.id === 'shigure-sprinkling-needles');
     const damageStatus = sprinklingNeedles.effects.find(
-        (effect) => effect.statusId === 'shigure_sprinkling_needles_mark'
+        (effect) => effect.statusId === 'shigure_sprinkling_needles'
     );
 
     assert.equal(damageStatus.metadata.turnEndDamage, 10);
-    assert.match(sprinklingNeedles.skilldescription, /10 piercing damage/);
-    assert.match(damageStatus.metadata.tooltipText, /10 piercing damage/);
+    assert.match(sprinklingNeedles.skilldescription, /10 physical damage/);
+    assert.match(damageStatus.metadata.tooltipText, /10 physical damage/);
 });
 
 test('battleLogic resolves Temari starter kit behavior used by the editor data', () => {

@@ -119,6 +119,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           piercingDamageOnStunSkillIds: Array.isArray(passive.piercingDamageOnStunSkillIds)
                               ? passive.piercingDamageOnStunSkillIds : [],
                           damageTakenInTurn: passive.damageTakenInTurn || null,
+                          firstEnemyDamagingSkillReductionFlat:
+                              Math.max(0, Number(passive.firstEnemyDamagingSkillReductionFlat) || 0),
                           bonusAgainstNonDamagingSkillUser:
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
                           onEnemySkillTargetedDamageToSourceAmount:
@@ -373,6 +375,15 @@ const resolveEffectiveSkill = ({ characters, rosterIndex, skillIndex, actorState
         const cooldownOverride = cooldownOverrides?.[resolvedSkill?.id];
         if (Number.isFinite(cooldownOverride) && cooldownOverride >= 0) {
             effectiveSkill = { ...effectiveSkill, cooldown: cooldownOverride };
+        }
+        const uncounterable = status?.metadata?.uncounterableSkillIds;
+        const unreflectable = status?.metadata?.unreflectableSkillIds;
+        if (Array.isArray(uncounterable) && uncounterable.includes(resolvedSkill?.id)) {
+            effectiveSkill = { ...effectiveSkill, cannotBeCountered: true };
+        }
+        if (Array.isArray(unreflectable) && unreflectable.includes(resolvedSkill?.id)) {
+            effectiveSkill = { ...effectiveSkill, cannotBeReflected: true,
+                ignoreDamageReflection: true };
         }
     }
     return effectiveSkill || baseSkill;
@@ -3216,6 +3227,28 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     const afflictionDamage =
         Boolean(context?.afflictionDamage) ||
         skillClasses.some((entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'affliction');
+    if (incoming > 0 && context?.skillCastId && context?.turnMarker &&
+        context?.sourceUsername && context?.targetUsername &&
+        context.sourceUsername !== context.targetUsername) {
+        const passive = (targetState.statuses || []).find((status) =>
+            isStatusActiveForMetadata(status, unit) && status?.metadata?.passive === true &&
+            Number(status.metadata.firstEnemyDamagingSkillReductionFlat) > 0);
+        if (passive) {
+            const snapshots = targetState.snapshots;
+            if (snapshots.firstEnemyDamagingSkillTurnMarker !== context.turnMarker) {
+                snapshots.firstEnemyDamagingSkillTurnMarker = context.turnMarker;
+                snapshots.firstEnemyDamagingSkillCastId = context.skillCastId;
+                snapshots.firstEnemyDamagingSkillReductionRemaining =
+                    Math.max(0, Number(passive.metadata.firstEnemyDamagingSkillReductionFlat) || 0);
+            }
+            if (!afflictionDamage && snapshots.firstEnemyDamagingSkillCastId === context.skillCastId) {
+                const reduction = Math.min(incoming,
+                    Math.max(0, Number(snapshots.firstEnemyDamagingSkillReductionRemaining) || 0));
+                incoming -= reduction;
+                snapshots.firstEnemyDamagingSkillReductionRemaining -= reduction;
+            }
+        }
+    }
     if (incoming > 0 && !afflictionDamage) {
         const sourceBarrierResult = consumeOutgoingBarrierOnSource({
             match: context?.match || null,
@@ -4420,6 +4453,7 @@ const triggerOnEnemySkillTargetedBonuses = ({
     recipient,
     skill,
     damagingEffectOnly = false,
+    triggeredGroupsThisCast = null,
 }) => {
     if (!match || !actingUsername || !actorUnit || !recipient?.unit) return;
     if (!recipient.username || recipient.username === actingUsername) return;
@@ -4443,6 +4477,13 @@ const triggerOnEnemySkillTargetedBonuses = ({
             : [];
         if (classFilter.length > 0 && !classFilter.some((entry) => hasSkillClass(skill?.classes || [], entry))) {
             return;
+        }
+        const group = typeof metadata.onEnemySkillTargetedOncePerCastGroup === 'string'
+            ? metadata.onEnemySkillTargetedOncePerCastGroup : '';
+        if (group && triggeredGroupsThisCast instanceof Set) {
+            const key = `${group}:${status.sourceUsername || recipient.username}:${status.sourceSlot ?? recipient.slot}`;
+            if (triggeredGroupsThisCast.has(key)) return;
+            triggeredGroupsThisCast.add(key);
         }
         const retaliateDamage = Math.max(0, Number(metadata.onEnemySkillTargetedDamageToSourceAmount) || 0);
         const retaliationUsername = metadata.onEnemySkillTargetedUseStatusSource
@@ -4963,6 +5004,21 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 status?.sourceUsername && Number.isInteger(status?.sourceSlot)
                     ? match.board?.[status.sourceUsername]?.[Number(status.sourceSlot)] || null
                     : null;
+            if (status?.metadata?.ownerUseTriggerRequiresLivingSource &&
+                (!sourceUnit || sourceUnit.alive === false)) return;
+            const enhancedBySourceStatusId =
+                status?.metadata?.sharedFirstTriggerUnlessSourceStatusId;
+            if (enhancedBySourceStatusId && sourceUnit &&
+                !hasStatus(ensureUnitStateShape(sourceUnit), enhancedBySourceStatusId)) {
+                (match.board?.[actingUsername] || []).forEach((teamUnit) => {
+                    if (!teamUnit || teamUnit === actorUnit) return;
+                    const teamState = ensureUnitStateShape(teamUnit);
+                    teamState.statuses = teamState.statuses.filter((entry) =>
+                        !(entry?.id === status.id &&
+                            entry.sourceUsername === status.sourceUsername &&
+                            entry.sourceSlot === status.sourceSlot));
+                });
+            }
             const healAmount = Math.max(0, Number(status?.metadata?.onOwnerUseSkillHealSourceAmount) || 0);
             if (healAmount > 0 && sourceUnit && sourceUnit.alive !== false) {
                 applyHealToUnit(sourceUnit, healAmount);
@@ -5436,6 +5492,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             (Array.isArray(recipients) ? recipients : []).map((recipient) => {
                 if (!recipient?.unit || recipient.unit.alive === false) return recipient;
                 if (recipient.username === actingUsername) return recipient;
+                if (skillCannotBeReflected) return recipient;
                 const targetReflectStatus = getTargetReflectStatus(recipient);
                 if (targetReflectStatus?.id) {
                     const targetState = ensureUnitStateShape(recipient.unit);
@@ -5883,6 +5940,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             return didEvadeRecipient(recipient) || shouldEvadeForRecipient(recipient);
         };
         const damagingPassiveRecipients = new Set();
+        const targetedTriggerGroupsThisCast = new Set();
         const preflightRecipientsByTargetType = (() => {
             const targetType = String(skill?.target || '').trim().toLowerCase();
             if (targetType === 'single-enemy' || targetType === 'single-character') {
@@ -5959,6 +6017,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 actorSlot,
                 recipient,
                 skill,
+                triggeredGroupsThisCast: targetedTriggerGroupsThisCast,
             });
             if (
                 skillIsHarmful &&
@@ -6058,6 +6117,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             triggerOnEnemySkillTargetedBonuses({
                                 match, actingUsername, actorUnit, actorSlot,
                                 recipient, skill, damagingEffectOnly: true,
+                                triggeredGroupsThisCast: targetedTriggerGroupsThisCast,
                             });
                         }
                     }
@@ -7751,6 +7811,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         sourceUsername: entry.sourceUsername || actingUsername,
                         sourceSlot: Number.isInteger(entry.sourceSlot) ? entry.sourceSlot : actorSlot,
                         sourceSkillId: entry.sourceSkillId || skill.id || null,
+                        skillCastId: `${turnMarker}:${actorSlot}:${actorState.totalSkillUseCount || 0}`,
+                        turnMarker,
                         damageDebugLabel: entry.damageDebugLabel || null,
                         targetUsername: entry.recipient.username,
                         targetSlot: entry.recipient.slot,
@@ -7761,6 +7823,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         ignoreDamageReduction:
                             Boolean(entry.ignoreDamageReduction) || Boolean(entry.healthStealDamage),
                         ignoreDestructibleDefense: entry.ignoreDestructibleDefense,
+                        skipDamageReflection: Boolean(skill?.ignoreDamageReflection),
                         unpierceableBudgetMap: turnUnpierceableBudgetByRecipient,
                         unpierceableBudgetKey: mitigationBudgetKey,
                         standardMitigationBudgetMap: turnStandardMitigationBudgetByRecipient,
