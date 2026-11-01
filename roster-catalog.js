@@ -54,6 +54,28 @@ const NarutoRosterCatalog = (() => {
         ['ahri-the-nine-tailed-fox', 'ionia'],
     ];
 
+    // Display order for the selection grid: starters first, grouped by team, then mission
+    // unlocks in roughly the order they unlock. This only orders the grid; it never changes
+    // roster indices, which matches use to identify characters.
+    const rosterOrder = [
+        'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
+        'inuzuka-kiba', 'aburame-shino', 'hyuuga-hinata',
+        'nara-shikamaru', 'akimichi-chouji', 'yamanaka-ino',
+        'rock-lee', 'neji-hyuuga', 'tenten',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'baki',
+        'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
+        'akadou-yoroi', 'tsurugi-misumi',
+        'oboro', 'shigure',
+        'shiore-orochimaru', 'mitarashi-anko', 'gekko-hayate',
+        'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox',
+        'umino-iruka', 'mizuki',
+        'sarutobi-konohamaru', 'ebisu',
+        'hatake-kakashi',
+        'demon-brothers', 'haku', 'momochi-zabuza', 'gato', 'zori-and-waraji',
+        'sarutobi-hiruzen',
+    ];
+    const rosterOrderById = new Map(rosterOrder.map((id, index) => [id, index]));
+
     const arcsById = new Map(arcs.map((arc) => [arc.id, arc]));
     const characterMeta = new Map(characters.map(([id, arcId], order) => [id, { arcId, order }]));
     const getCharacterId = (character) => character?.characterId || character?.id;
@@ -85,6 +107,12 @@ const NarutoRosterCatalog = (() => {
                 const second = roster[b];
                 if (sort === 'name') {
                     return String(first.name || '').localeCompare(String(second.name || '')) || a - b;
+                }
+                if (sort === 'roster') {
+                    return (rosterOrderById.get(getCharacterId(first)) ?? Infinity)
+                        - (rosterOrderById.get(getCharacterId(second)) ?? Infinity)
+                        || String(first.name || '').localeCompare(String(second.name || ''))
+                        || a - b;
                 }
                 const firstMeta = characterMeta.get(getCharacterId(first));
                 const secondMeta = characterMeta.get(getCharacterId(second));

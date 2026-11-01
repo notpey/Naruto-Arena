@@ -6429,7 +6429,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const search = rosterSearchEl?.value || '';
         const arc = rosterArcFilterEl?.value || '';
         const availability = rosterLockMode === 'all' ? '' : rosterLockMode;
-        const sort = rosterSortEl?.value || 'arc';
+        const sort = rosterSortEl?.value || 'roster';
         const visibleIndices = rosterCatalog
             ? rosterCatalog.filterRosterIndices(roster, { search, arc, availability, sort })
             : roster.map((_, index) => index).filter((index) => roster[index]?.hidden !== true);

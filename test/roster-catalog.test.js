@@ -83,3 +83,33 @@ test('arc sorting changes display order without changing canonical roster indice
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'lissandra-the-ice-witch')).label, 'Freljord');
     assert.equal(catalog.getArc(roster.find((character) => character.characterId === 'ahri-the-nine-tailed-fox')).label, 'Ionia');
 });
+
+test('roster order puts starters first in team groups, then mission unlocks', () => {
+    const { getDefaultMissionCatalog } = require('../server.js');
+    const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({ characterId, name: characterId }));
+    const order = catalog.filterRosterIndices(roster, { sort: 'roster' })
+        .map((index) => roster[index].characterId);
+    assert.deepEqual(order, [
+        'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
+        'inuzuka-kiba', 'aburame-shino', 'hyuuga-hinata',
+        'nara-shikamaru', 'akimichi-chouji', 'yamanaka-ino',
+        'rock-lee', 'neji-hyuuga', 'tenten',
+        'gaara-of-the-desert', 'kankuro', 'temari', 'baki',
+        'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
+        'akadou-yoroi', 'tsurugi-misumi',
+        'oboro', 'shigure',
+        'shiore-orochimaru', 'mitarashi-anko', 'gekko-hayate',
+        'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox',
+        'umino-iruka', 'mizuki',
+        'sarutobi-konohamaru', 'ebisu',
+        'hatake-kakashi',
+        'demon-brothers', 'haku', 'momochi-zabuza', 'gato', 'zori-and-waraji',
+        'sarutobi-hiruzen',
+    ]);
+    assert.equal(new Set(order).size, ACTIVE_ROSTER_IDS.length, 'every active character has a roster position');
+
+    const missionRewards = new Set(getDefaultMissionCatalog().map((mission) => mission.reward_character));
+    const firstMissionIndex = order.findIndex((id) => missionRewards.has(id));
+    assert.ok(order.slice(firstMissionIndex).every((id) => missionRewards.has(id)),
+        'all starters come before every mission unlock');
+});
