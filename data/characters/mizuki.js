@@ -2,9 +2,18 @@ module.exports = {
     id: 'mizuki', characterId: 'mizuki', name: 'Mizuki',
     facePicture: 'https://i.imgur.com/4MCaK7l.png', requiredMissionId: 'a-dishonored-shinobi',
     characterdeescription: "An instructor at the Hidden Leaf's Ninja Academy, Mizuki conceals his hunger for power beneath a sympathetic demeanor. Hoping to steal the forbidden Scroll of Seals, he manipulates Naruto's desire to become a ninja, only to have his betrayal exposed by Iruka.",
-    passive: { name: 'Meld in the Shadows', icon: 'https://i.imgur.com/JDdDwn0.png',
-        description: "Mizuki's damaging skills deal 5 additional damage to enemies who use a non-damaging skill that turn.",
-        bonusAgainstNonDamagingSkillUser: 5 },
+    passive: {
+        name: 'Windmill', icon: 'https://i.imgur.com/JDdDwn0.png',
+        description: 'Mizuki can use Execution Shuriken twice. If it kills an enemy, Mizuki becomes invulnerable for 1 turn and gains one additional use.',
+        onOwnerKillSourceSkillIdsAny: ['mizuki-execution-shuriken'],
+        onOwnerKillTargetRelation: 'enemy',
+        onOwnerKillGrantSkillUse: { skillId: 'mizuki-execution-shuriken', amount: 1 },
+        onOwnerKillApplyStatusToSelf: {
+            statusId: 'mizuki_windmill_invulnerable', duration: 1,
+            metadata: { helpful: true, invulnerable: true,
+                tooltipText: 'Mizuki is invulnerable for 1 turn after an Execution Shuriken kill.' },
+        },
+    },
     skills: [
         {
             id: 'mizuki-kunai-ambush', name: 'Kunai Ambush', skillimage: 'https://i.imgur.com/oTFkPZG.png',
@@ -21,20 +30,30 @@ module.exports = {
         {
             id: 'mizuki-execution-shuriken', name: 'Execution Shuriken',
             skillimage: 'https://i.imgur.com/O3Y4Q29.png',
-            skilldescription: 'Mizuki deals 30 physical damage to one enemy. During Windmill, this skill instead deals 25 physical damage to all enemies, and Windmill ends.',
+            skilldescription: 'Mizuki deals 30 physical damage to one enemy. If the target falls to 10 health or less, they are executed. This skill can be used twice, gaining one use for each kill it makes.',
             energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 30, scope: 'target' }],
+            maxUses: 2, classes: ['Physical', 'Instant'],
+            effects: [{ type: 'damage', amount: 30, scope: 'target',
+                metadata: { executeBelowHpThreshold: 10 } }],
         },
         {
-            id: 'mizuki-windmill', name: 'Windmill', skillimage: 'https://i.imgur.com/jETOs8w.png',
-            skilldescription: 'For 2 turns, Mizuki’s next Execution Shuriken affects all enemies.',
+            id: 'mizuki-meld-in-the-shadows', name: 'Meld in the Shadows',
+            skillimage: 'https://i.imgur.com/jETOs8w.png',
+            skilldescription: 'Mizuki secretly counters the first Physical skill used against him for 1 turn. The countered enemy is then targeted by Kunai Ambush. This skill is invisible.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 2,
-            classes: ['Strategic', 'Instant', 'Physical*'], effects: [
-                { type: 'apply_status', statusId: 'mizuki_windmill', duration: 2, scope: 'self',
-                    metadata: { helpful: true,
-                        skillReplacements: { 'mizuki-execution-shuriken': 'mizuki-execution-shuriken-windmill' },
-                        removeSelfOnSkillUseSkillIds: ['mizuki-execution-shuriken-windmill'],
-                        tooltipText: 'The next Execution Shuriken hits all enemies, then Windmill ends.' } },
+            classes: ['Strategic', 'Instant'], effects: [
+                { type: 'apply_status', statusId: 'mizuki_meld_in_the_shadows', duration: 1, scope: 'self',
+                    metadata: { helpful: true, invisible: true, hideTooltipFromEnemy: true,
+                        triggerOnEnemyHarmfulSkillClassesAny: ['physical'],
+                        counterCancelsSkill: true,
+                        counterEffectsToAttacker: [
+                            { type: 'damage', amount: 20 },
+                            { type: 'apply_status', statusId: 'mizuki_kunai_ambush_trap', duration: 1,
+                                metadata: { harmful: true, triggerOnOwnerHelpfulSkill: true,
+                                    counterCancelsSkill: true, turnDurationAnchor: 'source_turn',
+                                    tooltipText: 'The next helpful skill this character uses is countered.' } },
+                        ],
+                        tooltipText: 'For 1 turn, Mizuki counters the first Physical skill used against him, then hits the attacker with Kunai Ambush for 20 damage.' } },
             ],
         },
         {
@@ -44,18 +63,8 @@ module.exports = {
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'mizuki_effortless_side_step', duration: 1, scope: 'self',
-                    metadata: { helpful: true, invulnerable: true, tooltipText: 'Mizuki is invulnerable.' } },
-            ],
-        },
-        {
-            id: 'mizuki-execution-shuriken-windmill', baseSkillId: 'mizuki-execution-shuriken', useBaseSkillCooldown: true,
-            hiddenFromSelectionViewer: true, name: 'Execution Shuriken',
-            skillimage: 'https://i.imgur.com/O3Y4Q29.png',
-            skilldescription: 'Mizuki deals 25 physical damage to all enemies, ending Windmill.',
-            energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 25, scope: 'all-enemy' },
-                { type: 'remove_status', statusId: 'mizuki_windmill', scope: 'self' },
+                    metadata: { helpful: true, invulnerable: true,
+                        tooltipText: 'Mizuki is invulnerable.' } },
             ],
         },
     ],

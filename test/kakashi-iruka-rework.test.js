@@ -66,6 +66,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
             skillIndex: slot, actorState: match.board.p1[0].state,
         });
         assert.equal(ready.id, 'hatake-kakashi-raikiri');
+        assert.deepEqual(ready.classes, ['Chakra', 'Instant']);
         const cost = computeEffectiveEnergyCost({ skill: ready, actorState: match.board.p1[0].state });
         assert.equal(cost.reservedSpecific.ninjutsu, expectedCost.ninjutsu || 0);
         assert.equal(cost.reservedSpecific.taijutsu, expectedCost.taijutsu || 0);
@@ -73,7 +74,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
         cast(match, 'p1', 0, slot, ['p2', 0]);
-        assert.equal(match.board.p2[0].hp, 35);
+        assert.equal(match.board.p2[0].hp, 55, 'Naruto awakens when Raikiri leaves him below 40 health');
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         assert.equal(resolveEffectiveSkill({
             characters, rosterIndex: index('hatake-kakashi'),

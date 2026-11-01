@@ -99,6 +99,14 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                               : (passive.description || '').trim(),
                           physicalDamageBonusWhileHelpful:
                               Math.max(0, Number(passive.physicalDamageBonusWhileHelpful) || 0),
+                          onFirstHpAtMost: passive.onFirstHpAtMost || null,
+                          sacrificeFirstLethalAllyAttack:
+                              Boolean(passive.sacrificeFirstLethalAllyAttack),
+                          nextSkillDamageBonusOnStun: passive.nextSkillDamageBonusOnStun || null,
+                          onOwnerKillSourceSkillIdsAny: passive.onOwnerKillSourceSkillIdsAny || null,
+                          onOwnerKillTargetRelation: passive.onOwnerKillTargetRelation || null,
+                          onOwnerKillGrantSkillUse: passive.onOwnerKillGrantSkillUse || null,
+                          onOwnerKillApplyStatusToSelf: passive.onOwnerKillApplyStatusToSelf || null,
                           destructibleDefenseBonusGranted:
                               Math.max(0, Number(passive.destructibleDefenseBonusGranted) || 0),
                           physicalDamageBonusAgainstTargetStatus:
@@ -763,7 +771,9 @@ const doesUnitSatisfySkillTargetCondition = (unit, skill, actorUsername = null, 
 const doesActorSatisfySkillCondition = (actorUnit, actorState, skill) => {
     const condition = skill?.actorCondition;
     const maxUses = Number(skill?.maxUses);
-    if (Number.isFinite(maxUses) && maxUses >= 0 && getSkillUseCount(actorState, skill?.id, skill) >= maxUses) {
+    const bonusUses = Math.max(0, Number(actorState?.bonusSkillUses?.[skill?.id]) || 0);
+    if (Number.isFinite(maxUses) && maxUses >= 0 &&
+        getSkillUseCount(actorState, skill?.id, skill) >= maxUses + bonusUses) {
         return false;
     }
     if (!condition || typeof condition !== 'object') return true;
@@ -2957,6 +2967,21 @@ const maybeTriggerReactiveDefenses = ({
             });
         }
     }
+    const counterEffectsToAttacker = Array.isArray(trapMetadata?.counterEffectsToAttacker)
+        ? trapMetadata.counterEffectsToAttacker.filter((entry) => entry && typeof entry === 'object')
+        : [];
+    if (counterEffectsToAttacker.length > 0) {
+        applyTriggeredEffectsFromStatus({
+            effects: counterEffectsToAttacker,
+            match,
+            status: trapStatus,
+            targetUnit: actorUnit,
+            targetState: ensureUnitStateShape(actorUnit),
+            targetUsername: actingUsername,
+            targetSlot: Array.isArray(match?.board?.[actingUsername])
+                ? match.board[actingUsername].indexOf(actorUnit) : null,
+        });
+    }
     if (Array.isArray(trapMetadata?.counterEffectsToEnemiesOfSource) && trapMetadata.counterEffectsToEnemiesOfSource.length > 0) {
         applyTriggeredEffectsToRecipients({
             effects: trapMetadata.counterEffectsToEnemiesOfSource,
@@ -3443,7 +3468,66 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     }
     const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
     const hpBeforeDamage = Math.max(0, Number(unit.hp) || 0);
+    const hpAfterDamage = Math.max(contextualMinimumHp, hpBeforeDamage - dealt);
+    const executeThreshold = Number.isFinite(context?.executeBelowHpThreshold)
+        ? Math.max(0, Number(context.executeBelowHpThreshold)) : null;
+    const lethalToAlly = dealt > 0 && hpBeforeDamage > 0 &&
+        (hpAfterDamage <= 0 || (executeThreshold !== null && hpAfterDamage <= executeThreshold));
+    if (lethalToAlly && !context?.skipAllySacrifice && context?.match && context?.targetUsername &&
+        context?.sourceUsername !== context.targetUsername) {
+        const allies = context.match.board?.[context.targetUsername] || [];
+        const hakuSlot = allies.findIndex((ally) =>
+            ally && ally !== unit && ally.alive !== false &&
+            (ensureUnitStateShape(ally).statuses || []).some((status) =>
+                isStatusActiveForMetadata(status, ally) &&
+                status?.metadata?.passive === true &&
+                status?.metadata?.sacrificeFirstLethalAllyAttack &&
+                !status.metadata._sacrificeUsed
+            )
+        );
+        if (hakuSlot >= 0) {
+            const haku = allies[hakuSlot];
+            const passive = ensureUnitStateShape(haku).statuses.find((status) =>
+                isStatusActiveForMetadata(status, haku) &&
+                status?.metadata?.passive === true &&
+                status?.metadata?.sacrificeFirstLethalAllyAttack &&
+                !status.metadata._sacrificeUsed
+            );
+            passive.metadata._sacrificeUsed = true;
+            applyDamageToUnit(haku, dealt, {
+                ...context,
+                targetSlot: hakuSlot,
+                skipAllySacrifice: true,
+                ignoreDamageReduction: true,
+                ignoreDestructibleDefense: true,
+                damageDebugReason: 'Sacrifice',
+            });
+            return 0;
+        }
+    }
     unit.hp = Math.max(contextualMinimumHp, hpBeforeDamage - dealt);
+    if (unit.hp < hpBeforeDamage) {
+        const awakening = targetState.statuses.find((status) =>
+            isStatusActiveForMetadata(status, unit) &&
+            status?.metadata?.passive === true &&
+            status?.metadata?.onFirstHpAtMost &&
+            !status.metadata._onFirstHpAtMostTriggered &&
+            unit.hp <= Math.max(0, Number(status.metadata.onFirstHpAtMost.threshold) || 0)
+        );
+        if (awakening) {
+            awakening.metadata._onFirstHpAtMostTriggered = true;
+            applyHealToUnit(unit, Math.max(0, Number(awakening.metadata.onFirstHpAtMost.heal) || 0));
+            if (context?.match && context?.targetUsername) {
+                const chakraCount = Math.max(0, Number(awakening.metadata.onFirstHpAtMost.randomChakra) || 0);
+                for (let i = 0; i < chakraCount; i += 1) {
+                    const chakraType = chakraTypes[Math.floor(Math.random() * chakraTypes.length)];
+                    applyChakraGainToMatch({
+                        match: context.match, username: context.targetUsername, chakraType, amount: 1,
+                    });
+                }
+            }
+        }
+    }
     const healthDamage = Math.max(0, hpBeforeDamage - unit.hp);
     if (dealt > 0) {
         targetState.snapshots.tookDamageThisTurn = true;
@@ -3699,10 +3783,13 @@ const applyPassiveStunDamage = ({
     const passive = sourceState.statuses.find((status) =>
         isStatusActiveForMetadata(status, sourceUnit) &&
         status.metadata?.passive === true &&
-        Number(status.metadata?.piercingDamageOnStun) > 0
+        (Number(status.metadata?.piercingDamageOnStun) > 0 ||
+            status.metadata?.nextSkillDamageBonusOnStun?.skillId)
     );
     if (!passive || !sourceSkillId) return;
-    if (!passive.metadata.piercingDamageOnStunSkillIds?.includes(sourceSkillId)) return;
+    const piercingStunSkillIds = passive.metadata.piercingDamageOnStunSkillIds || [];
+    const nextSkillBonus = passive.metadata.nextSkillDamageBonusOnStun;
+    if (!piercingStunSkillIds.includes(sourceSkillId) && !nextSkillBonus?.skillId) return;
     const targetState = ensureUnitStateShape(targetUnit);
     const applied = targetState.statuses.some((status) =>
         status.id === statusId && status.sourceUsername === sourceUsername &&
@@ -3712,11 +3799,30 @@ const applyPassiveStunDamage = ({
                 status.metadata.cannotUseSkillClasses.length > 0))
     );
     if (!applied) return;
-    applyDamageToUnit(targetUnit, Number(passive.metadata.piercingDamageOnStun), {
-        match, sourceUsername, sourceSlot, sourceSkillId, targetUsername, targetSlot,
-        ignoreDamageReduction: true, ignoreDestructibleDefense: true,
-        skillClasses: [], damageDebugReason: 'stun passive',
-    });
+    if (nextSkillBonus?.skillId && Number(nextSkillBonus.amount) > 0) {
+        applyStatus({
+            targetState: sourceState,
+            statusId: `${nextSkillBonus.skillId}_stun_bonus`,
+            duration: 99,
+            sourceSkillId,
+            sourceUsername,
+            sourceSlot,
+            metadata: {
+                helpful: true,
+                skillDamageBonuses: { [nextSkillBonus.skillId]: Number(nextSkillBonus.amount) },
+                removeSelfOnSkillUseSkillIds: [nextSkillBonus.skillId],
+                tooltipText: `${nextSkillBonus.skillId} deals ${nextSkillBonus.amount} additional damage on its next use.`,
+            },
+            fresh: false,
+        });
+    }
+    if (piercingStunSkillIds.includes(sourceSkillId) && Number(passive.metadata.piercingDamageOnStun) > 0) {
+        applyDamageToUnit(targetUnit, Number(passive.metadata.piercingDamageOnStun), {
+            match, sourceUsername, sourceSlot, sourceSkillId, targetUsername, targetSlot,
+            ignoreDamageReduction: true, ignoreDestructibleDefense: true,
+            skillClasses: [], damageDebugReason: 'stun passive',
+        });
+    }
 };
 
 const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
@@ -4220,6 +4326,13 @@ const triggerSourceKillHooks = ({
             }
         }
         const applyStatusToSelf = metadata.onOwnerKillApplyStatusToSelf;
+        const extraUse = metadata.onOwnerKillGrantSkillUse;
+        if (extraUse?.skillId && Number(extraUse.amount) > 0) {
+            sourceState.bonusSkillUses = sourceState.bonusSkillUses || {};
+            sourceState.bonusSkillUses[extraUse.skillId] =
+                Math.max(0, Number(sourceState.bonusSkillUses[extraUse.skillId]) || 0) +
+                Math.max(0, Number(extraUse.amount) || 0);
+        }
         if (applyStatusToSelf?.statusId) {
             applyStatus({
                 targetState: sourceState,
@@ -4847,14 +4960,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         }
 
         const skillUsePassive = characters?.[actorUnit?.rosterIndex]?.passive;
-        const randomPiercing = skillUsePassive?.onSkillUseRandomEnemyPiercingDamage;
-        const randomPiercingAmount = Math.max(0, Number(randomPiercing?.amount) || 0);
-        if (randomPiercingAmount > 0 && actorUnit.alive !== false &&
+        const randomDamage = skillUsePassive?.onSkillUseRandomEnemyDamage;
+        const randomDamageAmount = Math.max(0, Number(randomDamage?.amount) || 0);
+        if (randomDamageAmount > 0 && actorUnit.alive !== false &&
             actorState.statuses.some((status) => status?.metadata?.passive === true &&
                 status?.metadata?.sourceSkillName === skillUsePassive.name &&
                 (Number(status?.remainingTurns) || 0) > 0)) {
             const growth = actorState.statuses.find((status) =>
-                status?.id === randomPiercing.extraTriggersStatusId &&
+                status?.id === randomDamage.extraTriggersStatusId &&
                 (Number(status?.remainingTurns) || 0) > 0);
             const extraTriggers = Math.max(0, Number(growth?.metadata?.extraTriggers) || 0);
             const enemyUsername = (match.players || []).find((player) =>
@@ -4865,10 +4978,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (enemies.length === 0) break;
                 const enemy = enemies[Math.floor(Math.random() * enemies.length)];
                 if (isUnitInvulnerableForSkill(enemy, ['Physical'])) continue;
-                applyDamageToUnit(enemy, randomPiercingAmount, {
+                applyDamageToUnit(enemy, randomDamageAmount, {
                     match, sourceUsername: actingUsername, sourceSlot: actorSlot,
                     sourceSkillId: null, targetUsername: enemyUsername,
-                    skillClasses: ['Physical'], ignoreDamageReduction: true,
+                    skillClasses: ['Physical'],
                     damageDebugReason: 'passive',
                 });
             }

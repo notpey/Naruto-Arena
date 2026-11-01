@@ -6,10 +6,14 @@ const characters = [
         "facePicture": "https://i.imgur.com/NwbpKdo.png",
         "characterdeescription": "Shunned by the Hidden Leaf Village for the Nine-Tailed Fox sealed within him, Naruto Uzumaki is a mischievous young genin determined to earn everyone's recognition and one day become Hokage. Armed with his newly learned Shadow Clone Technique and an unshakable spirit, Naruto begins his journey alongside Team 7, eager to prove that he's more than the village outcast.",
         "passive": {
-            "name": "Unpredictable Ninja",
+            "name": "Kyuubi Awakening",
             "icon": "https://i.imgur.com/TxXUuaP.png",
-            "description": "Naruto's damaging Physical skills deal 5 additional damage while he is affected by a helpful effect.",
-            "physicalDamageBonusWhileHelpful": 5
+            "description": "The first time Naruto falls to 40 or fewer health, he heals 20 health and gains 1 random chakra.",
+            "onFirstHpAtMost": {
+                "threshold": 40,
+                "heal": 20,
+                "randomChakra": 1
+            }
         },
         "skills": [
             {
@@ -143,6 +147,9 @@ const characters = [
                     }
                 ]
             }
+        ],
+        "tags": [
+            "konoha-genin"
         ]
     },
     {
@@ -984,7 +991,7 @@ const characters = [
                 "id": "hyuuga-hinata-eight-trigrams-64-palms",
                 "name": "Eight Trigrams 64 Palms",
                 "skillimage": "https://i.imgur.com/ADoVhoI.png",
-                "skilldescription": "Requires Shy Byakugan. Hinata deals 10 physical damage to all enemies, heals all allies for 10 health, and reduces the non-affliction damage of all enemies by 5 for 1 turn. This skill's damage and healing are increased by 5 for 1 turn after use.",
+                "skilldescription": "Requires Shy Byakugan. Hinata deals 5 physical damage to all enemies, heals all allies for 5 health, and gives all allies 5 damage reduction for 1 turn. This skill's damage and healing are increased by 5 for 1 turn after use.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -1001,24 +1008,23 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 10,
+                        "amount": 5,
                         "scope": "all-enemy"
                     },
                     {
                         "type": "heal",
-                        "amount": 10,
+                        "amount": 5,
                         "scope": "all-allies"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "hyuuga_hinata_64_palms_debuff",
+                        "statusId": "hyuuga_hinata_64_palms_reduction",
                         "duration": 1,
-                        "scope": "all-enemy",
+                        "scope": "all-allies",
                         "metadata": {
-                            "harmful": true,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character deals 5 less non-affliction damage for 1 turn."
+                            "helpful": true,
+                            "damageReductionFlat": 5,
+                            "tooltipText": "This character has 5 damage reduction for 1 turn."
                         }
                     },
                     {
@@ -1102,6 +1108,9 @@ const characters = [
                     }
                 ]
             }
+        ],
+        "tags": [
+            "konoha-genin"
         ]
     },
     {
@@ -1403,49 +1412,43 @@ const characters = [
         "id": "yamanaka-ino",
         "characterId": "yamanaka-ino",
         "name": "Yamanaka Ino",
-        "facePicture": "https://i.imgur.com/qqaI3xv.png",
-        "characterdeescription": "A Genin from Team 10, Ino is a member of the Yamanaka clan, and a very confident and vain girl. Ino is able to use a variety of abilities to take over and control her enemies, making it difficult to tell friend from foe.",
+        "facePicture": "https://i.imgur.com/h2p3QjN.png",
+        "characterdeescription": "A confident young kunoichi from Konohagakure's Yamanaka clan, Ino specializes in secret techniques that allow her to transfer her consciousness into another person's body. During the Chūnin Exams, her rivalry with Sakura reveals a clever and resourceful fighter capable of deceiving opponents into falling for her carefully prepared traps.",
+        "passive": {
+            "name": "Art of the Valentine",
+            "icon": "https://i.imgur.com/kZPSOwC.png",
+            "description": "When Ino successfully stuns an enemy, Mind Transfer Feint deals 5 additional Chakra damage on its next use.",
+            "nextSkillDamageBonusOnStun": {
+                "skillId": "yamanaka-ino-mind-transfer-feint",
+                "amount": 5
+            }
+        },
         "skills": [
             {
-                "id": "yamanaka-ino-mind-body-disturbance",
-                "name": "Mind Body Disturbance",
-                "ignoreInvulnerability": false,
-                "skillimage": "https://i.imgur.com/3g2XWzn.png",
-                "skilldescription": "Yamanaka Ino targets one random enemy, stunning their physical, chakra, and strategic skills for 1 turn. Another random enemy takes 25 piercing damage.",
+                "id": "yamanaka-ino-mind-transfer-feint",
+                "name": "Mind Transfer Feint",
+                "skillimage": "https://i.imgur.com/1RddcCQ.png",
+                "skilldescription": "Ino deals 20 Chakra damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.",
                 "energy": [
-                    "Genjutsu"
+                    "Random"
                 ],
-                "target": "self",
+                "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 0,
                 "classes": [
-                    "Mental",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "yamanaka_ino_mind_body_disturbance_control",
-                        "duration": 1,
-                        "scope": "random-enemy",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "strategic",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's physical, chakra, and strategic skills are stunned."
-                        }
-                    },
-                    {
                         "type": "damage",
-                        "amount": 25,
-                        "scope": "random-enemy",
+                        "amount": 20,
+                        "scope": "target",
                         "metadata": {
-                            "ignoreDamageReduction": true,
-                            "ignoreDestructibleDefense": true
+                            "skillClasses": [
+                                "Chakra"
+                            ],
+                            "bonusDamageIfTargetStunned": 10
                         }
                     }
                 ]
@@ -1453,75 +1456,56 @@ const characters = [
             {
                 "id": "yamanaka-ino-mind-body-switch",
                 "name": "Mind Body Switch",
-                "skillimage": "https://i.imgur.com/dHM9uYL.png",
-                "skilldescription": "Yamanaka Ino targets one enemy for 3 turns. On the first turn, their physical skills are stunned. On the second turn, their physical and chakra skills are stunned. On the third turn, they are fully stunned for 1 turn. During this time, this skill becomes 'Art of the Valentine'.",
+                "skillimage": "https://i.imgur.com/cKdM0Dy.png",
+                "skilldescription": "Ino stuns one enemy for 2 turns. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.",
                 "energy": [
-                    "Random",
-                    "Random"
+                    "Genjutsu",
+                    "Genjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 2,
                 "classes": [
-                    "Strategic",
+                    "Chakra",
                     "Control"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "yamanaka_ino_mind_body_switch_stage_1",
-                        "duration": 1,
+                        "statusId": "ino_mind_body_switch_target",
+                        "duration": 2,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical"
-                            ],
-                            "tooltipText": "This character's physical skills are stunned. Next turn, their physical and chakra skills will be stunned. After that, they will be fully stunned.",
-                            "onExpireEffects": [
-                                {
-                                    "type": "apply_status",
-                                    "statusId": "yamanaka_ino_mind_body_switch_stage_2",
-                                    "duration": 1,
-                                    "scope": "self",
-                                    "metadata": {
-                                        "harmful": true,
-                                        "cannotUseSkillClasses": [
-                                            "physical",
-                                            "energy"
-                                        ],
-                                        "tooltipText": "This character's physical and chakra skills are stunned.",
-                                        "onExpireEffects": [
-                                            {
-                                                "type": "apply_status",
-                                                "statusId": "yamanaka_ino_mind_body_switch_stage_3",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                    "harmful": true,
-                                                    "cannotUseSkills": true,
-                                                    "tooltipText": "This character is stunned and cannot use skills."
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
+                            "cannotUseSkills": true,
                             "ongoingClass": "control",
-                            "turnDurationAnchor": "source_turn"
+                            "endsOnAnySourceStun": true,
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "Mind Body Switch: all skills are stunned while Ino maintains control."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "yamanaka_ino_mind_body_switch_active",
-                        "duration": 3,
+                        "statusId": "ino_mind_body_switch_active",
+                        "duration": 2,
                         "scope": "self",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "ino_mind_body_switch_target",
+                            "statusFromActor": true
+                        },
                         "metadata": {
+                            "helpful": true,
+                            "ongoingClass": "control",
+                            "endsOnAnySourceStun": true,
+                            "linkedTargetStatusId": "ino_mind_body_switch_target",
+                            "copyTargetKeyToKeys": [
+                                "linkedTargetKey"
+                            ],
                             "skillReplacements": {
-                                "yamanaka-ino-mind-body-switch": "yamanaka-ino-art-of-the-valentine"
+                                "yamanaka-ino-mind-body-switch": "yamanaka-ino-forced-betrayal"
                             },
-                            "tooltipText": "Mind Body Switch is replaced by Art of the Valentine.",
-                            "ongoingClass": "control"
+                            "tooltipText": "Mind Body Switch is replaced by Forced Betrayal while the target is controlled."
                         }
                     }
                 ]
@@ -1529,50 +1513,49 @@ const characters = [
             {
                 "id": "yamanaka-ino-chakra-hair-strand-trap",
                 "name": "Chakra Hair Strand Trap",
-                "skillimage": "https://i.imgur.com/CH2jrFU.png",
-                "skilldescription": "Yamanaka Ino targets one enemy. For 1 turn, if they use a skill, they receive 10 damage, have their strategic skills stunned for 1 turn, and become unable to ignore stun effects for 1 turn. This skill is invisible.",
-                "energy": [],
+                "skillimage": "https://i.imgur.com/7m4IPdu.png",
+                "skilldescription": "Ino places an invisible trap on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends.",
+                "energy": [
+                    "Genjutsu"
+                ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 0,
                 "classes": [
                     "Strategic",
-                    "Ninjutsu",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "yamanaka_ino_chakra_hair_strand_trap",
-                        "duration": 1,
+                        "statusId": "ino_hair_strand_trap",
+                        "duration": 2,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
+                            "invisible": true,
                             "hideTooltipFromUnitOwner": true,
                             "onOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillHarmfulOnly": true,
                             "onOwnerUseSkillEffects": [
                                 {
-                                    "type": "damage",
-                                    "amount": 10,
-                                    "scope": "self"
-                                },
-                                {
                                     "type": "apply_status",
-                                    "statusId": "yamanaka_ino_chakra_hair_strand_trap_strategic_stun",
+                                    "statusId": "ino_hair_strand_stun",
                                     "duration": 1,
+                                    "fresh": true,
                                     "scope": "self",
                                     "metadata": {
                                         "harmful": true,
                                         "cannotUseSkillClasses": [
-                                            "strategic"
+                                            "physical",
+                                            "chakra"
                                         ],
-                                        "cannotIgnoreStuns": true,
-                                        "tooltipText": "This character's strategic skills are stunned and they cannot ignore stun effects."
+                                        "tooltipText": "Physical and Chakra skills are stunned."
                                     }
                                 }
                             ],
-                            "tooltipText": "If this character uses a skill, they take 10 damage and their strategic skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "The next harmful skill triggers a Physical and Chakra stun."
                         }
                     }
                 ]
@@ -1580,7 +1563,7 @@ const characters = [
             {
                 "id": "yamanaka-ino-ino-block",
                 "name": "Ino Block",
-                "skillimage": "https://i.imgur.com/ZTn3Gt4.png",
+                "skillimage": "https://i.imgur.com/bgwFeRq.png",
                 "skilldescription": "Yamanaka Ino becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -1595,57 +1578,51 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "ino_block",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Ino is invulnerable."
                         }
                     }
                 ]
             },
             {
-                "id": "yamanaka-ino-art-of-the-valentine",
-                "name": "Art of the Valentine",
+                "id": "yamanaka-ino-forced-betrayal",
+                "name": "Forced Betrayal",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/p25BBXs.png",
-                "skilldescription": "Yamanaka Ino deals 15 damage to one enemy. If the target is affected by a stun effect, this skill deals 10 additional damage.",
+                "skillimage": "https://i.imgur.com/TX3m6tw.png",
+                "skilldescription": "Ino deals 30 physical damage to one enemy through Mind Body Switch.",
                 "energy": [
                     "Random"
                 ],
                 "target": "single-enemy",
+                "targetCondition": {
+                    "statusId": "ino_mind_body_switch_target",
+                    "statusFromActor": true
+                },
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Mental",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 15,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
+                        "amount": 30,
                         "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusIdsAny": [
-                                "stunned",
-                                "yamanaka_ino_mind_body_disturbance_control",
-                                "yamanaka_ino_mind_body_switch_stage_1",
-                                "yamanaka_ino_mind_body_switch_stage_2",
-                                "yamanaka_ino_mind_body_switch_stage_3",
-                                "nara_shikamaru_shadow_imitation",
-                                "uzumaki_naruto_rasengan_stun"
-                            ]
+                        "metadata": {
+                            "damageSourceControlledStatusId": "ino_mind_body_switch_target"
                         }
                     }
                 ]
             }
+        ],
+        "tags": [
+            "konoha-genin"
         ]
     },
     {
@@ -1874,14 +1851,24 @@ const characters = [
         "id": "tenten",
         "characterId": "tenten",
         "name": "Tenten",
-        "facePicture": "https://i.imgur.com/xkYENuj.png",
-        "characterdeescription": "A member of team Gai, Tenten is a tomboyish weapon specialist who believes a kunoichi can be as strong as a male ninja. In battle, Tenten surrounds the battlefield in weapons, using them for damage and for disabling her opponents.",
+        "facePicture": "https://i.imgur.com/NHZg6gh.png",
+        "characterdeescription": "A hardworking genin of Team Guy, Tenten specializes in weapons combat, using summoning scrolls to unleash a vast arsenal of deadly projectiles. Determined to become a legendary kunoichi, she relies on precision, preparation, and relentless training to overcome her opponents.",
+        "passive": {
+            "name": "Sharp Tools",
+            "icon": "https://i.imgur.com/4KEJ94b.png",
+            "description": "Enemies who use a damaging skill on Tenten take 5 physical damage.",
+            "onEnemySkillTargetedDamageToSourceAmount": 5,
+            "onEnemySkillTargetedDamageToSourceSkillClasses": [
+                "Physical"
+            ],
+            "onEnemySkillTargetedDamagingOnly": true
+        },
         "skills": [
             {
                 "id": "tenten-twin-rising-dragons",
                 "name": "Twin Rising Dragons",
-                "skillimage": "https://i.imgur.com/735M5GV.png",
-                "skilldescription": "Tenten deals 15 damage to one enemy and 10 damage to all others. For 2 turns, all enemies will take 10 additional damage from 'Twin Rising Dragons Trap'.",
+                "skillimage": "https://i.imgur.com/g4ksO57.png",
+                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -1895,7 +1882,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 15,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
@@ -1908,14 +1895,10 @@ const characters = [
                         "statusId": "tenten_twin_rising_dragons_mark",
                         "duration": 2,
                         "scope": "all-enemy",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "tenten_full_release_active"
-                        },
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 10,
+                            "bonusDamageFromSourceSkillsFlat": 5,
                             "mergeNumericAddKeys": [
                                 "bonusDamageFromSourceSkillsFlat"
                             ],
@@ -1923,7 +1906,7 @@ const characters = [
                             "bonusDamageAppliesToSkillIds": [
                                 "tenten-twin-rising-dragons-trap"
                             ],
-                            "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
+                            "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
                         }
                     },
                     {
@@ -1938,7 +1921,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "bonusDamageFromSourceSkillsFlat": 20,
+                            "bonusDamageFromSourceSkillsFlat": 5,
                             "mergeNumericAddKeys": [
                                 "bonusDamageFromSourceSkillsFlat"
                             ],
@@ -1946,13 +1929,13 @@ const characters = [
                             "bonusDamageAppliesToSkillIds": [
                                 "tenten-twin-rising-dragons-trap"
                             ],
-                            "tooltipTextTemplate": "This character takes {bonusDamageFromSourceSkillsFlat} additional damage from Twin Rising Dragons Trap."
+                            "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
                         }
                     },
                     {
-                        "type": "cleanse_statuses",
-                        "scope": "self",
+                        "type": "remove_status",
                         "statusId": "tenten_full_release_active",
+                        "scope": "self",
                         "condition": {
                             "scope": "self",
                             "statusId": "tenten_full_release_active"
@@ -1963,14 +1946,14 @@ const characters = [
             {
                 "id": "tenten-twin-rising-dragons-trap",
                 "name": "Twin Rising Dragons Trap",
-                "skillimage": "https://i.imgur.com/pOsj115.png",
-                "skilldescription": "Tenten deals 5 damage to all enemies. Enemies affected by 'Twin Rising Dragons' will have their physical and chakra skills stunned for 1 turn and will deal 10 less physical and chakra damage. All stacks of 'Twin Rising Dragons' will be removed from all targets afterwards.",
+                "skillimage": "https://i.imgur.com/LZze4F3.png",
+                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their Physical and Chakra damage is lowered by 5. All stacks of 'Twin Rising Dragons' are removed afterwards.",
                 "energy": [
                     "Random"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 0,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -1986,102 +1969,56 @@ const characters = [
                         "statusId": "tenten_twin_rising_dragons_trap_debuff",
                         "duration": 1,
                         "scope": "all-enemy",
-                        "condition": {
-                            "all": [
-                                {
-                                    "scope": "target",
-                                    "statusId": "tenten_twin_rising_dragons_mark"
-                                },
-                                {
-                                    "scope": "self",
-                                    "missingStatusId": "tenten_full_release_active"
-                                }
-                            ]
-                        },
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
                             "damageDebuffBySkillClass": {
-                                "physical": 10,
-                                "energy": 10
+                                "physical": 5,
+                                "chakra": 5
                             },
-                            "tooltipText": "This character deals 10 less physical and chakra damage."
+                            "damageDebuffBySkillClassFromTargetStatus": {
+                                "statusId": "tenten_twin_rising_dragons_mark",
+                                "metadataKey": "bonusDamageFromSourceSkillsFlat",
+                                "classes": [
+                                    "physical",
+                                    "chakra"
+                                ]
+                            },
+                            "tooltipText": "This character deals 5 less Physical and Chakra damage for 1 turn."
                         }
                     },
                     {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_trap_debuff",
-                        "duration": 2,
-                        "scope": "all-enemy",
-                        "condition": {
-                            "all": [
-                                {
-                                    "scope": "target",
-                                    "statusId": "tenten_twin_rising_dragons_mark"
-                                },
-                                {
-                                    "scope": "self",
-                                    "statusId": "tenten_full_release_active"
-                                }
-                            ]
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "damageDebuffBySkillClass": {
-                                "physical": 10,
-                                "energy": 10
-                            },
-                            "tooltipText": "This character deals 10 less physical and chakra damage."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "tenten_twin_rising_dragons_trap_skill_stun",
-                        "duration": 1,
+                        "type": "remove_status",
+                        "statusId": "tenten_twin_rising_dragons_mark",
                         "scope": "all-enemy",
                         "condition": {
                             "scope": "target",
-                            "statusId": "tenten_twin_rising_dragons_mark"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's physical and chakra skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "statusId": "tenten_twin_rising_dragons_mark",
+                            "statusFromActor": true
                         }
                     },
                     {
-                        "type": "cleanse_statuses",
-                        "scope": "self",
+                        "type": "remove_status",
                         "statusId": "tenten_full_release_active",
+                        "scope": "self",
                         "condition": {
                             "scope": "self",
                             "statusId": "tenten_full_release_active"
                         }
-                    },
-                    {
-                        "type": "cleanse_statuses",
-                        "scope": "all-enemy",
-                        "statusId": "tenten_twin_rising_dragons_mark"
                     }
                 ]
             },
             {
                 "id": "tenten-twin-rising-dragons-full-release",
                 "name": "Twin Rising Dragons Full Release",
-                "skillimage": "https://i.imgur.com/5cUbYBW.png",
-                "skilldescription": "Tenten becomes invulnerable for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons marks will cause Twin Rising Dragons Trap to deal 20 additional damage, and Twin Rising Dragons Trap's damage reduction will last 1 additional turn.",
+                "skillimage": "https://i.imgur.com/4KGkFYx.png",
+                "skilldescription": "Tenten becomes invulnerable to non-Strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons applies its non-damage effect twice, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 2,
+                "cooldown": 1,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -2093,8 +2030,9 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
-                            "invulnerable": true,
-                            "tooltipText": "Tenten is invulnerable."
+                            "helpful": true,
+                            "invulnerableToNonStrategicSkills": true,
+                            "tooltipText": "This character is invulnerable to non-Strategic skills."
                         }
                     },
                     {
@@ -2103,8 +2041,11 @@ const characters = [
                         "duration": 99,
                         "scope": "self",
                         "metadata": {
-                            "consumeOnNextSkillUse": true,
-                            "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons marks will make Twin Rising Dragons Trap deal 20 additional damage. Twin Rising Dragons Trap's damage reduction will last 1 additional turn."
+                            "helpful": true,
+                            "skillDurationBonuses": {
+                                "tenten-twin-rising-dragons-trap": 1
+                            },
+                            "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons applies its mark twice, or Twin Rising Dragons Trap lowers Physical and Chakra damage for 1 additional turn."
                         }
                     }
                 ]
@@ -2112,7 +2053,7 @@ const characters = [
             {
                 "id": "tenten-spiked-boulder-wall",
                 "name": "Spiked Boulder Wall",
-                "skillimage": "https://i.imgur.com/45XopDc.png",
+                "skillimage": "https://i.imgur.com/WcN7LHU.png",
                 "skilldescription": "Tenten becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -2131,12 +2072,16 @@ const characters = [
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
                     }
                 ]
             }
+        ],
+        "tags": [
+            "konoha-genin"
         ]
     },
     {
@@ -2285,87 +2230,75 @@ const characters = [
     {
         "id": "gaara-of-the-desert",
         "characterId": "gaara-of-the-desert",
-        "name": "Gaara",
-        "facePicture": "https://i.imgur.com/mmAjCZ7.png",
-        "characterdeescription": "A Jinchuuriki from the Village of Sand, Gaara is an unstable ninja with the Shukaku, the one-tailed beast. With the Shukaku, and his own abilities, Gaara can manipulate the sand in his gourd to crush the enemy, or defend himself.",
+        "name": "Gaara of the Desert",
+        "facePicture": "https://i.imgur.com/IiEAyw6.png",
+        "characterdeescription": "A ruthless genin from the Hidden Sand Village, Gaara commands a seemingly endless supply of sand that protects him from harm and crushes his enemies. Feared for his merciless nature and mysterious abilities, he seeks to prove his existence through the lives of those who challenge him.",
+        "passive": {
+            "name": "Sand Flow",
+            "icon": "https://i.imgur.com/qOFhrZc.png",
+            "description": "Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage.",
+            "unpierceableDamageReductionFlat": 5,
+            "onDamageStackMetadataKey": "sandFlowStacks",
+            "onDamageStackAmount": 1,
+            "onUndamagedTurnStackMetadataKey": "sandFlowStacks",
+            "onUndamagedTurnStackAmount": 2,
+            "sandFlowStacks": 0,
+            "stackTooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
+        },
         "skills": [
             {
-                "id": "gaara-of-the-desert-sand-coffin",
-                "name": "Sand Coffin",
-                "skillimage": "https://i.imgur.com/cZ7Pk49.png",
-                "skilldescription": "Gaara stuns one enemy's physical, chakra, and strategic skills for 2 turns. For 1 turn, this enemy cannot reduce damage or become invulnerable.",
-                "energy": [
-                    "Ninjutsu",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 2,
-                "classes": [
-                    "Strategic",
-                    "Control"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "gaara_sand_coffin_stun",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "strategic",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's physical, chakra, and strategic skills are stunned.",
-                            "ongoingClass": "control"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "gaara_sand_coffin_crush",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character cannot reduce damage or become invulnerable.",
-                            "ongoingClass": "control",
-                            "turnDurationAnchor": "source_turn"
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "gaara_sand_coffin_ready",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "skillReplacements": {
-                                "gaara-of-the-desert-sand-coffin": "gaara-of-the-desert-sand-burial"
-                            },
-                            "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Sand Coffin is replaced by Sand Burial.",
-                            "ongoingClass": "control"
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "gaara-of-the-desert-sand-burial",
-                "name": "Sand Burial",
-                "cannotBeCountered": true,
-                "cannotBeReflected": true,
-                "skillimage": "https://i.imgur.com/ljX9izT.png",
-                "skilldescription": "Gaara deals 30 piercing damage to one enemy and ignores helpful effects for 1 turn. If used 1 turn after 'Sand Coffin', this skill costs 1 ninjutsu and 1 bloodline chakra and deals 50 piercing damage instead.",
+                "id": "gaara-of-the-desert-sand-binding-coffin",
+                "name": "Sand Binding Coffin",
+                "skillimage": "https://i.imgur.com/3aST3cX.png",
+                "skilldescription": "Gaara stuns one enemy for 1 turn and gains 2 Sand Flow stacks.",
                 "energy": [
                     "Ninjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 1,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "gaara_sand_binding_coffin_stun",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "cannotUseSkills": true,
+                            "tooltipText": "This character is stunned."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "gaara_of_the_desert_sand_flow",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "stackMetadataKey": "sandFlowStacks",
+                            "stackDelta": 2,
+                            "stackMax": 9999,
+                            "tooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "gaara-of-the-desert-desert-funeral",
+                "name": "Desert Funeral",
+                "skillimage": "https://i.imgur.com/9do9XxC.png",
+                "skilldescription": "Gaara deals 20 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
+                "energy": [
+                    "Bloodline",
+                    "Bloodline"
+                ],
+                "target": "single-enemy",
+                "damage": 20,
+                "cooldown": 1,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -2373,76 +2306,76 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 30,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "missingStatusId": "gaara_sand_coffin_crush"
-                        },
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 50,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "gaara_sand_coffin_crush"
-                        },
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "gaara_sand_burial_ignore_helpful",
-                        "duration": 1,
+                        "amount": 20,
                         "scope": "target",
                         "metadata": {
-                            "harmful": true,
-                            "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character ignores helpful effects for 1 turn."
+                            "ignoreDamageReduction": true,
+                            "executeBelowHpThreshold": 10,
+                            "bonusPerStatusMetadata": {
+                                "scope": "self",
+                                "statusId": "gaara_of_the_desert_sand_flow",
+                                "metadataKey": "sandFlowStacks",
+                                "multiplier": 5,
+                                "consumeStacks": true
+                            }
                         }
                     }
                 ]
             },
             {
-                "id": "gaara-of-the-desert-armor-of-sand",
-                "name": "Armor of Sand",
-                "skillimage": "https://i.imgur.com/qfrA8gB.png",
-                "skilldescription": "Gaara gains 25 points of permanent destructible defense. This skill cannot be used again while it is still active.",
+                "id": "gaara-of-the-desert-sand-sphere",
+                "name": "Sand Sphere",
+                "skillimage": "https://i.imgur.com/eUfA1nN.png",
+                "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                 "energy": [
+                    "Ninjutsu",
                     "Random"
                 ],
                 "target": "self",
-                "targetCondition": {
-                    "missingStatusId": "gaara_armor_of_sand"
-                },
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 5,
                 "classes": [
                     "Strategic",
+                    "Physical*",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "gaara_armor_of_sand",
-                        "duration": 99,
+                        "statusId": "gaara_sand_sphere",
+                        "duration": 3,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "destructibleDefensePoints": 25,
-                            "tooltipText": "Gaara has 25 points of permanent destructible defense from Armor of Sand."
+                            "scaleFromSourceStatusMetadata": {
+                                "statusId": "gaara_of_the_desert_sand_flow",
+                                "metadataKey": "sandFlowStacks",
+                                "multiplier": 5,
+                                "targetKeys": [
+                                    "destructibleDefensePoints"
+                                ],
+                                "addToTargetKeys": true
+                            },
+                            "onEnemySkillTargetedDamageToSourceAmount": 15,
+                            "onEnemySkillTargetedDamageToSourceSkillClasses": [
+                                "Physical"
+                            ],
+                            "onOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillIdsAny": [
+                                "gaara-of-the-desert-sand-binding-coffin",
+                                "gaara-of-the-desert-desert-funeral",
+                                "gaara-of-the-desert-sand-shield"
+                            ],
+                            "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill."
                         }
                     }
                 ]
             },
             {
-                "id": "gaara-of-the-desert-shield-of-sand",
-                "name": "Shield of Sand",
-                "skillimage": "https://i.imgur.com/vL03kPm.png",
+                "id": "gaara-of-the-desert-sand-shield",
+                "name": "Sand Shield",
+                "skillimage": "https://i.imgur.com/2oNtSkX.png",
                 "skilldescription": "Gaara becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -2457,10 +2390,11 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "gaara_sand_shield",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
                             "tooltipText": "This character is invulnerable."
                         }
@@ -2652,8 +2586,8 @@ const characters = [
         "passive": {
             "name": "Phantom Gale",
             "icon": "https://i.imgur.com/74m04BG.png",
-            "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 piercing damage.",
-            "onSkillUseRandomEnemyPiercingDamage": {
+            "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 physical damage.",
+            "onSkillUseRandomEnemyDamage": {
                 "amount": 5,
                 "extraTriggersStatusId": "temari_phantom_gale_growth"
             }
@@ -2663,7 +2597,7 @@ const characters = [
                 "id": "temari-cutting-whirlwind",
                 "name": "Cutting Whirlwind",
                 "skillimage": "https://i.imgur.com/TceZL1M.png",
-                "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 20 piercing damage to an enemy and 10 piercing damage to all other enemies. Temari also becomes invulnerable to non-mental skills for 1 turn.",
+                "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing damage to an enemy and 5 piercing damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -2677,7 +2611,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
+                        "amount": 15,
                         "scope": "target",
                         "metadata": {
                             "ignoreDamageReduction": true
@@ -2685,7 +2619,7 @@ const characters = [
                     },
                     {
                         "type": "damage",
-                        "amount": 10,
+                        "amount": 5,
                         "scope": "all-other-enemy",
                         "metadata": {
                             "ignoreDamageReduction": true
@@ -2698,12 +2632,7 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "invulnerableToSkillClasses": [
-                                "physical",
-                                "energy",
-                                "strategic",
-                                "affliction"
-                            ],
+                            "invulnerableToNonStrategicSkills": true,
                             "skillCostOverridesBySkillId": {
                                 "temari-summoning-quick-beheading-dance": {
                                     "energy": [
@@ -2712,7 +2641,7 @@ const characters = [
                                     ]
                                 }
                             },
-                            "tooltipText": "Temari is invulnerable to non-mental skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
+                            "tooltipText": "Temari is invulnerable to non-Strategic skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
                         }
                     }
                 ]
@@ -2721,7 +2650,7 @@ const characters = [
                 "id": "temari-summoning-quick-beheading-dance",
                 "name": "Summoning: Quick Beheading Dance",
                 "skillimage": "https://i.imgur.com/cvblibj.png",
-                "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 35 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+                "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
                 "energy": [
                     "Ninjutsu",
                     "Random",
@@ -2737,7 +2666,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 35,
+                        "amount": 30,
                         "scope": "all-enemy"
                     },
                     {
@@ -5389,17 +5318,33 @@ const characters = [
         "requiredMissionId": "a-dishonored-shinobi",
         "characterdeescription": "An instructor at the Hidden Leaf's Ninja Academy, Mizuki conceals his hunger for power beneath a sympathetic demeanor. Hoping to steal the forbidden Scroll of Seals, he manipulates Naruto's desire to become a ninja, only to have his betrayal exposed by Iruka.",
         "passive": {
-            "name": "Meld in the Shadows",
+            "name": "Windmill",
             "icon": "https://i.imgur.com/JDdDwn0.png",
-            "description": "Mizuki's damaging skills deal 5 additional damage to enemies who use a non-damaging skill that turn.",
-            "bonusAgainstNonDamagingSkillUser": 5
+            "description": "Mizuki can use Execution Shuriken twice. If it kills an enemy, Mizuki becomes invulnerable for 1 turn and gains one additional use.",
+            "onOwnerKillSourceSkillIdsAny": [
+                "mizuki-execution-shuriken"
+            ],
+            "onOwnerKillTargetRelation": "enemy",
+            "onOwnerKillGrantSkillUse": {
+                "skillId": "mizuki-execution-shuriken",
+                "amount": 1
+            },
+            "onOwnerKillApplyStatusToSelf": {
+                "statusId": "mizuki_windmill_invulnerable",
+                "duration": 1,
+                "metadata": {
+                    "helpful": true,
+                    "invulnerable": true,
+                    "tooltipText": "Mizuki is invulnerable for 1 turn after an Execution Shuriken kill."
+                }
+            }
         },
         "skills": [
             {
                 "id": "mizuki-kunai-ambush",
                 "name": "Kunai Ambush",
                 "skillimage": "https://i.imgur.com/oTFkPZG.png",
-                "skilldescription": "Mizuki attacks one enemy with a barrage of kunai, dealing 15 physical damage. For 1 turn, the next helpful skill that enemy uses is countered.",
+                "skilldescription": "Mizuki deals 20 physical damage to one enemy. Their next helpful skill is countered for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -5413,7 +5358,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 15,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
@@ -5435,7 +5380,7 @@ const characters = [
                 "id": "mizuki-execution-shuriken",
                 "name": "Execution Shuriken",
                 "skillimage": "https://i.imgur.com/O3Y4Q29.png",
-                "skilldescription": "Mizuki deals 30 physical damage to one enemy. During Windmill, this skill instead deals 20 physical damage to all enemies, and Windmill ends.",
+                "skilldescription": "Mizuki deals 30 physical damage to one enemy. If the target falls to 10 health or less, they are executed. This skill can be used twice, gaining one use for each kill it makes.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -5443,6 +5388,7 @@ const characters = [
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 1,
+                "maxUses": 2,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -5451,15 +5397,18 @@ const characters = [
                     {
                         "type": "damage",
                         "amount": 30,
-                        "scope": "target"
+                        "scope": "target",
+                        "metadata": {
+                            "executeBelowHpThreshold": 10
+                        }
                     }
                 ]
             },
             {
-                "id": "mizuki-windmill",
-                "name": "Windmill",
+                "id": "mizuki-meld-in-the-shadows",
+                "name": "Meld in the Shadows",
                 "skillimage": "https://i.imgur.com/jETOs8w.png",
-                "skilldescription": "For 2 turns, Mizuki’s next Execution Shuriken affects all enemies.",
+                "skilldescription": "Mizuki secretly counters the first Physical skill used against him for 1 turn. The countered enemy is then targeted by Kunai Ambush. This skill is invisible.",
                 "energy": [
                     "Random"
                 ],
@@ -5468,24 +5417,41 @@ const characters = [
                 "cooldown": 2,
                 "classes": [
                     "Strategic",
-                    "Instant",
-                    "Physical*"
+                    "Instant"
                 ],
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "mizuki_windmill",
-                        "duration": 2,
+                        "statusId": "mizuki_meld_in_the_shadows",
+                        "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "skillReplacements": {
-                                "mizuki-execution-shuriken": "mizuki-execution-shuriken-windmill"
-                            },
-                            "removeSelfOnSkillUseSkillIds": [
-                                "mizuki-execution-shuriken-windmill"
+                            "invisible": true,
+                            "hideTooltipFromEnemy": true,
+                            "triggerOnEnemyHarmfulSkillClassesAny": [
+                                "physical"
                             ],
-                            "tooltipText": "The next Execution Shuriken hits all enemies, then Windmill ends."
+                            "counterCancelsSkill": true,
+                            "counterEffectsToAttacker": [
+                                {
+                                    "type": "damage",
+                                    "amount": 20
+                                },
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "mizuki_kunai_ambush_trap",
+                                    "duration": 1,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "triggerOnOwnerHelpfulSkill": true,
+                                        "counterCancelsSkill": true,
+                                        "turnDurationAnchor": "source_turn",
+                                        "tooltipText": "The next helpful skill this character uses is countered."
+                                    }
+                                }
+                            ],
+                            "tooltipText": "For 1 turn, Mizuki counters the first Physical skill used against him, then hits the attacker with Kunai Ambush for 20 damage."
                         }
                     }
                 ]
@@ -5500,7 +5466,7 @@ const characters = [
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 0,
+                "cooldown": 4,
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -5516,38 +5482,6 @@ const characters = [
                             "invulnerable": true,
                             "tooltipText": "Mizuki is invulnerable."
                         }
-                    }
-                ]
-            },
-            {
-                "id": "mizuki-execution-shuriken-windmill",
-                "baseSkillId": "mizuki-execution-shuriken",
-                "useBaseSkillCooldown": true,
-                "hiddenFromSelectionViewer": true,
-                "name": "Execution Shuriken",
-                "skillimage": "https://i.imgur.com/O3Y4Q29.png",
-                "skilldescription": "Mizuki deals 20 physical damage to all enemies, ending Windmill.",
-                "energy": [
-                    "Taijutsu",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "all-enemy"
-                    },
-                    {
-                        "type": "remove_status",
-                        "statusId": "mizuki_windmill",
-                        "scope": "self"
                     }
                 ]
             }
@@ -5869,96 +5803,33 @@ const characters = [
         "requiredMissionId": "hidden-hunter",
         "characterdeescription": "A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.",
         "passive": {
-            "name": "Demon of the Ice",
+            "name": "Sacrifice",
             "icon": "https://i.imgur.com/aBCcujF.png",
-            "description": "Enemies stunned by Haku cannot be healed for 1 turn.",
-            "healingBlockOnStun": {
-                "statusId": "haku_demon_of_the_ice",
-                "duration": 1
-            }
+            "description": "Haku takes the damage of the first lethal attack against an ally in their place.",
+            "sacrificeFirstLethalAllyAttack": true
         },
         "skills": [
-            {
-                "id": "haku-demonic-mirroring-ice-crystals",
-                "name": "Demonic Mirroring Ice Crystals",
-                "skillimage": "https://i.imgur.com/2sgPkS0.png",
-                "skilldescription": "Haku surrounds one enemy with demonic mirrors of ice for 4 turns, dealing 10 damage to that enemy each turn. During this time, Haku gains 30 points of destructible defense, and Flying Needles of Death and Acupuncture are improved. If Haku is stunned, this skill ends.",
-                "energy": [
-                    "Bloodline",
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 4,
-                "classes": [
-                    "Chakra",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "haku_mirror_target",
-                        "duration": 4,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "ongoingClass": "control",
-                            "turnEndDamage": 10,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "triggerOnApply": true,
-                            "tooltipText": "Haku deals 10 damage to this character each turn. The mirrors end if Haku is stunned."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "haku_mirror_guard",
-                        "duration": 4,
-                        "scope": "self",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "haku_mirror_target",
-                            "statusFromActor": true
-                        },
-                        "metadata": {
-                            "helpful": true,
-                            "destructibleDefensePoints": 30,
-                            "linkedTargetStatusId": "haku_mirror_target",
-                            "copyTargetKeyToKeys": [
-                                "linkedTargetKey"
-                            ],
-                            "skillReplacements": {
-                                "haku-flying-needles-of-death": "haku-flying-needles-of-death-mirrors",
-                                "haku-acupuncture": "haku-acupuncture-mirrors"
-                            },
-                            "tooltipText": "Haku has 30 destructible defense and empowers Flying Needles of Death and Acupuncture while the mirrors remain."
-                        }
-                    }
-                ]
-            },
             {
                 "id": "haku-flying-needles-of-death",
                 "name": "Flying Needles of Death",
                 "skillimage": "https://i.imgur.com/1wG05K5.png",
-                "skilldescription": "Haku deals 20 piercing damage to one enemy. During Demonic Mirroring Ice Crystals, the enemy trapped in the mirrors takes 10 piercing damage unless already targeted by this skill.",
+                "skilldescription": "Haku deals 30 physical damage to one enemy. During Demonic Mirroring Ice Crystals, this skill targets all enemies.",
                 "energy": [
-                    "Ninjutsu"
+                    "Ninjutsu",
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Chakra",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
+                        "amount": 30,
+                        "scope": "target"
                     }
                 ]
             },
@@ -5966,7 +5837,7 @@ const characters = [
                 "id": "haku-acupuncture",
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku stuns the Physical and Chakra skills of one enemy for 1 turn. During Demonic Mirroring Ice Crystals, this skill also stuns the Physical skills of the enemy surrounded by the mirrors for 1 turn.",
+                "skilldescription": "Haku stuns one enemy's Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill targets all enemies.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -5990,14 +5861,48 @@ const characters = [
                                 "chakra"
                             ],
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character's Physical and Chakra skills are stunned."
+                            "tooltipText": "Physical and Chakra skills are stunned."
                         }
                     }
                 ]
             },
             {
-                "id": "haku-mirror-flee",
-                "name": "Mirror Flee",
+                "id": "haku-demonic-mirroring-ice-crystals",
+                "name": "Demonic Mirroring Ice Crystals",
+                "skillimage": "https://i.imgur.com/2sgPkS0.png",
+                "skilldescription": "Haku becomes invulnerable for 3 turns. During this time, Flying Needles of Death and Acupuncture target all enemies.",
+                "energy": [
+                    "Bloodline",
+                    "Ninjutsu"
+                ],
+                "target": "self",
+                "damage": 0,
+                "cooldown": 4,
+                "classes": [
+                    "Strategic",
+                    "Instant"
+                ],
+                "effects": [
+                    {
+                        "type": "apply_status",
+                        "statusId": "haku_mirror_guard",
+                        "duration": 3,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invulnerable": true,
+                            "skillReplacements": {
+                                "haku-flying-needles-of-death": "haku-flying-needles-of-death-mirrors",
+                                "haku-acupuncture": "haku-acupuncture-mirrors"
+                            },
+                            "tooltipText": "Haku is invulnerable. Flying Needles of Death and Acupuncture target all enemies."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "haku-demon-of-the-ice",
+                "name": "Demon of the Ice",
                 "skillimage": "https://i.imgur.com/Jo62MEC.png",
                 "skilldescription": "Haku becomes invulnerable for 1 turn.",
                 "energy": [
@@ -6013,7 +5918,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "haku_mirror_flee",
+                        "statusId": "haku_demon_of_the_ice_guard",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
@@ -6031,34 +5936,23 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "name": "Flying Needles of Death",
                 "skillimage": "https://i.imgur.com/1wG05K5.png",
-                "skilldescription": "Haku deals 20 piercing damage to one enemy and 10 piercing damage to the enemy in his mirrors, if different.",
+                "skilldescription": "Haku deals 30 physical damage to all enemies.",
                 "energy": [
-                    "Ninjutsu"
+                    "Ninjutsu",
+                    "Random"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Chakra",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target",
-                        "metadata": {
-                            "ignoreDamageReduction": true
-                        }
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "linked-enemy-other-than-target",
-                        "metadata": {
-                            "linkedTargetStatusId": "haku_mirror_target",
-                            "ignoreDamageReduction": true
-                        }
+                        "amount": 30,
+                        "scope": "all-enemy"
                     }
                 ]
             },
@@ -6069,11 +5963,11 @@ const characters = [
                 "hiddenFromSelectionViewer": true,
                 "name": "Acupuncture",
                 "skillimage": "https://i.imgur.com/dDxetJr.png",
-                "skilldescription": "Haku stuns one enemy's Physical and Chakra skills and also stuns the mirrored enemy's Physical skills for 1 turn.",
+                "skilldescription": "Haku stuns all enemies' Physical and Chakra skills for 1 turn.",
                 "energy": [
                     "Bloodline"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
@@ -6085,7 +5979,7 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "haku_acupuncture_stun",
                         "duration": 1,
-                        "scope": "target",
+                        "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
                             "cannotUseSkillClasses": [
@@ -6093,22 +5987,7 @@ const characters = [
                                 "chakra"
                             ],
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character's Physical and Chakra skills are stunned."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "haku_mirror_acupuncture_stun",
-                        "duration": 1,
-                        "scope": "linked-enemy-other-than-target",
-                        "metadata": {
-                            "harmful": true,
-                            "linkedTargetStatusId": "haku_mirror_target",
-                            "cannotUseSkillClasses": [
-                                "physical"
-                            ],
-                            "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character's Physical skills are stunned by Haku."
+                            "tooltipText": "Physical and Chakra skills are stunned."
                         }
                     }
                 ]
@@ -8682,7 +8561,7 @@ const characters = [
                 "id": "hatake-kakashi-sharingan-counter",
                 "name": "Sharingan Insight",
                 "skillimage": "https://i.imgur.com/wrowrxL.png",
-                "skilldescription": "Kakashi reveals hidden enemy effects for 1 turn and counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.",
+                "skilldescription": "Kakashi reveals hidden enemy effects for 1 turn and invisibly counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -8703,6 +8582,7 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "revealInvisibleSkills": true,
+                            "hideTooltipFromEnemy": true,
                             "tooltipText": "Kakashi can see hidden enemy effects."
                         }
                     },
@@ -8713,6 +8593,8 @@ const characters = [
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "invisible": true,
+                            "hideTooltipFromEnemy": true,
                             "triggerOnEnemyHarmfulSkill": true,
                             "counterCancelsSkill": true,
                             "counterCopySkillReplacementFor": "hatake-kakashi-sharingan-counter",
@@ -8731,7 +8613,7 @@ const characters = [
                 "id": "hatake-kakashi-summoning-ninja-dogs",
                 "name": "Nin-Dogs Summoning",
                 "skillimage": "https://i.imgur.com/PFMVHdp.png",
-                "skilldescription": "Kakashi summons tracking hounds to restrain one enemy, dealing 15 physical damage and stunning their Physical skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.",
+                "skilldescription": "Kakashi deals 20 physical damage to one enemy and stuns their Physical and Affliction skills for 1 turn. Nin-Dogs Summoning becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -8739,13 +8621,13 @@ const characters = [
                 "damage": 0,
                 "cooldown": 2,
                 "classes": [
-                    "Strategic",
+                    "Physical",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 15,
+                        "amount": 20,
                         "scope": "target",
                         "metadata": {
                             "skillClasses": [
@@ -8761,10 +8643,11 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "cannotUseSkillClasses": [
-                                "physical"
+                                "physical",
+                                "affliction"
                             ],
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character cannot use Physical skills."
+                            "tooltipText": "This character cannot use Physical or Affliction skills."
                         }
                     },
                     {
@@ -8795,7 +8678,7 @@ const characters = [
                 "id": "hatake-kakashi-earth-style-headhunter-jutsu",
                 "name": "Earth Style: Headhunter Jutsu",
                 "skillimage": "https://i.imgur.com/m9r8Dpo.png",
-                "skilldescription": "Kakashi drags one enemy underground, dealing 15 physical damage and stunning their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.",
+                "skilldescription": "Kakashi deals 20 physical damage to one enemy and stuns their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -8809,7 +8692,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 15,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
@@ -8884,7 +8767,7 @@ const characters = [
                 "id": "hatake-kakashi-raikiri",
                 "name": "Raikiri",
                 "skillimage": "https://i.imgur.com/CVE7tBQ.png",
-                "skilldescription": "Kakashi deals 45 piercing damage to one enemy.",
+                "skilldescription": "Kakashi deals 45 piercing Chakra damage to one enemy.",
                 "energy": [
                     "Ninjutsu",
                     "Taijutsu"

@@ -240,7 +240,7 @@ const collectTooltipNumericOmissions = () => {
                     typeof child === 'number' &&
                     Number.isFinite(child) &&
                     child > 0 &&
-                    !/duration|cooldown|remaining|maxuses|minimumhp|threshold|atleast/i.test(childPath)
+                    !/duration|cooldown|remaining|maxuses|minimumhp|threshold|atleast|stackmax/i.test(childPath)
                 ) {
                     values.push(child);
                 } else {
@@ -362,8 +362,8 @@ test('Naruto rework keeps four active skills and a separate passive', () => {
             'uzumaki-naruto-sexy-technique',
         ]
     );
-    assert.equal(naruto.passive.name, 'Unpredictable Ninja');
-    assert.equal(naruto.passive.physicalDamageBonusWhileHelpful, 5);
+    assert.equal(naruto.passive.name, 'Kyuubi Awakening');
+    assert.deepEqual(naruto.passive.onFirstHpAtMost, { threshold: 40, heal: 20, randomChakra: 1 });
     assert.deepEqual(naruto.skills.map(skill => skill.energy), [
         ['Taijutsu'], ['Random'], ['Taijutsu', 'Random'], ['Random'],
     ]);
@@ -373,10 +373,10 @@ test('Naruto rework keeps four active skills and a separate passive', () => {
 test('Naruto passive is a permanent visible match effect, outside the skill tray', () => {
     const match = makeMatch();
     const statuses = match.board.p1[0].state.statuses;
-    const passive = statuses.find(status => status.id === 'uzumaki_naruto_unpredictable_ninja');
+    const passive = statuses.find(status => status.id === 'uzumaki_naruto_kyuubi_awakening');
     assert.ok(passive, 'passive exists from match start');
     assert.equal(passive.remainingTurns, 99);
-    assert.equal(passive.metadata.sourceSkillName, 'Unpredictable Ninja');
+    assert.equal(passive.metadata.sourceSkillName, 'Kyuubi Awakening');
     assert.equal(passive.metadata.statusIcon, getNaruto().passive.icon);
     assert.ok(passive.metadata.tooltipText.startsWith(getNaruto().passive.description));
     assert.equal(passive.metadata.tooltipText, getNaruto().passive.description);
@@ -388,7 +388,7 @@ test('Naruto passive is a permanent visible match effect, outside the skill tray
     const enemyPayload = buildMatchPayloadForUser(match, 'p2');
     for (const payload of [ownerPayload, enemyPayload]) {
         const visible = payload.board.p1[0].state.statuses.find(status => status.id === passive.id);
-        assert.equal(visible.metadata.sourceSkillName, 'Unpredictable Ninja');
+        assert.equal(visible.metadata.sourceSkillName, 'Kyuubi Awakening');
         assert.equal(visible.metadata.statusIcon, getNaruto().passive.icon);
         assert.equal(visible.metadata.tooltipText, passive.metadata.tooltipText);
     }
@@ -396,7 +396,7 @@ test('Naruto passive is a permanent visible match effect, outside the skill tray
 
 test('Naruto passive survives status cleansing and explicit status removal', () => {
     const match = makeMatch();
-    const passiveId = 'uzumaki_naruto_unpredictable_ninja';
+    const passiveId = 'uzumaki_naruto_kyuubi_awakening';
     const testCharacters = [...characters];
     const castEffect = (effect) => {
         testCharacters[0] = {
@@ -436,12 +436,12 @@ test('Naruto rework applies Shadow Clone Technique and consumes it after empower
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 45, 'Assault deals 20 + 10 clone bonus + 5 passive bonus');
+    assert.equal(match.board.p2[0].hp, 50, 'Assault deals 20 + 10 clone bonus');
 
     match.board.p2[0].hp = 100;
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55, 'Feint deals 25 + 15 clone bonus + 5 passive bonus');
+    assert.equal(match.board.p2[0].hp, 60, 'Feint deals 25 + 15 clone bonus');
     assert.equal(
         match.board.p2[0].state.statuses.some(
             (status) =>
@@ -453,7 +453,7 @@ test('Naruto rework applies Shadow Clone Technique and consumes it after empower
     assert.equal(narutoState.statuses.some(status => status.id === 'uzumaki_naruto_shadow_clone_technique'), false);
 });
 
-test('Naruto passive works with other helpful effects and ignores harmful effects', () => {
+test('Naruto Assault damage remains the same with helpful and harmful effects', () => {
     const match = makeMatch();
     const narutoState = match.board.p1[0].state;
     narutoState.statuses.push({ id: 'test_harmful', remainingTurns: 1, metadata: { harmful: true } });
@@ -463,7 +463,7 @@ test('Naruto passive works with other helpful effects and ignores harmful effect
     narutoState.statuses.push({ id: 'test_helpful', remainingTurns: 1, metadata: { helpful: true } });
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 55);
+    assert.equal(match.board.p2[0].hp, 60);
     narutoState.statuses = [
         ...narutoState.statuses.filter(status => status.metadata?.passive),
         {
@@ -473,7 +473,7 @@ test('Naruto passive works with other helpful effects and ignores harmful effect
     ];
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 30, 'an allied helpful effect also triggers the passive');
+    assert.equal(match.board.p2[0].hp, 40);
 });
 
 test('Sakura rework keeps four skills and a visible passive that strengthens Guard Duty', () => {
@@ -811,11 +811,11 @@ test('battleLogic resolves Ino starter kit behavior used by the editor data', ()
         match.board.p2[0].state.statuses.some(
             (status) =>
                 status.id === 'ino_mind_body_switch_target' &&
-                status.metadata.cannotUseHarmfulSkills
+                status.metadata.cannotUseSkills
         ),
         true
     );
-    assert.equal(match.board.p2[0].hp, 95, 'Art of the Valentine deals 5 piercing damage on stun');
+    assert.equal(match.board.p2[0].hp, 100, 'Art of the Valentine prepares the next Feint');
 });
 
 test('battleLogic resolves Rock Lee starter kit behavior used by the editor data', () => {
@@ -873,19 +873,19 @@ test('Tenten Dragons stacks Trap marks, and Trap consumes them after damage and 
     }
     assert.equal(primary.hp, 60);
     assert.equal(other.hp, 80);
-    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
-    assert.equal(status(other, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 10);
+    assert.equal(status(other, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 10);
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(primary.hp, 35, 'Trap deals 5 plus 20 from two marks');
-    assert.equal(other.hp, 55);
+    assert.equal(primary.hp, 45, 'Trap deals 5 plus 10 from two marks');
+    assert.equal(other.hp, 65);
     assert.equal(status(primary, 'tenten_twin_rising_dragons_mark'), undefined);
     assert.equal(status(other, 'tenten_twin_rising_dragons_mark'), undefined);
     assert.deepEqual(status(primary, 'tenten_twin_rising_dragons_trap_debuff').metadata.damageDebuffBySkillClass,
-        { physical: 25, chakra: 25 });
+        { physical: 15, chakra: 15 });
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(primary.hp, 30, 'a second Trap has no consumed mark bonus');
+    assert.equal(primary.hp, 40, 'a second Trap has no consumed mark bonus');
     assert.deepEqual(status(primary, 'tenten_twin_rising_dragons_trap_debuff').metadata.damageDebuffBySkillClass,
         { physical: 5, chakra: 5 });
 });
@@ -908,11 +908,11 @@ test('Tenten Full Release protects against non-Strategic skills and enhances one
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(primary.hp, 80, 'Full Release does not repeat damage');
-    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 20);
+    assert.equal(status(primary, 'tenten_twin_rising_dragons_mark').metadata.bonusDamageFromSourceSkillsFlat, 10);
     assert.equal(status(actor, 'tenten_full_release_active'), undefined);
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(primary.hp, 55);
+    assert.equal(primary.hp, 65);
     assert.equal(status(primary, 'tenten_twin_rising_dragons_trap_debuff').remainingTurns, 1);
 });
 
@@ -963,10 +963,10 @@ test('Tenten Trap also reduces Chakra damage by its base value plus Dragon marks
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const debuff = match.board.p2[0].state.statuses.find((entry) =>
         entry.id === 'tenten_twin_rising_dragons_trap_debuff');
-    assert.deepEqual(debuff.metadata.damageDebuffBySkillClass, { physical: 15, chakra: 15 });
+    assert.deepEqual(debuff.metadata.damageDebuffBySkillClass, { physical: 10, chakra: 10 });
     queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 95, 'Sasuke Fireball deals 20 minus 15 Chakra damage');
+    assert.equal(match.board.p1[0].hp, 90, 'Sasuke Fireball deals 20 minus 10 Chakra damage');
 });
 
 test('battleLogic resolves Neji draft damage, chakra costs, and passive', () => {
@@ -1165,8 +1165,8 @@ test('battleLogic resolves Temari starter kit behavior used by the editor data',
 
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 165,
-        'Cutting Whirlwind deals 20 and 10 piercing damage, plus one 5-damage Phantom Gale hit');
+    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 175,
+        'Cutting Whirlwind deals 15 and 5 piercing damage, plus two 5-damage Phantom Gale hits');
     assert.equal(
         resolveEffectiveSkill({
             characters,
@@ -1276,24 +1276,24 @@ test('Shino Insect Clone grants one turn of invulnerability and a four turn cool
     assert.equal(shino.state.cooldowns['aburame-shino-insect-clone'], 4);
 });
 
-test('Hinata 64 Palms damages and weakens all enemies, heals allies, then gains a one-turn boost', () => {
-    const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
+test('Hinata 64 Palms damages enemies, heals allies, and grants damage reduction', () => {
+    const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('rock-lee')],
         [getCharIndex('haruno-sakura'), getCharIndex('uchiha-sasuke')]);
     applyDamageToUnit(match.board.p1[1], 60, { match, sourceUsername: 'p2',
         targetUsername: 'p1', targetSlot: 1 });
     match.board.p1[0].hp = 70;
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.deepEqual(match.board.p2.map(unit => unit.hp), [90, 90]);
-    assert.deepEqual(match.board.p1.map(unit => unit.hp), [80, 50]);
-    assert.equal(match.board.p2[0].state.statuses.find(status =>
-        status.id === 'hyuuga_hinata_64_palms_debuff')?.metadata.nonAfflictionDamageDebuffFlat, 5);
+    assert.deepEqual(match.board.p2.map(unit => unit.hp), [95, 95]);
+    assert.deepEqual(match.board.p1.map(unit => unit.hp), [75, 45]);
+    assert.equal(match.board.p1[0].state.statuses.find(status =>
+        status.id === 'hyuuga_hinata_64_palms_reduction')?.metadata.damageReductionFlat, 5);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     queueSkill(match, 'p1', 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.deepEqual(match.board.p2.map(unit => unit.hp), [75, 75]);
-    assert.deepEqual(match.board.p1.map(unit => unit.hp), [95, 65]);
+    assert.deepEqual(match.board.p2.map(unit => unit.hp), [85, 85]);
+    assert.deepEqual(match.board.p1.map(unit => unit.hp), [85, 55]);
 });
 
 test('Hinata Secret Oinment heals four turns and boosts only other healing', () => {

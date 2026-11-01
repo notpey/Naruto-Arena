@@ -31,8 +31,8 @@ test('Gaara draft is playable and starts with permanent unpierceable reduction',
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.name),
         ['Sand Binding Coffin', 'Desert Funeral', 'Sand Sphere', 'Sand Shield']);
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.energy),
-        [['Ninjutsu'], ['Bloodline', 'Random'], ['Ninjutsu', 'Random'], ['Random']]);
-    assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.cooldown), [1, 0, 5, 4]);
+        [['Ninjutsu'], ['Bloodline', 'Bloodline'], ['Ninjutsu', 'Random'], ['Random']]);
+    assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.cooldown), [1, 1, 5, 4]);
     const match = makeMatch();
     const gaara = match.board.p1[0];
     assert.equal(flow(match), 0);
@@ -81,7 +81,7 @@ test('an undamaged round grants two passive stacks, not four', () => {
 test('Desert Funeral scales by stacks, consumes them, and executes at ten health', () => {
     const match = makeMatch();
     cast(match, 'p1', 0, target('p2'));
-    match.board.p2[0].hp = 50;
+    match.board.p2[0].hp = 35;
     cast(match, 'p1', 1, target('p2'));
     assert.equal(match.board.p2[0].hp, 0);
     assert.equal(match.board.p2[0].alive, false);
@@ -91,7 +91,7 @@ test('Desert Funeral scales by stacks, consumes them, and executes at ten health
     noStacks.board.p2[0].state.statuses.push({ id: 'normal_reduction', remainingTurns: 2,
         metadata: { damageReductionFlat: 20 } });
     cast(noStacks, 'p1', 1, target('p2'));
-    assert.equal(noStacks.board.p2[0].hp, 70, 'piercing damage ignores ordinary reduction');
+    assert.equal(noStacks.board.p2[0].hp, 80, 'piercing damage ignores ordinary reduction');
 });
 
 test('Sand Sphere scales defense, retaliates once per targeted skill, and ends on another skill', () => {

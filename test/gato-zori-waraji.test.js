@@ -128,15 +128,15 @@ test('an ally killing a marked enemy grants chakra only once for that contract',
     assert.equal(gainedChakra(match), 2);
 });
 
-test('Forced Entry removes at most ten defense per enemy before damage', () => {
+test('Forced Entry destroys all defense on every enemy before damage', () => {
     const match = makeMatch();
     match.board.p2[0].state.statuses.push({ id: 'defense-a', remainingTurns: 3,
         metadata: { destructibleDefensePoints: 40 } });
     match.board.p2[1].state.statuses.push({ id: 'defense-b', remainingTurns: 3,
         metadata: { destructibleDefensePoints: 5 } });
     cast(match, 1, 2);
-    assert.equal(match.board.p2[0].state.statuses[0].metadata.destructibleDefensePoints, 15);
-    assert.equal(match.board.p2[0].hp, 100);
+    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'defense-a'), false);
+    assert.equal(match.board.p2[0].hp, 85);
     assert.equal(match.board.p2[1].hp, 85);
 });
 

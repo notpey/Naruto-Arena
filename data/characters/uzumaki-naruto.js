@@ -5,10 +5,10 @@ module.exports = {
     facePicture: 'https://i.imgur.com/NwbpKdo.png',
     characterdeescription: "Shunned by the Hidden Leaf Village for the Nine-Tailed Fox sealed within him, Naruto Uzumaki is a mischievous young genin determined to earn everyone's recognition and one day become Hokage. Armed with his newly learned Shadow Clone Technique and an unshakable spirit, Naruto begins his journey alongside Team 7, eager to prove that he's more than the village outcast.",
     passive: {
-        name: 'Unpredictable Ninja',
+        name: 'Kyuubi Awakening',
         icon: 'https://i.imgur.com/TxXUuaP.png',
-        description: "Naruto's damaging Physical skills deal 5 additional damage while he is affected by a helpful effect.",
-        physicalDamageBonusWhileHelpful: 5,
+        description: 'The first time Naruto falls to 40 or fewer health, he heals 20 health and gains 1 random chakra.',
+        onFirstHpAtMost: { threshold: 40, heal: 20, randomChakra: 1 },
     },
     skills: [
         {

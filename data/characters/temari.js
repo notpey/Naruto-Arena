@@ -7,8 +7,8 @@ module.exports = {
     "passive": {
         "name": "Phantom Gale",
         "icon": "https://i.imgur.com/74m04BG.png",
-        "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 piercing damage.",
-        "onSkillUseRandomEnemyPiercingDamage": {
+        "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 physical damage.",
+        "onSkillUseRandomEnemyDamage": {
             "amount": 5,
             "extraTriggersStatusId": "temari_phantom_gale_growth"
         }
@@ -18,7 +18,7 @@ module.exports = {
             "id": "temari-cutting-whirlwind",
             "name": "Cutting Whirlwind",
             "skillimage": "https://i.imgur.com/TceZL1M.png",
-            "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 20 piercing damage to an enemy and 10 piercing damage to all other enemies. Temari also becomes invulnerable to non-mental skills for 1 turn.",
+            "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing damage to an enemy and 5 piercing damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
             "energy": [
                 "Ninjutsu"
             ],
@@ -32,7 +32,7 @@ module.exports = {
             "effects": [
                 {
                     "type": "damage",
-                    "amount": 20,
+                    "amount": 15,
                     "scope": "target",
                     "metadata": {
                         "ignoreDamageReduction": true
@@ -40,7 +40,7 @@ module.exports = {
                 },
                 {
                     "type": "damage",
-                    "amount": 10,
+                    "amount": 5,
                     "scope": "all-other-enemy",
                     "metadata": {
                         "ignoreDamageReduction": true
@@ -53,12 +53,7 @@ module.exports = {
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
-                        "invulnerableToSkillClasses": [
-                            "physical",
-                            "energy",
-                            "strategic",
-                            "affliction"
-                        ],
+                        "invulnerableToNonStrategicSkills": true,
                         "skillCostOverridesBySkillId": {
                             "temari-summoning-quick-beheading-dance": {
                                 "energy": [
@@ -67,7 +62,7 @@ module.exports = {
                                 ]
                             }
                         },
-                        "tooltipText": "Temari is invulnerable to non-mental skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
+                        "tooltipText": "Temari is invulnerable to non-Strategic skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
                     }
                 }
             ]
@@ -76,7 +71,7 @@ module.exports = {
             "id": "temari-summoning-quick-beheading-dance",
             "name": "Summoning: Quick Beheading Dance",
             "skillimage": "https://i.imgur.com/cvblibj.png",
-            "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 35 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+            "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
             "energy": [
                 "Ninjutsu",
                 "Random",
@@ -92,7 +87,7 @@ module.exports = {
             "effects": [
                 {
                     "type": "damage",
-                    "amount": 35,
+                    "amount": 30,
                     "scope": "all-enemy"
                 },
                 {

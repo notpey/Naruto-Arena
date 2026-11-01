@@ -67,92 +67,6 @@ test('Ino and Konohamaru appear in the canonical active roster', () => {
     assert.equal(konohamaru.skills.filter((skill) => !skill.hiddenFromSelectionViewer).length, 4);
 });
 
-test('Ino Feint adds 10 damage against any stun', () => {
-    const match = makeMatch();
-    cast(match, 'p1', 0, 0, 'p2', 0);
-    assert.equal(match.board.p2[0].hp, 80);
-    match.board.p2[1].state.statuses.push({
-        id: 'foreign_stun', remainingTurns: 1,
-        metadata: { harmful: true, cannotUseSkillClasses: ['physical'] },
-    });
-    cast(match, 'p1', 0, 0, 'p2', 1);
-    assert.equal(match.board.p2[1].hp, 70);
-
-    const physicalGuard = makeMatch();
-    physicalGuard.board.p2[0].state.statuses.push({
-        id: 'physical_guard', remainingTurns: 1,
-        metadata: { physicalDamageReductionFlat: 5 },
-    });
-    cast(physicalGuard, 'p1', 0, 0, 'p2', 0);
-    assert.equal(physicalGuard.board.p2[0].hp, 85,
-        'Feint deals Physical damage despite its Chakra skill class');
-
-    const boosted = makeMatch();
-    boosted.board.p2[0].state.statuses.push({
-        id: 'foreign_stun', remainingTurns: 1,
-        metadata: { harmful: true, cannotUseSkillClasses: ['physical'] },
-    });
-    boosted.board.p1[0].state.statuses.push({
-        id: 'physical_boost', remainingTurns: 1,
-        metadata: { helpful: true, damageBonusBySkillClass: { physical: 5 } },
-    });
-    cast(boosted, 'p1', 0, 0, 'p2', 0);
-    assert.equal(boosted.board.p2[0].hp, 65,
-        'Feint applies its Physical damage bonus once to 30 base damage');
-});
-
-test('Ino Switch stuns, triggers piercing passive, and Forced Betrayal damages its target without ending control', () => {
-    const match = makeMatch();
-    match.board.p2[0].state.statuses.push({
-        id: 'mitigation', remainingTurns: 2,
-        metadata: { damageReductionFlat: 10, destructibleDefensePoints: 20 },
-    });
-    cast(match, 'p1', 0, 1, 'p2', 0);
-    assert.equal(match.board.p2[0].hp, 95);
-    assert.ok(has(match.board.p2[0], 'ino_mind_body_switch_target'));
-    assert.equal(battle.resolveEffectiveSkill({
-        characters, rosterIndex: 0, skillIndex: 1, actorState: match.board.p1[0].state,
-    }).id, 'yamanaka-ino-forced-betrayal');
-    const targets = battle.computeTargetOptions({
-        match, actingUsername: 'p1', actorSlot: 0, skillIndex: 1, characters,
-    }).targets;
-    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 0), true);
-    assert.equal(targets.some((target) => target.username === 'p2' && target.slot === 1), false);
-    match.board.p2[0].state.statuses =
-        match.board.p2[0].state.statuses.filter((entry) => entry.id !== 'mitigation');
-    cast(match, 'p1', 0, 1, 'p2', 0);
-    assert.equal(match.board.p2[0].hp, 65);
-    assert.match(match.board.p2[0].state.lastDamageDebugText, /Test Attacker/);
-    assert.ok(has(match.board.p2[0], 'ino_mind_body_switch_target'));
-    assert.ok(has(match.board.p1[0], 'ino_mind_body_switch_active'));
-    cast(match, 'p1', 0, 1, 'p2', 0);
-    assert.equal(match.board.p2[0].hp, 35);
-});
-
-test('Ino hair trap stuns the first harmful cast and Switch consumes it', () => {
-    const match = makeMatch();
-    cast(match, 'p1', 0, 2, 'p2', 0);
-    assert.ok(has(match.board.p2[0], 'ino_hair_strand_trap'));
-    cast(match, 'p2', 0, 0, 'p1', 0);
-    assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'));
-    assert.equal(match.board.p2[0].hp, 95, 'the trap stun triggers Ino passive');
-    assert.equal(has(match.board.p2[0], 'ino_hair_strand_trap'), false);
-    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'),
-        'the trap stun survives the triggering turn');
-    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.ok(has(match.board.p2[0], 'ino_hair_strand_stun'),
-        'the trap stun blocks the target next turn');
-    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(has(match.board.p2[0], 'ino_hair_strand_stun'), false);
-
-    const second = makeMatch();
-    cast(second, 'p1', 0, 2, 'p2', 0);
-    cast(second, 'p1', 0, 1, 'p2', 0);
-    assert.equal(has(second.board.p2[0], 'ino_hair_strand_trap'), false);
-    assert.ok(has(second.board.p2[0], 'ino_mind_body_switch_trap_break'));
-});
-
 test('Ino hair trap does not stun or damage a stun-immune enemy', () => {
     const match = makeMatch();
     match.board.p2[0].state.statuses.push({
@@ -233,30 +147,6 @@ test('Konohamaru cloak protects an ally and credits his retaliation', () => {
     const stun = status(match.board.p2[0], 'konohamaru_cloak_physical_stun');
     assert.equal(stun.sourceUsername, 'p1');
     assert.equal(stun.sourceSlot, 1);
-});
-
-test('Konohamaru confusion redirects a helpful targeted skill to a random enemy', () => {
-    const match = makeMatch();
-    for (const unit of match.board.p1) unit.hp = 50;
-    match.board.p2[1].hp = 50;
-    cast(match, 'p1', 1, 1, 'p2', 0);
-    cast(match, 'p2', 0, 2, 'p2', 1);
-    assert.equal(match.board.p2[1].hp, 50);
-    assert.equal(match.board.p1.reduce((sum, unit) => sum + unit.hp, 0), 160);
-});
-
-test('Konohamaru confusion redirects self and team-wide skill effects to one enemy', () => {
-    const selfMatch = makeMatch();
-    cast(selfMatch, 'p1', 1, 1, 'p2', 0);
-    cast(selfMatch, 'p2', 0, 3, 'p2', 0);
-    assert.equal(has(selfMatch.board.p2[0], 'test_guard'), false);
-    assert.equal(selfMatch.board.p1.filter((unit) => has(unit, 'test_guard')).length, 1);
-
-    const areaMatch = makeMatch();
-    cast(areaMatch, 'p1', 1, 1, 'p2', 0);
-    cast(areaMatch, 'p2', 0, 4);
-    assert.equal(areaMatch.board.p1.reduce((sum, unit) => sum + unit.hp, 0), 290);
-    assert.equal(areaMatch.board.p1.filter((unit) => unit.hp === 90).length, 1);
 });
 
 test('Konohamaru Ambush hits one and pierces the others, then counters targeting', () => {

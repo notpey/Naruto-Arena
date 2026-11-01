@@ -42,11 +42,11 @@ module.exports = {
         {
             id: 'zori-and-waraji-forced-entry', name: 'Forced Entry',
             skillimage: 'https://i.imgur.com/6wswhvT.png',
-            skilldescription: 'Zōri and Waraji charge through the enemy team, destroying 10 points of destructible defense from each enemy and dealing 15 physical damage to all enemies.',
+            skilldescription: 'Zōri and Waraji charge through the enemy team, destroying all destructible defense from each enemy and dealing 15 physical damage to all enemies.',
             energy: ['Taijutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
             classes: ['Physical', 'Instant'],
             effects: [
-                { type: 'destroy_destructible_defense', amount: 10, scope: 'all-enemy' },
+                { type: 'destroy_destructible_defense', scope: 'all-enemy' },
                 { type: 'damage', amount: 15, scope: 'all-enemy' },
             ],
         },

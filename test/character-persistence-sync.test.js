@@ -139,7 +139,7 @@ test('Naruto rework replaces stale stored artwork and skills once', async () => 
     const naruto = stored.find(character => character.id === 'uzumaki-naruto');
     assert.equal(naruto.facePicture, 'https://i.imgur.com/NwbpKdo.png');
     assert.equal(naruto.skills[0].name, 'Shadow Clone Assault');
-    assert.equal(naruto.passive.name, 'Unpredictable Ninja');
+    assert.equal(naruto.passive.name, 'Kyuubi Awakening');
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.uzumaki-naruto-rework-2026-10-23']));
 });
@@ -257,9 +257,9 @@ test('Haku, Zabuza, and Mizuki rework replaces stored concepts once', async () =
     const service = new CharacterService({ appStateCollection: mockCollection });
     const stored = await service.getStoredCharacters();
     for (const [id, passive, skill] of [
-        ['haku', 'Demon of the Ice', 'Demonic Mirroring Ice Crystals'],
+        ['haku', 'Sacrifice', 'Flying Needles of Death'],
         ['momochi-zabuza', 'Silent Killing', 'Kubikiribōchō'],
-        ['mizuki', 'Meld in the Shadows', 'Kunai Ambush'],
+        ['mizuki', 'Windmill', 'Kunai Ambush'],
     ]) {
         const character = stored.find((entry) => entry.characterId === id);
         assert.equal(character.passive.name, passive);

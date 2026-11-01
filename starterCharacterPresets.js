@@ -536,7 +536,7 @@
                     "id": "hyuuga-hinata-eight-trigrams-64-palms",
                     "name": "Eight Trigrams 64 Palms",
                     "skillimage": "https://i.imgur.com/ADoVhoI.png",
-                    "skilldescription": "Requires Shy Byakugan. Hinata deals 10 physical damage to all enemies, heals all allies for 10 health, and reduces the non-affliction damage of all enemies by 5 for 1 turn. This skill's damage and healing are increased by 5 for 1 turn after use.",
+                    "skilldescription": "Requires Shy Byakugan. Hinata deals 5 physical damage to all enemies, heals all allies for 5 health, and gives all allies 5 damage reduction for 1 turn. This skill's damage and healing are increased by 5 for 1 turn after use.",
                     "energy": [
                         "Ninjutsu"
                     ],
@@ -553,24 +553,23 @@
                     "effects": [
                         {
                             "type": "damage",
-                            "amount": 10,
+                            "amount": 5,
                             "scope": "all-enemy"
                         },
                         {
                             "type": "heal",
-                            "amount": 10,
+                            "amount": 5,
                             "scope": "all-allies"
                         },
                         {
                             "type": "apply_status",
-                            "statusId": "hyuuga_hinata_64_palms_debuff",
+                            "statusId": "hyuuga_hinata_64_palms_reduction",
                             "duration": 1,
-                            "scope": "all-enemy",
+                            "scope": "all-allies",
                             "metadata": {
-                                "harmful": true,
-                                "nonAfflictionDamageDebuffFlat": 5,
-                                "turnDurationAnchor": "source_turn",
-                                "tooltipText": "This character deals 5 less non-affliction damage for 1 turn."
+                                "helpful": true,
+                                "damageReductionFlat": 5,
+                                "tooltipText": "This character has 5 damage reduction for 1 turn."
                             }
                         },
                         {
@@ -654,6 +653,9 @@
                         }
                     ]
                 }
+            ],
+            "tags": [
+                "konoha-genin"
             ]
         },
         "nara-shikamaru": {

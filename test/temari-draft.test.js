@@ -37,9 +37,9 @@ test('Cutting Whirlwind deals piercing splash damage and Phantom Gale hits once'
     assert.ok(temari.state.statuses.some(status => status.metadata.passive &&
         status.metadata.sourceSkillName === 'Phantom Gale'));
     cast(match, 0, 0);
-    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 165);
+    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 175);
     assert.ok(isUnitInvulnerableForSkill(temari, ['Physical']));
-    assert.ok(!isUnitInvulnerableForSkill(temari, ['Mental']));
+    assert.ok(!isUnitInvulnerableForSkill(temari, ['Strategic']));
 });
 
 test('Summoning follows Whirlwind at lower cost and grows later Phantom Gale hits', () => {
@@ -51,7 +51,7 @@ test('Summoning follows Whirlwind at lower cost and grows later Phantom Gale hit
     }).requiredRandom, 1);
     match.board.p2[0].hp = 100;
     cast(match, 1);
-    assert.equal(match.board.p2[0].hp, 60, 'Summoning deals 35 plus one initial Phantom Gale hit');
+    assert.equal(match.board.p2[0].hp, 65, 'Summoning deals 30 plus one initial Phantom Gale hit');
     const growth = match.board.p1[0].state.statuses.find(status =>
         status.id === 'temari_phantom_gale_growth');
     assert.equal(growth.metadata.extraTriggers, 1);
@@ -62,11 +62,11 @@ test('Summoning follows Whirlwind at lower cost and grows later Phantom Gale hit
     match.board.p1[0].state.cooldowns = {};
     match.board.p2[0].hp = 100;
     cast(match, 1);
-    assert.equal(match.board.p2[0].hp, 55, 'A second Summoning triggers the current two hits');
+    assert.equal(match.board.p2[0].hp, 60, 'A second Summoning triggers the current two hits');
     assert.equal(growth.metadata.extraTriggers, 2);
     match.board.p2[0].hp = 100;
     cast(match, 0, 0);
-    assert.equal(match.board.p2[0].hp, 65, 'Later skills trigger Phantom Gale three times');
+    assert.equal(match.board.p2[0].hp, 70, 'Later skills trigger Phantom Gale three times');
 });
 
 test('Dust Wind shields every ally and extends its enemy debuff after Whirlwind', () => {

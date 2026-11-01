@@ -11,248 +11,221 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
     return {
         "yamanaka-ino": {
-                "id": "yamanaka-ino",
-                "characterId": "yamanaka-ino",
-                "name": "Yamanaka Ino",
-                "facePicture": "https://i.imgur.com/h2p3QjN.png",
-                "characterdeescription": "A confident young kunoichi from Konohagakure's Yamanaka clan, Ino specializes in secret techniques that allow her to transfer her consciousness into another person's body. During the Chūnin Exams, her rivalry with Sakura reveals a clever and resourceful fighter capable of deceiving opponents into falling for her carefully prepared traps.",
-                "passive": {
-                        "name": "Art of the Valentine",
-                        "icon": "https://i.imgur.com/kZPSOwC.png",
-                        "description": "Whenever Ino stuns an enemy with one of her skills, that enemy receives 5 piercing damage.",
-                        "piercingDamageOnStun": 5,
-                        "piercingDamageOnStunSkillIds": [
-                                "yamanaka-ino-mind-body-switch",
-                                "yamanaka-ino-chakra-hair-strand-trap"
-                        ]
-                },
-                "skills": [
+            "id": "yamanaka-ino",
+            "characterId": "yamanaka-ino",
+            "name": "Yamanaka Ino",
+            "facePicture": "https://i.imgur.com/h2p3QjN.png",
+            "characterdeescription": "A confident young kunoichi from Konohagakure's Yamanaka clan, Ino specializes in secret techniques that allow her to transfer her consciousness into another person's body. During the Chūnin Exams, her rivalry with Sakura reveals a clever and resourceful fighter capable of deceiving opponents into falling for her carefully prepared traps.",
+            "passive": {
+                "name": "Art of the Valentine",
+                "icon": "https://i.imgur.com/kZPSOwC.png",
+                "description": "When Ino successfully stuns an enemy, Mind Transfer Feint deals 5 additional Chakra damage on its next use.",
+                "nextSkillDamageBonusOnStun": {
+                    "skillId": "yamanaka-ino-mind-transfer-feint",
+                    "amount": 5
+                }
+            },
+            "skills": [
+                {
+                    "id": "yamanaka-ino-mind-transfer-feint",
+                    "name": "Mind Transfer Feint",
+                    "skillimage": "https://i.imgur.com/1RddcCQ.png",
+                    "skilldescription": "Ino deals 20 Chakra damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Chakra",
+                        "Instant"
+                    ],
+                    "effects": [
                         {
-                                "id": "yamanaka-ino-mind-transfer-feint",
-                                "name": "Mind Transfer Feint",
-                                "skillimage": "https://i.imgur.com/1RddcCQ.png",
-                                "skilldescription": "Ino deals 20 physical damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage.",
-                                "energy": [
-                                        "Random"
+                            "type": "damage",
+                            "amount": 20,
+                            "scope": "target",
+                            "metadata": {
+                                "skillClasses": [
+                                    "Chakra"
                                 ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Chakra",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "skillClasses": [
-                                                                "Physical"
-                                                        ],
-                                                        "bonusDamageIfTargetStunned": 10
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "yamanaka-ino-mind-body-switch",
-                                "name": "Mind Body Switch",
-                                "skillimage": "https://i.imgur.com/cKdM0Dy.png",
-                                "skilldescription": "Ino stuns one enemy’s harmful skills for 2 turns. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.",
-                                "energy": [
-                                        "Genjutsu",
-                                        "Random"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Chakra",
-                                        "Control"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "ino_mind_body_switch_target",
-                                                "duration": 2,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "cannotUseHarmfulSkills": true,
-                                                        "ongoingClass": "control",
-                                                        "endsOnAnySourceStun": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "Mind Body Switch: harmful skills are stunned while Ino maintains control."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "ino_mind_body_switch_trap_break",
-                                                "duration": 1,
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "ino_hair_strand_trap",
-                                                        "statusFromActor": true
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "cannotReduceDamage": true,
-                                                        "cannotBecomeInvulnerable": true,
-                                                        "ongoingClass": "control",
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "This character cannot reduce damage or become invulnerable."
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_status",
-                                                "statusId": "ino_hair_strand_trap",
-                                                "scope": "target",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "ino_hair_strand_trap",
-                                                        "statusFromActor": true
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "ino_mind_body_switch_active",
-                                                "duration": 2,
-                                                "scope": "self",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "ino_mind_body_switch_target",
-                                                        "statusFromActor": true
-                                                },
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "ongoingClass": "control",
-                                                        "endsOnAnySourceStun": true,
-                                                        "linkedTargetStatusId": "ino_mind_body_switch_target",
-                                                        "copyTargetKeyToKeys": [
-                                                                "linkedTargetKey"
-                                                        ],
-                                                        "skillReplacements": {
-                                                                "yamanaka-ino-mind-body-switch": "yamanaka-ino-forced-betrayal"
-                                                        },
-                                                        "tooltipText": "Mind Body Switch is replaced by Forced Betrayal while the target is controlled."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "yamanaka-ino-chakra-hair-strand-trap",
-                                "name": "Chakra Hair Strand Trap",
-                                "skillimage": "https://i.imgur.com/7m4IPdu.png",
-                                "skilldescription": "Ino places an invisible trap on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends. If Ino uses Mind Body Switch on that enemy while the trap is active, they also become unable to reduce damage or become invulnerable for 1 turn, and the trap ends.",
-                                "energy": [
-                                        "Genjutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "ino_hair_strand_trap",
-                                                "duration": 2,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "invisible": true,
-                                                        "hideTooltipFromUnitOwner": true,
-                                                        "onOwnerUseSkillTrigger": true,
-                                                        "onOwnerUseSkillHarmfulOnly": true,
-                                                        "onOwnerUseSkillEffects": [
-                                                                {
-                                                                        "type": "apply_status",
-                                                                        "statusId": "ino_hair_strand_stun",
-                                                                        "duration": 1,
-                                                                        "fresh": true,
-                                                                        "scope": "self",
-                                                                        "metadata": {
-                                                                                "harmful": true,
-                                                                                "cannotUseSkillClasses": [
-                                                                                        "physical",
-                                                                                        "chakra"
-                                                                                ],
-                                                                                "tooltipText": "Physical and Chakra skills are stunned."
-                                                                        }
-                                                                }
-                                                        ],
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "tooltipText": "The next harmful skill triggers a Physical and Chakra stun."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "yamanaka-ino-ino-block",
-                                "name": "Ino Block",
-                                "skillimage": "https://i.imgur.com/bgwFeRq.png",
-                                "skilldescription": "Yamanaka Ino becomes invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "ino_block",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "invulnerable": true,
-                                                        "tooltipText": "Ino is invulnerable."
-                                                }
-                                        }
-                                ]
-                        },
-                        {
-                                "id": "yamanaka-ino-forced-betrayal",
-                                "name": "Forced Betrayal",
-                                "hiddenFromSelectionViewer": true,
-                                "skillimage": "https://i.imgur.com/TX3m6tw.png",
-                                "skilldescription": "Ino deals 30 physical damage to one enemy through Mind Body Switch.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "single-enemy",
-                                "targetCondition": {
-                                        "statusId": "ino_mind_body_switch_target",
-                                        "statusFromActor": true
-                                },
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 30,
-                                                "scope": "target",
-                                                "metadata": {
-                                                        "damageSourceControlledStatusId": "ino_mind_body_switch_target"
-                                                }
-                                        }
-                                ]
+                                "bonusDamageIfTargetStunned": 10
+                            }
                         }
-                ]
+                    ]
+                },
+                {
+                    "id": "yamanaka-ino-mind-body-switch",
+                    "name": "Mind Body Switch",
+                    "skillimage": "https://i.imgur.com/cKdM0Dy.png",
+                    "skilldescription": "Ino stuns one enemy for 2 turns. During this time, this skill is replaced by Forced Betrayal. If Ino is stunned, Mind Body Switch ends.",
+                    "energy": [
+                        "Genjutsu",
+                        "Genjutsu"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 2,
+                    "classes": [
+                        "Chakra",
+                        "Control"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "ino_mind_body_switch_target",
+                            "duration": 2,
+                            "scope": "target",
+                            "metadata": {
+                                "harmful": true,
+                                "cannotUseSkills": true,
+                                "ongoingClass": "control",
+                                "endsOnAnySourceStun": true,
+                                "turnDurationAnchor": "source_turn",
+                                "tooltipText": "Mind Body Switch: all skills are stunned while Ino maintains control."
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "ino_mind_body_switch_active",
+                            "duration": 2,
+                            "scope": "self",
+                            "condition": {
+                                "scope": "target",
+                                "statusId": "ino_mind_body_switch_target",
+                                "statusFromActor": true
+                            },
+                            "metadata": {
+                                "helpful": true,
+                                "ongoingClass": "control",
+                                "endsOnAnySourceStun": true,
+                                "linkedTargetStatusId": "ino_mind_body_switch_target",
+                                "copyTargetKeyToKeys": [
+                                    "linkedTargetKey"
+                                ],
+                                "skillReplacements": {
+                                    "yamanaka-ino-mind-body-switch": "yamanaka-ino-forced-betrayal"
+                                },
+                                "tooltipText": "Mind Body Switch is replaced by Forced Betrayal while the target is controlled."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "yamanaka-ino-chakra-hair-strand-trap",
+                    "name": "Chakra Hair Strand Trap",
+                    "skillimage": "https://i.imgur.com/7m4IPdu.png",
+                    "skilldescription": "Ino places an invisible trap on one enemy for 2 turns. The first time that enemy uses a new harmful skill, their Physical and Chakra skills are stunned for 1 turn, and the trap ends.",
+                    "energy": [
+                        "Genjutsu"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "ino_hair_strand_trap",
+                            "duration": 2,
+                            "scope": "target",
+                            "metadata": {
+                                "harmful": true,
+                                "invisible": true,
+                                "hideTooltipFromUnitOwner": true,
+                                "onOwnerUseSkillTrigger": true,
+                                "onOwnerUseSkillHarmfulOnly": true,
+                                "onOwnerUseSkillEffects": [
+                                    {
+                                        "type": "apply_status",
+                                        "statusId": "ino_hair_strand_stun",
+                                        "duration": 1,
+                                        "fresh": true,
+                                        "scope": "self",
+                                        "metadata": {
+                                            "harmful": true,
+                                            "cannotUseSkillClasses": [
+                                                "physical",
+                                                "chakra"
+                                            ],
+                                            "tooltipText": "Physical and Chakra skills are stunned."
+                                        }
+                                    }
+                                ],
+                                "turnDurationAnchor": "source_turn",
+                                "tooltipText": "The next harmful skill triggers a Physical and Chakra stun."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "yamanaka-ino-ino-block",
+                    "name": "Ino Block",
+                    "skillimage": "https://i.imgur.com/bgwFeRq.png",
+                    "skilldescription": "Yamanaka Ino becomes invulnerable for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "self",
+                    "damage": 0,
+                    "cooldown": 4,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "ino_block",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerable": true,
+                                "tooltipText": "Ino is invulnerable."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "yamanaka-ino-forced-betrayal",
+                    "name": "Forced Betrayal",
+                    "hiddenFromSelectionViewer": true,
+                    "skillimage": "https://i.imgur.com/TX3m6tw.png",
+                    "skilldescription": "Ino deals 30 physical damage to one enemy through Mind Body Switch.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "single-enemy",
+                    "targetCondition": {
+                        "statusId": "ino_mind_body_switch_target",
+                        "statusFromActor": true
+                    },
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "damage",
+                            "amount": 30,
+                            "scope": "target",
+                            "metadata": {
+                                "damageSourceControlledStatusId": "ino_mind_body_switch_target"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "tags": [
+                "konoha-genin"
+            ]
         },
         "rock-lee": {
                 "id": "rock-lee",
@@ -477,238 +450,241 @@
                 ]
         },
         "tenten": {
-                "id": "tenten",
-                "characterId": "tenten",
-                "name": "Tenten",
-                "facePicture": "https://i.imgur.com/NHZg6gh.png",
-                "characterdeescription": "A hardworking genin of Team Guy, Tenten specializes in weapons combat, using summoning scrolls to unleash a vast arsenal of deadly projectiles. Determined to become a legendary kunoichi, she relies on precision, preparation, and relentless training to overcome her opponents.",
-                "passive": {
-                        "name": "Sharp Tools",
-                        "icon": "https://i.imgur.com/4KEJ94b.png",
-                        "description": "Enemies who use a damaging skill on Tenten take 5 physical damage.",
-                        "onEnemySkillTargetedDamageToSourceAmount": 5,
-                        "onEnemySkillTargetedDamageToSourceSkillClasses": [
-                                "Physical"
-                        ],
-                        "onEnemySkillTargetedDamagingOnly": true
-                },
-                "skills": [
+            "id": "tenten",
+            "characterId": "tenten",
+            "name": "Tenten",
+            "facePicture": "https://i.imgur.com/NHZg6gh.png",
+            "characterdeescription": "A hardworking genin of Team Guy, Tenten specializes in weapons combat, using summoning scrolls to unleash a vast arsenal of deadly projectiles. Determined to become a legendary kunoichi, she relies on precision, preparation, and relentless training to overcome her opponents.",
+            "passive": {
+                "name": "Sharp Tools",
+                "icon": "https://i.imgur.com/4KEJ94b.png",
+                "description": "Enemies who use a damaging skill on Tenten take 5 physical damage.",
+                "onEnemySkillTargetedDamageToSourceAmount": 5,
+                "onEnemySkillTargetedDamageToSourceSkillClasses": [
+                    "Physical"
+                ],
+                "onEnemySkillTargetedDamagingOnly": true
+            },
+            "skills": [
+                {
+                    "id": "tenten-twin-rising-dragons",
+                    "name": "Twin Rising Dragons",
+                    "skillimage": "https://i.imgur.com/g4ksO57.png",
+                    "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it.",
+                    "energy": [
+                        "Taijutsu"
+                    ],
+                    "target": "single-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
                         {
-                                "id": "tenten-twin-rising-dragons",
-                                "name": "Twin Rising Dragons",
-                                "skillimage": "https://i.imgur.com/g4ksO57.png",
-                                "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 10 additional points from it.",
-                                "energy": [
-                                        "Taijutsu"
-                                ],
-                                "target": "single-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 20,
-                                                "scope": "target"
-                                        },
-                                        {
-                                                "type": "damage",
-                                                "amount": 10,
-                                                "scope": "all-other-enemy"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 10,
-                                                        "mergeNumericAddKeys": [
-                                                                "bonusDamageFromSourceSkillsFlat"
-                                                        ],
-                                                        "bonusDamageFromSourceCharacterId": "tenten",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "tenten-twin-rising-dragons-trap"
-                                                        ],
-                                                        "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                "duration": 2,
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
-                                                },
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "bonusDamageFromSourceSkillsFlat": 10,
-                                                        "mergeNumericAddKeys": [
-                                                                "bonusDamageFromSourceSkillsFlat"
-                                                        ],
-                                                        "bonusDamageFromSourceCharacterId": "tenten",
-                                                        "bonusDamageAppliesToSkillIds": [
-                                                                "tenten-twin-rising-dragons-trap"
-                                                        ],
-                                                        "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_status",
-                                                "statusId": "tenten_full_release_active",
-                                                "scope": "self",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
-                                                }
-                                        }
-                                ]
+                            "type": "damage",
+                            "amount": 20,
+                            "scope": "target"
                         },
                         {
-                                "id": "tenten-twin-rising-dragons-trap",
-                                "name": "Twin Rising Dragons Trap",
-                                "skillimage": "https://i.imgur.com/LZze4F3.png",
-                                "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their Physical and Chakra damage is lowered by 5. All stacks of 'Twin Rising Dragons' are removed afterwards.",
-                                "energy": [
-                                        "Random"
-                                ],
-                                "target": "all-enemy",
-                                "damage": 0,
-                                "cooldown": 0,
-                                "classes": [
-                                        "Physical",
-                                        "Instant"
-                                ],
-                                "effects": [
-                                        {
-                                                "type": "damage",
-                                                "amount": 5,
-                                                "scope": "all-enemy"
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_twin_rising_dragons_trap_debuff",
-                                                "duration": 1,
-                                                "scope": "all-enemy",
-                                                "metadata": {
-                                                        "harmful": true,
-                                                        "turnDurationAnchor": "source_turn",
-                                                        "damageDebuffBySkillClass": {
-                                                                "physical": 5,
-                                                                "chakra": 5
-                                                        },
-                                                        "damageDebuffBySkillClassFromTargetStatus": {
-                                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                                "metadataKey": "bonusDamageFromSourceSkillsFlat",
-                                                                "classes": [
-                                                                        "physical",
-                                                                        "chakra"
-                                                                ]
-                                                        },
-                                                        "tooltipText": "This character deals 5 less Physical and Chakra damage for 1 turn."
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_status",
-                                                "statusId": "tenten_twin_rising_dragons_mark",
-                                                "scope": "all-enemy",
-                                                "condition": {
-                                                        "scope": "target",
-                                                        "statusId": "tenten_twin_rising_dragons_mark",
-                                                        "statusFromActor": true
-                                                }
-                                        },
-                                        {
-                                                "type": "remove_status",
-                                                "statusId": "tenten_full_release_active",
-                                                "scope": "self",
-                                                "condition": {
-                                                        "scope": "self",
-                                                        "statusId": "tenten_full_release_active"
-                                                }
-                                        }
-                                ]
+                            "type": "damage",
+                            "amount": 10,
+                            "scope": "all-other-enemy"
                         },
                         {
-                                "id": "tenten-twin-rising-dragons-full-release",
-                                "name": "Twin Rising Dragons Full Release",
-                                "skillimage": "https://i.imgur.com/4KGkFYx.png",
-                                "skilldescription": "Tenten becomes invulnerable to non-Strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons applies its non-damage effect twice, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
-                                "energy": [
-                                        "Random"
+                            "type": "apply_status",
+                            "statusId": "tenten_twin_rising_dragons_mark",
+                            "duration": 2,
+                            "scope": "all-enemy",
+                            "metadata": {
+                                "harmful": true,
+                                "turnDurationAnchor": "source_turn",
+                                "bonusDamageFromSourceSkillsFlat": 5,
+                                "mergeNumericAddKeys": [
+                                    "bonusDamageFromSourceSkillsFlat"
                                 ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 1,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
+                                "bonusDamageFromSourceCharacterId": "tenten",
+                                "bonusDamageAppliesToSkillIds": [
+                                    "tenten-twin-rising-dragons-trap"
                                 ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_full_release_invulnerability",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "invulnerableToNonStrategicSkills": true,
-                                                        "tooltipText": "This character is invulnerable to non-Strategic skills."
-                                                }
-                                        },
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "tenten_full_release_active",
-                                                "duration": 99,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "skillDurationBonuses": {
-                                                                "tenten-twin-rising-dragons-trap": 1
-                                                        },
-                                                        "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons applies its mark twice, or Twin Rising Dragons Trap lowers Physical and Chakra damage for 1 additional turn."
-                                                }
-                                        }
-                                ]
+                                "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
+                            }
                         },
                         {
-                                "id": "tenten-spiked-boulder-wall",
-                                "name": "Spiked Boulder Wall",
-                                "skillimage": "https://i.imgur.com/WcN7LHU.png",
-                                "skilldescription": "Tenten becomes invulnerable for 1 turn.",
-                                "energy": [
-                                        "Random"
+                            "type": "apply_status",
+                            "statusId": "tenten_twin_rising_dragons_mark",
+                            "duration": 2,
+                            "scope": "all-enemy",
+                            "condition": {
+                                "scope": "self",
+                                "statusId": "tenten_full_release_active"
+                            },
+                            "metadata": {
+                                "harmful": true,
+                                "turnDurationAnchor": "source_turn",
+                                "bonusDamageFromSourceSkillsFlat": 5,
+                                "mergeNumericAddKeys": [
+                                    "bonusDamageFromSourceSkillsFlat"
                                 ],
-                                "target": "self",
-                                "damage": 0,
-                                "cooldown": 4,
-                                "classes": [
-                                        "Strategic",
-                                        "Instant"
+                                "bonusDamageFromSourceCharacterId": "tenten",
+                                "bonusDamageAppliesToSkillIds": [
+                                    "tenten-twin-rising-dragons-trap"
                                 ],
-                                "effects": [
-                                        {
-                                                "type": "apply_status",
-                                                "statusId": "invulnerable",
-                                                "duration": 1,
-                                                "scope": "self",
-                                                "metadata": {
-                                                        "helpful": true,
-                                                        "invulnerable": true,
-                                                        "tooltipText": "This character is invulnerable."
-                                                }
-                                        }
-                                ]
+                                "tooltipTextTemplate": "Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points."
+                            }
+                        },
+                        {
+                            "type": "remove_status",
+                            "statusId": "tenten_full_release_active",
+                            "scope": "self",
+                            "condition": {
+                                "scope": "self",
+                                "statusId": "tenten_full_release_active"
+                            }
                         }
-                ]
+                    ]
+                },
+                {
+                    "id": "tenten-twin-rising-dragons-trap",
+                    "name": "Twin Rising Dragons Trap",
+                    "skillimage": "https://i.imgur.com/LZze4F3.png",
+                    "skilldescription": "Tenten deals 5 damage to all enemies. For 1 turn, their Physical and Chakra damage is lowered by 5. All stacks of 'Twin Rising Dragons' are removed afterwards.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "all-enemy",
+                    "damage": 0,
+                    "cooldown": 0,
+                    "classes": [
+                        "Physical",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "damage",
+                            "amount": 5,
+                            "scope": "all-enemy"
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "tenten_twin_rising_dragons_trap_debuff",
+                            "duration": 1,
+                            "scope": "all-enemy",
+                            "metadata": {
+                                "harmful": true,
+                                "turnDurationAnchor": "source_turn",
+                                "damageDebuffBySkillClass": {
+                                    "physical": 5,
+                                    "chakra": 5
+                                },
+                                "damageDebuffBySkillClassFromTargetStatus": {
+                                    "statusId": "tenten_twin_rising_dragons_mark",
+                                    "metadataKey": "bonusDamageFromSourceSkillsFlat",
+                                    "classes": [
+                                        "physical",
+                                        "chakra"
+                                    ]
+                                },
+                                "tooltipText": "This character deals 5 less Physical and Chakra damage for 1 turn."
+                            }
+                        },
+                        {
+                            "type": "remove_status",
+                            "statusId": "tenten_twin_rising_dragons_mark",
+                            "scope": "all-enemy",
+                            "condition": {
+                                "scope": "target",
+                                "statusId": "tenten_twin_rising_dragons_mark",
+                                "statusFromActor": true
+                            }
+                        },
+                        {
+                            "type": "remove_status",
+                            "statusId": "tenten_full_release_active",
+                            "scope": "self",
+                            "condition": {
+                                "scope": "self",
+                                "statusId": "tenten_full_release_active"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "tenten-twin-rising-dragons-full-release",
+                    "name": "Twin Rising Dragons Full Release",
+                    "skillimage": "https://i.imgur.com/4KGkFYx.png",
+                    "skilldescription": "Tenten becomes invulnerable to non-Strategic skills for 1 turn and improves her harmful skills until the next time she uses one; this does not stack. Twin Rising Dragons applies its non-damage effect twice, and Twin Rising Dragons Trap's damage reduction lasts 1 additional turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "self",
+                    "damage": 0,
+                    "cooldown": 1,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "tenten_full_release_invulnerability",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerableToNonStrategicSkills": true,
+                                "tooltipText": "This character is invulnerable to non-Strategic skills."
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "tenten_full_release_active",
+                            "duration": 99,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "skillDurationBonuses": {
+                                    "tenten-twin-rising-dragons-trap": 1
+                                },
+                                "tooltipText": "Tenten's next harmful skill is improved. Twin Rising Dragons applies its mark twice, or Twin Rising Dragons Trap lowers Physical and Chakra damage for 1 additional turn."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "tenten-spiked-boulder-wall",
+                    "name": "Spiked Boulder Wall",
+                    "skillimage": "https://i.imgur.com/WcN7LHU.png",
+                    "skilldescription": "Tenten becomes invulnerable for 1 turn.",
+                    "energy": [
+                        "Random"
+                    ],
+                    "target": "self",
+                    "damage": 0,
+                    "cooldown": 4,
+                    "classes": [
+                        "Strategic",
+                        "Instant"
+                    ],
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "statusId": "invulnerable",
+                            "duration": 1,
+                            "scope": "self",
+                            "metadata": {
+                                "helpful": true,
+                                "invulnerable": true,
+                                "tooltipText": "This character is invulnerable."
+                            }
+                        }
+                    ]
+                }
+            ],
+            "tags": [
+                "konoha-genin"
+            ]
         },
         "neji-hyuuga": {
                 "id": "neji-hyuuga",
@@ -904,7 +880,7 @@
                 {
                     "id": "gaara-of-the-desert-sand-binding-coffin",
                     "name": "Sand Binding Coffin",
-                        "skillimage": "https://i.imgur.com/3aST3cX.png",
+                    "skillimage": "https://i.imgur.com/3aST3cX.png",
                     "skilldescription": "Gaara stuns one enemy for 1 turn and gains 2 Sand Flow stacks.",
                     "energy": [
                         "Ninjutsu"
@@ -946,14 +922,14 @@
                     "id": "gaara-of-the-desert-desert-funeral",
                     "name": "Desert Funeral",
                     "skillimage": "https://i.imgur.com/9do9XxC.png",
-                    "skilldescription": "Gaara deals 30 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
+                    "skilldescription": "Gaara deals 20 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
                     "energy": [
                         "Bloodline",
-                        "Random"
+                        "Bloodline"
                     ],
                     "target": "single-enemy",
-                    "damage": 30,
-                    "cooldown": 0,
+                    "damage": 20,
+                    "cooldown": 1,
                     "classes": [
                         "Physical",
                         "Instant"
@@ -961,7 +937,7 @@
                     "effects": [
                         {
                             "type": "damage",
-                            "amount": 30,
+                            "amount": 20,
                             "scope": "target",
                             "metadata": {
                                 "ignoreDamageReduction": true,
@@ -980,7 +956,7 @@
                 {
                     "id": "gaara-of-the-desert-sand-sphere",
                     "name": "Sand Sphere",
-                        "skillimage": "https://i.imgur.com/eUfA1nN.png",
+                    "skillimage": "https://i.imgur.com/eUfA1nN.png",
                     "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                     "energy": [
                         "Ninjutsu",
@@ -1030,7 +1006,7 @@
                 {
                     "id": "gaara-of-the-desert-sand-shield",
                     "name": "Sand Shield",
-                        "skillimage": "https://i.imgur.com/2oNtSkX.png",
+                    "skillimage": "https://i.imgur.com/2oNtSkX.png",
                     "skilldescription": "Gaara becomes invulnerable for 1 turn.",
                     "energy": [
                         "Random"
@@ -1241,8 +1217,8 @@
             "passive": {
                 "name": "Phantom Gale",
                 "icon": "https://i.imgur.com/74m04BG.png",
-                "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 piercing damage.",
-                "onSkillUseRandomEnemyPiercingDamage": {
+                "description": "Temari's winds strike unpredictably. Whenever she uses a skill, a random enemy takes 5 physical damage.",
+                "onSkillUseRandomEnemyDamage": {
                     "amount": 5,
                     "extraTriggersStatusId": "temari_phantom_gale_growth"
                 }
@@ -1252,7 +1228,7 @@
                     "id": "temari-cutting-whirlwind",
                     "name": "Cutting Whirlwind",
                     "skillimage": "https://i.imgur.com/TceZL1M.png",
-                    "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 20 piercing damage to an enemy and 10 piercing damage to all other enemies. Temari also becomes invulnerable to non-mental skills for 1 turn.",
+                    "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing damage to an enemy and 5 piercing damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
                     "energy": [
                         "Ninjutsu"
                     ],
@@ -1266,7 +1242,7 @@
                     "effects": [
                         {
                             "type": "damage",
-                            "amount": 20,
+                            "amount": 15,
                             "scope": "target",
                             "metadata": {
                                 "ignoreDamageReduction": true
@@ -1274,7 +1250,7 @@
                         },
                         {
                             "type": "damage",
-                            "amount": 10,
+                            "amount": 5,
                             "scope": "all-other-enemy",
                             "metadata": {
                                 "ignoreDamageReduction": true
@@ -1287,12 +1263,7 @@
                             "scope": "self",
                             "metadata": {
                                 "helpful": true,
-                                "invulnerableToSkillClasses": [
-                                    "physical",
-                                    "energy",
-                                    "strategic",
-                                    "affliction"
-                                ],
+                                "invulnerableToNonStrategicSkills": true,
                                 "skillCostOverridesBySkillId": {
                                     "temari-summoning-quick-beheading-dance": {
                                         "energy": [
@@ -1301,7 +1272,7 @@
                                         ]
                                     }
                                 },
-                                "tooltipText": "Temari is invulnerable to non-mental skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
+                                "tooltipText": "Temari is invulnerable to non-Strategic skills. Summoning: Quick Beheading Dance costs 1 less Random chakra on her next turn."
                             }
                         }
                     ]
@@ -1310,7 +1281,7 @@
                     "id": "temari-summoning-quick-beheading-dance",
                     "name": "Summoning: Quick Beheading Dance",
                     "skillimage": "https://i.imgur.com/cvblibj.png",
-                    "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 35 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+                    "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
                     "energy": [
                         "Ninjutsu",
                         "Random",
@@ -1326,7 +1297,7 @@
                     "effects": [
                         {
                             "type": "damage",
-                            "amount": 35,
+                            "amount": 30,
                             "scope": "all-enemy"
                         },
                         {

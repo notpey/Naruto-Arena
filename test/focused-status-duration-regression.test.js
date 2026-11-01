@@ -111,8 +111,8 @@ test('Tenten Twin Rising Dragons and Trap apply expected damage', () => {
 
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 75, 'Gaara reduces the marked 15 physical Trap damage');
-    assert.equal(match.board.p2[1].hp, 75);
+    assert.equal(match.board.p2[0].hp, 80, 'Gaara reduces the marked 10 physical Trap damage');
+    assert.equal(match.board.p2[1].hp, 80);
 });
 
 test('Tenten Twin Rising Dragons marks stack, then Trap removes every mark', () => {
@@ -123,12 +123,12 @@ test('Tenten Twin Rising Dragons marks stack, then Trap removes every mark', () 
     queueSkill(match, 'p1', 0, 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark')
-        ?.metadata?.bonusDamageFromSourceSkillsFlat, 20);
+        ?.metadata?.bonusDamageFromSourceSkillsFlat, 10);
     queueSkill(match, 'p1', 0, 1);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_mark'), undefined);
     assert.deepEqual(getStatus(match, 'p2', 0, 'tenten_twin_rising_dragons_trap_debuff')
-        ?.metadata?.damageDebuffBySkillClass, { physical: 25, chakra: 25 });
+        ?.metadata?.damageDebuffBySkillClass, { physical: 15, chakra: 15 });
 });
 
 test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {
@@ -168,11 +168,9 @@ test('Temari Summoning Quick Beheading Dance damages all enemies on apply', () =
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
 
-    assert.ok([60, 65].includes(match.board.p2[0].hp));
-    assert.equal(match.board.p2[1].hp, 70);
-    assert.ok([60, 65].includes(match.board.p2[2].hp));
-    assert.ok(match.board.p2[0].hp + match.board.p2[2].hp >= 125,
-        'Phantom Gale adds at most one 5-damage hit to the immediate area damage');
+    assert.ok(match.board.p2.every((unit) => unit.hp >= 65 && unit.hp <= 75),
+        JSON.stringify(match.board.p2.map((unit) => unit.hp)));
+    assert.equal(match.board.p2.reduce((sum, unit) => sum + unit.hp, 0), 210);
 });
 
 test('Kakashi Nin-Dogs prepares Raikiri for his next turn', () => {

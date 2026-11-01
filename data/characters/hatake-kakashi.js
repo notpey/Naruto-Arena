@@ -46,16 +46,16 @@ module.exports = {
             id: 'hatake-kakashi-summoning-ninja-dogs',
             name: 'Nin-Dogs Summoning',
             skillimage: 'https://i.imgur.com/PFMVHdp.png',
-            skilldescription: 'Kakashi deals 20 physical damage to one enemy and stuns their Physical skills for 1 turn. Nin-Dogs Summoning becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
+            skilldescription: 'Kakashi deals 20 physical damage to one enemy and stuns their Physical and Affliction skills for 1 turn. Nin-Dogs Summoning becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
             energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
-            classes: ['Strategic', 'Instant'],
+            classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target', metadata: { skillClasses: ['Physical'] } },
                 {
                     type: 'apply_status', statusId: 'kakashi_nin_dogs_stun', duration: 1, scope: 'target',
                     metadata: {
-                        harmful: true, cannotUseSkillClasses: ['physical'], turnDurationAnchor: 'source_turn',
-                        tooltipText: 'This character cannot use Physical skills.',
+                        harmful: true, cannotUseSkillClasses: ['physical', 'affliction'], turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character cannot use Physical or Affliction skills.',
                     },
                 },
                 {
@@ -112,7 +112,7 @@ module.exports = {
             id: 'hatake-kakashi-raikiri',
             name: 'Raikiri',
             skillimage: 'https://i.imgur.com/CVE7tBQ.png',
-            skilldescription: 'Kakashi deals 45 piercing damage to one enemy.',
+            skilldescription: 'Kakashi deals 45 piercing Chakra damage to one enemy.',
             energy: ['Ninjutsu', 'Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Chakra', 'Instant'], hiddenFromSelectionViewer: true, requiresPreparation: true,
             effects: [{ type: 'damage', amount: 45, scope: 'target', metadata: { ignoreDamageReduction: true } }],

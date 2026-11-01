@@ -17,7 +17,7 @@ module.exports = {
             id: 'tenten-twin-rising-dragons',
             name: 'Twin Rising Dragons',
             skillimage: 'https://i.imgur.com/g4ksO57.png',
-            skilldescription: "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 10 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 10 additional points from it.",
+            skilldescription: "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it.",
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
@@ -26,7 +26,7 @@ module.exports = {
                 { type: 'apply_status', statusId: 'tenten_twin_rising_dragons_mark',
                     duration: 2, scope: 'all-enemy', metadata: {
                         harmful: true, turnDurationAnchor: 'source_turn',
-                        bonusDamageFromSourceSkillsFlat: 10,
+                        bonusDamageFromSourceSkillsFlat: 5,
                         mergeNumericAddKeys: ['bonusDamageFromSourceSkillsFlat'],
                         bonusDamageFromSourceCharacterId: 'tenten',
                         bonusDamageAppliesToSkillIds: ['tenten-twin-rising-dragons-trap'],
@@ -37,7 +37,7 @@ module.exports = {
                     condition: { scope: 'self', statusId: 'tenten_full_release_active' },
                     metadata: {
                         harmful: true, turnDurationAnchor: 'source_turn',
-                        bonusDamageFromSourceSkillsFlat: 10,
+                        bonusDamageFromSourceSkillsFlat: 5,
                         mergeNumericAddKeys: ['bonusDamageFromSourceSkillsFlat'],
                         bonusDamageFromSourceCharacterId: 'tenten',
                         bonusDamageAppliesToSkillIds: ['tenten-twin-rising-dragons-trap'],

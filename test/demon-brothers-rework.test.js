@@ -6,7 +6,7 @@ const { buildInitialBoard, resolvePendingTurnSkills, resolveEffectiveSkill, tick
 
 const index = (id) => characters.findIndex((character) => character.characterId === id);
 const pool = () => ({ taijutsu: 20, ninjutsu: 20, bloodline: 20, genjutsu: 20 });
-const matchFor = (enemyIds = ['uzumaki-naruto']) => {
+const matchFor = (enemyIds = ['haruno-sakura']) => {
     const players = [
         { username: 'a', team: [index('demon-brothers')] },
         { username: 'b', team: enemyIds.map(index) },
@@ -44,7 +44,7 @@ test('Demon Brothers roster seed, passive, costs, and visible skills match the d
 });
 
 test('Chain Wrap stuns Physical skills, binds one target, and Chain Shred pierces then ends it', () => {
-    const match = matchFor(['uzumaki-naruto', 'haruno-sakura']);
+    const match = matchFor(['haruno-sakura', 'uchiha-sasuke']);
     cast(match, 0, 0);
     assert.equal(match.board.b[0].hp, 85);
     assert.deepEqual(status(match, 'b', 0, 'demon_brothers_chain_wrap_stun').metadata.cannotUseSkillClasses, ['physical']);
