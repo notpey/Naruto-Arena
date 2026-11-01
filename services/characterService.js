@@ -17,6 +17,7 @@ const GAARA_REWORK_MIGRATION_ID = 'gaara-of-the-desert-rework-2026-10-28';
 const NEJI_REWORK_MIGRATION_ID = 'neji-hyuuga-draft-2026-10-29';
 const TENTEN_REWORK_MIGRATION_ID = 'tenten-draft-2026-10-29';
 const IRUKA_REWORK_MIGRATION_ID = 'umino-iruka-rw-draft-2026-10-31';
+const RAIN_GENIN_REWORK_MIGRATION_ID = 'rock-lee-shigure-oboro-drafts-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -243,6 +244,7 @@ class CharacterService {
                     [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -303,6 +305,7 @@ class CharacterService {
                         [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -331,6 +334,7 @@ class CharacterService {
         const shouldApplyNejiRework = !completedMigrations[NEJI_REWORK_MIGRATION_ID];
         const shouldApplyTentenRework = !completedMigrations[TENTEN_REWORK_MIGRATION_ID];
         const shouldApplyIrukaRework = !completedMigrations[IRUKA_REWORK_MIGRATION_ID];
+        const shouldApplyRainGeninRework = !completedMigrations[RAIN_GENIN_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -346,6 +350,7 @@ class CharacterService {
             ...(shouldApplyNejiRework ? ['neji-hyuuga'] : []),
             ...(shouldApplyTentenRework ? ['tenten'] : []),
             ...(shouldApplyIrukaRework ? ['umino-iruka'] : []),
+            ...(shouldApplyRainGeninRework ? ['rock-lee', 'oboro', 'shigure'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -422,6 +427,7 @@ class CharacterService {
                 if (shouldApplyNejiRework && characterId === 'neji-hyuuga') return seedEntry;
                 if (shouldApplyTentenRework && characterId === 'tenten') return seedEntry;
                 if (shouldApplyIrukaRework && characterId === 'umino-iruka') return seedEntry;
+                if (shouldApplyRainGeninRework && ['rock-lee', 'oboro', 'shigure'].includes(characterId)) return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -486,6 +492,7 @@ class CharacterService {
             shouldApplyNejiRework ||
             shouldApplyTentenRework ||
             shouldApplyIrukaRework ||
+            shouldApplyRainGeninRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -514,6 +521,7 @@ class CharacterService {
                         [`completed.${NEJI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },

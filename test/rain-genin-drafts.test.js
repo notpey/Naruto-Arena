@@ -1,9 +1,17 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const characters = require('../data/characters');
+const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('../data/activeRoster');
 const battle = require('../battleLogic');
 
 const indexOf = (id) => characters.findIndex((character) => character.id === id);
+test('Rock Lee, Oboro, and Shigure are included in the playable roster', () => {
+    for (const id of ['rock-lee', 'oboro', 'shigure']) {
+        assert.ok(ACTIVE_ROSTER_IDS.includes(id), `${id} is active`);
+        assert.ok(isActiveCharacter(characters[indexOf(id)]), `${id} is present in the character seed`);
+        assert.ok(!characters[indexOf(id)].requiredMissionId, `${id} has no obsolete mission lock`);
+    }
+});
 const pool = () => ({ taijutsu: 10, ninjutsu: 10, bloodline: 10, genjutsu: 10 });
 const status = (unit, id) => unit.state.statuses.find((entry) =>
     entry.id === id && entry.remainingTurns > 0);

@@ -16,7 +16,7 @@ module.exports = {
     id: 'oboro', characterId: 'oboro', name: 'Oboro',
     facePicture: 'https://i.imgur.com/5Sw5ij0.png',
     characterdeescription: 'A cunning genin of the Hidden Rain Village, Oboro specializes in using illusory clones and underground ambushes to deceive his opponents. Relying on misdirection and surprise attacks, he strikes when his enemies least expect it.',
-    requiredMissionId: 'yellow-flash',
+    requiredMissionId: null,
     passive: {
         name: 'False Opening', icon: 'https://i.imgur.com/2Ne6VxL.png',
         description: 'Oboro takes 10 less non-affliction damage from the first damaging enemy skill used on him each turn.',

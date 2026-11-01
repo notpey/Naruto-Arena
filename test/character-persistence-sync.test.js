@@ -364,6 +364,45 @@ test('Neji draft migration replaces stored artwork and biography once', async ()
     assert.equal(writes.length, writeCount);
 });
 
+test('Rock Lee, Oboro, and Shigure drafts replace stored kits and obsolete locks once', async () => {
+    const ids = ['rock-lee', 'oboro', 'shigure'];
+    const seeds = require('../data/characters');
+    let storedCharacters = ids.map((id) => ({
+        id, characterId: id, name: id, facePicture: `https://example.com/old-${id}.png`,
+        characterdeescription: `Old ${id} biography`, requiredMissionId: 'obsolete-mission',
+        skills: [{ id: `${id}-old-skill`, name: 'Old Skill' }],
+    }));
+    const completed = {};
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedCharacters }
+            : { key, completed },
+        updateOne: async ({ key }, update) => {
+            writes.push(key);
+            if (key === 'characters') storedCharacters = structuredClone(update.$set.characters);
+            if (key === 'character_migrations') {
+                for (const [field, value] of Object.entries(update.$set)) {
+                    if (field.startsWith('completed.')) completed[field.slice('completed.'.length)] = value;
+                }
+            }
+        },
+    };
+    const service = new CharacterService({ appStateCollection: collection });
+    const migrated = await service.getStoredCharacters();
+    for (const id of ids) {
+        assert.deepEqual(migrated.find((character) => character.id === id),
+            seeds.find((character) => character.id === id));
+    }
+    assert.ok(completed['rock-lee-shigure-oboro-drafts-2026-11-01']);
+
+    storedCharacters.find((character) => character.id === 'oboro').characterdeescription = 'Edited later';
+    const writeCount = writes.length;
+    const reloaded = await service.getStoredCharacters();
+    assert.equal(reloaded.find((character) => character.id === 'oboro').characterdeescription, 'Edited later');
+    assert.equal(writes.length, writeCount);
+});
+
 test('Tenten draft migration replaces stored artwork and biography once', async () => {
     const seed = require('../data/characters').find((character) => character.id === 'tenten');
     let storedCharacters = [{
