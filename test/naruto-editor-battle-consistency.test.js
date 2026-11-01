@@ -1157,37 +1157,6 @@ test('battleLogic resolves Gaara Sand Binding Coffin from the editor data', () =
     ).metadata.sandFlowStacks, 2);
 });
 
-test('Hayate Meld into Shadows lets Crescent Moon Slash hit invulnerable enemies', () => {
-    const hayateIndex = characters.findIndex((character) => character?.characterId === 'gekko-hayate');
-    assert.ok(hayateIndex >= 0, 'Gekko Hayate must exist in characters.js');
-    const match = makeMatch([hayateIndex], [1]);
-    const hayate = match.board.p1[0];
-    const target = match.board.p2[0];
-
-    hayate.state.statuses.push({
-        id: 'gekko_hayate_meld_into_shadows',
-        remainingTurns: 1,
-        metadata: {
-            skillDamageBonuses: {
-                'gekko-hayate-crescent-moon-slash': 15,
-            },
-            ignoreInvulnerabilityForSkillIds: ['gekko-hayate-crescent-moon-slash'],
-        },
-    });
-    target.state.statuses.push({
-        id: 'test_invulnerable',
-        remainingTurns: 1,
-        metadata: {
-            invulnerable: true,
-        },
-    });
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.equal(target.hp, 65, 'Crescent Moon Slash should deal 20 plus 15 through invulnerability');
-});
-
 test('Tayuya Summoning Doki description matches its damage reduction value', () => {
     const tayuya = getCharacter('tayuya');
     const doki = tayuya.skills.find((skill) => skill.id === 'tayuya-summoning-doki');

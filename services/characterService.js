@@ -26,6 +26,7 @@ const SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID = 'nara-shikamaru-mark-icon-2026-1
 const MISUMI_REWORK_MIGRATION_ID = 'tsurugi-misumi-draft-2026-11-01';
 const SHIORE_OROCHIMARU_REWORK_MIGRATION_ID = 'shiore-orochimaru-draft-2026-11-01';
 const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
+const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -261,6 +262,7 @@ class CharacterService {
                     [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -330,6 +332,7 @@ class CharacterService {
                         [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -367,6 +370,7 @@ class CharacterService {
         const shouldApplyMisumiRework = !completedMigrations[MISUMI_REWORK_MIGRATION_ID];
         const shouldApplyShioreOrochimaruRework = !completedMigrations[SHIORE_OROCHIMARU_REWORK_MIGRATION_ID];
         const shouldApplyBakiRework = !completedMigrations[BAKI_REWORK_MIGRATION_ID];
+        const shouldApplyGekkoHayateRework = !completedMigrations[GEKKO_HAYATE_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -391,6 +395,7 @@ class CharacterService {
             ...(shouldApplyMisumiRework ? ['tsurugi-misumi'] : []),
             ...(shouldApplyShioreOrochimaruRework ? ['shiore-orochimaru'] : []),
             ...(shouldApplyBakiRework ? ['baki'] : []),
+            ...(shouldApplyGekkoHayateRework ? ['gekko-hayate'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -476,6 +481,7 @@ class CharacterService {
                 if (shouldApplyMisumiRework && ['tsurugi-misumi'].includes(characterId)) return seedEntry;
                 if (shouldApplyShioreOrochimaruRework && ['shiore-orochimaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyBakiRework && ['baki'].includes(characterId)) return seedEntry;
+                if (shouldApplyGekkoHayateRework && ['gekko-hayate'].includes(characterId)) return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -549,6 +555,7 @@ class CharacterService {
             shouldApplyMisumiRework ||
             shouldApplyShioreOrochimaruRework ||
             shouldApplyBakiRework ||
+            shouldApplyGekkoHayateRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -586,6 +593,7 @@ class CharacterService {
                         [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },

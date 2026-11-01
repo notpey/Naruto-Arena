@@ -464,14 +464,7 @@ test('Kabuto: Chakra Scalpel damage bonus is consumed upon use and does not ramp
 });
 
 test('Audit Fixes: One-time skill damage bonuses consume themselves upon skill use', () => {
-    const hayateChar = require('../data/characters/gekko-hayate');
     const jiroubouChar = require('../data/characters/jiroubou');
-
-    const hayateMeld = hayateChar.skills.find((s) => s.id === 'gekko-hayate-meld-into-shadows');
-    const hayateMeldStatus = hayateMeld.effects.find((e) => e.statusId === 'gekko_hayate_meld_into_shadows');
-    assert.deepEqual(hayateMeldStatus.metadata.removeSelfOnSkillUseSkillIds, [
-        'gekko-hayate-crescent-moon-slash',
-    ]);
 
     const jiroubouArhat = jiroubouChar.skills.find((s) => s.id === 'jiroubou-arhat-fist');
     const jiroubouArhatStatus = jiroubouArhat.effects.find((e) => e.statusId === 'jiroubou_arhat_fist_bonus');
