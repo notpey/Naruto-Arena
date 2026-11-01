@@ -3424,6 +3424,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         );
                     };
                     const defensePoints = Math.max(0, Number(statusMetadata?.destructibleDefensePoints) || 0);
+                    // Tooltips that bake in a fixed amount ("has 30 destructible defense") show the
+                    // live remaining points instead, so damage to the defense is reflected at once.
+                    if (Number.isFinite(Number(statusMetadata?.destructibleDefensePoints))) {
+                        normalized = normalized.replace(
+                            /\b\d+(\s+(?:points? of\s+)?(?:permanent\s+)?destructible defense)/gi,
+                            (match, phrase) => `${defensePoints}${phrase}`
+                        );
+                    }
                     injectMissingValue(
                         defensePoints,
                         /\b(has|have)\s+permanent destructible defense\b/i,

@@ -1394,6 +1394,19 @@ const renderTooltipTemplate = (template, metadata = {}) => {
     });
 };
 
+// Tooltips written with a fixed number ("has 30 destructible defense") are rewritten to the
+// status's current points so they stay accurate as the defense is damaged or restored.
+const DESTRUCTIBLE_DEFENSE_TOOLTIP_PATTERN =
+    /\b\d+(\s+(?:points? of\s+)?(?:permanent\s+)?destructible defense)/gi;
+const syncDestructibleDefenseTooltip = (metadata) => {
+    if (!metadata || typeof metadata.tooltipText !== 'string') return metadata;
+    const points = Number(metadata.destructibleDefensePoints);
+    if (!Number.isFinite(points)) return metadata;
+    const tooltipText = metadata.tooltipText.replace(DESTRUCTIBLE_DEFENSE_TOOLTIP_PATTERN,
+        (match, phrase) => `${Math.max(0, points)}${phrase}`);
+    return tooltipText === metadata.tooltipText ? metadata : { ...metadata, tooltipText };
+};
+
 const changeStatusMetadataStack = (status, key, amount) => {
     if (!status || typeof key !== 'string' || !key || !Number.isFinite(Number(amount))) return;
     const metadata = status.metadata || {};
@@ -1423,6 +1436,8 @@ const refreshDerivedStatusTooltips = (targetState) => {
                     ...metadata,
                     tooltipText: renderTooltipTemplate(metadata.tooltipTextTemplate, metadata),
                 };
+            } else if (status?.metadata) {
+                status.metadata = syncDestructibleDefenseTooltip(metadata);
             }
             return;
         }
@@ -3415,6 +3430,8 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             status.metadata = nextMetadata;
             if (typeof nextMetadata.tooltipTextTemplate === 'string' && nextMetadata.tooltipTextTemplate) {
                 status.metadata.tooltipText = renderTooltipTemplate(nextMetadata.tooltipTextTemplate, nextMetadata);
+            } else {
+                status.metadata = syncDestructibleDefenseTooltip(status.metadata);
             }
             if (remainingPoints <= 0) {
                 const removeStatusIdsOnBreak = Array.isArray(status?.metadata?.removeStatusIdsOnBreak)
