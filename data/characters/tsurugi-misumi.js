@@ -1,216 +1,94 @@
+const JOINTS_PREP = 'tsurugi_misumi_flexible_twisting_joints';
+const SOFT_MARK = 'tsurugi_misumi_soft_physique_mark';
+const SOFT_REFLECT = 'tsurugi_misumi_soft_physique_reflect';
+const PASSIVE_ICON = 'https://i.imgur.com/XAt3Ht4.png';
+
 module.exports = {
-    "id": "tsurugi-misumi",
-    "characterId": "tsurugi-misumi",
-    "name": "Tsurugi Misumi",
-    "facePicture": "https://i.imgur.com/0eoJQlb.png",
-    "characterdeescription": "A sound village genin that infiltrated Konoha as a spy, Misumi likes taking the initiative when it comes to combat. Misumi can flex his muscles and bones, twisting them to wrap around his enemies, or even defend his allies.",
-    "requiredMissionId": "twisting-sound",
-    "skills": [
+    id: 'tsurugi-misumi', characterId: 'tsurugi-misumi', name: 'Tsurugi Misumi',
+    facePicture: 'https://i.imgur.com/gI96GYe.png',
+    characterdeescription: 'A deceptive genin of the Hidden Sound Village, Misumi possesses an unusually flexible body that allows him to twist and contort his limbs at will. Using his unnatural physique to entangle opponents and redirect incoming attacks, he specializes in immobilizing enemies before they can fight back.',
+    requiredMissionId: null,
+    passive: {
+        name: 'Twisted Advantage', icon: PASSIVE_ICON,
+        description: "Whenever Misumi reflects an enemy's physical skill with Soft Physique Modification, he gains 1 random chakra.",
+    },
+    skills: [
         {
-            "id": "tsurugi-misumi-flexible-twisting-joints",
-            "name": "Flexible Twisting Joints",
-            "skillimage": "https://i.imgur.com/6CRiBav.png",
-            "skilldescription": "Tsurugi Misumi gains 20 points of damage reduction for 1 turn and targets one enemy or one member of his team. If used on an enemy, they will take 20 damage that ignores invulnerability. If used on a member of his team, they will gain 20 points of damage reduction for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'tsurugi-misumi-flexible-twisting-joints', name: 'Flexible Twisting Joints',
+            skillimage: 'https://i.imgur.com/363kxVX.png',
+            skilldescription: 'Misumi twists his body to strike an enemy, dealing 15 physical damage. Tighten Joints can be used on the target for 1 turn.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 15, scope: 'target' },
+                { type: 'apply_status', statusId: JOINTS_PREP, duration: 1, scope: 'target',
+                    metadata: { harmful: true, turnDurationAnchor: 'source_turn',
+                        tooltipText: 'Tighten Joints can be used on this character.' } },
             ],
-            "target": "single-character",
-            "damage": 0,
-            "cooldown": 0,
-            "ignoreInvulnerability": true,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_flexible_joints_self",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "damageReductionFlat": 20,
-                        "tooltipText": "This character has 20 damage reduction."
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "targetRelation": "enemy"
-                    },
-                    "metadata": {
-                        "cannotBeEvaded": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_flexible_joints_ally",
-                    "duration": 1,
-                    "scope": "target",
-                    "condition": {
-                        "scope": "target",
-                        "targetRelation": "ally"
-                    },
-                    "metadata": {
-                        "helpful": true,
-                        "damageReductionFlat": 20,
-                        "tooltipText": "This character has 20 damage reduction."
-                    }
-                }
-            ]
         },
         {
-            "id": "tsurugi-misumi-soft-physique-modification",
-            "name": "Soft Physique Modification",
-            "skillimage": "https://i.imgur.com/N1qHrVL.png",
-            "skilldescription": "Tsurugi Misumi targets one enemy. For 2 turns, all new harmful skills used on Tsurugi Misumi will be reflected onto that enemy instead. During this time, that enemy will be unable to reduce damage or become invulnerable.",
-            "energy": [
-                "Random",
-                "Random"
+            id: 'tsurugi-misumi-soft-physique-modification', name: 'Soft Physique Modification',
+            skillimage: 'https://i.imgur.com/4kSRPt1.png',
+            skilldescription: 'Misumi secretly marks an enemy for 1 turn, reflecting all physical skills used against him onto that target. Tighten Joints can be used on the marked enemy for 1 turn.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 3,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'apply_status', statusId: SOFT_REFLECT, duration: 1, scope: 'self',
+                    condition: { scope: 'target' },
+                    metadata: {
+                        helpful: true, hideTooltipFromEnemy: true,
+                        reflectNextIncomingSkill: true, reflectOnlyHarmfulSkills: true,
+                        reflectOnlySkillClasses: ['Physical'], persistReflectAcrossTriggers: true,
+                        reflectToFixedTarget: true,
+                        copyTargetUsernameToKeys: ['reflectTargetUsername'],
+                        copyTargetSlotToKeys: ['reflectTargetSlot'],
+                        onReflectGainChakra: { chakraType: 'random', amount: 1 },
+                        tooltipText: 'Physical skills used on Misumi are reflected onto the enemy marked by Soft Physique Modification. Each reflected skill grants 1 random chakra.',
+                    } },
+                { type: 'apply_status', statusId: SOFT_MARK, duration: 1, scope: 'target',
+                    metadata: {
+                        harmful: true, turnDurationAnchor: 'source_turn', hideTooltipFromUnitOwner: true,
+                        statusIcon: 'https://i.imgur.com/4kSRPt1.png',
+                        tooltipText: "Physical skills used on Misumi are reflected onto this character, and Tighten Joints can be used on them.",
+                    } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Control"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_soft_physique_reflect",
-                    "duration": 2,
-                    "scope": "self",
-                    "condition": {
-                        "scope": "target"
-                    },
-                    "metadata": {
-                        "helpful": true,
-                        "reflectNextIncomingSkill": true,
-                        "reflectToFixedTarget": true,
-                        "persistReflectAcrossTriggers": true,
-                        "copyTargetUsernameToKeys": [
-                            "reflectTargetUsername"
-                        ],
-                        "copyTargetSlotToKeys": [
-                            "reflectTargetSlot"
-                        ],
-                        "tooltipText": "New harmful skills used on this character will be reflected onto the enemy affected by Soft Physique Modification.",
-                        "ongoingClass": "control"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_soft_physique_mark",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable.",
-                        "ongoingClass": "control"
-                    }
-                }
-            ]
         },
         {
-            "id": "tsurugi-misumi-tighten-joints",
-            "name": "Tighten Joints",
-            "skillimage": "https://i.imgur.com/GasBrwW.png",
-            "skilldescription": "Tsurugi Misumi gains 15 points of permanent destructible defense. If 'Soft Physique Modification' is active, the enemy targeted by it will also take 20 damage and be stunned for 1 turn, and Misumi will heal 10 health.",
-            "energy": [
-                "Random"
+            id: 'tsurugi-misumi-tighten-joints', name: 'Tighten Joints',
+            skillimage: 'https://i.imgur.com/PrYadov.png',
+            skilldescription: 'Misumi wraps his body around a prepared enemy, dealing 15 physical damage each turn for 2 turns and stunning their physical and strategic skills. Misumi cannot use other skills during this time.',
+            energy: ['Random', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            targetCondition: { statusIdsAny: [JOINTS_PREP, SOFT_MARK] },
+            classes: ['Physical', 'Action'],
+            effects: [
+                { type: 'apply_status', statusId: 'tsurugi_misumi_tighten_joints', duration: 2, scope: 'target',
+                    metadata: {
+                        harmful: true, ongoingClass: 'action',
+                        turnEndDamage: 15, turnEndTrigger: 'source_turn', turnEndSkillClasses: ['Physical'],
+                        turnDurationAnchor: 'source_turn', triggerOnApply: true,
+                        tooltipText: 'This character takes 15 physical damage each turn from Tighten Joints.',
+                    } },
+                { type: 'apply_status', statusId: 'tsurugi_misumi_tighten_joints_stun', duration: 2, scope: 'target',
+                    metadata: {
+                        harmful: true, ongoingClass: 'action', turnDurationAnchor: 'source_turn',
+                        cannotUseSkillClasses: ['physical', 'strategic'],
+                        tooltipText: "This character's physical and strategic skills are stunned.",
+                    } },
+                { type: 'apply_status', statusId: 'tsurugi_misumi_tighten_joints_lock', duration: 1, scope: 'self',
+                    metadata: {
+                        ongoingClass: 'action', cannotBeCleansed: true, cannotUseSkillIndices: [0, 1, 3],
+                        tooltipText: 'Misumi cannot use other skills while Tighten Joints is active.',
+                    } },
             ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_tighten_joints_dd",
-                    "duration": 99,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "destructibleDefensePoints": 15,
-                        "mergeNumericAddKeys": [
-                            "destructibleDefensePoints"
-                        ],
-                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
-                    }
-                },
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "all-enemy",
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "tsurugi_misumi_soft_physique_mark"
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsurugi_misumi_tighten_joints_stun",
-                    "duration": 1,
-                    "scope": "all-enemy",
-                    "condition": {
-                        "scope": "target",
-                        "statusId": "tsurugi_misumi_soft_physique_mark"
-                    },
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkills": true,
-                        "tooltipText": "This character is stunned by Tighten Joints.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                },
-                {
-                    "type": "heal",
-                    "amount": 10,
-                    "scope": "self",
-                    "condition": {
-                        "scope": "self",
-                        "statusId": "tsurugi_misumi_soft_physique_reflect"
-                    }
-                }
-            ]
         },
         {
-            "id": "tsurugi-misumi-misumi-block",
-            "name": "Misumi Block",
-            "skillimage": "https://i.imgur.com/LJMVcjB.png",
-            "skilldescription": "Misumi becomes invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'tsurugi-misumi-misumi-block', name: 'Misumi Block',
+            skillimage: 'https://i.imgur.com/m17inXY.png',
+            skilldescription: 'Misumi contorts his body to evade incoming attacks, becoming invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'tsurugi_misumi_misumi_block', duration: 1, scope: 'self',
+                metadata: { helpful: true, invulnerable: true, tooltipText: 'Misumi is invulnerable.' } }],
+        },
+    ],
 };

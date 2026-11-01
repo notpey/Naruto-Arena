@@ -5561,6 +5561,23 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         }
         const randomScopeGroupPicks = new Map();
         const reflectedRecipientByOriginalKey = new Map();
+        const reflectChakraGrantedKeys = new Set();
+        // A reflect status may grant its owner chakra once for each skill it reflects.
+        const grantReflectChakra = (owner, reflectStatus) => {
+            const gain = reflectStatus?.metadata?.onReflectGainChakra;
+            const amount = Math.max(0, Number(gain?.amount) || 0);
+            if (!amount || !owner?.username || owner.username === actingUsername) return;
+            const key = `${owner.username}:${owner.slot}:${reflectStatus.id}`;
+            if (reflectChakraGrantedKeys.has(key)) return;
+            reflectChakraGrantedKeys.add(key);
+            const chakraType = String(gain.chakraType || 'random').trim().toLowerCase();
+            for (let i = 0; i < amount; i += 1) {
+                applyChakraGainToMatch({
+                    match, username: owner.username, amount: 1,
+                    chakraType: chakraType === 'random' ? pickRandomEntry(chakraTypes) : chakraType,
+                });
+            }
+        };
         const resolveFixedReflectTarget = (metadata, sourceStatus = null) => {
             let fixedUsername = null;
             let fixedSlot = null;
@@ -5587,6 +5604,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 if (targetReflectStatus?.id) {
                     const targetState = ensureUnitStateShape(recipient.unit);
                     const metadata = targetReflectStatus?.metadata || {};
+                    grantReflectChakra(recipient, targetReflectStatus);
                     if (!Boolean(metadata?.persistReflectAcrossTriggers)) {
                         consumeStatus(targetState, targetReflectStatus.id);
                     }
