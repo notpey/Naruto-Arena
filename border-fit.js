@@ -1,6 +1,6 @@
 // Shop borders are frames: they should sit around the avatar, overlapping it only slightly.
-// Border art varies (padding, thickness), so measure each image's frame and place it so its
-// inner edge overlaps the avatar by a fraction of the frame's thickness and the rest hangs outside.
+// Border art varies (padding, thickness), so measure each image's frame and centre its band on
+// the avatar's edge, never letting it reach more than a little way outside.
 (function () {
     "use strict";
     var OVERLAY_SELECTOR = [
@@ -10,8 +10,8 @@
         ".shop-avatar-border",
         ".daily-spin-avatar-border"
     ].join(",");
-    var ALPHA_THRESHOLD = 32; // Ignore faint glow when finding edges.
-    var OVERLAP = 0.25; // Share of the frame's thickness drawn over the avatar.
+    var ALPHA_THRESHOLD = 96; // Measure the solid frame, not its soft glow.
+    var MAX_OUTSIDE = 0.06; // Most a frame may extend past the avatar, as a share of its size.
     var SAMPLE_SIZE = 256;
     var cache = new Map();
 
@@ -99,8 +99,12 @@
         }
         var thickness = ((inner.left - outer.left) + (outer.right - inner.right) + (inner.top - outer.top) + (outer.bottom - inner.bottom)) / 4;
         var opening = ((inner.right - inner.left) + (inner.bottom - inner.top)) / 2;
-        // The opening plus the overlapping share of the frame on both sides spans the avatar.
-        var scale = 1 / (opening + 2 * OVERLAP * thickness);
+        // Centre the frame's band on the avatar's edge: half over it, half outside.
+        var scale = 1 / (opening + thickness);
+        if ((thickness * scale) / 2 > MAX_OUTSIDE) {
+            // Thick frames would hang too far out; cap the overhang and let the rest sit on the avatar.
+            scale = (1 + 2 * MAX_OUTSIDE) / (opening + 2 * thickness);
+        }
         return {
             scale: scale,
             x: 0.5 - ((inner.left + inner.right) / 2) * scale,
