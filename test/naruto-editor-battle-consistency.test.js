@@ -594,7 +594,7 @@ test('Sasuke Fireball burn drives his passive bonus and Shadow Shuriken follow-u
     assert.equal(foreignBurnMatch.board.p2[0].state.statuses.some(status => status.id === 'uchiha_sasuke_shadow_shuriken_stun'), false);
 });
 
-test('Sasuke Sharingan visibly counters the first harmful Physical skill and then ends', () => {
+test('Sasuke Sharingan hides its counter and ends after countering a Physical skill', () => {
     const match = makeMatch([2], [2]);
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
@@ -602,7 +602,8 @@ test('Sasuke Sharingan visibly counters the first harmful Physical skill and the
     const sharingan = state.statuses.find(status => status.id === 'uchiha_sasuke_sharingan');
     assert.equal(sharingan.remainingTurns, 3);
     assert.equal(sharingan.metadata.damageReductionFlat, 10);
-    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses.some(status => status.id === sharingan.id), true);
+    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses.some(status => status.id === sharingan.id), false);
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.some(status => status.id === sharingan.id), true);
 
     queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });

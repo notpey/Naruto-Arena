@@ -5670,6 +5670,14 @@ const shouldHideStatusFromViewer = ({ status, unitUsername, viewerUsername, reve
     if (Boolean(metadata.hideTooltip)) {
         return true;
     }
+    const isCounterEffect = Object.keys(metadata).some((key) => /^counter[A-Z]/.test(key));
+    const counterOwnerUsername = status?.sourceUsername || unitUsername;
+    if (isCounterEffect && viewerUsername !== counterOwnerUsername && !revealInvisibleSkills) {
+        return true;
+    }
+    if (isCounterEffect && viewerUsername === counterOwnerUsername) {
+        return false;
+    }
     if (viewerUsername !== unitUsername && Boolean(metadata.hideTooltipFromEnemy) && !revealInvisibleSkills) {
         return true;
     }
