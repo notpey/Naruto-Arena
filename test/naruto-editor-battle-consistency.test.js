@@ -829,6 +829,17 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
         characters, rosterIndex: leeIndex, skillIndex: index, actorState: actor.state,
     });
     assert.equal(lee.passive.name, 'Gate Opening');
+    assert.equal(actor.state.statuses.find((status) =>
+        status.id === 'rock_lee_gate_opening_trigger')?.metadata.hideTooltip, true,
+    'internal Gate trigger does not appear as a raw status tooltip');
+    assert.equal(actor.state.statuses.find((status) => status.metadata?.passive)?.metadata.tooltipText,
+        lee.passive.description, 'the visible passive explains Gate Opening');
+    const visibleStatuses = buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses;
+    assert.equal(visibleStatuses.some((status) => status.id === 'rock_lee_gate_opening_trigger'),
+        false, 'the battle payload omits the internal trigger');
+    assert.ok(visibleStatuses.some((status) =>
+        status.metadata?.sourceSkillName === 'Gate Opening' &&
+        status.metadata?.tooltipText === lee.passive.description));
     assert.deepEqual(lee.skills.slice(0, 4).map((skill) => skill.name), [
         'High Speed Taijutsu', 'Front Lotus', 'Remove Training Weights', 'Lee Dodge',
     ]);
@@ -850,6 +861,7 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
         queueSkill(match, 'p1', 1, [{ username: 'p2', slot: count % 3 }]);
         resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
         assert.equal(gate()?.metadata.gateCount, count);
+        assert.match(gate()?.metadata.tooltipText || '', /Lee has opened \d+ Gates/);
         if (count === 3) {
             assert.deepEqual(computeEffectiveEnergyCost({
                 skill: effective(0), actorState: actor.state,

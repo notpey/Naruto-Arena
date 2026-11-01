@@ -245,6 +245,7 @@
                     "metadata": {
                         "permanent": true,
                         "cannotBeCleansed": true,
+                        "hideTooltip": true,
                         "onOwnerUseSkillTrigger": true,
                         "preserveOnOwnerUseSkillTrigger": true,
                         "onOwnerUseSkillClassesAny": [

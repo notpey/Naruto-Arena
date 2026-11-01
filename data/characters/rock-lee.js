@@ -48,7 +48,8 @@ module.exports = {
     startStatuses: [{
         statusId: 'rock_lee_gate_opening_trigger', duration: 99,
         metadata: {
-            permanent: true, cannotBeCleansed: true, onOwnerUseSkillTrigger: true,
+            permanent: true, cannotBeCleansed: true, hideTooltip: true,
+            onOwnerUseSkillTrigger: true,
             preserveOnOwnerUseSkillTrigger: true,
             onOwnerUseSkillClassesAny: ['Physical'],
             onOwnerUseSkillApplyStatusToOwner: {
