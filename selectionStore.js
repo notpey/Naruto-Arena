@@ -1234,6 +1234,19 @@
         if (state.view === "profile") renderIdentity();
     });
 
+    // Rewards granted elsewhere (the daily spin) change ownership and loadout.
+    document.addEventListener("arena:inventory-changed", function () {
+        state.shopRequest = null;
+        if (state.view === "shop" || state.view === "profile" || state.shop) {
+            loadShop(true).then(rerenderVisible, rerenderVisible);
+        }
+    });
+
+    document.addEventListener("arena:loadout-changed", function (event) {
+        setLoadout(event.detail || {});
+        rerenderVisible();
+    });
+
     document.addEventListener("arena:roster-ready", function () {
         if (state.view === "shop") renderShop();
     });

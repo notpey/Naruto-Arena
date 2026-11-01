@@ -2777,6 +2777,16 @@ function normalizeAchievementsState(achObj = {}) {
     };
 }
 
+// Daily spin wheel: one spin per UTC day; the last result is kept so the client can show it again.
+function normalizeDailySpinState(spinObj = {}) {
+    const source = spinObj && typeof spinObj === 'object' ? spinObj : {};
+    return {
+        lastSpinDate: typeof source.lastSpinDate === 'string' ? source.lastSpinDate : null,
+        totalSpins: Math.max(0, Number(source.totalSpins) || 0),
+        lastResult: source.lastResult && typeof source.lastResult === 'object' ? source.lastResult : null,
+    };
+}
+
 function normalizeLoginRewardsState(loginObj = {}) {
     return {
         streakCount: Math.max(0, Number(loginObj.streakCount) || 0),
@@ -2909,6 +2919,7 @@ const normalizeUserProfile = (user = {}) => {
         quests: normalizeQuestsState(source.quests),
         achievements: normalizeAchievementsState(source.achievements),
         loginRewards: normalizeLoginRewardsState(source.loginRewards),
+        dailySpin: normalizeDailySpinState(source.dailySpin),
         redeemedCodes: Array.isArray(source.redeemedCodes) ? source.redeemedCodes.map(String) : [],
         inventory: {
             avatars: Array.isArray(source.inventory?.avatars) ? source.inventory.avatars.map(String) : [],
@@ -8926,6 +8937,19 @@ async function initDb() {
         requireSession,
     });
     app.use(shopRouter);
+
+    const dailySpinRouter = require('./routes/dailySpin.js')({
+        usersCollection,
+        normalizeUserProfile,
+        cosmeticsService,
+        characterService,
+        characterRankAccess,
+        getCharacterAvailability,
+        getMissionLockedCharacterIds,
+        normalizeCharacterId,
+        requireSession,
+    });
+    app.use(dailySpinRouter);
 
     const profileRouter = require('./routes/profile.js')({
         usersCollection,
