@@ -123,6 +123,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                               Math.max(0, Number(passive.firstEnemyDamagingSkillReductionFlat) || 0),
                           onEnemyIncreasedCostSkillApplyStatusToSelf:
                               passive.onEnemyIncreasedCostSkillApplyStatusToSelf || null,
+                          onOwnerDeathGainTeamChakra: passive.onOwnerDeathGainTeamChakra || null,
                           bonusAgainstNonDamagingSkillUser:
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
                           onEnemySkillTargetedDamageToSourceAmount:
@@ -3513,7 +3514,10 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         }
     }
     if (incoming > 0) {
-        const classScopedTargetTotals = getTargetClassScopedDamageModifiers(targetState, skillClasses);
+        // Affliction damage-over-time often carries no class list, but still counts as affliction here.
+        const classScopedTargetTotals = getTargetClassScopedDamageModifiers(targetState,
+            afflictionDamage && !hasSkillClass(skillClasses, 'affliction')
+                ? [...skillClasses, 'Affliction'] : skillClasses);
         incoming += Math.max(0, Number(classScopedTargetTotals.damageTakenBonusFlat) || 0);
     }
     const standardPercentReduction = ignoreDamageReduction || afflictionDamage
@@ -4398,6 +4402,19 @@ const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
         changed = true;
     });
     if (unit.alive === false) {
+        (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
+            const gain = status?.metadata?.onOwnerDeathGainTeamChakra;
+            const amount = Math.max(0, Number(gain?.amount) || 0);
+            if (!amount || status.metadata._onOwnerDeathChakraGranted) return;
+            status.metadata._onOwnerDeathChakraGranted = true;
+            const chakraType = String(gain.chakraType || 'random').trim().toLowerCase();
+            for (let i = 0; i < amount; i += 1) {
+                applyChakraGainToMatch({
+                    match, username, amount: 1,
+                    chakraType: chakraType === 'random' ? pickRandomEntry(chakraTypes) : chakraType,
+                });
+            }
+        });
         (match.players || []).forEach((player) => {
             const sourceUsername = player?.username;
             if (!sourceUsername || sourceUsername === username) return;

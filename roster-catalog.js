@@ -45,6 +45,7 @@ const NarutoRosterCatalog = (() => {
         ['shiore-orochimaru', 'chunin-exams'],
         ['baki', 'chunin-exams'],
         ['gekko-hayate', 'chunin-exams'],
+        ['mitarashi-anko', 'chunin-exams'],
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
         ['sarutobi-hiruzen', 'land-of-waves'],

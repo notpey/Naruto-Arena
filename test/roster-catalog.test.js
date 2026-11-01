@@ -39,6 +39,7 @@ test('arc sorting changes display order without changing canonical roster indice
         ['shiore-orochimaru', 'Shiore Orochimaru'],
         ['baki', 'Baki'],
         ['gekko-hayate', 'Gekko Hayate'],
+        ['mitarashi-anko', 'Mitarashi Anko'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
         ['fern', 'Fern'],
@@ -62,7 +63,7 @@ test('arc sorting changes display order without changing canonical roster indice
         'gato', 'zori-and-waraji', 'sarutobi-hiruzen',
         'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert',
         'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
-        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate',
+        'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate', 'mitarashi-anko',
         'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
