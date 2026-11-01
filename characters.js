@@ -7015,7 +7015,7 @@ const characters = [
         "name": "Oboro",
         "facePicture": "https://i.imgur.com/5Sw5ij0.png",
         "characterdeescription": "A cunning genin of the Hidden Rain Village, Oboro specializes in using illusory clones and underground ambushes to deceive his opponents. Relying on misdirection and surprise attacks, he strikes when his enemies least expect it.",
-        "requiredMissionId": "yellow-flash",
+        "requiredMissionId": null,
         "passive": {
             "name": "False Opening",
             "icon": "https://i.imgur.com/2Ne6VxL.png",
@@ -7047,7 +7047,7 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "invisible": true,
-                            "hideTooltipFromEnemy": true,
+                            "hideTooltipFromUnitOwner": true,
                             "turnDurationAnchor": "source_turn",
                             "removeOnSourceDeath": true,
                             "onOwnerUseSkillTrigger": true,

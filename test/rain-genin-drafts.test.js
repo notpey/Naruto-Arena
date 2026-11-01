@@ -114,3 +114,13 @@ test('Haze Clones spreads Exploding Kunais and its affliction follows on Oboro t
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     assert.deepEqual(match.board.p2.map((unit) => unit.hp), [80, 80]);
 });
+
+test('Underground Ambush is visible to Oboro but hidden from the ambushed enemies', () => {
+    const { buildMatchPayloadForUser } = require('../server.js');
+    const match = matchFor(['oboro'], ['tenten']);
+    cast(match, 'p1', 0, 0);
+    const visibleTo = (username) => buildMatchPayloadForUser(match, username).board.p2[0].state.statuses
+        .some((entry) => entry.id === 'oboro_underground_ambush');
+    assert.equal(visibleTo('p1'), true);
+    assert.equal(visibleTo('p2'), false);
+});

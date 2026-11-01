@@ -31,7 +31,7 @@ module.exports = {
             classes: ['Physical', 'Instant'],
             effects: [{ type: 'apply_status', statusId: AMBUSH, duration: 1,
                 scope: 'all-enemy', metadata: {
-                    harmful: true, invisible: true, hideTooltipFromEnemy: true,
+                    harmful: true, invisible: true, hideTooltipFromUnitOwner: true,
                     turnDurationAnchor: 'source_turn', removeOnSourceDeath: true,
                     onOwnerUseSkillTrigger: true,
                     ownerUseTriggerRequiresLivingSource: true,
