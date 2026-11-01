@@ -23,6 +23,7 @@ const CHOUJI_REWORK_MIGRATION_ID = 'akimichi-chouji-draft-2026-11-01';
 const SHIKAMARU_REWORK_MIGRATION_ID = 'nara-shikamaru-draft-2026-11-01';
 const OBORO_AMBUSH_REWORK_MIGRATION_ID = 'oboro-ambush-visibility-2026-11-01';
 const SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID = 'nara-shikamaru-mark-icon-2026-11-01';
+const HINATA_SHIKAMARU_TARGETING_FIX_MIGRATION_ID = 'hinata-shikamaru-turn-targeting-2026-11-01';
 const MISUMI_REWORK_MIGRATION_ID = 'tsurugi-misumi-draft-2026-11-01';
 const SHIORE_OROCHIMARU_REWORK_MIGRATION_ID = 'shiore-orochimaru-draft-2026-11-01';
 const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
@@ -260,6 +261,7 @@ class CharacterService {
                     [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${HINATA_SHIKAMARU_TARGETING_FIX_MIGRATION_ID}`]: now,
                     [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
@@ -331,6 +333,7 @@ class CharacterService {
                         [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${HINATA_SHIKAMARU_TARGETING_FIX_MIGRATION_ID}`]: now,
                         [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
@@ -370,6 +373,8 @@ class CharacterService {
         const shouldApplyShikamaruRework = !completedMigrations[SHIKAMARU_REWORK_MIGRATION_ID];
         const shouldApplyOboroAmbushRework = !completedMigrations[OBORO_AMBUSH_REWORK_MIGRATION_ID];
         const shouldApplyShikamaruMarkIconRework = !completedMigrations[SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID];
+        const shouldApplyHinataShikamaruTargetingFix =
+            !completedMigrations[HINATA_SHIKAMARU_TARGETING_FIX_MIGRATION_ID];
         const shouldApplyMisumiRework = !completedMigrations[MISUMI_REWORK_MIGRATION_ID];
         const shouldApplyShioreOrochimaruRework = !completedMigrations[SHIORE_OROCHIMARU_REWORK_MIGRATION_ID];
         const shouldApplyBakiRework = !completedMigrations[BAKI_REWORK_MIGRATION_ID];
@@ -396,6 +401,7 @@ class CharacterService {
             ...(shouldApplyShikamaruRework ? ['nara-shikamaru'] : []),
             ...(shouldApplyOboroAmbushRework ? ['oboro'] : []),
             ...(shouldApplyShikamaruMarkIconRework ? ['nara-shikamaru'] : []),
+            ...(shouldApplyHinataShikamaruTargetingFix ? ['hyuuga-hinata', 'nara-shikamaru'] : []),
             ...(shouldApplyMisumiRework ? ['tsurugi-misumi'] : []),
             ...(shouldApplyShioreOrochimaruRework ? ['shiore-orochimaru'] : []),
             ...(shouldApplyBakiRework ? ['baki'] : []),
@@ -483,6 +489,8 @@ class CharacterService {
                 if (shouldApplyShikamaruRework && ['nara-shikamaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyOboroAmbushRework && ['oboro'].includes(characterId)) return seedEntry;
                 if (shouldApplyShikamaruMarkIconRework && ['nara-shikamaru'].includes(characterId)) return seedEntry;
+                if (shouldApplyHinataShikamaruTargetingFix &&
+                    ['hyuuga-hinata', 'nara-shikamaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyMisumiRework && ['tsurugi-misumi'].includes(characterId)) return seedEntry;
                 if (shouldApplyShioreOrochimaruRework && ['shiore-orochimaru'].includes(characterId)) return seedEntry;
                 if (shouldApplyBakiRework && ['baki'].includes(characterId)) return seedEntry;
@@ -558,6 +566,7 @@ class CharacterService {
             shouldApplyShikamaruRework ||
             shouldApplyOboroAmbushRework ||
             shouldApplyShikamaruMarkIconRework ||
+            shouldApplyHinataShikamaruTargetingFix ||
             shouldApplyMisumiRework ||
             shouldApplyShioreOrochimaruRework ||
             shouldApplyBakiRework ||
@@ -597,6 +606,7 @@ class CharacterService {
                         [`completed.${SHIKAMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${OBORO_AMBUSH_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIKAMARU_MARK_ICON_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${HINATA_SHIKAMARU_TARGETING_FIX_MIGRATION_ID}`]: now,
                         [`completed.${MISUMI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${SHIORE_OROCHIMARU_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,

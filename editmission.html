@@ -1425,6 +1425,11 @@
                 <span class="mission-field-help">Player must be at least this ladder level.</span>
               </label>
               <label class="mission-field">
+                Mission Rank
+                <select id="mission-rank"><option value="">From level</option><option value="dc">D &amp; C</option><option value="b">B</option><option value="a">A</option><option value="s">S</option></select>
+                <span class="mission-field-help">Choose a rank independent of the level requirement.</span>
+              </label>
+              <label class="mission-field">
                 Reward Text
                 <input type="text" id="mission-reward" placeholder="Unlock Minato Namikaze." />
                 <span class="mission-field-help">Short text shown in the mission popup.</span>
@@ -1505,6 +1510,10 @@
                 <option value="win_matches">Win matches with character</option>
                 <option value="win_streak">Win streak with character</option>
                 <option value="win_matches_same_team">Win games with two characters on the same team</option>
+                <option value="win_matches_tag">Win with a tagged teammate</option>
+                <option value="win_matches_against_tag">Win against a tagged opponent</option>
+                <option value="win_matches_all_team_tag">Win with three tagged teammates</option>
+                <option value="win_matches_tag_members">Count each tagged teammate in a win</option>
                 <option value="use_skill">Use a character's skill N times</option>
               </select>
               <span class="mission-field-help">Choose a plain text goal or a character win target.</span>
@@ -1523,6 +1532,14 @@
               Second Character ID
               <select id="mission-goal-character-two"></select>
               <span class="mission-field-help">Required teammate for same-team win goals.</span>
+            </label>
+            <label class="mission-field" id="mission-goal-tag-field" hidden>
+              Character Tag
+              <select id="mission-goal-tag"><option value="konoha-genin">Konoha genin</option><option value="konoha-ninja">Konoha ninja</option><option value="team-7">Team 7</option></select>
+            </label>
+            <label class="mission-field" id="mission-goal-tag-label-field" hidden>
+              Display Name
+              <input type="text" id="mission-goal-tag-label" placeholder="Konoha genin" />
             </label>
             <label class="mission-field" id="mission-goal-count-field" hidden>
               <span id="mission-goal-count-label">Match Count</span>
@@ -1555,6 +1572,7 @@
         missionId: document.getElementById("mission-id"),
         title: document.getElementById("mission-title"),
         levelRequirement: document.getElementById("mission-level-requirement"),
+        missionRank: document.getElementById("mission-rank"),
         reward: document.getElementById("mission-reward"),
         rewardCharacter: document.getElementById("mission-reward-character"),
         modeQuick: document.getElementById("mission-mode-quick"),
@@ -1581,6 +1599,10 @@
       const goalCharacterField = document.getElementById("mission-goal-character");
       const goalCharacterTwoWrap = document.getElementById("mission-goal-character-two-field");
       const goalCharacterTwoField = document.getElementById("mission-goal-character-two");
+      const goalTagWrap = document.getElementById("mission-goal-tag-field");
+      const goalTagField = document.getElementById("mission-goal-tag");
+      const goalTagLabelWrap = document.getElementById("mission-goal-tag-label-field");
+      const goalTagLabelField = document.getElementById("mission-goal-tag-label");
       const goalCountWrap = document.getElementById("mission-goal-count-field");
       const goalCountLabel = document.getElementById("mission-goal-count-label");
       const goalCountField = document.getElementById("mission-goal-count");
@@ -1690,6 +1712,10 @@
             ],
             wins,
           };
+        }
+        if (["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].includes(type)) {
+          const tag = String(source.character_tag || source.characterTag || "").trim().toLowerCase();
+          return wins && tag ? { type, character_tag: tag, character_name: characterName, wins } : null;
         }
         if (type === "win_matches" || type === "win_streak") {
           if (!wins) return null;
@@ -1802,6 +1828,13 @@
           const label = normalized.character_name || (normalized.character_names || []).join(" or ");
           return `Win ${normalized.wins} battles with ${label}.`;
         }
+        if (["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].includes(normalized.type)) {
+          const label = normalized.character_name || normalized.character_tag;
+          if (normalized.type === "win_matches_against_tag") return `Win ${normalized.wins} battles against a team with ${label}.`;
+          if (normalized.type === "win_matches_all_team_tag") return `Win ${normalized.wins} battles with all three teammates from ${label}.`;
+          if (normalized.type === "win_matches_tag_members") return `Earn ${normalized.wins} winning-team credits with ${label} (one per teammate).`;
+          return `Win ${normalized.wins} battles with ${label}.`;
+        }
         if (normalized.type === "use_skill") {
           const label = normalized.character_name || normalized.character_id;
           return `Use ${label ? label + "'s " : ""}"${normalized.skill_name || normalized.skill_id}" ${normalized.wins} times.`;
@@ -1819,6 +1852,9 @@
         }
         if (normalized.type === "win_streak_any" || normalized.type === "win_matches_any") {
           return `Type: ${normalized.type.replace(/_/g, " ")} | Characters: ${(normalized.character_ids || []).join(", ") || normalized.character_name || ""} | Count: ${normalized.wins} (edit as JSON — no form UI yet)`;
+        }
+        if (["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].includes(normalized.type)) {
+          return `Type: ${normalized.type.replace(/_/g, " ")} | Tag: ${normalized.character_tag} | Count: ${normalized.wins}`;
         }
         if (normalized.type === "win_matches" || normalized.type === "win_streak") {
           return `Type: ${normalized.type.replace(/_/g, " ")} | Character ID: ${normalized.character_id} | Count: ${normalized.wins}`;
@@ -1878,7 +1914,8 @@
         const goalType = goalTypeField.value;
         const isSingleCharacterWin = goalType === "win_matches" || goalType === "win_streak";
         const isSameTeamWin = goalType === "win_matches_same_team";
-        const isWinGoal = isSingleCharacterWin || isSameTeamWin;
+        const isTagWin = ["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].includes(goalType);
+        const isWinGoal = isSingleCharacterWin || isSameTeamWin || isTagWin;
         const isRankGoal = goalType === "reach_rank";
         if (goalCountLabel) {
           goalCountLabel.textContent = goalType === "win_streak" ? "Win Streak Wins" : "Match Count";
@@ -1892,6 +1929,8 @@
         if (goalCharacterTwoWrap) {
           goalCharacterTwoWrap.hidden = !isSameTeamWin;
         }
+        goalTagWrap.hidden = !isTagWin;
+        goalTagLabelWrap.hidden = !isTagWin;
         if (goalCountWrap) {
           goalCountWrap.hidden = !isWinGoal;
         }
@@ -1911,6 +1950,8 @@
         }
         populateCharacterSelect(goalCharacterField, normalized.character_id || sameTeamCharacterIds[0] || "batman");
         populateCharacterSelect(goalCharacterTwoField, sameTeamCharacterIds[1] || "");
+        goalTagField.value = normalized.character_tag || "konoha-genin";
+        goalTagLabelField.value = normalized.character_name || "";
         if (goalCountField) {
           goalCountField.value = normalized.wins ? String(normalized.wins) : "21";
         }
@@ -1962,6 +2003,10 @@
             ],
             wins,
           };
+        }
+        if (["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].includes(goalType)) {
+          return { type: goalType, character_tag: goalTagField.value,
+            character_name: goalTagLabelField.value.trim(), wins: Number(goalCountField.value) || 0 };
         }
         if (goalType === "win_matches" || goalType === "win_streak") {
           const wins = Number(goalCountField && goalCountField.value ? goalCountField.value : 0) || 0;
@@ -2016,6 +2061,8 @@
           missionId: slugify(m.missionId || m.id || t) || `mission-${i + 1}`,
           title: t,
           level_requirement: levelRequirement,
+          mission_rank: String(m.mission_rank || "").toLowerCase(),
+          revision: Number(m.revision) || 0,
           rank: levelRequirement ? String(levelRequirement) : "",
           reward: String(m.reward || "").trim(),
           reward_character: rewardCharacter,
@@ -2051,6 +2098,7 @@
         fields.missionId.value = m.missionId || "";
         fields.title.value = m.title || "";
         fields.levelRequirement.value = String(m.level_requirement || "");
+        fields.missionRank.value = m.mission_rank || "";
         fields.reward.value = m.reward || "";
         refreshCharacterSelects(m);
         const allowedModes = Array.isArray(m.mode_restriction && m.mode_restriction.allowed_modes)
@@ -2074,6 +2122,8 @@
           missionId: fields.missionId.value,
           title: fields.title.value,
           level_requirement: Number(fields.levelRequirement.value) || 0,
+          mission_rank: fields.missionRank.value,
+          revision: Number(missions.find((mission) => mission.missionId === selectedId)?.revision) || 0,
           reward: fields.reward.value,
           reward_character: fields.rewardCharacter.value,
           win_streak: {

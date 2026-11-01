@@ -383,6 +383,7 @@
         }
 
         function rankOf(mission) {
+            if (mission && ["dc", "b", "a", "s"].indexOf(mission.mission_rank) !== -1) return mission.mission_rank;
             var level = getLevelRequirementValue(mission) || 1;
             if (level >= 40) return "s";
             if (level >= 30) return "a";
@@ -407,6 +408,9 @@
             var rank = Number(s.rank != null ? s.rank : (s.level != null ? s.level : 0)) || 0;
             if (type === "reach_rank") return rank ? { type: "reach_rank", rank: rank } : null;
             if (type === "win_matches" || type === "win_streak") return wins ? { type: type, character_name: cname, wins: wins } : null;
+            if (["win_matches_tag", "win_matches_against_tag", "win_matches_all_team_tag", "win_matches_tag_members"].indexOf(type) !== -1) {
+                return wins && s.character_tag ? { type: type, character_name: cname, character_tag: String(s.character_tag), wins: wins } : null;
+            }
             if (type === "win_streak_any" || type === "win_matches_any") {
                 var anyNames = Array.isArray(s.character_names) ? s.character_names.filter(Boolean) : [];
                 var anyIds = Array.isArray(s.character_ids) ? s.character_ids.filter(Boolean) : [];
@@ -433,6 +437,10 @@
             if (n.type === "win_streak") return "Win " + n.wins + " battles in a row" + (n.character_name ? " with " + n.character_name : "") + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
             if (n.type === "win_streak_any") return "Win " + n.wins + " battles in a row with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
             if (n.type === "win_matches_any") return "Win " + n.wins + " battles with " + (n.group_label || n.character_names.join(" or ")) + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_matches_tag") return "Win " + n.wins + " battles with " + n.character_name + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_matches_against_tag") return "Win " + n.wins + " battles against a team with " + n.character_name + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_matches_all_team_tag") return "Win " + n.wins + " battles with all three teammates from " + n.character_name + ". (" + Math.min(c, n.wins) + "/" + n.wins + ")";
+            if (n.type === "win_matches_tag_members") return "Earn " + n.wins + " winning-team credits with " + n.character_name + " (one per teammate). (" + Math.min(c, n.wins) + "/" + n.wins + ")";
             if (n.type === "use_skill") return "Use " + (n.character_name ? n.character_name + "'s " : "") + "\"" + (n.skill_name || n.skill_id) + "\" " + n.wins + " times. (" + Math.min(c, n.wins) + "/" + n.wins + ")";
             return n.text || "";
         }

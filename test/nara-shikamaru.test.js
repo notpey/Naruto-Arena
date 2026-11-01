@@ -105,7 +105,8 @@ test('Shadow Imitation stuns physical and chakra skills of marked enemies', () =
 });
 
 test('Meditate lasts 5 turns, cannot be stacked, and ends if Shikamaru dies', () => {
-    const match = matchFor(['nara-shikamaru', 'haruno-sakura'], ['tenten']);
+    const match = matchFor(['nara-shikamaru', 'haruno-sakura'], ['tenten', 'mizuki']);
+    markOnly(match, 1);
     cast(match, 'p1', 0, 0, 'p2');
     assert.equal(status(match.board.p2[0], 'nara_shikamaru_meditate').remainingTurns, 5);
     assert.equal(battle.computeTargetOptions({
@@ -115,6 +116,19 @@ test('Meditate lasts 5 turns, cannot be stacked, and ends if Shikamaru dies', ()
     match.board.p1[0].alive = false;
     battle.purgeTetheredStatusesOnSourceDeath({ match, sourceUsername: 'p1', sourceSlot: 0 });
     assert.equal(status(match.board.p2[0], 'nara_shikamaru_meditate'), undefined);
+});
+
+test('Meditate cannot target the passive-marked enemy', () => {
+    const match = matchFor(['nara-shikamaru'], ['tenten', 'mizuki']);
+    markOnly(match, 0);
+    const options = battle.computeTargetOptions({
+        characters, match, actingUsername: 'p1', actorSlot: 0, skillIndex: 0,
+    });
+    assert.deepEqual(options.targets.map((target) => target.slot), [1]);
+    cast(match, 'p1', 0, 0, 'p2', 0);
+    assert.equal(status(match.board.p2[0], 'nara_shikamaru_meditate'), undefined);
+    cast(match, 'p1', 0, 0, 'p2', 1);
+    assert.ok(status(match.board.p2[1], 'nara_shikamaru_meditate'));
 });
 
 test('the passive mark is visible to Shikamaru but hidden from the marked enemy', () => {

@@ -1352,7 +1352,9 @@ test('Hinata Secret Oinment heals four turns and boosts only other healing', () 
     assert.equal(naruto.hp, 65, 'ointment does not heal on its casting turn');
     for (let turn = 0; turn < 4; turn += 1) {
         tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+        assert.equal(naruto.hp, 65 + turn * 5, 'enemy turn must not trigger ointment');
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+        assert.equal(naruto.hp, 70 + turn * 5, 'Hinata team turn heals once');
     }
     assert.equal(naruto.hp, 85, 'four ointment ticks heal 5 each');
     assert.equal(naruto.state.statuses.some(status =>
@@ -1373,15 +1375,14 @@ test('Hinata Block prevents an enemy attack for one turn', () => {
     assert.equal(match.board.p1[0].state.cooldowns['hyuuga-hinata-hinata-block'], 4);
 });
 
-test('Meditate can mark another enemy immediately and Water Assault costs only Ninjutsu', () => {
+test('Meditate can mark an unmarked enemy immediately and Water Assault costs only Ninjutsu', () => {
     const match = makeMatch([getCharIndex('nara-shikamaru')], [1, 2]);
-    for (const slot of [0, 1]) {
-        queueSkill(match, 'p1', 0, [{ username: 'p2', slot }]);
-        resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    }
-    match.board.p2.forEach((unit) => {
-        assert.equal(unit.state.statuses.some((status) => status.id === 'nara_shikamaru_meditate'), true);
-    });
+    const unmarkedSlot = match.board.p2.findIndex((unit) => !unit.state.statuses.some((status) =>
+        status.id === 'nara_shikamaru_ninja_tactics_mark'));
+    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: unmarkedSlot }]);
+    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
+    assert.equal(match.board.p2[unmarkedSlot].state.statuses.some((status) =>
+        status.id === 'nara_shikamaru_meditate'), true);
     assert.equal(match.board.p1[0].state.cooldowns['nara-shikamaru-meditate'] || 0, 0);
     assert.deepEqual(
         computeEffectiveEnergyCost({

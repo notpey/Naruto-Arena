@@ -2,16 +2,19 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const characters = require('../data/characters');
+const { getMissionCharacterTags } = require('../data/missionCharacterTags');
 const { ACTIVE_ROSTER_IDS } = require('../data/activeRoster');
 const { INITIAL_POLICIES } = require('../services/characterRankAccess');
 const { getDefaultMissionCatalog, normalizeMissionCatalog, awardMissionCompletion,
     buildDefaultUserProfile, getCharacterAvailability, resolveMissionCatalogState,
-    getProgressForMissionRevision } = require('../server');
+    getProgressForMissionRevision, getMissionTagGoalIncrement } = require('../server');
 
 const characterIds = new Set(characters.map((character) => character.characterId));
 const trackedTypes = new Set([
     'win_matches', 'win_streak', 'win_matches_any', 'win_streak_any',
     'win_matches_same_team', 'reach_rank', 'use_skill',
+    'win_matches_tag', 'win_matches_against_tag',
+    'win_matches_all_team_tag', 'win_matches_tag_members',
 ]);
 
 function goalCanUseRoster(goal, available) {
@@ -29,7 +32,7 @@ test('every default mission has valid, trackable goals and a distinct character 
     const rewardIds = new Set();
     assert.equal(missions.length, 11);
     assert.deepEqual(missions.map((mission) => mission.level_requirement),
-        [1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 11]);
+        [1, 1, 1, 1, 6, 6, 11, 6, 6, 16, 11]);
 
     for (const mission of missions) {
         assert.ok(characterIds.has(mission.reward_character), `${mission.missionId}: unknown reward`);
@@ -41,6 +44,11 @@ test('every default mission has valid, trackable goals and a distinct character 
         for (const goal of mission.goals) {
             assert.ok(trackedTypes.has(goal.type), `${mission.missionId}: untracked goal ${goal.type}`);
             assert.ok((goal.type === 'reach_rank' ? goal.rank : goal.wins) > 0, `${mission.missionId}: invalid target`);
+            if (goal.type.includes('_tag')) {
+                assert.ok(goal.character_tag, `${mission.missionId}: missing tag`);
+                assert.ok(characters.some((character) => getMissionCharacterTags(character).has(goal.character_tag)),
+                    `${mission.missionId}: unused tag`);
+            }
             const references = [goal.character_id, ...(goal.character_ids || [])].filter(Boolean);
             for (const id of references) {
                 assert.ok(characterIds.has(id), `${mission.missionId}: unknown goal character ${id}`);
@@ -130,8 +138,55 @@ test('launch migration replaces the old mission catalog once and preserves later
         { missionId: 'edited', title: 'Edited', reward_character: 'ebisu',
             goals: [{ type: 'win_matches', character_id: 'uzumaki-naruto', wins: 2 }] },
     ] });
-    assert.equal(edited.migrate, false);
+    assert.equal(edited.migrate, true);
     assert.equal(edited.missions[0].missionId, 'edited');
+    assert.equal(resolveMissionCatalogState({ catalogVersion: 3, missions: edited.missions }).migrate, false);
+
+    const previous = getDefaultMissionCatalog();
+    const customized = previous.map((mission) => ({ ...mission }));
+    customized[0].title = 'Custom Generation Title';
+    customized[1].goals = [{ type: 'win_matches', character_id: 'uzumaki-naruto', wins: 1 }];
+    const migrated = resolveMissionCatalogState({ catalogVersion: 2, missions: customized });
+    assert.equal(migrated.missions[0].title, 'Custom Generation Title');
+    assert.deepEqual(migrated.missions[1].goals.map((goal) => goal.wins), [5, 3]);
+    assert.equal(migrated.missions[1].revision, 3);
+});
+
+test('revised launch missions keep their requested ranks and goal counts', () => {
+    const missions = new Map(getDefaultMissionCatalog().map((mission) => [mission.missionId, mission]));
+    assert.deepEqual(missions.get('duty-of-a-sensei').goals.map((goal) => goal.wins), [5, 3]);
+    assert.equal(missions.get('a-dishonored-shinobi').goals[0].type, 'win_matches_against_tag');
+    assert.deepEqual(missions.get('hidden-hunter').goals.map((goal) => goal.wins), [4, 4]);
+    assert.equal(missions.get('devotion').mission_rank, 'b');
+    assert.equal(missions.get('the-shipping-magnate').goals[0].wins, 4);
+    assert.equal(missions.get('team-7-fights-as-a-team').mission_rank, 'a');
+    assert.equal(missions.get('team-7-fights-as-a-team').goals[0].type, 'win_matches_all_team_tag');
+    assert.equal(missions.get('the-god-of-the-shinobi').mission_rank, 'b');
+    assert.equal(missions.get('the-god-of-the-shinobi').goals[0].wins, 30);
+});
+
+test('tag goals count opponent genin, full Team 7 teams, and each Konoha teammate', () => {
+    assert.equal(getMissionCharacterTags(characters.find((character) =>
+        character.characterId === 'kyuubi-naruto')).has('team-7'), true);
+    const roster = new Map(ACTIVE_ROSTER_IDS.map((id, index) => [id, index]));
+    const team = (...ids) => ids.map((id) => roster.get(id));
+    const match = { players: [
+        { username: 'winner', team: team('uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura') },
+        { username: 'loser', team: team('gaara-of-the-desert', 'kankuro', 'temari') },
+    ] };
+    const against = { type: 'win_matches_against_tag', character_tag: 'konoha-genin' };
+    const allTeam = { type: 'win_matches_all_team_tag', character_tag: 'team-7' };
+    const members = { type: 'win_matches_tag_members', character_tag: 'konoha-ninja' };
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', against), 0);
+    assert.equal(getMissionTagGoalIncrement(match, 'loser', against), 1);
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', allTeam), 1);
+    assert.equal(getMissionTagGoalIncrement(match, 'loser', allTeam), 0);
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', members), 3);
+    match.players[0].team = team('uzumaki-naruto', 'uchiha-sasuke', 'kankuro');
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', allTeam), 0);
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', members), 2);
+    match.players[0].team = team('umino-iruka', 'uzumaki-naruto', 'kankuro');
+    assert.equal(getMissionTagGoalIncrement(match, 'winner', members), 2);
 });
 
 test('redesigned objectives reset partial progress but keep completed mission unlocks', () => {

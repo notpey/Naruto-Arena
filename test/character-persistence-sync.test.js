@@ -2,6 +2,27 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { CharacterService } = require('../services/characterService');
 
+test('stored Hinata and Shikamaru receive the turn and targeting fix', async () => {
+    const ids = ['hyuuga-hinata', 'nara-shikamaru'];
+    const storedCharacters = ids.map((id) => ({ characterId: id, id, skills: [] }));
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedCharacters }
+            : { key, completed: {} },
+        updateOne: async (filter, update) => { writes.push({ filter, update }); },
+    };
+    const loaded = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const hinata = loaded.find((character) => character.characterId === 'hyuuga-hinata');
+    const shikamaru = loaded.find((character) => character.characterId === 'nara-shikamaru');
+    assert.equal(hinata.skills[2].effects[0].metadata.turnDurationAnchor, 'source_turn');
+    assert.deepEqual(shikamaru.skills[0].targetCondition.missingStatusIdsAny, [
+        'nara_shikamaru_meditate', 'nara_shikamaru_ninja_tactics_mark',
+    ]);
+    assert.ok(writes.some(({ update }) => update.$set?.[
+        'completed.hinata-shikamaru-turn-targeting-2026-11-01']));
+});
+
 test('CharacterService serializes and syncs character data accurately', () => {
     const service = new CharacterService();
     const characters = service.getCharacters();

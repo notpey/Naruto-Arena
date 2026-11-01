@@ -57,6 +57,7 @@ module.exports = {
                 { type: 'apply_status', statusId: 'hyuuga_hinata_secret_ointment',
                     duration: 4, scope: 'target', metadata: { helpful: true,
                         turnEndHealFlat: 5, turnEndTrigger: 'source_turn',
+                        turnDurationAnchor: 'source_turn',
                         healReceivedBonusFlat: 5,
                         tooltipText: 'This character heals 5 health each turn for 4 turns and receives 5 additional health from other healing.' } },
             ],

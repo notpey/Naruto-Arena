@@ -822,6 +822,8 @@ const doesUnitSatisfySkillTargetCondition = (unit, skill, actorUsername = null, 
         return false;
     }
     if (condition?.missingStatusId && hasStatus(state, condition.missingStatusId)) return false;
+    if (Array.isArray(condition?.missingStatusIdsAny) &&
+        condition.missingStatusIdsAny.some((statusId) => hasStatus(state, statusId))) return false;
     return true;
 };
 

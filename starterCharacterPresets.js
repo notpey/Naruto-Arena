@@ -618,6 +618,7 @@
                                 "helpful": true,
                                 "turnEndHealFlat": 5,
                                 "turnEndTrigger": "source_turn",
+                                "turnDurationAnchor": "source_turn",
                                 "healReceivedBonusFlat": 5,
                                 "tooltipText": "This character heals 5 health each turn for 4 turns and receives 5 additional health from other healing."
                             }
@@ -687,13 +688,16 @@
                                 "id": "nara-shikamaru-meditate",
                                 "name": "Meditate",
                                 "skillimage": "https://i.imgur.com/fglmxM1.png",
-                                "skilldescription": "Shikamaru studies an enemy's movements, marking them with Meditate for 5 turns. This skill cannot be used on an enemy already affected by it, and the effect ends if Shikamaru dies.",
+                                "skilldescription": "Shikamaru studies an enemy's movements, marking them with Meditate for 5 turns. This skill cannot target an enemy already marked by Meditate or Ninja Tactics, for Dummies. The effect ends if Shikamaru dies.",
                                 "energy": [],
                                 "target": "single-enemy",
                                 "damage": 0,
                                 "cooldown": 0,
                                 "targetCondition": {
-                                        "missingStatusId": "nara_shikamaru_meditate"
+                                        "missingStatusIdsAny": [
+                                                "nara_shikamaru_meditate",
+                                                "nara_shikamaru_ninja_tactics_mark"
+                                        ]
                                 },
                                 "classes": [
                                         "Strategic",

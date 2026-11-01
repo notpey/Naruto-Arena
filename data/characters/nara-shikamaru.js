@@ -21,9 +21,9 @@ module.exports = {
         {
             id: 'nara-shikamaru-meditate', name: 'Meditate',
             skillimage: 'https://i.imgur.com/fglmxM1.png',
-            skilldescription: "Shikamaru studies an enemy's movements, marking them with Meditate for 5 turns. This skill cannot be used on an enemy already affected by it, and the effect ends if Shikamaru dies.",
+            skilldescription: "Shikamaru studies an enemy's movements, marking them with Meditate for 5 turns. This skill cannot target an enemy already marked by Meditate or Ninja Tactics, for Dummies. The effect ends if Shikamaru dies.",
             energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
-            targetCondition: { missingStatusId: MEDITATE },
+            targetCondition: { missingStatusIdsAny: [MEDITATE, TACTICS_MARK] },
             classes: ['Strategic', 'Instant'],
             effects: [{ type: 'apply_status', statusId: MEDITATE, duration: 5, scope: 'target',
                 metadata: { harmful: true, turnDurationAnchor: 'source_turn', removeOnSourceDeath: true,
