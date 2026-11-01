@@ -4355,6 +4355,7 @@ const triggerOnEnemySkillTargetedBonuses = ({
     actorSlot = null,
     recipient,
     skill,
+    damagingEffectOnly = false,
 }) => {
     if (!match || !actingUsername || !actorUnit || !recipient?.unit) return;
     if (!recipient.username || recipient.username === actingUsername) return;
@@ -4363,6 +4364,7 @@ const triggerOnEnemySkillTargetedBonuses = ({
     (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
         if (!isStatusActiveForMetadata(status, targetUnit)) return;
         const metadata = status?.metadata || {};
+        if (Boolean(metadata.onEnemySkillTargetedDamagingOnly) !== damagingEffectOnly) return;
         if (metadata.onEnemySkillTargetedUseStatusSource) {
             const sourceUnit = match.board?.[status.sourceUsername]?.[status.sourceSlot];
             if (!sourceUnit || sourceUnit.alive === false) return;
@@ -4376,13 +4378,6 @@ const triggerOnEnemySkillTargetedBonuses = ({
                   .filter(Boolean)
             : [];
         if (classFilter.length > 0 && !classFilter.some((entry) => hasSkillClass(skill?.classes || [], entry))) {
-            return;
-        }
-        if (metadata.onEnemySkillTargetedDamagingOnly &&
-            !(Array.isArray(skill?.effects) && skill.effects.some((effect) =>
-                effect?.type === 'damage' || effect?.type === 'health_steal_damage' ||
-                Math.max(0, Number(effect?.metadata?.turnEndDamage) || 0) > 0
-            ))) {
             return;
         }
         const retaliateDamage = Math.max(0, Number(metadata.onEnemySkillTargetedDamageToSourceAmount) || 0);
@@ -5808,6 +5803,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             if (skillCannotBeEvaded) return false;
             return didEvadeRecipient(recipient) || shouldEvadeForRecipient(recipient);
         };
+        const damagingPassiveRecipients = new Set();
         const preflightRecipientsByTargetType = (() => {
             const targetType = String(skill?.target || '').trim().toLowerCase();
             if (targetType === 'single-enemy' || targetType === 'single-character') {
@@ -5945,6 +5941,16 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     if (rollPerRecipient && Number.isFinite(activationChance)) {
                         if (!rollPercentSuccess(activationChance)) return;
+                    }
+                    if (recipient.username !== actingUsername) {
+                        const passiveRecipientKey = `${recipient.username}:${recipient.slot}`;
+                        if (!damagingPassiveRecipients.has(passiveRecipientKey)) {
+                            damagingPassiveRecipients.add(passiveRecipientKey);
+                            triggerOnEnemySkillTargetedBonuses({
+                                match, actingUsername, actorUnit, actorSlot,
+                                recipient, skill, damagingEffectOnly: true,
+                            });
+                        }
                     }
                     const targetState = ensureUnitStateShape(recipient.unit);
                     if (hasStatusMetadataFlag(targetState, 'invulnerableToHarmfulEffects')) {
