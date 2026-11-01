@@ -121,6 +121,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           damageTakenInTurn: passive.damageTakenInTurn || null,
                           firstEnemyDamagingSkillReductionFlat:
                               Math.max(0, Number(passive.firstEnemyDamagingSkillReductionFlat) || 0),
+                          onEnemyIncreasedCostSkillApplyStatusToSelf:
+                              passive.onEnemyIncreasedCostSkillApplyStatusToSelf || null,
                           bonusAgainstNonDamagingSkillUser:
                               Math.max(0, Number(passive.bonusAgainstNonDamagingSkillUser) || 0),
                           onEnemySkillTargetedDamageToSourceAmount:
@@ -1100,7 +1102,7 @@ const getOverrideAllSkillsToAllRandomConfig = (actorState, skillId) => {
     return resolvedConfig;
 };
 
-const computeEffectiveEnergyCost = ({ skill, actorState }) => {
+const computeBaseEnergyCost = ({ skill, actorState }) => {
     const tierConfig = skill?.energyBySourceStatusMetadata;
     const tierStatus = tierConfig?.statusId && (actorState?.statuses || []).find((status) =>
         status?.id === tierConfig.statusId && (Number(status?.remainingTurns) || 0) > 0
@@ -1110,7 +1112,18 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
         ? [...tierConfig.tiers].sort((a, b) => Number(b?.min) - Number(a?.min))
             .find((entry) => tierValue >= Math.max(0, Number(entry?.min) || 0))
         : null;
-    const base = normalizeEnergyCost(Array.isArray(tier?.energy) ? tier.energy : skill?.energy || []);
+    return normalizeEnergyCost(Array.isArray(tier?.energy) ? tier.energy : skill?.energy || []);
+};
+
+const isEnergyCostIncreased = ({ skill, actorState, cost }) => {
+    if (!cost) return false;
+    const base = computeBaseEnergyCost({ skill, actorState });
+    return (Number(cost.requiredRandom) || 0) > base.requiredRandom ||
+        chakraTypes.some((type) => (Number(cost.reservedSpecific?.[type]) || 0) > base.reservedSpecific[type]);
+};
+
+const computeEffectiveEnergyCost = ({ skill, actorState }) => {
+    const base = computeBaseEnergyCost({ skill, actorState });
     const skillOverride = getSkillCostOverrideForSkill(actorState, skill?.id || null);
     if (skillOverride) {
         return skillOverride;
@@ -4901,6 +4914,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             (sum, type) => sum + Math.max(0, Number(queuedCost.reservedSpecific?.[type]) || 0),
             Math.max(0, Number(queuedCost.requiredRandom) || 0)
         );
+        if (!queued?.isAutoCast && isEnergyCostIncreased({ skill, actorState, cost: queuedCost })) {
+            applyOnEnemyIncreasedCostSkillBonuses({ match, actingUsername });
+        }
         const ownerUseSkillTriggeredStatusIds = new Set();
         const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
         (Array.isArray(actorState?.statuses) ? actorState.statuses : []).forEach((status) => {
@@ -9161,6 +9177,31 @@ const applyOnEnemyTeamMemberUseSkillBonuses = ({
                     : null,
                 metadata: applyStatusToTarget.metadata || {},
                 fresh: false,
+            });
+        });
+    });
+};
+
+const applyOnEnemyIncreasedCostSkillBonuses = ({ match, actingUsername }) => {
+    (match?.players || []).forEach((player) => {
+        if (!player?.username || player.username === actingUsername) return;
+        (match.board?.[player.username] || []).forEach((unit, slot) => {
+            if (!unit || unit.alive === false) return;
+            const state = ensureUnitStateShape(unit);
+            state.statuses.slice().forEach((status) => {
+                if (!isStatusActiveForMetadata(status, unit)) return;
+                const applyStatusToSelf = status?.metadata?.onEnemyIncreasedCostSkillApplyStatusToSelf;
+                if (!applyStatusToSelf?.statusId) return;
+                applyStatus({
+                    targetState: state,
+                    statusId: applyStatusToSelf.statusId,
+                    duration: applyStatusToSelf.duration,
+                    sourceSkillId: null,
+                    sourceUsername: player.username,
+                    sourceSlot: slot,
+                    metadata: applyStatusToSelf.metadata || {},
+                    fresh: false,
+                });
             });
         });
     });

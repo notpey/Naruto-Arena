@@ -138,7 +138,7 @@ test('Tsuchi Kin Unnerving Bells no longer applies cooldown paralyze', () => {
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
 
     assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells_cooldown_paralyze'), undefined);
-    assert.equal(getStatus(match, 'p1', 0, 'tsuchi_kin_illusion_bell_trigger_unnerving_bells')?.remainingTurns, 1);
+    assert.equal(getStatus(match, 'p2', 0, 'tsuchi_kin_unnerving_bells')?.remainingTurns, 99);
 });
 
 test('Orochimaru Manda grants one random chakra on Orochimaru turn end', () => {

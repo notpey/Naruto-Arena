@@ -1,137 +1,76 @@
+const BELLS = 'tsuchi_kin_unnerving_bells';
+
 module.exports = {
-    "id": "tsuchi-kin",
-    "characterId": "tsuchi-kin",
-    "name": "Tsuchi Kin",
-    "facePicture": "https://i.imgur.com/hOoNOfj.png",
-    "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
-    "skills": [
+    id: 'tsuchi-kin', characterId: 'tsuchi-kin', name: 'Tsuchi Kin',
+    facePicture: 'https://i.imgur.com/aSPsypU.png',
+    characterdeescription: 'One of the three sound genin; Kin is a confident ninja that likes to toy with her enemies before finishing them off. Using a set of needles and bells, Kin has a number of different effects she can create to attack her enemies.',
+    requiredMissionId: null,
+    passive: {
+        name: 'Sound Trio',
+        icon: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg',
+        description: "When an enemy uses a skill with increased cost, this character's physical damage is increased by 5 for one turn.",
+        onEnemyIncreasedCostSkillApplyStatusToSelf: {
+            statusId: 'sound_trio_physical_bonus', duration: 1,
+            metadata: { helpful: true, damageBonusBySkillClass: { physical: 5 },
+                tooltipText: 'This character deals 5 additional physical damage.' },
+        },
+    },
+    skills: [
         {
-            "id": "tsuchi-kin-illusion-bell-needles",
-            "name": "Illusion Bell Needles",
-            "skillimage": "https://i.imgur.com/wFHxiW6.png",
-            "skilldescription": "Tsuchi Kin deals 20 damage to one enemy.",
-            "energy": [
-                "Genjutsu"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Mental",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target"
-                }
-            ]
+            id: 'tsuchi-kin-illusion-bell-needles', name: 'Illusion Bell Needles',
+            skillimage: 'https://i.imgur.com/r7SrvC3.png',
+            skilldescription: 'Kin will counter the next skill used on her.',
+            energy: ['Genjutsu'], target: 'self', damage: 0, cooldown: 2,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'tsuchi_kin_illusion_bell_needles',
+                duration: 99, scope: 'self', metadata: {
+                    helpful: true, triggerOnEnemyHarmfulSkill: true, counterCancelsSkill: true,
+                    tooltipText: 'The next enemy skill used on Kin will be countered.',
+                } }],
         },
         {
-            "id": "tsuchi-kin-needle-and-bell-trap",
-            "name": "Needle and Bell Trap",
-            "skillimage": "https://i.imgur.com/spMHiJJ.png",
-            "skilldescription": "Tsuchi Kin deals 15 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
-            "energy": [
-                "Random"
+            id: 'tsuchi-kin-needle-and-bell-trap', name: 'Needle and Bell Trap',
+            skillimage: 'https://i.imgur.com/giDdgX6.png',
+            skilldescription: 'Kin deals 10 piercing physical damage to an enemy. Enemies affected by Unnerving Bells take 5 extra damage and have their strategic skills stunned for 1 turn.',
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 10, scope: 'target',
+                    condition: { scope: 'target', statusId: BELLS, conditionalAmount: 15 },
+                    metadata: { ignoreDamageReduction: true } },
+                { type: 'apply_status', statusId: 'tsuchi_kin_needle_and_bell_trap_stun', duration: 1,
+                    scope: 'target', condition: { scope: 'target', statusId: BELLS },
+                    metadata: { harmful: true, cannotUseSkillClasses: ['strategic'],
+                        turnDurationAnchor: 'source_turn',
+                        tooltipText: "This character's strategic skills are stunned." } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 15,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_needle_and_bell_trap_stun",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotUseSkillClasses": [
-                            "physical",
-                            "strategic"
-                        ],
-                        "tooltipText": "This character's physical and strategic skills are stunned.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
         {
-            "id": "tsuchi-kin-unnerving-bells",
-            "name": "Unnerving Bells",
-            "skillimage": "https://i.imgur.com/BU6EHyR.png",
-            "skilldescription": "Tsuchi Kin deals 10 damage to one enemy and removes 1 random chakra from them.",
-            "energy": [
-                "Random"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target"
-                },
-                {
-                    "type": "remove_random_chakra",
-                    "amount": 1,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "tooltipText": "Unnerving Bells trigger active.",
-                        "turnDurationAnchor": "source_turn",
-                        "ongoingClass": "control"
-                    }
-                }
-            ]
+            id: 'tsuchi-kin-unnerving-bells', name: 'Unnerving Bells',
+            skillimage: 'https://i.imgur.com/G5mXyIU.png',
+            skilldescription: 'An enemy will take 10 affliction damage each turn, permanently. During this time, their skills cost 1 extra genjutsu chakra to use. This skill ends if the target uses a skill and cannot be used on an enemy already affected by it.',
+            energy: ['Genjutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
+            targetCondition: { missingStatusId: BELLS },
+            classes: ['Affliction', 'Chakra', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: BELLS, duration: 99, scope: 'target',
+                metadata: {
+                    harmful: true, afflictionDamage: true, turnEndDamage: 10,
+                    turnEndTrigger: 'source_turn', genjutsuCostIncrease: 1,
+                    onOwnerUseSkillTrigger: true,
+                    tooltipText: "This character takes 10 affliction damage each turn and their skills cost 1 additional genjutsu chakra. This effect ends when they use a skill.",
+                } }],
         },
         {
-            "id": "tsuchi-kin-kin-substitution",
-            "name": "Kin Substitution",
-            "skillimage": "https://i.imgur.com/XVx6f4x.png",
-            "skilldescription": "Tsuchi Kin becomes invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'tsuchi-kin-sharp-analysis', name: 'Sharp Analysis',
+            skillimage: 'https://i.imgur.com/JOJymkR.png',
+            skilldescription: 'Makes Tsuchi Kin invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'tsuchi_kin_sharp_analysis',
+                duration: 1, scope: 'self', metadata: {
+                    helpful: true, invulnerable: true,
+                    tooltipText: 'Kin is invulnerable.',
+                } }],
+        },
+    ],
 };

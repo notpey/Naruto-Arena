@@ -3375,15 +3375,32 @@ const characters = [
     {
         "id": "dosu-kinuta",
         "characterId": "dosu-kinuta",
-        "name": "Dosu Kinuta",
-        "facePicture": "https://i.imgur.com/NY3b12m.png",
-        "characterdeescription": "One of the three sound genin, and possibly the strongest; Dosu is an intelligent and patient ninja that likes to act with logic. Using a powerful sound based arm, Dosu can disable his enemies by disrupting their hearing and throwing them off.",
+        "name": "Kinuta Dosu",
+        "facePicture": "https://i.imgur.com/d5yZAyK.png",
+        "characterdeescription": "Perhaps the strongest of the three sound genin, Kinuta Dosu uses his implanted Melody Arm to amplify sound waves and increase the power of his taijutsu.",
+        "requiredMissionId": null,
+        "passive": {
+            "name": "Sound Trio",
+            "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
+            "description": "When an enemy uses a skill with increased cost, this character's physical damage is increased by 5 for one turn.",
+            "onEnemyIncreasedCostSkillApplyStatusToSelf": {
+                "statusId": "sound_trio_physical_bonus",
+                "duration": 1,
+                "metadata": {
+                    "helpful": true,
+                    "damageBonusBySkillClass": {
+                        "physical": 5
+                    },
+                    "tooltipText": "This character deals 5 additional physical damage."
+                }
+            }
+        },
         "skills": [
             {
-                "id": "dosu-kinuta-resonating-echo-drill",
-                "name": "Resonating Echo Drill",
-                "skillimage": "https://i.imgur.com/arSzsOV.png",
-                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 1 turn. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
+                "id": "dosu-kinuta-vibrating-sound-drill",
+                "name": "Vibrating Sound Drill",
+                "skillimage": "https://i.imgur.com/RHsi6uX.png",
+                "skilldescription": "Dosu deals 20 physical damage to an enemy. For 4 turns, Sound Manipulation may be used on them. This effect renews. Enhanced effect: the enemy is permanently marked by this ability.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -3402,25 +3419,13 @@ const characters = [
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                        "duration": 1,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character cannot reduce damage or become invulnerable."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                        "duration": 1,
+                        "statusId": "dosu_kinuta_vibrating_sound_drill",
+                        "duration": 4,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
+                            "tooltipText": "Sound Manipulation may be used on this character."
                         }
                     }
                 ]
@@ -3428,45 +3433,41 @@ const characters = [
             {
                 "id": "dosu-kinuta-sound-manipulation",
                 "name": "Sound Manipulation",
-                "skillimage": "https://i.imgur.com/eSCnMmL.png",
-                "skilldescription": "Kinuta Dosu deals 10 damage to one enemy. For 1 turn, this enemy will take 5 additional damage from non-affliction skills and will deal 5 less damage with non-affliction skills. During 'Melody Arm Tuning', this skill's non-damage effects will last permanently instead and may stack.",
+                "skillimage": "https://i.imgur.com/hz3JOSD.png",
+                "skilldescription": "Dosu deals 10 affliction damage to all enemies affected by Vibrating Sound Drill. For 2 turns, their physical skills will cost 1 extra chakra. Enhanced effect: affects all skills and deals damage each turn. In both states this skill ignores invulnerability.",
                 "energy": [
                     "Genjutsu"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
+                "targetCondition": {
+                    "statusId": "dosu_kinuta_vibrating_sound_drill"
+                },
+                "ignoreInvulnerability": true,
                 "classes": [
-                    "Mental",
+                    "Affliction",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
                         "amount": 10,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                            "scope": "target",
-                            "consumeOnMatch": true
-                        }
+                        "scope": "all-enemy"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_sound_manipulation_debuff",
-                        "duration": 1,
-                        "scope": "target",
+                        "statusId": "dosu_kinuta_sound_manipulation",
+                        "duration": 2,
+                        "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
-                            "nonAfflictionDamageTakenBonusFlat": 5,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "tooltipText": "This character takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "randomCostIncreaseForSkillClasses": {
+                                "physical": 1
+                            },
+                            "tooltipText": "This character's physical skills cost 1 additional random chakra."
                         }
                     }
                 ]
@@ -3474,14 +3475,17 @@ const characters = [
             {
                 "id": "dosu-kinuta-melody-arm-tuning",
                 "name": "Melody Arm Tuning",
-                "skillimage": "https://i.imgur.com/yqkQKWQ.png",
-                "skilldescription": "For the following 3 turns, 'Resonating Echo Drill' will deal 20 additional damage and 'Sound Manipulation' will deal 10 additional damage.",
+                "skillimage": "https://i.imgur.com/mcaE8De.png",
+                "skilldescription": "The next use of Vibrating Sound Drill or Sound Manipulation will be enhanced. This skill ends when Dosu uses any of those skills and cannot be used while active.",
                 "energy": [
                     "Random"
                 ],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 2,
+                "actorCondition": {
+                    "missingStatusId": "dosu_kinuta_melody_arm_tuning"
+                },
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -3489,25 +3493,30 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_melody_arm_tuning_active",
-                        "duration": 3,
+                        "statusId": "dosu_kinuta_melody_arm_tuning",
+                        "duration": 99,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
+                            "onOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillIdsAny": [
+                                "dosu-kinuta-vibrating-sound-drill-enhanced",
+                                "dosu-kinuta-sound-manipulation-enhanced"
+                            ],
                             "skillReplacements": {
-                                "dosu-kinuta-resonating-echo-drill": "dosu-kinuta-resonating-echo-drill-improved",
-                                "dosu-kinuta-sound-manipulation": "dosu-kinuta-sound-manipulation-improved"
+                                "dosu-kinuta-vibrating-sound-drill": "dosu-kinuta-vibrating-sound-drill-enhanced",
+                                "dosu-kinuta-sound-manipulation": "dosu-kinuta-sound-manipulation-enhanced"
                             },
-                            "tooltipText": "Resonating Echo Drill deals 20 additional damage and Sound Manipulation deals 10 additional damage."
+                            "tooltipText": "The next Vibrating Sound Drill or Sound Manipulation will be enhanced."
                         }
                     }
                 ]
             },
             {
-                "id": "dosu-kinuta-agile-leap",
-                "name": "Agile Leap",
-                "skillimage": "https://i.imgur.com/Irubt1X.png",
-                "skilldescription": "Kinuta Dosu becomes invulnerable for 1 turn.",
+                "id": "dosu-kinuta-dosu-dodge",
+                "name": "Dosu Dodge",
+                "skillimage": "https://i.imgur.com/xCBubIe.png",
+                "skilldescription": "Makes Kinuta Dosu invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3521,22 +3530,24 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "dosu_kinuta_dosu_dodge",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Dosu is invulnerable."
                         }
                     }
                 ]
             },
             {
-                "id": "dosu-kinuta-resonating-echo-drill-improved",
-                "name": "Resonating Echo Drill",
+                "id": "dosu-kinuta-vibrating-sound-drill-enhanced",
+                "name": "Vibrating Sound Drill",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/arSzsOV.png",
-                "skilldescription": "Kinuta Dosu deals 40 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
+                "useBaseSkillCooldown": true,
+                "skillimage": "https://i.imgur.com/RHsi6uX.png",
+                "skilldescription": "Dosu deals 20 physical damage to an enemy and permanently marks them. Sound Manipulation may be used on marked enemies.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -3550,80 +3561,74 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 40,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                        "duration": 2,
-                        "scope": "target",
-                        "metadata": {
-                            "harmful": true,
-                            "cannotReduceDamage": true,
-                            "cannotBecomeInvulnerable": true,
-                            "tooltipText": "This character cannot reduce damage or become invulnerable."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                        "duration": 1,
+                        "statusId": "dosu_kinuta_vibrating_sound_drill",
+                        "duration": 99,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
+                            "tooltipText": "Sound Manipulation may be used on this character."
                         }
                     }
                 ]
             },
             {
-                "id": "dosu-kinuta-sound-manipulation-improved",
+                "id": "dosu-kinuta-sound-manipulation-enhanced",
                 "name": "Sound Manipulation",
                 "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/eSCnMmL.png",
-                "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks).",
+                "useBaseSkillCooldown": true,
+                "skillimage": "https://i.imgur.com/hz3JOSD.png",
+                "skilldescription": "Dosu deals 10 affliction damage to all enemies affected by Vibrating Sound Drill each turn for 2 turns. For 2 turns, all of their skills will cost 1 extra chakra. This skill ignores invulnerability.",
                 "energy": [
                     "Genjutsu"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
+                "targetCondition": {
+                    "statusId": "dosu_kinuta_vibrating_sound_drill"
+                },
+                "ignoreInvulnerability": true,
                 "classes": [
-                    "Mental",
+                    "Affliction",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
+                        "amount": 10,
+                        "scope": "all-enemy"
                     },
                     {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target",
-                        "condition": {
-                            "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                            "scope": "target",
-                            "consumeOnMatch": true
+                        "type": "apply_status",
+                        "statusId": "dosu_kinuta_sound_manipulation_enhanced",
+                        "duration": 2,
+                        "scope": "all-enemy",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "randomCostIncrease": 1,
+                            "tooltipText": "All of this character's skills cost 1 additional random chakra."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "dosu_kinuta_sound_manipulation_debuff_permanent",
-                        "duration": 99,
-                        "scope": "target",
+                        "statusId": "dosu_kinuta_sound_manipulation_affliction",
+                        "duration": 1,
+                        "scope": "all-enemy",
                         "metadata": {
                             "harmful": true,
-                            "nonAfflictionDamageTakenBonusFlat": 5,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "mergeNumericAddKeys": [
-                                "nonAfflictionDamageTakenBonusFlat",
-                                "nonAfflictionDamageDebuffFlat"
-                            ],
-                            "tooltipText": "This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks)."
+                            "afflictionDamage": true,
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character takes 10 affliction damage on Dosu's following turn."
                         }
                     }
                 ]
@@ -3634,66 +3639,101 @@ const characters = [
         "id": "tsuchi-kin",
         "characterId": "tsuchi-kin",
         "name": "Tsuchi Kin",
-        "facePicture": "https://i.imgur.com/hOoNOfj.png",
-        "characterdeescription": "Tsuchi Kin is a kunoichi of the Hidden Sound who weaponizes resonance and deception through the ringing of her bells. She excels at destabilizing opponents, unraveling their rhythm before striking with precision. Every bell she casts is a trap layered within another, turning confidence into hesitation and timing into ruin.",
+        "facePicture": "https://i.imgur.com/aSPsypU.png",
+        "characterdeescription": "One of the three sound genin; Kin is a confident ninja that likes to toy with her enemies before finishing them off. Using a set of needles and bells, Kin has a number of different effects she can create to attack her enemies.",
+        "requiredMissionId": null,
+        "passive": {
+            "name": "Sound Trio",
+            "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
+            "description": "When an enemy uses a skill with increased cost, this character's physical damage is increased by 5 for one turn.",
+            "onEnemyIncreasedCostSkillApplyStatusToSelf": {
+                "statusId": "sound_trio_physical_bonus",
+                "duration": 1,
+                "metadata": {
+                    "helpful": true,
+                    "damageBonusBySkillClass": {
+                        "physical": 5
+                    },
+                    "tooltipText": "This character deals 5 additional physical damage."
+                }
+            }
+        },
         "skills": [
             {
                 "id": "tsuchi-kin-illusion-bell-needles",
                 "name": "Illusion Bell Needles",
-                "skillimage": "https://i.imgur.com/wFHxiW6.png",
-                "skilldescription": "Tsuchi Kin deals 20 damage to one enemy.",
+                "skillimage": "https://i.imgur.com/r7SrvC3.png",
+                "skilldescription": "Kin will counter the next skill used on her.",
                 "energy": [
                     "Genjutsu"
                 ],
-                "target": "single-enemy",
+                "target": "self",
                 "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Mental",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 20,
-                        "scope": "target"
-                    }
-                ]
-            },
-            {
-                "id": "tsuchi-kin-needle-and-bell-trap",
-                "name": "Needle and Bell Trap",
-                "skillimage": "https://i.imgur.com/spMHiJJ.png",
-                "skilldescription": "Tsuchi Kin deals 15 damage to one enemy and stuns their physical and strategic skills for 1 turn.",
-                "energy": [
-                    "Random"
-                ],
-                "target": "single-enemy",
-                "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Strategic",
                     "Instant"
                 ],
                 "effects": [
                     {
+                        "type": "apply_status",
+                        "statusId": "tsuchi_kin_illusion_bell_needles",
+                        "duration": 99,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "triggerOnEnemyHarmfulSkill": true,
+                            "counterCancelsSkill": true,
+                            "tooltipText": "The next enemy skill used on Kin will be countered."
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "tsuchi-kin-needle-and-bell-trap",
+                "name": "Needle and Bell Trap",
+                "skillimage": "https://i.imgur.com/giDdgX6.png",
+                "skilldescription": "Kin deals 10 piercing physical damage to an enemy. Enemies affected by Unnerving Bells take 5 extra damage and have their strategic skills stunned for 1 turn.",
+                "energy": [
+                    "Random"
+                ],
+                "target": "single-enemy",
+                "damage": 0,
+                "cooldown": 0,
+                "classes": [
+                    "Physical",
+                    "Instant"
+                ],
+                "effects": [
+                    {
                         "type": "damage",
-                        "amount": 15,
-                        "scope": "target"
+                        "amount": 10,
+                        "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "tsuchi_kin_unnerving_bells",
+                            "conditionalAmount": 15
+                        },
+                        "metadata": {
+                            "ignoreDamageReduction": true
+                        }
                     },
                     {
                         "type": "apply_status",
                         "statusId": "tsuchi_kin_needle_and_bell_trap_stun",
                         "duration": 1,
                         "scope": "target",
+                        "condition": {
+                            "scope": "target",
+                            "statusId": "tsuchi_kin_unnerving_bells"
+                        },
                         "metadata": {
                             "harmful": true,
                             "cannotUseSkillClasses": [
-                                "physical",
                                 "strategic"
                             ],
-                            "tooltipText": "This character's physical and strategic skills are stunned.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "tooltipText": "This character's strategic skills are stunned."
                         }
                     }
                 ]
@@ -3701,47 +3741,45 @@ const characters = [
             {
                 "id": "tsuchi-kin-unnerving-bells",
                 "name": "Unnerving Bells",
-                "skillimage": "https://i.imgur.com/BU6EHyR.png",
-                "skilldescription": "Tsuchi Kin deals 10 damage to one enemy and removes 1 random chakra from them.",
+                "skillimage": "https://i.imgur.com/G5mXyIU.png",
+                "skilldescription": "An enemy will take 10 affliction damage each turn, permanently. During this time, their skills cost 1 extra genjutsu chakra to use. This skill ends if the target uses a skill and cannot be used on an enemy already affected by it.",
                 "energy": [
-                    "Random"
+                    "Genjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 1,
+                "targetCondition": {
+                    "missingStatusId": "tsuchi_kin_unnerving_bells"
+                },
                 "classes": [
-                    "Strategic",
+                    "Affliction",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "target"
-                    },
-                    {
-                        "type": "remove_random_chakra",
-                        "amount": 1,
-                        "scope": "target"
-                    },
-                    {
                         "type": "apply_status",
-                        "statusId": "tsuchi_kin_illusion_bell_trigger_unnerving_bells",
-                        "duration": 1,
-                        "scope": "self",
+                        "statusId": "tsuchi_kin_unnerving_bells",
+                        "duration": 99,
+                        "scope": "target",
                         "metadata": {
-                            "tooltipText": "Unnerving Bells trigger active.",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "control"
+                            "harmful": true,
+                            "afflictionDamage": true,
+                            "turnEndDamage": 10,
+                            "turnEndTrigger": "source_turn",
+                            "genjutsuCostIncrease": 1,
+                            "onOwnerUseSkillTrigger": true,
+                            "tooltipText": "This character takes 10 affliction damage each turn and their skills cost 1 additional genjutsu chakra. This effect ends when they use a skill."
                         }
                     }
                 ]
             },
             {
-                "id": "tsuchi-kin-kin-substitution",
-                "name": "Kin Substitution",
-                "skillimage": "https://i.imgur.com/XVx6f4x.png",
-                "skilldescription": "Tsuchi Kin becomes invulnerable for 1 turn.",
+                "id": "tsuchi-kin-sharp-analysis",
+                "name": "Sharp Analysis",
+                "skillimage": "https://i.imgur.com/JOJymkR.png",
+                "skilldescription": "Makes Tsuchi Kin invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3755,12 +3793,13 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "tsuchi_kin_sharp_analysis",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Kin is invulnerable."
                         }
                     }
                 ]
@@ -3770,15 +3809,32 @@ const characters = [
     {
         "id": "zaku-abumi",
         "characterId": "zaku-abumi",
-        "name": "Zaku Abumi",
-        "facePicture": "https://i.imgur.com/GMkH15X.png",
-        "characterdeescription": "One of the three sound genin; Zaku is a willful individual who has a very strong desire to win and succeed. Using the implanted tubes in his arm, Zaku can create powerful waves of chakra, or alter the wind ever so gently to protect an ally.",
+        "name": "Abumi Zaku",
+        "facePicture": "https://i.imgur.com/1hP3uis.png",
+        "characterdeescription": "Abumi Zaku is one of the three sound genin sent to the chuunin exams. He was surgically altered with hollow tubes in his arms, allowing him to create waves of compressed air.",
+        "requiredMissionId": null,
+        "passive": {
+            "name": "Sound Trio",
+            "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg",
+            "description": "When an enemy uses a skill with increased cost, this character's physical damage is increased by 5 for one turn.",
+            "onEnemyIncreasedCostSkillApplyStatusToSelf": {
+                "statusId": "sound_trio_physical_bonus",
+                "duration": 1,
+                "metadata": {
+                    "helpful": true,
+                    "damageBonusBySkillClass": {
+                        "physical": 5
+                    },
+                    "tooltipText": "This character deals 5 additional physical damage."
+                }
+            }
+        },
         "skills": [
             {
-                "id": "zaku-abumi-decapitating-airwaves",
-                "name": "Decapitating Airwaves",
-                "skillimage": "https://i.imgur.com/wYuJK6u.png",
-                "skilldescription": "Abumi Zaku deals 25 damage to one enemy. During the following turn, 'Extreme Decapitating Airwaves' may be used.",
+                "id": "zaku-abumi-air-cutter",
+                "name": "Air Cutter",
+                "skillimage": "https://i.imgur.com/mUBqjVI.png",
+                "skilldescription": "Zaku deals 20 physical damage to an enemy. Extreme Air Cutter may be used for 1 turn.",
                 "energy": [
                     "Bloodline"
                 ],
@@ -3792,34 +3848,31 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "zaku_abumi_decapitating_airwaves_unlock",
+                        "statusId": "zaku_abumi_air_cutter_follow_up",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
                             "turnDurationAnchor": "source_turn",
-                            "skillReplacements": {
-                                "zaku-abumi-extreme-decapitating-airwaves": "zaku-abumi-extreme-decapitating-airwaves-active"
-                            },
-                            "tooltipText": "Extreme Decapitating Airwaves may be used."
+                            "tooltipText": "Extreme Air Cutter may be used."
                         }
                     }
                 ]
             },
             {
-                "id": "zaku-abumi-wall-of-air",
-                "name": "Wall of Air",
-                "skillimage": "https://i.imgur.com/1bKTzwA.png",
-                "skilldescription": "Abumi Zaku targets one ally. The following turn, the first harmful non-strategic skill used on this ally will be countered. This skill is invisible.",
+                "id": "zaku-abumi-sound-wall",
+                "name": "Sound Wall",
+                "skillimage": "https://i.imgur.com/fjsUpgG.png",
+                "skilldescription": "Zaku will counter the first physical skill used on his team for 1 turn. If a skill is countered, he will gain 1 Bloodline chakra. This skill is invisible and ends if Zaku dies.",
                 "energy": [
-                    "Random"
+                    "Bloodline"
                 ],
-                "target": "self-or-single-ally",
+                "target": "all-allies",
                 "damage": 0,
                 "cooldown": 2,
                 "classes": [
@@ -3829,24 +3882,38 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "zaku_abumi_wall_of_air",
+                        "statusId": "zaku_abumi_sound_wall",
                         "duration": 1,
-                        "scope": "target",
+                        "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
+                            "invisible": true,
                             "hideTooltipFromEnemy": true,
-                            "triggerOnEnemyHarmfulNonStrategic": true,
+                            "turnDurationAnchor": "source_turn",
+                            "removeOnSourceDeath": true,
+                            "triggerOnEnemyHarmfulSkillClassesAny": [
+                                "Physical"
+                            ],
                             "counterCancelsSkill": true,
-                            "tooltipText": "The first non-strategic skill used on this character will be countered."
+                            "statusGroupId": "zaku_abumi_sound_wall",
+                            "removeStatusGroupIdOnTrigger": "zaku_abumi_sound_wall",
+                            "counterEffectsToSourceOwner": [
+                                {
+                                    "type": "gain_chakra",
+                                    "chakraType": "bloodline",
+                                    "amount": 1
+                                }
+                            ],
+                            "tooltipText": "The first physical skill used on Zaku's team will be countered and Zaku will gain 1 Bloodline chakra."
                         }
                     }
                 ]
             },
             {
-                "id": "zaku-abumi-extreme-decapitating-airwaves",
-                "name": "Extreme Decapitating Airwaves",
-                "skillimage": "https://i.imgur.com/BGu8oPg.png",
-                "skilldescription": "Abumi Zaku deals 45 damage to all enemies. This skill can only be used during the turn after 'Decapitating Airwaves' is used.",
+                "id": "zaku-abumi-extreme-air-cutter",
+                "name": "Extreme Air Cutter",
+                "skillimage": "https://i.imgur.com/Be54D9f.png",
+                "skilldescription": "Requires Air Cutter. Zaku deals 45 physical damage to all enemies.",
                 "energy": [
                     "Bloodline",
                     "Random",
@@ -3856,20 +3923,25 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "actorCondition": {
-                    "statusId": "zaku_abumi_decapitating_airwaves_unlock"
+                    "statusId": "zaku_abumi_air_cutter_follow_up"
                 },
                 "classes": [
-                    "Strategic",
                     "Physical",
                     "Instant"
                 ],
-                "effects": []
+                "effects": [
+                    {
+                        "type": "damage",
+                        "amount": 45,
+                        "scope": "all-enemy"
+                    }
+                ]
             },
             {
-                "id": "zaku-abumi-airwave-deflection",
-                "name": "Airwave Deflection",
-                "skillimage": "https://i.imgur.com/yszdsLO.png",
-                "skilldescription": "Abumi Zaku becomes invulnerable for 1 turn.",
+                "id": "zaku-abumi-sound-deflection",
+                "name": "Sound Deflection",
+                "skillimage": "https://i.imgur.com/cTyqfr0.png",
+                "skilldescription": "Makes Abumi Zaku invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3883,39 +3955,14 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "invulnerable",
+                        "statusId": "zaku_abumi_sound_deflection",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
+                            "helpful": true,
                             "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
+                            "tooltipText": "Zaku is invulnerable."
                         }
-                    }
-                ]
-            },
-            {
-                "id": "zaku-abumi-extreme-decapitating-airwaves-active",
-                "name": "Extreme Decapitating Airwaves",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/BGu8oPg.png",
-                "skilldescription": "Abumi Zaku deals 45 damage to all enemies.",
-                "energy": [
-                    "Bloodline",
-                    "Random",
-                    "Random"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 0,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 45,
-                        "scope": "all-enemy"
                     }
                 ]
             }

@@ -1,258 +1,116 @@
+const MARK = 'dosu_kinuta_vibrating_sound_drill';
+const TUNING = 'dosu_kinuta_melody_arm_tuning';
+const DRILL = 'dosu-kinuta-vibrating-sound-drill';
+const MANIPULATION = 'dosu-kinuta-sound-manipulation';
+const DRILL_ENHANCED = 'dosu-kinuta-vibrating-sound-drill-enhanced';
+const MANIPULATION_ENHANCED = 'dosu-kinuta-sound-manipulation-enhanced';
+
+const drillEffects = (markDuration) => [
+    { type: 'damage', amount: 20, scope: 'target' },
+    { type: 'apply_status', statusId: MARK, duration: markDuration, scope: 'target',
+        metadata: { harmful: true, turnDurationAnchor: 'source_turn',
+            tooltipText: 'Sound Manipulation may be used on this character.' } },
+];
+
 module.exports = {
-    "id": "dosu-kinuta",
-    "characterId": "dosu-kinuta",
-    "name": "Dosu Kinuta",
-    "facePicture": "https://i.imgur.com/NY3b12m.png",
-    "characterdeescription": "One of the three sound genin, and possibly the strongest; Dosu is an intelligent and patient ninja that likes to act with logic. Using a powerful sound based arm, Dosu can disable his enemies by disrupting their hearing and throwing them off.",
-    "skills": [
+    id: 'dosu-kinuta', characterId: 'dosu-kinuta', name: 'Kinuta Dosu',
+    facePicture: 'https://i.imgur.com/d5yZAyK.png',
+    characterdeescription: 'Perhaps the strongest of the three sound genin, Kinuta Dosu uses his implanted Melody Arm to amplify sound waves and increase the power of his taijutsu.',
+    requiredMissionId: null,
+    passive: {
+        name: 'Sound Trio',
+        icon: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-051-a-shadow-in-darkness-danger-approaches-sasuke/cap_09-45_1865.jpg',
+        description: "When an enemy uses a skill with increased cost, this character's physical damage is increased by 5 for one turn.",
+        onEnemyIncreasedCostSkillApplyStatusToSelf: {
+            statusId: 'sound_trio_physical_bonus', duration: 1,
+            metadata: { helpful: true, damageBonusBySkillClass: { physical: 5 },
+                tooltipText: 'This character deals 5 additional physical damage.' },
+        },
+    },
+    skills: [
         {
-            "id": "dosu-kinuta-resonating-echo-drill",
-            "name": "Resonating Echo Drill",
-            "skillimage": "https://i.imgur.com/arSzsOV.png",
-            "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 1 turn. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
-            "energy": [
-                "Taijutsu"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
-                    }
-                }
-            ]
+            id: DRILL, name: 'Vibrating Sound Drill',
+            skillimage: 'https://i.imgur.com/RHsi6uX.png',
+            skilldescription: 'Dosu deals 20 physical damage to an enemy. For 4 turns, Sound Manipulation may be used on them. This effect renews. Enhanced effect: the enemy is permanently marked by this ability.',
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: drillEffects(4),
         },
         {
-            "id": "dosu-kinuta-sound-manipulation",
-            "name": "Sound Manipulation",
-            "skillimage": "https://i.imgur.com/eSCnMmL.png",
-            "skilldescription": "Kinuta Dosu deals 10 damage to one enemy. For 1 turn, this enemy will take 5 additional damage from non-affliction skills and will deal 5 less damage with non-affliction skills. During 'Melody Arm Tuning', this skill's non-damage effects will last permanently instead and may stack.",
-            "energy": [
-                "Genjutsu"
+            id: MANIPULATION, name: 'Sound Manipulation',
+            skillimage: 'https://i.imgur.com/hz3JOSD.png',
+            skilldescription: 'Dosu deals 10 affliction damage to all enemies affected by Vibrating Sound Drill. For 2 turns, their physical skills will cost 1 extra chakra. Enhanced effect: affects all skills and deals damage each turn. In both states this skill ignores invulnerability.',
+            energy: ['Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
+            targetCondition: { statusId: MARK }, ignoreInvulnerability: true,
+            classes: ['Affliction', 'Chakra', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 10, scope: 'all-enemy' },
+                { type: 'apply_status', statusId: 'dosu_kinuta_sound_manipulation', duration: 2,
+                    scope: 'all-enemy', metadata: {
+                        harmful: true, turnDurationAnchor: 'source_turn',
+                        randomCostIncreaseForSkillClasses: { physical: 1 },
+                        tooltipText: "This character's physical skills cost 1 additional random chakra.",
+                    } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Mental",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target"
-                },
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target",
-                    "condition": {
-                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                        "scope": "target",
-                        "consumeOnMatch": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_sound_manipulation_debuff",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "nonAfflictionDamageTakenBonusFlat": 5,
-                        "nonAfflictionDamageDebuffFlat": 5,
-                        "tooltipText": "This character takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
         {
-            "id": "dosu-kinuta-melody-arm-tuning",
-            "name": "Melody Arm Tuning",
-            "skillimage": "https://i.imgur.com/yqkQKWQ.png",
-            "skilldescription": "For the following 3 turns, 'Resonating Echo Drill' will deal 20 additional damage and 'Sound Manipulation' will deal 10 additional damage.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_melody_arm_tuning_active",
-                    "duration": 3,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "skillReplacements": {
-                            "dosu-kinuta-resonating-echo-drill": "dosu-kinuta-resonating-echo-drill-improved",
-                            "dosu-kinuta-sound-manipulation": "dosu-kinuta-sound-manipulation-improved"
-                        },
-                        "tooltipText": "Resonating Echo Drill deals 20 additional damage and Sound Manipulation deals 10 additional damage."
-                    }
-                }
-            ]
+            id: 'dosu-kinuta-melody-arm-tuning', name: 'Melody Arm Tuning',
+            skillimage: 'https://i.imgur.com/mcaE8De.png',
+            skilldescription: 'The next use of Vibrating Sound Drill or Sound Manipulation will be enhanced. This skill ends when Dosu uses any of those skills and cannot be used while active.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 2,
+            actorCondition: { missingStatusId: TUNING },
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: TUNING, duration: 99, scope: 'self',
+                metadata: {
+                    helpful: true, onOwnerUseSkillTrigger: true,
+                    onOwnerUseSkillIdsAny: [DRILL_ENHANCED, MANIPULATION_ENHANCED],
+                    skillReplacements: { [DRILL]: DRILL_ENHANCED, [MANIPULATION]: MANIPULATION_ENHANCED },
+                    tooltipText: 'The next Vibrating Sound Drill or Sound Manipulation will be enhanced.',
+                } }],
         },
         {
-            "id": "dosu-kinuta-agile-leap",
-            "name": "Agile Leap",
-            "skillimage": "https://i.imgur.com/Irubt1X.png",
-            "skilldescription": "Kinuta Dosu becomes invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "invulnerable",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
+            id: 'dosu-kinuta-dosu-dodge', name: 'Dosu Dodge',
+            skillimage: 'https://i.imgur.com/xCBubIe.png',
+            skilldescription: 'Makes Kinuta Dosu invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'dosu_kinuta_dosu_dodge',
+                duration: 1, scope: 'self', metadata: {
+                    helpful: true, invulnerable: true,
+                    tooltipText: 'Dosu is invulnerable.',
+                } }],
         },
         {
-            "id": "dosu-kinuta-resonating-echo-drill-improved",
-            "name": "Resonating Echo Drill",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/arSzsOV.png",
-            "skilldescription": "Kinuta Dosu deals 40 damage to one enemy. This enemy will be unable to reduce damage or become invulnerable for 2 turns. The following turn, 'Sound Manipulation' will deal 10 additional damage to them.",
-            "energy": [
-                "Taijutsu"
-            ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 40,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_resonating_echo_drill_debuff",
-                    "duration": 2,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "cannotReduceDamage": true,
-                        "cannotBecomeInvulnerable": true,
-                        "tooltipText": "This character cannot reduce damage or become invulnerable."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "turnDurationAnchor": "source_turn",
-                        "tooltipText": "Dosu's Sound Manipulation will deal 10 additional damage to this character."
-                    }
-                }
-            ]
+            id: DRILL_ENHANCED, name: 'Vibrating Sound Drill',
+            hiddenFromSelectionViewer: true, useBaseSkillCooldown: true,
+            skillimage: 'https://i.imgur.com/RHsi6uX.png',
+            skilldescription: 'Dosu deals 20 physical damage to an enemy and permanently marks them. Sound Manipulation may be used on marked enemies.',
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: drillEffects(99),
         },
         {
-            "id": "dosu-kinuta-sound-manipulation-improved",
-            "name": "Sound Manipulation",
-            "hiddenFromSelectionViewer": true,
-            "skillimage": "https://i.imgur.com/eSCnMmL.png",
-            "skilldescription": "Kinuta Dosu deals 20 damage to one enemy. This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks).",
-            "energy": [
-                "Genjutsu"
+            id: MANIPULATION_ENHANCED, name: 'Sound Manipulation',
+            hiddenFromSelectionViewer: true, useBaseSkillCooldown: true,
+            skillimage: 'https://i.imgur.com/hz3JOSD.png',
+            skilldescription: 'Dosu deals 10 affliction damage to all enemies affected by Vibrating Sound Drill each turn for 2 turns. For 2 turns, all of their skills will cost 1 extra chakra. This skill ignores invulnerability.',
+            energy: ['Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
+            targetCondition: { statusId: MARK }, ignoreInvulnerability: true,
+            classes: ['Affliction', 'Chakra', 'Instant'],
+            effects: [
+                { type: 'damage', amount: 10, scope: 'all-enemy' },
+                { type: 'apply_status', statusId: 'dosu_kinuta_sound_manipulation_enhanced', duration: 2,
+                    scope: 'all-enemy', metadata: {
+                        harmful: true, turnDurationAnchor: 'source_turn', randomCostIncrease: 1,
+                        tooltipText: 'All of this character\'s skills cost 1 additional random chakra.',
+                    } },
+                { type: 'apply_status', statusId: 'dosu_kinuta_sound_manipulation_affliction', duration: 1,
+                    scope: 'all-enemy', metadata: {
+                        harmful: true, afflictionDamage: true, turnEndDamage: 10,
+                        turnEndTrigger: 'source_turn', turnDurationAnchor: 'source_turn',
+                        tooltipText: 'This character takes 10 affliction damage on Dosu\'s following turn.',
+                    } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 1,
-            "classes": [
-                "Mental",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "damage",
-                    "amount": 20,
-                    "scope": "target"
-                },
-                {
-                    "type": "damage",
-                    "amount": 10,
-                    "scope": "target",
-                    "condition": {
-                        "statusId": "dosu_kinuta_resonating_echo_drill_mark",
-                        "scope": "target",
-                        "consumeOnMatch": true
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "dosu_kinuta_sound_manipulation_debuff_permanent",
-                    "duration": 99,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "nonAfflictionDamageTakenBonusFlat": 5,
-                        "nonAfflictionDamageDebuffFlat": 5,
-                        "mergeNumericAddKeys": [
-                            "nonAfflictionDamageTakenBonusFlat",
-                            "nonAfflictionDamageDebuffFlat"
-                        ],
-                        "tooltipText": "This character permanently takes 5 additional damage from non-affliction skills and deals 5 less damage with non-affliction skills (stacks)."
-                    }
-                }
-            ]
-        }
-    ]
+        },
+    ],
 };

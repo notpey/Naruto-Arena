@@ -18,6 +18,7 @@ const NEJI_REWORK_MIGRATION_ID = 'neji-hyuuga-draft-2026-10-29';
 const TENTEN_REWORK_MIGRATION_ID = 'tenten-draft-2026-10-29';
 const IRUKA_REWORK_MIGRATION_ID = 'umino-iruka-rw-draft-2026-10-31';
 const RAIN_GENIN_REWORK_MIGRATION_ID = 'rock-lee-shigure-oboro-drafts-2026-11-01';
+const SOUND_GENIN_REWORK_MIGRATION_ID = 'sound-genin-drafts-2026-11-01';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const LAUNCH_UNLOCK_RULE_CHARACTER_IDS = new Set([
     'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
@@ -245,6 +246,7 @@ class CharacterService {
                     [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${SOUND_GENIN_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
@@ -306,6 +308,7 @@ class CharacterService {
                         [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SOUND_GENIN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
@@ -335,6 +338,7 @@ class CharacterService {
         const shouldApplyTentenRework = !completedMigrations[TENTEN_REWORK_MIGRATION_ID];
         const shouldApplyIrukaRework = !completedMigrations[IRUKA_REWORK_MIGRATION_ID];
         const shouldApplyRainGeninRework = !completedMigrations[RAIN_GENIN_REWORK_MIGRATION_ID];
+        const shouldApplySoundGeninRework = !completedMigrations[SOUND_GENIN_REWORK_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
             ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
@@ -351,6 +355,7 @@ class CharacterService {
             ...(shouldApplyTentenRework ? ['tenten'] : []),
             ...(shouldApplyIrukaRework ? ['umino-iruka'] : []),
             ...(shouldApplyRainGeninRework ? ['rock-lee', 'oboro', 'shigure'] : []),
+            ...(shouldApplySoundGeninRework ? ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'] : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ]);
         const defaultByCharacterId = new Map(
@@ -428,6 +433,7 @@ class CharacterService {
                 if (shouldApplyTentenRework && characterId === 'tenten') return seedEntry;
                 if (shouldApplyIrukaRework && characterId === 'umino-iruka') return seedEntry;
                 if (shouldApplyRainGeninRework && ['rock-lee', 'oboro', 'shigure'].includes(characterId)) return seedEntry;
+                if (shouldApplySoundGeninRework && ['dosu-kinuta', 'tsuchi-kin', 'zaku-abumi'].includes(characterId)) return seedEntry;
                 if (shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
@@ -493,6 +499,7 @@ class CharacterService {
             shouldApplyTentenRework ||
             shouldApplyIrukaRework ||
             shouldApplyRainGeninRework ||
+            shouldApplySoundGeninRework ||
             shouldApplyLaunchUnlocks ||
             newSeedCharacters.length > 0 ||
             backfilledMissingImages
@@ -522,6 +529,7 @@ class CharacterService {
                         [`completed.${TENTEN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${IRUKA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${RAIN_GENIN_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SOUND_GENIN_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
                     },
