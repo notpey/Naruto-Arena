@@ -1,0 +1,97 @@
+/* Character Editor additions on top of the Concept Drafts (charactercreator.css) layout. */
+#save-state.is-error { color: #ffa8a1; }
+#save-state.is-success { color: #9ad8b0; }
+.ce-tab-count { display: inline-block; min-width: 18px; margin-left: 4px; padding: 1px 5px; border-radius: 3px; background: #e8801a; color: #111; font-size: 10px; }
+.ce-tab-count[hidden] { display: none; }
+.ce-empty { max-width: 560px; padding: 40px 0; }
+.ce-empty h2 { margin: 0 0 8px; color: #f3eadb; font-size: 21px; text-transform: uppercase; }
+.ce-empty p { margin: 0; color: #bfb6aa; }
+.ce-empty[hidden] { display: none; }
+#character-form[hidden] { display: none; }
+#character-form { max-width: 1180px; }
+#character-form .passive-section, #character-form .skills-section { margin-top: 26px; }
+.ce-muted { color: #8a96a8; font-size: 12px; }
+.skills-section .inline-section-bar .ce-muted { color: #aeb7c4; }
+
+/* Roster list with portraits */
+.ce-roster-item { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px; }
+.ce-roster-item img { width: 38px; height: 38px; border: 1px solid #3c4553; object-fit: cover; background: #222833; }
+.ce-roster-item span { min-width: 0; }
+.ce-roster-item strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ce-roster-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ce-dirty-dot { color: #e8801a; font-size: 10px; vertical-align: 2px; }
+.draft-list { max-height: calc(100vh - 260px); overflow-y: auto; }
+
+/* Cards */
+.ce-badge { flex: none; padding: 2px 7px; border: 1px solid #aa8dc4; border-radius: 3px; color: #6d4c8f !important; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.inline-character-bottom input[readonly] { color: #6b7a8e; cursor: not-allowed; }
+.ce-skill-footer { grid-template-columns: minmax(120px, auto) minmax(0, 1fr); align-items: end; }
+.ce-skill-footer select { display: block; width: 100%; min-height: 29px; border: 0; border-bottom: 1px solid #c4cbd4; padding: 4px 0; color: #2d405b; font-size: 13px; text-transform: none; }
+.ce-stale { margin: 0 0 8px; padding: 7px 9px; border-left: 3px solid #d68a2c; background: #fff4e5; color: #6b4a1b !important; font-size: 12px; }
+.ce-stale[hidden] { display: none; }
+
+/* Number steppers make quick cooldown and value tweaks one click. */
+.ce-stepper { display: inline-flex; align-items: center; margin-top: 4px; border: 1px solid #c5cbd4; border-radius: 3px; background: #f5f7fa; }
+.ce-stepper button { width: 28px; height: 28px; border: 0; background: none; color: #2d5a94; font-size: 16px; font-weight: 800; line-height: 1; }
+.ce-stepper button:hover { background: #e3eaf3; }
+.inline-editor .ce-stepper input { width: 42px; min-height: 28px; border: 0; border-left: 1px solid #dde2e8; border-right: 1px solid #dde2e8; padding: 0; color: #1e344e; font-size: 14px; font-weight: 800; text-align: center; appearance: textfield; }
+.ce-stepper input::-webkit-inner-spin-button, .ce-stepper input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.ce-stepper:focus-within { outline: 2px solid #2f73cf; outline-offset: 1px; }
+
+/* Chakra: one counter per type, matching the cost pips in game. */
+.ce-skill-footer .chakra-cost-controls { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+.ce-chakra { justify-content: space-between; gap: 2px; min-width: 0; padding: 2px 3px; }
+.ce-chakra .chakra-square { flex-basis: 12px; width: 12px; height: 12px; }
+.ce-chakra button { width: 18px; height: 20px; padding: 0; border: 0; border-radius: 2px; background: none; color: #2d5a94; font-weight: 800; line-height: 1; }
+.ce-chakra button:hover:not(:disabled) { background: #e3eaf3; }
+.inline-editor .inline-skill-card .ce-chakra b { min-width: 10px; color: #1e344e !important; font-size: 13px; text-align: center; }
+.inline-editor .inline-skill-card .ce-chakra:not(.has-cost) b { color: #9aa7b6 !important; }
+.ce-chakra.has-cost { border-color: #8fa3bb; background: #fff; }
+
+/* Classes as removable chips */
+.ce-classes { grid-column: 1 / -1; display: grid; gap: 6px; padding-top: 8px; border-top: 1px dashed #b9c0ca; }
+.ce-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ce-chip { display: inline-flex; align-items: center; gap: 2px; padding: 2px 3px 2px 8px; border: 1px solid #9eb0c6; border-radius: 3px; background: #edf2f8; color: #1e344e !important; font-size: 12px; font-weight: 700; }
+.ce-chip button { width: 20px; height: 20px; border: 0; background: none; color: #8e4d48; font-size: 15px; line-height: 1; }
+.ce-chips select { min-height: 26px; border: 1px dashed #9eb0c6; border-radius: 3px; padding: 2px 6px; background: #fff; color: #2d5a94; font-size: 12px; font-weight: 700; }
+
+/* Effects and tooltips */
+.ce-effects > div { gap: 10px !important; }
+.ce-effects-empty { margin: 10px 0 0; }
+.ce-effect { display: grid; gap: 8px; padding: 10px; border: 1px solid #dde2e8; border-radius: 3px; background: #f7f9fb; }
+.ce-effect-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.inline-editor .ce-effect-head strong { color: #1e344e !important; font-size: 12px; }
+.ce-effect-head span { color: #5c6f86 !important; font-size: 11px; }
+.ce-effect-numbers { display: flex; flex-wrap: wrap; gap: 14px; }
+.ce-effect-numbers label { display: grid; gap: 2px; }
+.ce-tip { display: grid; gap: 4px; }
+.ce-tip > span { color: #29364b !important; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.inline-editor .ce-tip textarea { width: 100%; min-height: 48px; border: 1px solid #d0d6de; border-radius: 3px; padding: 6px 8px; background: #fff; color: #2d405b; font-size: 12px; line-height: 1.45; resize: vertical; }
+.ce-tip-icon-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 8px; }
+.ce-tip-thumb { width: 34px; height: 34px; overflow: hidden; border: 1px solid #9ba9bc; border-radius: 3px; background: #ecf0f5; color: #53677f; font-size: 8px; }
+.ce-tip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.inline-editor .ce-tip input { width: 100%; border: 0; border-bottom: 1px solid #c5cbd4; padding: 4px 0; color: #4b6077; font-size: 11px; }
+
+/* Changes review */
+.ce-changes { max-width: 1000px; }
+.ce-warning { margin: 0 0 16px; padding: 10px 14px; border-left: 3px solid #e8801a; background: #2a2116; color: #f3d4a8; }
+.ce-change-table { width: 100%; border-collapse: collapse; background: #171e2a; border: 1px solid #344052; }
+.ce-change-table th, .ce-change-table td { padding: 10px 12px; border-bottom: 1px solid #2b3545; text-align: left; vertical-align: top; font-size: 13px; overflow-wrap: anywhere; }
+.ce-change-table th { color: #aeb7c4; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.ce-change-table td:first-child { width: 34%; color: #f3eadb; font-weight: 700; }
+.ce-before { color: #f2a6a0; text-decoration: line-through; text-decoration-color: rgba(242, 166, 160, .5); }
+.ce-after { color: #9ad8b0; }
+
+/* Raw data */
+.ce-raw { max-width: 1100px; }
+#raw-json { width: 100%; min-height: 60vh; padding: 14px; border: 1px solid #344052; background: #0c1018; color: #d8e2ee; font: 12px/1.5 ui-monospace, Consolas, monospace; resize: vertical; }
+.ce-raw-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 12px; }
+#raw-state { color: #d8c9b7; font-size: 12px; }
+
+@media (max-width: 700px) {
+  /* The roster becomes a swipeable strip; keep it from widening the page. */
+  .creator-layout > * { min-width: 0; }
+  .draft-list { max-height: none; }
+  .ce-roster-item { min-width: 190px; }
+  .ce-skill-footer { grid-template-columns: 1fr; }
+}

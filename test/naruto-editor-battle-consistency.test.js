@@ -331,24 +331,12 @@ test('character editor presets match starter kits in characters.js', () => {
         assert.deepEqual(getCharacter(characterId), preset);
     });
 
+    // The editor edits exactly what the server returns; static presets must never override live data.
     const html = fs.readFileSync(path.join(__dirname, '..', 'charactereditor.html'), 'utf8');
-    const presetIndex = html.indexOf('./narutoStarterCharacter.js');
-    const sakuraPresetIndex = html.indexOf('./sakuraStarterCharacter.js');
-    const sasukePresetIndex = html.indexOf('./sasukeStarterCharacter.js');
-    const sharedPresetIndex = html.indexOf('./starterCharacterPresets.js');
-    const batch2PresetIndex = html.indexOf('./starterCharacterPresetsBatch2.js');
-    const appIndex = html.indexOf('./index.js');
-    assert.ok(presetIndex >= 0, 'character editor must load Naruto starter preset');
-    assert.ok(sakuraPresetIndex >= 0, 'character editor must load Sakura starter preset');
-    assert.ok(sasukePresetIndex >= 0, 'character editor must load Sasuke starter preset');
-    assert.ok(sharedPresetIndex >= 0, 'character editor must load shared starter presets');
-    assert.ok(batch2PresetIndex >= 0, 'character editor must load second shared starter presets');
-    assert.ok(appIndex >= 0, 'character editor must load index.js');
-    assert.ok(presetIndex < appIndex, 'Naruto starter preset must load before index.js');
-    assert.ok(sakuraPresetIndex < appIndex, 'Sakura starter preset must load before index.js');
-    assert.ok(sasukePresetIndex < appIndex, 'Sasuke starter preset must load before index.js');
-    assert.ok(sharedPresetIndex < appIndex, 'shared starter presets must load before index.js');
-    assert.ok(batch2PresetIndex < appIndex, 'second shared starter presets must load before index.js');
+    assert.ok(html.includes('charactereditor.js'), 'character editor must load its editor script');
+    ['narutoStarterCharacter.js', 'sakuraStarterCharacter.js', 'sasukeStarterCharacter.js', 'starterCharacterPresets.js', 'starterCharacterPresetsBatch2.js'].forEach((file) => {
+        assert.ok(!html.includes(file), `character editor must not load ${file}`);
+    });
 });
 
 test('Naruto rework keeps four active skills and a separate passive', () => {

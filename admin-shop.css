@@ -1,0 +1,251 @@
+/* ACP section switcher and the Shop catalog workspace. */
+.acp-sections {
+  display: flex;
+  gap: 4px;
+  margin: -8px 0 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.acp-sections a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--ca-parchment);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.acp-sections a:hover { color: #fff; }
+.acp-sections a[aria-current="page"] { color: var(--ca-orange); border-bottom-color: var(--ca-orange); }
+.acp-section-badge {
+  min-width: 18px;
+  padding: 2px 6px;
+  background: var(--ca-orange);
+  color: #05070e;
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 0;
+}
+.acp-section-badge[hidden] { display: none; }
+[data-acp-section][hidden] { display: none !important; }
+
+.acp-shop {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(8, 10, 18, 0.92);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.acp-shop-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.acp-shop-stats { display: flex; gap: 8px; margin: 0; }
+.acp-shop-stat { min-width: 86px; padding: 8px 12px; border: 1px solid rgba(255, 255, 255, 0.08); background: #10131c; }
+.acp-shop-stat dt { color: var(--ca-dust); font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.acp-shop-stat dd { margin: 3px 0 0; color: #fff; font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+.acp-shop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.acp-shop-tabs, .acp-shop-filters { display: flex; gap: 2px; }
+.acp-shop-tabs button, .acp-shop-filters button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #10131c;
+  color: var(--ca-parchment);
+  cursor: pointer;
+  font: 800 11px var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.acp-shop-tabs button span { margin-left: 4px; color: var(--ca-dust); font-variant-numeric: tabular-nums; }
+.acp-shop-tabs button:hover, .acp-shop-filters button:hover { color: #fff; border-color: rgba(232, 128, 26, 0.5); }
+.acp-shop-tabs button.is-active, .acp-shop-filters button.is-active { border-color: var(--ca-orange); background: rgba(232, 128, 26, 0.14); color: #fff; }
+.acp-shop-tabs button.is-active span { color: var(--ca-amber); }
+.acp-shop-search {
+  flex: 1 1 180px;
+  max-width: 260px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #10131c;
+  color: var(--ca-bone);
+  font: 600 13px var(--font-ui);
+}
+.acp-shop-toolbar [data-shop-new] { margin-left: auto; }
+.acp-shop-error { margin: 14px 20px 0; padding: 12px 14px; border: 1px solid rgba(213, 34, 53, 0.35); background: rgba(213, 34, 53, 0.12); color: #ffb0b0; font-size: 13px; font-weight: 800; }
+.acp-shop-error[hidden] { display: none; }
+
+.acp-shop-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px); min-height: 560px; }
+.acp-shop-list { min-width: 0; border-right: 1px solid rgba(255, 255, 255, 0.07); }
+.acp-shop-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin: 0; padding: 28px 20px; color: var(--ca-parchment); font-size: 13px; }
+.acp-shop-empty p { margin: 0; }
+.acp-shop-rows { margin: 0; padding: 0; list-style: none; max-height: 720px; overflow-y: auto; }
+.acp-shop-row { display: flex; align-items: center; gap: 4px; padding-left: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.acp-shop-row.is-editing { background: rgba(232, 128, 26, 0.1); box-shadow: inset 3px 0 0 var(--ca-orange); }
+.acp-shop-check { width: 16px; height: 16px; accent-color: var(--ca-orange); cursor: pointer; }
+.acp-shop-row-open {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 16px 10px 8px;
+  border: 0;
+  background: none;
+  color: var(--ca-bone);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+.acp-shop-row-open:hover { background: rgba(255, 255, 255, 0.03); }
+.acp-shop-row-thumb { display: grid; place-items: center; flex: none; width: 96px; min-height: 44px; }
+.acp-shop-row-title { max-width: 96px; color: var(--ca-amber); font-size: 11px; font-weight: 900; letter-spacing: 0.04em; line-height: 1.25; text-align: center; text-transform: uppercase; }
+.acp-shop-row-text { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
+.acp-shop-row-text strong { overflow: hidden; color: #fff; font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.acp-shop-row-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--ca-dust); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.acp-shop-rarity, .acp-shop-rarity-choice { --rarity: #a9b8be; }
+.rarity-common { --rarity: #a9b8be; }
+.rarity-uncommon { --rarity: #8fd0a8; }
+.rarity-rare { --rarity: #7fb2ec; }
+.rarity-epic { --rarity: #c39cf2; }
+.rarity-legendary { --rarity: #f0b866; }
+.acp-shop-rarity { color: var(--rarity); }
+.acp-shop-rarity::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--rarity); vertical-align: 1px; }
+
+.acp-shop-pill { flex: none; padding: 4px 8px; border: 1px solid; font-size: 10px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.acp-shop-pill.is-live { border-color: rgba(111, 191, 140, 0.5); color: #9ad8b0; background: rgba(111, 191, 140, 0.1); }
+.acp-shop-pill.is-draft { border-color: rgba(240, 189, 98, 0.5); color: var(--ca-amber); background: rgba(240, 189, 98, 0.08); }
+.acp-shop-pill.is-retired { border-color: rgba(255, 255, 255, 0.16); color: var(--ca-dust); }
+
+.acp-shop-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid rgba(232, 128, 26, 0.25); background: rgba(232, 128, 26, 0.08); }
+.acp-shop-bulk[hidden] { display: none; }
+.acp-shop-bulk-count { margin-right: 4px; color: #fff; font-size: 12px; font-weight: 900; }
+
+/* Avatar with optional overlay, at in-game sizes. */
+.shop-avatar { position: relative; display: inline-block; flex: none; overflow: hidden; border: 1px solid #71858e; background: #0e1a22; }
+.shop-avatar-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.shop-avatar-border { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+/* Editor */
+.acp-shop-editor { min-width: 0; padding: 18px 20px 22px; }
+.acp-shop-editor-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.acp-shop-kicker { color: var(--ca-dust); font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+.acp-shop-editor-title { margin: 4px 0 0; overflow: hidden; color: #fff; font-size: 20px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.acp-shop-link { padding: 4px 0; border: 0; background: none; color: var(--ca-amber); cursor: pointer; font: 800 12px var(--font-ui); text-decoration: underline; text-underline-offset: 3px; }
+.acp-shop-link:hover { color: #fff; }
+.acp-shop-editor-body { display: grid; grid-template-columns: minmax(0, 1fr) 232px; gap: 18px; }
+.acp-shop-form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.acp-shop-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.acp-shop-field-label { color: var(--ca-parchment); font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.acp-shop-input {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #10131c;
+  color: var(--ca-bone);
+  font: 600 13px var(--font-ui);
+  box-sizing: border-box;
+}
+.acp-shop-input:focus-visible, .acp-shop-search:focus-visible, .acp-shop-check:focus-visible, .acp-shop-row-open:focus-visible,
+.acp-shop-tabs button:focus-visible, .acp-shop-filters button:focus-visible, .acp-shop-link:focus-visible,
+.acp-shop-rarity-choice:focus-visible, .acp-sections a:focus-visible { outline: 2px solid var(--ca-orange); outline-offset: 2px; }
+.acp-shop-textarea { min-height: 110px; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 12px; line-height: 1.5; }
+.acp-shop-price { max-width: 130px; font-variant-numeric: tabular-nums; }
+.acp-shop-price-row { display: flex; align-items: center; gap: 12px; }
+.acp-shop-field-foot { display: flex; justify-content: space-between; gap: 10px; color: var(--ca-dust); font-size: 11px; line-height: 1.4; }
+.acp-shop-counter { flex: none; font-variant-numeric: tabular-nums; }
+.acp-shop-check-status { min-height: 16px; font-size: 12px; font-weight: 700; line-height: 1.4; }
+.acp-shop-check-status.is-pending { color: var(--ca-dust); }
+.acp-shop-check-status.is-ok { color: #9ad8b0; }
+.acp-shop-check-status.is-error { color: #ffb0b0; }
+.acp-shop-rarities { display: flex; flex-wrap: wrap; gap: 4px; }
+.acp-shop-rarity-choice {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #10131c;
+  color: var(--ca-parchment);
+  cursor: pointer;
+  font: 800 11px var(--font-ui);
+}
+.acp-shop-rarity-choice::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--rarity); vertical-align: 1px; }
+.acp-shop-rarity-choice.is-active { border-color: var(--rarity); color: #fff; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 -2px 0 var(--rarity); }
+
+/* Previews mirror the in-game player card and battle nameplate. */
+.acp-shop-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.acp-shop-preview-body { display: flex; flex-direction: column; gap: 12px; }
+.acp-shop-mock { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.acp-shop-mock figcaption { color: var(--ca-dust); font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.acp-shop-mock-card, .acp-shop-mock-plate { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #405560; background: #172a34; }
+.acp-shop-mock-plate { justify-content: flex-end; background: #12212a; }
+.acp-shop-mock-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; font-family: 'Libre Franklin', var(--font-ui); }
+.acp-shop-mock-info.is-right { align-items: flex-end; text-align: right; }
+.acp-shop-mock-name { max-width: 100%; overflow: hidden; color: #f0b866; font-size: 12px; font-weight: 800; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.acp-shop-mock-rank { max-width: 100%; overflow: hidden; color: #c8d5d7; font-size: 10px; font-weight: 700; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.acp-shop-mock-rank.is-title { color: #f0b866; font-weight: 800; }
+.acp-shop-mock-meta { color: #9bb0b8; font-size: 10px; font-weight: 600; }
+.acp-shop-mock-checker {
+  display: grid;
+  place-items: center;
+  height: 104px;
+  border: 1px solid #405560;
+  background-color: #d9dde0;
+  background-image: linear-gradient(45deg, #b8bec2 25%, transparent 25%), linear-gradient(-45deg, #b8bec2 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b8bec2 75%), linear-gradient(-45deg, transparent 75%, #b8bec2 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+.acp-shop-mock-border-alone { width: 88px; height: 88px; object-fit: contain; }
+.acp-shop-mock-hint { margin: 0; padding: 0 10px; color: var(--ca-dust); font-size: 11px; line-height: 1.4; text-align: center; }
+.acp-shop-mock-checker .acp-shop-mock-hint { color: #3c4448; }
+
+.acp-shop-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.acp-shop-actions-note { color: var(--ca-dust); font-size: 12px; }
+.acp-shop-danger { margin-left: auto; border-color: rgba(209, 90, 93, 0.6); background: transparent; color: #ffb0b0; }
+.acp-shop-danger + .acp-shop-actions-note { flex-basis: 100%; text-align: right; }
+.acp-shop-message { margin: 12px 0 0; font-size: 13px; font-weight: 700; line-height: 1.45; }
+.acp-shop .acp-shop-message.is-success { color: #9ad8b0; }
+.acp-shop .acp-shop-message.is-error { color: #ffb0b0; }
+.acp-shop-message.is-info { color: var(--ca-parchment); }
+
+/* Batch avatars */
+.acp-shop-batch { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.acp-shop-batch > .acp-shop-field { width: 100%; }
+.acp-shop-batch-defaults { display: grid; grid-template-columns: minmax(0, 1.4fr) 90px minmax(0, 1fr) 110px; gap: 10px; width: 100%; }
+.acp-shop-batch-rows { display: flex; flex-direction: column; gap: 6px; max-height: 360px; margin: 16px 0 0; padding: 0; overflow-y: auto; list-style: none; }
+.acp-shop-batch-row { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid rgba(255, 255, 255, 0.08); background: #10131c; }
+.acp-shop-batch-row.is-error { border-color: rgba(209, 90, 93, 0.55); }
+.acp-shop-batch-row.is-ok { border-color: rgba(111, 191, 140, 0.35); }
+.acp-shop-batch-fields { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
+.acp-shop-batch-note { overflow: hidden; color: var(--ca-dust); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.acp-shop-batch-row.is-error .acp-shop-batch-note { color: #ffb0b0; white-space: normal; }
+
+@media (max-width: 1180px) {
+  .acp-shop-workspace { grid-template-columns: minmax(0, 1fr); }
+  .acp-shop-list { border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+  .acp-shop-rows { max-height: 420px; }
+}
+@media (max-width: 640px) {
+  .acp-shop-head { flex-direction: column; }
+  .acp-shop-toolbar { padding: 12px 14px; }
+  .acp-shop-toolbar [data-shop-new] { margin-left: 0; }
+  .acp-shop-editor { padding: 16px 14px; }
+  .acp-shop-editor-body { grid-template-columns: minmax(0, 1fr); }
+  .acp-shop-batch-defaults { grid-template-columns: 1fr 1fr; }
+  .acp-shop-row-thumb { width: 56px; }
+}

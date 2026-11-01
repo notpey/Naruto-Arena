@@ -206,6 +206,7 @@
     }
   </style>
     <link rel="stylesheet" href="account.css?v=1">
+    <link rel="stylesheet" href="admin-shop.css?v=1">
     <script src="character-images.js?v=1"></script>
     <script src="account-client.js?v=1"></script>
 </head>
@@ -230,7 +231,12 @@
       </nav>
     </header>
 
-    <main class="acp-main">
+    <nav class="acp-sections" aria-label="Control panel sections">
+      <a href="#operations" data-acp-section-link="operations">Operations</a>
+      <a href="#shop" data-acp-section-link="shop">Shop <span class="acp-section-badge" data-shop-draft-badge hidden></span></a>
+    </nav>
+
+    <main class="acp-main" data-acp-section="operations">
       <div class="acp-error" id="acp-error" hidden style="grid-column: 1 / -1; width: 100%; margin-bottom: 24px;"></div>
       <div class="acp-grid">
         <section class="acp-panel">
@@ -418,141 +424,6 @@
             <div class="acp-rank-message" id="acp-promo-message"></div>
           </div>
         </section>
-
-        <section class="acp-panel" id="acp-cosmetics-panel">
-          <div class="acp-panel-head">
-            <div class="acp-panel-head-row">
-              <div>
-                <h2 class="acp-panel-title">🛍️ Cosmetics & Avatar Uploader</h2>
-                <p class="acp-panel-copy">Upload player avatars, create titles, and manage card borders.</p>
-              </div>
-              <div class="acp-panel-actions">
-                <button class="acp-button secondary" type="button" id="acp-cosmetics-refresh">Refresh Catalog</button>
-              </div>
-            </div>
-          </div>
-          <div class="acp-story" style="padding: 18px;">
-            <!-- Creators Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
-              
-              <!-- Multi-Avatar Uploader Card -->
-              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
-                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">👤 Multi-Avatar Uploader</h3>
-                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Select 1 or multiple avatar images (PNG/JPG/WebP) to upload in bulk.</p>
-                <div style="margin-bottom: 10px;">
-                  <input type="file" id="acp-avatar-file-input" multiple accept="image/png,image/jpeg,image/webp,image/gif" style="font-size: 11px; width: 100%; color: #fff;">
-                </div>
-                
-                <div style="display: flex; gap: 8px; align-items: center; background: #080a12; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-size: 11px;">
-                  <span style="color: var(--ca-dust); font-weight: 700;">Batch Defaults:</span>
-                  <label>Rarity: 
-                    <select id="acp-avatar-batch-rarity" style="padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">
-                      <option value="common">Common</option>
-                      <option value="uncommon">Uncommon</option>
-                      <option value="rare" selected>Rare</option>
-                      <option value="epic">Epic</option>
-                      <option value="legendary">Legendary</option>
-                    </select>
-                  </label>
-                  <button type="button" id="acp-avatar-apply-batch-btn" style="padding: 3px 8px; font-size: 10px; background: #2563eb; color: #fff; border: none; border-radius: 3px; cursor: pointer;">Apply</button>
-                </div>
-
-                <div id="acp-avatar-queue-container" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
-                  <div style="text-align: center; color: var(--ca-dust); font-size: 11px; padding: 12px; border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;">No files selected yet. Choose files above.</div>
-                </div>
-
-                <button type="button" class="acp-button" id="acp-avatar-upload-btn" style="width: 100%;">Upload All Avatars</button>
-              </div>
-
-              <!-- Clean Title Creator Card -->
-              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
-                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">🏷️ Predefined Title Creator</h3>
-                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Create titles for player profiles.</p>
-                <div style="margin-bottom: 12px; padding: 12px; background: #080a12; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; text-align: center;">
-                  <span style="font-size: 10px; color: var(--ca-dust); text-transform: uppercase; display: block; margin-bottom: 4px;">In-Game Title Preview</span>
-                  <span id="acp-title-preview" style="font-size: 14px; font-weight: 800; letter-spacing: 0.5px; color: #ffae42; text-transform: uppercase;">Leaf Village Prodigy</span>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
-                  <div style="grid-column: 1 / -1;"><label>Title Name: <input type="text" id="acp-title-name" class="acp-rank-input" placeholder="e.g. The Yellow Flash" value="Leaf Village Prodigy"></label></div>
-                  <div>
-                    <label>Rarity:
-                      <select id="acp-title-rarity" class="acp-rank-input">
-                        <option value="common">Common</option>
-                        <option value="uncommon">Uncommon</option>
-                        <option value="rare" selected>Rare</option>
-                        <option value="epic">Epic</option>
-                        <option value="legendary">Legendary</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div style="grid-column: 1 / -1;"><label>Description: <input type="text" id="acp-title-desc" class="acp-rank-input" placeholder="e.g. Awarded to elite tacticians."></label></div>
-                </div>
-                <button type="button" class="acp-button" id="acp-title-create-btn" style="width: 100%;">Create Title</button>
-              </div>
-
-              <!-- Custom Asset Border Creator Card -->
-              <div style="background: #10131c; padding: 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">
-                <h3 style="margin:0 0 10px 0; color: var(--ca-orange); font-size:14px; text-transform:uppercase;">🖼️ Custom Border Frame Asset</h3>
-                <p style="font-size: 11px; color: var(--ca-dust); margin-bottom: 10px;">Upload transparent frame image assets (PNG/SVG) that fit around player avatars.</p>
-                <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; background: #080a12; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
-                  <div style="position: relative; width: 64px; height: 64px; min-width: 64px; min-height: 64px; border-radius: 6px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center;">
-                    <img src="sharingan-remaster.png?v=2" alt="Avatar Base" style="width: 100%; height: 100%; object-fit: cover;">
-                    <img id="acp-border-preview-overlay" src="borders/anbu_frame.svg" alt="Border Frame Asset" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
-                  </div>
-                  <div style="flex: 1;">
-                    <label style="font-size: 11px; color: var(--ca-dust); display: block; margin-bottom: 4px;">Border Image File (PNG/SVG):</label>
-                    <input type="file" id="acp-border-file-input" accept="image/png,image/svg+xml,image/webp" style="font-size: 11px; width: 100%; color: #fff;">
-                    <label style="font-size: 11px; color: var(--ca-dust); display: block; margin-top: 4px; margin-bottom: 4px;">Or Direct Frame Asset URL:</label>
-                    <input type="text" id="acp-border-url-input" class="acp-rank-input" placeholder="borders/anbu_frame.svg" style="font-size: 11px;">
-                  </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
-                  <div style="grid-column: 1 / -1;"><label>Border Name: <input type="text" id="acp-border-name" class="acp-rank-input" placeholder="e.g. ANBU Black Ops Frame"></label></div>
-                  <div>
-                    <label>Rarity:
-                      <select id="acp-border-rarity" class="acp-rank-input">
-                        <option value="common">Common</option>
-                        <option value="uncommon">Uncommon</option>
-                        <option value="rare" selected>Rare</option>
-                        <option value="epic">Epic</option>
-                        <option value="legendary">Legendary</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div style="grid-column: 1 / -1;"><label>Desc: <input type="text" id="acp-border-desc" class="acp-rank-input" placeholder="Custom frame artwork"></label></div>
-                </div>
-                <button type="button" class="acp-button" id="acp-border-create-btn" style="width: 100%;">Upload Border Frame</button>
-              </div>
-            </div>
-
-            <!-- Active Cosmetics Table -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <h3 style="margin: 0; color: var(--ca-bone); font-size:15px; text-transform:uppercase;">Cosmetics Catalog</h3>
-              <select id="acp-cosmetics-filter" style="padding: 6px 10px; font-size: 11px; font-weight: 700; background: #10131c; color: #fff; border: 1px solid rgba(255,255,255,0.14); border-radius: 4px;">
-                <option value="">All Categories</option>
-                <option value="avatars">Avatars</option>
-                <option value="titles">Titles</option>
-                <option value="borders">Borders</option>
-              </select>
-            </div>
-            <table class="acp-table">
-              <thead>
-                <tr>
-                  <th>Preview</th>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Rarity</th>
-                  <th>Description</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="acp-cosmetics-table">
-                <tr><td colspan="6" style="text-align: center; color: var(--ca-dust);">Loading cosmetics...</td></tr>
-              </tbody>
-            </table>
-            <div class="acp-rank-message" id="acp-cosmetics-message"></div>
-          </div>
-        </section>
       </div>
 
       <aside class="acp-grid">
@@ -578,6 +449,39 @@
           <div class="acp-status" id="acp-economy">Loading economy...</div>
         </section>
       </aside>
+    </main>
+
+    <main class="acp-shop" data-acp-section="shop" hidden aria-labelledby="acp-shop-title">
+      <header class="acp-shop-head">
+        <div>
+          <h2 class="acp-panel-title" id="acp-shop-title">Shop Catalog</h2>
+          <p class="acp-panel-copy">Prepare avatars, borders, and titles as drafts, check them on a player card, then publish them to the in-game Shop.</p>
+        </div>
+        <dl class="acp-shop-stats" data-shop-stats></dl>
+      </header>
+      <div class="acp-shop-toolbar">
+        <div class="acp-shop-tabs" role="tablist" aria-label="Item type">
+          <button type="button" role="tab" data-shop-category="avatars">Avatars <span data-shop-tab-count="avatars"></span></button>
+          <button type="button" role="tab" data-shop-category="borders">Borders <span data-shop-tab-count="borders"></span></button>
+          <button type="button" role="tab" data-shop-category="titles">Titles <span data-shop-tab-count="titles"></span></button>
+        </div>
+        <div class="acp-shop-filters" role="group" aria-label="Status">
+          <button type="button" data-shop-status="all">All</button>
+          <button type="button" data-shop-status="live">Live</button>
+          <button type="button" data-shop-status="draft">Drafts</button>
+          <button type="button" data-shop-status="retired">Retired</button>
+        </div>
+        <input type="search" class="acp-shop-search" data-shop-search placeholder="Search by name" aria-label="Search the catalog" autocomplete="off">
+        <button type="button" class="acp-button" data-shop-new>New avatar</button>
+      </div>
+      <p class="acp-shop-error" data-shop-error hidden></p>
+      <div class="acp-shop-workspace">
+        <section class="acp-shop-list" aria-label="Catalog items">
+          <div class="acp-shop-bulk" data-shop-bulk hidden></div>
+          <div data-shop-list><p class="acp-shop-empty">Loading the catalog...</p></div>
+        </section>
+        <section class="acp-shop-editor" data-shop-editor aria-label="Item editor"></section>
+      </div>
     </main>
   </div>
 
@@ -1144,331 +1048,9 @@
             showNotification(err.message || "Failed to delete promo code", "error");
           });
       };
-
-      // ── ACP COSMETICS & AVATAR UPLOADER MANAGEMENT ───────────────────
-      var avatarFileInput = document.getElementById("acp-avatar-file-input");
-      var avatarBatchRarity = document.getElementById("acp-avatar-batch-rarity");
-      var avatarApplyBatchBtn = document.getElementById("acp-avatar-apply-batch-btn");
-      var avatarQueueContainer = document.getElementById("acp-avatar-queue-container");
-      var avatarUploadBtn = document.getElementById("acp-avatar-upload-btn");
-      var queuedAvatars = [];
-
-      var titleNameInput = document.getElementById("acp-title-name");
-      var titlePreview = document.getElementById("acp-title-preview");
-      var titleCreateBtn = document.getElementById("acp-title-create-btn");
-
-      var borderFileInput = document.getElementById("acp-border-file-input");
-      var borderUrlInput = document.getElementById("acp-border-url-input");
-      var borderPreviewOverlay = document.getElementById("acp-border-preview-overlay");
-      var borderNameInput = document.getElementById("acp-border-name");
-      var borderCreateBtn = document.getElementById("acp-border-create-btn");
-      var borderUploadedDataUrl = "";
-
-      var cosmeticsTable = document.getElementById("acp-cosmetics-table");
-      var cosmeticsFilter = document.getElementById("acp-cosmetics-filter");
-      var cosmeticsRefreshBtn = document.getElementById("acp-cosmetics-refresh");
-      var cachedCosmeticsCatalog = null;
-
-      function renderAvatarQueue() {
-        if (!avatarQueueContainer) return;
-        if (!queuedAvatars.length) {
-          avatarQueueContainer.innerHTML = '<div style="text-align: center; color: var(--ca-dust); font-size: 11px; padding: 12px; border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px;">No files selected yet. Choose files above.</div>';
-          if (avatarUploadBtn) {
-            avatarUploadBtn.disabled = true;
-            avatarUploadBtn.textContent = "Upload All Avatars";
-          }
-          return;
-        }
-
-        var html = "";
-        queuedAvatars.forEach(function(item, idx) {
-          html += '<div style="display: flex; gap: 8px; align-items: center; background: #0c0f17; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: 11px;">' +
-            '<img src="' + escapeHtml(item.dataUrl) + '" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;">' +
-            '<input type="text" value="' + escapeHtml(item.name) + '" data-avatar-idx="' + idx + '" data-field="name" placeholder="Name" style="flex: 1; min-width: 80px; padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">' +
-            '<select data-avatar-idx="' + idx + '" data-field="rarity" style="padding: 2px 4px; font-size: 11px; background: #161a26; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 3px;">' +
-              '<option value="common"' + (item.rarity === 'common' ? ' selected' : '') + '>Common</option>' +
-              '<option value="uncommon"' + (item.rarity === 'uncommon' ? ' selected' : '') + '>Uncommon</option>' +
-              '<option value="rare"' + (item.rarity === 'rare' ? ' selected' : '') + '>Rare</option>' +
-              '<option value="epic"' + (item.rarity === 'epic' ? ' selected' : '') + '>Epic</option>' +
-              '<option value="legendary"' + (item.rarity === 'legendary' ? ' selected' : '') + '>Legendary</option>' +
-            '</select>' +
-            '<button type="button" data-avatar-remove="' + idx + '" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 0 4px;">&times;</button>' +
-          '</div>';
-        });
-
-        avatarQueueContainer.innerHTML = html;
-        if (avatarUploadBtn) {
-          avatarUploadBtn.disabled = false;
-          avatarUploadBtn.textContent = "Upload All (" + queuedAvatars.length + " Avatars)";
-        }
-      }
-
-      if (avatarFileInput) {
-        avatarFileInput.addEventListener("change", function(e) {
-          var files = Array.prototype.slice.call(e.target.files || []);
-          if (!files.length) return;
-          var defaultRarity = avatarBatchRarity ? avatarBatchRarity.value : "rare";
-
-          var remaining = files.length;
-          files.forEach(function(file) {
-            var reader = new FileReader();
-            reader.onload = function(evt) {
-              var cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-              cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-              queuedAvatars.push({
-                dataUrl: evt.target.result,
-                filename: file.name,
-                name: cleanName,
-                rarity: defaultRarity,
-                description: "Player avatar"
-              });
-              remaining--;
-              if (remaining === 0) {
-                renderAvatarQueue();
-              }
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-      }
-
-      if (avatarApplyBatchBtn) {
-        avatarApplyBatchBtn.addEventListener("click", function() {
-          var defaultRarity = avatarBatchRarity ? avatarBatchRarity.value : "rare";
-          queuedAvatars.forEach(function(item) {
-            item.rarity = defaultRarity;
-          });
-          renderAvatarQueue();
-        });
-      }
-
-      if (avatarQueueContainer) {
-        avatarQueueContainer.addEventListener("input", function(e) {
-          var idx = parseInt(e.target.getAttribute("data-avatar-idx"), 10);
-          var field = e.target.getAttribute("data-field");
-          if (!isNaN(idx) && queuedAvatars[idx] && field) {
-            queuedAvatars[idx][field] = e.target.value;
-          }
-        });
-
-        avatarQueueContainer.addEventListener("click", function(e) {
-          var rmBtn = e.target.closest("[data-avatar-remove]");
-          if (rmBtn) {
-            var idx = parseInt(rmBtn.getAttribute("data-avatar-remove"), 10);
-            if (!isNaN(idx)) {
-              queuedAvatars.splice(idx, 1);
-              renderAvatarQueue();
-            }
-          }
-        });
-      }
-
-      if (avatarUploadBtn) {
-        avatarUploadBtn.addEventListener("click", function() {
-          if (!queuedAvatars.length) {
-            alert("Please select avatar image files first.");
-            return;
-          }
-
-          avatarUploadBtn.disabled = true;
-          avatarUploadBtn.textContent = "Uploading " + queuedAvatars.length + " avatars...";
-
-          fetchJson("/api/admin/cosmetics/upload-avatars-bulk", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items: queuedAvatars })
-          }).then(function(res) {
-            alert(res.message || "Avatars uploaded successfully!");
-            queuedAvatars = [];
-            if (avatarFileInput) avatarFileInput.value = "";
-            renderAvatarQueue();
-            loadCosmeticsACP();
-          }).catch(function(err) {
-            alert(err.message || "Failed to upload avatars.");
-          }).finally(function() {
-            avatarUploadBtn.disabled = false;
-            avatarUploadBtn.textContent = "Upload All Avatars";
-          });
-        });
-      }
-
-      if (titleNameInput && titlePreview) {
-        titleNameInput.addEventListener("input", function() {
-          titlePreview.textContent = titleNameInput.value.trim() || "Title Preview";
-        });
-      }
-
-      if (titleCreateBtn) {
-        titleCreateBtn.addEventListener("click", function() {
-          var name = titleNameInput ? titleNameInput.value.trim() : "";
-          var desc = document.getElementById("acp-title-desc") ? document.getElementById("acp-title-desc").value.trim() : "";
-          var rarity = document.getElementById("acp-title-rarity") ? document.getElementById("acp-title-rarity").value : "rare";
-
-          if (!name) { alert("Title name is required."); return; }
-
-          titleCreateBtn.disabled = true;
-          titleCreateBtn.textContent = "Creating...";
-
-          fetchJson("/api/admin/cosmetics/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: name,
-              category: "titles",
-              description: desc,
-              rarity: rarity
-            })
-          }).then(function(res) {
-            alert(res.message || "Title added to catalog!");
-            if (titleNameInput) titleNameInput.value = "";
-            if (document.getElementById("acp-title-desc")) document.getElementById("acp-title-desc").value = "";
-            loadCosmeticsACP();
-          }).catch(function(err) {
-            alert(err.message || "Failed to create title.");
-          }).finally(function() {
-            titleCreateBtn.disabled = false;
-            titleCreateBtn.textContent = "Create Title";
-          });
-        });
-      }
-
-      if (borderFileInput) {
-        borderFileInput.addEventListener("change", function(e) {
-          var file = e.target.files && e.target.files[0];
-          if (!file) return;
-          var reader = new FileReader();
-          reader.onload = function(evt) {
-            borderUploadedDataUrl = evt.target.result;
-            if (borderPreviewOverlay) borderPreviewOverlay.src = borderUploadedDataUrl;
-            if (borderNameInput && !borderNameInput.value) {
-              borderNameInput.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      if (borderUrlInput) {
-        borderUrlInput.addEventListener("input", function() {
-          var url = borderUrlInput.value.trim();
-          if (url && borderPreviewOverlay) borderPreviewOverlay.src = url;
-          borderUploadedDataUrl = url;
-        });
-      }
-
-      if (borderCreateBtn) {
-        borderCreateBtn.addEventListener("click", function() {
-          var dataUrl = borderUploadedDataUrl || (borderUrlInput ? borderUrlInput.value.trim() : "");
-          var name = borderNameInput ? borderNameInput.value.trim() : "";
-          var desc = document.getElementById("acp-border-desc") ? document.getElementById("acp-border-desc").value.trim() : "";
-          var rarity = document.getElementById("acp-border-rarity") ? document.getElementById("acp-border-rarity").value : "rare";
-          var file = borderFileInput && borderFileInput.files && borderFileInput.files[0];
-
-          if (!dataUrl) { alert("Please select a border image file or provide a border URL."); return; }
-          if (!name) { alert("Border frame name is required."); return; }
-
-          borderCreateBtn.disabled = true;
-          borderCreateBtn.textContent = "Uploading...";
-
-          fetchJson("/api/admin/cosmetics/upload-border", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              dataUrl: dataUrl,
-              name: name,
-              description: desc,
-              rarity: rarity,
-              filename: file ? file.name : ""
-            })
-          }).then(function(res) {
-            alert(res.message || "Border frame added to catalog!");
-            if (borderFileInput) borderFileInput.value = "";
-            if (borderUrlInput) borderUrlInput.value = "";
-            if (borderNameInput) borderNameInput.value = "";
-            if (document.getElementById("acp-border-desc")) document.getElementById("acp-border-desc").value = "";
-            borderUploadedDataUrl = "";
-            loadCosmeticsACP();
-          }).catch(function(err) {
-            alert(err.message || "Failed to upload border frame.");
-          }).finally(function() {
-            borderCreateBtn.disabled = false;
-            borderCreateBtn.textContent = "Upload Border Frame";
-          });
-        });
-      }
-
-      if (cosmeticsFilter) cosmeticsFilter.addEventListener("change", renderCosmeticsTableRows);
-      if (cosmeticsRefreshBtn) cosmeticsRefreshBtn.addEventListener("click", loadCosmeticsACP);
-
-      function loadCosmeticsACP() {
-        if (!cosmeticsTable) return;
-        fetchJson("/api/admin/cosmetics")
-          .then(function(res) {
-            cachedCosmeticsCatalog = (res && res.catalog) || { avatars: [], titles: [], borders: [] };
-            renderCosmeticsTableRows();
-          })
-          .catch(function() {
-            cosmeticsTable.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Failed to load cosmetics catalog.</td></tr>';
-          });
-      }
-
-      function renderCosmeticsTableRows() {
-        if (!cosmeticsTable || !cachedCosmeticsCatalog) return;
-        var filter = cosmeticsFilter ? cosmeticsFilter.value : "";
-        var items = [];
-        if (!filter || filter === "avatars") items = items.concat(cachedCosmeticsCatalog.avatars || []);
-        if (!filter || filter === "titles") items = items.concat(cachedCosmeticsCatalog.titles || []);
-        if (!filter || filter === "borders") items = items.concat(cachedCosmeticsCatalog.borders || []);
-
-        if (!items.length) {
-          cosmeticsTable.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--ca-dust);">No items in this category.</td></tr>';
-          return;
-        }
-
-        var rarityColors = {
-          common: "#38bdf8",
-          uncommon: "#34d399",
-          rare: "#c084fc",
-          epic: "#fbbf24",
-          legendary: "#ef4444"
-        };
-
-        var html = "";
-        items.forEach(function(item) {
-          var previewHtml = "";
-          if (item.category === "avatars") {
-            previewHtml = '<img src="' + escapeHtml(item.imageUrl || "deadcharacter-remaster.png?v=2") + '" style="width:36px; height:36px; object-fit:cover; border-radius:4px;" onerror="this.src=\'deadcharacter-remaster.png?v=2\'">';
-          } else if (item.category === "titles") {
-            previewHtml = '<span style="font-weight:800; font-size:11px; color:#ffae42;">' + escapeHtml(item.name) + '</span>';
-          } else if (item.category === "borders") {
-            previewHtml = '<div style="position:relative; width:36px; height:36px; border-radius:4px; overflow:hidden; background:#000;"><img src="sharingan-remaster.png?v=2" style="width:100%; height:100%; object-fit:cover;"><img src="' + escapeHtml(item.imageUrl || "borders/anbu_frame.svg") + '" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain;"></div>';
-          }
-
-          var rCol = rarityColors[item.rarity] || "#94a3b8";
-          var rarityTag = '<span style="font-size:10px; font-weight:800; text-transform:uppercase; color:' + rCol + ';">' + escapeHtml(item.rarity || "common") + '</span>';
-
-          html += '<tr>' +
-            '<td>' + previewHtml + '</td>' +
-            '<td style="font-weight: 800; color: #fff;">' + escapeHtml(item.name) + '</td>' +
-            '<td style="text-transform: capitalize; font-size:11px; color: var(--ca-dust);">' + escapeHtml(item.category) + '</td>' +
-            '<td>' + rarityTag + '</td>' +
-            '<td style="font-size:11px; color: var(--ca-parchment); max-width:200px;">' + escapeHtml(item.description || "") + '</td>' +
-            '<td><button type="button" class="acp-button secondary" style="padding:2px 6px; font-size:9px;" onclick="window.deleteCosmeticItem(\'' + escapeHtml(item.id) + '\')">Delete</button></td>' +
-          '</tr>';
-        });
-        cosmeticsTable.innerHTML = html;
-      }
-
-      window.deleteCosmeticItem = function(itemId) {
-        if (!confirm("Are you sure you want to remove this cosmetic item from the catalog?")) return;
-        fetchJson("/api/admin/cosmetics/" + itemId, { method: "DELETE" })
-          .then(function() { loadCosmeticsACP(); })
-          .catch(function(err) { alert(err.message || "Failed to delete item."); });
-      };
-
-      loadCosmeticsACP();
     })();
   </script>
+  <script src="admin-shop.js?v=1"></script>
   <script src="./nav.js" defer></script>
 </body>
 </html>

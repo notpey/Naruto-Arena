@@ -7,6 +7,11 @@ const createCosmeticsService = require('../services/cosmeticsService.js');
 const createProfileRouter = require('../routes/profile.js');
 
 test('Cosmetics & Inventory System Tests', async (t) => {
+    // cosmeticsService persists to the real catalog file, so put it back afterwards.
+    const catalogFile = path.join(__dirname, '..', 'data', 'cosmeticsCatalog.json');
+    const originalCatalog = fs.readFileSync(catalogFile, 'utf8');
+    t.after(() => fs.writeFileSync(catalogFile, originalCatalog, 'utf8'));
+
     // 1. In-memory App State Collection Mock
     const appStateStore = new Map();
     const mockAppStateCollection = {
@@ -62,19 +67,11 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         assert.ok(updated.titles.some(t => t.id === 'title_test_flash'), 'Title should be added');
     });
 
-    await t.test('cosmeticsService can save base64 avatar and border asset files', async () => {
-        const fakeDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-        const avatarUrl = cosmeticsService.saveAvatarFile(fakeDataUrl, 'test_avatar.png');
-        assert.ok(avatarUrl.startsWith('avatars/avatar_'), 'Saved avatar path should start with avatars/avatar_');
-
-        const borderUrl = cosmeticsService.saveBorderFile(fakeDataUrl, 'test_border.png');
-        assert.ok(borderUrl.startsWith('borders/border_'), 'Saved border path should start with borders/border_');
-        
-        // Clean up created files
-        const fullAvatarPath = path.join(__dirname, '..', avatarUrl);
-        if (fs.existsSync(fullAvatarPath)) fs.unlinkSync(fullAvatarPath);
-        const fullBorderPath = path.join(__dirname, '..', borderUrl);
-        if (fs.existsSync(fullBorderPath)) fs.unlinkSync(fullBorderPath);
+    await t.test('cosmeticsService updates items in place', async () => {
+        const updated = await cosmeticsService.updateCosmeticItem('avatar_bulk_2', { category: 'avatars', name: 'Renamed Avatar', imageUrl: 'avatars/bulk_2.png' });
+        assert.equal(updated.name, 'Renamed Avatar');
+        assert.equal(updated.id, 'avatar_bulk_2');
+        assert.equal(await cosmeticsService.updateCosmeticItem('missing', { category: 'avatars', name: 'Nope' }), null);
     });
 
     await t.test('cosmeticsService can delete items', async () => {

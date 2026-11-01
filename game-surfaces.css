@@ -1811,3 +1811,9 @@
 .selection-client-page.game-remaster .card-arrow { color: #c9d5d5 !important; opacity: 1 !important; }
 .selection-client-page.game-remaster .quest-subtabs { border-color: #4c636d; border-radius: 6px; background: #20343e; }
 .selection-client-page.game-remaster .quest-tab-btn.active { background: #344b55; color: #f1d1a1; box-shadow: none; }
+
+/* Shop borders sit over battle avatars; an equipped title replaces the rank on nameplates. */
+.battle-avatar-frame { position: relative; display: inline-block; flex: none; line-height: 0; }
+.battle-avatar-frame > img:first-child { display: block; }
+.battle-avatar-border { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.game-remaster .player-status.is-equipped-title { color: #f0b866; }

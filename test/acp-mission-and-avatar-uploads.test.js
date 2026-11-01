@@ -25,42 +25,6 @@ class MockAppStateCollection {
     }
 }
 
-class MockCosmeticsService {
-    constructor() {
-        this.items = [];
-        this.savedFiles = [];
-    }
-
-    async loadCatalog() {
-        return {
-            avatars: this.items.filter(i => i.category === 'avatars'),
-            titles: this.items.filter(i => i.category === 'titles'),
-            borders: this.items.filter(i => i.category === 'borders')
-        };
-    }
-
-    async addCosmeticItem(item) {
-        this.items.push(item);
-        return item;
-    }
-
-    async addCosmeticItems(items) {
-        this.items.push(...items);
-        return items;
-    }
-
-    saveAvatarFile(dataUrl, filename) {
-        const fileRef = `avatars/custom_${Date.now()}_${filename || 'avatar.png'}`;
-        this.savedFiles.push({ fileRef, dataUrl });
-        return fileRef;
-    }
-
-    saveBorderFile(dataUrl, filename) {
-        const fileRef = `borders/custom_${Date.now()}_${filename || 'border.png'}`;
-        this.savedFiles.push({ fileRef, dataUrl });
-        return fileRef;
-    }
-}
 
 test('PUT /api/admin/missions saves missions via provided saveMissionCatalog and fallback', async () => {
     let savedMissionsArg = null;
@@ -132,83 +96,6 @@ test('PUT /api/admin/missions saves missions via provided saveMissionCatalog and
     const storedInDb = await mockAppState.findOne({ key: 'missions' });
     assert.ok(storedInDb);
     assert.equal(storedInDb.missions[0].missionId, 'm2');
-});
-
-test('POST /api/admin/cosmetics/upload-avatars-bulk and /upload-avatar work end-to-end', async () => {
-    const mockCosmetics = new MockCosmeticsService();
-
-    const router = createAdminRouter({
-        requireSession: (req, res, next) => next(),
-        cosmeticsService: mockCosmetics
-    });
-
-    const bulkRoute = router.stack.find(s => s.route?.path === '/cosmetics/upload-avatars-bulk' && s.route.methods.post)?.route;
-    assert.ok(bulkRoute, 'POST /cosmetics/upload-avatars-bulk route must exist');
-    const bulkHandler = bulkRoute.stack[bulkRoute.stack.length - 1].handle;
-
-    let resData = null;
-    let statusCode = 200;
-    const resMock = {
-        status(c) { statusCode = c; return this; },
-        json(d) { resData = d; return this; }
-    };
-
-    const reqBulk = {
-        authUser: { username: 'admin', role: 'admin' },
-        body: {
-            items: [
-                {
-                    dataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                    filename: 'kakashi_custom.png',
-                    name: 'Kakashi Custom',
-                    price: 300,
-                    rarity: 'epic',
-                    description: 'Legendary copy ninja avatar'
-                },
-                {
-                    dataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                    filename: 'itachi_custom.png',
-                    name: 'Itachi Custom',
-                    price: 400,
-                    rarity: 'legendary',
-                    description: 'Crow illusion avatar'
-                }
-            ]
-        }
-    };
-
-    await bulkHandler(reqBulk, resMock);
-    assert.equal(statusCode, 200);
-    assert.equal(resData.ok, true);
-    assert.equal(resData.count, 2);
-    assert.equal(mockCosmetics.items.length, 2);
-    assert.equal(mockCosmetics.items[0].name, 'Kakashi Custom');
-    assert.equal(mockCosmetics.items[1].name, 'Itachi Custom');
-    assert.match(mockCosmetics.items[0].imageUrl, /^avatars\/custom_/);
-
-    // Test Single Avatar Upload
-    const singleRoute = router.stack.find(s => s.route?.path === '/cosmetics/upload-avatar' && s.route.methods.post)?.route;
-    assert.ok(singleRoute, 'POST /cosmetics/upload-avatar route must exist');
-    const singleHandler = singleRoute.stack[singleRoute.stack.length - 1].handle;
-
-    resData = null;
-    statusCode = 200;
-    const reqSingle = {
-        authUser: { username: 'admin' },
-        body: {
-            dataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-            filename: 'minato_flash.png',
-            name: 'Minato Flash',
-            price: 500,
-            rarity: 'legendary'
-        }
-    };
-
-    await singleHandler(reqSingle, resMock);
-    assert.equal(statusCode, 200);
-    assert.equal(resData.ok, true);
-    assert.equal(mockCosmetics.items.length, 3);
-    assert.equal(mockCosmetics.items[2].name, 'Minato Flash');
 });
 
 test('Mission deletion persistence does not resurrect deleted missions on refresh', async () => {

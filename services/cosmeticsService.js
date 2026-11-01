@@ -2,8 +2,6 @@ const fs = require('fs');
 const path = require('path');
 
 const COSMETICS_CATALOG_FILE = path.join(__dirname, '..', 'data', 'cosmeticsCatalog.json');
-const AVATARS_DIR = path.join(__dirname, '..', 'avatars');
-const BORDERS_DIR = path.join(__dirname, '..', 'borders');
 
 function getInitialCosmeticsCatalog() {
     try {
@@ -103,6 +101,16 @@ module.exports = function(context = {}) {
         return itemsList;
     }
 
+    async function updateCosmeticItem(itemId, item) {
+        await loadCatalog();
+        const list = inMemoryCosmetics[item.category] || [];
+        const index = list.findIndex(c => c.id === itemId);
+        if (index === -1) return null;
+        list[index] = { ...item, id: itemId };
+        await saveCatalog(inMemoryCosmetics);
+        return list[index];
+    }
+
     async function deleteCosmeticItem(itemId) {
         await loadCatalog();
         for (const cat of ['avatars', 'titles', 'borders']) {
@@ -112,51 +120,13 @@ module.exports = function(context = {}) {
         return true;
     }
 
-    function extractBase64Payload(data) {
-        if (typeof data !== 'string') return '';
-        const commaIndex = data.indexOf(',');
-        if (data.startsWith('data:') && commaIndex !== -1) {
-            return data.slice(commaIndex + 1);
-        }
-        return data;
-    }
-
-    function saveAvatarFile(base64Data, filename = '') {
-        if (!fs.existsSync(AVATARS_DIR)) {
-            fs.mkdirSync(AVATARS_DIR, { recursive: true });
-        }
-        const safeBase = filename ? filename.replace(/[^a-zA-Z0-9._-]/g, '') : '';
-        const cleanName = safeBase ? `avatar_${Date.now()}_${safeBase}` : `avatar_${Date.now()}.png`;
-        const targetPath = path.join(AVATARS_DIR, cleanName);
-        
-        const cleanBase64 = extractBase64Payload(base64Data);
-        const buffer = Buffer.from(cleanBase64, 'base64');
-        fs.writeFileSync(targetPath, buffer);
-        return `avatars/${cleanName}`;
-    }
-
-    function saveBorderFile(base64Data, filename = '') {
-        if (!fs.existsSync(BORDERS_DIR)) {
-            fs.mkdirSync(BORDERS_DIR, { recursive: true });
-        }
-        const safeBase = filename ? filename.replace(/[^a-zA-Z0-9._-]/g, '') : '';
-        const cleanName = safeBase ? `border_${Date.now()}_${safeBase}` : `border_${Date.now()}.png`;
-        const targetPath = path.join(BORDERS_DIR, cleanName);
-        
-        const cleanBase64 = extractBase64Payload(base64Data);
-        const buffer = Buffer.from(cleanBase64, 'base64');
-        fs.writeFileSync(targetPath, buffer);
-        return `borders/${cleanName}`;
-    }
-
     return {
         loadCatalog,
         saveCatalog,
         getCatalogSync,
         addCosmeticItem,
         addCosmeticItems,
-        deleteCosmeticItem,
-        saveAvatarFile,
-        saveBorderFile
+        updateCosmeticItem,
+        deleteCosmeticItem
     };
 };

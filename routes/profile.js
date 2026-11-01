@@ -302,8 +302,10 @@ module.exports = function(context) {
                 },
                 catalog: cosmeticsCatalog,
                 ryo: profile.ryo || 0,
-                customSelectionBackground: profile.customSelectionBackground || '',
-                customIngameBackground: profile.customIngameBackground || ''
+                backgrounds: {
+                    selectionUrl: profile.backgrounds?.selectionUrl || '',
+                    ingameUrl: profile.backgrounds?.ingameUrl || '',
+                },
             });
         } catch (error) {
             console.error('Fetch inventory error:', error);
@@ -329,54 +331,58 @@ module.exports = function(context) {
             const rawProfile = normalizeUserProfile(user);
             const profile = rawProfile.profile || rawProfile;
             const inventory = profile.inventory || { avatars: [], titles: [], borders: [], customTitles: [] };
+            const cosmeticsCatalog = context.cosmeticsService
+                ? (typeof context.cosmeticsService.loadCatalog === 'function' ? await context.cosmeticsService.loadCatalog() : context.cosmeticsService.getCatalogSync())
+                : { avatars: [], titles: [], borders: [] };
+            let message = '';
 
+            // Only owned catalog items can be equipped; custom avatar URLs go through the validated avatar routes.
             if (cleanType === 'avatar') {
                 if (!cleanItemId) {
                     profile.avatarUrl = '';
+                    message = 'Restored the default avatar.';
                 } else {
-                    // Check if owned in inventory or direct valid URL/catalog item
-                    const cosmeticsCatalog = context.cosmeticsService
-                        ? (typeof context.cosmeticsService.loadCatalog === 'function' ? await context.cosmeticsService.loadCatalog() : context.cosmeticsService.getCatalogSync())
-                        : { avatars: [] };
                     const catalogItem = (cosmeticsCatalog.avatars || []).find(a => a.id === cleanItemId || a.imageUrl === cleanItemId);
-                    if (catalogItem) {
-                        if (!(inventory.avatars || []).includes(catalogItem.id)) {
-                            return res.status(403).json({ error: 'You do not own this avatar.' });
-                        }
-                        profile.avatarUrl = catalogItem.imageUrl;
-                    } else {
-                        // Direct URL
-                        profile.avatarUrl = cleanItemId;
+                    if (!catalogItem) {
+                        return res.status(404).json({ error: 'That avatar is not in the catalog.' });
                     }
+                    if (!(inventory.avatars || []).includes(catalogItem.id)) {
+                        return res.status(403).json({ error: 'You do not own this avatar.' });
+                    }
+                    profile.avatarUrl = catalogItem.imageUrl;
+                    message = `Equipped ${catalogItem.name || 'avatar'}.`;
                 }
             } else if (cleanType === 'title') {
                 if (!cleanItemId) {
                     profile.equippedTitle = '';
+                    message = 'Removed your title.';
                 } else {
-                    const isOwnedCatalog = (inventory.titles || []).includes(cleanItemId);
-                    if (!isOwnedCatalog) {
-                        return res.status(403).json({ error: 'You do not own this title.' });
+                    const customTitle = (inventory.customTitles || []).find(t => (typeof t === 'string' ? t : t?.id || t?.name) === cleanItemId);
+                    if (customTitle) {
+                        profile.equippedTitle = typeof customTitle === 'string' ? customTitle : String(customTitle.name || customTitle.id);
+                    } else {
+                        if (!(inventory.titles || []).includes(cleanItemId)) {
+                            return res.status(403).json({ error: 'You do not own this title.' });
+                        }
+                        const tObj = (cosmeticsCatalog.titles || []).find(t => t.id === cleanItemId);
+                        profile.equippedTitle = tObj ? tObj.name : cleanItemId;
                     }
-                    const cosmeticsCatalog = context.cosmeticsService ? context.cosmeticsService.getCatalogSync() : { titles: [] };
-                    const tObj = (cosmeticsCatalog.titles || []).find(t => t.id === cleanItemId);
-                    profile.equippedTitle = tObj ? tObj.name : cleanItemId;
+                    message = `Equipped title: ${profile.equippedTitle}.`;
                 }
             } else if (cleanType === 'border') {
                 if (!cleanItemId) {
                     profile.equippedBorder = '';
+                    message = 'Removed your border.';
                 } else {
-                    const cosmeticsCatalog = context.cosmeticsService
-                        ? (typeof context.cosmeticsService.loadCatalog === 'function' ? await context.cosmeticsService.loadCatalog() : context.cosmeticsService.getCatalogSync())
-                        : { borders: [] };
                     const bObj = (cosmeticsCatalog.borders || []).find(b => b.id === cleanItemId || b.imageUrl === cleanItemId);
-                    if (bObj) {
-                        if (!(inventory.borders || []).includes(bObj.id)) {
-                            return res.status(403).json({ error: 'You do not own this border.' });
-                        }
-                        profile.equippedBorder = bObj.imageUrl || bObj.id;
-                    } else {
-                        profile.equippedBorder = cleanItemId;
+                    if (!bObj) {
+                        return res.status(404).json({ error: 'That border is not in the catalog.' });
                     }
+                    if (!(inventory.borders || []).includes(bObj.id)) {
+                        return res.status(403).json({ error: 'You do not own this border.' });
+                    }
+                    profile.equippedBorder = bObj.imageUrl || bObj.id;
+                    message = `Equipped ${bObj.name || 'border'}.`;
                 }
             }
 
@@ -389,7 +395,7 @@ module.exports = function(context) {
 
             return res.json({
                 ok: true,
-                message: `Equipped ${cleanType}!`,
+                message,
                 equippedTitle: savedProfile.equippedTitle,
                 equippedBorder: savedProfile.equippedBorder,
                 avatarUrl: savedProfile.avatarUrl,

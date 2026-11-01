@@ -1,6 +1,8 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const { randomUUID } = require('node:crypto');
+const cosmeticsRules = require('../services/cosmeticsRules.js');
+const { validateCharacterPayload } = require('../services/characterValidation.js');
 
 module.exports = function(context) {
     const router = express.Router();
@@ -907,6 +909,10 @@ module.exports = function(context) {
         if (!characterId || !nextCharacter || typeof nextCharacter.characterId !== 'string' || !nextCharacter.characterId.trim()) {
             return res.status(400).json({ error: 'A valid character payload is required.' });
         }
+        const characterErrors = validateCharacterPayload(nextCharacter);
+        if (characterErrors.length) {
+            return res.status(400).json({ error: characterErrors.join(' '), errors: characterErrors });
+        }
     
         const currentCharacters = getCharactersList();
         const characterIndex = currentCharacters.findIndex(
@@ -946,6 +952,10 @@ module.exports = function(context) {
         const newCharacter = req.body && typeof req.body === 'object' ? req.body : null;
         if (!newCharacter || typeof newCharacter.characterId !== 'string' || !newCharacter.characterId.trim()) {
             return res.status(400).json({ error: 'A valid character payload with a characterId is required.' });
+        }
+        const newCharacterErrors = validateCharacterPayload(newCharacter);
+        if (newCharacterErrors.length) {
+            return res.status(400).json({ error: newCharacterErrors.join(' '), errors: newCharacterErrors });
         }
         const currentCharacters = getCharactersList();
         const duplicate = currentCharacters.find(
@@ -1471,208 +1481,189 @@ module.exports = function(context) {
         }
     });
 
-    // Cosmetics Management Endpoints
-    router.get('/cosmetics', requireSession, async (req, res) => {
-        if (!isAdminUser(req)) {
-            return res.status(403).json({ error: 'Admin access required.' });
+    // Shop cosmetics. Images are Imgur links (the host has no persistent disk), checked before saving.
+    const loadCosmeticsCatalog = async () => {
+        const cs = cosmeticsService || context.cosmeticsService;
+        if (!cs) return { avatars: [], titles: [], borders: [] };
+        return typeof cs.loadCatalog === 'function' ? cs.loadCatalog() : cs.getCatalogSync();
+    };
+
+    const findCosmetic = (catalog, itemId) => {
+        for (const category of cosmeticsRules.CATEGORIES) {
+            const item = (catalog[category] || []).find((entry) => entry && entry.id === itemId);
+            if (item) return item;
         }
+        return null;
+    };
+
+    // How many players own each item, so admins can see what retiring or deleting affects.
+    const countCosmeticOwners = async () => {
+        if (!usersCollection || typeof usersCollection.aggregate !== 'function') return {};
+        const rows = await usersCollection.aggregate([
+            { $project: { ids: { $concatArrays: cosmeticsRules.CATEGORIES.map((category) => ({ $ifNull: [`$profile.inventory.${category}`, []] })) } } },
+            { $unwind: '$ids' },
+            { $group: { _id: '$ids', count: { $sum: 1 } } },
+        ]).toArray();
+        return Object.fromEntries(rows.map((row) => [row._id, row.count]));
+    };
+
+    const inspectCosmeticImage = async (category, imageUrl) => {
+        if (typeof context.inspectRemoteImage !== 'function') return { info: null, errors: [], warnings: [] };
+        let info;
         try {
-            const cs = cosmeticsService || context.cosmeticsService;
-            const catalog = cs
-                ? (typeof cs.loadCatalog === 'function' ? await cs.loadCatalog() : cs.getCatalogSync())
-                : { avatars: [], titles: [], borders: [] };
-            return res.json({ ok: true, catalog });
+            info = await context.inspectRemoteImage(imageUrl);
+        } catch (error) {
+            return { info: null, errors: [`Couldn't load that image from Imgur (${error.message || 'unreachable'}).`], warnings: [] };
+        }
+        return { info, ...cosmeticsRules.checkCosmeticImage(category, info) };
+    };
+
+    // Names (and image links) must be unique per category: equipped titles are stored by name.
+    const findDuplicate = (catalog, item, ignoreId) => (catalog[item.category] || []).find((entry) => entry && entry.id !== ignoreId && (
+        String(entry.name || '').toLowerCase() === String(item.name || '').toLowerCase()
+        || (item.imageUrl && entry.imageUrl === item.imageUrl)
+    ));
+
+    const validateForSave = async (catalog, input, existing, pending = []) => {
+        const { item, errors } = cosmeticsRules.validateCosmeticInput(input, existing);
+        if (errors.length) return { errors };
+        const duplicate = findDuplicate(catalog, item, existing?.id) || pending.find((entry) => entry.category === item.category && (
+            entry.name.toLowerCase() === item.name.toLowerCase() || (item.imageUrl && entry.imageUrl === item.imageUrl)
+        ));
+        if (duplicate) {
+            return { errors: [duplicate.name.toLowerCase() === item.name.toLowerCase()
+                ? `Another ${item.category.slice(0, -1)} is already named “${duplicate.name}”.`
+                : `“${duplicate.name}” already uses that image.`] };
+        }
+        let warnings = [];
+        if (item.imageUrl && item.imageUrl !== existing?.imageUrl) {
+            const check = await inspectCosmeticImage(item.category, item.imageUrl);
+            if (check.errors.length) return { errors: check.errors };
+            warnings = check.warnings;
+        }
+        return { item, warnings, errors: [] };
+    };
+
+    router.get('/cosmetics', requireSession, adminCheck, async (req, res) => {
+        try {
+            const [catalog, owners] = await Promise.all([loadCosmeticsCatalog(), countCosmeticOwners().catch(() => ({}))]);
+            return res.json({ ok: true, catalog, owners });
         } catch (e) {
             console.error('Admin get cosmetics error:', e);
             return res.status(500).json({ error: 'Unable to load cosmetics catalog.' });
         }
     });
 
-        router.post('/cosmetics/add', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
+    router.post('/cosmetics/inspect-image', requireSession, adminCheck, async (req, res) => {
+        const category = String(req.body?.category || '').trim().toLowerCase();
+        if (!['avatars', 'borders'].includes(category)) {
+            return res.status(400).json({ error: 'Only avatars and borders use images.' });
+        }
+        const normalized = cosmeticsRules.normalizeImgurUrl(req.body?.url);
+        if (normalized.error) return res.status(400).json({ error: normalized.error });
+        const check = await inspectCosmeticImage(category, normalized.url);
+        return res.json({ ok: check.errors.length === 0, imageUrl: normalized.url, ...(check.info || {}), errors: check.errors, warnings: check.warnings });
+    });
+
+    router.post('/cosmetics', requireSession, adminCheck, async (req, res) => {
+        try {
+            const inputs = Array.isArray(req.body?.items) ? req.body.items : [];
+            if (!inputs.length || inputs.length > 50) {
+                return res.status(400).json({ error: 'Send between 1 and 50 items.' });
             }
-            try {
-                const { id, name, description, category, rarity, imageUrl } = req.body || {};
-                const cleanCategory = String(category || '').trim().toLowerCase();
-                const cleanName = String(name || '').trim();
-                const cleanId = String(id || '').trim() || `${cleanCategory}_${Date.now()}`;
-
-                if (!cleanName || !['avatars', 'titles', 'borders'].includes(cleanCategory)) {
-                    return res.status(400).json({ error: 'Valid name and category (avatars, titles, borders) are required.' });
-                }
-
-                const item = {
-                    id: cleanId,
-                    name: cleanName,
-                    description: String(description || '').trim(),
-                    category: cleanCategory,
-                    rarity: String(rarity || 'common').toLowerCase(),
-                    imageUrl: (cleanCategory === 'avatars' || cleanCategory === 'borders') ? String(imageUrl || '').trim() : undefined,
-                    updatedAt: new Date()
-                };
-
-                const cs = cosmeticsService || context.cosmeticsService;
-                if (cs && typeof cs.addCosmeticItem === 'function') {
-                    await cs.addCosmeticItem(item);
-                }
-
-                return res.json({ ok: true, message: `Saved cosmetic item: ${cleanName}`, item });
-            } catch (e) {
-                console.error('Admin save cosmetic error:', e);
-                return res.status(500).json({ error: 'Unable to save cosmetic item.' });
+            const catalog = await loadCosmeticsCatalog();
+            const prepared = [];
+            const failures = [];
+            for (let index = 0; index < inputs.length; index += 1) {
+                const result = await validateForSave(catalog, inputs[index], null, prepared);
+                if (result.errors.length) failures.push({ index, error: result.errors.join(' ') });
+                else prepared.push({ ...result.item, warnings: result.warnings });
             }
-        });
-
-        router.post('/cosmetics/upload-avatar', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
+            // All or nothing, so a batch never half-publishes.
+            if (failures.length) {
+                return res.status(400).json({ error: failures.length === 1 && inputs.length === 1 ? failures[0].error : `${failures.length} of ${inputs.length} items need fixing.`, failures });
             }
-            try {
-                const { dataUrl, name, description, rarity, filename } = req.body || {};
-                if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('avatars/'))) {
-                    return res.status(400).json({ error: 'A valid image data URL or image web URL is required.' });
+            const now = new Date();
+            const items = prepared.map(({ warnings, ...item }) => ({
+                ...item,
+                id: cosmeticsRules.createCosmeticId(item.category, item.name),
+                createdAt: now,
+                updatedAt: now,
+            }));
+            const cs = cosmeticsService || context.cosmeticsService;
+            await cs.addCosmeticItems(items);
+            const live = items.filter((item) => item.status === 'live').length;
+            return res.json({
+                ok: true,
+                items,
+                warnings: prepared.flatMap((item) => item.warnings.map((warning) => `${item.name}: ${warning}`)),
+                message: `Saved ${items.length} item${items.length === 1 ? '' : 's'}${live ? ` (${live} live in the shop)` : ' as drafts'}.`,
+            });
+        } catch (e) {
+            console.error('Admin create cosmetics error:', e);
+            return res.status(500).json({ error: 'Unable to save cosmetics.' });
+        }
+    });
+
+    router.patch('/cosmetics/:itemId', requireSession, adminCheck, async (req, res) => {
+        try {
+            const catalog = await loadCosmeticsCatalog();
+            const existing = findCosmetic(catalog, req.params.itemId);
+            if (!existing) return res.status(404).json({ error: 'That item no longer exists.' });
+            const result = await validateForSave(catalog, req.body || {}, existing);
+            if (result.errors.length) return res.status(400).json({ error: result.errors.join(' ') });
+            if (result.item.status === 'draft' && cosmeticsRules.getItemStatus(existing) !== 'draft') {
+                const owners = (await countCosmeticOwners().catch(() => ({})))[existing.id] || 0;
+                if (owners > 0) {
+                    return res.status(409).json({ error: `${owners} player${owners === 1 ? ' owns' : 's own'} ${existing.name}, so it can't go back to drafts. Retire it instead.` });
                 }
-
-                const cs = cosmeticsService || context.cosmeticsService;
-                let finalImageUrl = dataUrl;
-                if (dataUrl.startsWith('data:') && cs && typeof cs.saveAvatarFile === 'function') {
-                    finalImageUrl = cs.saveAvatarFile(dataUrl, filename);
-                }
-
-                const cleanName = String(name || filename || 'Custom Avatar').trim();
-                const cleanId = `avatar_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-                const item = {
-                    id: cleanId,
-                    name: cleanName,
-                    description: String(description || 'Player avatar').trim(),
-                    category: 'avatars',
-                    rarity: String(rarity || 'rare').toLowerCase(),
-                    imageUrl: finalImageUrl,
-                    createdAt: new Date()
-                };
-
-                if (cs && typeof cs.addCosmeticItem === 'function') {
-                    await cs.addCosmeticItem(item);
-                }
-
-                return res.json({ ok: true, message: `Uploaded and added avatar: ${cleanName}`, item });
-            } catch (e) {
-                console.error('Admin upload avatar error:', e);
-                return res.status(500).json({ error: 'Unable to upload avatar.' });
             }
-        });
 
-        router.post('/cosmetics/upload-avatars-bulk', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
+            const item = { ...result.item, updatedAt: new Date() };
+            const cs = cosmeticsService || context.cosmeticsService;
+            await cs.updateCosmeticItem(existing.id, item);
+
+            // Equipped cosmetics are stored by value, so carry owners over to the new name or image.
+            const equippedField = { avatars: 'avatarUrl', borders: 'equippedBorder', titles: 'equippedTitle' }[item.category];
+            const before = item.category === 'titles' ? existing.name : existing.imageUrl;
+            const after = item.category === 'titles' ? item.name : item.imageUrl;
+            let movedPlayers = 0;
+            if (usersCollection && before && after && before !== after) {
+                const moved = await usersCollection.updateMany(
+                    { [`profile.inventory.${item.category}`]: existing.id, [`profile.${equippedField}`]: before },
+                    { $set: { [`profile.${equippedField}`]: after } }
+                );
+                movedPlayers = moved?.modifiedCount || 0;
             }
-            try {
-                const itemsPayload = Array.isArray(req.body?.items) ? req.body.items : (req.body?.avatars || []);
-                if (!itemsPayload.length) {
-                    return res.status(400).json({ error: 'No avatar items provided for bulk upload.' });
-                }
+            return res.json({
+                ok: true,
+                item: { ...item, id: existing.id },
+                warnings: result.warnings,
+                message: `Saved ${item.name}.${movedPlayers ? ` Updated ${movedPlayers} player${movedPlayers === 1 ? '' : 's'} who had it equipped.` : ''}`,
+            });
+        } catch (e) {
+            console.error('Admin update cosmetic error:', e);
+            return res.status(500).json({ error: 'Unable to save that item.' });
+        }
+    });
 
-                const cs = cosmeticsService || context.cosmeticsService;
-                const savedItems = [];
-                for (let i = 0; i < itemsPayload.length; i++) {
-                    const entry = itemsPayload[i];
-                    const dataUrl = entry.dataUrl || entry.imageUrl;
-                    if (!dataUrl) continue;
-
-                    let finalImageUrl = dataUrl;
-                    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:') && cs && typeof cs.saveAvatarFile === 'function') {
-                        finalImageUrl = cs.saveAvatarFile(dataUrl, entry.filename);
-                    }
-
-                    const cleanName = String(entry.name || entry.filename || `Avatar ${i + 1}`).trim();
-                    const cleanId = `avatar_${Date.now()}_${i}_${Math.floor(Math.random() * 1000)}`;
-                    savedItems.push({
-                        id: cleanId,
-                        name: cleanName,
-                        description: String(entry.description || 'Player avatar').trim(),
-                        category: 'avatars',
-                        rarity: String(entry.rarity || 'rare').toLowerCase(),
-                        imageUrl: finalImageUrl,
-                        createdAt: new Date()
-                    });
-                }
-
-                if (cs && typeof cs.addCosmeticItems === 'function') {
-                    await cs.addCosmeticItems(savedItems);
-                } else if (cs && typeof cs.addCosmeticItem === 'function') {
-                    for (const item of savedItems) {
-                        await cs.addCosmeticItem(item);
-                    }
-                }
-
-                return res.json({
-                    ok: true,
-                    count: savedItems.length,
-                    message: `Successfully uploaded and added ${savedItems.length} avatars to the cosmetics catalog!`,
-                    items: savedItems
-                });
-            } catch (e) {
-                console.error('Admin bulk upload avatars error:', e);
-                return res.status(500).json({ error: 'Unable to process bulk avatar upload.' });
+    router.delete('/cosmetics/:itemId', requireSession, adminCheck, async (req, res) => {
+        try {
+            const catalog = await loadCosmeticsCatalog();
+            const existing = findCosmetic(catalog, req.params.itemId);
+            if (!existing) return res.status(404).json({ error: 'That item no longer exists.' });
+            const owners = (await countCosmeticOwners().catch(() => ({})))[existing.id] || 0;
+            if (owners > 0) {
+                return res.status(409).json({ error: `${owners} player${owners === 1 ? ' owns' : 's own'} ${existing.name}. Retire it instead so they keep it.` });
             }
-        });
-
-        router.post('/cosmetics/upload-border', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const { dataUrl, name, description, rarity, filename } = req.body || {};
-                if (typeof dataUrl !== 'string' || (!dataUrl.startsWith('data:') && !dataUrl.startsWith('http') && !dataUrl.startsWith('borders/'))) {
-                    return res.status(400).json({ error: 'A valid image data URL or border asset URL is required.' });
-                }
-
-                const cs = cosmeticsService || context.cosmeticsService;
-                let finalImageUrl = dataUrl;
-                if (dataUrl.startsWith('data:') && cs && typeof cs.saveBorderFile === 'function') {
-                    finalImageUrl = cs.saveBorderFile(dataUrl, filename);
-                }
-
-                const cleanName = String(name || filename || 'Custom Border Frame').trim();
-                const cleanId = `border_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-                const item = {
-                    id: cleanId,
-                    name: cleanName,
-                    description: String(description || 'Custom avatar frame').trim(),
-                    category: 'borders',
-                    rarity: String(rarity || 'rare').toLowerCase(),
-                    imageUrl: finalImageUrl,
-                    createdAt: new Date()
-                };
-
-                if (cs && typeof cs.addCosmeticItem === 'function') {
-                    await cs.addCosmeticItem(item);
-                }
-
-                return res.json({ ok: true, message: `Saved custom border frame asset: ${cleanName}`, item });
-            } catch (e) {
-                console.error('Admin upload border error:', e);
-                return res.status(500).json({ error: 'Unable to upload border frame asset.' });
-            }
-        });
-
-        router.delete('/cosmetics/:itemId', requireSession, async (req, res) => {
-            if (!isAdminUser(req)) {
-                return res.status(403).json({ error: 'Admin access required.' });
-            }
-            try {
-                const { itemId } = req.params;
-                const cs = cosmeticsService || context.cosmeticsService;
-                if (cs && typeof cs.deleteCosmeticItem === 'function') {
-                    await cs.deleteCosmeticItem(itemId);
-                }
-                return res.json({ ok: true, message: 'Cosmetic item removed from catalog.' });
-            } catch (e) {
-                console.error('Admin delete cosmetic error:', e);
-                return res.status(500).json({ error: 'Unable to delete cosmetic item.' });
-            }
-        });
+            const cs = cosmeticsService || context.cosmeticsService;
+            await cs.deleteCosmeticItem(existing.id);
+            return res.json({ ok: true, message: `Deleted ${existing.name}.` });
+        } catch (e) {
+            console.error('Admin delete cosmetic error:', e);
+            return res.status(500).json({ error: 'Unable to delete that item.' });
+        }
+    });
 
     return router;
 };

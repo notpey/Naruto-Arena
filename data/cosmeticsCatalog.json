@@ -179,14 +179,6 @@
       "rarity": "common",
       "imageUrl": "avatars/avatar_1786821448620_NA10.png",
       "createdAt": "2026-08-15T19:17:28.620Z"
-    },
-    {
-      "id": "avatar_bulk_2",
-      "name": "Bulk Avatar 2",
-      "category": "avatars",
-      "price": 300,
-      "rarity": "epic",
-      "imageUrl": "avatars/bulk_2.png"
     }
   ],
   "titles": [
@@ -229,13 +221,6 @@
       "category": "titles",
       "rarity": "legendary",
       "price": 1200
-    },
-    {
-      "id": "title_test_flash",
-      "name": "The Golden Flash",
-      "category": "titles",
-      "price": 500,
-      "rarity": "legendary"
     }
   ],
   "borders": [

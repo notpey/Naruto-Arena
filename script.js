@@ -620,8 +620,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                 avatarUrl: user.profile?.avatarUrl || defaultProfileAvatar,
                 clanAbbreviation: user.profile?.clan?.abbreviation || '',
                 ladder: normalizeLadderPresentation(user.profile?.ladder),
+                equippedTitle: user.profile?.equippedTitle || '',
+                equippedBorder: user.profile?.equippedBorder || '',
             })
         );
+    };
+
+    // An equipped shop title replaces the level-based rank wherever the player is named in-game.
+    const setRankLabel = (element, ladder, title) => {
+        if (!element) return;
+        element.textContent = title || ladder.rank;
+        element.classList.toggle('is-equipped-title', Boolean(title));
+    };
+
+    // Shop borders are transparent frames drawn over the battle avatar.
+    const applyBattleAvatarBorder = (avatarEl, borderUrl) => {
+        if (!avatarEl) return;
+        const hasBorder = typeof borderUrl === 'string' && /[./]/.test(borderUrl);
+        let frame = avatarEl.parentElement?.classList.contains('battle-avatar-frame') ? avatarEl.parentElement : null;
+        if (!frame) {
+            if (!hasBorder) return;
+            frame = document.createElement('span');
+            frame.className = 'battle-avatar-frame';
+            avatarEl.replaceWith(frame);
+            frame.appendChild(avatarEl);
+        }
+        let overlay = frame.querySelector('.battle-avatar-border');
+        if (!hasBorder) {
+            overlay?.remove();
+            return;
+        }
+        if (!overlay) {
+            overlay = document.createElement('img');
+            overlay.className = 'battle-avatar-border';
+            overlay.alt = '';
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.addEventListener('error', () => overlay.remove());
+            frame.appendChild(overlay);
+        }
+        overlay.src = borderUrl;
     };
 
     const applyPlayerIdentity = (options = {}) => {
@@ -629,6 +666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const avatarUrl = options.avatarUrl || defaultProfileAvatar;
         const clanAbbreviation = options.clanAbbreviation || 'None';
         const ladder = normalizeLadderPresentation(options.ladder);
+        const title = typeof options.title === 'string' ? options.title.trim() : '';
         const nameElements = Array.from(
             document.querySelectorAll('.player-nameselection, .player-left .player-name')
         );
@@ -685,11 +723,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 element.textContent = `RATIO: ${ladder.wins} - ${ladder.losses} ( ${formatSignedNumber(ladder.streak)} )`;
                 return;
             }
-            element.textContent = ladder.rank;
+            if (!element.hasAttribute('data-player-rank')) {
+                element.textContent = ladder.rank;
+            }
         });
-        if (playerStatusEl) {
-            playerStatusEl.textContent = ladder.rank;
-        }
+        setRankLabel(document.querySelector('[data-player-rank]'), ladder, title);
+        setRankLabel(playerStatusEl, ladder, title);
+        applyBattleAvatarBorder(document.querySelector('.player-avatar-left'), options.borderUrl);
         applyRankHatPresentation(playerHatEls, ladder);
     };
 
@@ -707,9 +747,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (opponentNameEl && name) {
             opponentNameEl.textContent = name;
         }
-        if (opponentStatusEl) {
-            opponentStatusEl.textContent = ladder.rank;
-        }
+        setRankLabel(opponentStatusEl, ladder, typeof options.title === 'string' ? options.title.trim() : '');
+        applyBattleAvatarBorder(opponentAvatar, options.borderUrl);
         applyRankHatPresentation(opponentHatEls, ladder);
     };
 
@@ -786,6 +825,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     avatarUrl: cachedUser.avatarUrl || defaultProfileAvatar,
                     clanAbbreviation: cachedUser.clanAbbreviation || 'None',
                     ladder: cachedUser.ladder,
+                    title: cachedUser.equippedTitle || '',
+                    borderUrl: cachedUser.equippedBorder || '',
                 });
             } else {
                 applyPlayerIdentity({
@@ -805,6 +846,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 avatarUrl: apiUser.profile?.avatarUrl || defaultProfileAvatar,
                 clanAbbreviation: apiUser.profile?.clan?.abbreviation || 'None',
                 ladder: apiUser.profile?.ladder || null,
+                title: apiUser.profile?.equippedTitle || '',
+                borderUrl: apiUser.profile?.equippedBorder || '',
             });
             applyCustomBackgrounds(apiUser);
         }
@@ -872,6 +915,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             name: user?.username || fallbackName,
             avatarUrl: user?.profile?.avatarUrl || defaultProfileAvatar,
             ladder: user?.profile?.ladder || null,
+            title: user?.profile?.equippedTitle || '',
+            borderUrl: user?.profile?.equippedBorder || '',
         });
         return user;
     };
@@ -5755,6 +5800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('[data-ryo-balance]').forEach((el) => {
             el.textContent = Math.round(rosterRyoBalance).toLocaleString('en-US');
         });
+        document.dispatchEvent(new CustomEvent('arena:ryo-changed', { detail: { ryo: rosterRyoBalance } }));
     };
 
     const CHARACTERS_PER_PAGE = 21;
@@ -6623,6 +6669,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Lets the hub Shop share this roster's prices, Ryo balance, and unlock state.
+    window.ArenaRoster = {
+        getCharacters: () => roster,
+        getArc: (character) => rosterCatalog?.getArc(character) || null,
+        getRyo: () => rosterRyoBalance,
+        setRyo: setRosterRyoBalance,
+        markUnlocked: (characterId, ryo) => {
+            const index = roster.findIndex((entry) => (entry?.characterId || entry?.id) === characterId);
+            if (index !== -1) roster[index].unlocked = true;
+            setRosterRyoBalance(ryo);
+            renderRosterPage();
+            if (index !== -1 && currentCharacterIndex === index) renderCharacter(roster[index], index);
+        },
+    };
+    document.dispatchEvent(new CustomEvent('arena:roster-ready'));
 
     renderRosterPage();
     window.ArenaSession.markStartup('roster-ready');

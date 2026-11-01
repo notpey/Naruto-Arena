@@ -70,10 +70,12 @@ test('Admin mission and story catalog methods are properly injected into admin r
     assert.match(adminSource, /saveStoryCatalog/);
 });
 
-test('Admin cosmetics bulk upload and single upload routes require session and handle items', () => {
-    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-avatars-bulk',\s*requireSession/);
-    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-avatar',\s*requireSession/);
-    assert.match(adminSource, /router\.post\('\/cosmetics\/upload-border',\s*requireSession/);
+test('Admin shop cosmetics routes require an admin session', () => {
+    assert.match(adminSource, /router\.get\('\/cosmetics',\s*requireSession,\s*adminCheck/);
+    assert.match(adminSource, /router\.post\('\/cosmetics',\s*requireSession,\s*adminCheck/);
+    assert.match(adminSource, /router\.post\('\/cosmetics\/inspect-image',\s*requireSession,\s*adminCheck/);
+    assert.match(adminSource, /router\.patch\('\/cosmetics\/:itemId',\s*requireSession,\s*adminCheck/);
+    assert.match(adminSource, /router\.delete\('\/cosmetics\/:itemId',\s*requireSession,\s*adminCheck/);
 });
 
 

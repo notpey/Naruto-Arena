@@ -6,9 +6,6 @@
         var panels = Array.prototype.slice.call(document.querySelectorAll("[data-hub-panel]"));
         var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".selection-hub-tabs [data-hub-view]"));
         var viewButtons = Array.prototype.slice.call(document.querySelectorAll("[data-hub-view]"));
-        var activeInventoryTab = "avatars";
-        var cachedInventoryData = null;
-        var loadedInventory = false;
 
         var missionGrid = document.querySelector("[data-mission-grid]");
         var missionDetailEl = document.querySelector("[data-mission-detail]");
@@ -17,8 +14,6 @@
         var missionSearch = document.querySelector("[data-mission-search]");
         var missionStatusSelect = document.querySelector("[data-mission-status]");
         var missionRankButtons = Array.prototype.slice.call(document.querySelectorAll("[data-mission-rank]"));
-        var inventoryGrid = document.querySelector(".selection-hub-inventory-grid");
-        var inventoryTabButtons = Array.prototype.slice.call(document.querySelectorAll("[data-inventory-tab]"));
         var pveModeButtons = Array.prototype.slice.call(document.querySelectorAll("[data-pve-mode]"));
         var storyListEl = document.querySelector("[data-story-list]");
         var storyBriefingEl = document.querySelector("[data-story-briefing]");
@@ -50,50 +45,6 @@
             a: "A Rank Missions",
             s: "S Rank Missions"
         };
-
-        function updatePlayerCardDisplay(profile) {
-            if (!profile) return;
-            var avatarEl = document.getElementById("player-avatar-img") || document.querySelector(".player-avatar");
-            if (avatarEl && profile.avatarUrl) {
-                avatarEl.src = profile.avatarUrl;
-            }
-
-            var borderOverlay = document.getElementById("player-avatar-border-overlay");
-            var frameEl = document.getElementById("player-avatar-frame");
-            if (borderOverlay) {
-                if (profile.equippedBorder && (profile.equippedBorder.indexOf("/") !== -1 || profile.equippedBorder.indexOf(".") !== -1)) {
-                    borderOverlay.src = profile.equippedBorder;
-                    borderOverlay.style.display = "block";
-                } else {
-                    borderOverlay.style.display = "none";
-                }
-            }
-
-            if (frameEl) {
-                var classesToRemove = [];
-                for (var i = 0; i < frameEl.classList.length; i++) {
-                    var cls = frameEl.classList[i];
-                    if (cls.startsWith("border-")) classesToRemove.push(cls);
-                }
-                classesToRemove.forEach(function(c) { frameEl.classList.remove(c); });
-                frameEl.style.borderColor = "";
-                frameEl.style.boxShadow = "";
-
-                if (profile.equippedBorder && profile.equippedBorder.startsWith("border-")) {
-                    frameEl.classList.add(profile.equippedBorder);
-                }
-            }
-
-            var titleBadge = document.getElementById("player-equipped-title-badge");
-            if (titleBadge) {
-                if (profile.equippedTitle) {
-                    titleBadge.style.display = "inline-block";
-                    titleBadge.textContent = profile.equippedTitle;
-                } else {
-                    titleBadge.style.display = "none";
-                }
-            }
-        }
 
         function setSettingsOpen(open) {
             if (settings) {
@@ -140,237 +91,6 @@
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#39;");
-        }
-
-        function handleEquipItem(type, itemId, button) {
-            if (!type || !button) return;
-            button.disabled = true;
-            button.textContent = "Equipping...";
-            fetchJson("/api/profile/equip", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: type, itemId: itemId })
-            }).then(function (data) {
-                alert(data.message || "Equipped successfully!");
-                if (cachedInventoryData) {
-                    if (type === "avatar") cachedInventoryData.avatarUrl = data.avatarUrl;
-                    if (type === "title") cachedInventoryData.equippedTitle = data.equippedTitle;
-                    if (type === "border") cachedInventoryData.equippedBorder = data.equippedBorder;
-                }
-                updatePlayerCardDisplay(data);
-                if (environment && !environment.hidden) {
-                    renderInventoryTab(activeInventoryTab);
-                }
-            }).catch(function (error) {
-                alert(error.message || "Equip failed.");
-            }).finally(function () {
-                button.disabled = false;
-            });
-        }
-
-        function loadInventoryEnvironment(force, preferredTab) {
-            if (!inventoryGrid || (loadedInventory && !force)) {
-                if (preferredTab) renderInventoryTab(preferredTab);
-                return;
-            }
-            loadedInventory = true;
-            inventoryGrid.innerHTML = '<div class="selection-hub-env-empty">Loading inventory...</div>';
-            fetchJson("/api/profile/inventory").then(function (data) {
-                cachedInventoryData = data;
-                updatePlayerCardDisplay(data);
-                renderInventoryTab(preferredTab || activeInventoryTab);
-            }).catch(function (err) {
-                loadedInventory = false;
-                inventoryGrid.innerHTML = '<div class="selection-hub-env-empty">' + escapeHtml(err.message || "Failed to load inventory.") + '</div>';
-            });
-        }
-
-        function renderInventoryTab(tab) {
-            if (!inventoryGrid) return;
-            activeInventoryTab = tab || "avatars";
-
-            inventoryTabButtons.forEach(function (button) {
-                button.classList.toggle("active", button.getAttribute("data-inventory-tab") === activeInventoryTab);
-            });
-
-            inventoryGrid.innerHTML = "";
-
-            if (!cachedInventoryData) {
-                loadInventoryEnvironment(false, activeInventoryTab);
-                return;
-            }
-
-            var items = [];
-            var currentEquipped = "";
-
-            if (activeInventoryTab === "avatars") {
-                items = cachedInventoryData.avatars || [];
-                currentEquipped = cachedInventoryData.avatarUrl || "";
-            } else if (activeInventoryTab === "titles") {
-                items = (cachedInventoryData.titles || []).concat(cachedInventoryData.customTitles || []);
-                currentEquipped = cachedInventoryData.equippedTitle || "";
-            } else if (activeInventoryTab === "borders") {
-                items = cachedInventoryData.borders || [];
-                currentEquipped = cachedInventoryData.equippedBorder || "";
-            } else if (activeInventoryTab === "consumables") {
-                var cRyo = cachedInventoryData.ryo || 0;
-
-                var consumCard = document.createElement("article");
-                consumCard.className = "selection-hub-cosmetic-card";
-                consumCard.style.gridColumn = "1 / -1";
-                consumCard.style.maxWidth = "400px";
-                consumCard.style.margin = "0 auto";
-                consumCard.innerHTML =
-                    '<h3 style="color:#ffae42; margin:0 0 12px 0; text-transform:uppercase; font-size:16px;">Shinobi Resources</h3>' +
-                    '<div style="display:flex; justify-content:space-around; width:100%; font-size:14px; font-weight:800;">' +
-                        '<div>🪙 ' + formatRyo(cRyo) + ' Ryo</div>' +
-                    '</div>';
-                inventoryGrid.appendChild(consumCard);
-                return;
-            } else if (activeInventoryTab === "backgrounds") {
-                var bgCard = document.createElement("article");
-                bgCard.className = "selection-hub-cosmetic-card";
-                bgCard.style.gridColumn = "1 / -1";
-                bgCard.style.maxWidth = "500px";
-                bgCard.style.margin = "0 auto";
-                bgCard.innerHTML =
-                    '<h3 style="color:#ffae42; margin:0 0 12px 0; text-transform:uppercase; font-size:16px;">Arena Backgrounds</h3>' +
-                    '<p style="font-size:12px; color:#cbd5e1; margin-bottom:14px;">Customize your background artwork URLs for selection and battle screens.</p>' +
-                    '<div style="width:100%; display:flex; flex-direction:column; gap:10px; margin-bottom:14px; text-align:left;">' +
-                        '<label style="font-size:11px; font-weight:700; color:#cbd5e1;">Selection Screen Background URL:' +
-                            '<input type="text" id="inv-bg-selection" class="shinobi-input" value="' + escapeHtml(cachedInventoryData.customSelectionBackground || "") + '" placeholder="https://..." style="width:100%; padding:6px 10px; font-size:12px; box-sizing:border-box; margin-top:4px; background:#0e121a; color:#fff; border:1px solid #334155; border-radius:4px;">' +
-                        '</label>' +
-                        '<label style="font-size:11px; font-weight:700; color:#cbd5e1;">Battle Screen Background URL:' +
-                            '<input type="text" id="inv-bg-ingame" class="shinobi-input" value="' + escapeHtml(cachedInventoryData.customIngameBackground || "") + '" placeholder="https://..." style="width:100%; padding:6px 10px; font-size:12px; box-sizing:border-box; margin-top:4px; background:#0e121a; color:#fff; border:1px solid #334155; border-radius:4px;">' +
-                        '</label>' +
-                    '</div>' +
-                    '<button type="button" class="cosmetic-card-btn buy-btn" id="inv-save-bg-btn" style="max-width:200px;">Save Backgrounds</button>';
-                inventoryGrid.appendChild(bgCard);
-
-                var saveBtn = bgCard.querySelector("#inv-save-bg-btn");
-                if (saveBtn) {
-                    saveBtn.addEventListener("click", function() {
-                        var selBg = document.getElementById("inv-bg-selection") ? document.getElementById("inv-bg-selection").value.trim() : "";
-                        var inBg = document.getElementById("inv-bg-ingame") ? document.getElementById("inv-bg-ingame").value.trim() : "";
-                        saveBtn.disabled = true;
-                        saveBtn.textContent = "Saving...";
-                        fetchJson("/api/profile/backgrounds", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ selectionBackground: selBg, ingameBackground: inBg })
-                        }).then(function(res) {
-                            alert(res.message || "Backgrounds saved!");
-                        }).catch(function(err) {
-                            alert(err.message || "Failed to save backgrounds.");
-                        }).finally(function() {
-                            saveBtn.disabled = false;
-                            saveBtn.textContent = "Save Backgrounds";
-                        });
-                    });
-                }
-                return;
-            }
-
-            if (!items.length) {
-                var empty = document.createElement("div");
-                empty.className = "selection-hub-env-empty selection-hub-inventory-empty";
-                empty.textContent = "No items in this category yet.";
-                inventoryGrid.appendChild(empty);
-                return;
-            }
-
-            items.forEach(function (item) {
-                var isEquipped = false;
-                if (activeInventoryTab === "avatars") isEquipped = (currentEquipped === item.imageUrl || (!currentEquipped && item.id === "avatar_starter"));
-                if (activeInventoryTab === "titles") isEquipped = (currentEquipped === item.name);
-                if (activeInventoryTab === "borders") isEquipped = (currentEquipped === item.borderStyle || currentEquipped === item.borderColor);
-
-                var card = document.createElement("article");
-                card.className = "selection-hub-cosmetic-card" + (isEquipped ? " equipped" : "");
-
-                // Preview wrapper
-                var previewWrapper = document.createElement("div");
-                previewWrapper.className = "cosmetic-preview-wrapper";
-
-                if (activeInventoryTab === "avatars") {
-                    var aImg = document.createElement("img");
-                    aImg.className = "cosmetic-avatar-img";
-                    aImg.src = item.imageUrl || "found-remaster.png";
-                    aImg.alt = item.name;
-                    previewWrapper.appendChild(aImg);
-                } else if (activeInventoryTab === "titles") {
-                    var tPreview = document.createElement("span");
-                    tPreview.className = "cosmetic-title-preview";
-                    tPreview.style.fontWeight = "800";
-                    tPreview.style.fontSize = "13px";
-                    tPreview.style.color = "#ffae42";
-                    tPreview.style.textTransform = "uppercase";
-                    tPreview.textContent = item.name;
-                    previewWrapper.appendChild(tPreview);
-                } else if (activeInventoryTab === "borders") {
-                    var bFrame = document.createElement("div");
-                    bFrame.className = "cosmetic-border-frame-preview";
-                    bFrame.style.position = "relative";
-                    bFrame.style.width = "56px";
-                    bFrame.style.height = "56px";
-                    bFrame.style.borderRadius = "6px";
-                    bFrame.style.overflow = "hidden";
-                    bFrame.style.background = "#000";
-
-                    var bImg = document.createElement("img");
-                    bImg.src = "sharingan-remaster.png?v=2";
-                    bImg.style.width = "100%";
-                    bImg.style.height = "100%";
-                    bImg.style.objectFit = "cover";
-
-                    var bOverlay = document.createElement("img");
-                    bOverlay.src = item.imageUrl || "borders/anbu_frame.svg";
-                    bOverlay.style.position = "absolute";
-                    bOverlay.style.inset = "0";
-                    bOverlay.style.width = "100%";
-                    bOverlay.style.height = "100%";
-                    bOverlay.style.objectFit = "contain";
-
-                    bFrame.appendChild(bImg);
-                    bFrame.appendChild(bOverlay);
-                    previewWrapper.appendChild(bFrame);
-                }
-
-                // Rarity Tag
-                var rTag = document.createElement("span");
-                rTag.className = "cosmetic-rarity-tag rarity-" + (item.rarity || "common");
-                rTag.textContent = item.rarity || "common";
-
-                // Name & Desc
-                var nameEl = document.createElement("div");
-                nameEl.className = "cosmetic-card-name";
-                nameEl.textContent = item.name;
-
-                var descEl = document.createElement("div");
-                descEl.className = "cosmetic-card-desc";
-                descEl.textContent = item.description || "";
-
-                // Action Button
-                var btn = document.createElement("button");
-                btn.type = "button";
-                if (isEquipped) {
-                    btn.className = "cosmetic-card-btn equipped-btn";
-                    btn.textContent = "Equipped";
-                    btn.disabled = true;
-                } else {
-                    btn.className = "cosmetic-card-btn equip-btn";
-                    btn.textContent = "Equip";
-                    btn.setAttribute("data-cosmetic-equip-type", activeInventoryTab === "avatars" ? "avatar" : (activeInventoryTab === "titles" ? "title" : "border"));
-                    btn.setAttribute("data-cosmetic-equip-id", item.id || item.name);
-                }
-
-                card.appendChild(previewWrapper);
-                card.appendChild(rTag);
-                card.appendChild(nameEl);
-                card.appendChild(descEl);
-                card.appendChild(btn);
-                inventoryGrid.appendChild(card);
-            });
         }
 
         function slug(value) {
@@ -1553,9 +1273,9 @@
         }
 
         function setHubView(view) {
-            var nextView = view === "missions" ? "missions" : "play";
+            var nextView = ["missions", "shop", "profile"].indexOf(view) !== -1 ? view : "play";
             var isEnvironment = nextView !== "play";
-            document.body.classList.remove("hub-view-missions", "hub-view-inventory", "hub-view-story");
+            document.body.classList.remove("hub-view-missions", "hub-view-shop", "hub-view-profile");
             if (isEnvironment) {
                 document.body.classList.add("hub-view-" + nextView);
             }
@@ -1573,6 +1293,7 @@
             });
             setSettingsOpen(false);
             if (nextView === "missions") { showMissionsGrid(); loadMissionEnvironment(false); }
+            document.dispatchEvent(new CustomEvent("arena:hub-view", { detail: { view: nextView } }));
         }
 
         if (settingsButton) {
@@ -1593,15 +1314,6 @@
             setHubView(new URLSearchParams(window.location.search).get("view"));
         } catch (error) { setHubView("play"); }
 
-        if (inventoryGrid) {
-            inventoryGrid.addEventListener("click", function (event) {
-                var equipBtn = event.target.closest("[data-cosmetic-equip-id]");
-                if (equipBtn && !equipBtn.disabled) {
-                    handleEquipItem(equipBtn.getAttribute("data-cosmetic-equip-type"), equipBtn.getAttribute("data-cosmetic-equip-id"), equipBtn);
-                }
-            });
-        }
-
         missionRankButtons.forEach(function (button) {
             button.addEventListener("click", function (event) {
                 event.preventDefault();
@@ -1616,14 +1328,6 @@
         });
 
         if (missionStatusSelect) missionStatusSelect.addEventListener("change", renderMissions);
-
-        inventoryTabButtons.forEach(function (button) {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
-                activeInventoryTab = button.getAttribute("data-inventory-tab") || "avatars";
-                renderInventoryTab(activeInventoryTab);
-            });
-        });
 
         pveModeButtons.forEach(function (button) {
             button.addEventListener("click", function (event) {

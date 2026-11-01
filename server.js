@@ -5669,6 +5669,42 @@ const getImageDimensionsFromBuffer = (buffer) =>
     readJpegDimensions(buffer) ||
     readWebpDimensions(buffer);
 
+// Alpha only matters for shop borders, which sit over the avatar; formats we can't read report null.
+const getImageAlphaFromBuffer = (buffer) => {
+    if (buffer.length > 26 && buffer.readUInt32BE(0) === 0x89504e47) {
+        if (buffer[25] === 4 || buffer[25] === 6) return true;
+        return buffer.includes(Buffer.from('tRNS'));
+    }
+    if (buffer.length > 30 && buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP') {
+        const chunkType = buffer.subarray(12, 16).toString('ascii');
+        if (chunkType === 'VP8X') return Boolean(buffer[20] & 0x10);
+        if (chunkType === 'VP8L') return Boolean((buffer.readUInt32LE(21) >> 28) & 1);
+        return false;
+    }
+    return null;
+};
+
+const getImageFormatFromBuffer = (buffer) => {
+    if (buffer.length > 8 && buffer.readUInt32BE(0) === 0x89504e47) return 'png';
+    if (buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8) return 'jpeg';
+    if (buffer.length > 6 && buffer.subarray(0, 3).toString('ascii') === 'GIF') return 'gif';
+    if (buffer.length > 12 && buffer.subarray(8, 12).toString('ascii') === 'WEBP') return 'webp';
+    return '';
+};
+
+const inspectRemoteImage = async (url) => {
+    const buffer = await getRemoteImageBuffer(url);
+    const dimensions = getImageDimensionsFromBuffer(buffer);
+    if (!dimensions) {
+        throw new Error('Unsupported image format.');
+    }
+    return {
+        ...dimensions,
+        format: getImageFormatFromBuffer(buffer),
+        hasAlpha: getImageAlphaFromBuffer(buffer),
+    };
+};
+
 const validateAvatarUrl = async (url) => {
     const buffer = await getRemoteImageBuffer(url);
     const dimensions = getImageDimensionsFromBuffer(buffer);
@@ -8853,6 +8889,7 @@ async function initDb() {
         makeEmptyPendingTurn,
         TRAINING_DUMMY_DISPLAY_NAME,
         cosmeticsService,
+        inspectRemoteImage,
         getStoredMissionCatalog,
         saveMissionCatalog,
         getStoredStoryCatalog,
@@ -8881,6 +8918,14 @@ async function initDb() {
         requireSession,
     });
     app.use(characterPurchasesRouter);
+
+    const shopRouter = require('./routes/shop.js')({
+        usersCollection,
+        normalizeUserProfile,
+        cosmeticsService,
+        requireSession,
+    });
+    app.use(shopRouter);
 
     const profileRouter = require('./routes/profile.js')({
         usersCollection,
