@@ -1812,6 +1812,8 @@
 }
 .selection-client-page.game-remaster .card-crest-badge { border: 1px solid #68808a !important; border-radius: 5px !important; background: #192b34 !important; color: #e7bd88 !important; }
 .selection-client-page.game-remaster .card-text-wrap span { color: #beccce !important; }
+.selection-client-page.game-remaster .card-text-wrap .reward-ready { display: inline-block; color: #1d2a31 !important; font-size: 9px !important; font-weight: 900 !important; line-height: 1.5; overflow: visible !important; }
+.selection-client-page.game-remaster .card-text-wrap .reward-ready[hidden] { display: none; }
 .selection-client-page.game-remaster .card-arrow { color: #c9d5d5 !important; opacity: 1 !important; }
 .selection-client-page.game-remaster .quest-subtabs { border-color: #4c636d; border-radius: 6px; background: #20343e; }
 .selection-client-page.game-remaster .quest-tab-btn.active { background: #344b55; color: #f1d1a1; box-shadow: none; }

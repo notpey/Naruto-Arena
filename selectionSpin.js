@@ -9,7 +9,6 @@
     var sideEl = modal.querySelector("[data-daily-spin-side]");
     var goButton = modal.querySelector("[data-daily-spin-go]");
     var readyBadge = document.querySelector("[data-daily-spin-ready]");
-    var settingsButton = document.querySelector("[data-settings-trigger]");
     var DISMISS_KEY = "naDailySpinDismissed";
     var SPIN_MS = 4600;
     var DEFAULT_AVATAR = "found-remaster.png";
@@ -320,7 +319,7 @@
         goButton.textContent = state.spinning ? "…" : state.available ? "Spin" : "Done";
         goButton.setAttribute("aria-label", state.available ? "Spin the wheel" : "Already spun today");
         if (readyBadge) readyBadge.hidden = !state.available;
-        if (settingsButton) settingsButton.classList.toggle("has-daily-spin", state.available);
+        document.dispatchEvent(new CustomEvent("arena:daily-spin-state", { detail: { available: state.available } }));
     }
 
     // ---------- spinning ----------
@@ -403,8 +402,10 @@
 
     function open() {
         modal.classList.remove("hidden");
-        var settings = document.getElementById("settings-modal");
-        if (settings) settings.classList.add("hidden");
+        ["settings-modal", "rewards-modal"].forEach(function (id) {
+            var menu = document.getElementById(id);
+            if (menu) menu.classList.add("hidden");
+        });
         state.result = null;
         load(true).then(function () {
             if (state.available) goButton.focus();

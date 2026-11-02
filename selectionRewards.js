@@ -5,6 +5,23 @@
             var loginRewardsModal = document.getElementById("login-rewards-modal");
             var promoCodeModal = document.getElementById("promo-code-modal");
             var settingsModal = document.getElementById("settings-modal");
+            var rewardsModal = document.getElementById("rewards-modal");
+            var hideHubMenus = function() {
+                if (settingsModal) settingsModal.classList.add("hidden");
+                if (rewardsModal) rewardsModal.classList.add("hidden");
+            };
+
+            document.querySelectorAll("[data-rewards-trigger]").forEach(function(btn) {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (settingsModal) settingsModal.classList.add("hidden");
+                    if (rewardsModal) rewardsModal.classList.remove("hidden");
+                    refreshRewardAlerts();
+                });
+            });
+            var rClose = document.getElementById("rewards-modal-close");
+            if (rClose) rClose.addEventListener("click", function() { if (rewardsModal) rewardsModal.classList.add("hidden"); });
+            if (rewardsModal) rewardsModal.addEventListener("click", function(e) { if (e.target === rewardsModal) rewardsModal.classList.add("hidden"); });
 
             // Open Triggers
             document.querySelectorAll("[data-settings-trigger]").forEach(function(btn) {
@@ -16,7 +33,7 @@
 
             document.querySelectorAll("[data-quests-trigger]").forEach(function(btn) {
                 btn.addEventListener("click", function() {
-                    if (settingsModal) settingsModal.classList.add("hidden");
+                    hideHubMenus();
                     if (questsModal) questsModal.classList.remove("hidden");
                     loadQuests();
                 });
@@ -24,7 +41,7 @@
 
             document.querySelectorAll("[data-achievements-trigger]").forEach(function(btn) {
                 btn.addEventListener("click", function() {
-                    if (settingsModal) settingsModal.classList.add("hidden");
+                    hideHubMenus();
                     if (achievementsModal) achievementsModal.classList.remove("hidden");
                     loadAchievements();
                 });
@@ -32,7 +49,7 @@
 
             document.querySelectorAll("[data-login-rewards-trigger]").forEach(function(btn) {
                 btn.addEventListener("click", function() {
-                    if (settingsModal) settingsModal.classList.add("hidden");
+                    hideHubMenus();
                     if (loginRewardsModal) loginRewardsModal.classList.remove("hidden");
                     loadLoginRewards();
                 });
@@ -40,7 +57,7 @@
 
             document.querySelectorAll("[data-promo-code-trigger]").forEach(function(btn) {
                 btn.addEventListener("click", function() {
-                    if (settingsModal) settingsModal.classList.add("hidden");
+                    hideHubMenus();
                     if (promoCodeModal) promoCodeModal.classList.remove("hidden");
                 });
             });
@@ -155,6 +172,7 @@
                 window.ArenaSession.fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
                         cachedQuests = (d.quests || []);
+                        setRewardCount("quests", cachedQuests.filter(function(q) { return q.canClaim && !q.isClaimed; }).length);
                         renderQuestsList();
                     }
                 }).catch(console.error);
@@ -221,6 +239,9 @@
             function loadAchievements() {
                 window.ArenaSession.fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
+                        setRewardCount("achievements", (d.achievements || []).reduce(function(sum, ach) {
+                            return sum + (ach.tiers || []).filter(function(t) { return t.canClaim && !t.isClaimed; }).length;
+                        }, 0));
                         renderAchievementsList((d.achievements || []));
                     }
                 }).catch(console.error);
@@ -283,6 +304,7 @@
             function loadLoginRewards() {
                 window.ArenaSession.fetch("/api/login-rewards").then(function(r) { return r.json(); }).then(function(d) {
                     if (d.ok) {
+                        setRewardCount("checkIn", d.canClaimToday ? 1 : 0);
                         renderLoginCalendar(d);
                     }
                 }).catch(console.error);
@@ -383,5 +405,46 @@
                     });
                 });
             }
+            // Reward alerts: count everything waiting to be claimed and surface it on the top bar,
+            // so players notice dailies without opening a menu.
+            var rewardCounts = { quests: 0, achievements: 0, checkIn: 0, spin: 0 };
+            var rewardsButton = document.querySelector("[data-rewards-trigger]");
+            var rewardsCountEl = document.querySelector("[data-rewards-count]");
+            function setRewardCount(key, count) {
+                rewardCounts[key] = Math.max(0, Number(count) || 0);
+                var badge = document.querySelector('[data-reward-ready="' + key + '"]');
+                if (badge) {
+                    badge.hidden = rewardCounts[key] === 0;
+                    badge.textContent = rewardCounts[key] > 1 ? rewardCounts[key] + " ready" : "Ready";
+                }
+                var total = rewardCounts.quests + rewardCounts.achievements + rewardCounts.checkIn + rewardCounts.spin;
+                if (rewardsCountEl) {
+                    rewardsCountEl.hidden = total === 0;
+                    rewardsCountEl.textContent = total > 9 ? "9+" : String(total);
+                }
+                if (rewardsButton) {
+                    rewardsButton.classList.toggle("has-rewards", total > 0);
+                    rewardsButton.setAttribute("aria-label", total > 0 ? "Open rewards, " + total + " ready to claim" : "Open rewards");
+                    rewardsButton.title = total > 0 ? total + (total === 1 ? " reward" : " rewards") + " ready to claim" : "Rewards";
+                }
+            }
+            function refreshRewardAlerts() {
+                loadQuests();
+                loadAchievements();
+                loadLoginRewards();
+            }
+            document.addEventListener("arena:daily-spin-state", function(event) {
+                setRewardCount("spin", event.detail && event.detail.available ? 1 : 0);
+            });
+            if (window.ArenaSession && window.ArenaSession.ready) {
+                window.ArenaSession.ready.then(function(user) { if (user) refreshRewardAlerts(); }).catch(function() {});
+            }
+            // Dailies reset while the page is open; recheck when the player comes back and every few minutes.
+            document.addEventListener("visibilitychange", function() {
+                if (document.visibilityState === "visible") refreshRewardAlerts();
+            });
+            setInterval(function() {
+                if (document.visibilityState === "visible") refreshRewardAlerts();
+            }, 5 * 60 * 1000);
         })();
 
