@@ -4043,6 +4043,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             avatarUrl: cachedUser.avatarUrl || defaultProfileAvatar,
                             clan: { abbreviation: cachedUser.clanAbbreviation || 'None' },
                             ladder: cachedUser.ladder || null,
+                            equippedTitle: cachedUser.equippedTitle || '',
+                            equippedBorder: cachedUser.equippedBorder || '',
                         },
                     };
                 }
@@ -4056,10 +4058,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const avatarSrc = avatarEl?.src || profile.avatarUrl || defaultProfileAvatar;
             const clanLabel = clan?.abbreviation || clan?.name || 'NONE';
             const ratioStr = `${ladder.wins} - ${ladder.losses} (${formatSignedNumber(ladder.streak)})`;
-            const rankLabel = String(ladder.rank || 'GENIN').toUpperCase();
+            const equippedTitle = typeof profile.equippedTitle === 'string' ? profile.equippedTitle.trim() : '';
+            const rankLabel = equippedTitle || String(ladder.rank || 'GENIN');
+            const borderUrl = typeof profile.equippedBorder === 'string' && /[./]/.test(profile.equippedBorder)
+                ? profile.equippedBorder
+                : '';
             const levelVal = String(ladder.level || 1);
-            const ladderRankVal = ladder.ladderRank ? String(ladder.ladderRank) : formatSignedNumber(ladder.streak);
-            const ladderRankLabel = ladder.ladderRank ? `LADDERRANK: ${ladderRankVal}` : `STREAK: ${ladderRankVal}`;
+            const ladderRankVal = ladder.ladderRank ? `#${ladder.ladderRank}` : formatSignedNumber(ladder.streak);
 
             const cardSet = isOpponent ? enemyCards : playerCards;
             const teamFaces = (Array.isArray(cardSet) ? cardSet : []).map((card) => {
@@ -4079,19 +4084,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 profileLayout.innerHTML = `
                     <div class="profile-avatar-box">
                         <img class="profile-avatar-img" src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(displayUsername)} avatar">
+                        ${borderUrl ? `<img class="profile-avatar-border" src="${escapeHtml(borderUrl)}" alt="" aria-hidden="true" onerror="this.remove()">` : ''}
                     </div>
                     <div class="profile-details-column">
                         <div class="profile-username">${escapeHtml(displayUsername)}</div>
-                        <div class="profile-rank-badge">${escapeHtml(rankLabel)}</div>
+                        <div class="profile-rank-badge${equippedTitle ? ' is-equipped-title' : ''}">${escapeHtml(rankLabel)}</div>
                         <div class="profile-stats-grid">
-                            <div class="profile-stat-item"><span class="profile-lbl">CLAN:</span><span class="profile-val">${escapeHtml(clanLabel)}</span></div>
-                            <div class="profile-stat-item"><span class="profile-lbl">LEVEL:</span><span class="profile-val">${escapeHtml(levelVal)}</span></div>
-                            <div class="profile-stat-item"><span class="profile-lbl">${ladder.ladderRank ? 'LADDERRANK:' : 'STREAK:'}</span><span class="profile-val">${escapeHtml(ladderRankVal)}</span></div>
-                            <div class="profile-stat-item"><span class="profile-lbl">RATIO:</span><span class="profile-val">${escapeHtml(ratioStr)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">Clan</span><span class="profile-val">${escapeHtml(clanLabel)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">Level</span><span class="profile-val">${escapeHtml(levelVal)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">${ladder.ladderRank ? 'Ladder rank' : 'Streak'}</span><span class="profile-val">${escapeHtml(ladderRankVal)}</span></div>
+                            <div class="profile-stat-item"><span class="profile-lbl">Record</span><span class="profile-val">${escapeHtml(ratioStr)}</span></div>
                         </div>
                     </div>
                     <div class="profile-team-section">
-                        <div class="profile-team-header">BATTLE TEAM</div>
+                        <div class="profile-team-header">Battle team</div>
                         <div class="profile-team-row">
                             ${teamFaces.map((faceSrc) => `
                                 <div class="profile-team-face-box">

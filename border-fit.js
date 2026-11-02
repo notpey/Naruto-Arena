@@ -8,7 +8,8 @@
         ".loadout-avatar-border",
         ".battle-avatar-border",
         ".shop-avatar-border",
-        ".daily-spin-avatar-border"
+        ".daily-spin-avatar-border",
+        ".profile-avatar-border"
     ].join(",");
     var ALPHA_THRESHOLD = 96; // Measure the solid frame, not its soft glow.
     var MAX_OUTSIDE = 0.06; // Most a frame may extend past the avatar, as a share of its size.
