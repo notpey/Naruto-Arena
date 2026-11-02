@@ -512,6 +512,9 @@
         var panel = shopDetail.querySelector(".store-skill-panel");
         if (!panel) return;
         var skill = item.skills[selected];
+        // One description at a time: an open skill replaces the character's bio.
+        var bio = shopDetail.querySelector(".store-detail-desc");
+        if (bio) bio.hidden = Boolean(skill);
         panel.innerHTML = "";
         panel.hidden = !skill;
         if (!skill) return;

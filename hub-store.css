@@ -409,7 +409,7 @@ body.selection-client-page.game-remaster :is(.hub-store, .hub-profile) :is(butto
 .store-stage-skill[aria-pressed="true"] { border-color: #f2c14e; box-shadow: 0 0 0 2px #f2c14e, 0 0 12px rgba(242, 193, 78, .45); }
 
 /* The selected skill's details, under the character's bio. */
-.store-skill-panel { margin-top: 14px; padding: 12px 14px; border: 1px solid #4b616b; border-left: 3px solid #f2c14e; border-radius: 5px; background: #13232c; }
+.store-skill-panel { margin-top: 10px; padding: 12px 14px; border: 1px solid #4b616b; border-left: 3px solid #f2c14e; border-radius: 5px; background: #13232c; }
 .store-skill-panel[hidden] { display: none; }
 .store-skill-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .store-skill-name { margin: 0; color: #f2c58b; font: 800 14px/1.3 'Libre Franklin', 'Franklin', Arial, sans-serif !important; text-transform: none !important; }
@@ -437,6 +437,7 @@ body.selection-client-page.game-remaster :is(.hub-store, .hub-profile) :is(butto
 .store-detail-kicker { --rarity: var(--store-text-soft); color: var(--rarity); font-size: 11px; font-weight: 700; letter-spacing: .03em; }
 .store-detail-title { margin: 4px 0 8px; color: #f2c58b; font: 800 22px/1.2 'Libre Franklin', 'Franklin', Arial, sans-serif !important; text-transform: none !important; }
 .store-detail-desc { margin: 0; color: #d5dfe1; font-size: 12px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.store-detail-desc[hidden] { display: none; }
 .store-detail-hint { margin: 10px 0 0; color: #b8dce5; font-size: 11px; line-height: 1.45; }
 
 .store-buy { margin-top: auto; padding-top: 16px; }

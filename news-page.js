@@ -56,12 +56,25 @@
     changes.forEach(function (entry) {
       var key = entry.characterId || entry.characterName || "change-" + groups.length;
       var group = groups.find(function (item) { return item.key === key; });
-      if (!group) { group = { key: key, entries: [], name: entry.characterName || "Other changes", face: entry.facePicture || "" }; groups.push(group); }
+      if (!group) { group = { key: key, entries: [], name: entry.characterName || "Other changes", face: entry.facePicture || "", characterId: entry.characterId || "" }; groups.push(group); }
       group.entries.push(entry);
     });
     groups.forEach(function (group, index) {
       var section = make("section", "news-page-change");
-      if (group.face) { var face = make("img"); face.src = group.face; face.alt = group.name; face.loading = "lazy"; section.appendChild(face); }
+      if (group.face) {
+        var face = make("img"); face.src = group.face; face.alt = group.name; face.loading = "lazy";
+        var characterId = String(group.characterId || "").trim();
+        if (characterId && characterId !== "new-character") {
+          // The portrait opens that character's page in Characters & Skills.
+          var portraitLink = make("a", "news-page-change-portrait");
+          portraitLink.href = "charactersandskills.html?character=" + encodeURIComponent(characterId);
+          portraitLink.title = "View " + group.name;
+          portraitLink.appendChild(face);
+          section.appendChild(portraitLink);
+        } else {
+          section.appendChild(face);
+        }
+      }
       else section.classList.add("no-portrait");
       var copy = make("div");
       var name = make("h3", "", group.name);

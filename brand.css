@@ -3897,6 +3897,10 @@ body:not(.selection-client-page):not(.ingame-client-page) {
 .news-post .news-change-list { gap: 20px; }
 .news-post .news-change-group { grid-template-columns: 76px minmax(0, 1fr); gap: 16px; padding: 16px; }
 .news-post .news-change-character { width: 76px; height: 76px; }
+.news-change-portrait { display: block; align-self: start; line-height: 0; transition: transform .15s ease, box-shadow .15s ease; }
+.news-change-portrait .news-change-character { display: block; }
+.news-change-portrait:hover { transform: translateY(-1px); box-shadow: 0 0 0 2px #f2c58b; }
+.news-change-portrait:focus-visible { outline: 2px solid #f2c58b; outline-offset: 3px; }
 .news-post .news-change-item { margin-top: 6px; }
 .news-post .news-change-text { font-size: 14px; line-height: 1.6; }
 .news-archive-cta,

@@ -765,6 +765,7 @@
           key: groupKey,
           facePicture: entry && entry.facePicture ? String(entry.facePicture) : "",
           characterName: entry && entry.characterName ? String(entry.characterName) : "",
+          characterId: entry && entry.characterId ? String(entry.characterId).trim() : "",
           entries: [entry]
         });
       });
@@ -778,7 +779,17 @@
           face.className = "news-change-character";
           face.src = group.facePicture;
           face.alt = group.characterName || "Character";
-          groupNode.appendChild(face);
+          if (group.characterId && group.characterId !== "new-character") {
+            // The portrait opens that character's page in Characters & Skills.
+            var portraitLink = document.createElement("a");
+            portraitLink.className = "news-change-portrait";
+            portraitLink.href = "charactersandskills.html?character=" + encodeURIComponent(group.characterId);
+            portraitLink.title = "View " + (group.characterName || "character");
+            portraitLink.appendChild(face);
+            groupNode.appendChild(portraitLink);
+          } else {
+            groupNode.appendChild(face);
+          }
         } else {
           var spacer = document.createElement("div");
           groupNode.appendChild(spacer);
