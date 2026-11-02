@@ -7,7 +7,6 @@
     if (!shopPanel || !profilePanel) return;
 
     var DEFAULT_AVATAR = "found-remaster.png";
-    var AVATAR_SIZE = 100;
     var AVATAR_MAX_FILE_BYTES = 2 * 1024 * 1024;
     var AVATAR_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
     var CATEGORIES = ["characters", "avatars", "borders", "titles"];
@@ -900,7 +899,7 @@
         card.appendChild(grid);
 
         var note = state.lockerCategory === "avatars"
-            ? "Uploads are cropped to 100×100 and replace any earlier custom image."
+            ? "Larger images are cropped to 100×100 (GIFs stay animated) and replace any earlier custom image."
             : state.lockerCategory === "borders"
                 ? "Borders frame your avatar on your player card."
                 : "An equipped title replaces your rank under your name in-game.";
@@ -970,7 +969,7 @@
         state.busyKey = "upload";
         state.lockerStatus = { text: "", tone: "" };
         renderProfile();
-        readAsSquareDataUrl(file).then(function (dataUrl) {
+        readAsDataUrl(file).then(function (dataUrl) {
             return postJson("/api/profile/avatar/upload", { dataUrl: dataUrl });
         }).then(function (data) {
             if (data.user) setUser(data.user);
@@ -983,26 +982,12 @@
         });
     }
 
-    // Center-crops to a 100x100 PNG, matching the website's Change Avatar page.
-    function readAsSquareDataUrl(file) {
+    // The server crops and resizes to 100x100, so send the original file (animated GIFs stay animated).
+    function readAsDataUrl(file) {
         return new Promise(function (resolve, reject) {
             var reader = new FileReader();
             reader.onerror = function () { reject(new Error("That image could not be read.")); };
-            reader.onload = function () {
-                var img = new Image();
-                img.onerror = function () { reject(new Error("That image could not be read.")); };
-                img.onload = function () {
-                    var canvas = document.createElement("canvas");
-                    canvas.width = AVATAR_SIZE;
-                    canvas.height = AVATAR_SIZE;
-                    var scale = Math.max(AVATAR_SIZE / img.naturalWidth, AVATAR_SIZE / img.naturalHeight);
-                    var width = img.naturalWidth * scale;
-                    var height = img.naturalHeight * scale;
-                    canvas.getContext("2d").drawImage(img, (AVATAR_SIZE - width) / 2, (AVATAR_SIZE - height) / 2, width, height);
-                    resolve(canvas.toDataURL("image/png"));
-                };
-                img.src = reader.result;
-            };
+            reader.onload = function () { resolve(reader.result); };
             reader.readAsDataURL(file);
         });
     }

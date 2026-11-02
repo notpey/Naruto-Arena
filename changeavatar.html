@@ -1033,7 +1033,7 @@
           <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/gif,image/webp" />
           <div class="avatar-drop-zone" id="avatar-drop-zone" role="button" tabindex="0" aria-label="Click or drag a file to upload an avatar">
             <span class="avatar-drop-zone-label">Click or drag & drop an image</span>
-            <span class="avatar-drop-zone-sub">PNG · JPEG · GIF · WebP · Max 2 MB<br>Will be auto-resized to 100×100 px</span>
+            <span class="avatar-drop-zone-sub">PNG · JPEG · GIF · WebP · Max 2 MB<br>Larger images are resized to 100×100 px · GIFs stay animated</span>
           </div>
           <!-- Live resize preview -->
           <div class="avatar-resize-preview" id="avatar-resize-preview">
@@ -1057,7 +1057,7 @@
             type="url"
             inputmode="url"
             autocomplete="off"
-            placeholder="Direct image URL (must be 100×100)"
+            placeholder="Direct image URL (larger images are resized to 100×100)"
             required
           />
           <button class="avatar-save" type="submit" id="change-avatar-submit">Save Avatar</button>
@@ -1202,16 +1202,16 @@
           var ox = (CANVAS_SIZE - dw) / 2, oy = (CANVAS_SIZE - dh) / 2;
           ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
           ctx.drawImage(img, ox, oy, dw, dh);
-          // Export as PNG for lossless quality at 100x100
-          pendingDataUrl = resizeCanvas.toDataURL('image/png');
+          // The canvas is only a preview; the server resizes the original so GIFs keep their animation.
+          pendingDataUrl = e.target.result;
           // Show preview strip
           resizePreview.classList.add('visible');
           dropZone.style.display = 'none';
           if (resizeMeta) {
-            var approxKb = Math.round((pendingDataUrl.length * 3 / 4) / 1024);
+            var formatLabel = (file.type.split('/')[1] || '').replace('jpeg', 'jpg').toUpperCase();
             resizeMeta.innerHTML =
               '<em>' + srcW + ' &times; ' + srcH + ' px</em> &rarr; <em>100 &times; 100 px</em><br>' +
-              'Format: PNG &nbsp;&bull;&nbsp; ~' + approxKb + ' KB';
+              'Format: ' + formatLabel + (file.type === 'image/gif' ? ' &nbsp;&bull;&nbsp; animation kept' : '');
           }
           if (uploadSubmit) uploadSubmit.disabled = false;
         };
@@ -1248,7 +1248,7 @@
           return;
         }
         // Update current avatar preview
-        if (currentImg) currentImg.src = pendingDataUrl;
+        if (currentImg) currentImg.src = (data.user && data.user.profile && data.user.profile.avatarUrl) || pendingDataUrl;
         // Sync into index.js session if available
         if (typeof setCurrentSessionUser === 'function' && data.user) {
           setCurrentSessionUser(data.user);

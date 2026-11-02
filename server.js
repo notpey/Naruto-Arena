@@ -19,6 +19,7 @@ const { reconcileUnitPassive } = require('./services/matchPassives');
 const gauntlet = require('./gauntlet');
 const { sortCharactersByRosterOrder, CANONICAL_ROSTER_ORDER } = require('./data/rosterOrder');
 const { localizeArtwork } = require('./services/characterImages');
+const { AvatarImageError, prepareAvatarDataUrl, prepareAvatarFromRemote } = require('./services/avatarImage');
 const { evaluateAccess, createCharacterRankAccessService } = require('./services/characterRankAccess');
 const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('./data/activeRoster');
 const { getMissionCharacterTags } = require('./data/missionCharacterTags');
@@ -5716,6 +5717,7 @@ const inspectRemoteImage = async (url) => {
     };
 };
 
+// Clan avatars are copied onto every member's profile, so they stay exact 100x100 links.
 const validateAvatarUrl = async (url) => {
     const buffer = await getRemoteImageBuffer(url);
     const dimensions = getImageDimensionsFromBuffer(buffer);
@@ -5727,6 +5729,9 @@ const validateAvatarUrl = async (url) => {
     }
     return true;
 };
+
+// Returns what to store as the avatar: the URL itself when it is already 100x100, or a resized copy.
+const prepareAvatarUrl = (url) => prepareAvatarFromRemote(url, getRemoteImageBuffer);
 
 const validateBackgroundUrl = async (url) => {
     if (!url) {
@@ -8958,7 +8963,7 @@ async function initDb() {
         serializeUserForClient,
         serializePublicUserProfile,
         avatarUpdateSchema,
-        validateAvatarUrl,
+        prepareAvatarUrl,
         validateBackgroundUrl,
         getExperienceRequiredForNextLevel,
         recalculatePlayerLadderStandings,
@@ -10509,13 +10514,13 @@ app.post('/api/profile/avatar', requireSession, async (req, res) => {
             return res.status(400).json({ error: 'A valid direct image URL is required.' });
         }
 
-        await validateAvatarUrl(value.avatarUrl);
+        const avatarUrl = await prepareAvatarUrl(value.avatarUrl);
         const user = await usersCollection.findOne({ username: req.authUser.username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
         const profile = normalizeUserProfile(user);
-        profile.avatarUrl = value.avatarUrl;
+        profile.avatarUrl = avatarUrl;
         await usersCollection.updateOne(
             { _id: user._id },
             {
@@ -10540,39 +10545,19 @@ app.post('/api/profile/avatar', requireSession, async (req, res) => {
     }
 });
 
-// Upload endpoint: accepts a base64-encoded data URI produced by the client-side
-// Canvas resize. The Canvas always outputs a 100x100 image so no remote fetch is
-// needed. We validate the data URI format, strip the header to check raw byte size
-// (≤ 300 KB), and accept only PNG / JPEG / WebP / GIF.
-const AVATAR_UPLOAD_MAX_BYTES = 300 * 1024; // 300 KB — plenty for a 100x100 image
-const AVATAR_UPLOAD_ALLOWED_MIME = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+// Upload endpoint: accepts the player's original image as a base64 data URI (PNG / JPEG /
+// WebP / GIF, up to 2 MB). Anything that isn't already 100x100 is cropped and resized
+// server-side so animated GIFs keep their animation.
 
 app.post('/api/profile/avatar/upload', requireSession, async (req, res) => {
     try {
-        const { dataUrl } = req.body || {};
-        if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
-            return res.status(400).json({ error: 'A valid image data URL is required.' });
-        }
-        // Parse "data:<mime>;base64,<data>"
-        const matchHeader = dataUrl.match(/^data:([^;]+);base64,/);
-        if (!matchHeader) {
-            return res.status(400).json({ error: 'Unsupported data URL format.' });
-        }
-        const mime = matchHeader[1].toLowerCase();
-        if (!AVATAR_UPLOAD_ALLOWED_MIME.has(mime)) {
-            return res.status(400).json({ error: 'Unsupported image format. Use PNG, JPEG, WebP, or GIF.' });
-        }
-        const base64Data = dataUrl.slice(matchHeader[0].length);
-        const byteLength = Math.ceil((base64Data.length * 3) / 4);
-        if (byteLength > AVATAR_UPLOAD_MAX_BYTES) {
-            return res.status(400).json({ error: 'Image exceeds the 300 KB size limit after resizing.' });
-        }
+        const avatarUrl = await prepareAvatarDataUrl(req.body?.dataUrl);
         const user = await usersCollection.findOne({ username: req.authUser.username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
         const profile = normalizeUserProfile(user);
-        profile.avatarUrl = dataUrl;
+        profile.avatarUrl = avatarUrl;
         await usersCollection.updateOne(
             { _id: user._id },
             { $set: { profile } }
@@ -10583,6 +10568,9 @@ app.post('/api/profile/avatar/upload', requireSession, async (req, res) => {
             user: serializeUserForClient(updatedUser),
         });
     } catch (error) {
+        if (error instanceof AvatarImageError) {
+            return res.status(400).json({ error: error.message });
+        }
         return res.status(500).json({ error: 'Unable to upload avatar.' });
     }
 });

@@ -135,7 +135,7 @@ test('Cosmetics & Inventory System Tests', async (t) => {
         serializeUserForClient: (u) => u,
         serializePublicUserProfile: (u) => u,
         avatarUpdateSchema: null,
-        validateAvatarUrl: () => ({ valid: true }),
+        prepareAvatarUrl: async (url) => url,
         validateBackgroundUrl: () => ({ valid: true }),
         getExperienceRequiredForNextLevel: () => 200,
         recalculatePlayerLadderStandings: () => {},
