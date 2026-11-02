@@ -5,23 +5,9 @@
             var loginRewardsModal = document.getElementById("login-rewards-modal");
             var promoCodeModal = document.getElementById("promo-code-modal");
             var settingsModal = document.getElementById("settings-modal");
-            var rewardsModal = document.getElementById("rewards-modal");
             var hideHubMenus = function() {
                 if (settingsModal) settingsModal.classList.add("hidden");
-                if (rewardsModal) rewardsModal.classList.add("hidden");
             };
-
-            document.querySelectorAll("[data-rewards-trigger]").forEach(function(btn) {
-                btn.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    if (settingsModal) settingsModal.classList.add("hidden");
-                    if (rewardsModal) rewardsModal.classList.remove("hidden");
-                    refreshRewardAlerts();
-                });
-            });
-            var rClose = document.getElementById("rewards-modal-close");
-            if (rClose) rClose.addEventListener("click", function() { if (rewardsModal) rewardsModal.classList.add("hidden"); });
-            if (rewardsModal) rewardsModal.addEventListener("click", function(e) { if (e.target === rewardsModal) rewardsModal.classList.add("hidden"); });
 
             // Open Triggers
             document.querySelectorAll("[data-settings-trigger]").forEach(function(btn) {
@@ -405,10 +391,11 @@
                     });
                 });
             }
-            // Reward alerts: count everything waiting to be claimed and surface it on the top bar,
-            // so players notice dailies without opening a menu.
+            // Reward alerts: count everything waiting to be claimed and light an orb on the Profile tab,
+            // so players notice dailies without opening a menu. The Profile > Rewards tab shows the count.
             var rewardCounts = { quests: 0, achievements: 0, checkIn: 0, spin: 0 };
-            var rewardsButton = document.querySelector("[data-rewards-trigger]");
+            var rewardsTab = document.querySelector("[data-rewards-tab]");
+            var rewardsOrb = document.querySelector("[data-rewards-orb]");
             var rewardsCountEl = document.querySelector("[data-rewards-count]");
             function setRewardCount(key, count) {
                 rewardCounts[key] = Math.max(0, Number(count) || 0);
@@ -422,10 +409,15 @@
                     rewardsCountEl.hidden = total === 0;
                     rewardsCountEl.textContent = total > 9 ? "9+" : String(total);
                 }
-                if (rewardsButton) {
-                    rewardsButton.classList.toggle("has-rewards", total > 0);
-                    rewardsButton.setAttribute("aria-label", total > 0 ? "Open rewards, " + total + " ready to claim" : "Open rewards");
-                    rewardsButton.title = total > 0 ? total + (total === 1 ? " reward" : " rewards") + " ready to claim" : "Rewards";
+                if (rewardsOrb) rewardsOrb.hidden = total === 0;
+                if (rewardsTab) {
+                    if (total > 0) {
+                        rewardsTab.setAttribute("aria-label", "Profile, " + total + (total === 1 ? " reward" : " rewards") + " ready to claim");
+                        rewardsTab.title = total + (total === 1 ? " reward" : " rewards") + " ready to claim";
+                    } else {
+                        rewardsTab.removeAttribute("aria-label");
+                        rewardsTab.removeAttribute("title");
+                    }
                 }
             }
             function refreshRewardAlerts() {
@@ -433,6 +425,7 @@
                 loadAchievements();
                 loadLoginRewards();
             }
+            document.addEventListener("arena:rewards-refresh", refreshRewardAlerts);
             document.addEventListener("arena:daily-spin-state", function(event) {
                 setRewardCount("spin", event.detail && event.detail.available ? 1 : 0);
             });

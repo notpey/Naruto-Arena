@@ -28,6 +28,7 @@
     var shopTabs = Array.prototype.slice.call(shopPanel.querySelectorAll("[data-shop-category]"));
     var profileIdentity = profilePanel.querySelector("[data-profile-identity]");
     var profileBody = profilePanel.querySelector("[data-profile-body]");
+    var profileRewards = profilePanel.querySelector("[data-profile-rewards]");
     var profileTabs = Array.prototype.slice.call(profilePanel.querySelectorAll("[data-profile-section]"));
     var profileLink = profilePanel.querySelector("[data-profile-public-link]");
     var avatarFileInput = profilePanel.querySelector("[data-profile-avatar-file]");
@@ -762,6 +763,14 @@
             tab.setAttribute("aria-selected", String(active));
         });
         renderIdentity();
+        // The Rewards section is static markup driven by selectionRewards.js.
+        var showRewards = state.profileSection === "rewards";
+        profileBody.hidden = showRewards;
+        if (profileRewards) profileRewards.hidden = !showRewards;
+        if (showRewards) {
+            document.dispatchEvent(new CustomEvent("arena:rewards-refresh"));
+            return;
+        }
         profileBody.innerHTML = "";
         if (!state.user) {
             profileBody.appendChild(el("div", "store-empty", "Loading profile..."));
@@ -899,7 +908,7 @@
         });
         games.sort(function (a, b) { return new Date(b.game.playedAt || 0) - new Date(a.game.playedAt || 0); });
         if (!games.length) {
-            history.appendChild(el("p", "profile-muted", "No battles in the last 24 hours. Queue up from Start Playing."));
+            history.appendChild(el("p", "profile-muted", "No battles in the last 24 hours. Queue up from Home."));
         } else {
             var list = el("ul", "profile-games");
             games.slice(0, 12).forEach(function (entry) {
@@ -1226,13 +1235,16 @@
     }
 
     function setProfileSection(name) {
-        state.profileSection = ["overview", "locker", "settings"].indexOf(name) !== -1 ? name : "overview";
+        state.profileSection = ["overview", "locker", "rewards", "settings"].indexOf(name) !== -1 ? name : "overview";
         state.lockerStatus = { text: "", tone: "" };
         renderProfile();
         if (state.profileSection === "locker" && !state.shop) loadShop(false).then(renderProfile, renderProfile);
     }
 
     function openProfile() {
+        // A lit orb on the Profile tab means rewards are waiting; land on them.
+        var orb = document.querySelector("[data-rewards-orb]");
+        if (orb && !orb.hidden) state.profileSection = "rewards";
         renderProfile();
         loadProfile().then(renderProfile).catch(function () {});
         loadShop(false).then(renderProfile, renderProfile);

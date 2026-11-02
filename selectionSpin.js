@@ -402,10 +402,8 @@
 
     function open() {
         modal.classList.remove("hidden");
-        ["settings-modal", "rewards-modal"].forEach(function (id) {
-            var menu = document.getElementById(id);
-            if (menu) menu.classList.add("hidden");
-        });
+        var settingsMenu = document.getElementById("settings-modal");
+        if (settingsMenu) settingsMenu.classList.add("hidden");
         state.result = null;
         load(true).then(function () {
             if (state.available) goButton.focus();

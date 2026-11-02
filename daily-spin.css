@@ -85,54 +85,35 @@
 .reward-ready { margin-left: 6px; padding: 1px 6px; border-radius: 3px; background: #e3ad68; color: #1d2a31; font-size: 9px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; vertical-align: 2px; white-space: nowrap; }
 .reward-ready[hidden] { display: none; }
 
-/* Top-bar Rewards button: lights up with a count whenever something is waiting to be claimed. */
-.selection-hub-rewards {
+/* Profile tab orb: lights up whenever something is waiting to be claimed in Profile > Rewards. */
+.selection-hub-tab-orb {
+    display: inline-block;
     position: relative;
-    display: grid;
-    place-items: center;
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    width: 34px;
-    height: 34px;
-    margin-left: 8px;
-    padding: 0;
-    border: 1px solid #657780;
-    border-radius: 6px;
-    background: #20313a;
-    color: #c9d6d8;
-    box-shadow: inset 0 1px rgba(255, 255, 255, .08);
-    cursor: pointer;
-    transition: border-color .15s ease, background .15s ease, color .15s ease;
-}
-.selection-hub-rewards svg { display: block; width: 18px; height: 18px; }
-.selection-hub-rewards:hover { border-color: #e3ad68; background: #30444e; color: #f4d0a1; }
-.selection-hub-rewards:focus-visible { outline: 2px solid #e3ad68; outline-offset: 3px; }
-.selection-hub-rewards.has-rewards { border-color: #e3ad68; color: #f4d0a1; }
-.selection-hub-rewards-count {
-    position: absolute;
-    top: -7px;
-    right: -7px;
-    box-sizing: border-box;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border: 2px solid #0f1b22;
-    border-radius: 9px;
+    top: -6px;
+    width: 7px;
+    height: 7px;
+    margin-left: 5px;
+    border-radius: 50%;
     background: #e3ad68;
-    color: #1d2a31;
-    font: 900 10px/14px "Libre Franklin", sans-serif;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
+    box-shadow: 0 0 0 2px #0f1b22;
+    pointer-events: none;
+    animation: rewards-pulse 2.4s ease-in-out infinite;
 }
-.selection-hub-rewards-count[hidden] { display: none; }
-.selection-hub-rewards.has-rewards .selection-hub-rewards-count { animation: rewards-pulse 2.4s ease-in-out infinite; }
+.selection-hub-tab-orb[hidden] { display: none; }
 @keyframes rewards-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(227, 173, 104, .55); }
-    50% { box-shadow: 0 0 0 5px rgba(227, 173, 104, 0); }
+    0%, 100% { box-shadow: 0 0 0 2px #0f1b22, 0 0 0 2px rgba(227, 173, 104, .6); }
+    50% { box-shadow: 0 0 0 2px #0f1b22, 0 0 0 7px rgba(227, 173, 104, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .selection-hub-rewards.has-rewards .selection-hub-rewards-count { animation: none; }
+    .selection-hub-tab-orb { animation: none; }
 }
+
+/* Profile > Rewards: the reward cards, with a ready count on the section tab. */
+.store-tab-count[data-rewards-count] { background: #e3ad68; color: #1d2a31; font-weight: 900; }
+.store-tab-count[data-rewards-count][hidden] { display: none; }
+.profile-rewards { min-height: 0; overflow-y: auto; }
+.profile-rewards[hidden] { display: none; }
+.profile-body[hidden] { display: none; }
 
 @keyframes daily-spin-pop {
     from { opacity: 0; transform: scale(.94); }

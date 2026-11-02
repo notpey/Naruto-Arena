@@ -196,12 +196,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 playModalCloseSound();
                 return;
             }
-            const rewardsModal = document.getElementById('rewards-modal');
-            if (rewardsModal && !rewardsModal.classList.contains('hidden')) {
-                rewardsModal.classList.add('hidden');
-                playModalCloseSound();
-                return;
-            }
             const promoModal = document.getElementById('promo-code-modal');
             if (promoModal && !promoModal.classList.contains('hidden')) {
                 promoModal.classList.add('hidden');

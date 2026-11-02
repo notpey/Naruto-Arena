@@ -15,11 +15,11 @@
     <link rel="stylesheet" href="account.css?v=2">
     <script src="character-images.js?v=1"></script>
     <script src="border-fit.js?v=6" defer></script>
-    <link rel="stylesheet" href="mobile-layout.css?v=5">
+    <link rel="stylesheet" href="mobile-layout.css?v=6">
     <link rel="stylesheet" href="game-surfaces.css?v=24">
     <link rel="stylesheet" href="missions.css?v=2">
     <link rel="stylesheet" href="hub-store.css?v=5">
-    <link rel="stylesheet" href="daily-spin.css?v=3">
+    <link rel="stylesheet" href="daily-spin.css?v=4">
 </head>
 <body class="selection-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -34,20 +34,16 @@
     <nav class="selection-hub-nav" aria-label="Selection hub navigation">
         <div class="selection-hub-brand" aria-label="Naruto Arena"><span class="selection-hub-wordmark">NARUTO<span>ARENA</span></span></div>
         <div class="selection-hub-tabs">
-            <button type="button" class="selection-hub-tab active" data-hub-view="play">Start Playing</button>
+            <button type="button" class="selection-hub-tab active" data-hub-view="play">Home</button>
             <button type="button" class="selection-hub-tab" data-hub-view="missions">Missions</button>
             <button type="button" class="selection-hub-tab" data-hub-view="shop">Shop</button>
-            <button type="button" class="selection-hub-tab" data-hub-view="profile">Profile</button>
+            <button type="button" class="selection-hub-tab" data-hub-view="profile" data-rewards-tab>Profile<span class="selection-hub-tab-orb" data-rewards-orb hidden></span></button>
         </div>
         <button type="button" class="selection-hub-ryo" data-hub-view="shop" title="Open the Shop">
             <span class="selection-hub-coin" aria-hidden="true">R</span>
             <span class="selection-hub-ryo-label">Ryo</span>
             <span data-ryo-balance>0</span>
             <span class="sr-only">Ryo balance. Open the Shop.</span>
-        </button>
-        <button type="button" class="selection-hub-rewards" data-rewards-trigger aria-label="Open rewards" title="Rewards">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11h16v9H4z"/><path d="M3 7h18v4H3z"/><path d="M12 7v13"/><path d="M12 7c-1.5-3-5-3.5-5-1.2C7 7 9.5 7 12 7Zm0 0c1.5-3 5-3.5 5-1.2C17 7 14.5 7 12 7Z"/></svg>
-            <span class="selection-hub-rewards-count" data-rewards-count hidden></span>
         </button>
         <div class="selection-hub-settings">
             <button type="button" class="selection-hub-settings-button" data-settings-trigger aria-label="Open settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.87 1.87-.06-.06A1.7 1.7 0 0 0 16 18.4a1.7 1.7 0 0 0-1 1.54V20H9v-.06a1.7 1.7 0 0 0-1-1.54 1.7 1.7 0 0 0-1.87.35l-.06.06-1.87-1.87.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.54-1H3v-4h.06A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88L4.2 7.06l1.87-1.87.06.06A1.7 1.7 0 0 0 8 5.6a1.7 1.7 0 0 0 1-1.54V4h6v.06a1.7 1.7 0 0 0 1 1.54 1.7 1.7 0 0 0 1.87-.35l.06-.06 1.87 1.87-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.54 1H21v4h-.06A1.7 1.7 0 0 0 19.4 15Z"/></svg></button>
@@ -168,7 +164,7 @@
             <div class="selection-hub-env-header">
                 <div>
                     <h1>Ninja Profile</h1>
-                    <p>Your record, your look, and your game settings.</p>
+                    <p>Your record, your look, your rewards, and your game settings.</p>
                 </div>
                 <a class="profile-public-link" data-profile-public-link href="profile.html" target="_blank" rel="noopener">View public profile <span aria-hidden="true">↗</span></a>
             </div>
@@ -176,6 +172,7 @@
                 <div class="store-tabs" role="tablist" aria-label="Profile sections">
                     <button type="button" class="store-tab active" role="tab" aria-selected="true" data-profile-section="overview">Overview</button>
                     <button type="button" class="store-tab" role="tab" aria-selected="false" data-profile-section="locker">Locker</button>
+                    <button type="button" class="store-tab" role="tab" aria-selected="false" data-profile-section="rewards">Rewards <span class="store-tab-count" data-rewards-count hidden></span></button>
                     <button type="button" class="store-tab" role="tab" aria-selected="false" data-profile-section="settings">Settings</button>
                 </div>
             </div>
@@ -184,6 +181,68 @@
                     <div class="store-empty">Loading profile...</div>
                 </aside>
                 <div class="profile-body" data-profile-body></div>
+                <!-- Rewards: quests, achievements and daily rewards; ready counts also light the Profile tab orb -->
+                <div class="profile-rewards" data-profile-rewards hidden>
+                    <section class="profile-card">
+                        <h3 class="profile-card-title">Daily &amp; Progression</h3>
+                        <div class="settings-grid">
+                            <button type="button" class="settings-hub-card-btn op-quests" data-quests-trigger>
+                                <div class="card-crest-badge quests">
+                                    <span>忍</span>
+                                </div>
+                                <div class="card-text-wrap">
+                                    <strong>Ninja Quests <span class="reward-ready" data-reward-ready="quests" hidden></span></strong>
+                                    <span>Daily &amp; weekly contracts</span>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </button>
+                            
+                            <button type="button" class="settings-hub-card-btn op-achieve" data-achievements-trigger>
+                                <div class="card-crest-badge achieve">
+                                    <span>栄</span>
+                                </div>
+                                <div class="card-text-wrap">
+                                    <strong>Achievements <span class="reward-ready" data-reward-ready="achievements" hidden></span></strong>
+                                    <span>Milestones &amp; honors</span>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </button>
+
+                            <button type="button" class="settings-hub-card-btn op-spin" data-daily-spin-trigger>
+                                <div class="card-crest-badge spin">
+                                    <span>運</span>
+                                </div>
+                                <div class="card-text-wrap">
+                                    <strong>Daily Spin <span class="reward-ready daily-spin-ready" data-daily-spin-ready hidden>Ready</span></strong>
+                                    <span>One free spin every day</span>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </button>
+
+                            <button type="button" class="settings-hub-card-btn op-login" data-login-rewards-trigger>
+                                <div class="card-crest-badge check-in">
+                                    <span>礼</span>
+                                </div>
+                                <div class="card-text-wrap">
+                                    <strong>Daily Check-In <span class="reward-ready" data-reward-ready="checkIn" hidden></span></strong>
+                                    <span>Claim daily rewards</span>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </button>
+
+                            <button type="button" class="settings-hub-card-btn op-promo" data-promo-code-trigger>
+                                <div class="card-crest-badge promo">
+                                    <span>文</span>
+                                </div>
+                                <div class="card-text-wrap">
+                                    <strong>Promo Codes</strong>
+                                    <span>Redeem promo codes</span>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
             </div>
             <input type="file" class="sr-only" data-profile-avatar-file accept="image/png,image/jpeg,image/gif,image/webp" tabindex="-1" aria-hidden="true">
         </div>
@@ -481,90 +540,6 @@
     </div>
 </div>
 
-<!-- Rewards Modal: quests, achievements and daily rewards, with ready alerts on the top bar -->
-<div id="rewards-modal" class="shinobi-modal-overlay settings-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rewards-modal-title">
-    <div class="shinobi-modal-panel settings-modal-dialog">
-        <button type="button" class="shinobi-modal-close settings-modal-close" id="rewards-modal-close" aria-label="Close">&times;</button>
-
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
-                    <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">賞</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title" id="rewards-modal-title">Rewards</h2>
-                <p class="settings-modal-subtitle">Quests, achievements &amp; daily rewards</p>
-            </div>
-        </div>
-
-        <div class="settings-modal-content">
-            <!-- Rewards Deck -->
-            <div class="settings-section-card">
-                <div class="settings-section-title">Daily &amp; Progression</div>
-                <div class="settings-grid">
-                    <button type="button" class="settings-hub-card-btn op-quests" data-quests-trigger>
-                        <div class="card-crest-badge quests">
-                            <span>忍</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Ninja Quests <span class="reward-ready" data-reward-ready="quests" hidden></span></strong>
-                            <span>Daily &amp; weekly contracts</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
-                    
-                    <button type="button" class="settings-hub-card-btn op-achieve" data-achievements-trigger>
-                        <div class="card-crest-badge achieve">
-                            <span>栄</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Achievements <span class="reward-ready" data-reward-ready="achievements" hidden></span></strong>
-                            <span>Milestones &amp; honors</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
-
-                    <button type="button" class="settings-hub-card-btn op-spin" data-daily-spin-trigger>
-                        <div class="card-crest-badge spin">
-                            <span>運</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Daily Spin <span class="reward-ready daily-spin-ready" data-daily-spin-ready hidden>Ready</span></strong>
-                            <span>One free spin every day</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
-
-                    <button type="button" class="settings-hub-card-btn op-login" data-login-rewards-trigger>
-                        <div class="card-crest-badge check-in">
-                            <span>礼</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Daily Check-In <span class="reward-ready" data-reward-ready="checkIn" hidden></span></strong>
-                            <span>Claim daily rewards</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
-
-                    <button type="button" class="settings-hub-card-btn op-promo" data-promo-code-trigger>
-                        <div class="card-crest-badge promo">
-                            <span>文</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Promo Codes</strong>
-                            <span>Redeem promo codes</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
 <!-- Settings Modal: sound, practice and support -->
 <div id="settings-modal" class="shinobi-modal-overlay settings-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
     <div class="shinobi-modal-panel settings-modal-dialog">
@@ -635,11 +610,11 @@
 <script src="characters.js?v=44"></script>
 <script src="roster-catalog.js?v=3"></script>
 <script src="skill-description-format.js?v=2"></script>
-<script src="script.js?v=64"></script>
+<script src="script.js?v=65"></script>
 <script src="selectionWar.js?v=1"></script>
-<script src="selectionRewards.js?v=2"></script>
-<script src="selectionStore.js?v=6"></script>
-<script src="selectionSpin.js?v=2"></script>
+<script src="selectionRewards.js?v=3"></script>
+<script src="selectionStore.js?v=7"></script>
+<script src="selectionSpin.js?v=3"></script>
 <script src="selectionHub.js?v=47"></script>
 <script>
     (function() {
