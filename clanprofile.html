@@ -1074,6 +1074,130 @@
         font-size: 24px;
       }
     }
+
+    /* Dark content cards matching the Player Profile page. The page id
+       outranks the shared light-sheet ink overrides in brand.css. */
+    #clan-profile-page {
+      width: min(1140px, 100%);
+      margin: 0 auto;
+      padding: 30px 28px 56px;
+    }
+
+    #clan-profile-page .clan-profile-panel {
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid #394658 !important;
+      border-radius: 4px;
+      background: #171e2a !important;
+      box-shadow: none !important;
+      color: #f7eee1 !important;
+    }
+
+    #clan-profile-page .clan-profile-block-head,
+    #clan-profile-page .clan-profile-member-heading {
+      margin: 0 0 4px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid #394658;
+      color: #f7eee1 !important;
+      font-size: 17px;
+      font-weight: 800 !important;
+      letter-spacing: 0.01em;
+      text-shadow: none !important;
+    }
+
+    #clan-profile-page .clan-profile-block-head span { color: inherit !important; }
+
+    #clan-profile-page .clan-profile-star { display: none; }
+
+    #clan-profile-page .clan-profile-header .clan-profile-block-head { margin-top: 0; }
+
+    #clan-profile-page .clan-profile-info-table { gap: 0; }
+
+    #clan-profile-page .clan-profile-info-row {
+      grid-template-columns: minmax(110px, 200px) minmax(0, 1fr);
+      min-height: 36px;
+      padding: 8px 0;
+      border: 0 !important;
+      border-bottom: 1px solid #303a49 !important;
+      border-radius: 0;
+      background: transparent !important;
+      color: #f7eee1 !important;
+    }
+
+    #clan-profile-page .clan-profile-info-row:last-child { border-bottom: 0 !important; }
+
+    #clan-profile-page .clan-profile-label { color: #bcb5aa !important; }
+    #clan-profile-page .clan-profile-value { color: #f7eee1 !important; font-weight: 600; }
+    #clan-profile-page .clan-profile-value.accent { color: #ffae42 !important; }
+    #clan-profile-page .clan-profile-label a { color: #ffae42; text-decoration: underline; text-underline-offset: 3px; }
+    #clan-profile-page .clan-profile-label a:hover { color: #ffca7b; }
+
+    #clan-profile-page .clan-profile-bio {
+      min-height: 0;
+      padding: 12px 0 0;
+      border: 0 !important;
+      background: transparent !important;
+      color: #ddd4c6 !important;
+    }
+
+    #clan-profile-page .clan-profile-avatar,
+    #clan-profile-page .clan-profile-member-avatar {
+      border: 1px solid #566377;
+      border-radius: 3px;
+    }
+
+    #clan-profile-page .clan-profile-level-meter,
+    #clan-profile-page .clan-profile-member-level {
+      border: 1px solid rgba(232, 128, 26, 0.3);
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    #clan-profile-page .clan-profile-level-meter { max-width: 120px; }
+
+    #clan-profile-page .clan-profile-level-score,
+    #clan-profile-page .clan-profile-member-level-score { color: #ffffff; }
+
+    #clan-profile-page .clan-profile-member-list { gap: 22px; margin-top: 14px; }
+
+    #clan-profile-page .clan-profile-member-rank {
+      color: #f7eee1 !important;
+      font-size: 13px;
+      font-weight: 800 !important;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #clan-profile-page .clan-profile-member-row {
+      border: 0 !important;
+      border-bottom: 1px solid #303a49 !important;
+      background: transparent !important;
+      padding: 8px 0;
+    }
+
+    #clan-profile-page .clan-profile-member-row-header {
+      color: #bcb5aa !important;
+      font-weight: 700 !important;
+    }
+
+    #clan-profile-page .clan-profile-member-row-header .clan-profile-member-cell { color: #bcb5aa !important; }
+    #clan-profile-page .clan-profile-member-cell { color: #f7eee1 !important; }
+    #clan-profile-page .clan-profile-member-cell a:hover { color: #ffae42; }
+    #clan-profile-page .clan-profile-member-date { color: #ddd4c6 !important; font-style: normal; }
+
+    #clan-profile-page .clan-profile-status,
+    #clan-profile-page .clan-profile-empty { color: #bcb5aa !important; }
+
+    #clan-profile-page a:focus-visible { outline: 2px solid #ffae42; outline-offset: 2px; }
+
+    @media (max-width: 700px) {
+      #clan-profile-page { padding: 22px 16px 42px; }
+      #clan-profile-page .clan-profile-panel { padding: 18px; }
+      #clan-profile-page .clan-profile-header { grid-template-columns: 1fr; }
+      #clan-profile-page .clan-profile-info-row { grid-template-columns: minmax(95px, 42%) minmax(0, 1fr); }
+      #clan-profile-page .clan-profile-member-row { grid-template-columns: 96px minmax(0, 1fr) minmax(0, 38%); }
+      #clan-profile-page .clan-profile-member-card { padding: 0 4px; }
+      #clan-profile-page .clan-profile-member-cell { padding: 0 6px; font-size: 13px; word-break: normal; overflow-wrap: anywhere; }
+    }
   </style>
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
@@ -1226,10 +1350,11 @@
 <div class="app">
 
 
-    <main class="main">
+    <main class="main" id="clan-profile-page">
       <nav class="clan-profile-crumb" aria-label="Breadcrumb">
         <a href="index.html">Naruto-Arena</a> &gt; <a href="clanprofile.html">Clan Profile</a> &gt; <span class="cur" id="clan-profile-crumb-current">No clan selected</span>
       </nav>
+      <h1 class="ca-subpage-title">Clan Profile</h1>
       <p class="clan-profile-return"><a href="leaderboards.html#clan-ladder">Back to Clan Ladder</a></p>
 
       <div class="clan-profile-layout">

@@ -2290,6 +2290,7 @@
     setHiddenState(clanManagementCard, !hasClan || !clanRankHasPermission(rankKey, "assignRanks"));
     setHiddenState(clanAvatarCard, !hasClan || !clanRankHasPermission(rankKey, "manageAvatar"));
     setHiddenState(clanInvitationsCard, false);
+    setHiddenState(document.getElementById("clan-wars-card"), !hasClan);
     setHiddenState(leaveClanCard, !hasClan);
     setHiddenState(clanRegisterCard, hasClan);
     if (clanRegisterOpen) {

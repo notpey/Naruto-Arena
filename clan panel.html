@@ -735,6 +735,56 @@
         gap: 6px;
       }
     }
+
+    /* Dark content cards matching the Player Profile page. The page id
+       outranks the shared light-sheet ink overrides in brand.css. */
+    #clan-panel-page {
+      width: min(1140px, 100%);
+      margin: 0 auto;
+      padding: 30px 28px 56px;
+    }
+
+    #clan-panel-page .clan-shell {
+      padding: 22px;
+      border: 1px solid #394658 !important;
+      border-radius: 4px;
+      background: #171e2a !important;
+      box-shadow: none !important;
+      color: #f7eee1 !important;
+    }
+
+    #clan-panel-page .clan-summary { border-bottom-color: #394658; }
+    #clan-panel-page .clan-summary-copy { color: #bcb5aa !important; }
+    #clan-panel-page .clan-summary-copy strong { color: #f7eee1 !important; }
+    #clan-panel-page .clan-summary-copy .rank { color: #ffae42 !important; }
+    #clan-panel-page .clan-avatar { border: 1px solid #566377; border-radius: 3px; }
+    #clan-panel-page .clan-divider,
+    #clan-panel-page .clan-bottom-divider { border-color: #394658; }
+
+    #clan-panel-page .clan-card {
+      border: 1px solid #303a49 !important;
+      border-radius: 4px;
+      background: #1d2532 !important;
+      color: #f7eee1 !important;
+    }
+
+    #clan-panel-page .clan-card:hover {
+      border-color: rgba(255, 174, 66, 0.55) !important;
+      background: #202a39 !important;
+    }
+
+    #clan-panel-page .clan-card p {
+      max-width: 320px;
+      color: #d8d0c4 !important;
+      font-size: 14px;
+    }
+
+    #clan-panel-page .clan-card button:focus-visible { outline: 2px solid #ffae42; outline-offset: 2px; }
+
+    @media (max-width: 700px) {
+      #clan-panel-page { padding: 22px 16px 42px; }
+      #clan-panel-page .clan-grid { grid-template-columns: 1fr; }
+    }
   </style>
     <link rel="stylesheet" href="account.css?v=1">
     <script src="character-images.js?v=1"></script>
@@ -887,7 +937,7 @@
 <div class="app">
 
 
-    <main class="main">
+    <main class="main" id="clan-panel-page">
       <nav class="clan-panel-crumb" aria-label="Breadcrumb">
         <a href="index.html">Naruto-Arena</a> &gt; <span class="cur">Clan Panel</span>
       </nav>
