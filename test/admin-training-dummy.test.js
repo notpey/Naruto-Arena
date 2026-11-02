@@ -61,13 +61,10 @@ test('training endpoint rejects a missing team and forwards a selected team', as
     assert.deepEqual(calls, [{ username: 'admin', team: [0, 1, 2] }]);
 });
 
-test('Admin mission and story catalog methods are properly injected into admin router', () => {
+test('Admin mission catalog methods are properly injected into admin router', () => {
     assert.match(serverSource, /saveMissionCatalog,/);
     assert.match(serverSource, /getStoredMissionCatalog,/);
-    assert.match(serverSource, /saveStoryCatalog,/);
-    assert.match(serverSource, /getStoredStoryCatalog,/);
     assert.match(adminSource, /saveMissionCatalog/);
-    assert.match(adminSource, /saveStoryCatalog/);
 });
 
 test('Admin shop cosmetics routes require an admin session', () => {

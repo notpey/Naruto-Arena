@@ -45,7 +45,6 @@ body.game-remaster > .selection-hub-environment .selection-hub-cosmetics-grid {
     }
     body.hub-view-inventory .game-stage-scroll,
     body.hub-view-missions .game-stage-scroll,
-    body.hub-view-story .game-stage-scroll { display: none; }
     body > .academy-guide-overlay { position: fixed; inset: 0; width: 100%; height: 100dvh; padding: 16px; box-sizing: border-box; overflow: auto; }
     body > .academy-guide-overlay .academy-guide-card { width: min(540px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 18px; box-sizing: border-box; }
     body > .academy-guide-overlay button { min-height: 44px; }

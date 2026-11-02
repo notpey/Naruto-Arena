@@ -13,7 +13,7 @@ The first internal review comes before a player preview. Visual consistency alon
 | Home and entry | `index.html`, `selection-login.html`, `recover.html` | Find news, sign in, and reach Start Playing |
 | Manual and roster | `manual.html`, `charactersandskills.html` | Learn rules and inspect characters and skills |
 | Competition | `leaderboards.html`, `winrates.html`, `clanprofile.html` | Find standings and player or clan records |
-| Missions and story | `missions.html`, `story.html` | Find a mission and read requirements, progress, and rewards |
+| Missions | `missions.html` | Find a mission and read requirements, progress, and rewards |
 | Profiles and account | `profile.html`, `changeavatar.html`, `changebackgrounds.html`, `resetaccount.html`, `clan panel.html` | Review identity and manage account choices |
 | Admin tools | `admin.html`, `charactereditor.html`, `editmission.html`, `playeraccounts.html`, `newspost.html` | Find, edit, and verify operational data |
 
@@ -30,7 +30,7 @@ The live reference has mission groups beyond the local D/C, B, A, and S grouping
 ## Delivery sequence
 
 1. **Pilot:** Missions overview, rank list, detail, character roster, and character detail. Validate navigation, search, progress, reward, and skill reading at desktop and phone sizes.
-2. **Public reading and competition:** Home, Manual, Ladders, Story, clan and player profiles. Reuse the pilot's heading, search, list, table, and detail patterns.
+2. **Public reading and competition:** Home, Manual, Ladders, clan and player profiles. Reuse the pilot's heading, search, list, table, and detail patterns.
 3. **Account and admin:** Account controls first, then admin hub and editors. Review permission, save, error, destructive-action, and dense-table states internally.
 4. **Review and release:** Compare before and after screenshots, run browser smoke checks and relevant existing tests, then ask a small group of players to perform the same tasks on the current and candidate interfaces before wider release.
 
@@ -45,10 +45,7 @@ The live reference has mission groups beyond the local D/C, B, A, and S grouping
 - The skill cards now share one desktop row height so their metadata dividers align across the grid. The portrait, name, and bio sit in a compact inset panel aligned to the skill grid; the explanatory alternate-skill line is removed. A long-description character was checked for clipping.
 - Site-wide canvas update: non-game pages use one solid dark background. Page-level shells on character details, missions, character roster, and legacy account tools no longer draw a second framed surface around their content. The navigation, illustrated hero, footer, and content cards remain. The game client pages are excluded.
 - Browser checks covered Home, character detail, Missions, Manual, Ladders, Profile, and Admin at desktop and phone widths. Their canvases resolved to the same solid color, with no horizontal overflow or page script errors in this pass. The game client pages retained their own background rules.
-- Review captures: [Missions overview](web-design-review/mission-home-pilot.png), [mission detail on phone](web-design-review/mission-detail-mobile-pilot.png), [character detail on desktop](web-design-review/character-detail-desktop-pilot.png), and [character detail on phone](web-design-review/character-detail-mobile-pilot.png).
-- Canvas review captures: [character detail](web-design-review/character-detail-canvas-desktop.png) and [phone](web-design-review/character-detail-canvas-phone.png), [Missions](web-design-review/missions-canvas-desktop.png) and [phone](web-design-review/missions-canvas-phone.png), [Manual](web-design-review/manual-canvas-desktop.png), and [Profile](web-design-review/profile-canvas-desktop.png).
 - Rankings Option A: Ladders now has full-width category lists for player levels, current streak, wins, highest streak, and clan levels. Search filters the selected list; empty clan rankings have a clear state. Home shows a three-player preview linked to Ladders. The repeated rankings rail was removed from 11 legacy profile, account, clan, and editor pages, allowing their content to use the available width. The Home account panel remains available.
-- Option A review captures: [Ladders desktop](web-design-review/leaderboards-option-a-1440.png), [Ladders phone](web-design-review/leaderboards-option-a-390.png), [Home desktop](web-design-review/home-option-a-1440.png), [Home phone](web-design-review/home-option-a-390.png), and [Profile desktop](web-design-review/profile-option-a-1440.png).
 
 ## Internal acceptance checks
 

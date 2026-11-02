@@ -16,7 +16,6 @@ const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
 const { reconcileUnitPassive } = require('./services/matchPassives');
-const gauntlet = require('./gauntlet');
 const { sortCharactersByRosterOrder, CANONICAL_ROSTER_ORDER } = require('./data/rosterOrder');
 const { localizeArtwork } = require('./services/characterImages');
 const { AvatarImageError, prepareAvatarDataUrl, prepareAvatarFromRemote } = require('./services/avatarImage');
@@ -34,7 +33,6 @@ let charactersData = selectActiveRoster(canonicalCharacters);
 const charactersBrowserScript = `const characters = ${JSON.stringify(localizeArtwork(charactersData))};\nif (typeof window !== 'undefined') window.characters = characters;`;
 
 const app = express();
-app.use('/api', require('./retiredFeatures.js'));
 const wsServer = new WebSocketServer({ noServer: true });
 const wsConnections = new Set();
 app.use(compression());
@@ -185,561 +183,7 @@ const AUDIT_REBALANCE_CHARACTER_IDS = new Set([
     'young-nagato',
     'teuchi',
 ]);
-const STORY_CATALOG_STATE_KEY = 'story';
-let storyCatalogCache = null;
-const STORY_HARD_MODE_RYO_REWARD = 250;
 const DEFAULT_MISSION_CATALOG = require('./data/launchMissions');
-
-const getStoryPortrait = (characterId, fallback = '') => {
-    const normalized = String(characterId || '').trim().toLowerCase();
-    const character = (Array.isArray(charactersData) ? charactersData : []).find(
-        (entry) => String(entry?.characterId || '').trim().toLowerCase() === normalized
-    );
-    return typeof character?.facePicture === 'string' && character.facePicture.trim()
-        ? character.facePicture.trim()
-        : fallback;
-};
-
-const STORY_PORTRAIT_NARUTO = getStoryPortrait('uzumaki-naruto', 'https://i.imgur.com/jp3OIOA.png');
-const STORY_PORTRAIT_IRUKA = getStoryPortrait('umino-iruka', 'https://i.imgur.com/snz8zD4.png');
-const STORY_PORTRAIT_MIZUKI = getStoryPortrait('mizuki', 'https://i.imgur.com/NZS59L7.png');
-const STORY_PORTRAIT_SASUKE = getStoryPortrait('uchiha-sasuke');
-const STORY_PORTRAIT_SAKURA = getStoryPortrait('haruno-sakura');
-const STORY_PORTRAIT_KAKASHI = getStoryPortrait('hatake-kakashi');
-const STORY_PORTRAIT_ZABUZA = getStoryPortrait('momochi-zabuza');
-const STORY_PORTRAIT_HAKU = getStoryPortrait('haku');
-const STORY_PORTRAIT_OROCHIMARU = getStoryPortrait('orochimaru');
-const STORY_PORTRAIT_SHIORE_OROCHIMARU = getStoryPortrait('shiore-orochimaru');
-const STORY_PORTRAIT_HIRUZEN = getStoryPortrait('sarutobi-hiruzen');
-const STORY_PORTRAIT_GAARA = getStoryPortrait('gaara-of-the-desert');
-const STORY_PORTRAIT_JIRAIYA = getStoryPortrait('jiraiya');
-const STORY_PORTRAIT_TSUNADE = getStoryPortrait('tsunade');
-const STORY_PORTRAIT_ITACHI = getStoryPortrait('uchiha-itachi');
-const STORY_PORTRAIT_KISAME = getStoryPortrait('hoshigaki-kisame');
-const STORY_PORTRAIT_AOI = getStoryPortrait('rokushou-aoi');
-const STORY_PORTRAIT_SHIKAMARU = getStoryPortrait('nara-shikamaru');
-
-const PART_ONE_STORY_PLAN = [
-    {
-        chapterId: 'chapter-1',
-        title: 'Chapter 1: The Nine-Tails Vessel',
-        nodeId: 'story-001-nine-tails-vessel',
-        nodeTitle: 'The Forbidden Scroll',
-        arcTitle: 'Prologue',
-        episodeRange: 'Episode 1',
-        summary: 'Naruto is introduced as the village outcast and the jinchuriki of the Nine-Tails. Mizuki tricks him into stealing the Scroll of Seals, but Iruka protects him.',
-        playerTeam: ['uzumaki-naruto', 'umino-iruka'],
-        enemyTeam: ['mizuki'],
-        enemyDisplayName: 'Mizuki',
-        reward_character: 'umino-iruka',
-        rewardText: 'Unlock Umino Iruka.',
-    },
-    {
-        chapterId: 'chapter-2',
-        title: 'Chapter 2: Team 7 Begins',
-        nodeId: 'story-002-team-7-begins',
-        nodeTitle: 'The Bell Test',
-        arcTitle: 'Prologue',
-        episodeRange: 'Episodes 2-5',
-        summary: 'Naruto, Sasuke, and Sakura are placed under Kakashi. The bell test teaches them that teamwork matters more than individual talent.',
-        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
-        enemyTeam: ['hatake-kakashi'],
-        enemyDisplayName: 'Kakashi',
-        rewardText: 'Story progression.',
-    },
-    {
-        chapterId: 'chapter-3',
-        title: 'Chapter 3: The Land of Waves',
-        nodeId: 'story-003-land-of-waves',
-        nodeTitle: 'Mist on the Road',
-        arcTitle: 'Land of Waves',
-        episodeRange: 'Episodes 6-12',
-        summary: 'Team 7 first real mission turns dangerous when enemy ninja attack. Zabuza appears and Kakashi reveals the Sharingan.',
-        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'hatake-kakashi'],
-        enemyTeam: ['demon-brothers', 'momochi-zabuza'],
-        enemyDisplayName: 'Zabuza and the Demon Brothers',
-        reward_character: 'demon-brothers',
-        rewardText: 'Unlock Demon Brothers.',
-    },
-    {
-        chapterId: 'chapter-4',
-        title: 'Chapter 4: The Bridge of Tears',
-        nodeId: 'story-004-bridge-of-tears',
-        nodeTitle: 'Haku and Zabuza',
-        arcTitle: 'Land of Waves',
-        episodeRange: 'Episodes 13-19',
-        summary: 'Haku fights Naruto and Sasuke on the bridge. Sasuke awakens his Sharingan, Naruto taps Nine-Tails chakra, and Zabuza humanity resurfaces.',
-        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'hatake-kakashi'],
-        enemyTeam: ['haku', 'momochi-zabuza'],
-        enemyDisplayName: 'Haku and Zabuza',
-        reward_character: 'haku',
-        rewardText: 'Unlock Haku.',
-    },
-    {
-        chapterId: 'chapter-5',
-        title: 'Chapter 5: The Chunin Exams Begin',
-        nodeId: 'story-005-chunin-exams-begin',
-        nodeTitle: 'Rookies and Rivals',
-        arcTitle: 'Chunin Exams',
-        episodeRange: 'Episodes 20-27',
-        summary: 'The Rookie Nine, Team Guy, Sand Siblings, and Sound Genin enter the exam. This chapter introduces story progression using default characters.',
-        playerTeam: ['uzumaki-naruto', 'nara-shikamaru', 'rock-lee'],
-        enemyTeam: ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin'],
-        enemyDisplayName: 'Sound Genin',
-        rewardText: 'Story progression.',
-    },
-    {
-        chapterId: 'chapter-6',
-        title: 'Chapter 6: The Forest of Death',
-        nodeId: 'story-006-forest-of-death',
-        nodeTitle: 'The Curse Mark',
-        arcTitle: 'Chunin Exams',
-        episodeRange: 'Episodes 27-37',
-        summary: 'Orochimaru attacks Team 7, gives Sasuke the Cursed Seal, and Sakura defends her unconscious teammates against the Sound Genin.',
-        playerTeam: ['haruno-sakura', 'uchiha-sasuke', 'uzumaki-naruto'],
-        enemyTeam: ['shiore-orochimaru', 'dosu-kinuta', 'zaku-abumi'],
-        enemyDisplayName: 'Shiore Orochimaru and Sound Genin',
-        reward_character: 'shiore-orochimaru',
-        rewardText: 'Unlock Shiore Orochimaru.',
-    },
-    {
-        chapterId: 'chapter-7',
-        title: 'Chapter 7: Preliminary Battles',
-        nodeId: 'story-007-preliminary-battles',
-        nodeTitle: 'The Arena Narrows',
-        arcTitle: 'Chunin Exams',
-        episodeRange: 'Episodes 38-51',
-        summary: 'The preliminaries spotlight Sakura, Ino, Naruto, Kiba, Hinata, Neji, Shikamaru, Lee, and Gaara.',
-        playerTeam: ['uzumaki-naruto', 'hyuuga-hinata', 'rock-lee'],
-        enemyTeam: ['inuzuka-kiba', 'neji-hyuuga', 'gaara-of-the-desert'],
-        enemyDisplayName: 'Exam Finalists',
-        rewardText: 'Story progression.',
-    },
-    {
-        chapterId: 'chapter-8',
-        title: 'Chapter 8: Finals Under Fire',
-        nodeId: 'story-008-finals-under-fire',
-        nodeTitle: 'The Finals Collapse',
-        arcTitle: 'Chunin Exams',
-        episodeRange: 'Episodes 52-67',
-        summary: 'Naruto trains with Jiraiya, learns to better access Nine-Tails chakra, defeats Neji, and the finals collapse when the invasion begins.',
-        playerTeam: ['uzumaki-naruto', 'jiraiya', 'shikamaru'],
-        enemyTeam: ['neji-hyuuga', 'gaara-of-the-desert', 'baki'],
-        enemyDisplayName: 'Finals Opposition',
-        reward_character: 'jiraiya',
-        rewardText: 'Unlock Jiraiya.',
-    },
-    {
-        chapterId: 'chapter-9',
-        title: 'Chapter 9: Konoha Crush',
-        nodeId: 'story-009-konoha-crush',
-        nodeTitle: 'The Third Hokage Stands',
-        arcTitle: 'Konoha Crush',
-        episodeRange: 'Episodes 68-80',
-        summary: 'Orochimaru launches his attack on Konoha. Hiruzen battles Orochimaru and the reanimated First and Second Hokage.',
-        playerTeam: ['sarutobi-hiruzen'],
-        enemyTeam: ['orochimaru', 'edo-tensei-hashirama', 'edo-tensei-tobirama'],
-        enemyDisplayName: 'Orochimaru and Edo Tensei',
-        reward_character: 'sarutobi-hiruzen',
-        rewardText: 'Unlock Sarutobi Hiruzen.',
-    },
-    {
-        chapterId: 'chapter-10',
-        title: 'Chapter 10: Naruto vs Gaara',
-        nodeId: 'story-010-naruto-vs-gaara',
-        nodeTitle: 'Lonely Monsters',
-        arcTitle: 'Konoha Crush',
-        episodeRange: 'Episodes 74-80',
-        summary: 'Naruto pursues Gaara, sees the lonely monster he could have become, and reaches Gaara through empathy and strength.',
-        playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'],
-        enemyTeam: ['shukaku-gaara'],
-        enemyDisplayName: 'Shukaku Gaara',
-        reward_character: 'shukaku-gaara',
-        rewardText: 'Unlock Shukaku Gaara.',
-    },
-    {
-        chapterId: 'chapter-11',
-        title: 'Chapter 11: Akatsuki Appears',
-        nodeId: 'story-011-akatsuki-appears',
-        nodeTitle: 'Itachi Returns',
-        arcTitle: 'Search for Tsunade',
-        episodeRange: 'Episodes 81-85',
-        summary: 'Itachi and Kisame enter Konoha looking for Naruto. Sasuke is humiliated, Kakashi is overwhelmed, and a larger threat is revealed.',
-        playerTeam: ['hatake-kakashi', 'uchiha-sasuke', 'sarutobi-asuma'],
-        enemyTeam: ['uchiha-itachi', 'hoshigaki-kisame'],
-        enemyDisplayName: 'Itachi and Kisame',
-        reward_character: 'hoshigaki-kisame',
-        rewardText: 'Unlock Hoshigaki Kisame.',
-    },
-    {
-        chapterId: 'chapter-12',
-        title: 'Chapter 12: The Fifth Hokage',
-        nodeId: 'story-012-fifth-hokage',
-        nodeTitle: 'The Sannin Deadlock',
-        arcTitle: 'Search for Tsunade',
-        episodeRange: 'Episodes 86-100',
-        summary: 'Naruto trains the Rasengan while Jiraiya searches for Tsunade. Orochimaru also seeks her out, leading to the Sannin confrontation.',
-        playerTeam: ['uzumaki-naruto', 'jiraiya', 'tsunade'],
-        enemyTeam: ['orochimaru', 'yakushi-kabuto'],
-        enemyDisplayName: 'Orochimaru and Kabuto',
-        reward_character: 'tsunade',
-        rewardText: 'Unlock Tsunade.',
-    },
-    {
-        chapterId: 'chapter-13',
-        title: 'Chapter 13: Land of Tea Escort',
-        nodeId: 'story-013-land-of-tea-escort',
-        nodeTitle: 'The Thunder God Sword',
-        arcTitle: 'Land of Tea',
-        episodeRange: 'Episodes 102-106',
-        summary: 'Team 7 protects Idate during a dangerous race. Aoi, a rogue Leaf ninja, becomes the main enemy.',
-        playerTeam: ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
-        enemyTeam: ['rokushou-aoi'],
-        enemyDisplayName: 'Rokushou Aoi',
-        reward_character: 'rokushou-aoi',
-        rewardText: 'Unlock Rokushou Aoi.',
-    },
-    {
-        chapterId: 'chapter-14',
-        title: 'Chapter 14: The Rooftop Clash',
-        nodeId: 'story-014-rooftop-clash',
-        nodeTitle: 'Rasengan and Chidori',
-        arcTitle: 'Sasuke Recovery',
-        episodeRange: 'Episodes 107-111',
-        summary: 'Sasuke jealousy and trauma boil over. Naruto and Sasuke clash, Kakashi stops them, and the Sound Four tempt Sasuke away.',
-        playerTeam: ['uzumaki-naruto', 'hatake-kakashi', 'haruno-sakura'],
-        enemyTeam: ['cursed-seal-lv1-sasuke', 'sakon-and-ukon'],
-        enemyDisplayName: 'Sasuke and the Sound Four',
-        reward_character: 'cursed-seal-lv1-sasuke',
-        rewardText: 'Unlock Cursed Seal Lv1 Sasuke.',
-    },
-    {
-        chapterId: 'chapter-15',
-        title: 'Chapter 15: The Retrieval Squad',
-        nodeId: 'story-015-retrieval-squad',
-        nodeTitle: 'Sound Four Gauntlet',
-        arcTitle: 'Sasuke Recovery',
-        episodeRange: 'Episodes 112-126',
-        summary: 'Shikamaru leads Naruto, Neji, Chouji, and Kiba after Sasuke. Each member stays behind for a survival battle.',
-        playerTeam: ['nara-shikamaru', 'neji-hyuuga', 'akimichi-chouji'],
-        enemyTeam: ['jiroubou', 'kidoumaru', 'tayuya'],
-        enemyDisplayName: 'Sound Four',
-        reward_character: 'jiroubou',
-        rewardText: 'Unlock Jiroubou.',
-    },
-    {
-        chapterId: 'chapter-16',
-        title: 'Chapter 16: Allied Sand Rescue',
-        nodeId: 'story-016-allied-sand-rescue',
-        nodeTitle: 'Changed Sand',
-        arcTitle: 'Sasuke Recovery',
-        episodeRange: 'Episodes 124-127',
-        summary: 'The Sand Siblings return as allies. Kankuro, Temari, and Gaara save the Leaf Genin and show how much they have changed.',
-        playerTeam: ['kankuro', 'temari', 'gaara-of-the-desert'],
-        enemyTeam: ['sakon-and-ukon', 'tayuya', 'kimimaro'],
-        enemyDisplayName: 'Sound Reinforcements',
-        reward_character: 'rehabilitated-gaara',
-        rewardText: 'Unlock Rehabilitated Gaara.',
-    },
-    {
-        chapterId: 'chapter-17',
-        title: 'Chapter 17: Valley of the End',
-        nodeId: 'story-017-valley-of-the-end',
-        nodeTitle: 'One Tail Against Curse Mark',
-        arcTitle: 'Sasuke Recovery',
-        episodeRange: 'Episodes 128-135',
-        summary: 'Naruto catches Sasuke at the Valley of the End. Their friendship and rivalry erupt into the defining Part I battle.',
-        playerTeam: ['kyuubi-naruto'],
-        enemyTeam: ['cursed-seal-sasuke'],
-        enemyDisplayName: 'Cursed Seal Sasuke',
-        reward_character: 'cursed-seal-sasuke',
-        rewardText: 'Unlock Cursed Seal Sasuke.',
-    },
-    {
-        chapterId: 'chapter-18',
-        title: 'Chapter 18: Departure',
-        nodeId: 'story-018-departure',
-        nodeTitle: 'The Promise Continues',
-        arcTitle: 'End of Part I',
-        episodeRange: 'Episode 220',
-        summary: 'Naruto fails to bring Sasuke back, Sakura begins training under Tsunade, and Naruto leaves with Jiraiya to prepare for the road ahead.',
-        playerTeam: ['uzumaki-naruto', 'haruno-sakura', 'jiraiya'],
-        enemyTeam: ['orochimaru', 'yakushi-kabuto', 'cursed-seal-sasuke'],
-        enemyDisplayName: 'The Road Ahead',
-        reward_character: 'kyuubi-naruto',
-        rewardText: 'Unlock Kyuubi Naruto.',
-    },
-];
-
-const getPartOneStoryDialogue = (entry = {}) => {
-    const naruto = STORY_PORTRAIT_NARUTO;
-    const sasuke = STORY_PORTRAIT_SASUKE;
-    const sakura = STORY_PORTRAIT_SAKURA;
-    const kakashi = STORY_PORTRAIT_KAKASHI;
-    const gaara = STORY_PORTRAIT_GAARA;
-    const shikamaru = STORY_PORTRAIT_SHIKAMARU;
-    const linesByNodeId = {
-        'story-001-nine-tails-vessel': {
-            intro: [
-                { speaker: 'Mizuki', portrait: STORY_PORTRAIT_MIZUKI, text: 'Naruto, the village has lied to you long enough. Take the scroll and prove you deserve that headband.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'If this is my shot, I am not wasting it. I will master every jutsu in there!' },
-                { speaker: 'Iruka', portrait: STORY_PORTRAIT_IRUKA, text: 'Naruto, stop! Mizuki is using you. That scroll is forbidden for a reason.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'Multi Shadow Clone Jutsu!' },
-                { speaker: 'Iruka', portrait: STORY_PORTRAIT_IRUKA, text: 'You protected what matters. Naruto, you pass.' },
-            ],
-            loss: [
-                { speaker: 'Mizuki', portrait: STORY_PORTRAIT_MIZUKI, text: 'The scroll, the fox, the village... none of it matters if you are still this weak.' },
-            ],
-        },
-        'story-002-team-7-begins': {
-            intro: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'Take these bells before noon. Anyone without one goes back to the academy.' },
-                { speaker: 'Sasuke', portrait: sasuke, text: 'He is baiting us into fighting separately.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Then we hit him together. That is what a squad does, right?' },
-            ],
-            win: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'Those who abandon their comrades are worse than trash. Remember that.' },
-            ],
-            loss: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'Three rookies, three separate plans. That is why you failed.' },
-            ],
-        },
-        'story-003-land-of-waves': {
-            intro: [
-                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Hand over the bridge builder and I may leave the brats breathing.' },
-                { speaker: 'Kakashi', portrait: kakashi, text: 'Naruto, Sasuke, protect Tazuna. This is no longer a C-rank mission.' },
-            ],
-            win: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'This is the world beyond the academy. Keep your guard up.' },
-            ],
-            loss: [
-                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Children playing ninja have no place on a battlefield.' },
-            ],
-        },
-        'story-004-bridge-of-tears': {
-            intro: [
-                { speaker: 'Haku', portrait: STORY_PORTRAIT_HAKU, text: 'For Zabuza, I will become a weapon sharp enough to cut through you.' },
-                { speaker: 'Sasuke', portrait: sasuke, text: 'Naruto, stay alive. I am starting to see his movements.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'Haku fought for someone precious. Zabuza, did you ever see that?' },
-                { speaker: 'Zabuza', portrait: STORY_PORTRAIT_ZABUZA, text: 'Say no more, kid.' },
-            ],
-            loss: [
-                { speaker: 'Haku', portrait: STORY_PORTRAIT_HAKU, text: 'A shinobi who cannot protect their precious person cannot defeat me.' },
-            ],
-        },
-        'story-005-chunin-exams-begin': {
-            intro: [
-                { speaker: 'Shikamaru', portrait: shikamaru, text: 'This exam is already troublesome. Too many teams are hiding what they can do.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Good. Let them hide. I will beat them anyway.' },
-            ],
-            win: [
-                { speaker: 'Shikamaru', portrait: shikamaru, text: 'Winning is nice. Surviving the next phase is the hard part.' },
-            ],
-            loss: [
-                { speaker: 'Dosu', portrait: getStoryPortrait('dosu-kinuta'), text: 'Noise, pressure, panic. You rookies break easily.' },
-            ],
-        },
-        'story-006-forest-of-death': {
-            intro: [
-                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_SHIORE_OROCHIMARU, text: 'Sasuke, your eyes deserve a stage larger than this village.' },
-                { speaker: 'Sakura', portrait: sakura, text: 'Naruto and Sasuke cannot move. That means I stand here.' },
-            ],
-            win: [
-                { speaker: 'Sakura', portrait: sakura, text: 'I was scared. I fought anyway.' },
-            ],
-            loss: [
-                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_SHIORE_OROCHIMARU, text: 'Fear is honest. Power is what you do with it.' },
-            ],
-        },
-        'story-007-preliminary-battles': {
-            intro: [
-                { speaker: 'Naruto', portrait: naruto, text: 'Kiba, Neji, Gaara... fine. I will climb over all of them.' },
-                { speaker: 'Gaara', portrait: gaara, text: 'Then show me whether your life has weight.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'Nobody gets to decide someone is a failure before the fight starts.' },
-            ],
-            loss: [
-                { speaker: 'Gaara', portrait: gaara, text: 'Weakness exists to be crushed.' },
-            ],
-        },
-        'story-008-finals-under-fire': {
-            intro: [
-                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'You want control over that chakra? Stop borrowing fear and start using will.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Neji called destiny fixed. I am going to prove him wrong.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'If destiny is a cage, I will break it open.' },
-            ],
-            loss: [
-                { speaker: 'Baki', portrait: getStoryPortrait('baki'), text: 'The signal has been given. Konoha falls now.' },
-            ],
-        },
-        'story-009-konoha-crush': {
-            intro: [
-                { speaker: 'Hiruzen', portrait: STORY_PORTRAIT_HIRUZEN, text: 'I failed to stop you once, Orochimaru. I will not fail this village again.' },
-                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Then show me the strength of the professor before time takes the rest.' },
-            ],
-            win: [
-                { speaker: 'Hiruzen', portrait: STORY_PORTRAIT_HIRUZEN, text: 'Even if I cannot take your life, I can take the hands you use to threaten Konoha.' },
-            ],
-            loss: [
-                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Sentiment makes even legends slow.' },
-            ],
-        },
-        'story-010-naruto-vs-gaara': {
-            intro: [
-                { speaker: 'Gaara', portrait: gaara, text: 'I exist by killing. That is the only proof I am alive.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'I know what being alone feels like. That is why I will stop you.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'You do not have to stay alone, Gaara.' },
-            ],
-            loss: [
-                { speaker: 'Gaara', portrait: gaara, text: 'Your bonds made you weak enough to lose them.' },
-            ],
-        },
-        'story-011-akatsuki-appears': {
-            intro: [
-                { speaker: 'Itachi', portrait: STORY_PORTRAIT_ITACHI, text: 'We are here for the Nine-Tails. Do not interfere.' },
-                { speaker: 'Sasuke', portrait: sasuke, text: 'Itachi... I have lived for this moment.' },
-            ],
-            win: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'If this is Akatsuki, then Orochimaru was only one warning.' },
-            ],
-            loss: [
-                { speaker: 'Itachi', portrait: STORY_PORTRAIT_ITACHI, text: 'Hatred alone does not close the distance between us, Sasuke.' },
-            ],
-        },
-        'story-012-fifth-hokage': {
-            intro: [
-                { speaker: 'Tsunade', portrait: STORY_PORTRAIT_TSUNADE, text: 'The title of Hokage is not a joke. It is a promise paid for in blood.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Then watch me protect that promise with the Rasengan!' },
-            ],
-            win: [
-                { speaker: 'Tsunade', portrait: STORY_PORTRAIT_TSUNADE, text: 'Fine, brat. I will become the Fifth Hokage.' },
-            ],
-            loss: [
-                { speaker: 'Orochimaru', portrait: STORY_PORTRAIT_OROCHIMARU, text: 'Dreams are fragile things. I prefer bodies that can be replaced.' },
-            ],
-        },
-        'story-013-land-of-tea-escort': {
-            intro: [
-                { speaker: 'Aoi', portrait: STORY_PORTRAIT_AOI, text: 'A shinobi who abandons his village learns one thing: loyalty is just another tool.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'No. People who trust you are not tools.' },
-            ],
-            win: [
-                { speaker: 'Sasuke', portrait: sasuke, text: 'The mission is not over until Idate crosses the line.' },
-            ],
-            loss: [
-                { speaker: 'Aoi', portrait: STORY_PORTRAIT_AOI, text: 'Run home, Leaf brats. The sword has already chosen the stronger shinobi.' },
-            ],
-        },
-        'story-014-rooftop-clash': {
-            intro: [
-                { speaker: 'Sasuke', portrait: sasuke, text: 'How did you get so strong while I stayed behind?' },
-                { speaker: 'Naruto', portrait: naruto, text: 'I am not your enemy, Sasuke!' },
-            ],
-            win: [
-                { speaker: 'Kakashi', portrait: kakashi, text: 'Power without purpose will only hollow you out.' },
-            ],
-            loss: [
-                { speaker: 'Sasuke', portrait: sasuke, text: 'If bonds make me hesitate, I will cut them away.' },
-            ],
-        },
-        'story-015-retrieval-squad': {
-            intro: [
-                { speaker: 'Shikamaru', portrait: shikamaru, text: 'The plan is ugly, but it works: one of us stays, the rest keep moving.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Then nobody loses. We bring Sasuke home together.' },
-            ],
-            win: [
-                { speaker: 'Shikamaru', portrait: shikamaru, text: 'Every second they bought us matters. Keep running.' },
-            ],
-            loss: [
-                { speaker: 'Tayuya', portrait: getStoryPortrait('tayuya'), text: 'Your little formation falls apart as soon as one piece breaks.' },
-            ],
-        },
-        'story-016-allied-sand-rescue': {
-            intro: [
-                { speaker: 'Gaara', portrait: gaara, text: 'I once fought only for myself. Now I will protect someone else.' },
-                { speaker: 'Temari', portrait: getStoryPortrait('temari'), text: 'Leaf owes us one after this.' },
-            ],
-            win: [
-                { speaker: 'Gaara', portrait: gaara, text: 'Naruto showed me another path. This is where I start walking it.' },
-            ],
-            loss: [
-                { speaker: 'Kimimaro', portrait: getStoryPortrait('kimimaro'), text: 'My body may fail, but my loyalty does not.' },
-            ],
-        },
-        'story-017-valley-of-the-end': {
-            intro: [
-                { speaker: 'Sasuke', portrait: sasuke, text: 'I am going to Orochimaru. I need power, no matter what it costs.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Then I will drag you back by force!' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'I said I would bring you back. I do not break promises.' },
-            ],
-            loss: [
-                { speaker: 'Sasuke', portrait: sasuke, text: 'This is the path I chose. Do not follow me.' },
-            ],
-        },
-        'story-018-departure': {
-            intro: [
-                { speaker: 'Sakura', portrait: sakura, text: 'Next time, I want to stand beside both of you instead of watching from behind.' },
-                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'Then train. The next threats will not wait for you to catch up.' },
-                { speaker: 'Naruto', portrait: naruto, text: 'Sasuke left, but I am not giving up. Not now. Not ever.' },
-            ],
-            win: [
-                { speaker: 'Naruto', portrait: naruto, text: 'I will get stronger, and I will bring him home.' },
-            ],
-            loss: [
-                { speaker: 'Jiraiya', portrait: STORY_PORTRAIT_JIRAIYA, text: 'Losing hurts. Good. Remember it, then turn it into discipline.' },
-            ],
-        },
-    };
-    const fallback = {
-        intro: [{ speaker: entry.nodeTitle || 'Story', portrait: '', text: entry.summary || 'The story continues.' }],
-        win: [{ speaker: 'Story', portrait: '', text: `${entry.nodeTitle || 'Battle'} cleared.` }],
-        loss: [{ speaker: 'Story', portrait: '', text: 'Regroup, adjust your plan, and try again.' }],
-    };
-    return linesByNodeId[entry.nodeId] || fallback;
-};
-
-const buildPartOneStoryCatalog = () =>
-    PART_ONE_STORY_PLAN.map((entry, index) => {
-        const dialogue = getPartOneStoryDialogue(entry);
-        return {
-            chapterId: entry.chapterId,
-            title: entry.title,
-            sortOrder: index + 1,
-            nodes: [
-                {
-                    nodeId: entry.nodeId,
-                    title: entry.nodeTitle,
-                    arcTitle: entry.arcTitle,
-                    episodeRange: entry.episodeRange,
-                    summary: entry.summary,
-                    level_requirement: 1,
-                    image: '',
-                    imageAlt: `${entry.nodeTitle} story artwork`,
-                    enemyTeam: entry.enemyTeam,
-                    playerTeam: entry.playerTeam,
-                    enemyDisplayName: entry.enemyDisplayName,
-                    introDialogue: dialogue.intro,
-                    outroDialogueWin: dialogue.win,
-                    outroDialogueLoss: dialogue.loss,
-                    reward_character: entry.reward_character || null,
-                    rewardText: entry.rewardText || 'Story progression.',
-                    requiresPreviousNode: index > 0,
-                    sortOrder: 1,
-                },
-            ],
-        };
-    });
 
 let mongoClient;
 let usersCollection;
@@ -1327,151 +771,6 @@ const normalizeMissionState = (missions = {}) => {
         progressByMissionId,
         progress: progressByMissionId,
         unlockedCharacterIds: Array.from(unlockedCharacterIds),
-    };
-};
-
-const normalizeStoryProgressEntry = (entry = {}) => {
-    const source = entry && typeof entry === 'object' ? entry : {};
-    const completedAt =
-        source.completedAt instanceof Date || typeof source.completedAt === 'string'
-            ? source.completedAt
-            : null;
-    const hardCompletedAt =
-        source.hardCompletedAt instanceof Date || typeof source.hardCompletedAt === 'string'
-            ? source.hardCompletedAt
-            : null;
-    const hardRyoAwardedAt =
-        source.hardRyoAwardedAt instanceof Date || typeof source.hardRyoAwardedAt === 'string'
-            ? source.hardRyoAwardedAt
-            : null;
-    return {
-        completedAt,
-        hardCompletedAt,
-        hardRyoAwardedAt,
-        hardRyoAwarded: Math.max(0, Math.round(Number(source.hardRyoAwarded) || 0)),
-    };
-};
-
-const normalizeStoryState = (story = {}) => {
-    const source = story && typeof story === 'object' ? story : {};
-    const sourceProgress =
-        source.progressByNodeId && typeof source.progressByNodeId === 'object' ? source.progressByNodeId : {};
-    const progressByNodeId = {};
-    Object.keys(sourceProgress).forEach((nodeId) => {
-        const normalizedNodeId = typeof nodeId === 'string' ? nodeId.trim() : '';
-        if (!normalizedNodeId) return;
-        progressByNodeId[normalizedNodeId] = normalizeStoryProgressEntry(sourceProgress[nodeId]);
-    });
-    return { progressByNodeId };
-};
-
-const normalizeGauntletRunState = (run = {}) => {
-    if (!run || typeof run !== 'object') return null;
-    const status = typeof run.status === 'string' ? run.status.trim().toLowerCase() : 'active';
-    const validStatus = ['active', 'won', 'lost', 'abandoned'].includes(status) ? status : 'active';
-    const team = Array.isArray(run.team)
-        ? run.team
-              .map((entry) => Number.parseInt(entry, 10))
-              .filter((entry) => Number.isInteger(entry) && entry >= 0)
-              .slice(0, 3)
-        : [];
-    const teamHp = team.map((_, index) => {
-        const hp = Number(Array.isArray(run.teamHp) ? run.teamHp[index] : 100);
-        return Math.max(0, Math.min(100, Number.isFinite(hp) ? Math.round(hp) : 100));
-    });
-    const map = run.map && typeof run.map === 'object' ? run.map : null;
-    return {
-        seed: typeof run.seed === 'string' && run.seed.trim() ? run.seed.trim() : `gauntlet-${Date.now()}`,
-        status: validStatus,
-        startingScrollType:
-            run.startingScrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
-                ? gauntlet.EXAM_SCROLL_TYPES.EARTH
-                : gauntlet.EXAM_SCROLL_TYPES.HEAVEN,
-        team,
-        teamHp,
-        actOneStep: Math.max(0, Math.min(3, Math.round(Number(run.actOneStep) || 0))),
-        actThreeStep:
-            typeof run.actThreeStep === 'string' && ['preliminary', 'finals', 'complete'].includes(run.actThreeStep)
-                ? run.actThreeStep
-                : '',
-        benchAvailable: Boolean(run.benchAvailable),
-        heavenScrolls: Math.max(0, Math.round(Number(run.heavenScrolls) || 0)),
-        earthScrolls: Math.max(0, Math.round(Number(run.earthScrolls) || 0)),
-        ryo: Math.max(0, Math.round(Number(run.ryo) || 0)),
-        scrollFragments: Math.max(0, Math.round(Number(run.scrollFragments) || 0)),
-        relics: (Array.isArray(run.relics) ? run.relics : [])
-            .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-            .filter(Boolean),
-        pendingOffers: (Array.isArray(run.pendingOffers) ? run.pendingOffers : [])
-            .map((entry) => {
-                if (!entry || typeof entry !== 'object') return null;
-                const type = typeof entry.type === 'string' ? entry.type.trim().toLowerCase() : '';
-                const id = typeof entry.id === 'string' ? entry.id.trim() : '';
-                return type && id ? { type, id, sourceNodeId: entry.sourceNodeId || null } : null;
-            })
-            .filter(Boolean),
-        currentAct: [1, 2, 3].includes(Number(run.currentAct)) ? Number(run.currentAct) : 2,
-        currentNodeId: typeof run.currentNodeId === 'string' && run.currentNodeId.trim() ? run.currentNodeId.trim() : null,
-        visitedNodeIds: Array.from(
-            new Set(
-                (Array.isArray(run.visitedNodeIds) ? run.visitedNodeIds : [])
-                    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-                    .filter(Boolean)
-            )
-        ),
-        lockedNodeIds: Array.from(
-            new Set(
-                (Array.isArray(run.lockedNodeIds) ? run.lockedNodeIds : [])
-                    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
-                    .filter(Boolean)
-            )
-        ),
-        pendingBattle:
-            run.pendingBattle && typeof run.pendingBattle === 'object'
-                ? {
-                      nodeId:
-                          typeof run.pendingBattle.nodeId === 'string' && run.pendingBattle.nodeId.trim()
-                              ? run.pendingBattle.nodeId.trim()
-                              : '',
-                      matchId:
-                          typeof run.pendingBattle.matchId === 'string' && run.pendingBattle.matchId.trim()
-                              ? run.pendingBattle.matchId.trim()
-                              : '',
-                  }
-                : null,
-        map,
-        startedAt: run.startedAt || null,
-        endedAt: run.endedAt || null,
-        lastNodeResult: run.lastNodeResult && typeof run.lastNodeResult === 'object' ? run.lastNodeResult : null,
-    };
-};
-
-const createDefaultGauntletState = () => ({
-    activeRun: null,
-    completedRuns: 0,
-    wins: 0,
-    losses: 0,
-    abandonedRuns: 0,
-    examMerit: 0,
-    unlockedCharacterIds: [],
-});
-
-const normalizeGauntletState = (gauntletState = {}) => {
-    const source = gauntletState && typeof gauntletState === 'object' ? gauntletState : {};
-    return {
-        activeRun: normalizeGauntletRunState(source.activeRun),
-        completedRuns: Math.max(0, Math.round(Number(source.completedRuns) || 0)),
-        wins: Math.max(0, Math.round(Number(source.wins) || 0)),
-        losses: Math.max(0, Math.round(Number(source.losses) || 0)),
-        abandonedRuns: Math.max(0, Math.round(Number(source.abandonedRuns) || 0)),
-        examMerit: Math.max(0, Math.round(Number(source.examMerit) || 0)),
-        unlockedCharacterIds: Array.from(
-            new Set(
-                (Array.isArray(source.unlockedCharacterIds) ? source.unlockedCharacterIds : [])
-                    .map((entry) => normalizeCharacterId(entry))
-                    .filter(Boolean)
-            )
-        ),
     };
 };
 
@@ -2134,254 +1433,12 @@ const saveMissionCatalog = async (missions, updatedBy) => {
     return normalizedCatalog;
 };
 
-const normalizeStoryNode = (node = {}, index = 0) => {
-    const source = node && typeof node === 'object' ? node : {};
-    const title = typeof source.title === 'string' && source.title.trim() ? source.title.trim() : `Battle ${index + 1}`;
-    const nodeId = slugifyMissionId(
-        typeof source.nodeId === 'string' && source.nodeId.trim() ? source.nodeId.trim() : title
-    ) || `node-${index + 1}`;
-    const enemyTeam = (Array.isArray(source.enemyTeam) ? source.enemyTeam : [])
-        .map((id) => normalizeCharacterId(id))
-        .filter(Boolean)
-        .slice(0, 3);
-    const playerTeam = (Array.isArray(source.playerTeam) ? source.playerTeam : [])
-        .map((id) => normalizeCharacterId(id))
-        .filter(Boolean)
-        .slice(0, 3);
-    const bossScript = (Array.isArray(source.bossScript) ? source.bossScript : [])
-        .map((rule) => (rule && typeof rule.skillId === 'string' && rule.skillId.trim()
-            ? { skillId: rule.skillId.trim(), when: rule.when && typeof rule.when === 'object' ? rule.when : {} }
-            : null))
-        .filter(Boolean);
-    const normalizeDialogue = (entries) =>
-        (Array.isArray(entries) ? entries : [])
-            .map((entry) => (entry && typeof entry.text === 'string' && entry.text.trim()
-                ? {
-                      speaker: typeof entry.speaker === 'string' ? entry.speaker.trim() : '',
-                      portrait: typeof entry.portrait === 'string' ? entry.portrait.trim() : '',
-                      text: entry.text.trim(),
-                  }
-                : null))
-            .filter(Boolean);
-    return {
-        nodeId,
-        title,
-        arcTitle: typeof source.arcTitle === 'string' ? source.arcTitle.trim() : '',
-        episodeRange: typeof source.episodeRange === 'string' ? source.episodeRange.trim() : '',
-        summary: typeof source.summary === 'string' ? source.summary.trim() : '',
-        level_requirement: Math.max(0, Number(source.level_requirement) || 0),
-        image: typeof source.image === 'string' ? source.image.trim() : '',
-        imageAlt:
-            typeof source.imageAlt === 'string' && source.imageAlt.trim()
-                ? source.imageAlt.trim()
-                : `${title} artwork`,
-        enemyTeam,
-        playerTeam,
-        enemyDisplayName:
-            typeof source.enemyDisplayName === 'string' && source.enemyDisplayName.trim()
-                ? source.enemyDisplayName.trim()
-                : GAME_BOT_DISPLAY_NAME,
-        bossScript,
-        introDialogue: normalizeDialogue(source.introDialogue),
-        outroDialogueWin: normalizeDialogue(source.outroDialogueWin),
-        outroDialogueLoss: normalizeDialogue(source.outroDialogueLoss),
-        reward_character: normalizeCharacterId(source.reward_character) || null,
-        rewardText: typeof source.rewardText === 'string' ? source.rewardText.trim() : '',
-        requiresPreviousNode: source.requiresPreviousNode !== false,
-        sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1,
-    };
-};
-
-const normalizeStoryCatalog = (chapters = []) =>
-    (Array.isArray(chapters) ? chapters : [])
-        .map((chapter, index) => {
-            const source = chapter && typeof chapter === 'object' ? chapter : {};
-            const title =
-                typeof source.title === 'string' && source.title.trim() ? source.title.trim() : `Chapter ${index + 1}`;
-            const chapterId = slugifyMissionId(
-                typeof source.chapterId === 'string' && source.chapterId.trim() ? source.chapterId.trim() : title
-            ) || `chapter-${index + 1}`;
-            return {
-                chapterId,
-                title,
-                sortOrder: Number.isFinite(Number(source.sortOrder)) ? Number(source.sortOrder) : index + 1,
-                nodes: (Array.isArray(source.nodes) ? source.nodes : []).map((node, nodeIndex) =>
-                    normalizeStoryNode(node, nodeIndex)
-                ),
-            };
-        })
-        .filter((chapter) => chapter.chapterId && chapter.nodes.length)
-        .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
-
-const getDefaultStoryCatalog = () => normalizeStoryCatalog(buildPartOneStoryCatalog());
-
-const isGeneratedStoryDialogueNode = (node = {}) => {
-    const planEntry = PART_ONE_STORY_PLAN.find((entry) => entry.nodeId === node.nodeId);
-    if (!planEntry) {
-        return false;
-    }
-    const intro = Array.isArray(node.introDialogue) ? node.introDialogue[0] : null;
-    const win = Array.isArray(node.outroDialogueWin) ? node.outroDialogueWin[0] : null;
-    const loss = Array.isArray(node.outroDialogueLoss) ? node.outroDialogueLoss[0] : null;
-    const generatedIntroSpeaker = planEntry.title.replace(/^Chapter\s+\d+:\s*/i, '');
-    return (
-        intro?.speaker === generatedIntroSpeaker &&
-        intro?.text === planEntry.summary &&
-        win?.speaker === 'Story' &&
-        win?.text === `${planEntry.nodeTitle} cleared. The next chapter is now within reach.` &&
-        loss?.speaker === 'Story' &&
-        loss?.text === 'Regroup, adjust your plan, and try this chapter again.'
-    );
-};
-
-const mergeStoryNodeWithDefault = (storedNode = {}, defaultNode = {}) => {
-    if (!defaultNode?.nodeId) {
-        return storedNode;
-    }
-    if (!isGeneratedStoryDialogueNode(storedNode)) {
-        return storedNode;
-    }
-    return {
-        ...storedNode,
-        introDialogue: defaultNode.introDialogue,
-        outroDialogueWin: defaultNode.outroDialogueWin,
-        outroDialogueLoss: defaultNode.outroDialogueLoss,
-    };
-};
-
-const mergeStoredStoryCatalogWithDefaults = (storedCatalog = [], defaultCatalog = []) => {
-    if (!Array.isArray(storedCatalog) || !storedCatalog.length) {
-        return defaultCatalog;
-    }
-    const storedNodeIds = storedCatalog.reduce((ids, chapter) => {
-        (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
-            if (node?.nodeId) ids.push(node.nodeId);
-        });
-        return ids;
-    }, []);
-    const legacyDefaultNodeIds = new Set(['chapter-1-node-1', 'chapter-1-node-2']);
-    const isOnlyLegacyDefaultStory =
-        storedNodeIds.length > 0 && storedNodeIds.every((nodeId) => legacyDefaultNodeIds.has(nodeId));
-    if (isOnlyLegacyDefaultStory) {
-        return defaultCatalog;
-    }
-    const storedChapterIds = new Set(storedCatalog.map((chapter) => chapter.chapterId).filter(Boolean));
-    const merged = storedCatalog.map((chapter) => {
-        const defaultChapter = defaultCatalog.find((entry) => entry.chapterId === chapter.chapterId);
-        if (!defaultChapter) {
-            return chapter;
-        }
-        const defaultNodesById = new Map(
-            (Array.isArray(defaultChapter.nodes) ? defaultChapter.nodes : [])
-                .filter((node) => node?.nodeId)
-                .map((node) => [node.nodeId, node])
-        );
-        const storedNodes = (Array.isArray(chapter.nodes) ? chapter.nodes : []).map((node) =>
-            mergeStoryNodeWithDefault(node, defaultNodesById.get(node.nodeId))
-        );
-        const storedNodeIds = new Set(storedNodes.map((node) => node.nodeId));
-        const missingDefaultNodes = (Array.isArray(defaultChapter.nodes) ? defaultChapter.nodes : []).filter(
-            (node) => node?.nodeId && !storedNodeIds.has(node.nodeId)
-        );
-        return missingDefaultNodes.length
-            ? { ...chapter, nodes: [...storedNodes, ...missingDefaultNodes] }
-            : { ...chapter, nodes: storedNodes };
-    });
-    const missingDefaultChapters = defaultCatalog.filter(
-        (chapter) => chapter?.chapterId && !storedChapterIds.has(chapter.chapterId)
-    );
-    return [...merged, ...missingDefaultChapters].sort(
-        (left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0)
-    );
-};
-
-const getStoredStoryCatalog = async () => {
-    const defaultCatalog = getDefaultStoryCatalog();
-    if (!appStateCollection) {
-        storyCatalogCache = defaultCatalog;
-        return defaultCatalog;
-    }
-    try {
-        const storedState = await appStateCollection.findOne({ key: STORY_CATALOG_STATE_KEY });
-        if (!storedState || !Array.isArray(storedState.chapters)) {
-            storyCatalogCache = defaultCatalog;
-            return defaultCatalog;
-        }
-        const storedCatalog = normalizeStoryCatalog(storedState.chapters);
-        storyCatalogCache = storedCatalog;
-        return storedCatalog;
-    } catch (error) {
-        console.error('Stored story catalog error:', error);
-        storyCatalogCache = defaultCatalog;
-        return defaultCatalog;
-    }
-};
-
-const saveStoryCatalog = async (chapters, updatedBy) => {
-    const normalizedCatalog = normalizeStoryCatalog(chapters);
-    if (!normalizedCatalog.length) {
-        throw new Error('At least one story chapter is required.');
-    }
-    await appStateCollection.updateOne(
-        { key: STORY_CATALOG_STATE_KEY },
-        {
-            $set: {
-                key: STORY_CATALOG_STATE_KEY,
-                chapters: normalizedCatalog,
-                updatedAt: new Date(),
-                updatedBy: updatedBy || '',
-            },
-        },
-        { upsert: true }
-    );
-    storyCatalogCache = normalizedCatalog;
-    return normalizedCatalog;
-};
-
-const findStoryNode = (catalog, nodeId) => {
-    const normalizedNodeId = typeof nodeId === 'string' ? nodeId.trim() : '';
-    if (!normalizedNodeId) return null;
-    for (const chapter of Array.isArray(catalog) ? catalog : []) {
-        const node = (Array.isArray(chapter?.nodes) ? chapter.nodes : []).find((n) => n.nodeId === normalizedNodeId);
-        if (node) {
-            return { chapter, node };
-        }
-    }
-    return null;
-};
-
-const flattenStoryNodes = (catalog = []) =>
-    (Array.isArray(catalog) ? catalog : [])
-        .slice()
-        .sort((left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0))
-        .flatMap((chapter) =>
-            (Array.isArray(chapter?.nodes) ? chapter.nodes : [])
-                .slice()
-                .sort((left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0))
-                .map((node) => ({ chapter, node }))
-        );
-
-const getPreviousStoryNode = (catalog = [], nodeId = '') => {
-    const nodes = flattenStoryNodes(catalog);
-    const index = nodes.findIndex((entry) => entry?.node?.nodeId === nodeId);
-    return index > 0 ? nodes[index - 1] : null;
-};
-
 const getMissionLockedCharacterIds = async () => {
     const catalog = missionCatalogCache && Array.isArray(missionCatalogCache)
         ? missionCatalogCache
         : await getStoredMissionCatalog();
-    const storyCatalog = storyCatalogCache && Array.isArray(storyCatalogCache)
-        ? storyCatalogCache
-        : await getStoredStoryCatalog();
     const locked = new Set((Array.isArray(catalog) ? catalog : [])
         .flatMap(getMissionRewardCharacterIds));
-    (Array.isArray(storyCatalog) ? storyCatalog : []).forEach((chapter) => {
-        (Array.isArray(chapter?.nodes) ? chapter.nodes : []).forEach((node) => {
-            const id = normalizeCharacterId(node.reward_character);
-            if (id) locked.add(id);
-        });
-    });
     // Also lock any character that has requiredMissionId set directly on the character
     (Array.isArray(charactersData) ? charactersData : []).forEach((character) => {
         if (character && typeof character.requiredMissionId === 'string' && character.requiredMissionId.trim()) {
@@ -2502,8 +1559,6 @@ const buildDefaultUserProfile = (user = {}) => {
         recentPrivateGames: [],
         recentLadderGames: [],
         missions: createDefaultMissionState(),
-        story: normalizeStoryState(),
-        gauntlet: createDefaultGauntletState(),
         matchmaking: {
             battleBotEnabled: true,
         },
@@ -2878,8 +1933,10 @@ const normalizeUserProfile = (user = {}) => {
         recentPrivateGamesCount24Hours: normalizeRecentQuickGames(source.recentPrivateGames).length,
         recentLadderGamesCount24Hours: normalizeRecentLadderGames(source.recentLadderGames).length,
         missions: normalizeMissionState(source.missions),
-        story: normalizeStoryState(source.story),
-        gauntlet: normalizeGauntletState(source.gauntlet),
+        // Story and gauntlet are retired for now; saved progress passes through untouched
+        // so it is still there when they return.
+        ...(source.story && typeof source.story === 'object' ? { story: source.story } : {}),
+        ...(source.gauntlet && typeof source.gauntlet === 'object' ? { gauntlet: source.gauntlet } : {}),
         matchmaking: {
             battleBotEnabled:
                 typeof matchmaking.battleBotEnabled === 'boolean'
@@ -3448,477 +2505,6 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
     return Object.fromEntries(missionResultsByUsername);
 };
 
-const applyStoryProgressForUsers = async (match, winnerUsername, endedAt) => {
-    if (!match || match.mode !== 'story' || !winnerUsername) {
-        return null;
-    }
-    const nodeId = typeof match.storyMatch?.nodeId === 'string' ? match.storyMatch.nodeId : '';
-    if (!nodeId) {
-        return null;
-    }
-    const humanPlayer = (Array.isArray(match.players) ? match.players : []).find(
-        (player) => player?.username && !isGameBotUsername(player.username)
-    );
-    if (!humanPlayer || humanPlayer.username !== winnerUsername) {
-        return null;
-    }
-
-    const user = await usersCollection.findOne(
-        { username: humanPlayer.username },
-        { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
-    );
-    if (!user) {
-        return null;
-    }
-
-    const storyCatalog = await getStoredStoryCatalog();
-    const found = findStoryNode(storyCatalog, nodeId);
-    const profile = normalizeUserProfile(user);
-    const storyState = normalizeStoryState(profile.story);
-    const progressByNodeId = { ...storyState.progressByNodeId };
-    const previousProgress = normalizeStoryProgressEntry(progressByNodeId[nodeId]);
-    const isHardMode = match.storyMatch?.difficulty === 'hard';
-    const completedAt = previousProgress.completedAt || endedAt || new Date();
-    const hardCompletedAt = isHardMode
-        ? previousProgress.hardCompletedAt || endedAt || new Date()
-        : previousProgress.hardCompletedAt;
-    const shouldAwardHardRyo = isHardMode && !previousProgress.hardRyoAwardedAt;
-    const hardRyoAwarded = previousProgress.hardRyoAwarded + (shouldAwardHardRyo ? STORY_HARD_MODE_RYO_REWARD : 0);
-    progressByNodeId[nodeId] = normalizeStoryProgressEntry({
-        completedAt,
-        hardCompletedAt,
-        hardRyoAwardedAt: shouldAwardHardRyo
-            ? endedAt || new Date()
-            : previousProgress.hardRyoAwardedAt,
-        hardRyoAwarded,
-    });
-
-    const rewardCharacterId = normalizeCharacterId(found?.node?.reward_character);
-    const missionState = normalizeMissionState(profile.missions);
-    const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
-    let unlockedIdsChanged = false;
-    if (rewardCharacterId && !unlockedIds.has(rewardCharacterId)) {
-        unlockedIds.add(rewardCharacterId);
-        unlockedIdsChanged = true;
-    }
-
-    if (shouldAwardHardRyo) {
-        profile.ryo = Math.max(0, Number(profile.ryo) || 0) + STORY_HARD_MODE_RYO_REWARD;
-    }
-
-    const progressChanged =
-        progressByNodeId[nodeId].completedAt !== previousProgress.completedAt ||
-        progressByNodeId[nodeId].hardCompletedAt !== previousProgress.hardCompletedAt ||
-        progressByNodeId[nodeId].hardRyoAwardedAt !== previousProgress.hardRyoAwardedAt ||
-        progressByNodeId[nodeId].hardRyoAwarded !== previousProgress.hardRyoAwarded;
-    const result = {
-        nodeId,
-        difficulty: isHardMode ? 'hard' : 'normal',
-        hardCompleted: Boolean(progressByNodeId[nodeId].hardCompletedAt),
-        hardFirstClear: shouldAwardHardRyo,
-        ryoDelta: shouldAwardHardRyo ? STORY_HARD_MODE_RYO_REWARD : 0,
-        rewardCharacterId: unlockedIdsChanged ? rewardCharacterId : null,
-        unlockedCharacters: unlockedIdsChanged
-            ? [{ characterId: rewardCharacterId, name: getCharacterDisplayNameById(rewardCharacterId) }]
-            : [],
-    };
-
-    if (!progressChanged && !unlockedIdsChanged && !shouldAwardHardRyo) {
-        return null;
-    }
-
-    profile.story = { progressByNodeId };
-    if (unlockedIdsChanged) {
-        profile.missions = {
-            ...profile.missions,
-            unlockedCharacterIds: Array.from(unlockedIds),
-        };
-    }
-
-    const normalizedProfile = normalizeUserProfile({ ...user, profile });
-    await usersCollection.updateOne(
-        { _id: user._id },
-        {
-            $set: {
-                profile: normalizedProfile,
-            },
-        }
-    );
-    return { [humanPlayer.username]: result };
-};
-
-const pickGauntletRandomEntry = (rng, entries = []) => {
-    const pool = Array.isArray(entries) ? entries.filter(Boolean) : [];
-    return pool[Math.floor(rng() * pool.length)] || pool[0] || null;
-};
-
-const buildGauntletModifierSummary = (runState = {}) =>
-    Array.from(new Set(Array.isArray(runState.relics) ? runState.relics : []))
-        .map((id) => {
-            const relic = gauntlet.getRelicById(id);
-            const curse = gauntlet.getCurseById(id);
-            const source = relic || curse;
-            if (!source) return null;
-            return {
-                id: source.id,
-                name: source.name || source.id,
-                description: source.description || '',
-                isCurse: Boolean(source.isCurse || curse),
-            };
-        })
-        .filter(Boolean);
-
-const getGauntletRng = (runState = {}, node = {}, purpose = '') =>
-    gauntlet.createSeededRng(`${runState.seed || 'gauntlet'}:${node.id || ''}:${purpose}`);
-
-const getOppositeGauntletScrollType = (runState = {}) =>
-    runState.startingScrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
-        ? gauntlet.EXAM_SCROLL_TYPES.HEAVEN
-        : gauntlet.EXAM_SCROLL_TYPES.EARTH;
-
-const applyGauntletHpDelta = (runState = {}, target = 'all', amount = 0, rng = Math.random) => {
-    const delta = Math.round(Number(amount) || 0);
-    const hp = Array.isArray(runState.teamHp) ? runState.teamHp.slice() : [];
-    const applyAtIndex = (index) => {
-        const current = Math.max(1, Math.min(100, Math.round(Number(hp[index]) || 100)));
-        hp[index] = Math.max(1, Math.min(100, current + delta));
-    };
-    if (target === 'one') {
-        const livingIndices = hp.map((value, index) => (Number(value) > 0 ? index : null)).filter((index) => index !== null);
-        const pickedIndex = livingIndices[Math.floor(rng() * livingIndices.length)] ?? 0;
-        applyAtIndex(pickedIndex);
-    } else {
-        hp.forEach((_, index) => applyAtIndex(index));
-    }
-    runState.teamHp = hp;
-};
-
-const addGauntletRewardToRun = (runState = {}, reward = {}) => {
-    runState.ryo = Math.max(0, (Number(runState.ryo) || 0) + (Number(reward.ryo) || 0));
-    runState.scrollFragments = Math.max(
-        0,
-        (Number(runState.scrollFragments) || 0) + (Number(reward.scrollFragments) || 0)
-    );
-    runState.heavenScrolls = Math.max(0, (Number(runState.heavenScrolls) || 0) + (Number(reward.heavenScrolls) || 0));
-    runState.earthScrolls = Math.max(0, (Number(runState.earthScrolls) || 0) + (Number(reward.earthScrolls) || 0));
-    runState.relics = Array.from(
-        new Set([...(Array.isArray(runState.relics) ? runState.relics : []), ...(Array.isArray(reward.relics) ? reward.relics : [])])
-    );
-    if (reward.benchAvailable) {
-        runState.benchAvailable = true;
-    }
-    const curseOffers = Array.isArray(reward.curseOffers) ? reward.curseOffers : [];
-    if (curseOffers.length > 0) {
-        const existing = Array.isArray(runState.pendingOffers) ? runState.pendingOffers : [];
-        runState.pendingOffers = [
-            ...existing,
-            ...curseOffers.map((id) => ({
-                type: 'curse',
-                id,
-                sourceNodeId: reward.nodeId || reward.eventId || null,
-            })),
-        ];
-    }
-};
-
-const getGauntletActOneEventForRun = (runState = {}) => {
-    const step = Math.max(0, Math.min(3, Math.round(Number(runState.actOneStep) || 0)));
-    return step < 3 ? gauntlet.ACT_ONE_EVENTS[step] || null : null;
-};
-
-const resolveGauntletActOneChoice = (runState = {}, choiceIndex = 0) => {
-    const nextRun = normalizeGauntletRunState(runState);
-    const event = getGauntletActOneEventForRun(nextRun);
-    const pickedChoice = Array.isArray(event?.choices) ? event.choices[choiceIndex] || null : null;
-    if (!event || !pickedChoice) {
-        throw new Error('A valid Written Test choice is required.');
-    }
-    const fakeNode = {
-        id: `act1-${nextRun.actOneStep + 1}`,
-        row: 0,
-        type: gauntlet.NODE_TYPES.EVENT,
-        content: { eventId: event.eventId },
-    };
-    const reward = getGauntletNodeReward(nextRun, fakeNode, { choiceIndex });
-    addGauntletRewardToRun(nextRun, reward);
-    nextRun.actOneStep += 1;
-    nextRun.currentAct = nextRun.actOneStep >= 3 ? 2 : 1;
-    nextRun.lastNodeResult = {
-        nodeId: fakeNode.id,
-        nodeType: 'act1_event',
-        clearedAt: new Date(),
-        reward,
-    };
-    return nextRun;
-};
-
-const getGauntletBattleReward = (runState = {}, node = {}) => {
-    const reward = {
-        ryo: 0,
-        scrollFragments: 0,
-        heavenScrolls: 0,
-        earthScrolls: 0,
-        relics: [],
-        curseOffers: [],
-        recruitOffer: false,
-        benchAvailable: false,
-    };
-    const type = typeof node?.type === 'string' ? node.type : '';
-    if (type === gauntlet.NODE_TYPES.BATTLE || type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
-        const rng = getGauntletRng(runState, node, 'battle-reward');
-        const rewardRange = Array.isArray(node.content?.rewardRyo) ? node.content.rewardRyo : [25, 40];
-        const minRyo = Math.max(0, Math.round(Number(rewardRange[0]) || 0));
-        const maxRyo = Math.max(minRyo, Math.round(Number(rewardRange[1]) || minRyo));
-        reward.ryo = minRyo + Math.floor(rng() * (maxRyo - minRyo + 1));
-        const scrollDropChance = Math.max(0, Math.min(1, Number(node.content?.scrollDropChance) || 0));
-        if (rng() < scrollDropChance) {
-            const scrollType = getOppositeGauntletScrollType(runState);
-            if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
-                reward.earthScrolls = 1;
-            } else {
-                reward.heavenScrolls = 1;
-            }
-        }
-        if (type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
-            reward.scrollFragments = 1;
-            const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
-            if (relic?.id) {
-                reward.relics.push(relic.id);
-            }
-        }
-        return reward;
-    }
-    return reward;
-};
-
-const getGauntletNodeReward = (runState = {}, node = {}, options = {}) => {
-    const reward = getGauntletBattleReward(runState, node);
-    const type = typeof node?.type === 'string' ? node.type : '';
-    if (type === gauntlet.NODE_TYPES.BATTLE || type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
-        return reward;
-    }
-    if (type === gauntlet.NODE_TYPES.EVENT) {
-        const event = gauntlet.getEventById(node.content?.eventId);
-        const choiceIndex = Math.max(0, Number.parseInt(options.choiceIndex, 10) || 0);
-        const pickedChoice = Array.isArray(event?.choices) ? event.choices[choiceIndex] || event.choices[0] : null;
-        const rng = getGauntletRng(runState, node, `event-${choiceIndex}`);
-        if (pickedChoice) {
-            (Array.isArray(pickedChoice.effects) ? pickedChoice.effects : []).forEach((effect = {}) => {
-                const amount = Math.round(Number(effect.amount) || 0);
-                if (effect.kind === 'ryo') {
-                    reward.ryo += amount;
-                    return;
-                }
-                if (effect.kind === 'ryo_range') {
-                    const min = Math.round(Number(effect.min) || 0);
-                    const max = Math.max(min, Math.round(Number(effect.max) || min));
-                    reward.ryo += min + Math.floor(rng() * (max - min + 1));
-                    return;
-                }
-                if (effect.kind === 'fragment') {
-                    reward.scrollFragments += amount;
-                    return;
-                }
-                if (effect.kind === 'scroll') {
-                    if (effect.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
-                        reward.earthScrolls += amount;
-                    } else {
-                        reward.heavenScrolls += amount;
-                    }
-                    return;
-                }
-                if (effect.kind === 'random_scroll') {
-                    for (let index = 0; index < Math.max(1, amount || 1); index += 1) {
-                        if (rng() < 0.5) {
-                            reward.heavenScrolls += 1;
-                        } else {
-                            reward.earthScrolls += 1;
-                        }
-                    }
-                    return;
-                }
-                if (effect.kind === 'opposite_scroll') {
-                    const scrollType = getOppositeGauntletScrollType(runState);
-                    if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
-                        reward.earthScrolls += Math.max(1, amount || 1);
-                    } else {
-                        reward.heavenScrolls += Math.max(1, amount || 1);
-                    }
-                    return;
-                }
-                if (effect.kind === 'relic' && gauntlet.getRelicById(effect.relicId)) {
-                    reward.relics.push(effect.relicId);
-                    return;
-                }
-                if (effect.kind === 'random_relic') {
-                    const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
-                    if (relic?.id) reward.relics.push(relic.id);
-                    return;
-                }
-                if (effect.kind === 'curse_offer' && gauntlet.getCurseById(effect.curseId)) {
-                    reward.curseOffers.push(effect.curseId);
-                    return;
-                }
-                if (effect.kind === 'hp') {
-                    applyGauntletHpDelta(runState, effect.target, amount, rng);
-                    return;
-                }
-                if (effect.kind === 'recruit_offer') {
-                    reward.recruitOffer = true;
-                    reward.benchAvailable = true;
-                }
-            });
-            reward.eventId = event.eventId;
-            reward.choiceIndex = choiceIndex;
-            reward.choiceLabel = pickedChoice.label;
-        }
-        return reward;
-    }
-    if (type === gauntlet.NODE_TYPES.MERCHANT) {
-        return reward;
-    }
-    if (type === gauntlet.NODE_TYPES.REST_CAMP) {
-        return reward;
-    }
-    if (type === gauntlet.NODE_TYPES.SCROLL_CACHE) {
-        const scrollType = node.content?.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH
-            ? gauntlet.EXAM_SCROLL_TYPES.EARTH
-            : gauntlet.EXAM_SCROLL_TYPES.HEAVEN;
-        if (scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
-            reward.earthScrolls = 1;
-        } else {
-            reward.heavenScrolls = 1;
-        }
-    }
-    return reward;
-};
-
-const applyGauntletNodeClearToRun = (runState = {}, node = {}, options = {}) => {
-    const nextRun = normalizeGauntletRunState(runState);
-    if (!nextRun || !node) return nextRun;
-    const reward = getGauntletNodeReward(nextRun, node, options);
-    nextRun.currentAct = node.row >= gauntlet.DEFAULT_ROWS ? 3 : 2;
-    nextRun.currentNodeId = node.id;
-    nextRun.visitedNodeIds = Array.from(new Set([...(nextRun.visitedNodeIds || []), node.id]));
-    nextRun.lockedNodeIds = Array.from(
-        new Set([...(nextRun.lockedNodeIds || []), ...(Array.isArray(node.locksSiblings) ? node.locksSiblings : [])])
-    );
-    nextRun.pendingBattle = null;
-    addGauntletRewardToRun(nextRun, reward);
-    if (node.type === gauntlet.NODE_TYPES.REST_CAMP) {
-        nextRun.teamHp = (Array.isArray(nextRun.teamHp) ? nextRun.teamHp : []).map(() => 100);
-    }
-    if (node.row === gauntlet.DEFAULT_ROWS) {
-        nextRun.currentAct = 3;
-        nextRun.actThreeStep = 'preliminary';
-    }
-    if (node.id === 'act3-preliminary') {
-        nextRun.currentAct = 3;
-        nextRun.actThreeStep = 'finals';
-    }
-    if (node.id === 'act3-finals') {
-        nextRun.status = 'won';
-        nextRun.currentAct = 3;
-        nextRun.actThreeStep = 'complete';
-        nextRun.endedAt = new Date();
-        nextRun.pendingBattle = null;
-    }
-    nextRun.lastNodeResult = {
-        nodeId: node.id,
-        nodeType: node.type,
-        clearedAt: new Date(),
-        reward,
-    };
-    return nextRun;
-};
-
-const applyGauntletProgressForUsers = async (match, winnerUsername, endedAt) => {
-    if (!match || match.mode !== 'gauntlet') {
-        return null;
-    }
-    const humanPlayer = (Array.isArray(match.players) ? match.players : []).find(
-        (player) => player?.username && !isGameBotUsername(player.username)
-    );
-    if (!humanPlayer) {
-        return null;
-    }
-    const user = await usersCollection.findOne(
-        { username: humanPlayer.username },
-        { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
-    );
-    if (!user) {
-        return null;
-    }
-    const profile = normalizeUserProfile(user);
-    const gauntletState = normalizeGauntletState(profile.gauntlet);
-    const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-    const matchId = typeof match.matchId === 'string' ? match.matchId : '';
-    if (!activeRun?.pendingBattle || activeRun.pendingBattle.matchId !== matchId) {
-        return null;
-    }
-    const node = gauntlet.getNodeById(activeRun.map, activeRun.pendingBattle.nodeId);
-    if (!node) {
-        return null;
-    }
-    const humanUnits = Array.isArray(match.board?.[humanPlayer.username]) ? match.board[humanPlayer.username] : [];
-    activeRun.teamHp = activeRun.team.map((_, index) => {
-        const unit = humanUnits[index];
-        if (!unit) return 0;
-        return Math.max(0, Math.min(Number(unit.hpCap) || battleLogic.DEFAULT_HP, Math.round(Number(unit.hp) || 0)));
-    });
-
-    const didWin = Boolean(winnerUsername) && winnerUsername === humanPlayer.username;
-    let nextRun;
-    if (didWin) {
-        nextRun = applyGauntletNodeClearToRun(activeRun, node);
-    } else {
-        nextRun = {
-            ...activeRun,
-            status: 'lost',
-            pendingBattle: null,
-            endedAt: endedAt || new Date(),
-            lastNodeResult: {
-                nodeId: node.id,
-                nodeType: node.type,
-                clearedAt: endedAt || new Date(),
-                reward: getGauntletNodeReward(activeRun, node),
-                lost: true,
-            },
-        };
-    }
-
-    const runEnded = nextRun.status === 'won' || nextRun.status === 'lost';
-    const nextGauntletState = {
-        ...gauntletState,
-        activeRun: runEnded ? null : nextRun,
-        completedRuns: gauntletState.completedRuns + (runEnded ? 1 : 0),
-        wins: gauntletState.wins + (nextRun.status === 'won' ? 1 : 0),
-        losses: gauntletState.losses + (nextRun.status === 'lost' ? 1 : 0),
-    };
-    profile.gauntlet = normalizeGauntletState(nextGauntletState);
-    const normalizedProfile = normalizeUserProfile({ ...user, profile });
-    await usersCollection.updateOne(
-        { _id: user._id },
-        {
-            $set: {
-                profile: normalizedProfile,
-            },
-        }
-    );
-
-    return {
-        [humanPlayer.username]: {
-            didWin,
-            nodeId: node.id,
-            nodeType: node.type,
-            runStatus: nextRun.status,
-            runEnded,
-            reward: nextRun.lastNodeResult?.reward || null,
-            activeRun: runEnded ? null : nextRun,
-        },
-    };
-};
-
 const addClanExperience = async (clanName, clanExpDelta) => {
     const normalizedClanName = typeof clanName === 'string' ? clanName.trim().toLowerCase() : '';
     const gain = Math.max(0, Number(clanExpDelta) || 0);
@@ -4060,23 +2646,9 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         return null;
     }
 
-    if (match.mode === 'gauntlet') {
-        const gauntletResults = await applyGauntletProgressForUsers(match, winnerUsername, endedAt);
-        match.gauntletResults =
-            gauntletResults && Object.keys(gauntletResults).length > 0 ? gauntletResults : null;
-        return null;
-    }
-
     const missionResults = await applyMissionProgressForUsers(match, winnerUsername, endedAt);
     match.missionResults =
         missionResults && Object.keys(missionResults).length > 0 ? missionResults : null;
-
-    if (match.mode === 'story') {
-        const storyResults = await applyStoryProgressForUsers(match, winnerUsername, endedAt);
-        match.storyResults =
-            storyResults && Object.keys(storyResults).length > 0 ? storyResults : null;
-        return null;
-    }
 
     if (match.mode === 'war') {
         // A scoring failure must not stop the match itself from ending.
@@ -5294,12 +3866,25 @@ const getLatestCharacterReleases = async () => {
     return normalizeLatestCharacterReleases(entries);
 };
 
+// Every request (including each image and stylesheet) checks maintenance mode, so the
+// flag is cached briefly instead of costing a database round trip per file.
+const MAINTENANCE_MODE_CACHE_MS = 5000;
+let maintenanceModeCache = { value: false, expiresAt: 0 };
+
+const invalidateMaintenanceModeCache = () => {
+    maintenanceModeCache = { value: false, expiresAt: 0 };
+};
+
 const getMaintenanceModeState = async () => {
     if (!appStateCollection) {
         return false;
     }
+    if (Date.now() < maintenanceModeCache.expiresAt) {
+        return maintenanceModeCache.value;
+    }
     const state = await appStateCollection.findOne({ key: MAINTENANCE_MODE_STATE_KEY });
-    return Boolean(state?.enabled);
+    maintenanceModeCache = { value: Boolean(state?.enabled), expiresAt: Date.now() + MAINTENANCE_MODE_CACHE_MS };
+    return maintenanceModeCache.value;
 };
 
 const parseSessionTokenFromRequest = (req = {}) => {
@@ -5491,15 +4076,67 @@ app.get('/characters.js', (req, res) => {
     res.send(charactersBrowserScript);
 });
 
-app.use(express.static(path.join(__dirname), {
+const STATIC_MEDIA_PATTERN = /\.(png|jpe?g|gif|webp|svg|ico|ttf|otf|woff2?|mp3|ogg|wav)$/i;
+// Only the client is downloadable: pages, styles, media, and the browser scripts the
+// pages load. Server code, data, tests, docs and config stay private. A new client
+// script must be added here or it will 404.
+const PUBLIC_ROOT_SCRIPTS = new Set([
+    'account-client.js',
+    'admin-shop.js',
+    'border-fit.js',
+    'character-images.js',
+    'character-tracker.js',
+    'charactercreator.js',
+    'charactereditor.js',
+    'characters.js',
+    'clanwars.js',
+    'index.js',
+    'mobile-layout.js',
+    'nav.js',
+    'news-author.js',
+    'news-composer.js',
+    'news-page.js',
+    'recovery-client.js',
+    'roster-catalog.js',
+    'script.js',
+    'selectionHub.js',
+    'selectionRewards.js',
+    'selectionSpin.js',
+    'selectionStore.js',
+    'selectionWar.js',
+    'skill-description-format.js',
+]);
+const PUBLIC_MEDIA_DIRS = new Set(['assets', 'avatars', 'borders', 'hats', 'sounds']);
+const isPublicStaticPath = (requestPath = '') => {
+    let decoded;
+    try {
+        decoded = decodeURIComponent(String(requestPath));
+    } catch (error) {
+        return false;
+    }
+    const segments = decoded.split('/').filter(Boolean);
+    if (!segments.length) return true;
+    if (segments.some((segment) => segment.startsWith('.') || segment.includes('\\'))) return false;
+    const fileName = segments[segments.length - 1];
+    if (segments.length > 1) {
+        return PUBLIC_MEDIA_DIRS.has(segments[0]) && STATIC_MEDIA_PATTERN.test(fileName);
+    }
+    return /\.(html|css)$/i.test(fileName) || STATIC_MEDIA_PATTERN.test(fileName) || PUBLIC_ROOT_SCRIPTS.has(fileName);
+};
+const serveStaticFile = express.static(path.join(__dirname), {
     setHeaders(res, filePath) {
         if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
             // Always revalidate so deploys apply immediately, but let unchanged files answer
             // with a small 304 instead of a full re-download.
             res.set('Cache-Control', 'no-cache, private');
+        } else if (STATIC_MEDIA_PATTERN.test(filePath)) {
+            // Art, fonts and sounds only change on deploy; an hour of reuse keeps page
+            // switches from revalidating hundreds of images (use ?v= to bust sooner).
+            res.set('Cache-Control', 'public, max-age=3600');
         }
     },
-}));
+});
+app.use((req, res, next) => (isPublicStaticPath(req.path) ? serveStaticFile(req, res, next) : next()));
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -6110,53 +4747,6 @@ const buildMatchPayloadForUser = (match, username) => {
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
-        storyResult: match.storyResults?.[username] || null,
-        gauntletResult: match.gauntletResults?.[username] || null,
-        gauntletMatch: match.gauntletMatch
-            ? {
-                  runSeed: match.gauntletMatch.runSeed || null,
-                  nodeId: match.gauntletMatch.nodeId || null,
-                  nodeType: match.gauntletMatch.nodeType || null,
-                  enemyTeamId: match.gauntletMatch.enemyTeamId || null,
-                  enemyDisplayName: match.gauntletMatch.enemyDisplayName || null,
-                  aggressionTier: Math.max(1, Math.min(3, Number(match.gauntletMatch.aggressionTier) || 1)),
-                  resources:
-                      match.gauntletMatch.resources && typeof match.gauntletMatch.resources === 'object'
-                          ? {
-                                heavenScrolls: Math.max(0, Number(match.gauntletMatch.resources.heavenScrolls) || 0),
-                                earthScrolls: Math.max(0, Number(match.gauntletMatch.resources.earthScrolls) || 0),
-                                scrollFragments: Math.max(0, Number(match.gauntletMatch.resources.scrollFragments) || 0),
-                                ryo: Math.max(0, Number(match.gauntletMatch.resources.ryo) || 0),
-                            }
-                          : null,
-                  modifiers: Array.isArray(match.gauntletMatch.modifiers)
-                      ? match.gauntletMatch.modifiers
-                            .map((modifier) => ({
-                                id: typeof modifier?.id === 'string' ? modifier.id : '',
-                                name: typeof modifier?.name === 'string' ? modifier.name : '',
-                                description: typeof modifier?.description === 'string' ? modifier.description : '',
-                                isCurse: Boolean(modifier?.isCurse),
-                            }))
-                            .filter((modifier) => modifier.id && modifier.name)
-                      : [],
-              }
-            : null,
-        storyMatch: match.storyMatch
-            ? {
-                  chapterId: match.storyMatch.chapterId || null,
-                  nodeId: match.storyMatch.nodeId || null,
-                  difficulty: match.storyMatch.difficulty || 'normal',
-                  hardModeRyoReward: Math.max(0, Number(match.storyMatch.hardModeRyoReward) || 0),
-                  enemyDisplayName: match.storyMatch.enemyDisplayName || null,
-                  introDialogue: Array.isArray(match.storyMatch.introDialogue) ? match.storyMatch.introDialogue : [],
-                  outroDialogueWin: Array.isArray(match.storyMatch.outroDialogueWin)
-                      ? match.storyMatch.outroDialogueWin
-                      : [],
-                  outroDialogueLoss: Array.isArray(match.storyMatch.outroDialogueLoss)
-                      ? match.storyMatch.outroDialogueLoss
-                      : [],
-              }
-            : null,
     };
 };
 
@@ -6918,168 +5508,6 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
     return matchDocument;
 };
 
-const applyHardStoryModifiersToBoard = (board, botUsername) => {
-    const botUnits = Array.isArray(board?.[botUsername]) ? board[botUsername] : [];
-    const aliveEnemyCount = Math.max(1, botUnits.filter((unit) => unit && unit.alive !== false).length || 1);
-    const pressureScale = aliveEnemyCount === 1 ? 3 : aliveEnemyCount === 2 ? 2 : 1;
-    botUnits.forEach((unit) => {
-        if (!unit || unit.alive === false) return;
-        unit.state = unit.state && typeof unit.state === 'object' ? unit.state : {};
-        unit.state.statuses = Array.isArray(unit.state.statuses) ? unit.state.statuses : [];
-        unit.state.statuses.push({
-            id: 'story_hard_mode_enemy_pressure',
-            remainingTurns: 99,
-            sourceUsername: botUsername,
-            metadata: {
-                helpful: true,
-                destructibleDefensePoints: 15 + pressureScale * 15,
-                damageReductionFlat: pressureScale * 5,
-                damageBonusFlat: pressureScale * 5,
-                turnEndGainChakra: {
-                    chakraType: 'random',
-                    amount: pressureScale,
-                },
-                tooltipText:
-                    'Hard Mode: This character has destructible defense, damage reduction, bonus damage, and gains 1 random chakra each turn.',
-            },
-        });
-    });
-};
-
-const buildStoryBattleBotMatch = async ({ username, team, chapter, node, difficulty = 'normal' }) => {
-    const isHardMode = difficulty === 'hard';
-    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const enemyRosterIndices = resolveRosterIndicesForCharacterIds(node.enemyTeam);
-    const botPlayer = createBattleBotPlayer({
-        matchId,
-        team: enemyRosterIndices.length ? enemyRosterIndices : buildBattleBotTeam(),
-        ladderLevel: isHardMode ? 30 : 1,
-        displayName: isHardMode ? `${node.enemyDisplayName} (Hard)` : node.enemyDisplayName,
-    });
-    const aliveLookup = {
-        [username]: Array.isArray(team) ? team.length : 3,
-        [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
-    };
-    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
-    const playerDocs = [
-        {
-            username,
-            team,
-            aliveCount: aliveLookup[username],
-        },
-        botPlayer,
-    ];
-    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
-    if (isHardMode) {
-        applyHardStoryModifiersToBoard(board, botPlayer.username);
-    }
-    const matchDocument = {
-        matchId: built.matchId,
-        mode: 'story',
-        status: 'active',
-        createdAt: new Date(),
-        matchStartsAt: built.matchStartsAt,
-        chakraPools: built.chakraPools,
-        economy: built.economy,
-        pendingTurns: built.pendingTurns,
-        currentTurn: built.currentTurn,
-        turnStartedAt: built.turnStartedAt,
-        turnOrder: built.turnOrder,
-        turnExpiresAt: built.turnExpiresAt,
-        board,
-        players: playerDocs,
-        botMatch: {
-            enabled: true,
-            displayName: botPlayer.displayName || node.enemyDisplayName,
-        },
-        storyMatch: {
-            chapterId: chapter.chapterId,
-            nodeId: node.nodeId,
-            difficulty: isHardMode ? 'hard' : 'normal',
-            hardModeRyoReward: isHardMode ? STORY_HARD_MODE_RYO_REWARD : 0,
-            bossScript: node.bossScript || null,
-            enemyDisplayName: isHardMode ? `${node.enemyDisplayName} (Hard)` : node.enemyDisplayName,
-            introDialogue: node.introDialogue || [],
-            outroDialogueWin: node.outroDialogueWin || [],
-            outroDialogueLoss: node.outroDialogueLoss || [],
-        },
-    };
-    await insertMatchActive(matchDocument);
-    return matchDocument;
-};
-
-const buildGauntletBattleBotMatch = async ({ username, runState, node }) => {
-    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const enemyTeam = gauntlet.getEnemyTeamById(node?.content?.enemyTeamId) || gauntlet.ENEMY_TEAMS[0];
-    const enemyRosterIndices = resolveRosterIndicesForCharacterIds(enemyTeam?.characterIds || []);
-    const botPlayer = createBattleBotPlayer({
-        matchId,
-        team: enemyRosterIndices.length ? enemyRosterIndices : buildBattleBotTeam(),
-        ladderLevel: Math.max(1, Number(node?.content?.aggressionTier) || 1),
-        displayName: enemyTeam?.name || 'Forest Rival Team',
-    });
-    const team = Array.isArray(runState?.team) ? runState.team.slice(0, 3) : [];
-    const aliveLookup = {
-        [username]: team.length || 3,
-        [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
-    };
-    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
-    const playerDocs = [
-        {
-            username,
-            team,
-            aliveCount: aliveLookup[username],
-        },
-        botPlayer,
-    ];
-    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
-    const playerUnits = Array.isArray(board?.[username]) ? board[username] : [];
-    playerUnits.forEach((unit, index) => {
-        if (!unit) return;
-        const hp = Number(Array.isArray(runState?.teamHp) ? runState.teamHp[index] : battleLogic.DEFAULT_HP);
-        const hpCap = Number(unit.hpCap) || battleLogic.DEFAULT_HP;
-        unit.hp = Math.max(1, Math.min(hpCap, Number.isFinite(hp) ? Math.round(hp) : hpCap));
-        unit.alive = unit.hp > 0;
-    });
-    const matchDocument = {
-        matchId: built.matchId,
-        mode: 'gauntlet',
-        status: 'active',
-        createdAt: new Date(),
-        matchStartsAt: built.matchStartsAt,
-        chakraPools: built.chakraPools,
-        economy: built.economy,
-        pendingTurns: built.pendingTurns,
-        currentTurn: built.currentTurn,
-        turnStartedAt: built.turnStartedAt,
-        turnOrder: built.turnOrder,
-        turnExpiresAt: built.turnExpiresAt,
-        board,
-        players: playerDocs,
-        botMatch: {
-            enabled: true,
-            displayName: botPlayer.displayName || enemyTeam?.name || 'Forest Rival Team',
-        },
-        gauntletMatch: {
-            runSeed: runState?.seed || null,
-            nodeId: node?.id || null,
-            nodeType: node?.type || null,
-            enemyTeamId: enemyTeam?.id || null,
-            enemyDisplayName: enemyTeam?.name || 'Forest Rival Team',
-            aggressionTier: Math.max(1, Math.min(3, Number(node?.content?.aggressionTier) || 1)),
-            resources: {
-                heavenScrolls: Math.max(0, Number(runState?.heavenScrolls) || 0),
-                earthScrolls: Math.max(0, Number(runState?.earthScrolls) || 0),
-                scrollFragments: Math.max(0, Number(runState?.scrollFragments) || 0),
-                ryo: Math.max(0, Number(runState?.ryo) || 0),
-            },
-            modifiers: buildGauntletModifierSummary(runState),
-        },
-    };
-    await insertMatchActive(matchDocument);
-    return matchDocument;
-};
-
 const clearScheduledBattleBotQueueCheck = (username) => {
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
     if (!normalizedUsername) return;
@@ -7422,21 +5850,6 @@ const botCanAffordSkill = ({ match, username, skill, actorState }) => {
     return remainingPool >= Math.max(0, Number(pending.unresolvedRandom) || 0) + requiredRandom;
 };
 
-const getBattleBotTurnActionLimit = ({ match, username }) => {
-    if (match?.mode !== 'gauntlet') {
-        return Number.POSITIVE_INFINITY;
-    }
-    const tier = Math.max(1, Math.min(3, Number(match?.gauntletMatch?.aggressionTier) || 1));
-    const botTurnCount = Math.max(0, Number(match?.economy?.turnCounts?.[username]) || 0);
-    if (tier <= 1) {
-        return 1;
-    }
-    if (tier === 2) {
-        return botTurnCount === 0 ? 1 : 2;
-    }
-    return 2;
-};
-
 const chooseBattleBotTargetSelection = (options = {}) => {
     const targets = Array.isArray(options.targets) ? options.targets : [];
     if (!targets.length) {
@@ -7461,125 +5874,6 @@ const assignBattleBotRandomChakra = ({ match, username }) => {
         const nextPending = getPendingTurn(match, username);
         pending.unresolvedRandom = nextPending.unresolvedRandom;
     }
-};
-
-const classifySkillEffects = (skill) => {
-    const effects = Array.isArray(skill?.effects) ? skill.effects : [];
-    const hasType = (type) => effects.some((effect) => effect && effect.type === type);
-    return {
-        isDamage: hasType('damage') || hasType('health_steal_damage') || hasType('execute_below_hp'),
-        isHeal: hasType('heal'),
-        isCleanse: hasType('cleanse_statuses'),
-    };
-};
-
-const isTargetAlly = (target, actingUsername) => Boolean(target) && target.username === actingUsername;
-
-const pickLowestHpFractionTarget = (hydrated, targets = []) => {
-    let best = null;
-    let bestFraction = Infinity;
-    (Array.isArray(targets) ? targets : []).forEach((target) => {
-        const unit = hydrated?.board?.[target?.username]?.[target?.slot];
-        if (!unit || unit.alive === false) {
-            return;
-        }
-        const fraction = (Number(unit.hp) || 0) / (Number(battleLogic.DEFAULT_HP) || 100);
-        if (fraction < bestFraction) {
-            bestFraction = fraction;
-            best = target;
-        }
-    });
-    return best || targets[0] || null;
-};
-
-// Picks a smarter target than random: damage/harmful skills go to the lowest-HP enemy,
-// heals go to the lowest-HP ally. Falls back to null so callers can use the random default.
-const pickBestTargetSelection = ({ hydrated, actingUsername, skill, options }) => {
-    const targets = Array.isArray(options?.targets) ? options.targets : [];
-    if (!targets.length) {
-        return null;
-    }
-    if (options.mode === 'all') {
-        return targets;
-    }
-    if (options.mode !== 'single') {
-        return null;
-    }
-    const classification = classifySkillEffects(skill);
-    let pool = targets;
-    if (options.targetType === 'single-character') {
-        const filtered = targets.filter((target) =>
-            classification.isHeal ? isTargetAlly(target, actingUsername) : !isTargetAlly(target, actingUsername)
-        );
-        if (filtered.length) {
-            pool = filtered;
-        }
-    }
-    const picked = pickLowestHpFractionTarget(hydrated, pool);
-    return picked ? [picked] : null;
-};
-
-// Heuristic priority score for a skill: favors damage, favors healing only when an ally is
-// actually hurt (so the bot doesn't waste heals at full HP), mildly favors cleansing.
-const scoreSkillChoice = ({ hydrated, actingUsername, skill }) => {
-    const classification = classifySkillEffects(skill);
-    let score = 1;
-    if (classification.isDamage) {
-        score += 5;
-    }
-    if (classification.isHeal) {
-        const team = Array.isArray(hydrated?.board?.[actingUsername]) ? hydrated.board[actingUsername] : [];
-        const hurtAlly = team.some(
-            (unit) =>
-                unit &&
-                unit.alive !== false &&
-                (Number(unit.hp) || 0) < (Number(battleLogic.DEFAULT_HP) || 100) * 0.4
-        );
-        score += hurtAlly ? 8 : -3;
-    }
-    if (classification.isCleanse) {
-        score += 2;
-    }
-    return score;
-};
-
-const bossScriptRuleMatches = ({ rule, turnNumber, actorHpFraction }) => {
-    const when = rule?.when || {};
-    if (Number.isFinite(Number(when.turnGte)) && turnNumber < Number(when.turnGte)) {
-        return false;
-    }
-    if (Number.isFinite(Number(when.selfHpBelowFraction)) && actorHpFraction >= Number(when.selfHpBelowFraction)) {
-        return false;
-    }
-    return true;
-};
-
-// Orders a boss's skill indices for a turn: scripted rules (matched against turn/HP
-// conditions) come first in priority order, remaining skills are ranked by heuristic score.
-// Legality/affordability is still validated by the caller for each candidate in turn.
-const orderStoryBotSkillIndices = ({ hydrated, username, actorUnit, character, candidateIndices, bossScript }) => {
-    const turnNumber = Number(hydrated?.economy?.turnCounts?.[username]) || 0;
-    const actorHpFraction = (Number(actorUnit?.hp) || 0) / (Number(battleLogic.DEFAULT_HP) || 100);
-    const skills = Array.isArray(character?.skills) ? character.skills : [];
-    const priorityIndices = [];
-    (Array.isArray(bossScript) ? bossScript : []).forEach((rule) => {
-        if (!bossScriptRuleMatches({ rule, turnNumber, actorHpFraction })) {
-            return;
-        }
-        const skillIndex = skills.findIndex((skill) => skill?.id === rule.skillId);
-        if (skillIndex >= 0 && candidateIndices.includes(skillIndex) && !priorityIndices.includes(skillIndex)) {
-            priorityIndices.push(skillIndex);
-        }
-    });
-    const remaining = candidateIndices
-        .filter((index) => !priorityIndices.includes(index))
-        .map((index) => ({
-            index,
-            score: scoreSkillChoice({ hydrated, actingUsername: username, skill: skills[index] }),
-        }))
-        .sort((a, b) => b.score - a.score)
-        .map((entry) => entry.index);
-    return [...priorityIndices, ...remaining];
 };
 
 const resolveTurnStartChoiceForUser = ({ match, username, choiceKey }) => {
@@ -7688,17 +5982,12 @@ const runBattleBotTurn = async (matchId) => {
         }
 
         const team = Array.isArray(hydrated.board?.[username]) ? hydrated.board[username] : [];
-        const actionLimit = getBattleBotTurnActionLimit({ match: hydrated, username });
-        let queuedActionCount = Object.keys(pendingTurn.queuedByActorSlot || {}).length;
         const actorSlots = shuffleList(
             team
                 .map((unit, slot) => (unit && unit.alive !== false ? slot : null))
                 .filter((slot) => Number.isInteger(slot))
         );
         if (!passiveBot) actorSlots.forEach((actorSlot) => {
-            if (queuedActionCount >= actionLimit) {
-                return;
-            }
             const actorUnit = hydrated.board?.[username]?.[actorSlot];
             if (!actorUnit || actorUnit.alive === false) {
                 return;
@@ -7708,7 +5997,6 @@ const runBattleBotTurn = async (matchId) => {
                 return;
             }
             const character = charactersData?.[actorUnit.rosterIndex];
-            const isStoryBot = hydrated.mode === 'story' || hydrated.mode === 'gauntlet';
             // Hidden alt-skill entries (e.g. Dosu's "-improved" variants, Jiraiya's
             // locked follow-ups) only exist to be swapped in at their base skill's
             // slot via skillReplacements once unlocked -- they are not independent
@@ -7719,16 +6007,7 @@ const runBattleBotTurn = async (matchId) => {
                     skill && !skill.hiddenFromSelectionViewer && !skill.omitFromSelectionViewer ? index : null
                 )
                 .filter((index) => index !== null);
-            const skillIndices = isStoryBot
-                ? orderStoryBotSkillIndices({
-                      hydrated,
-                      username,
-                      actorUnit,
-                      character,
-                      candidateIndices: baseSkillIndices,
-                      bossScript: hydrated.storyMatch?.bossScript,
-                  })
-                : shuffleList(baseSkillIndices);
+            const skillIndices = shuffleList(baseSkillIndices);
             for (const skillIndex of skillIndices) {
                 const options = battleLogic.computeTargetOptions({
                     match: hydrated,
@@ -7752,10 +6031,7 @@ const runBattleBotTurn = async (matchId) => {
                 const classChoiceOptions = Array.isArray(skill?.classChoiceOptions)
                     ? skill.classChoiceOptions.map((entry) => normalizeClassChoice(entry)).filter(Boolean)
                     : [];
-                const targetSelection = isStoryBot
-                    ? pickBestTargetSelection({ hydrated, actingUsername: username, skill, options }) ||
-                      chooseBattleBotTargetSelection(options)
-                    : chooseBattleBotTargetSelection(options);
+                const targetSelection = chooseBattleBotTargetSelection(options);
                 if (!targetSelection) {
                     continue;
                 }
@@ -7768,7 +6044,6 @@ const runBattleBotTurn = async (matchId) => {
                         targetSelection,
                         classChoice: classChoiceOptions[0] || null,
                     });
-                    queuedActionCount += 1;
                     break;
                 } catch (error) {
                     continue;
@@ -8187,8 +6462,6 @@ const ensureBoardState = async (match) => {
                     combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
-                    storyResults: match.storyResults || null,
-                    gauntletResults: match.gauntletResults || null,
                 },
             }
         );
@@ -8277,8 +6550,6 @@ const finalizeTurn = async (match, username) => {
                     combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                     ladderResults: match.ladderResults || null,
                     missionResults: match.missionResults || null,
-                    storyResults: match.storyResults || null,
-                    gauntletResults: match.gauntletResults || null,
                 },
             }
         );
@@ -8401,8 +6672,6 @@ async function ensureEarlyAccessNewsPost() {
                 content: `Welcome Shinobi! Early Access Weekend is officially live.\n\n` +
                     `### What's New & Ready to Play:\n` +
                     `- **Quick & Ladder Battles**: Queue against active players or automated battle bots.\n` +
-                    `- **Chunin Exams (PvE Gauntlet)**: Draft relics, manage chakra scrolls, and battle through exam stages.\n` +
-                    `- **Story Missions**: Complete classic saga encounters and unlock mission-exclusive characters.\n` +
                     `- **Mobile Optimization**: Complete viewport fit, pinch-zoom support, and touch UI polish.\n` +
                     `- **In-Game Surrender & Active Match Resume**: Never get stranded; resume your active match if disconnected.\n\n` +
                     `Found a bug or issue? Click **🐛 Report Bug** on any screen!`,
@@ -8902,6 +7171,9 @@ async function initDb() {
         serializeCharactersDataFile,
         latestReleasesUpdateSchema,
         maintenanceModeUpdateSchema,
+        MAINTENANCE_MODE_STATE_KEY,
+        getMaintenanceModeState,
+        invalidateMaintenanceModeCache,
         matchesCollection,
         teamSchema,
         userToMatch,
@@ -8924,8 +7196,6 @@ async function initDb() {
         inspectRemoteImage,
         getStoredMissionCatalog,
         saveMissionCatalog,
-        getStoredStoryCatalog,
-        saveStoryCatalog,
     });
     app.use('/api/admin', adminRouter);
 
@@ -9002,8 +7272,6 @@ async function initDb() {
     app.use(clanWarsRouter);
 }
 
-app.use('/avatars', express.static(path.join(__dirname, 'avatars')));
-app.use('/borders', express.static(path.join(__dirname, 'borders')));
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
 
 app.get(['/health', '/api/health'], (req, res) => {
@@ -9078,40 +7346,6 @@ const matchJoinSchema = Joi.object({
     mode: Joi.string().valid('quick', 'ladder', 'private', 'war').default('quick'),
     targetUsername: Joi.string().trim().min(1).max(64).allow('').optional(),
     warSetId: Joi.string().trim().max(128).allow('').optional(),
-});
-
-const storyStartSchema = Joi.object({
-    nodeId: Joi.string().trim().min(1).max(128).required(),
-    difficulty: Joi.string().valid('normal', 'hard').default('normal'),
-    team: teamSchema.optional(),
-});
-
-const gauntletRunStartSchema = Joi.object({
-    team: teamSchema.optional(),
-    seed: Joi.string().trim().min(1).max(128).optional(),
-    startingScrollType: Joi.string().valid('heaven', 'earth').default('heaven'),
-});
-
-const gauntletNodeEnterSchema = Joi.object({
-    nodeId: Joi.string().trim().min(1).max(32).required(),
-    choiceIndex: Joi.number().integer().min(0).max(8).optional(),
-});
-
-const gauntletActOneChoiceSchema = Joi.object({
-    choiceIndex: Joi.number().integer().min(0).max(8).required(),
-});
-
-const gauntletMerchantBuySchema = Joi.object({
-    itemType: Joi.string().valid('heaven_scroll', 'earth_scroll', 'heal', 'random_relic').required(),
-});
-
-const gauntletForgeScrollSchema = Joi.object({
-    scrollType: Joi.string().valid('heaven', 'earth').required(),
-});
-
-const gauntletOfferAcceptSchema = Joi.object({
-    offerType: Joi.string().valid('curse').required(),
-    offerId: Joi.string().trim().min(1).max(128).required(),
 });
 
 const publicProfileLookupSchema = Joi.object({
@@ -9484,111 +7718,6 @@ app.post('/api/team/save', requireSession, async (req, res) => {
 });
 
 
-app.post('/api/story/start', requireSession, async (req, res) => {
-    try {
-        const username = req.authUser.username;
-        const { error: validationError, value } = storyStartSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A story battle is required.' });
-        }
-        const { nodeId, difficulty } = value;
-        const isHardMode = difficulty === 'hard';
-
-        if (userToMatch.has(username)) {
-            return res.status(409).json({ error: 'You are already in a match.' });
-        }
-        const existingMatch = await matchesCollection.findOne({
-            'players.username': username,
-            status: { $ne: 'ended' },
-        });
-        if (existingMatch) {
-            return res.status(409).json({ error: 'You are already in a match.' });
-        }
-
-        const user = await usersCollection.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-
-        const storyCatalog = await getStoredStoryCatalog();
-        const found = findStoryNode(storyCatalog, nodeId);
-        if (!found) {
-            return res.status(404).json({ error: 'Story battle not found.' });
-        }
-        const userLevel = Number(profile?.ladder?.level) || 1;
-        if (found.node.level_requirement > 0 && userLevel < found.node.level_requirement) {
-            return res.status(403).json({ error: 'You are not a high enough level for this battle yet.' });
-        }
-        if (found.node.requiresPreviousNode !== false) {
-            const previous = getPreviousStoryNode(storyCatalog, found.node.nodeId);
-            if (previous?.node?.nodeId) {
-                const storyState = normalizeStoryState(profile.story);
-                const previousProgress = storyState.progressByNodeId[previous.node.nodeId];
-                if (!previousProgress?.completedAt) {
-                    return res.status(403).json({
-                        error: `Clear "${previous.node.title}" before starting this battle.`,
-                    });
-                }
-            }
-        }
-        const storyState = normalizeStoryState(profile.story);
-        if (isHardMode && !storyState.progressByNodeId[found.node.nodeId]?.completedAt) {
-            return res.status(403).json({ error: 'Clear this story battle before starting Hard Mode.' });
-        }
-
-        const normalTeam = resolveRosterIndicesForCharacterIds(found.node.playerTeam);
-        if (normalTeam.length !== found.node.playerTeam.length) {
-            console.error(`Story node ${nodeId} has an invalid playerTeam entry.`);
-            return res.status(500).json({ error: 'This story battle is misconfigured.' });
-        }
-        const hardTeam = Array.isArray(value.team) ? value.team : Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
-        const team = isHardMode ? hardTeam : normalTeam;
-        if (isHardMode) {
-            const { error: hardTeamError } = teamSchema.validate(team);
-            if (hardTeamError) {
-                return res.status(400).json({ error: 'Save a full selected team before starting Hard Mode.' });
-            }
-            try {
-                await assertTeamCanBeUsed(profile, team, user.role);
-            } catch (error) {
-                return res.status(403).json({ error: error.message || 'Your saved team contains a locked character.' });
-            }
-        }
-
-        const matchDocument = await buildStoryBattleBotMatch({
-            username,
-            team,
-            chapter: found.chapter,
-            node: found.node,
-            difficulty,
-        });
-        const opponentDisplayName = isHardMode ? `${found.node.enemyDisplayName} (Hard)` : found.node.enemyDisplayName;
-        userToMatch.set(username, { matchId: matchDocument.matchId, opponent: opponentDisplayName });
-        scheduleBattleBotTurn(matchDocument);
-        const safePayload = buildMatchPayloadForUser(matchDocument, username);
-        return res.json({
-            ok: true,
-            matchFound: true,
-            matchId: matchDocument.matchId,
-            mode: 'story',
-            opponent: opponentDisplayName,
-            matchStartsAt: matchDocument.matchStartsAt,
-            matchReady: new Date(matchDocument.matchStartsAt).getTime() <= Date.now(),
-            currentTurn: matchDocument.currentTurn || null,
-            turnOrder: matchDocument.turnOrder || null,
-            turnExpiresAt: matchDocument.turnExpiresAt || null,
-            turnDurationMs: getTurnDurationMsForUser(matchDocument, matchDocument?.currentTurn),
-            chakraPools: safePayload?.chakraPools || null,
-            lastChakraGain: safePayload?.lastChakraGain || null,
-            pendingTurn: safePayload?.pendingTurn || makeEmptyPendingTurn(),
-        });
-    } catch (error) {
-        console.error('Story match start error:', error);
-        return res.status(500).json({ error: 'Internal server error.' });
-    }
-});
-
 app.get('/api/match/status', requireSession, async (req, res) => {
     try {
         const username = req.authUser.username;
@@ -9783,8 +7912,6 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
             endedAt: match.endedAt || null,
             ladderResult: match.ladderResults?.[username] || null,
             missionResult: match.missionResults?.[username] || null,
-            storyResult: match.storyResults?.[username] || null,
-            gauntletResult: match.gauntletResults?.[username] || null,
         });
     }
     const opponentEntry = match.players.find((p) => p.username !== username);
@@ -9807,8 +7934,6 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
                 turnExpiresAt: null,
                 ladderResults: ladderResults || null,
                 missionResults: match.missionResults || null,
-                storyResults: match.storyResults || null,
-                gauntletResults: match.gauntletResults || null,
             },
         }
     );
@@ -9825,8 +7950,6 @@ app.post('/api/match/:matchId/surrender', requireSession, async (req, res) => {
         endedAt,
         ladderResult: ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
-        storyResult: match.storyResults?.[username] || null,
-        gauntletResult: match.gauntletResults?.[username] || null,
     });
 });
 
@@ -10381,34 +8504,6 @@ app.get('/api/missions', async (req, res) => {
     } catch (error) {
         console.error('Mission catalog load error:', error);
         return res.status(500).json({ error: 'Unable to load missions.' });
-    }
-});
-
-app.get('/api/story', async (req, res) => {
-    try {
-        const chapters = await getStoredStoryCatalog();
-        let storyState = { progressByNodeId: {} };
-        let unlockedCharacterIds = [];
-        try {
-            const token = req.cookies?.[SESSION_COOKIE_NAME];
-            const authUser = token ? await getSessionUserFromToken(token) : null;
-            if (authUser) {
-                const normalizedProfile = normalizeUserProfile(authUser);
-                storyState = normalizeStoryState(normalizedProfile.story);
-                unlockedCharacterIds = normalizedProfile.missions.unlockedCharacterIds || [];
-            }
-        } catch (sessionError) {
-            console.warn('Story session lookup failed:', sessionError);
-        }
-        return res.json({
-            ok: true,
-            chapters,
-            storyProgressByNodeId: storyState.progressByNodeId,
-            unlockedCharacterIds,
-        });
-    } catch (error) {
-        console.error('Story catalog load error:', error);
-        return res.status(500).json({ error: 'Unable to load story mode.' });
     }
 });
 
@@ -11904,532 +9999,6 @@ app.post('/api/clan/invitations/accept', requireSession, async (req, res) => {
     }
 });
 
-app.get('/api/gauntlet/catalog', (req, res) => {
-    return res.json({
-        ok: true,
-        relicScrolls: gauntlet.RELIC_SCROLLS,
-        curses: gauntlet.CURSES,
-        actOneEvents: gauntlet.ACT_ONE_EVENTS,
-        actTwoEvents: gauntlet.ACT_TWO_EVENTS,
-        enemyTeams: gauntlet.ENEMY_TEAMS,
-    });
-});
-
-app.get('/api/gauntlet/map-preview', (req, res) => {
-    const rawSeed = typeof req.query?.seed === 'string' ? req.query.seed.trim() : '';
-    const rawStartingScroll =
-        typeof req.query?.startingScrollType === 'string' ? req.query.startingScrollType.trim().toLowerCase() : '';
-    const startingScrollType =
-        rawStartingScroll === gauntlet.EXAM_SCROLL_TYPES.EARTH
-            ? gauntlet.EXAM_SCROLL_TYPES.EARTH
-            : gauntlet.EXAM_SCROLL_TYPES.HEAVEN;
-    const seed = rawSeed || `preview-${Date.now()}`;
-    const map = gauntlet.generateAct2Map({ seed, startingScrollType });
-
-    return res.json({
-        ok: true,
-        map,
-        invariants: {
-            everyPathHasRestAndScrollSources: gauntlet
-                .findAllPaths(map)
-                .every((pathEntries) => gauntlet.pathHasRestAndScrollSource(pathEntries)),
-        },
-    });
-});
-
-app.post('/api/gauntlet/run/start', requireSession, async (req, res) => {
-    try {
-        const username = req.authUser.username;
-        const { error: validationError, value } = gauntletRunStartSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A valid Gauntlet team is required.' });
-        }
-        if (userToMatch.has(username)) {
-            return res.status(409).json({ error: 'Finish your current match before starting a Gauntlet run.' });
-        }
-        const existingMatch = await matchesCollection.findOne({
-            'players.username': username,
-            status: { $ne: 'ended' },
-        });
-        if (existingMatch) {
-            return res.status(409).json({ error: 'Finish your current match before starting a Gauntlet run.' });
-        }
-
-        const user = await usersCollection.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        if (gauntletState.activeRun?.status === 'active') {
-            return res.status(409).json({ error: 'A Gauntlet run is already active.' });
-        }
-
-        const team = Array.isArray(value.team) ? value.team : Array.isArray(user.savedTeamIndices) ? user.savedTeamIndices : [];
-        const { error: teamError } = teamSchema.validate(team);
-        if (teamError) {
-            return res.status(400).json({ error: 'Save or provide a full selected team before starting Gauntlet.' });
-        }
-        try {
-            await assertTeamCanBeUsed(profile, team, user.role);
-        } catch (error) {
-            return res.status(403).json({ error: error.message || 'Your Gauntlet team contains a locked character.' });
-        }
-
-        const seed = value.seed || `gauntlet-${Date.now()}`;
-        const map = gauntlet.generateAct2Map({ seed, startingScrollType: value.startingScrollType });
-        const activeRun = {
-            ...gauntlet.createInitialRunState({
-                seed,
-                team,
-                startingScrollType: value.startingScrollType,
-                map,
-            }),
-        };
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-
-        return res.status(201).json({
-            ok: true,
-            run: normalizedProfile.gauntlet.activeRun,
-            actOneEvent: getGauntletActOneEventForRun(normalizedProfile.gauntlet.activeRun),
-            reachableNodeIds: gauntlet.getReachableNodeIds(normalizedProfile.gauntlet.activeRun),
-        });
-    } catch (error) {
-        console.error('Gauntlet run start error:', error);
-        return res.status(500).json({ error: 'Unable to start Gauntlet run.' });
-    }
-});
-
-app.get('/api/gauntlet/run', requireSession, async (req, res) => {
-    try {
-        const user = await usersCollection.findOne(
-            { username: req.authUser.username },
-            { projection: { _id: 1, username: 1, createdAt: 1, profile: 1 } }
-        );
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const activeRun = normalizeGauntletState(profile.gauntlet).activeRun;
-        return res.json({
-            ok: true,
-            run: activeRun,
-            actOneEvent: activeRun ? getGauntletActOneEventForRun(activeRun) : null,
-            reachableNodeIds: activeRun ? gauntlet.getReachableNodeIds(activeRun) : [],
-        });
-    } catch (error) {
-        console.error('Gauntlet run load error:', error);
-        return res.status(500).json({ error: 'Unable to load Gauntlet run.' });
-    }
-});
-
-app.post('/api/gauntlet/run/abandon', requireSession, async (req, res) => {
-    try {
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = gauntletState.activeRun;
-        if (!activeRun) {
-            return res.json({ ok: true, run: null });
-        }
-        if (activeRun.pendingBattle?.matchId) {
-            const match = await getMatchActive(activeRun.pendingBattle.matchId);
-            if (match && match.status !== 'ended') {
-                return res.status(409).json({ error: 'Surrender the active Gauntlet battle before abandoning the run.' });
-            }
-        }
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun: null,
-            abandonedRuns: gauntletState.abandonedRuns + 1,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        return res.json({ ok: true, run: null });
-    } catch (error) {
-        console.error('Gauntlet run abandon error:', error);
-        return res.status(500).json({ error: 'Unable to abandon Gauntlet run.' });
-    }
-});
-
-app.post('/api/gauntlet/run/act1/choose', requireSession, async (req, res) => {
-    try {
-        const { error: validationError, value } = gauntletActOneChoiceSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A valid Written Test choice is required.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-        if (!activeRun || activeRun.status !== 'active') {
-            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
-        }
-        if (activeRun.currentAct !== 1) {
-            return res.status(409).json({ error: 'The Written Test is already complete.' });
-        }
-        let nextRun;
-        try {
-            nextRun = resolveGauntletActOneChoice(activeRun, value.choiceIndex);
-        } catch (error) {
-            return res.status(400).json({ error: error.message || 'A valid Written Test choice is required.' });
-        }
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun: nextRun,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        const run = normalizedProfile.gauntlet.activeRun;
-        return res.json({
-            ok: true,
-            run,
-            actOneEvent: getGauntletActOneEventForRun(run),
-            nodeResult: nextRun.lastNodeResult,
-            reachableNodeIds: gauntlet.getReachableNodeIds(run),
-        });
-    } catch (error) {
-        console.error('Gauntlet Act 1 choice error:', error);
-        return res.status(500).json({ error: 'Unable to resolve Written Test choice.' });
-    }
-});
-
-app.post('/api/gauntlet/run/offer/accept', requireSession, async (req, res) => {
-    try {
-        const { error: validationError, value } = gauntletOfferAcceptSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A valid Gauntlet offer is required.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-        if (!activeRun || activeRun.status !== 'active') {
-            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
-        }
-        const offerIndex = (activeRun.pendingOffers || []).findIndex(
-            (offer) => offer.type === value.offerType && offer.id === value.offerId
-        );
-        if (offerIndex < 0 || value.offerType !== 'curse' || !gauntlet.getCurseById(value.offerId)) {
-            return res.status(404).json({ error: 'Gauntlet offer not found.' });
-        }
-        activeRun.pendingOffers.splice(offerIndex, 1);
-        activeRun.relics = Array.from(new Set([...(activeRun.relics || []), value.offerId]));
-        activeRun.lastNodeResult = {
-            nodeId: activeRun.currentNodeId || null,
-            nodeType: 'offer_accept',
-            clearedAt: new Date(),
-            reward: { relics: [value.offerId] },
-        };
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        return res.json({
-            ok: true,
-            run: normalizedProfile.gauntlet.activeRun,
-            acceptedOffer: { type: value.offerType, id: value.offerId },
-        });
-    } catch (error) {
-        console.error('Gauntlet offer accept error:', error);
-        return res.status(500).json({ error: 'Unable to accept Gauntlet offer.' });
-    }
-});
-
-app.post('/api/gauntlet/run/merchant/buy', requireSession, async (req, res) => {
-    try {
-        const { error: validationError, value } = gauntletMerchantBuySchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A valid merchant item is required.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-        if (!activeRun || activeRun.status !== 'active') {
-            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
-        }
-        const currentNode = gauntlet.getNodeById(activeRun.map, activeRun.currentNodeId);
-        if (!currentNode || currentNode.type !== gauntlet.NODE_TYPES.MERCHANT) {
-            return res.status(403).json({ error: 'You are not at a Merchant node.' });
-        }
-        const prices = {
-            heaven_scroll: activeRun.relics.includes('scroll-hoarder') ? 70 : 100,
-            earth_scroll: activeRun.relics.includes('scroll-hoarder') ? 70 : 100,
-            heal: 55,
-            random_relic: 120,
-        };
-        const price = prices[value.itemType];
-        if ((Number(activeRun.ryo) || 0) < price) {
-            return res.status(400).json({ error: 'Not enough Ryo.' });
-        }
-        activeRun.ryo -= price;
-        const reward = {
-            ryo: 0,
-            scrollFragments: 0,
-            heavenScrolls: value.itemType === 'heaven_scroll' ? 1 : 0,
-            earthScrolls: value.itemType === 'earth_scroll' ? 1 : 0,
-            relics: [],
-        };
-        if (value.itemType === 'heal') {
-            activeRun.teamHp = activeRun.teamHp.map((hp) => Math.min(100, Math.max(1, Number(hp) || 1) + 30));
-        }
-        if (value.itemType === 'random_relic') {
-            const rng = gauntlet.createSeededRng(`${activeRun.seed}:${activeRun.currentNodeId}:merchant:${activeRun.relics.length}`);
-            const relic = pickGauntletRandomEntry(rng, gauntlet.RELIC_SCROLLS);
-            if (relic?.id) reward.relics.push(relic.id);
-        }
-        addGauntletRewardToRun(activeRun, reward);
-        activeRun.lastNodeResult = {
-            nodeId: activeRun.currentNodeId,
-            nodeType: 'merchant_purchase',
-            clearedAt: new Date(),
-            reward: { ...reward, ryo: -price, itemType: value.itemType },
-        };
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        return res.json({
-            ok: true,
-            run: normalizedProfile.gauntlet.activeRun,
-            purchase: activeRun.lastNodeResult.reward,
-        });
-    } catch (error) {
-        console.error('Gauntlet merchant purchase error:', error);
-        return res.status(500).json({ error: 'Unable to complete merchant purchase.' });
-    }
-});
-
-app.post('/api/gauntlet/run/fragments/forge', requireSession, async (req, res) => {
-    try {
-        const { error: validationError, value } = gauntletForgeScrollSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'Choose a Heaven or Earth Scroll to forge.' });
-        }
-        const user = await usersCollection.findOne({ username: req.authUser.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-        if (!activeRun || activeRun.status !== 'active') {
-            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
-        }
-        const fragmentCount = Math.max(0, Math.round(Number(activeRun.scrollFragments) || 0));
-        if (fragmentCount < 3) {
-            return res.status(400).json({ error: 'You need 3 Scroll Fragments to forge an exam scroll.' });
-        }
-        activeRun.scrollFragments = fragmentCount - 3;
-        if (value.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH) {
-            activeRun.earthScrolls = Math.max(0, Number(activeRun.earthScrolls) || 0) + 1;
-        } else {
-            activeRun.heavenScrolls = Math.max(0, Number(activeRun.heavenScrolls) || 0) + 1;
-        }
-        activeRun.lastNodeResult = {
-            nodeId: activeRun.currentNodeId || null,
-            nodeType: 'fragment_forge',
-            clearedAt: new Date(),
-            reward: {
-                scrollFragments: -3,
-                heavenScrolls: value.scrollType === gauntlet.EXAM_SCROLL_TYPES.HEAVEN ? 1 : 0,
-                earthScrolls: value.scrollType === gauntlet.EXAM_SCROLL_TYPES.EARTH ? 1 : 0,
-            },
-        };
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun,
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        const run = normalizedProfile.gauntlet.activeRun;
-        return res.json({
-            ok: true,
-            run,
-            nodeResult: activeRun.lastNodeResult,
-            reachableNodeIds: gauntlet.getReachableNodeIds(run),
-        });
-    } catch (error) {
-        console.error('Gauntlet fragment forge error:', error);
-        return res.status(500).json({ error: 'Unable to forge an exam scroll.' });
-    }
-});
-
-app.post('/api/gauntlet/run/node/enter', requireSession, async (req, res) => {
-    try {
-        const username = req.authUser.username;
-        const { error: validationError, value } = gauntletNodeEnterSchema.validate(req.body || {});
-        if (validationError) {
-            return res.status(400).json({ error: 'A Gauntlet node is required.' });
-        }
-        const user = await usersCollection.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-        const profile = normalizeUserProfile(user);
-        const gauntletState = normalizeGauntletState(profile.gauntlet);
-        const activeRun = normalizeGauntletRunState(gauntletState.activeRun);
-        if (!activeRun || activeRun.status !== 'active') {
-            return res.status(400).json({ error: 'Start a Gauntlet run first.' });
-        }
-        if (activeRun.pendingBattle?.matchId) {
-            return res.status(409).json({ error: 'Finish the current Gauntlet battle before entering another node.' });
-        }
-        const node = gauntlet.getNodeById(activeRun.map, value.nodeId);
-        if (!node) {
-            return res.status(404).json({ error: 'Gauntlet node not found.' });
-        }
-        const reachableNodeIds = gauntlet.getReachableNodeIds(activeRun);
-        if (!reachableNodeIds.includes(node.id)) {
-            return res.status(403).json({ error: 'That Gauntlet node is not reachable.' });
-        }
-        if (!gauntlet.canEnterNode(activeRun, node)) {
-            return res.status(403).json({ error: 'You need both Heaven and Earth Scrolls to enter an exit node.' });
-        }
-        if (node.type === gauntlet.NODE_TYPES.EVENT) {
-            const event = gauntlet.getEventById(node.content?.eventId);
-            const choiceIndex = Number.isInteger(value.choiceIndex) ? value.choiceIndex : 0;
-            if (!event || !Array.isArray(event.choices) || !event.choices[choiceIndex]) {
-                return res.status(400).json({ error: 'A valid event choice is required.' });
-            }
-        }
-
-        if (node.type === gauntlet.NODE_TYPES.BATTLE || node.type === gauntlet.NODE_TYPES.ELITE_BATTLE) {
-            if (userToMatch.has(username)) {
-                return res.status(409).json({ error: 'Finish your current match before entering a Gauntlet battle.' });
-            }
-            const existingMatch = await matchesCollection.findOne({
-                'players.username': username,
-                status: { $ne: 'ended' },
-            });
-            if (existingMatch) {
-                return res.status(409).json({ error: 'Finish your current match before entering a Gauntlet battle.' });
-            }
-            const matchDocument = await buildGauntletBattleBotMatch({ username, runState: activeRun, node });
-            activeRun.pendingBattle = { nodeId: node.id, matchId: matchDocument.matchId };
-            activeRun.currentNodeId = node.id;
-            profile.gauntlet = normalizeGauntletState({
-                ...gauntletState,
-                activeRun,
-            });
-            const normalizedProfile = normalizeUserProfile({ ...user, profile });
-            await usersCollection.updateOne(
-                { _id: user._id },
-                {
-                    $set: {
-                        profile: normalizedProfile,
-                    },
-                }
-            );
-            userToMatch.set(username, {
-                matchId: matchDocument.matchId,
-                opponent: matchDocument.gauntletMatch?.enemyDisplayName || 'Forest Rival Team',
-            });
-            scheduleBattleBotTurn(matchDocument);
-            return res.json({
-                ok: true,
-                battleStarted: true,
-                run: normalizedProfile.gauntlet.activeRun,
-                match: buildMatchPayloadForUser(matchDocument, username),
-            });
-        }
-
-        const nextRun = applyGauntletNodeClearToRun(activeRun, node, {
-            choiceIndex: Number.isInteger(value.choiceIndex) ? value.choiceIndex : 0,
-        });
-        profile.gauntlet = normalizeGauntletState({
-            ...gauntletState,
-            activeRun: nextRun.status === 'active' ? nextRun : null,
-            completedRuns: gauntletState.completedRuns + (nextRun.status === 'won' ? 1 : 0),
-            wins: gauntletState.wins + (nextRun.status === 'won' ? 1 : 0),
-        });
-        const normalizedProfile = normalizeUserProfile({ ...user, profile });
-        await usersCollection.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    profile: normalizedProfile,
-                },
-            }
-        );
-        const run = normalizedProfile.gauntlet.activeRun;
-        return res.json({
-            ok: true,
-            battleStarted: false,
-            run,
-            nodeResult: nextRun.lastNodeResult,
-            reachableNodeIds: run ? gauntlet.getReachableNodeIds(run) : [],
-        });
-    } catch (error) {
-        console.error('Gauntlet node enter error:', error);
-        return res.status(500).json({ error: 'Unable to enter Gauntlet node.' });
-    }
-});
-
 // Basic static routes for the frontend
 app.get(['/', '/selection-login', '/selection-login.html'], (req, res) => {
     if (req.path === '/selection-login') return res.redirect(308, '/selection-login.html');
@@ -12558,6 +10127,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+    isPublicStaticPath,
     initializeEconomyState,
     buildMatchPayloadForUser,
     getDefaultMissionCatalog,

@@ -1,5 +1,5 @@
 // Presentation metadata for the playable roster. Keep these arc names aligned
-// with the story chapters; the server's character array remains untouched.
+// with the series arcs; the server's character array remains untouched.
 const NarutoRosterCatalog = (() => {
     const arcs = [
         { id: 'prologue', series: 'Naruto', label: 'Prologue', order: 0 },

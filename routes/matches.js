@@ -467,8 +467,6 @@ module.exports = function(context) {
                 endedAt: match.endedAt || null,
                 ladderResult: match.ladderResults?.[username] || null,
                 missionResult: match.missionResults?.[username] || null,
-                storyResult: match.storyResults?.[username] || null,
-                gauntletResult: match.gauntletResults?.[username] || null,
             });
         }
         const opponentEntry = match.players.find((p) => p.username !== username);
@@ -491,8 +489,6 @@ module.exports = function(context) {
                     turnExpiresAt: null,
                     ladderResults: ladderResults || null,
                     missionResults: match.missionResults || null,
-                    storyResults: match.storyResults || null,
-                    gauntletResults: match.gauntletResults || null,
                 },
             }
         );
@@ -509,8 +505,6 @@ module.exports = function(context) {
             endedAt,
             ladderResult: ladderResults?.[username] || null,
             missionResult: match.missionResults?.[username] || null,
-            storyResult: match.storyResults?.[username] || null,
-            gauntletResult: match.gauntletResults?.[username] || null,
         });
     });
 

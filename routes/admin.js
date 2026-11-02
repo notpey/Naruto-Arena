@@ -27,10 +27,13 @@ module.exports = function(context) {
         charactersCollection,
         recalculatePlayerLadderStandings,
         latestReleasesUpdateSchema,
+        LATEST_CHARACTER_RELEASES_STATE_KEY = 'latest_character_releases',
         maintenanceModeUpdateSchema,
+        MAINTENANCE_MODE_STATE_KEY = 'maintenance_mode',
+        getMaintenanceModeState: getSharedMaintenanceModeState,
+        invalidateMaintenanceModeCache,
         newsPostSchema,
         userUpdateSchema,
-        battleGauntletService,
         matchesCollection,
         teamSchema,
         userToMatch,
@@ -46,8 +49,6 @@ module.exports = function(context) {
         insertMatchActive,
         getStoredMissionCatalog,
         saveMissionCatalog,
-        getStoredStoryCatalog,
-        saveStoryCatalog,
         cosmeticsService,
     } = context;
 
@@ -126,18 +127,7 @@ module.exports = function(context) {
         }
     }
 
-    async function fallbackGetStoredStoryCatalog() {
-        if (!appStateCollection) return [];
-        try {
-            const doc = await appStateCollection.findOne({ key: 'story' });
-            return (doc && Array.isArray(doc.chapters)) ? doc.chapters : [];
-        } catch (e) {
-            return [];
-        }
-    }
-
     const fetchMissions = typeof getStoredMissionCatalog === 'function' ? getStoredMissionCatalog : fallbackGetStoredMissionCatalog;
-    const fetchStory = typeof getStoredStoryCatalog === 'function' ? getStoredStoryCatalog : fallbackGetStoredStoryCatalog;
 
     async function fallbackSaveMissionCatalog(missions, updatedBy) {
         if (appStateCollection) {
@@ -157,31 +147,15 @@ module.exports = function(context) {
         return missions;
     }
 
-    async function fallbackSaveStoryCatalog(chapters, updatedBy) {
-        if (appStateCollection) {
-            await appStateCollection.updateOne(
-                { key: 'story' },
-                {
-                    $set: {
-                        key: 'story',
-                        chapters,
-                        updatedAt: new Date(),
-                        updatedBy: updatedBy || '',
-                    },
-                },
-                { upsert: true }
-            );
-        }
-        return chapters;
-    }
-
     const persistMissions = typeof saveMissionCatalog === 'function' ? saveMissionCatalog : fallbackSaveMissionCatalog;
-    const persistStory = typeof saveStoryCatalog === 'function' ? saveStoryCatalog : fallbackSaveStoryCatalog;
 
     async function getMaintenanceModeState() {
         if (!appStateCollection) return false;
         try {
-            const doc = await appStateCollection.findOne({ key: 'maintenance' });
+            if (typeof getSharedMaintenanceModeState === 'function') {
+                return await getSharedMaintenanceModeState();
+            }
+            const doc = await appStateCollection.findOne({ key: MAINTENANCE_MODE_STATE_KEY });
             return Boolean(doc && doc.enabled);
         } catch (e) {
             return false;
@@ -191,7 +165,7 @@ module.exports = function(context) {
     async function getLatestCharacterReleases() {
         if (!appStateCollection) return [];
         try {
-            const doc = await appStateCollection.findOne({ key: 'latest_releases' });
+            const doc = await appStateCollection.findOne({ key: LATEST_CHARACTER_RELEASES_STATE_KEY });
             return (doc && Array.isArray(doc.releases)) ? doc.releases : [];
         } catch (e) {
             return [];
@@ -528,6 +502,9 @@ module.exports = function(context) {
             },
             { upsert: true }
         );
+        if (typeof invalidateMaintenanceModeCache === 'function') {
+            invalidateMaintenanceModeCache();
+        }
         return res.json({
             ok: true,
             enabled: Boolean(value.enabled),
@@ -650,22 +627,6 @@ module.exports = function(context) {
             return res.status(500).json({ error: 'Unable to load missions.' });
         }
     });
-    router.get('/story', requireSession, async (req, res) => {
-        if (!isAdminUser(req)) {
-            return res.status(403).json({ error: 'Admin access required.' });
-        }
-    
-        try {
-            const chapters = await fetchStory();
-            return res.json({
-                ok: true,
-                chapters,
-            });
-        } catch (error) {
-            console.error('Admin story catalog load error:', error);
-            return res.status(500).json({ error: 'Unable to load story mode.' });
-        }
-    });
     router.get('/control-panel', requireSession, async (req, res) => {
         if (!isAdminUser(req)) {
             return res.status(403).json({ error: 'Admin access required.' });
@@ -714,12 +675,6 @@ module.exports = function(context) {
                         title: 'Mission Editor',
                         description: 'Manage unlock missions, rank requirements, goals, and rewards.',
                         status: 'Live editor',
-                    },
-                    {
-                        href: '#acp-story-panel',
-                        title: 'Story Thumbnails',
-                        description: 'Update story mode battle thumbnails and image alt text.',
-                        status: 'Inline editor',
                     },
                     {
                         href: 'playeraccounts.html',
@@ -807,27 +762,6 @@ module.exports = function(context) {
         } catch (error) {
             console.error('Admin mission catalog save error:', error);
             return res.status(400).json({ error: error.message || 'Unable to save missions.' });
-        }
-    });
-    router.put('/story', requireSession, async (req, res) => {
-        if (!isAdminUser(req)) {
-            return res.status(403).json({ error: 'Admin access required.' });
-        }
-    
-        const chapters = Array.isArray(req.body?.chapters) ? req.body.chapters : null;
-        if (!chapters) {
-            return res.status(400).json({ error: 'Story chapters are required.' });
-        }
-    
-        try {
-            const savedChapters = await persistStory(chapters, req.authUser.username);
-            return res.json({
-                ok: true,
-                chapters: savedChapters,
-            });
-        } catch (error) {
-            console.error('Admin story catalog save error:', error);
-            return res.status(400).json({ error: error.message || 'Unable to save story mode.' });
         }
     });
     router.get('/characters', requireSession, (req, res) => {

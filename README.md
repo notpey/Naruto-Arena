@@ -2,7 +2,7 @@
 
 Naruto-Arena is a browser strategy game with an Express and MongoDB server. The current web client is the reference for gameplay and presentation. The server owns match state and combat outcomes through `battleLogic.js`; client work should preserve that behavior.
 
-The repository includes the game client, non-game pages, character data, missions, ladders, and admin tools. A Godot client migration is planned while keeping the existing server authoritative.
+The repository includes the game client, non-game pages, character data, missions, ladders, and admin tools.
 
 ## Features
 

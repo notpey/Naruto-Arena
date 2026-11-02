@@ -1018,16 +1018,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const battleEndTitleEl = battleEndOverlayEl?.querySelector('.battle-end-title');
         const battleEndMessageEl = battleEndOverlayEl?.querySelector('.battle-end-message');
         const battleEndContinueButton = battleEndOverlayEl?.querySelector('.battle-end-continue');
-        const storyDialogueOverlayEl = document.getElementById('story-dialogue-overlay');
-        const storyDialoguePortraitEl = document.getElementById('story-dialogue-portrait');
-        const storyDialogueSpeakerEl = document.getElementById('story-dialogue-speaker');
-        const storyDialogueTextEl = document.getElementById('story-dialogue-text');
-        const storyDialogueProgressEl = document.getElementById('story-dialogue-progress');
-        const storyDialogueNextButton = document.getElementById('story-dialogue-next');
-        const gauntletIndicatorEl = document.getElementById('gauntlet-battle-indicator');
-        const gauntletChipEl = document.getElementById('gauntlet-battle-chip');
-        const gauntletSummaryEl = document.getElementById('gauntlet-battle-summary');
-        const gauntletPopoverEl = document.getElementById('gauntlet-battle-popover');
         const classChoicePopupEl = document.querySelector('.class-choice-popup');
         const classChoicePopupOptionsEl = classChoicePopupEl?.querySelector('.class-choice-popup-options');
         const classChoicePopupCancelButton = classChoicePopupEl?.querySelector('.class-choice-popup-cancel');
@@ -1081,10 +1071,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         let queuedTargetSignatureByCard = new WeakMap();
         let lastMatchStateSignature = '';
         let observedCombatEventIds = null;
-        let latestGauntletIndicatorMatch = null;
-        let gauntletRunIndicatorFallback = null;
-        let gauntletRunIndicatorFallbackKey = '';
-        let gauntletRunIndicatorFetchInFlight = false;
         const cancelGlobalStatusTooltipHide = () => {
             if (globalStatusTooltipHideTimer) {
                 clearTimeout(globalStatusTooltipHideTimer);
@@ -1106,9 +1092,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         let battleEndShown = false;
         let selectedExchangeType = 'taijutsu';
-        let storyIntroDialogueShown = false;
-        let storyOutroDialogueShown = false;
-        let storyDialogueActive = false;
         const playIngameSound = (audio) => {
             soundManager.play(audio);
         };
@@ -2740,14 +2723,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }).catch(() => {});
                     } catch (_) {}
                 }
-                if (currentMatchMode === 'gauntlet') {
-                    window.location.href = 'selection.html?view=gauntlet';
-                    return;
-                }
-                if (currentMatchMode === 'story') {
-                    window.location.href = 'selection.html?view=story';
-                    return;
-                }
                 window.location.href = 'selection.html';
             });
         }
@@ -2879,58 +2854,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             activeCastingSkill = null;
         };
 
-        // Story Mode cinematic dialogue: plays step-by-step over the already
-        // rendered battlefield. The scrim (`.story-dialogue-overlay.visible`)
-        // covers the whole stage with pointer-events enabled, so it naturally
-        // blocks skill/target clicks underneath without touching battle logic.
-        const showStoryDialogue = (entries, finalLabel, onComplete) => {
-            if (!storyDialogueOverlayEl || !Array.isArray(entries) || !entries.length) {
-                onComplete();
-                return;
-            }
-            storyDialogueActive = true;
-            let stepIndex = 0;
-            const renderStep = () => {
-                const entry = entries[stepIndex] || {};
-                if (storyDialoguePortraitEl) {
-                    if (entry.portrait) {
-                        storyDialoguePortraitEl.src = entry.portrait;
-                        storyDialoguePortraitEl.alt = entry.speaker || 'Speaker portrait';
-                        storyDialoguePortraitEl.hidden = false;
-                    } else {
-                        storyDialoguePortraitEl.hidden = true;
-                    }
-                }
-                if (storyDialogueSpeakerEl) storyDialogueSpeakerEl.textContent = entry.speaker || '';
-                if (storyDialogueTextEl) storyDialogueTextEl.textContent = entry.text || '';
-                if (storyDialogueProgressEl) {
-                    storyDialogueProgressEl.textContent = `${stepIndex + 1} / ${entries.length}`;
-                }
-                const isLast = stepIndex >= entries.length - 1;
-                if (storyDialogueNextButton) {
-                    storyDialogueNextButton.textContent = isLast ? finalLabel : 'Next ▶';
-                }
-            };
-            const advance = () => {
-                if (stepIndex >= entries.length - 1) {
-                    storyDialogueOverlayEl.classList.remove('visible');
-                    storyDialogueActive = false;
-                    if (storyDialogueNextButton) {
-                        storyDialogueNextButton.removeEventListener('click', advance);
-                    }
-                    onComplete();
-                    return;
-                }
-                stepIndex += 1;
-                renderStep();
-            };
-            if (storyDialogueNextButton) {
-                storyDialogueNextButton.addEventListener('click', advance);
-            }
-            renderStep();
-            storyDialogueOverlayEl.classList.add('visible');
-        };
-
         const MAX_HP = 100;
         const HEALTH_BAR_MAX_WIDTH = 75;
         const getHealthBarMaxWidth = (healthBar) => {
@@ -2958,7 +2881,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const renderUnitHealth = (card, unit) => {
             if (!card) return;
             if (!unit) {
-                // No combatant occupies this slot (e.g. a story-mode enemy team
+                // No combatant occupies this slot (e.g. an enemy team
                 // smaller than the fixed 3-slot layout). Keep the box in place
                 // (visibility, not display) so the real cards don't reflow.
                 card.style.visibility = 'hidden';
@@ -3149,122 +3072,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .replaceAll('<', '&lt;')
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;');
-
-        const formatGauntletNodeType = (nodeType = '') => {
-            const labels = {
-                battle: 'Battle',
-                elite_battle: 'Elite Battle',
-                event: 'Event',
-                rest_camp: 'Rest',
-                merchant: 'Merchant',
-                scroll_cache: 'Scroll Cache',
-            };
-            return labels[nodeType] || String(nodeType || 'Node').replaceAll('_', ' ');
-        };
-
-        const fetchGauntletIndicatorFallback = async (expectedKey = '') => {
-            if (gauntletRunIndicatorFetchInFlight) return;
-            gauntletRunIndicatorFetchInFlight = true;
-            try {
-                const [runResponse, catalogResponse] = await Promise.all([
-                    window.ArenaSession.fetch(`${API_BASE_URL}/api/gauntlet/run`, { credentials: 'include' }),
-                    window.ArenaSession.fetch(`${API_BASE_URL}/api/gauntlet/catalog`, { credentials: 'include' }),
-                ]);
-                if (!runResponse.ok || !catalogResponse.ok) return;
-                const runData = await runResponse.json();
-                const catalogData = await catalogResponse.json();
-                const run = runData?.run && typeof runData.run === 'object' ? runData.run : null;
-                const relicIds = Array.from(new Set(Array.isArray(run?.relics) ? run.relics : []));
-                const catalogEntries = [
-                    ...(Array.isArray(catalogData?.relicScrolls) ? catalogData.relicScrolls : []),
-                    ...(Array.isArray(catalogData?.curses) ? catalogData.curses : []),
-                ];
-                const modifiers = relicIds
-                    .map((id) => {
-                        const entry = catalogEntries.find((candidate) => candidate?.id === id);
-                        if (!entry) return null;
-                        return {
-                            id: entry.id,
-                            name: entry.name || entry.id,
-                            description: entry.description || '',
-                            isCurse: Boolean(entry.isCurse),
-                        };
-                    })
-                    .filter(Boolean);
-                if (expectedKey && expectedKey !== gauntletRunIndicatorFallbackKey) return;
-                gauntletRunIndicatorFallback = {
-                    modifiers,
-                    resources: run
-                        ? {
-                              heavenScrolls: Number(run.heavenScrolls) || 0,
-                              earthScrolls: Number(run.earthScrolls) || 0,
-                              scrollFragments: Number(run.scrollFragments) || 0,
-                              ryo: Number(run.ryo) || 0,
-                          }
-                        : null,
-                };
-                if (latestGauntletIndicatorMatch) {
-                    renderGauntletBattleIndicator(latestGauntletIndicatorMatch);
-                }
-            } catch (error) {
-                if (!expectedKey || expectedKey === gauntletRunIndicatorFallbackKey) {
-                    gauntletRunIndicatorFallback = { modifiers: [], resources: null };
-                }
-            } finally {
-                gauntletRunIndicatorFetchInFlight = false;
-            }
-        };
-
-        const renderGauntletBattleIndicator = (gauntletMatch = null) => {
-            if (!gauntletIndicatorEl || !gauntletSummaryEl || !gauntletPopoverEl) return;
-            if (!gauntletMatch || typeof gauntletMatch !== 'object') {
-                latestGauntletIndicatorMatch = null;
-                gauntletIndicatorEl.hidden = true;
-                gauntletPopoverEl.hidden = true;
-                gauntletPopoverEl.innerHTML = '';
-                if (gauntletChipEl) gauntletChipEl.setAttribute('aria-expanded', 'false');
-                return;
-            }
-            latestGauntletIndicatorMatch = gauntletMatch;
-            const fallbackKey = `${gauntletMatch.runSeed || ''}:${gauntletMatch.nodeId || ''}`;
-            if (fallbackKey !== gauntletRunIndicatorFallbackKey) {
-                gauntletRunIndicatorFallbackKey = fallbackKey;
-                gauntletRunIndicatorFallback = null;
-            }
-            const matchModifiers = Array.isArray(gauntletMatch.modifiers) ? gauntletMatch.modifiers : [];
-            if (!matchModifiers.length && !gauntletRunIndicatorFallback) {
-                fetchGauntletIndicatorFallback(fallbackKey);
-            }
-            const modifiers = matchModifiers.length
-                ? matchModifiers
-                : (Array.isArray(gauntletRunIndicatorFallback?.modifiers) ? gauntletRunIndicatorFallback.modifiers : []);
-            const fallbackResources = gauntletRunIndicatorFallback?.resources || null;
-            const resources = gauntletMatch.resources && typeof gauntletMatch.resources === 'object'
-                ? gauntletMatch.resources
-                : (fallbackResources || {});
-            const nodeLabel = formatGauntletNodeType(gauntletMatch.nodeType);
-            const enemyLabel = gauntletMatch.enemyDisplayName || 'Forest Rival Team';
-            const modifierCount = modifiers.length;
-            gauntletIndicatorEl.hidden = false;
-            gauntletPopoverEl.hidden = false;
-            gauntletSummaryEl.textContent = modifierCount
-                ? `Chunin Exams: ${modifierCount} effect${modifierCount === 1 ? '' : 's'}`
-                : 'Chunin Exams';
-            gauntletPopoverEl.innerHTML =
-                '<p class="gauntlet-battle-title">Chunin Exams</p>' +
-                '<p class="gauntlet-battle-line">' + escapeHtml(nodeLabel) + ' vs. ' + escapeHtml(enemyLabel) + '</p>' +
-                '<p class="gauntlet-battle-line">Scrolls: H ' + (Number(resources.heavenScrolls) || 0) +
-                ' / E ' + (Number(resources.earthScrolls) || 0) +
-                ' / Fragments ' + (Number(resources.scrollFragments) || 0) + '</p>' +
-                (modifiers.length
-                    ? '<div class="gauntlet-battle-mods">' + modifiers.map((modifier) =>
-                        '<div class="gauntlet-battle-mod' + (modifier.isCurse ? ' curse' : '') + '">' +
-                            '<strong>' + escapeHtml(modifier.name || modifier.id || 'Run Effect') + '</strong>' +
-                            '<span>' + escapeHtml(modifier.description || 'Active for this run.') + '</span>' +
-                        '</div>'
-                    ).join('') + '</div>'
-                    : '<p class="gauntlet-battle-empty">No relic or curse effects are active yet.</p>');
-        };
 
         const ensureGlobalStatusTooltip = () => {
             if (globalStatusTooltipEl) return globalStatusTooltipEl;
@@ -3889,7 +3696,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 board: data.board || null,
                 chakraPools: data.chakraPools || null,
                 pendingTurn: data.pendingTurn || null,
-                gauntletMatch: data.gauntletMatch || null,
                 combatEventIds: (Array.isArray(data.combatEvents) ? data.combatEvents : []).map((event) => event?.id),
             });
             if (matchStateSignature === lastMatchStateSignature) {
@@ -3918,7 +3724,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof data.mode === 'string' && data.mode.trim()) {
                 currentMatchMode = data.mode.trim().toLowerCase();
             }
-            renderGauntletBattleIndicator(data.gauntletMatch || null);
             if (data.opponent) {
                 if (typeof data.opponent === 'string') {
                     currentOpponentDisplayName = data.opponent;
@@ -3936,15 +3741,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!currentOpponentUsername && data.board && typeof data.board === 'object') {
                 const otherKey = Object.keys(data.board).find((k) => k !== currentPlayerUsername);
                 if (otherKey) currentOpponentUsername = otherKey;
-            }
-            if (
-                data.mode === 'story' &&
-                !storyIntroDialogueShown &&
-                Array.isArray(data.storyMatch?.introDialogue) &&
-                data.storyMatch.introDialogue.length
-            ) {
-                storyIntroDialogueShown = true;
-                showStoryDialogue(data.storyMatch.introDialogue, 'Begin ▶', () => {});
             }
             const pool = data.chakraPools?.[currentPlayerUsername] || playerPoolState || emptyPool();
             renderChakra(pool);
@@ -3966,24 +3762,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (data.status === 'ended') {
                 const didWin = Boolean(data.winner && data.winner === currentPlayerUsername);
-                if (data.mode === 'story' && data.storyMatch?.chapterId && data.storyMatch?.nodeId) {
-                    if (storyOutroDialogueShown) return;
-                    storyOutroDialogueShown = true;
-                    battleEndShown = true;
-                    stopMatchRealtime();
-                    clearTargetHighlights();
-                    activeTargetOptions = null;
-                    activeCastingSkill = null;
-                    const outroEntries = didWin ? data.storyMatch.outroDialogueWin : data.storyMatch.outroDialogueLoss;
-                    const storyRyoDelta = Math.max(0, Number(data.storyResult?.ryoDelta) || 0);
-                    const continueLabel = storyRyoDelta > 0
-                        ? `Claim +${storyRyoDelta.toLocaleString()} Ryo`
-                        : 'Continue';
-                    showStoryDialogue(outroEntries, continueLabel, () => {
-                        window.location.href = 'selection.html?view=story';
-                    });
-                    return;
-                }
                 const opponentFromResult = didWin ? data.surrenderedBy : data.winner;
                 showBattleEndOverlay({
                     didWin,
