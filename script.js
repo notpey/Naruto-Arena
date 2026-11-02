@@ -312,9 +312,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         skillFallback: 'skillqqueue-remaster.png?v=2',
         sharingan: 'sharingan-remaster.png?v=2',
         found: 'found-remaster.png',
-        win: 'win-remaster.png?v=2',
-        lose: 'lose-remaster.png?v=2',
-        surrender: 'surrenderimage-remaster.png?v=2',
+        win: 'battle-victory.png?v=1',
+        lose: 'battle-defeat.png?v=1',
+        surrender: 'battle-surrender.png?v=1',
         render: 'render-remaster.png?v=2',
     };
     const attachImageFallback = (img, fallbackSrc) => {

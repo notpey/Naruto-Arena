@@ -1387,11 +1387,11 @@
     width: 112px;
     height: 350px;
     border-radius: 5px;
-    background: #0d1820 url('win-remaster.png?v=2') center / cover no-repeat;
+    background: #0d1820 url('battle-chakra-panel.png?v=1') center / cover no-repeat;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 8px 20px rgba(0, 0, 0, .35);
     pointer-events: none;
 }
-.game-remaster .exchange_chakra::before { background-image: url('surrenderimage-remaster.png?v=2'); }
+.game-remaster .exchange_chakra::before { background-image: url('battle-chakra-panel.png?v=1'); }
 .game-remaster .ChakraChooseEndTurn .chakrachoose,
 .game-remaster .exchange_chakra_title,
 .game-remaster .exchange_chakra_subtitle { color: #f6e8d5; text-shadow: none; }
@@ -1529,6 +1529,10 @@
     border: 0;
     border-radius: 4px;
     box-shadow: 0 10px 24px rgba(0, 0, 0, .32);
+}
+.game-remaster .battle-end-overlay.is-victory .battle-end-portrait {
+    object-fit: contain;
+    background: #0d1820;
 }
 .game-remaster .battle-end-overlay.is-defeat .battle-end-portrait { height: 290px; }
 .game-remaster .battle-end-copy {

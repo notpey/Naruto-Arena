@@ -70,10 +70,10 @@
     --private-button-remaster-image: url("privatebutton-remaster.png");
     --logout-button-remaster-image: url("logout-remaster.png");
     --search-art-remaster-image: url("sasukesearch-remaster.png");
-    --surrender-art-remaster-image: url("surrenderimage-remaster.png?v=2");
+    --surrender-art-remaster-image: url("battle-surrender.png?v=1");
     --render-remaster-image: url("render-remaster.png?v=2");
-    --win-remaster-image: url("win-remaster.png?v=2");
-    --lose-remaster-image: url("lose-remaster.png?v=2");
+    --win-remaster-image: url("battle-victory.png?v=1");
+    --lose-remaster-image: url("battle-defeat.png?v=1");
     --dead-character-remaster-image: url("deadcharacter-remaster.png?v=2");
     --found-remaster-image: url("found-remaster.png");
     --loading-remaster-image: url("loading-remaster.png");
