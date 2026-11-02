@@ -60,7 +60,7 @@ module.exports = {
             name: 'Sand Sphere',
             skillimage: 'https://i.imgur.com/eUfA1nN.png',
             skilldescription: 'Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.',
-            energy: ['Ninjutsu', 'Random'],
+            energy: ['Ninjutsu', 'Ninjutsu'],
             target: 'self',
             damage: 0,
             cooldown: 5,

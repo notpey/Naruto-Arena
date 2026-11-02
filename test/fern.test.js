@@ -92,14 +92,14 @@ test('Ordinary Defensive Magic renews a one-turn shield using current stacks and
     cast(match, 'p1', 1);
     const unit = match.board.p1[0];
     const shield = () => unit.state.statuses.find(status => status.id === 'fern_ordinary_defensive_magic_shield');
-    assert.equal(shield().metadata.destructibleDefensePoints, 6);
+    assert.equal(shield().metadata.destructibleDefensePoints, 5);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(shield().metadata.destructibleDefensePoints, 11);
+    assert.equal(shield().metadata.destructibleDefensePoints, 10);
     assert.equal(shield().remainingTurns, 1);
     cast(match, 'p1', 1);
     assert.equal(unit.state.statuses.filter(status => status.id === 'fern_ordinary_defensive_magic').length, 1);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(shield().metadata.destructibleDefensePoints, 16);
+    assert.equal(shield().metadata.destructibleDefensePoints, 15);
 });
 
 test('Orbital Cannon counters a Physical skill and grants a stack', () => {

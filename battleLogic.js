@@ -2458,6 +2458,14 @@ const getSkillSpecificDamageBonus = (actorState, skillId) => {
     }, 0);
 };
 
+// Extra damage against a target that would be invulnerable to this skill (e.g. Zabuza's Silent Killing).
+const getInvulnerableTargetDamageBonus = (actorState, targetUnit, skillClasses = []) => {
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    const bonus = statuses.reduce((sum, status) => isStatusActiveForMetadata(status)
+        ? sum + Math.max(0, Number(status?.metadata?.bonusDamageAgainstInvulnerableTargets) || 0) : sum, 0);
+    return bonus > 0 && isUnitInvulnerableForSkill(targetUnit, skillClasses) ? bonus : 0;
+};
+
 const getSkillSpecificHealingBonus = (actorState, skillId) => {
     if (!skillId) return 0;
     return (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce((sum, status) => {
@@ -6367,7 +6375,8 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         skillClasses: damageSkillClasses,
                     });
                     const skillSpecificBonus = controlledSource ? 0 :
-                        getSkillSpecificDamageBonus(actorState, skill.id || null);
+                        getSkillSpecificDamageBonus(actorState, skill.id || null) +
+                        getInvulnerableTargetDamageBonus(actorState, recipient.unit, damageSkillClasses);
                     const passiveBonus = controlledSource ? 0 : getCharacterPassiveDamageBonus({
                         actorState,
                         actorUsername: actingUsername,

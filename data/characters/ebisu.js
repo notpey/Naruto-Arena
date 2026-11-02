@@ -16,7 +16,7 @@ module.exports = {
             id: 'ebisu-water-walking', name: 'Water Walking',
             skillimage: 'https://i.imgur.com/NdSN8te.png',
             skilldescription: 'Ebisu grants himself or one ally 10 destructible defense for 2 turns. During this time, the next skill they use costs 1 less Random chakra.',
-            energy: ['Ninjutsu'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
+            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'ebisu_water_walking_defense', duration: 2,
                     scope: 'target', metadata: { helpful: true, destructibleDefensePoints: 10,
@@ -49,7 +49,7 @@ module.exports = {
             id: 'ebisu-strict-discipline', name: 'Strict Discipline',
             skillimage: 'https://i.imgur.com/AVnlbkW.png',
             skilldescription: "Ebisu deals 15 affliction damage to one enemy. For 2 turns, that enemy's harmful skills cost 1 additional Random chakra. This effect cannot stack.",
-            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 2,
+            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Affliction', 'Action'], effects: [
                 { type: 'damage', amount: 15, scope: 'target',
                     metadata: { afflictionDamage: true, ignoreDamageReduction: true,

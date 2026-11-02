@@ -31,7 +31,7 @@ test('Gaara draft is playable and starts with permanent unpierceable reduction',
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.name),
         ['Sand Binding Coffin', 'Desert Funeral', 'Sand Sphere', 'Sand Shield']);
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.energy),
-        [['Ninjutsu'], ['Bloodline', 'Bloodline'], ['Ninjutsu', 'Random'], ['Random']]);
+        [['Ninjutsu'], ['Bloodline', 'Bloodline'], ['Ninjutsu', 'Ninjutsu'], ['Random']]);
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.cooldown), [1, 1, 5, 4]);
     const match = makeMatch();
     const gaara = match.board.p1[0];

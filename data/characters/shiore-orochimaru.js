@@ -17,7 +17,7 @@ module.exports = {
             id: 'shiore-orochimaru-five-elements-seal', name: 'Five Elements Seal',
             skillimage: 'https://i.imgur.com/SZOdcEy.png',
             skilldescription: "Orochimaru disrupts an enemy's chakra flow, increasing the cost of their skills by 1 random chakra for 3 turns.",
-            energy: ['Ninjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 3,
+            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 3,
             classes: ['Chakra', 'Instant'],
             effects: [{ type: 'apply_status', statusId: 'shiore_orochimaru_five_elements_seal', duration: 3,
                 scope: 'target', metadata: {

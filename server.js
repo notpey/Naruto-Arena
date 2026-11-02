@@ -102,6 +102,8 @@ const SHIORE_OROCHIMARU_REWORK_MIGRATION_ID = 'shiore-orochimaru-draft-2026-11-0
 const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
 const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const MITARASHI_ANKO_REWORK_MIGRATION_ID = 'mitarashi-anko-draft-2026-11-01';
+const BALANCE_UPDATE_0_3_MIGRATION_ID = 'balance-update-0-3-2026-11-02';
+const BALANCE_UPDATE_0_3_CHARACTER_IDS = ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko', 'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza', 'fern'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -2973,6 +2975,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
+                [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3038,6 +3041,7 @@ const getStoredCharacters = async () => {
                     [`completed.${BAKI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3082,6 +3086,7 @@ const getStoredCharacters = async () => {
     const shouldApplyBakiRework = !completedMigrations[BAKI_REWORK_MIGRATION_ID];
     const shouldApplyGekkoHayateRework = !completedMigrations[GEKKO_HAYATE_REWORK_MIGRATION_ID];
     const shouldApplyMitarashiAnkoRework = !completedMigrations[MITARASHI_ANKO_REWORK_MIGRATION_ID];
+    const shouldApplyBalanceUpdate03 = !completedMigrations[BALANCE_UPDATE_0_3_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3111,6 +3116,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyBakiRework ? ['baki'] : []),
         ...(shouldApplyGekkoHayateRework ? ['gekko-hayate'] : []),
         ...(shouldApplyMitarashiAnkoRework ? ['mitarashi-anko'] : []),
+        ...(shouldApplyBalanceUpdate03 ? BALANCE_UPDATE_0_3_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3206,6 +3212,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyBakiRework && ['baki'].includes(characterId)) return seedEntry;
             if (shouldApplyGekkoHayateRework && ['gekko-hayate'].includes(characterId)) return seedEntry;
             if (shouldApplyMitarashiAnkoRework && ['mitarashi-anko'].includes(characterId)) return seedEntry;
+            if (shouldApplyBalanceUpdate03 && BALANCE_UPDATE_0_3_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3270,7 +3277,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3350,6 +3357,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyMitarashiAnkoRework) {
             completedMigrationUpdates[`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyBalanceUpdate03) {
+            completedMigrationUpdates[`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;

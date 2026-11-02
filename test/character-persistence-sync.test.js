@@ -117,6 +117,7 @@ test('launch unlock migration aligns starter and mission requirements without re
                 'waves-haku-zabuza-mizuki-rework-2026-10-24': new Date(),
                 'demon-brothers-rework-2026-10-25': new Date(),
                 'hokage-hiruzen-rework-2026-10-26': new Date(),
+                'balance-update-0-3-2026-11-02': new Date(),
             } },
         updateOne: async (filter, update) => { writes.push({ filter, update }); },
     };
@@ -435,6 +436,8 @@ for (const [label, ids, migrationId] of [
     ['Baki draft', ['baki'], 'baki-draft-2026-11-01'],
     ['Gekko Hayate draft', ['gekko-hayate'], 'gekko-hayate-draft-2026-11-01'],
     ['Mitarashi Anko draft', ['mitarashi-anko'], 'mitarashi-anko-draft-2026-11-01'],
+    ['Balance Update 0.3', ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko',
+        'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza', 'fern'], 'balance-update-0-3-2026-11-02'],
 ]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({

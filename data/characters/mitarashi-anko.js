@@ -36,25 +36,25 @@ module.exports = {
         {
             id: 'mitarashi-anko-dragon-fire', name: 'Dragon Fire',
             skillimage: 'https://i.imgur.com/Kh95uYY.png',
-            skilldescription: 'Anko unleashes a stream of flames, dealing 5 affliction damage to all enemies each turn for 2 turns.',
-            energy: ['Ninjutsu'], target: 'all-enemy', damage: 0, cooldown: 1,
+            skilldescription: 'Anko unleashes a stream of flames, dealing 10 affliction damage to all enemies each turn for 2 turns.',
+            energy: ['Ninjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
             classes: ['Affliction', 'Instant'],
             effects: [{ type: 'apply_status', statusId: 'mitarashi_anko_dragon_fire', duration: 2, scope: 'all-enemy',
                 metadata: {
-                    harmful: true, afflictionDamage: true, turnEndDamage: 5,
+                    harmful: true, afflictionDamage: true, turnEndDamage: 10,
                     turnEndTrigger: 'source_turn', turnDurationAnchor: 'source_turn', triggerOnApply: true,
-                    tooltipText: 'This character takes 5 affliction damage each turn from Dragon Fire.',
+                    tooltipText: 'This character takes 10 affliction damage each turn from Dragon Fire.',
                 } }],
         },
         {
             id: 'mitarashi-anko-hidden-shadow-snake-hand', name: 'Hidden Shadow Snake Hand',
             skillimage: 'https://i.imgur.com/7CtEQFV.png',
-            skilldescription: 'Anko unleashes a swarm of snakes from her sleeve, dealing 20 physical damage to an enemy. The target also takes 5 affliction damage each turn for the following 3 turns.',
+            skilldescription: 'Anko unleashes a swarm of snakes from her sleeve, dealing 20 physical damage to an enemy. The target also takes 5 affliction damage each turn for the following 2 turns.',
             energy: ['Ninjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Affliction', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target', metadata: { skillClasses: ['Physical'] } },
-                { type: 'apply_status', statusId: 'mitarashi_anko_hidden_shadow_snake_hand', duration: 3,
+                { type: 'apply_status', statusId: 'mitarashi_anko_hidden_shadow_snake_hand', duration: 2,
                     scope: 'target', metadata: {
                         harmful: true, afflictionDamage: true, turnEndDamage: 5,
                         turnEndTrigger: 'source_turn', turnDurationAnchor: 'source_turn',

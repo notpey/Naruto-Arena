@@ -41,42 +41,62 @@ test('new kits expose four skills and a permanent passive, with alternate skills
     assert.equal(match.board.b[0].hp, 100, 'hidden alternates cannot be selected directly');
 });
 
-test('Zabuza prison changes sword targets, mist buffs its damage, and clone counters once', () => {
-    const match = matchFor(['momochi-zabuza', 'uzumaki-naruto'], ['haku', 'mizuki', 'umino-iruka']);
+test('Water Prison stuns physical and chakra skills and shields the prisoner from everyone', () => {
+    const match = matchFor(['momochi-zabuza', 'uzumaki-naruto'], ['haku', 'umino-iruka']);
     const prisonCost = computeEffectiveEnergyCost({
         skill: effective(match, 'a', 0, 1), actorState: match.board.a[0].state,
     });
     assert.equal(prisonCost.reservedSpecific.ninjutsu, 1);
-    assert.equal(prisonCost.requiredRandom, 0);
+    assert.equal(prisonCost.requiredRandom, 1);
     cast(match, 'a', 0, 1, ['b', 0]);
-    assert.ok(status(match, 'b', 0, 'zabuza_water_prison'));
-    assert.equal(effective(match, 'a', 0, 0).id, 'momochi-zabuza-kubikiribocho-clone');
-    cast(match, 'a', 0, 0, ['b', 1]);
-    assert.equal(match.board.b[0].hp, 100);
-    assert.equal(match.board.b[1].hp, 85);
-    assert.equal(match.board.b[2].hp, 85);
-    cast(match, 'a', 0, 3, ['a', 1]);
-    cast(match, 'b', 1, 0, ['a', 1]);
-    assert.equal(match.board.a[1].hp, 100);
-    assert.ok(status(match, 'b', 1, 'zabuza_silent_killing'));
-    assert.equal(status(match, 'a', 1, 'zabuza_water_clone'), undefined);
-    match.board.a[0].state.statuses.push({ id: 'test_stun', remainingTurns: 1,
-        metadata: { harmful: true, cannotUseSkills: true } });
+    const prison = status(match, 'b', 0, 'zabuza_water_prison');
+    assert.deepEqual(prison.metadata.cannotUseSkillClasses, ['physical', 'chakra']);
+    assert.equal(effective(match, 'a', 0, 0).id, 'momochi-zabuza-kubikiribocho', 'no water clone sword');
+
+    const targetsOf = (user, slot, skillIndex) => computeTargetOptions({ match, actingUsername: user,
+        actorSlot: slot, skillIndex, characters }).targets.map((target) => `${target.username}:${target.slot}`);
+    assert.ok(!targetsOf('a', 1, 0).includes('b:0'), 'other enemies cannot reach the prisoner');
+    assert.ok(!targetsOf('b', 1, 1).includes('b:0'), 'allies cannot reach the prisoner either');
+    assert.ok(targetsOf('a', 0, 0).includes('b:0'), 'Silent Killing lets Zabuza reach the prisoner');
+
     tickStatusesForTurnEnd({ match, endingUsername: 'a' });
-    assert.equal(status(match, 'b', 0, 'zabuza_water_prison'), undefined);
-    assert.equal(status(match, 'a', 0, 'zabuza_water_prison_link'), undefined);
+    assert.ok(status(match, 'b', 0, 'zabuza_water_prison'), 'the prison is not broken by its own invulnerability');
+    cast(match, 'b', 0, 0, ['a', 1]);
+    assert.equal(match.board.a[1].hp, 100, "the prisoner's physical skills are stunned");
+    tickStatusesForTurnEnd({ match, endingUsername: 'b' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'a' });
+    assert.ok(status(match, 'b', 0, 'zabuza_water_prison'), 'still imprisoned for the second turn');
+    tickStatusesForTurnEnd({ match, endingUsername: 'b' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'a' });
+    assert.equal(status(match, 'b', 0, 'zabuza_water_prison'), undefined, 'the prison lasts 2 turns');
+});
+
+test('Silent Killing ignores invulnerability and adds 5 damage against invulnerable targets', () => {
+    const match = matchFor(['momochi-zabuza'], ['uzumaki-naruto', 'haku']);
+    const swordCost = computeEffectiveEnergyCost({
+        skill: effective(match, 'a', 0, 0), actorState: match.board.a[0].state,
+    });
+    assert.equal(swordCost.reservedSpecific.taijutsu, 1);
+    assert.equal(swordCost.requiredRandom, 1);
+    cast(match, 'a', 0, 0, ['b', 0]);
+    assert.equal(match.board.b[0].hp, 70, '30 physical damage');
+    match.board.b[1].state.statuses.push({ id: 'test_invulnerable', remainingTurns: 2,
+        metadata: { invulnerable: true } });
+    match.board.a[0].state.cooldowns = {};
+    cast(match, 'a', 0, 0, ['b', 1]);
+    assert.equal(match.board.b[1].hp, 65, '30 plus 5 through invulnerability');
+
+    cast(match, 'a', 0, 3);
+    assert.ok(status(match, 'a', 0, 'zabuza_water_clone').metadata.invulnerable,
+        'Water Clone Technique is standard invulnerability');
 });
 
 test('Hidden Mist charges enemy Physical and Chakra skills, then empowers Kubikiribōchō', () => {
-    const during = matchFor(['momochi-zabuza'], ['uzumaki-naruto']);
-    cast(during, 'a', 0, 2);
-    during.board.b[0].state.statuses.push({ id: 'mist_test_invulnerability', remainingTurns: 2,
-        metadata: { invulnerable: true } });
-    assert.equal(computeTargetOptions({ match: during, actingUsername: 'a', actorSlot: 0,
-        skillIndex: 0, characters }).targets.length, 1);
-    cast(during, 'a', 0, 0, ['b', 0]);
-    assert.equal(during.board.b[0].hp, 75, 'sword bypasses invulnerability during Hidden Mist');
     const match = matchFor(['momochi-zabuza'], ['uzumaki-naruto']);
+    const mistCost = computeEffectiveEnergyCost({
+        skill: effective(match, 'a', 0, 2), actorState: match.board.a[0].state,
+    });
+    assert.equal(mistCost.reservedSpecific.genjutsu, 1);
     cast(match, 'a', 0, 2);
     assert.ok(status(match, 'b', 0, 'zabuza_hidden_mist_cost'));
     assert.ok(status(match, 'a', 0, 'zabuza_hidden_mist_defense'));
@@ -86,8 +106,6 @@ test('Hidden Mist charges enemy Physical and Chakra skills, then empowers Kubiki
     }
     assert.equal(status(match, 'b', 0, 'zabuza_hidden_mist_cost'), undefined);
     assert.ok(status(match, 'a', 0, 'zabuza_hidden_mist_attack'));
-    match.board.b[0].state.statuses.push({ id: 'test_invulnerable', remainingTurns: 1,
-        metadata: { invulnerable: true } });
     cast(match, 'a', 0, 0, ['b', 0]);
-    assert.equal(match.board.b[0].hp, 65, 'Mist empowered sword deals 35 through invulnerability');
+    assert.equal(match.board.b[0].hp, 60, 'Mist empowered sword deals 40');
 });

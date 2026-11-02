@@ -16,13 +16,14 @@ module.exports = {
             skillimage: 'https://i.imgur.com/jYOQrWm.png',
             skilldescription: 'Konohamaru covers himself or an ally with a camouflage sheet. The target ignores all damage dealt to them for 1 turn. If the target is targeted during this turn, Konohamaru jumps out, deals 15 damage to the attacker, and stuns their Physical skills for 1 turn.',
             energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 2,
-            classes: ['Physical', 'Instant'], effects: [
+            classes: ['Strategic', 'Physical', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'konohamaru_invisibility_cloak', duration: 1, scope: 'target',
                     metadata: { helpful: true, ignoreAllDamage: true,
                         onEnemySkillTargetedUseStatusSource: true,
                         onEnemySkillTargetedDamageToSourceAmount: 15,
                         onEnemySkillTargetedApplyStatusToSource: {
-                            statusId: 'konohamaru_cloak_physical_stun', duration: 1,
+                            // Fresh: it lands during the attacker's turn and must last through their next one.
+                            statusId: 'konohamaru_cloak_physical_stun', duration: 1, fresh: true,
                             metadata: { harmful: true, cannotUseSkillClasses: ['physical'],
                                 tooltipText: 'Physical skills are stunned by Konohamaru.' },
                         },
@@ -32,16 +33,16 @@ module.exports = {
         { id: 'sarutobi-konohamaru-sexy-jutsu-konohamaru-style',
             name: 'Sexy Jutsu: Konohamaru Style',
             skillimage: 'https://i.imgur.com/VJeRkMO.png',
-            skilldescription: 'Konohamaru reduces all enemies\' damage by 20 for 1 turn. During this time, each new Strategic skill an enemy uses permanently reduces their non-affliction damage by 5; this stacks.',
+            skilldescription: 'Konohamaru reduces all enemies\' damage by 20 for 1 turn. During this time, each new Strategic skill an enemy uses permanently reduces their non-affliction damage by 5; this stacks. These effects end if Konohamaru dies.',
             energy: ['Random', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
-            classes: ['Chakra', 'Instant'], effects: [
+            classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'konohamaru_sexy_jutsu_debuff', duration: 1, scope: 'all-enemy',
-                    metadata: { harmful: true, damageDebuffFlat: 20,
+                    metadata: { harmful: true, damageDebuffFlat: 20, removeOnSourceDeath: true,
                         onOwnerUseSkillTrigger: true, onOwnerUseSkillClassesAny: ['strategic'],
                         persistOnOwnerUseSkillTrigger: true,
                         onOwnerUseSkillApplyStatusToOwner: {
                             statusId: 'konohamaru_sexy_jutsu_permanent_debuff', duration: 99,
-                            metadata: { harmful: true, permanent: true,
+                            metadata: { harmful: true, permanent: true, removeOnSourceDeath: true,
                                 stackMetadataKey: 'nonAfflictionDamageDebuffFlat', stackDelta: 5,
                                 stackMax: 9999,
                                 tooltipTextTemplate: 'This character deals {nonAfflictionDamageDebuffFlat} less non-affliction damage.' },
@@ -67,7 +68,7 @@ module.exports = {
             skillimage: 'https://i.imgur.com/kYdI5MF.png',
             skilldescription: 'Konohamaru becomes invulnerable for 1 turn.',
             energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Chakra', 'Instant'], effects: [
+            classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'konohamaru_replacement', duration: 1, scope: 'self',
                     metadata: { helpful: true, invulnerable: true, tooltipText: 'Konohamaru is invulnerable.' } },
             ],

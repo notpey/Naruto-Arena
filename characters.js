@@ -1861,7 +1861,7 @@ const characters = [
                 "id": "rock-lee-high-speed-taijutsu",
                 "name": "High Speed Taijutsu",
                 "skillimage": "https://i.imgur.com/roHIgPj.jpg",
-                "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
                 "energy": [
                     "Taijutsu",
                     "Random"
@@ -2002,7 +2002,7 @@ const characters = [
                     },
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 15,
                         "scope": "target",
                         "metadata": {
                             "bonusPerStatusMetadata": {
@@ -2044,7 +2044,7 @@ const characters = [
                 "id": "rock-lee-front-lotus",
                 "name": "Front Lotus",
                 "skillimage": "https://i.imgur.com/xTW0rSg.jpg",
-                "skilldescription": "Lee deals 45 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                "skilldescription": "Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
                 "energy": [
                     "Taijutsu",
                     "Taijutsu"
@@ -2186,7 +2186,7 @@ const characters = [
                     },
                     {
                         "type": "damage",
-                        "amount": 45,
+                        "amount": 35,
                         "scope": "target",
                         "metadata": {
                             "bonusPerStatusMetadata": {
@@ -2438,7 +2438,7 @@ const characters = [
                 "name": "High Speed Taijutsu",
                 "hiddenFromSelectionViewer": true,
                 "skillimage": "https://i.imgur.com/roHIgPj.jpg",
-                "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
+                "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -2566,7 +2566,7 @@ const characters = [
                     },
                     {
                         "type": "damage",
-                        "amount": 25,
+                        "amount": 15,
                         "scope": "target",
                         "metadata": {
                             "bonusPerStatusMetadata": {
@@ -3077,7 +3077,7 @@ const characters = [
                 "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                 "energy": [
                     "Ninjutsu",
-                    "Random"
+                    "Ninjutsu"
                 ],
                 "target": "self",
                 "damage": 0,
@@ -3174,6 +3174,9 @@ const characters = [
                     "helpful": true,
                     "permanent": true,
                     "destructibleDefensePoints": 15,
+                    "skillDurationBonuses": {
+                        "kankuro-poison-bomb": 1
+                    },
                     "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation."
                 }
             }
@@ -3207,13 +3210,14 @@ const characters = [
                 "id": "kankuro-poison-bomb",
                 "name": "Poison Bomb",
                 "skillimage": "https://i.imgur.com/vJFqLIY.png",
-                "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn.",
+                "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn, or 2 turns while Puppet Preparation's destructible defense remains. This skill starts on cooldown for 1 turn.",
                 "energy": [
                     "Random"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 2,
+                "startingCooldown": 1,
                 "classes": [
                     "Affliction",
                     "Instant"
@@ -3247,7 +3251,7 @@ const characters = [
                 "id": "kankuro-puppet-trap",
                 "name": "Puppet Trap",
                 "skillimage": "/assets/characters/kankuro-puppet-trap.jpg",
-                "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
+                "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a physical or strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -3276,7 +3280,8 @@ const characters = [
                             "triggerOnlyOnOwnerSkillUse": true,
                             "triggerOnOwnerHelpfulSkill": true,
                             "triggerOnEnemyHarmfulSkillClassesAny": [
-                                "strategic"
+                                "strategic",
+                                "physical"
                             ],
                             "counterCancelsSkill": true,
                             "counterStatusId": "kankuro_puppet_trap_stun",
@@ -3289,7 +3294,7 @@ const characters = [
                                 ],
                                 "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
                             },
-                            "tooltipText": "The next Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
+                            "tooltipText": "The next Physical or Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
                         }
                     }
                 ]
@@ -6799,16 +6804,32 @@ const characters = [
         "passive": {
             "name": "Silent Killing",
             "icon": "https://i.imgur.com/9eJkbJa.png",
-            "description": "Whenever Water Clone Technique successfully counters an enemy skill, that enemy becomes unable to reduce damage or become invulnerable for 1 turn."
+            "description": "Zabuza's skills ignore invulnerability and deal 5 additional damage to invulnerable targets."
         },
+        "startStatuses": [
+            {
+                "statusId": "zabuza_silent_killing",
+                "duration": 99,
+                "metadata": {
+                    "helpful": true,
+                    "permanent": true,
+                    "cannotBeCleansed": true,
+                    "fromPassive": true,
+                    "hideTooltip": true,
+                    "ignoreEnemyInvulnerability": true,
+                    "bonusDamageAgainstInvulnerableTargets": 5
+                }
+            }
+        ],
         "skills": [
             {
                 "id": "momochi-zabuza-kubikiribocho",
                 "name": "Kubikiribōchō",
                 "skillimage": "https://i.imgur.com/aZfxDVs.png",
-                "skilldescription": "Zabuza attacks one enemy with his enormous sword, dealing 20 physical damage. While Water Prison Technique is active, a water clone will instead attack all enemies not affected by Water Prison Technique, dealing 10 physical damage to each.",
+                "skilldescription": "Zabuza deals 30 physical damage to one enemy. For the 2 turns after Hidden Mist Technique, this skill deals 10 additional damage.",
                 "energy": [
-                    "Taijutsu"
+                    "Taijutsu",
+                    "Random"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -6820,7 +6841,7 @@ const characters = [
                 "effects": [
                     {
                         "type": "damage",
-                        "amount": 20,
+                        "amount": 30,
                         "scope": "target"
                     }
                 ]
@@ -6829,7 +6850,7 @@ const characters = [
                 "id": "momochi-zabuza-water-prison-technique",
                 "name": "Water Prison Technique",
                 "skillimage": "https://i.imgur.com/dT988nl.png",
-                "skilldescription": "Zabuza stuns one enemy's harmful skills for 2 turns.",
+                "skilldescription": "Zabuza stuns one enemy's physical and chakra skills for 2 turns. During this time, the target is invulnerable to both allied and enemy skills.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -6850,32 +6871,15 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "ongoingClass": "control",
-                            "cannotUseHarmfulSkills": true,
                             "turnDurationAnchor": "source_turn",
-                            "tooltipText": "This character cannot use harmful skills."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
-                        "statusId": "zabuza_water_prison_link",
-                        "duration": 2,
-                        "scope": "self",
-                        "condition": {
-                            "scope": "target",
-                            "statusId": "zabuza_water_prison",
-                            "statusFromActor": true
-                        },
-                        "metadata": {
-                            "helpful": true,
-                            "ongoingClass": "control",
-                            "linkedTargetStatusId": "zabuza_water_prison",
-                            "copyTargetKeyToKeys": [
-                                "linkedTargetKey"
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "chakra"
                             ],
-                            "skillReplacements": {
-                                "momochi-zabuza-kubikiribocho": "momochi-zabuza-kubikiribocho-clone"
-                            },
-                            "tooltipText": "Enemies outside Water Prison take damage from Zabuza."
+                            "invulnerable": true,
+                            "invulnerableToHelpfulSkills": true,
+                            "controlIgnoresOwnerInvulnerability": true,
+                            "tooltipText": "This character cannot use physical or chakra skills and is invulnerable to allied and enemy skills."
                         }
                     }
                 ]
@@ -6884,9 +6888,9 @@ const characters = [
                 "id": "momochi-zabuza-hidden-mist-technique",
                 "name": "Hidden Mist Technique",
                 "skillimage": "https://i.imgur.com/IkZwEbi.png",
-                "skilldescription": "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability. This skill ignores invulnerability.",
+                "skilldescription": "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage.",
                 "energy": [
-                    "Ninjutsu"
+                    "Genjutsu"
                 ],
                 "target": "self",
                 "damage": 0,
@@ -6927,17 +6931,12 @@ const characters = [
                                 "metadata": {
                                     "helpful": true,
                                     "skillDamageBonuses": {
-                                        "momochi-zabuza-kubikiribocho": 10,
-                                        "momochi-zabuza-kubikiribocho-clone": 10
+                                        "momochi-zabuza-kubikiribocho": 10
                                     },
-                                    "ignoreInvulnerabilityForSkillIds": [
-                                        "momochi-zabuza-kubikiribocho",
-                                        "momochi-zabuza-kubikiribocho-clone"
-                                    ],
-                                    "tooltipText": "Kubikiribōchō deals 10 additional damage and ignores invulnerability."
+                                    "tooltipText": "Kubikiribōchō deals 10 additional damage."
                                 }
                             },
-                            "tooltipText": "Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage and ignores invulnerability."
+                            "tooltipText": "Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage."
                         }
                     }
                 ]
@@ -6946,11 +6945,11 @@ const characters = [
                 "id": "momochi-zabuza-water-clone-technique",
                 "name": "Water Clone Technique",
                 "skillimage": "https://i.imgur.com/m1hfJAx.png",
-                "skilldescription": "Zabuza counters the first harmful Physical skill used on himself or one ally for 1 turn.",
+                "skilldescription": "Zabuza becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
-                "target": "self-or-single-ally",
+                "target": "self",
                 "damage": 0,
                 "cooldown": 4,
                 "classes": [
@@ -6962,53 +6961,11 @@ const characters = [
                         "type": "apply_status",
                         "statusId": "zabuza_water_clone",
                         "duration": 1,
-                        "scope": "target",
+                        "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "triggerOnEnemyHarmfulSkillClassesAny": [
-                                "physical"
-                            ],
-                            "counterCancelsSkill": true,
-                            "counterStatusId": "zabuza_silent_killing",
-                            "counterStatusDuration": 1,
-                            "counterStatusFresh": false,
-                            "counterStatusMetadata": {
-                                "harmful": true,
-                                "cannotReduceDamage": true,
-                                "cannotBecomeInvulnerable": true,
-                                "turnDurationAnchor": "source_turn",
-                                "tooltipText": "Silent Killing: this character cannot reduce damage or become invulnerable."
-                            },
-                            "tooltipText": "The next harmful Physical skill against this character is countered by Zabuza’s water clone."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "momochi-zabuza-kubikiribocho-clone",
-                "baseSkillId": "momochi-zabuza-kubikiribocho",
-                "useBaseSkillCooldown": true,
-                "hiddenFromSelectionViewer": true,
-                "name": "Kubikiribōchō",
-                "skillimage": "https://i.imgur.com/aZfxDVs.png",
-                "skilldescription": "A water clone deals 10 physical damage to each enemy outside Water Prison Technique.",
-                "energy": [
-                    "Taijutsu"
-                ],
-                "target": "all-enemy",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Physical",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "damage",
-                        "amount": 10,
-                        "scope": "all-enemy-without-source-status",
-                        "metadata": {
-                            "excludedStatusId": "zabuza_water_prison"
+                            "invulnerable": true,
+                            "tooltipText": "Zabuza is invulnerable."
                         }
                     }
                 ]
@@ -7413,8 +7370,7 @@ const characters = [
                 "skillimage": "https://i.imgur.com/SZOdcEy.png",
                 "skilldescription": "Orochimaru disrupts an enemy's chakra flow, increasing the cost of their skills by 1 random chakra for 3 turns.",
                 "energy": [
-                    "Ninjutsu",
-                    "Random"
+                    "Ninjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
@@ -8859,13 +8815,13 @@ const characters = [
                 "id": "mitarashi-anko-dragon-fire",
                 "name": "Dragon Fire",
                 "skillimage": "https://i.imgur.com/Kh95uYY.png",
-                "skilldescription": "Anko unleashes a stream of flames, dealing 5 affliction damage to all enemies each turn for 2 turns.",
+                "skilldescription": "Anko unleashes a stream of flames, dealing 10 affliction damage to all enemies each turn for 2 turns.",
                 "energy": [
                     "Ninjutsu"
                 ],
                 "target": "all-enemy",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 2,
                 "classes": [
                     "Affliction",
                     "Instant"
@@ -8879,11 +8835,11 @@ const characters = [
                         "metadata": {
                             "harmful": true,
                             "afflictionDamage": true,
-                            "turnEndDamage": 5,
+                            "turnEndDamage": 10,
                             "turnEndTrigger": "source_turn",
                             "turnDurationAnchor": "source_turn",
                             "triggerOnApply": true,
-                            "tooltipText": "This character takes 5 affliction damage each turn from Dragon Fire."
+                            "tooltipText": "This character takes 10 affliction damage each turn from Dragon Fire."
                         }
                     }
                 ]
@@ -8892,7 +8848,7 @@ const characters = [
                 "id": "mitarashi-anko-hidden-shadow-snake-hand",
                 "name": "Hidden Shadow Snake Hand",
                 "skillimage": "https://i.imgur.com/7CtEQFV.png",
-                "skilldescription": "Anko unleashes a swarm of snakes from her sleeve, dealing 20 physical damage to an enemy. The target also takes 5 affliction damage each turn for the following 3 turns.",
+                "skilldescription": "Anko unleashes a swarm of snakes from her sleeve, dealing 20 physical damage to an enemy. The target also takes 5 affliction damage each turn for the following 2 turns.",
                 "energy": [
                     "Ninjutsu",
                     "Random"
@@ -8919,7 +8875,7 @@ const characters = [
                     {
                         "type": "apply_status",
                         "statusId": "mitarashi_anko_hidden_shadow_snake_hand",
-                        "duration": 3,
+                        "duration": 2,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,

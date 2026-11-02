@@ -42,7 +42,7 @@ test('Shiore Orochimaru draft kit matches names, costs, cooldowns, and roster', 
     const orochimaru = characters[indexOf('shiore-orochimaru')];
     assert.equal(orochimaru.passive.name, 'Cursed Seal');
     assert.deepEqual(orochimaru.skills.map((skill) => [skill.name, skill.energy, skill.cooldown]), [
-        ['Five Elements Seal', ['Ninjutsu', 'Random'], 3], ['Devour', ['Bloodline', 'Random'], 0],
+        ['Five Elements Seal', ['Ninjutsu'], 3], ['Devour', ['Bloodline', 'Random'], 0],
         ['Cursed Seal Bite', ['Random'], 1], ['Skin Shed', ['Random'], 4],
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('shiore-orochimaru'));

@@ -16,7 +16,7 @@ const zoltraakCost = {
 
 const shieldMetadata = {
     helpful: true,
-    destructibleDefensePoints: 6,
+    destructibleDefensePoints: 5,
     scaleFromSourceStatusMetadata: {
         statusId: CONCEALMENT,
         metadataKey: 'magicalConcealmentStacks',
@@ -56,7 +56,7 @@ module.exports = {
         {
             id: 'fern-ordinary-defensive-magic', name: 'Ordinary Defensive Magic',
             skillimage: 'https://i.imgur.com/aFBoFrH.png',
-            skilldescription: 'Fern gains 6 destructible defense for 1 turn each turn for the rest of the battle, increased by 5 for each Magical Concealment stack. This skill cannot be used while active.',
+            skilldescription: 'Fern gains 5 destructible defense for 1 turn each turn for the rest of the battle, increased by 5 for each Magical Concealment stack. This skill cannot be used while active.',
             energy: ['Ninjutsu'], target: 'self', damage: 0, cooldown: 0,
             actorCondition: { missingStatusId: BARRIER },
             classes: ['Strategic', 'Instant'],
@@ -68,7 +68,7 @@ module.exports = {
                             statusId: BARRIER_SHIELD, duration: 1,
                             metadata: shieldMetadata, fresh: true,
                         },
-                        tooltipText: 'Ordinary Defensive Magic renews Fern’s 6 destructible defense, plus 5 per Magical Concealment stack, each turn.' } },
+                        tooltipText: 'Ordinary Defensive Magic renews Fern’s 5 destructible defense, plus 5 per Magical Concealment stack, each turn.' } },
                 { type: 'apply_status', statusId: BARRIER_SHIELD, duration: 1, scope: 'self',
                     metadata: shieldMetadata },
             ],

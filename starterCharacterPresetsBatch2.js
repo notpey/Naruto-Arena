@@ -309,7 +309,7 @@
                     "id": "rock-lee-high-speed-taijutsu",
                     "name": "High Speed Taijutsu",
                     "skillimage": "https://i.imgur.com/roHIgPj.jpg",
-                    "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                    "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
                     "energy": [
                         "Taijutsu",
                         "Random"
@@ -450,7 +450,7 @@
                         },
                         {
                             "type": "damage",
-                            "amount": 25,
+                            "amount": 15,
                             "scope": "target",
                             "metadata": {
                                 "bonusPerStatusMetadata": {
@@ -492,7 +492,7 @@
                     "id": "rock-lee-front-lotus",
                     "name": "Front Lotus",
                     "skillimage": "https://i.imgur.com/xTW0rSg.jpg",
-                    "skilldescription": "Lee deals 45 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                    "skilldescription": "Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
                     "energy": [
                         "Taijutsu",
                         "Taijutsu"
@@ -634,7 +634,7 @@
                         },
                         {
                             "type": "damage",
-                            "amount": 45,
+                            "amount": 35,
                             "scope": "target",
                             "metadata": {
                                 "bonusPerStatusMetadata": {
@@ -886,7 +886,7 @@
                     "name": "High Speed Taijutsu",
                     "hiddenFromSelectionViewer": true,
                     "skillimage": "https://i.imgur.com/roHIgPj.jpg",
-                    "skilldescription": "Lee deals 25 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
+                    "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn.",
                     "energy": [
                         "Random"
                     ],
@@ -1014,7 +1014,7 @@
                         },
                         {
                             "type": "damage",
-                            "amount": 25,
+                            "amount": 15,
                             "scope": "target",
                             "metadata": {
                                 "bonusPerStatusMetadata": {
@@ -1038,9 +1038,6 @@
                         }
                     ]
                 }
-            ],
-            "tags": [
-                "konoha-genin"
             ]
         },
         "tenten": {
@@ -1554,7 +1551,7 @@
                     "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                     "energy": [
                         "Ninjutsu",
-                        "Random"
+                        "Ninjutsu"
                     ],
                     "target": "self",
                     "damage": 0,
@@ -1651,6 +1648,9 @@
                         "helpful": true,
                         "permanent": true,
                         "destructibleDefensePoints": 15,
+                        "skillDurationBonuses": {
+                            "kankuro-poison-bomb": 1
+                        },
                         "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation."
                     }
                 }
@@ -1684,13 +1684,14 @@
                     "id": "kankuro-poison-bomb",
                     "name": "Poison Bomb",
                     "skillimage": "https://i.imgur.com/vJFqLIY.png",
-                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn.",
+                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn, or 2 turns while Puppet Preparation's destructible defense remains. This skill starts on cooldown for 1 turn.",
                     "energy": [
                         "Random"
                     ],
                     "target": "all-enemy",
                     "damage": 0,
                     "cooldown": 2,
+                    "startingCooldown": 1,
                     "classes": [
                         "Affliction",
                         "Instant"
@@ -1724,7 +1725,7 @@
                     "id": "kankuro-puppet-trap",
                     "name": "Puppet Trap",
                     "skillimage": "/assets/characters/kankuro-puppet-trap.jpg",
-                    "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
+                    "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a physical or strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
                     "energy": [
                         "Random"
                     ],
@@ -1753,7 +1754,8 @@
                                 "triggerOnlyOnOwnerSkillUse": true,
                                 "triggerOnOwnerHelpfulSkill": true,
                                 "triggerOnEnemyHarmfulSkillClassesAny": [
-                                    "strategic"
+                                    "strategic",
+                                    "physical"
                                 ],
                                 "counterCancelsSkill": true,
                                 "counterStatusId": "kankuro_puppet_trap_stun",
@@ -1766,7 +1768,7 @@
                                     ],
                                     "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
                                 },
-                                "tooltipText": "The next Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
+                                "tooltipText": "The next Physical or Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
                             }
                         }
                     ]

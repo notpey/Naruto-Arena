@@ -44,6 +44,7 @@ test('Kankuro starts with 15 defense and One Shot gains 15 damage against a trap
 
 test('Poison Bomb damages every enemy and blocks healing', () => {
     const match = makeMatch(['inuzuka-kiba', 'haruno-sakura']);
+    match.board.p1[0].state.cooldowns = {}; // Poison Bomb starts on cooldown
     cast(match, 'p1', 1);
     assert.deepEqual(match.board.p2.map(unit => unit.hp), [90, 90]);
     for (const unit of match.board.p2) {

@@ -42,7 +42,7 @@ test('Anko draft kit matches names, costs, cooldowns, and roster', () => {
     const anko = characters[indexOf('mitarashi-anko')];
     assert.equal(anko.passive.name, "Anko's Cursed Seal");
     assert.deepEqual(anko.skills.map((skill) => [skill.name, skill.energy, skill.cooldown]), [
-        ['Dual Pin', ['Random'], 2], ['Dragon Fire', ['Ninjutsu'], 1],
+        ['Dual Pin', ['Random'], 2], ['Dragon Fire', ['Ninjutsu'], 2],
         ['Hidden Shadow Snake Hand', ['Ninjutsu', 'Random'], 1], ['Quick Reflexes', ['Random'], 4],
         ['Twin Snakes Mutual Death', ['Ninjutsu', 'Ninjutsu'], 0],
     ]);
@@ -62,15 +62,15 @@ test('Dual Pin pierces, strips defenses, amplifies affliction, and unlocks Twin 
 
     cast(match, 'p1', 0, 1);
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.deepEqual(match.board.p2.map((unit) => unit.hp), [85, 95],
-        'Dragon Fire ticks 5, plus 5 on the pinned enemy');
+    assert.deepEqual(match.board.p2.map((unit) => unit.hp), [80, 90],
+        'Dragon Fire ticks 10, plus 5 on the pinned enemy');
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     assert.equal(effectiveId(match, 0), 'mitarashi-anko-dual-pin', 'Twin Snakes is only available for 1 turn');
     assert.equal(status(match.board.p2[0], 'mitarashi_anko_dual_pin_debuff'), undefined);
 });
 
-test('Hidden Shadow Snake Hand deals physical damage now and affliction on the following 3 turns', () => {
+test('Hidden Shadow Snake Hand deals physical damage now and affliction on the following 2 turns', () => {
     const match = matchFor(['mitarashi-anko'], ['haruno-sakura']);
     battle.applyStatus({ targetState: match.board.p2[0].state, statusId: 'test_reduction', duration: 9,
         sourceUsername: 'p2', sourceSlot: 0, metadata: { helpful: true, damageReductionFlat: 5 } });
@@ -78,14 +78,14 @@ test('Hidden Shadow Snake Hand deals physical damage now and affliction on the f
     assert.equal(match.board.p2[0].hp, 85, '20 physical damage is reduced by damage reduction');
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     assert.equal(match.board.p2[0].hp, 85, 'no affliction on the cast turn');
-    for (const expected of [80, 75, 70]) {
+    for (const expected of [80, 75]) {
         battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
         battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         assert.equal(match.board.p2[0].hp, expected);
     }
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 70);
+    assert.equal(match.board.p2[0].hp, 75, 'the affliction has ended');
 });
 
 test('Twin Snakes Mutual Death executes the pinned enemy and then Anko, whose death grants chakra', () => {

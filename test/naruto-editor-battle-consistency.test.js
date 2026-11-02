@@ -882,7 +882,7 @@ test('Rock Lee High Speed Taijutsu uses the first Gate and offers its random cha
     const match = makeMatch([leeIndex], [1]);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 70, 'the first Gate adds 5 to the 25 physical damage');
+    assert.equal(match.board.p2[0].hp, 80, 'the first Gate adds 5 to the 15 physical damage');
     assert.equal(resolveEffectiveSkill({
         characters, rosterIndex: leeIndex, skillIndex: 0,
         actorState: match.board.p1[0].state,
@@ -892,8 +892,8 @@ test('Rock Lee High Speed Taijutsu uses the first Gate and offers its random cha
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 35,
-        'the next-turn follow-up deals 25 plus the second Gate bonus');
+    assert.equal(match.board.p2[0].hp, 55,
+        'the next-turn follow-up deals 15 plus the second Gate bonus');
     assert.equal(match.board.p1[0].state.statuses.find((status) =>
         status.id === 'rock_lee_gate_openings').metadata.gateCount, 2);
 });
@@ -905,14 +905,14 @@ test('Remove Training Weights reduces Lee physical damage without reducing fifth
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, '25 base plus 5 Gate damage minus 10 from weights');
+    assert.equal(match.board.p2[0].hp, 90, '15 base plus 5 Gate damage minus 10 from weights');
     match.board.p2[0].state.statuses.push({
         id: 'test_invulnerable', remainingTurns: 1,
         sourceUsername: 'p2', sourceSlot: 0, metadata: { invulnerable: true },
     });
     queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 35,
+    assert.equal(match.board.p2[0].hp, 55,
         'Front Lotus ignores invulnerability after weights are removed');
 });
 
@@ -947,7 +947,7 @@ test('Remove Training Weights bypasses counters and both forms of reflection', (
     assert.equal(weightedSkill.cannotBeReflected, true);
     queueSkill(withWeights, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match: withWeights, actingUsername: 'p1', characters });
-    assert.equal(withWeights.board.p2[0].hp, 80);
+    assert.equal(withWeights.board.p2[0].hp, 90);
     assert.equal(withWeights.board.p1[0].hp, 100);
 });
 
