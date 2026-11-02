@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naruto-Arena — Clan Wars</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="brand.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(232, 128, 26, 0.16), transparent 30%),
+        radial-gradient(ellipse at 85% 8%, rgba(44, 156, 219, 0.08), transparent 28%),
+        linear-gradient(155deg, #05070e 0%, #0c0c10 38%, #000000 70%, #120a06 100%);
+      color: var(--ca-bone); font-family: var(--font-ui);
+    }
+    a { color: var(--ca-amber); }
+    button, select, input { font: inherit; }
+    button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--ca-amber); outline-offset: 2px; }
+
+    .cw-page { width: min(1100px, 100%); margin: 0 auto; padding: 0 16px 64px; }
+    .cw-title { margin: 28px 0 6px; font-size: clamp(32px, 5vw, 52px); font-weight: 900; text-transform: uppercase; color: var(--ca-orange); line-height: 1.08; }
+    .cw-lede { margin: 0 0 18px; color: var(--ca-parchment); max-width: 720px; }
+    .cw-status { min-height: 20px; margin: 0 0 12px; color: var(--ca-amber); }
+    .cw-status.error { color: #ff9a9c; }
+
+    .cw-panel { background: rgba(17, 16, 16, 0.92); border: 1px solid var(--ca-slate); border-radius: 6px; padding: 18px; margin-bottom: 18px; }
+    .cw-panel h2 { margin: 0 0 12px; font-size: 18px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ca-amber); }
+    .cw-panel h3 { margin: 16px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ca-parchment); }
+    .cw-muted { color: var(--ca-dust); font-size: 13px; }
+
+    .cw-button { background: var(--ca-orange); color: #1a1208; border: 0; border-radius: 4px; padding: 9px 16px; font-weight: 700; cursor: pointer; min-height: 40px; }
+    .cw-button:hover { background: var(--ca-amber); }
+    .cw-button.secondary { background: transparent; color: var(--ca-bone); border: 1px solid var(--ca-mist); }
+    .cw-button.danger { background: transparent; color: #ff9a9c; border: 1px solid #a8474a; }
+    .cw-button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .cw-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+
+    .cw-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ca-parchment); }
+    .cw-field input, .cw-field select, .cw-select { background: #11151d; color: var(--ca-bone); border: 1px solid rgba(208,200,184,.35); border-radius: 4px; padding: 8px 10px; min-height: 40px; }
+    .cw-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+
+    .cw-ban-search { width: 100%; margin-bottom: 8px; }
+    .cw-ban-list { max-height: 220px; overflow-y: auto; border: 1px solid var(--ca-slate); border-radius: 4px; padding: 6px; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 10px; }
+    .cw-ban-list label { display: flex; gap: 8px; align-items: baseline; font-size: 13px; padding: 4px; cursor: pointer; }
+    .cw-tags { color: var(--ca-dust); font-size: 11px; }
+    .cw-combo-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .cw-combo-row .cw-select { flex: 1 1 160px; }
+    .cw-chip-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    .cw-chip { display: inline-flex; gap: 6px; align-items: center; background: var(--ca-iron); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 13px; }
+    .cw-chip button { background: transparent; border: 0; color: var(--ca-parchment); cursor: pointer; min-width: 28px; min-height: 28px; border-radius: 50%; }
+
+    .cw-war-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .cw-war-link { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; background: var(--ca-ash); border: 1px solid var(--ca-slate); border-radius: 6px; color: var(--ca-bone); text-decoration: none; }
+    .cw-war-link:hover { border-color: var(--ca-orange); }
+    .cw-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--ca-iron); color: var(--ca-parchment); }
+    .cw-pill.active { background: #2f4a22; color: #b9ecab; }
+    .cw-pill.proposed { background: var(--ca-purple-dim); color: var(--ca-amber); }
+
+    .cw-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .cw-matchup { margin: 0; font-size: clamp(22px, 4vw, 32px); font-weight: 800; }
+    .cw-score { font-size: clamp(28px, 5vw, 44px); font-weight: 900; color: var(--ca-amber); }
+    .cw-score small { display: block; font-size: 12px; font-weight: 600; color: var(--ca-dust); text-transform: uppercase; letter-spacing: 0.06em; }
+    .cw-rules { margin: 0; padding-left: 18px; color: var(--ca-parchment); font-size: 14px; }
+    .cw-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .cw-roster { list-style: none; margin: 0; padding: 0; }
+    .cw-roster li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--ca-slate); }
+    .cw-set { padding: 12px 0; border-bottom: 1px solid var(--ca-slate); }
+    .cw-set:last-child { border-bottom: 0; }
+    .cw-set-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .cw-set-players { font-weight: 700; }
+    .cw-set-score { color: var(--ca-amber); font-weight: 800; margin: 0 6px; }
+    .cw-result { font-size: 18px; font-weight: 800; color: var(--ca-amber); margin: 0 0 6px; }
+  </style>
+  <link rel="stylesheet" href="account.css?v=1">
+  <script src="character-images.js?v=1"></script>
+  <script src="account-client.js?v=1"></script>
+</head>
+<body>
+
+  <!-- ═══ SHINOBI-ARENA SHARED NAV ══════════════════════════════ -->
+  <nav class="ca-nav">
+    <div class="ca-nav-inner">
+      <a class="ca-nav-seal" href="index.html" aria-label="Naruto-Arena home">
+        <svg class="ca-seal-svg" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+          <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.06)"/>
+          <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="13" font-weight="900" letter-spacing="-0.5" font-family="system-ui,sans-serif">N·A</text>
+        </svg>
+      </a>
+      <ul class="ca-nav-links" role="list">
+        <li class="ca-nav-item"><a class="ca-nav-link" href="index.html" data-nav="index.html">Home</a></li>
+        <li class="ca-nav-item"><a class="ca-nav-link" href="selection.html" data-nav="selection.html selection-login.html" data-game-window>Start Playing</a></li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="manual.html charactersandskills.html">Game Manual<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Game Manual">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#basics">The Basics</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="charactersandskills.html">Characters &amp; Skills</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="manual.html#ninja-ladder">The Ninja Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="leaderboards.html">Ladders<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ladders">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#road-to-hokage">Road to Hokage</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#hall-of-fame">Hall of Fame</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#ninja-ladder">Ninja Ladder</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="leaderboards.html#clan-ladder">Clan Ladder</a></li>
+          </ul>
+        </li>
+        <li class="ca-nav-item ca-has-menu">
+          <button class="ca-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-nav="missions.html">Ninja Missions<span class="ca-caret" aria-hidden="true">&#9662;</span></button>
+          <ul class="ca-nav-menu" role="menu" aria-label="Ninja Missions">
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html">Overview &mdash; All Ranks</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=dc">D &amp; C Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=b">B Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=a">A Rank Missions</a></li>
+            <li role="none"><a role="menuitem" class="ca-nav-menu-link" href="missions.html?rank=s">S Rank Missions</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <div class="ca-nav-account" id="ca-nav-account">
+        <div class="ca-account-menu-wrap">
+          <button class="ca-account-trigger" type="button" id="ca-account-trigger" aria-haspopup="true" aria-expanded="false">
+            <span id="ca-nav-guest" class="ca-nav-guest">Login / Register</span>
+            <span id="ca-nav-user" class="ca-nav-user" hidden>
+              <span class="ca-nav-avatar" aria-hidden="true"></span>
+              <span class="ca-nav-welcome">Welcome, <strong id="ca-nav-username"></strong></span>
+            </span>
+            <span class="ca-account-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="ca-account-menu" id="ca-account-menu" hidden>
+            <section class="group" id="auth-panel">
+              <h2 class="group-title" id="auth-title">Login</h2>
+              <div id="guest-auth-view">
+                <p class="auth-description" id="auth-description">Sign in with your Naruto-Arena account.</p>
+                <form class="auth-form" id="auth-form">
+                  <input class="auth-input" type="text" name="username" placeholder="Username" autocomplete="username" required />
+                  <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                  <input class="auth-input" type="password" name="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" hidden />
+                  <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" hidden />
+                  <button class="auth-button" type="submit" id="auth-submit">Login</button>
+                  <button class="auth-switch" type="button" id="auth-toggle">Need an account? Register</button>
+            <a class="account-recovery-link" href="recover.html">Forgot password?</a>
+                  <p class="auth-status" id="auth-status" aria-live="polite"></p>
+                </form>
+              </div>
+              <div class="account-panel" id="account-panel" hidden>
+                <p class="account-greeting">Welcome back, <span class="account-name" id="account-username">Player</span>!</p>
+                <div class="account-actions">
+                  <button class="account-action" type="button" id="view-profile-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25" /><path d="M5 19c.9-3 3.6-4.5 7-4.5S18.1 16 19 19" /></svg>
+                    <span>View Profile</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-avatar-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6" /><path d="M9 6h6" /><path d="M5 21c1.2-3.2 4-4.8 7-4.8s5.8 1.6 7 4.8" /></svg>
+                    <span>Change Avatar</span>
+                  </button>
+                  <button class="account-action" type="button" id="clan-panel-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V6l8-3 8 3v12l-8 3z" /><path d="M8 10h8" /><path d="M8 14h5" /></svg>
+                    <span>Clan Panel</span>
+                  </button>
+                  <button class="account-action" type="button" id="change-backgrounds-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" /><path d="M4 14c2.5-3 5.5-4.5 8-4.5s5.5 1.5 8 4.5" /></svg>
+                    <span>Custom Background</span>
+                  </button>
+                  <button class="account-action" type="button" id="reset-account-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14" /><path d="M8 7V5h8v2" /><path d="M9 11v5" /><path d="M15 11v5" /><path d="M7 7l1 12h8l1-12" /></svg>
+                    <span>Reset Account</span>
+                  </button>
+                  <section class="group" id="admin-panel-section" hidden>
+                    <h2 class="group-title">Admin Panel</h2>
+                    <nav class="nav">
+                      <a class="nav-link" href="winrates.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" /><path d="M7 14V9" /><path d="M12 14V6" /><path d="M17 14v-3" /></svg>
+                        <span>Winrates</span>
+                      </a>
+                      <a class="nav-link" href="charactereditor.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 16 18 4" /><path d="m14 4 4 4" /><path d="M6 16l-1 4 4-1" /></svg>
+                        <span>Character Editor</span>
+                      </a>
+                      <a class="nav-link" href="editmission.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" /><path d="M7 16l10-10" /><path d="M14 6l4 4" /><path d="M6 18l1-4 4-1" /></svg>
+                        <span>Mission Editor</span>
+                      </a>
+                      <a class="nav-link" href="playeraccounts.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="2.5" /><circle cx="16.5" cy="9.5" r="2" /><path d="M4.5 18c.8-2.7 3-4 5.5-4s4.7 1.3 5.5 4" /><path d="M14 17c.5-1.7 1.8-2.8 3.8-2.8 1.5 0 2.9.8 3.7 2.3" /></svg>
+                        <span>Player Accounts</span>
+                      </a>
+                      <a class="nav-link" href="newspost.html">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14" /><path d="M5 11.5h14" /><path d="M5 16.5h9" /><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
+                        <span>News Post</span>
+                      </a>
+                    </nav>
+                  </section>
+                  <button class="account-action" type="button" id="logout-button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H4" /><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>
+                    <span>Log Out</span>
+                  </button>
+                </div>
+                <p class="auth-status" id="account-status" aria-live="polite"></p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═════════════════════════════════════════════════ -->
+  <header class="ca-hero">
+    <div class="ca-hero-inner">
+      <div class="ca-hero-arrow ca-hero-arrow--left" aria-hidden="true">◁</div>
+      <div class="ca-hero-center">
+        <button class="ca-hero-play" type="button" id="play-now-button">› START PLAYING</button>
+        <div class="ca-hero-wordmark" aria-label="Naruto-Arena">
+          <span class="ca-hero-word">NARUTO</span>
+          <svg class="ca-hero-seal" viewBox="0 0 40 46" fill="none" aria-hidden="true">
+            <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#e8801a" stroke-width="1.5" fill="rgba(232,128,26,0.12)"/>
+            <text x="20" y="29" text-anchor="middle" fill="#7c4dff" font-size="12" font-weight="900" font-family="system-ui,sans-serif">⚡</text>
+          </svg>
+          <span class="ca-hero-word">ARENA</span>
+        </div>
+        <p class="ca-hero-tagline">YOUR #1 ONLINE SHINOBI STRATEGY GAME</p>
+      </div>
+      <div class="ca-hero-arrow ca-hero-arrow--right" aria-hidden="true">▷</div>
+    </div>
+  </header>
+
+
+  <main class="cw-page">
+    <h1 class="cw-title">Clan Wars</h1>
+    <p class="cw-lede">Clan Leaders declare wars and agree on the rules. Members join the roster and challenge enemy members to best-of-3 or best-of-5 sets. The clan that reaches the target number of set wins first takes the war.</p>
+    <p class="cw-status" id="cw-status" role="status" aria-live="polite"></p>
+    <div id="cw-view"></div>
+  </main>
+
+  <footer class="ms-footer"></footer>
+
+  <script src="./index.js" defer></script>
+  <script src="./nav.js" defer></script>
+  <script src="./clanwars.js?v=1" defer></script>
+</body>
+</html>

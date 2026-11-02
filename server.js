@@ -750,6 +750,9 @@ const characterRankAccess = createCharacterRankAccessService({
     getCharacters: () => charactersData,
 });
 let newsPostsCollection;
+let clanWarsCollection;
+// Set once the database is ready; the match endpoints use it for war battles.
+let clanWarsRouter = null;
 let cosmeticsService = require('./services/cosmeticsService.js')({});
 const matchSocketRooms = new Map();
 
@@ -4075,6 +4078,16 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         return null;
     }
 
+    if (match.mode === 'war') {
+        // A scoring failure must not stop the match itself from ending.
+        try {
+            await clanWarsRouter?.recordWarBattleResult(match, winnerUsername, endedAt);
+        } catch (error) {
+            console.error('Clan war battle result error:', error);
+        }
+        return null;
+    }
+
     if (match.mode === 'private') {
         await recordRecentPrivateGameForUsers({
             players: match.players || [],
@@ -6703,7 +6716,7 @@ const enqueuePlayer = (entry) => {
     quickQueue = quickQueue.filter((u) => u.username !== entry.username);
     ladderQueue = ladderQueue.filter((u) => u.username !== entry.username);
     privateQueue = privateQueue.filter((u) => u.username !== entry.username);
-    if (entry.mode === 'private') {
+    if (entry.mode === 'private' || entry.mode === 'war') {
         privateQueue.push(entry);
         return;
     }
@@ -7162,7 +7175,9 @@ const maybeCreateBattleBotMatch = async ({ username, mode, userProfile = null })
     return matchDocument;
 };
 
-const dequeuePrivateOpponent = (username, targetUsername) => {
+// War battles share the private queue; `warSetId` keeps a war entry from
+// pairing with a private game, or with a different set, between the same players.
+const dequeuePrivateOpponent = (username, targetUsername, warSetId = '') => {
     const normalizedTarget = typeof targetUsername === 'string' ? targetUsername.trim().toLowerCase() : '';
     if (!normalizedTarget) return null;
     const opponent = privateQueue.find((entry) => {
@@ -7172,7 +7187,8 @@ const dequeuePrivateOpponent = (username, targetUsername) => {
         return (
             entry.username !== username &&
             entry.username.toLowerCase() === normalizedTarget &&
-            entryTarget === username.toLowerCase()
+            entryTarget === username.toLowerCase() &&
+            (entry.warSetId || '') === (warSetId || '')
         );
     });
     if (!opponent) return null;
@@ -8970,6 +8986,20 @@ async function initDb() {
         cosmeticsService
     });
     app.use(profileRouter);
+
+    clanWarsCollection = db.collection('clanWars');
+    clanWarsRouter = require('./routes/clanWars.js')({
+        clanWarsCollection,
+        usersCollection,
+        normalizeUserProfile,
+        normalizeClanRankKey,
+        getRoster: () => charactersData,
+        getRosterCharacterId,
+        addClanExperience,
+        requireSession,
+    });
+    await clanWarsRouter.ensureIndexes();
+    app.use(clanWarsRouter);
 }
 
 app.use('/avatars', express.static(path.join(__dirname, 'avatars')));
@@ -9045,8 +9075,9 @@ const teamSchema = Joi.array()
 
 const matchJoinSchema = Joi.object({
     team: teamSchema.required(),
-    mode: Joi.string().valid('quick', 'ladder', 'private').default('quick'),
+    mode: Joi.string().valid('quick', 'ladder', 'private', 'war').default('quick'),
     targetUsername: Joi.string().trim().min(1).max(64).allow('').optional(),
+    warSetId: Joi.string().trim().max(128).allow('').optional(),
 });
 
 const storyStartSchema = Joi.object({
@@ -9199,7 +9230,11 @@ app.post('/api/team/save', requireSession, async (req, res) => {
         }
         const team = value.team;
         const mode = value.mode;
-        const targetUsername = typeof value.targetUsername === 'string' ? value.targetUsername.trim() : '';
+        let targetUsername = typeof value.targetUsername === 'string' ? value.targetUsername.trim() : '';
+        const warSetId = mode === 'war' && typeof value.warSetId === 'string' ? value.warSetId.trim() : '';
+        if (mode === 'war' && (!warSetId || !clanWarsRouter)) {
+            return res.status(400).json({ error: 'Choose a war set before starting a war battle.' });
+        }
         if (mode === 'private') {
             if (!targetUsername) {
                 return res.status(400).json({ error: 'Opponent username is required for a private game.' });
@@ -9296,9 +9331,24 @@ app.post('/api/team/save', requireSession, async (req, res) => {
             return res.status(403).json({ error: error.message || 'Character is locked.' });
         }
 
+        // War battles pair like private games, but only with the other player
+        // in the same war set, and only with a team the war's rules allow.
+        let warBattle = null;
+        if (mode === 'war') {
+            try {
+                warBattle = await clanWarsRouter.prepareWarBattle({ username, setId: warSetId, team });
+            } catch (error) {
+                return res.status(error.status || 500).json({
+                    error: error.message || 'Unable to start the war battle.',
+                    violations: error.violations || [],
+                });
+            }
+            targetUsername = warBattle.opponent;
+        }
+
         // Try to pair with waiting opponent
-        const opponent = mode === 'private'
-            ? dequeuePrivateOpponent(username, targetUsername)
+        const opponent = mode === 'private' || mode === 'war'
+            ? dequeuePrivateOpponent(username, targetUsername, warSetId)
             : dequeueOpponent(username, mode);
         if (opponent) {
             const aliveLookup = {
@@ -9321,6 +9371,16 @@ app.post('/api/team/save', requireSession, async (req, res) => {
                 { username: opponent.username, team: opponent.team, aliveCount: aliveLookup[opponent.username] },
             ];
             const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
+            const warFields = warBattle
+                ? {
+                      warId: warBattle.warId,
+                      warSetId: warBattle.setId,
+                      warTeams: {
+                          [username]: warBattle.characterIds,
+                          [opponent.username]: opponent.warCharacterIds || [],
+                      },
+                  }
+                : {};
             await insertMatchActive({
                 matchId,
                 mode,
@@ -9335,6 +9395,7 @@ app.post('/api/team/save', requireSession, async (req, res) => {
                 turnExpiresAt,
                 board,
                 players: playerDocs,
+                ...warFields,
             });
             const createdMatch = {
                 matchId,
@@ -9350,6 +9411,7 @@ app.post('/api/team/save', requireSession, async (req, res) => {
                 turnExpiresAt,
                 board,
                 players: playerDocs,
+                ...warFields,
             };
             scheduleBattleBotTurn(createdMatch);
             const opponentName = opponent.username;
@@ -9403,6 +9465,8 @@ app.post('/api/team/save', requireSession, async (req, res) => {
             team,
             mode,
             targetUsername,
+            warSetId: warBattle?.setId || '',
+            warCharacterIds: warBattle?.characterIds || [],
             queuedAt: new Date(),
             allowBattleBot: Boolean(profile.matchmaking?.battleBotEnabled),
             ladderLevel: Number(profile.ladder?.level) || 1,
@@ -10484,6 +10548,7 @@ app.get('/api/clans/:clanName/profile', async (req, res) => {
         if (!clan) {
             return res.status(404).json({ error: 'Clan not found.' });
         }
+        clan.warRecord = clanWarsRouter ? await clanWarsRouter.getClanWarRecord(clan.name) : null;
         return res.json({
             ok: true,
             clan,

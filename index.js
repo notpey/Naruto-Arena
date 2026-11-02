@@ -94,6 +94,10 @@
   var clanProfileWinPercentage = document.getElementById("clan-profile-win-percentage");
   var clanProfileMemberList = document.getElementById("clan-profile-member-list");
   var clanProfileStatus = document.getElementById("clan-profile-status");
+  var clanProfileWarWins = document.getElementById("clan-profile-war-wins");
+  var clanProfileWarLosses = document.getElementById("clan-profile-war-losses");
+  var clanProfileWarDraws = document.getElementById("clan-profile-war-draws");
+  var clanProfileWarList = document.getElementById("clan-profile-war-list");
   var changeAvatarForm = document.getElementById("change-avatar-form");
   var changeAvatarCurrentImage = document.getElementById("change-avatar-current-image");
   var changeAvatarUrlInput = document.getElementById("change-avatar-url");
@@ -3218,6 +3222,7 @@
       setText(clanProfileLosses, "0");
       setText(clanProfileWinPercentage, "0.00 %");
       renderClanProfileMembers(null);
+      renderClanProfileWars(null);
       return;
     }
 
@@ -3248,6 +3253,42 @@
       (Number.isFinite(Number(ladder.winPercentage)) ? Number(ladder.winPercentage).toFixed(2) : "0.00") + " %"
     );
     renderClanProfileMembers(clan);
+    renderClanProfileWars(clan.warRecord);
+  }
+
+  // Finished clan wars: overall record plus the most recent results.
+  function renderClanProfileWars(record) {
+    var data = record || { wins: 0, losses: 0, draws: 0, recent: [] };
+    setText(clanProfileWarWins, formatInteger(data.wins));
+    setText(clanProfileWarLosses, formatInteger(data.losses));
+    setText(clanProfileWarDraws, formatInteger(data.draws));
+    if (!clanProfileWarList) {
+      return;
+    }
+    clearChildren(clanProfileWarList);
+    var recent = Array.isArray(data.recent) ? data.recent : [];
+    if (!recent.length) {
+      return;
+    }
+    var outcomeLabels = { won: "Won", lost: "Lost", draw: "Draw" };
+    recent.forEach(function (war) {
+      var row = document.createElement("div");
+      row.className = "clan-profile-info-row";
+      var label = document.createElement("div");
+      label.className = "clan-profile-label";
+      var link = document.createElement("a");
+      link.href = "clanwars.html?war=" + encodeURIComponent(war.warId);
+      link.textContent = "vs " + war.opponent;
+      label.appendChild(link);
+      var value = document.createElement("div");
+      value.className = "clan-profile-value";
+      value.textContent =
+        (outcomeLabels[war.outcome] || war.outcome) + " " + war.setsWon + "–" + war.setsLost +
+        (war.completedAt ? " · " + formatDate(war.completedAt) : "");
+      row.appendChild(label);
+      row.appendChild(value);
+      clanProfileWarList.appendChild(row);
+    });
   }
 
   async function fetchPublicClanProfile(clanName) {

@@ -2795,6 +2795,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const outcomeText = didWin
                 ? isLadderMatch
                     ? `You won a ladder battle against ${opponent}.`
+                    : currentMatchMode === 'war'
+                        ? `You won a clan war battle against ${opponent}.`
                     : currentMatchMode === 'private'
                         ? `You won a private game against ${opponent}.`
                         : currentMatchMode === 'training'
@@ -2802,6 +2804,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             : `You won a quick battle against ${opponent}.`
                 : isLadderMatch
                     ? `You lost a ladder battle against ${opponent}.`
+                    : currentMatchMode === 'war'
+                        ? `You lost a clan war battle against ${opponent}.`
                     : currentMatchMode === 'private'
                         ? `You lost a private game against ${opponent}.`
                         : currentMatchMode === 'training'
@@ -5430,12 +5434,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchingMessage.textContent =
             mode === 'training'
                 ? 'Preparing training battle'
-                : mode === 'private' && activeSearchTargetUsername
+                : (mode === 'private' || mode === 'war') && activeSearchTargetUsername
                     ? `Searching for ${activeSearchTargetUsername}`
                     : 'Searching for an opponent';
         if (searchingDetail) searchingDetail.textContent =
             mode === 'ladder' ? 'Looking for a ranked opponent.'
                 : mode === 'private' ? 'Looking for this player in the private queue.'
+                : mode === 'war' ? 'Waiting for your opponent to start this war battle.'
                     : mode === 'training' ? 'Setting up your practice battle.'
                         : 'Looking for an available opponent.';
     };
@@ -5581,7 +5586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         isSearching = true;
         activeSearchMode = mode;
-        activeSearchTargetUsername = mode === 'private' ? (options.targetUsername || '').trim() : '';
+        activeSearchTargetUsername = mode === 'private' || mode === 'war' ? (options.targetUsername || '').trim() : '';
         setSearchingState('searching', mode);
         openSearching();
         try {
@@ -5592,7 +5597,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify({
                     team,
                     mode,
-                    targetUsername: options.targetUsername || '',
+                    targetUsername: mode === 'war' ? '' : options.targetUsername || '',
+                    warSetId: options.warSetId || '',
                 }),
             });
             const data = await readApiJson(response, 'Could not start matchmaking. Please try again.');
@@ -6228,6 +6234,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.warn('Failed to save team selection.', error);
         }
+    };
+
+    // Lets the clan war banner (selectionWar.js) read the team and start a war battle.
+    window.ArenaWarBattle = {
+        getTeam: getTeamIndices,
+        start: (warSetId, opponent) => {
+            persistTeamSelection();
+            joinMatchmaking('war', { warSetId, targetUsername: opponent });
+        },
     };
 
     const handleSlotDragEnd = () => {};
