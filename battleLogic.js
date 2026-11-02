@@ -266,7 +266,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                 sourceSkillId: null,
                 sourceUsername: username,
                 sourceSlot: slot,
-                metadata: config.metadata || {},
+                metadata: markFromPassive(config.metadata),
                 fresh: false,
             });
         });
@@ -1278,6 +1278,10 @@ const DAMAGE_ONLY_STATUS_KEYS = [
     'sharedFirstTriggerUnlessSourceStatusId', 'statusIcon', 'sourceSkillName',
 ];
 
+// Passives cannot be removed or ignored, and that covers the statuses they create on any unit.
+const markFromPassive = (metadata = {}) => ({ ...(metadata || {}), fromPassive: true, cannotBeCleansed: true });
+const isPassiveStatus = (status) => status?.metadata?.passive === true || status?.metadata?.fromPassive === true;
+
 const getIgnoreNonDamageOwnerUsername = (state) => {
     const status = (Array.isArray(state?.statuses) ? state.statuses : []).find((entry) =>
         isStatusActiveForMetadata(entry) && entry?.metadata?.ignoreHarmfulNonDamageEffects);
@@ -1305,7 +1309,8 @@ const toDamageOnlyStatusMetadata = (metadata = {}) => {
 
 const ignoreExistingEnemyNonDamageStatuses = (state, ownerUsername) => {
     state.statuses = (Array.isArray(state.statuses) ? state.statuses : []).flatMap((status) => {
-        if (!status?.metadata?.harmful || !status.sourceUsername || status.sourceUsername === ownerUsername) {
+        if (!status?.metadata?.harmful || !status.sourceUsername || status.sourceUsername === ownerUsername ||
+            isPassiveStatus(status)) {
             return [status];
         }
         const metadata = toDamageOnlyStatusMetadata(status.metadata);
@@ -1642,7 +1647,7 @@ const applyStatus = ({
     if (metadata?.cannotUseSkills && getStatusMetadataTotals(targetState).stunImmune) {
         return;
     }
-    if (metadata?.harmful && ignoresNonDamageEffectsFrom(targetState, sourceUsername)) {
+    if (metadata?.harmful && !metadata.fromPassive && ignoresNonDamageEffectsFrom(targetState, sourceUsername)) {
         metadata = toDamageOnlyStatusMetadata(metadata);
         if (!metadata) return;
     }
@@ -3785,12 +3790,12 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                 sourceSkillId: context.sourceSkillId,
                 sourceUsername: context.sourceUsername,
                 sourceSlot: context.sourceSlot,
-                metadata: {
+                metadata: markFromPassive({
                     harmful: true,
                     allyFollowupDamageBonus: Math.max(0, Number(mark.amount) || 0),
                     turnDurationAnchor: 'source_turn',
                     tooltipText: `The next damaging hit from another ally of ${sourcePassive.metadata.sourceSkillName || 'this character'} deals ${Math.max(0, Number(mark.amount) || 0)} additional damage.`,
-                },
+                }),
                 fresh: true,
             });
         }
@@ -4578,7 +4583,7 @@ const triggerSourceKillHooks = ({
                 sourceSkillId: sourceSkillId || status?.sourceSkillId || null,
                 sourceUsername,
                 sourceSlot,
-                metadata: applyStatusToSelf.metadata || {},
+                metadata: isPassiveStatus(status) ? markFromPassive(applyStatusToSelf.metadata) : applyStatusToSelf.metadata || {},
                 fresh: false,
             });
         }
@@ -7877,7 +7882,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     }
                     targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter((status) => {
                         if (!status) return false;
-                        if (status?.metadata?.passive === true) return true;
+                        if (isPassiveStatus(status)) return true;
                         if (targetStatusId && status.id === targetStatusId &&
                             (!condition?.statusFromActor ||
                                 (status.sourceUsername === actingUsername && status.sourceSlot === actorSlot))) return false;
@@ -8030,7 +8035,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         deferredStatusRemovals.forEach(({ recipient, targetStatusId, sourceUsername, sourceSlot }) => {
             const targetState = ensureUnitStateShape(recipient.unit);
             targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : []).filter(
-                (status) => status?.id !== targetStatusId ||
+                (status) => isPassiveStatus(status) || status?.id !== targetStatusId ||
                     (sourceUsername && (status.sourceUsername !== sourceUsername || status.sourceSlot !== sourceSlot))
             );
             refreshDerivedStatusTooltips(targetState);
@@ -9374,7 +9379,7 @@ const applyOnEnemyIncreasedCostSkillBonuses = ({ match, actingUsername }) => {
                     sourceSkillId: null,
                     sourceUsername: player.username,
                     sourceSlot: slot,
-                    metadata: applyStatusToSelf.metadata || {},
+                    metadata: isPassiveStatus(status) ? markFromPassive(applyStatusToSelf.metadata) : applyStatusToSelf.metadata || {},
                     fresh: false,
                 });
             });
