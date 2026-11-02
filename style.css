@@ -5398,85 +5398,42 @@ body.ingame-client-page .backgroundingame {
     width: 219px;
 }
 
-/* --- Battlefield Background Character Render (Budokai-Arena style) --- */
+/* --- Battlefield character render ---
+   Kakashi stands between the player's skill rows and the enemy column at the art's
+   native size, his feet on the skill information panel (top: 606px). He shows on the
+   player's turn and fades away while the opponent acts (script.js toggles .hidden-turn). */
 .battlefield-render-container {
     position: absolute;
-    left: 450px;
-    top: 60px;
-    width: 280px;
-    height: 347px;
-    z-index: 1; /* Second layer, right above battle background */
+    left: 638px;
+    top: 93px;
+    width: 339px;
+    height: 513px;
+    z-index: 1; /* Above the battle background, under every control. */
     pointer-events: none;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    overflow: visible; /* NO box cropping -- natural PNG transparency */
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: none;
+    transition: opacity .4s cubic-bezier(.4, 0, .2, 1), transform .4s cubic-bezier(.4, 0, .2, 1), visibility 0s linear 0s;
 }
 
 .battlefield-render-container.hidden-turn {
     opacity: 0;
     visibility: hidden;
-    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s;
 }
 
 .battlefield-render {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
-    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .45));
 }
 
-.battlefield-render-konan,
-.battlefield-render-deidara {
-    transform: translate(0px, 0px);
-}
-
-.battlefield-render-pain {
-    transform: translate(35px, 0px);
-}
-
-.battlefield-render-itachi {
-    transform: translate(60px, 0px);
-}
-
-/* Remaster Stage (1100x800) -- Stops at Y=587px (19px clean padding above skillinformation at Y=606px) */
-.game-remaster .battlefield-render-container {
-    left: 622px;
-    top: 90px;
-    right: auto;
-    width: 401px;
-    height: 497px;
-    z-index: 1;
-    overflow: visible;
-}
-
-.game-remaster .battlefield-render-konan {
-    width: 401px;
-    height: 497px;
-    transform: translate(0px, 0px) scale(1.1);
-}
-
-.game-remaster .battlefield-render-deidara {
-    width: 401px;
-    height: 497px;
-    transform: translate(0px, 0px) scale(0.98);
-}
-
-.game-remaster .battlefield-render-pain {
-    width: 401px;
-    height: 497px;
-    transform: translate(50px, 0px) scale(0.9);
-}
-
-.game-remaster .battlefield-render-itachi {
-    width: 401px;
-    height: 497px;
-    transform: translate(75px, 0px) scale(1.22);
+@media (prefers-reduced-motion: reduce) {
+    .battlefield-render-container,
+    .battlefield-render-container.hidden-turn { transform: none; }
 }
 
 /* --- Battle-end overlay and panel ---

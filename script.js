@@ -5097,39 +5097,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             surrenderConfirmCancelButton.addEventListener('click', closeSurrenderConfirm);
         }
 
-        const battlefieldRenderContainer = document.getElementById('battlefield-render-container');
-        const battlefieldRenderImg = document.getElementById('battlefield-render-img');
-        if (battlefieldRenderContainer && battlefieldRenderImg) {
-            const renders = [
-                { src: 'itachi-render.png', alt: 'Itachi Uchiha Render', class: 'battlefield-render-itachi' },
-                { src: 'konan-render.png', alt: 'Konan Render', class: 'battlefield-render-konan' },
-                { src: 'deidara-render.png', alt: 'Deidara Render', class: 'battlefield-render-deidara' },
-                { src: 'pain-render.png', alt: 'Pain Deva Path Render', class: 'battlefield-render-pain' }
-            ];
-            let currentRenderIdx = Math.floor(Math.random() * renders.length);
-            const applyRender = (idx) => {
-                const item = renders[idx];
-                battlefieldRenderImg.style.opacity = '0';
-                setTimeout(() => {
-                    battlefieldRenderImg.src = item.src;
-                    battlefieldRenderImg.alt = item.alt;
-                    battlefieldRenderImg.className = `battlefield-render ${item.class}`;
-                    battlefieldRenderImg.style.opacity = '1';
-                }, 150);
-            };
-            applyRender(currentRenderIdx);
-            battlefieldRenderContainer.addEventListener('click', () => {
-                currentRenderIdx = (currentRenderIdx + 1) % renders.length;
-                applyRender(currentRenderIdx);
-            });
-            window.addEventListener('keydown', (e) => {
-                if ((e.key === 'r' || e.key === 'R') && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-                    currentRenderIdx = (currentRenderIdx + 1) % renders.length;
-                    applyRender(currentRenderIdx);
-                }
-            });
-        }
-
         return;
     }
 
