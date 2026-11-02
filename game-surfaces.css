@@ -108,12 +108,12 @@
     top: auto;
     bottom: auto;
     display: grid;
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 84px minmax(0, 1fr);
     width: 100%;
-    gap: 12px;
+    gap: 18px; /* Leaves room for an equipped border hanging past the avatar. */
     align-items: start;
     margin: 0;
-    padding: 0;
+    padding: 4px 0 0;
     color: var(--arena-text);
     font-family: 'Libre Franklin', sans-serif;
     font-size: 10px;
@@ -121,10 +121,10 @@
 }
 .game-remaster .player-card::before { display: none; }
 .game-remaster .player-avatar-frame {
-    width: 88px;
-    height: 88px;
-    min-width: 88px;
-    min-height: 88px;
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    min-height: 84px;
     border: 1px solid #71858e;
     border-radius: 5px;
     background: #0e1a22;
@@ -149,7 +149,7 @@
 .game-remaster .player-nameselection {
     overflow: hidden;
     width: 100%;
-    margin: 0 0 4px;
+    margin: 0 0 5px;
     font: 700 13px/1.2 'Libre Franklin', sans-serif;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -157,14 +157,14 @@
 .game-remaster .player-card .player-stat {
     overflow: hidden;
     width: 100%;
-    margin: 0 0 1px;
+    margin: 0 0 3px;
     color: #d5e0e1;
     font-size: 10px;
     line-height: 1.35;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.game-remaster .player-level-block { width: 100%; margin: 7px 0 7px; }
+.game-remaster .player-level-block { width: 100%; margin: 9px 0 9px; }
 .game-remaster .player-level-row { gap: 4px; font-size: 10px; line-height: 1.2; }
 .game-remaster .player-level-xp { color: #bdcdd0; font-size: 9px; white-space: nowrap; }
 .game-remaster .player-level-bar-track { height: 5px; margin-top: 5px; border-radius: 2px; background: #394d55; }
