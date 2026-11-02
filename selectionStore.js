@@ -46,6 +46,7 @@
         confirmKey: "",
         busyKey: "",
         shopStatus: { key: "", text: "", tone: "" },
+        storeSkill: { key: "", index: -1 },
         profileSection: "overview",
         lockerCategory: "avatars",
         lockerStatus: { text: "", tone: "" },
@@ -471,19 +472,86 @@
         stage.appendChild(portrait);
         if (item.skills.length) {
             var skills = el("div", "store-stage-skills");
-            item.skills.forEach(function (skill) {
-                var icon = el("img", "store-stage-skill");
+            item.skills.forEach(function (skill, index) {
+                var pick = button("store-stage-skill", null, function () {
+                    var open = state.storeSkill.key === item.key && state.storeSkill.index === index;
+                    state.storeSkill = open ? { key: "", index: -1 } : { key: item.key, index: index };
+                    showStoreSkill(item);
+                });
+                pick.setAttribute("aria-label", skill.name || "Skill");
+                pick.setAttribute("aria-controls", "store-skill-panel");
+                pick.title = skill.name || "Skill";
+                var icon = el("img");
                 icon.src = skill.skillimage || skill.image || "skillqqueue-remaster.png?v=2";
-                icon.alt = skill.name || "Skill";
-                icon.title = skill.name || "Skill";
+                icon.alt = "";
                 icon.loading = "lazy";
                 icon.addEventListener("error", function () { icon.src = "skillqqueue-remaster.png?v=2"; });
-                skills.appendChild(icon);
+                pick.appendChild(icon);
+                skills.appendChild(pick);
             });
             stage.appendChild(skills);
         }
-        stage.appendChild(el("span", "store-stage-label", item.skills.length ? "Skills" : "Character"));
+        stage.appendChild(el("span", "store-stage-label", item.skills.length ? "Select a skill to read it" : "Character"));
         return stage;
+    }
+
+    var STORE_ENERGY_CLASSES = {
+        ninjutsu: "energy-ninjutsu",
+        bloodline: "energy-bloodline",
+        random: "energy-random",
+        genjutsu: "energy-genjutsu",
+        taijutsu: "energy-taijutsu"
+    };
+
+    // Shows the chosen skill under the character's bio and marks its icon as active.
+    function showStoreSkill(item) {
+        var selected = state.storeSkill.key === item.key ? state.storeSkill.index : -1;
+        Array.prototype.forEach.call(shopDetail.querySelectorAll(".store-stage-skill"), function (pick, index) {
+            pick.setAttribute("aria-pressed", String(index === selected));
+        });
+        var panel = shopDetail.querySelector(".store-skill-panel");
+        if (!panel) return;
+        var skill = item.skills[selected];
+        panel.innerHTML = "";
+        panel.hidden = !skill;
+        if (!skill) return;
+
+        var head = el("div", "store-skill-head");
+        head.appendChild(el("h3", "store-skill-name", skill.name || "Skill"));
+        var cooldown = Math.max(0, Number(skill.cooldown) || 0);
+        head.appendChild(el("span", "store-skill-cooldown", cooldown ? "Cooldown " + cooldown : "No cooldown"));
+        panel.appendChild(head);
+
+        var meta = el("div", "store-skill-meta");
+        var cost = el("span", "store-skill-cost");
+        var energy = (Array.isArray(skill.energy) ? skill.energy : []).filter(function (type) {
+            var normalized = String(type || "").trim().toLowerCase();
+            return normalized && normalized !== "none" && normalized !== "non";
+        });
+        if (energy.length) {
+            energy.forEach(function (type) {
+                var pip = el("span", ["energy-pip", "filled", STORE_ENERGY_CLASSES[String(type).trim().toLowerCase()]].filter(Boolean).join(" "));
+                pip.title = type;
+                cost.appendChild(pip);
+            });
+        } else {
+            cost.textContent = "No chakra";
+        }
+        meta.appendChild(cost);
+        var classes = (Array.isArray(skill.classes) ? skill.classes : [])
+            .map(function (entry) { return String(entry || "").trim().toLowerCase() === "energy" ? "Chakra" : String(entry || "").trim(); })
+            .filter(function (entry) { return entry && entry.toLowerCase() !== "invisible"; });
+        if (classes.length) meta.appendChild(el("span", "store-skill-classes", classes.join(" · ")));
+        panel.appendChild(meta);
+
+        var description = el("p", "store-skill-desc");
+        var text = skill.skilldescription || skill.description || "";
+        if (typeof window.renderSkillDescription === "function") {
+            window.renderSkillDescription(description, text, item.skills.map(function (entry) { return entry && entry.name; }));
+        } else {
+            description.textContent = text;
+        }
+        panel.appendChild(description);
     }
 
     // Shows the cosmetic on the player's own card, layered over what they currently wear.
@@ -518,6 +586,13 @@
         info.appendChild(el("span", "store-detail-kicker" + (item.rarity ? " rarity-" + item.rarity : ""), kicker));
         info.appendChild(el("h2", "store-detail-title", item.name));
         if (item.description) info.appendChild(el("p", "store-detail-desc", item.description));
+        if (item.category === "characters" && item.skills.length) {
+            var skillPanel = el("div", "store-skill-panel");
+            skillPanel.id = "store-skill-panel";
+            skillPanel.setAttribute("aria-live", "polite");
+            skillPanel.hidden = true;
+            info.appendChild(skillPanel);
+        }
         if (item.category === "characters" && !item.owned && item.requiredMissionId) {
             var hint = el("p", "store-detail-hint", "");
             var missionTitle = state.missionTitles && state.missionTitles[item.requiredMissionId];
@@ -528,6 +603,7 @@
         }
         shopDetail.appendChild(info);
         shopDetail.appendChild(buildPurchaseBox(item));
+        if (item.category === "characters") showStoreSkill(item);
     }
 
     function buildPurchaseBox(item) {

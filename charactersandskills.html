@@ -51,13 +51,6 @@
     .gi-search-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(232,128,26,0.36); color: var(--ca-amber); font-size: 12px; }
 
 
-    /* In-game info panel (light sheet) */
-    .gi-ingame { padding: 28px 30px; max-width: 820px; margin-top: 24px;
-      background: var(--ca-surface-light); border: 1px solid var(--ca-line-ink);
-      border-radius: 10px; box-shadow: var(--ca-shadow-sheet); }
-    .gi-ingame h2 { margin: 0 0 14px; font-size: 18px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ca-violet); }
-    .gi-ingame p { margin: 0 0 14px; font-size: 14px; line-height: 1.6; color: var(--ca-ink-soft); }
-    .gi-ingame strong { color: var(--ca-ink); }
 
     /* ── CHARACTER FACE GRID (light sheet on the dark shell) ──── */
     .gi-grid {
@@ -368,12 +361,6 @@
     <!-- list view (grid or in-game) -->
     <section id="gi-list-view">
       <div class="gi-grid" id="gi-grid"><div class="gi-empty">Loading characters…</div></div>
-      <div class="gi-ingame" id="gi-ingame">
-        <h2>How a match works</h2>
-        <p>Naruto-Arena is a turn-based strategy game. You bring a team of <strong>three characters</strong> into battle and spend <strong>chakra</strong> each turn to activate their skills.</p>
-        <p>Every skill has a <strong>cooldown</strong>, a set of <strong>classes</strong> (Physical, Instant, Melee, and so on), and a <strong>chakra cost</strong>. Reading those values — shown on every character's detail page — is the core of building a winning team.</p>
-        <p>Browse the roster above to study each fighter's kit before you queue up. Choose <strong>Start Playing</strong> when you're ready to put a team together.</p>
-      </div>
     </section>
 
     <!-- detail view -->
@@ -411,7 +398,6 @@
       var listView = document.getElementById("gi-list-view");
       var detailView = document.getElementById("gi-detail-view");
       var grid = document.getElementById("gi-grid");
-      var ingame = document.getElementById("gi-ingame");
       var characterCount = document.getElementById("gi-character-count");
       var BASE_SKILL_COUNT = 4;
 
@@ -681,7 +667,6 @@
         if (detailView) { detailView.hidden = true; detailView.innerHTML = ""; }
         if (listView) listView.hidden = false;
         if (grid) grid.hidden = false;
-        if (ingame) ingame.hidden = false;
       }
 
       function route() {

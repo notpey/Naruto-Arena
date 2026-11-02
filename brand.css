@@ -1430,15 +1430,15 @@ button {
 }
 
 .news-change-type.buff {
-  background: rgba(99, 214, 104, 0.15);
-  border: 1px solid rgba(99, 214, 104, 0.3);
-  color: #2a7a2e;
+  background: #3f7a4c;
+  border: 1px solid #3f7a4c;
+  color: #f2fbf3;
 }
 
 .news-change-type.nerf {
-  background: rgba(209, 90, 93, 0.12);
-  border: 1px solid rgba(209, 90, 93, 0.28);
-  color: var(--ca-red);
+  background: #a3484b;
+  border: 1px solid #a3484b;
+  color: #fff3f3;
 }
 
 .news-change-skill {
@@ -2466,13 +2466,6 @@ body.na-legacy-light {
   background: #e7dbc8;
 }
 
-.news-change-type.buff {
-  color: #2f7644;
-  border-color: rgba(117, 181, 129, 0.34);
-  background: rgba(117, 181, 129, 0.14);
-}
-
-.news-change-type.nerf,
 .ca-auth-status[data-state="error"],
 .news-status[data-state="error"] {
   color: #e68b8e;
@@ -3024,7 +3017,6 @@ strong, b {
    CHARACTERS & SKILLS + MISSIONS DARK SHINOBI OVERRIDES
    Fixes white-on-white text contrast and aligns standalone pages
    ============================================================ */
-.gi-ingame,
 .gi-grid,
 #gi-detail-view {
     background: linear-gradient(165deg, #121724 0%, #0a0d16 100%) !important;
@@ -3062,7 +3054,6 @@ strong, b {
 
 .gi-char-desc,
 .gi-skill-desc,
-.gi-ingame p,
 .gi-intro {
     color: #d0c8b8 !important;
 }
@@ -3249,7 +3240,6 @@ strong, b {
 .ca-releases,
 .ca-sidebar-section,
 #gi-detail-view,
-.gi-ingame,
 .gi-grid {
     background: rgba(14, 18, 28, 0.82) !important;
     backdrop-filter: blur(14px) !important;
@@ -3945,6 +3935,10 @@ body:not(.selection-client-page):not(.ingame-client-page) {
 .news-author { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 .news-author-avatar { width: 36px; height: 36px; flex: 0 0 36px; object-fit: cover; border: 1px solid #5a6068; border-radius: 4px; background: #242b36; }
 .news-author-name { color: #f0e6d8 !important; font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: none; overflow-wrap: anywhere; }
+a.news-author { text-decoration: none; border-radius: 4px; }
+a.news-author[href]:hover .news-author-name { color: #f2c58b !important; text-decoration: underline; text-underline-offset: 3px; }
+a.news-author[href]:hover .news-author-avatar { border-color: #f2c58b; }
+a.news-author:focus-visible { outline: 2px solid #f2c58b; outline-offset: 3px; }
 .news-post-date { color: #bcb6b1; font-size: 12px; font-variant-numeric: tabular-nums; }
 .news-post .news-divider { margin: 26px 0; background: #39414e; }
 .news-post .mainsection-body > p,

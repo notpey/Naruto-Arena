@@ -47,8 +47,8 @@ body.news-page { margin: 0; background: #101620 !important; color: #eee9e3 !impo
 .news-page-change-item + .news-page-change-item { border-top: 1px solid #323842; }
 .news-page-change-item-head { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-bottom: 6px; }
 .news-page-change-type { padding: 3px 7px; border: 1px solid #6a655e; color: #d8d0c7; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-.news-page-change-type.buff { border-color: #5a8f65; color: #b8d9be; }
-.news-page-change-type.nerf { border-color: #a36969; color: #edb5b5; }
+.news-page-change-type.buff { border-color: #3f7a4c; background: #3f7a4c; color: #f2fbf3; }
+.news-page-change-type.nerf { border-color: #a3484b; background: #a3484b; color: #fff3f3; }
 .news-page-skill { display: inline-flex; align-items: center; gap: 7px; color: #f3ddbd; font-size: 13px; font-weight: 700; }
 .news-page-skill img { width: 25px; height: 25px; object-fit: cover; }
 .news-page-change-item p { margin: 0; color: #e4ddd5 !important; white-space: pre-line; font-size: 15px; line-height: 1.6; }

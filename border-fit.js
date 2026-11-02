@@ -14,6 +14,7 @@
     var ALPHA_THRESHOLD = 96; // Measure the solid frame, not its soft glow.
     var MAX_OUTSIDE = 0.06; // Most a frame may extend past the avatar, as a share of its size.
     var SAMPLE_SIZE = 256;
+    var MAX_BAND_GAP = 0.03; // Gaps this small (double-line frames) still count as one band.
     var cache = new Map();
 
     function median(values) {
@@ -40,23 +41,58 @@
         var cx = Math.floor((minX + maxX) / 2);
         var cy = Math.floor((minY + maxY) / 2);
         if (opaque(cx, cy)) return { outer: outer, inner: null }; // Solid art, not a frame.
+        // From the opening's edge, follow the band outward to where it ends. Measuring the band on
+        // the same lines (not the art's outer bounds) keeps corner ornaments from reading as thickness.
+        var maxGap = Math.max(1, Math.round(Math.min(w, h) * MAX_BAND_GAP));
+        function bandEnd(start, step, limit, isOpaque) {
+            var last = start;
+            var gap = 0;
+            for (var p = start; step < 0 ? p >= limit : p <= limit; p += step) {
+                if (isOpaque(p)) {
+                    last = p;
+                    gap = 0;
+                } else if ((gap += 1) > maxGap) {
+                    break;
+                }
+            }
+            return last;
+        }
         // Walk outward from the centre along several lines; the median ignores flame tips and gaps.
         var hits = { left: [], right: [], top: [], bottom: [] };
+        var ends = { left: [], right: [], top: [], bottom: [] };
         [0.4, 0.45, 0.5, 0.55, 0.6].forEach(function (fraction) {
             var row = Math.min(h - 1, Math.round(minY + (maxY - minY) * fraction));
             var col = Math.min(w - 1, Math.round(minX + (maxX - minX) * fraction));
+            var inRow = function (x) { return opaque(x, row); };
+            var inCol = function (y) { return opaque(col, y); };
             var x, y;
             for (x = cx; x >= minX && !opaque(x, row); x -= 1) {}
-            if (x >= minX) hits.left.push((x + 1) / w);
+            if (x >= minX) {
+                hits.left.push((x + 1) / w);
+                ends.left.push(bandEnd(x, -1, minX, inRow) / w);
+            }
             for (x = cx; x <= maxX && !opaque(x, row); x += 1) {}
-            if (x <= maxX) hits.right.push(x / w);
+            if (x <= maxX) {
+                hits.right.push(x / w);
+                ends.right.push((bandEnd(x, 1, maxX, inRow) + 1) / w);
+            }
             for (y = cy; y >= minY && !opaque(col, y); y -= 1) {}
-            if (y >= minY) hits.top.push((y + 1) / h);
+            if (y >= minY) {
+                hits.top.push((y + 1) / h);
+                ends.top.push(bandEnd(y, -1, minY, inCol) / h);
+            }
             for (y = cy; y <= maxY && !opaque(col, y); y += 1) {}
-            if (y <= maxY) hits.bottom.push(y / h);
+            if (y <= maxY) {
+                hits.bottom.push(y / h);
+                ends.bottom.push((bandEnd(y, 1, maxY, inCol) + 1) / h);
+            }
         });
         if (!hits.left.length || !hits.right.length || !hits.top.length || !hits.bottom.length) return { outer: outer, inner: null };
-        return { outer: outer, inner: { left: median(hits.left), right: median(hits.right), top: median(hits.top), bottom: median(hits.bottom) } };
+        return {
+            outer: outer,
+            inner: { left: median(hits.left), right: median(hits.right), top: median(hits.top), bottom: median(hits.bottom) },
+            band: { left: median(ends.left), right: median(ends.right), top: median(ends.top), bottom: median(ends.bottom) }
+        };
     }
 
     function measure(src) {
@@ -98,7 +134,8 @@
             var solidScale = 1 / span;
             return { scale: solidScale, x: 0.5 - ((outer.left + outer.right) / 2) * solidScale, y: 0.5 - ((outer.top + outer.bottom) / 2) * solidScale };
         }
-        var thickness = ((inner.left - outer.left) + (outer.right - inner.right) + (inner.top - outer.top) + (outer.bottom - inner.bottom)) / 4;
+        var band = frame.band;
+        var thickness = ((inner.left - band.left) + (band.right - inner.right) + (inner.top - band.top) + (band.bottom - inner.bottom)) / 4;
         var opening = ((inner.right - inner.left) + (inner.bottom - inner.top)) / 2;
         // Centre the frame's band on the avatar's edge: half over it, half outside.
         var scale = 1 / (opening + thickness);
@@ -128,13 +165,19 @@
                 return;
             }
             var place = placement(frame);
+            // Percentages resolve inside the box's own outline; widen by that outline so the frame
+            // centres on the edge players actually see and covers the default outline.
+            var box = img.parentElement ? window.getComputedStyle(img.parentElement) : null;
+            var bx = box ? parseFloat(box.borderLeftWidth) || 0 : 0;
+            var by = box ? parseFloat(box.borderTopWidth) || 0 : 0;
+            var length = function (fraction, px) { return "calc(" + (fraction * 100) + "% + " + px + "px)"; };
             img.style.inset = "auto";
             img.style.maxWidth = "none";
             img.style.maxHeight = "none";
-            img.style.width = (place.scale * 100) + "%";
-            img.style.height = (place.scale * 100) + "%";
-            img.style.left = (place.x * 100) + "%";
-            img.style.top = (place.y * 100) + "%";
+            img.style.width = length(place.scale, 2 * place.scale * bx);
+            img.style.height = length(place.scale, 2 * place.scale * by);
+            img.style.left = length(place.x, (2 * place.x - 1) * bx);
+            img.style.top = length(place.y, (2 * place.y - 1) * by);
         });
     }
 
