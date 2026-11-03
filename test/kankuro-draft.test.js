@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const characters = require('../data/characters');
-const { buildInitialBoard, resolvePendingTurnSkills, applyHealToUnit } = require('../battleLogic');
+const { buildInitialBoard, resolvePendingTurnSkills, applyHealToUnit, tickStatusesForTurnEnd } = require('../battleLogic');
 
 const indexOf = id => characters.findIndex(character => character.id === id);
 const makeMatch = (enemyTeam = ['inuzuka-kiba'], allyTeam = ['kankuro']) => {
@@ -46,6 +46,7 @@ test('Poison Bomb damages every enemy and blocks healing', () => {
     const match = makeMatch(['inuzuka-kiba', 'haruno-sakura']);
     match.board.p1[0].state.cooldowns = {}; // Poison Bomb starts on cooldown
     cast(match, 'p1', 1);
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     assert.deepEqual(match.board.p2.map(unit => unit.hp), [90, 90]);
     for (const unit of match.board.p2) {
         assert.ok(unit.state.statuses.some(status => status.id === 'kankuro_poison_bomb_no_heal'));

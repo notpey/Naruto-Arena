@@ -1684,7 +1684,7 @@
                     "id": "kankuro-poison-bomb",
                     "name": "Poison Bomb",
                     "skillimage": "https://i.imgur.com/vJFqLIY.png",
-                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn, or 2 turns while Puppet Preparation's destructible defense remains. This skill starts on cooldown for 1 turn.",
+                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn. While Puppet Preparation's destructible defense remains, the poison lasts 2 turns, dealing 10 affliction damage each turn and blocking healing for both. This skill starts on cooldown for 1 turn.",
                     "energy": [
                         "Random"
                     ],
@@ -1698,13 +1698,18 @@
                     ],
                     "effects": [
                         {
-                            "type": "damage",
-                            "amount": 10,
+                            "type": "apply_status",
+                            "statusId": "kankuro_poison_bomb_poison",
+                            "duration": 1,
                             "scope": "all-enemy",
                             "metadata": {
+                                "harmful": true,
                                 "afflictionDamage": true,
-                                "ignoreDamageReduction": true,
-                                "ignoreDestructibleDefense": true
+                                "turnEndDamage": 10,
+                                "turnEndTrigger": "source_turn",
+                                "turnDurationAnchor": "source_turn",
+                                "triggerOnApply": true,
+                                "tooltipText": "This character takes 10 affliction damage each turn from Poison Bomb."
                             }
                         },
                         {
@@ -1765,6 +1770,11 @@
                                     "cannotUseSkillClasses": [
                                         "physical",
                                         "strategic"
+                                    ],
+                                    "bonusDamageFromSourceSkillsFlat": 15,
+                                    "bonusDamageFromSourceCharacterId": "kankuro",
+                                    "bonusDamageAppliesToSkillIds": [
+                                        "kankuro-black-secret-machine-one-shot"
                                     ],
                                     "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
                                 },

@@ -558,3 +558,18 @@ test('ACP edits to a shipped character survive a reload once its migrations are 
     assert.equal(zabuza.skills[0].cooldown, 4, 'balance edits are kept');
     assert.equal(zabuza.skills[0].ignoreInvulnerability, true, 'mechanic edits are kept');
 });
+
+test('the Kankuro trap and poison fix replaces a stored Kankuro once', async () => {
+    const stale = { characterId: 'kankuro', id: 'kankuro', name: 'Kankuro', skills: [] };
+    const writes = [];
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [stale] }
+            : { key, completed: { 'balance-update-0-3-2026-11-02': new Date() } },
+        updateOne: async (filter, update) => { writes.push(update); },
+    };
+    const loaded = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const kankuro = loaded.find((character) => character.characterId === 'kankuro');
+    assert.ok(kankuro.skills[1].effects.some((effect) => effect.statusId === 'kankuro_poison_bomb_poison'));
+    assert.ok(writes.some((update) => update.$set?.['completed.kankuro-trap-poison-fix-2026-11-03']));
+});

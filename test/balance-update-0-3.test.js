@@ -51,8 +51,20 @@ test('Poison Bomb starts on cooldown and blocks healing longer while Puppet Prep
     assert.ok(match.board.p1[0].state.cooldowns['kankuro-poison-bomb'] > 0, 'starts on cooldown');
     match.board.p1[0].state.cooldowns = {};
     cast(match, 'p1', 0, 1);
-    assert.equal(match.board.p2[0].hp, 90);
-    assert.equal(status(match.board.p2[0], 'kankuro_poison_bomb_no_heal').remainingTurns, 2,
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p2[0].hp, 90, '10 affliction damage on the turn it is used');
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p2[0].hp, 80, 'and 10 more the next turn while the defense remains');
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(match.board.p2[0].hp, 80, 'the poison lasts only 2 turns');
+    assert.equal(status(match.board.p2[0], 'kankuro_poison_bomb_poison'), undefined);
+
+    const fresh = matchFor(['kankuro'], ['haruno-sakura']);
+    fresh.board.p1[0].state.cooldowns = {};
+    cast(fresh, 'p1', 0, 1);
+    assert.equal(status(fresh.board.p2[0], 'kankuro_poison_bomb_no_heal').remainingTurns, 2,
         '2 turns while the defense remains');
 
     const broken = matchFor(['kankuro'], ['haruno-sakura']);
@@ -62,6 +74,11 @@ test('Poison Bomb starts on cooldown and blocks healing longer while Puppet Prep
     cast(broken, 'p1', 0, 1);
     assert.equal(status(broken.board.p2[0], 'kankuro_poison_bomb_no_heal').remainingTurns, 1,
         '1 turn once the defense is gone');
+    for (let round = 0; round < 3; round += 1) {
+        battle.tickStatusesForTurnEnd({ match: broken, endingUsername: 'p1' });
+        battle.tickStatusesForTurnEnd({ match: broken, endingUsername: 'p2' });
+    }
+    assert.equal(broken.board.p2[0].hp, 90, 'only one hit of poison without the defense');
 });
 
 test('Puppet Trap now counters physical skills too', () => {
@@ -70,6 +87,22 @@ test('Puppet Trap now counters physical skills too', () => {
     cast(match, 'p2', 0, 0, 'p1');
     assert.equal(match.board.p1[0].hp, 100, 'the physical skill is countered');
     assert.ok(status(match.board.p2[0], 'kankuro_puppet_trap_stun'), 'and the attacker is stunned');
+});
+
+test('Black Secret Machine One Shot deals 15 more to a trapped or countered enemy', () => {
+    const trapped = matchFor(['kankuro'], ['tenten']);
+    cast(trapped, 'p1', 0, 2, 'p2');
+    trapped.board.p1[0].state.cooldowns = {};
+    cast(trapped, 'p1', 0, 0, 'p2');
+    assert.equal(trapped.board.p2[0].hp, 55, '30 plus 15 while Puppet Trap waits');
+
+    const countered = matchFor(['kankuro'], ['tenten']);
+    cast(countered, 'p1', 0, 2, 'p2');
+    cast(countered, 'p2', 0, 0, 'p1');
+    assert.ok(status(countered.board.p2[0], 'kankuro_puppet_trap_stun'), 'the trap countered the skill');
+    countered.board.p1[0].state.cooldowns = {};
+    cast(countered, 'p1', 0, 0, 'p2');
+    assert.equal(countered.board.p2[0].hp, 55, '30 plus 15 after the counter');
 });
 
 test('Rock Lee damaging skills deal 10 less base damage', () => {

@@ -104,6 +104,7 @@ const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const MITARASHI_ANKO_REWORK_MIGRATION_ID = 'mitarashi-anko-draft-2026-11-01';
 const BALANCE_UPDATE_0_3_MIGRATION_ID = 'balance-update-0-3-2026-11-02';
 const BALANCE_UPDATE_0_3_CHARACTER_IDS = ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko', 'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza', 'fern'];
+const KANKURO_TRAP_POISON_FIX_MIGRATION_ID = 'kankuro-trap-poison-fix-2026-11-03';
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -2976,6 +2977,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
+                [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3042,6 +3044,7 @@ const getStoredCharacters = async () => {
                     [`completed.${GEKKO_HAYATE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
+                    [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3087,6 +3090,7 @@ const getStoredCharacters = async () => {
     const shouldApplyGekkoHayateRework = !completedMigrations[GEKKO_HAYATE_REWORK_MIGRATION_ID];
     const shouldApplyMitarashiAnkoRework = !completedMigrations[MITARASHI_ANKO_REWORK_MIGRATION_ID];
     const shouldApplyBalanceUpdate03 = !completedMigrations[BALANCE_UPDATE_0_3_MIGRATION_ID];
+    const shouldApplyKankuroTrapPoisonFix = !completedMigrations[KANKURO_TRAP_POISON_FIX_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3117,6 +3121,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyGekkoHayateRework ? ['gekko-hayate'] : []),
         ...(shouldApplyMitarashiAnkoRework ? ['mitarashi-anko'] : []),
         ...(shouldApplyBalanceUpdate03 ? BALANCE_UPDATE_0_3_CHARACTER_IDS : []),
+        ...(shouldApplyKankuroTrapPoisonFix ? ['kankuro'] : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3213,6 +3218,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyGekkoHayateRework && ['gekko-hayate'].includes(characterId)) return seedEntry;
             if (shouldApplyMitarashiAnkoRework && ['mitarashi-anko'].includes(characterId)) return seedEntry;
             if (shouldApplyBalanceUpdate03 && BALANCE_UPDATE_0_3_CHARACTER_IDS.includes(characterId)) return seedEntry;
+            if (shouldApplyKankuroTrapPoisonFix && characterId === 'kankuro') return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3255,7 +3261,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3338,6 +3344,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyBalanceUpdate03) {
             completedMigrationUpdates[`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyKankuroTrapPoisonFix) {
+            completedMigrationUpdates[`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
