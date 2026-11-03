@@ -27,6 +27,7 @@ const selectActiveRoster = (entries) => (Array.isArray(entries) ? entries : [])
     .filter(isActiveCharacter)
     .sort((a, b) => (activeRosterOrder.get(a.characterId) ?? 9999) - (activeRosterOrder.get(b.characterId) ?? 9999));
 const canonicalCharacters = require('./data/characters/index.js');
+const battleBot = require('./services/battleBot');
 const missionCharacterTagsById = new Map(canonicalCharacters.map((character) =>
     [character.characterId, getMissionCharacterTags(character)]));
 let charactersData = selectActiveRoster(canonicalCharacters);
@@ -103,8 +104,10 @@ const BAKI_REWORK_MIGRATION_ID = 'baki-draft-2026-11-01';
 const GEKKO_HAYATE_REWORK_MIGRATION_ID = 'gekko-hayate-draft-2026-11-01';
 const MITARASHI_ANKO_REWORK_MIGRATION_ID = 'mitarashi-anko-draft-2026-11-01';
 const BALANCE_UPDATE_0_3_MIGRATION_ID = 'balance-update-0-3-2026-11-02';
-const BALANCE_UPDATE_0_3_CHARACTER_IDS = ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko', 'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza', 'fern'];
+const BALANCE_UPDATE_0_3_CHARACTER_IDS = ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko', 'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza'];
 const KANKURO_TRAP_POISON_FIX_MIGRATION_ID = 'kankuro-trap-poison-fix-2026-11-03';
+const ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID = 'zabuza-hinata-mizuki-fix-2026-11-03';
+const ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS = ['momochi-zabuza', 'hyuuga-hinata', 'mizuki'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -2978,6 +2981,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                 [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
+                [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3045,6 +3049,7 @@ const getStoredCharacters = async () => {
                     [`completed.${MITARASHI_ANKO_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                     [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
+                    [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3091,6 +3096,7 @@ const getStoredCharacters = async () => {
     const shouldApplyMitarashiAnkoRework = !completedMigrations[MITARASHI_ANKO_REWORK_MIGRATION_ID];
     const shouldApplyBalanceUpdate03 = !completedMigrations[BALANCE_UPDATE_0_3_MIGRATION_ID];
     const shouldApplyKankuroTrapPoisonFix = !completedMigrations[KANKURO_TRAP_POISON_FIX_MIGRATION_ID];
+    const shouldApplyZabuzaHinataMizukiFix = !completedMigrations[ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3122,6 +3128,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyMitarashiAnkoRework ? ['mitarashi-anko'] : []),
         ...(shouldApplyBalanceUpdate03 ? BALANCE_UPDATE_0_3_CHARACTER_IDS : []),
         ...(shouldApplyKankuroTrapPoisonFix ? ['kankuro'] : []),
+        ...(shouldApplyZabuzaHinataMizukiFix ? ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3219,6 +3226,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyMitarashiAnkoRework && ['mitarashi-anko'].includes(characterId)) return seedEntry;
             if (shouldApplyBalanceUpdate03 && BALANCE_UPDATE_0_3_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyKankuroTrapPoisonFix && characterId === 'kankuro') return seedEntry;
+            if (shouldApplyZabuzaHinataMizukiFix && ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3261,7 +3269,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3347,6 +3355,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyKankuroTrapPoisonFix) {
             completedMigrationUpdates[`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyZabuzaHinataMizukiFix) {
+            completedMigrationUpdates[`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
@@ -4712,6 +4723,31 @@ const sanitizeLastChakraGainForViewer = (lastChakraGain, viewerUsername) => {
     return ownGain ? { [viewerUsername]: ownGain } : null;
 };
 
+// Skill indices of the viewer's own living units that have no legal target right now, by the
+// server's own targeting rules (invulnerability, use limits, target conditions). The client greys
+// these out instead of guessing at targeting itself.
+const attachSkillsWithoutTargets = (board, match, username) => {
+    if (!board || !Array.isArray(board[username]) || match?.status === 'finished') return board;
+    board[username].forEach((unit, actorSlot) => {
+        if (!unit || unit.alive === false || !unit.state) return;
+        const character = Number.isInteger(unit.rosterIndex) ? charactersData[unit.rosterIndex] : null;
+        const skillCount = Array.isArray(character?.skills) ? character.skills.length : 0;
+        const withoutTargets = [];
+        for (let skillIndex = 0; skillIndex < skillCount; skillIndex += 1) {
+            try {
+                const options = battleLogic.computeTargetOptions({
+                    match, actingUsername: username, actorSlot, skillIndex, characters: charactersData,
+                });
+                if (!Array.isArray(options?.targets) || options.targets.length === 0) withoutTargets.push(skillIndex);
+            } catch (_) {
+                // Leave the skill to the client's usual checks if targeting cannot be computed.
+            }
+        }
+        unit.state.skillsWithoutTargets = withoutTargets;
+    });
+    return board;
+};
+
 const buildMatchPayloadForUser = (match, username) => {
     if (!match || !username) return null;
     const playerEntry = Array.isArray(match.players)
@@ -4737,7 +4773,7 @@ const buildMatchPayloadForUser = (match, username) => {
         turnStartedAt: match.turnStartedAt || null,
         turnExpiresAt: match.turnExpiresAt || null,
         turnDurationMs: getTurnDurationMsForUser(match, match?.currentTurn),
-        board: sanitizeBoardForViewer(match.board, username),
+        board: attachSkillsWithoutTargets(sanitizeBoardForViewer(match.board, username), match, username),
         chakraPools: sanitizeChakraPoolsForViewer(match.chakraPools, username),
         lastChakraGain: sanitizeLastChakraGainForViewer(match.economy?.lastChakraGain, username),
         combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-15) : [],
@@ -5862,11 +5898,10 @@ const assignBattleBotRandomChakra = ({ match, username }) => {
     const pending = getPendingTurn(match, username);
     while ((pending.unresolvedRandom || 0) > 0) {
         const pool = match?.chakraPools?.[username] || createEmptyChakraPool();
-        const availableTypes = chakraTypes.filter((type) => (Number(pool[type]) || 0) > 0);
-        if (!availableTypes.length) {
+        const chakraType = battleBot.pickRandomChakraType(pool, chakraTypes);
+        if (!chakraType) {
             break;
         }
-        const chakraType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
         adjustRandomAssignment({ match, username, chakraType, delta: 1 });
         const nextPending = getPendingTurn(match, username);
         pending.unresolvedRandom = nextPending.unresolvedRandom;
@@ -5978,75 +6013,18 @@ const runBattleBotTurn = async (matchId) => {
             }
         }
 
-        const team = Array.isArray(hydrated.board?.[username]) ? hydrated.board[username] : [];
-        const actorSlots = shuffleList(
-            team
-                .map((unit, slot) => (unit && unit.alive !== false ? slot : null))
-                .filter((slot) => Number.isInteger(slot))
-        );
-        if (!passiveBot) actorSlots.forEach((actorSlot) => {
-            const actorUnit = hydrated.board?.[username]?.[actorSlot];
-            if (!actorUnit || actorUnit.alive === false) {
-                return;
-            }
-            const actorState = battleLogic.getUnitState(hydrated, username, actorSlot);
-            if (battleLogic.isActorUnableToUseSkills(actorState)) {
-                return;
-            }
-            const character = charactersData?.[actorUnit.rosterIndex];
-            // Hidden alt-skill entries (e.g. Dosu's "-improved" variants, Jiraiya's
-            // locked follow-ups) only exist to be swapped in at their base skill's
-            // slot via skillReplacements once unlocked -- they are not independent
-            // action slots. Iterating the raw array let bots queue them directly,
-            // bypassing whatever unlock condition normally gates them.
-            const baseSkillIndices = (Array.isArray(character?.skills) ? character.skills : [])
-                .map((skill, index) =>
-                    skill && !skill.hiddenFromSelectionViewer && !skill.omitFromSelectionViewer ? index : null
-                )
-                .filter((index) => index !== null);
-            const skillIndices = shuffleList(baseSkillIndices);
-            for (const skillIndex of skillIndices) {
-                const options = battleLogic.computeTargetOptions({
-                    match: hydrated,
-                    actingUsername: username,
-                    actorSlot,
-                    skillIndex,
-                    characters: charactersData,
-                });
-                if (!options?.targetType || options.mode === 'unknown' || !Array.isArray(options.targets) || !options.targets.length) {
-                    continue;
-                }
-                const skill = battleLogic.resolveEffectiveSkill({
-                    characters: charactersData,
-                    rosterIndex: actorUnit.rosterIndex,
-                    skillIndex,
-                    actorState,
-                });
-                if (!botCanAffordSkill({ match: hydrated, username, skill, actorState })) {
-                    continue;
-                }
-                const classChoiceOptions = Array.isArray(skill?.classChoiceOptions)
-                    ? skill.classChoiceOptions.map((entry) => normalizeClassChoice(entry)).filter(Boolean)
-                    : [];
-                const targetSelection = chooseBattleBotTargetSelection(options);
-                if (!targetSelection) {
-                    continue;
-                }
-                try {
-                    queueSkillForActorSlot({
-                        match: hydrated,
-                        username,
-                        actorSlot,
-                        skillIndex,
-                        targetSelection,
-                        classChoice: classChoiceOptions[0] || null,
-                    });
-                    break;
-                } catch (error) {
-                    continue;
-                }
-            }
-        });
+        if (!passiveBot) {
+            battleBot.planBattleBotTurn({
+                match: hydrated,
+                username,
+                characters: charactersData,
+                battleLogic,
+                canAfford: ({ skill, actorState }) => botCanAffordSkill({ match: hydrated, username, skill, actorState }),
+                queue: ({ actorSlot, skillIndex, targetSelection, classChoice }) => queueSkillForActorSlot({
+                    match: hydrated, username, actorSlot, skillIndex, targetSelection, classChoice,
+                }),
+            });
+        }
 
         assignBattleBotRandomChakra({ match: hydrated, username });
         const updated = await finalizeTurn(hydrated, username);

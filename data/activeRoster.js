@@ -38,9 +38,6 @@ const ACTIVE_ROSTER_IDS = [
     'baki',
     'gekko-hayate',
     'mitarashi-anko',
-    'fern',
-    'lissandra-the-ice-witch',
-    'ahri-the-nine-tailed-fox',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

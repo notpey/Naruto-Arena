@@ -48,7 +48,7 @@ module.exports = {
             ],
         },
         {
-            id: 'hyuuga-hinata-secret-ointment', name: 'Secret Oinment',
+            id: 'hyuuga-hinata-secret-ointment', name: 'Secret Ointment',
             skillimage: 'https://i.imgur.com/8y7PIEz.png',
             skilldescription: 'Hinata applies a healing ointment to herself or an ally, restoring 5 health each turn for 4 turns. During this time, all other healing received by the target is increased by 5. This effect cannot be reapplied while active.',
             energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
@@ -56,7 +56,7 @@ module.exports = {
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'hyuuga_hinata_secret_ointment',
                     duration: 4, scope: 'target', metadata: { helpful: true,
-                        turnEndHealFlat: 5, turnEndTrigger: 'source_turn',
+                        turnEndHealFlat: 5, turnEndTrigger: 'source_turn', triggerOnApply: true,
                         turnDurationAnchor: 'source_turn',
                         healReceivedBonusFlat: 5,
                         tooltipText: 'This character heals 5 health each turn for 4 turns and receives 5 additional health from other healing.' } },

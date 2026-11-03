@@ -437,7 +437,9 @@ for (const [label, ids, migrationId] of [
     ['Gekko Hayate draft', ['gekko-hayate'], 'gekko-hayate-draft-2026-11-01'],
     ['Mitarashi Anko draft', ['mitarashi-anko'], 'mitarashi-anko-draft-2026-11-01'],
     ['Balance Update 0.3', ['rock-lee', 'gaara-of-the-desert', 'kankuro', 'shiore-orochimaru', 'mitarashi-anko',
-        'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza', 'fern'], 'balance-update-0-3-2026-11-02'],
+        'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza'], 'balance-update-0-3-2026-11-02'],
+    ['Kankuro trap and poison fix', ['kankuro'], 'kankuro-trap-poison-fix-2026-11-03'],
+    ['Zabuza, Hinata and Mizuki fix', ['momochi-zabuza', 'hyuuga-hinata', 'mizuki'], 'zabuza-hinata-mizuki-fix-2026-11-03'],
 ]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({

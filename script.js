@@ -1992,7 +1992,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isSkillBlockedByClassLock(actorUnit, effectiveSkill)) return false;
             if (isSkillBlockedByIndexLock(actorUnit, meta.skillIdx)) return false;
             if (isSkillBlockedByActorCondition(actorUnit, effectiveSkill)) return false;
-            if (!hasValidTargetsForSkill(meta, actorUnit, effectiveSkill)) return false;
+            // The server lists skills with no legal target this turn; fall back to local checks without it.
+            const serverSkillsWithoutTargets = actorUnit?.state?.skillsWithoutTargets;
+            if (Array.isArray(serverSkillsWithoutTargets)) {
+                if (serverSkillsWithoutTargets.includes(meta.skillIdx)) return false;
+            } else if (!hasValidTargetsForSkill(meta, actorUnit, effectiveSkill)) {
+                return false;
+            }
             const isPlayersTurn =
                 currentPlayerUsername && currentTurnUsername && currentPlayerUsername === currentTurnUsername;
             if (!isPlayersTurn) return false;

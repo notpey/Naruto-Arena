@@ -48,7 +48,9 @@ module.exports = {
                         counterCancelsSkill: true,
                         counterEffectsToAttacker: [
                             { type: 'damage', amount: 20 },
-                            { type: 'apply_status', statusId: 'mizuki_kunai_ambush_trap', duration: 1,
+                            // Applied during the attacker's turn, so it needs 2 of Mizuki's turn ends
+                            // to still be waiting on the attacker's next turn.
+                            { type: 'apply_status', statusId: 'mizuki_kunai_ambush_trap', duration: 2,
                                 metadata: { harmful: true, triggerOnOwnerHelpfulSkill: true,
                                     counterCancelsSkill: true, turnDurationAnchor: 'source_turn',
                                     tooltipText: 'The next helpful skill this character uses is countered.' } },

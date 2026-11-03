@@ -78,8 +78,7 @@ test('mission rewards are reachable except the Forest of Death team requiring hi
     const rewardIds = new Set(missions.flatMap((mission) => mission.reward_characters || [mission.reward_character]));
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
-        'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
     const remaining = new Map(missions.map((mission) => [mission.missionId, mission]));
@@ -110,8 +109,7 @@ test('new Members get the mission-free roster; staff see and use all active char
     }).unlocked);
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
-        'fern', 'lissandra-the-ice-witch', 'ahri-the-nine-tailed-fox']);
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,
         characterId, lockedCharacterIds,

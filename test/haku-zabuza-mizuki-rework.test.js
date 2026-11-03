@@ -100,12 +100,19 @@ test('Hidden Mist charges enemy Physical and Chakra skills, then empowers Kubiki
     cast(match, 'a', 0, 2);
     assert.ok(status(match, 'b', 0, 'zabuza_hidden_mist_cost'));
     assert.ok(status(match, 'a', 0, 'zabuza_hidden_mist_defense'));
+    cast(match, 'a', 0, 0, ['b', 0]);
+    assert.equal(match.board.b[0].hp, 60, 'the sword deals 40 during Hidden Mist');
+    assert.equal(match.board.a[0].state.cooldowns['momochi-zabuza-kubikiribocho'] || 0, 0,
+        'Kubikiribōchō has no cooldown');
     for (let turn = 0; turn < 3; turn++) {
         tickStatusesForTurnEnd({ match, endingUsername: 'a' });
         tickStatusesForTurnEnd({ match, endingUsername: 'b' });
     }
     assert.equal(status(match, 'b', 0, 'zabuza_hidden_mist_cost'), undefined);
-    assert.ok(status(match, 'a', 0, 'zabuza_hidden_mist_attack'));
+    assert.equal(status(match, 'a', 0, 'zabuza_hidden_mist_defense'), undefined);
+    // Reset the target so Naruto's low-health Kyuubi Awakening does not soften the hit.
+    match.board.b[0].hp = 100;
+    match.board.b[0].state.statuses = [];
     cast(match, 'a', 0, 0, ['b', 0]);
-    assert.equal(match.board.b[0].hp, 60, 'Mist empowered sword deals 40');
+    assert.equal(match.board.b[0].hp, 70, 'back to 30 once the mist ends');
 });

@@ -18,8 +18,8 @@ module.exports = {
         {
             id: KUBIKIRIBOCHO, name: 'Kubikiribōchō',
             skillimage: 'https://i.imgur.com/aZfxDVs.png',
-            skilldescription: 'Zabuza deals 30 physical damage to one enemy. For the 2 turns after Hidden Mist Technique, this skill deals 10 additional damage.',
-            energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            skilldescription: 'Zabuza deals 30 physical damage to one enemy. During Hidden Mist Technique, this skill deals 10 additional damage.',
+            energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'], effects: [{ type: 'damage', amount: 30, scope: 'target' }],
         },
         {
@@ -40,7 +40,7 @@ module.exports = {
         {
             id: 'momochi-zabuza-hidden-mist-technique', name: 'Hidden Mist Technique',
             skillimage: 'https://i.imgur.com/IkZwEbi.png',
-            skilldescription: "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra and Zabuza gains 5 damage reduction. For the following 2 turns, Kubikiribōchō deals 10 additional damage.",
+            skilldescription: "For 2 turns, all enemies' Physical and Chakra skills cost 1 additional random chakra, Zabuza gains 5 damage reduction, and Kubikiribōchō deals 10 additional damage.",
             energy: ['Genjutsu'], target: 'self', damage: 0, cooldown: 3, ignoreInvulnerability: true,
             classes: ['Strategic', 'Instant'], effects: [
                 { type: 'apply_status', statusId: 'zabuza_hidden_mist_cost', duration: 2, scope: 'all-enemy',
@@ -48,11 +48,8 @@ module.exports = {
                         tooltipText: 'Physical and Chakra skills cost 1 additional random chakra from Hidden Mist Technique.' } },
                 { type: 'apply_status', statusId: 'zabuza_hidden_mist_defense', duration: 2, scope: 'self',
                     metadata: { helpful: true, damageReductionFlat: 5,
-                        onExpireApplyStatusToSelf: { statusId: 'zabuza_hidden_mist_attack', duration: 2,
-                            metadata: { helpful: true,
-                                skillDamageBonuses: { [KUBIKIRIBOCHO]: 10 },
-                                tooltipText: 'Kubikiribōchō deals 10 additional damage.' } },
-                        tooltipText: 'Zabuza has 5 damage reduction for 2 turns. For the following 2 turns, Kubikiribōchō deals 10 additional damage.' } },
+                        skillDamageBonuses: { [KUBIKIRIBOCHO]: 10 },
+                        tooltipText: 'Zabuza has 5 damage reduction and Kubikiribōchō deals 10 additional damage.' } },
             ],
         },
         {

@@ -1326,7 +1326,7 @@ test('Hinata 64 Palms damages enemies, heals allies, and grants damage reduction
     assert.deepEqual(match.board.p1.map(unit => unit.hp), [85, 55]);
 });
 
-test('Hinata Secret Oinment heals four turns and boosts only other healing', () => {
+test('Hinata Secret Ointment heals at the end of four of her turns and boosts only other healing', () => {
     const match = makeMatch([getCharIndex('hyuuga-hinata'), getCharIndex('uzumaki-naruto')],
         [getCharIndex('haruno-sakura')]);
     const naruto = match.board.p1[1];
@@ -1337,16 +1337,19 @@ test('Hinata Secret Oinment heals four turns and boosts only other healing', () 
         skillIndex: 2, characters }).targets.some(target => target.slot === 1), false);
     assert.equal(applyHealToUnit(naruto, 10), 15);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(naruto.hp, 65, 'ointment does not heal on its casting turn');
-    for (let turn = 0; turn < 4; turn += 1) {
+    assert.equal(naruto.hp, 70, 'the first heal lands at the end of the turn it is used');
+    for (let turn = 1; turn < 4; turn += 1) {
         tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
         assert.equal(naruto.hp, 65 + turn * 5, 'enemy turn must not trigger ointment');
         tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
         assert.equal(naruto.hp, 70 + turn * 5, 'Hinata team turn heals once');
     }
     assert.equal(naruto.hp, 85, 'four ointment ticks heal 5 each');
+    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
+    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
+    assert.equal(naruto.hp, 85, 'no fifth heal');
     assert.equal(naruto.state.statuses.some(status =>
-        status.id === 'hyuuga_hinata_secret_ointment'), false);
+        status.id === 'hyuuga_hinata_secret_ointment' && status.remainingTurns > 0), false);
     assert.equal(applyHealToUnit(naruto, 10), 10);
 });
 
