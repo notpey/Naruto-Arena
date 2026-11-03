@@ -517,31 +517,9 @@ class CharacterService {
                     (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
                 }
-                const storedFace = typeof entry.facePicture === 'string' ? entry.facePicture.trim() : '';
-                const facePicture = !isMissingOrPlaceholderImage(storedFace) ? storedFace : seedEntry.facePicture;
-                if (facePicture !== storedFace) {
-                    backfilledMissingImages = true;
-                }
-
-                const nextSkills = (Array.isArray(seedEntry.skills) ? seedEntry.skills : []).map((seedSkill) => {
-                    const storedSkill = (Array.isArray(entry.skills) ? entry.skills : []).find(s => s.id === seedSkill.id);
-                    const storedSkillImg = typeof storedSkill?.skillimage === 'string' ? storedSkill.skillimage.trim() : '';
-                    const skillimage = !isMissingOrPlaceholderImage(storedSkillImg) ? storedSkillImg : seedSkill.skillimage;
-                    if (skillimage !== storedSkillImg) {
-                        backfilledMissingImages = true;
-                    }
-                    return {
-                        ...seedSkill,
-                        skillimage,
-                    };
-                });
-
-                return {
-                    ...seedEntry,
-                    facePicture,
-                    skills: nextSkills,
-                    characterdeescription: (typeof entry.characterdeescription === 'string' && entry.characterdeescription.trim()) || seedEntry.characterdeescription,
-                };
+                // Outside a one-time migration above, the stored (ACP-edited) character is kept as is,
+                // so admin changes to art, balance and mechanics survive restarts and redeploys.
+                // Only missing or placeholder images fall back to the seed's.
             }
             return withSeedImageFallback(entry);
         });

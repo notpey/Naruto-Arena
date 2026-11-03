@@ -537,3 +537,24 @@ test('Gaara rework replaces a stored legacy kit and records its migration', asyn
         update.$set['completed.gaara-of-the-desert-rework-2026-10-28']));
 });
 
+
+test('ACP edits to a shipped character survive a reload once its migrations are done', async () => {
+    const seed = new CharacterService().getCharacters()
+        .find((character) => character.characterId === 'momochi-zabuza');
+    const edited = JSON.parse(JSON.stringify(seed));
+    edited.facePicture = 'https://example.com/acp-zabuza.png';
+    edited.skills[0].cooldown = 4;
+    edited.skills[0].ignoreInvulnerability = true;
+    const allMigrationsDone = new Proxy({}, { get: () => new Date() });
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [edited] }
+            : { key, completed: allMigrationsDone },
+        updateOne: async () => {},
+    };
+    const loaded = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const zabuza = loaded.find((character) => character.characterId === 'momochi-zabuza');
+    assert.equal(zabuza.facePicture, 'https://example.com/acp-zabuza.png');
+    assert.equal(zabuza.skills[0].cooldown, 4, 'balance edits are kept');
+    assert.equal(zabuza.skills[0].ignoreInvulnerability, true, 'mechanic edits are kept');
+});

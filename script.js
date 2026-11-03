@@ -1713,6 +1713,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (doesSkillIgnoreInvulnerability(skill) || hasLiveStatusMetadataFlag(actorUnit, 'ignoreEnemyInvulnerability')) {
                 return true;
             }
+            // Hidden permanent passives (hideTooltip) never reach the client board, so read them
+            // from the actor's canonical character definition instead.
+            const actorDefinition =
+                Number.isInteger(actorUnit?.rosterIndex) && Array.isArray(getRosterData())
+                    ? getRosterData()[actorUnit.rosterIndex]
+                    : null;
+            if (
+                actorUnit?.alive !== false &&
+                (Array.isArray(actorDefinition?.startStatuses) ? actorDefinition.startStatuses : []).some(
+                    (status) =>
+                        Boolean(status?.metadata?.permanent) &&
+                        Boolean(status?.metadata?.hideTooltip) &&
+                        Boolean(status?.metadata?.ignoreEnemyInvulnerability)
+                )
+            ) {
+                return true;
+            }
             const skillId = typeof skill?.id === 'string' ? skill.id.trim() : '';
             if (
                 skillId &&
@@ -1786,9 +1803,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!options || !Array.isArray(options.targets)) return options;
             if (!latestBoardState || typeof latestBoardState !== 'object') return options;
             const skill = castingSkill?.skill || null;
-            const actorSlot = Number.parseInt(castingSkill?.actorSlot, 10);
-            const actorUnit = getActorUnitForSlot(currentPlayerUsername, actorSlot);
-            const enemyTargeting = skillIsEnemyTargeting(skill);
             const targets = options.targets.filter((target) => {
                 const slot = Number.parseInt(target?.slot, 10);
                 const unit = latestBoardState?.[target?.username]?.[slot];
@@ -1796,14 +1810,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const dead = unit?.alive === false || (Number.isFinite(hp) && hp <= 0);
                 if (!unit || dead) return false;
                 if (!doesUnitSatisfySkillTargetCondition(unit, skill)) return false;
-                const isEnemyTarget = target.username !== currentPlayerUsername;
-                if (
-                    isEnemyTarget &&
-                    isUnitInvulnerableForSkill(unit, skill) &&
-                    !canActorIgnoreTargetInvulnerability({ actorUnit, skill, targetUnit: unit })
-                ) {
-                    return false;
-                }
+                // Invulnerability is not re-checked here: the server already applied it, including
+                // effects hidden from this board (such as Zabuza's Silent Killing).
                 return true;
             });
             return { ...options, targets };
