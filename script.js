@@ -2044,6 +2044,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (cooldownRemaining > 0) {
                     badge.textContent = String(cooldownRemaining);
                     badge.style.display = 'flex';
+                    // Center over the icon's rendered box (inside its border).
+                    const img = meta.imgEl;
+                    if (img.offsetParent === badge.offsetParent && img.clientWidth > 0) {
+                        badge.style.left = `${img.offsetLeft + img.clientLeft}px`;
+                        badge.style.top = `${img.offsetTop + img.clientTop}px`;
+                        badge.style.width = `${img.clientWidth}px`;
+                        badge.style.height = `${img.clientHeight}px`;
+                    }
                 } else {
                     badge.textContent = '';
                     badge.style.display = 'none';
