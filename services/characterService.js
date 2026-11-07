@@ -34,6 +34,8 @@ const BALANCE_UPDATE_0_3_CHARACTER_IDS = ['rock-lee', 'gaara-of-the-desert', 'ka
 const KANKURO_TRAP_POISON_FIX_MIGRATION_ID = 'kankuro-trap-poison-fix-2026-11-03';
 const ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID = 'zabuza-hinata-mizuki-fix-2026-11-03';
 const ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS = ['momochi-zabuza', 'hyuuga-hinata', 'mizuki'];
+const BALANCE_UPDATE_0_4_MIGRATION_ID = 'balance-update-0-4-2026-11-07';
+const BALANCE_UPDATE_0_4_CHARACTER_IDS = ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin', 'hatake-kakashi', 'rock-lee', 'gaara-of-the-desert', 'nara-shikamaru', 'yamanaka-ino', 'tenten', 'sarutobi-hiruzen', 'aburame-shino', 'shiore-orochimaru'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -281,6 +283,7 @@ class CharacterService {
                     [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                     [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                     [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
+                    [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -357,6 +360,7 @@ class CharacterService {
                         [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                         [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                         [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
+                        [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
@@ -402,6 +406,7 @@ class CharacterService {
         const shouldApplyBalanceUpdate03 = !completedMigrations[BALANCE_UPDATE_0_3_MIGRATION_ID];
         const shouldApplyKankuroTrapPoisonFix = !completedMigrations[KANKURO_TRAP_POISON_FIX_MIGRATION_ID];
         const shouldApplyZabuzaHinataMizukiFix = !completedMigrations[ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID];
+        const shouldApplyBalanceUpdate04 = !completedMigrations[BALANCE_UPDATE_0_4_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
@@ -433,6 +438,7 @@ class CharacterService {
             ...(shouldApplyBalanceUpdate03 ? BALANCE_UPDATE_0_3_CHARACTER_IDS : []),
             ...(shouldApplyKankuroTrapPoisonFix ? ['kankuro'] : []),
             ...(shouldApplyZabuzaHinataMizukiFix ? ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS : []),
+            ...(shouldApplyBalanceUpdate04 ? BALANCE_UPDATE_0_4_CHARACTER_IDS : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
             ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
         ]);
@@ -526,6 +532,7 @@ class CharacterService {
                 if (shouldApplyBalanceUpdate03 && BALANCE_UPDATE_0_3_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplyKankuroTrapPoisonFix && characterId === 'kankuro') return seedEntry;
                 if (shouldApplyZabuzaHinataMizukiFix && ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
+                if (shouldApplyBalanceUpdate04 && BALANCE_UPDATE_0_4_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                     (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -584,6 +591,7 @@ class CharacterService {
             shouldApplyBalanceUpdate03 ||
             shouldApplyKankuroTrapPoisonFix ||
             shouldApplyZabuzaHinataMizukiFix ||
+            shouldApplyBalanceUpdate04 ||
             shouldApplyLaunchUnlocks ||
             shouldApplyNewMissionUnlocks ||
             newSeedCharacters.length > 0 ||
@@ -628,6 +636,7 @@ class CharacterService {
                         [`completed.${BALANCE_UPDATE_0_3_MIGRATION_ID}`]: now,
                         [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                         [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
+                        [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,

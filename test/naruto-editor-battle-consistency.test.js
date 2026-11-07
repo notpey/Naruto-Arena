@@ -678,14 +678,14 @@ test('Shino Female Bug and Infestation work together without stacking marks', ()
         status.id === 'aburame_shino_infestation_debuff'));
     queueSkill(match, 'p2', 1, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p2[0].hp, 90, 'two chakra spent trigger 10 affliction damage');
+    assert.equal(match.board.p2[0].hp, 85, 'Infestation hits for 5 on cast, then two chakra spent trigger 10 affliction damage');
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'aburame_shino_female_bug'), false);
     assert.equal(match.board.p2[1].state.statuses.filter(status => status.id === 'aburame_shino_female_bug').length, 1);
     assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'aburame_shino_infestation_debuff'), false);
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 85, 'Infestation continues after Female Bug moves');
+    assert.equal(match.board.p2[0].hp, 80, 'Infestation continues after Female Bug moves');
 });
 
 test('Hinata awakens after four turns and Gentle Fist loses its cooldown', () => {
@@ -840,10 +840,11 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(gate(), undefined, 'the strategic weights skill does not open a Gate');
-    assert.equal(match.chakraPools.p1.taijutsu, 1);
+    const poolTotal = () => Object.values(match.chakraPools.p1).reduce((sum, value) => sum + value, 0);
+    assert.equal(poolTotal(), 1, 'removing the weights grants 1 random chakra');
     queueSkill(match, 'p1', 2);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.chakraPools.p1.taijutsu, 1,
+    assert.equal(poolTotal(), 1,
         'training weights cannot be removed twice');
 
     for (let count = 1; count <= 5; count += 1) {
@@ -861,8 +862,8 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
                 requiredRandom: 0 });
         }
     }
-    assert.equal(effective(0).cooldown, 0);
-    assert.equal(effective(1).cooldown, 0);
+    assert.equal(effective(0).cooldown, 2, 'the fifth Gate no longer removes High Speed Taijutsu cooldown');
+    assert.equal(effective(1).cooldown, 2, 'the fifth Gate no longer removes Front Lotus cooldown');
     assert.equal(effective(2).id, 'rock-lee-final-lotus');
     assert.equal(actor.hp, 50, 'opening the fifth Gate costs 50 nonlethal affliction damage');
     assert.ok(actor.state.statuses.some((status) =>
@@ -871,8 +872,8 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].alive, false);
-    assert.equal(match.chakraPools.p1.taijutsu, chakraBeforeLotus + 2,
-        'the turn grant and successful Final Lotus each add one taijutsu');
+    assert.equal(match.chakraPools.p1.taijutsu, chakraBeforeLotus + 1,
+        'only the turn grant adds taijutsu; a successful Final Lotus no longer does');
     assert.ok(actor.state.statuses.some((status) =>
         status.id === 'rock_lee_final_lotus_immortal'));
 });
@@ -1249,7 +1250,7 @@ test('Shino Chakra Leech gains its conditional effects from Female Bug and Infes
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.chakraPools.p2.taijutsu, 1);
     assert.equal(match.chakraPools.p1.taijutsu, 1);
-    assert.equal(match.board.p2[0].hp, 90);
+    assert.equal(match.board.p2[0].hp, 85, '5 from Infestation on cast plus 10 from Chakra Leech');
     const debuff = match.board.p2[0].state.statuses.find(status =>
         status.id === 'aburame_shino_chakra_leech_debuff');
     assert.equal(debuff?.metadata.nonAfflictionDamageDebuffFlat, 15);

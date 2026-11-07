@@ -110,6 +110,8 @@ const ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID = 'zabuza-hinata-mizuki-fix-2026-11-
 const ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS = ['momochi-zabuza', 'hyuuga-hinata', 'mizuki'];
 const UNIQUE_SKILLS_MIGRATION_ID = 'unique-skills-2026-11-05';
 const UNIQUE_SKILLS_CHARACTER_IDS = ['hatake-kakashi', 'inuzuka-kiba', 'akimichi-chouji', 'yamanaka-ino', 'rock-lee', 'shiore-orochimaru', 'mitarashi-anko'];
+const BALANCE_UPDATE_0_4_MIGRATION_ID = 'balance-update-0-4-2026-11-07';
+const BALANCE_UPDATE_0_4_CHARACTER_IDS = ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin', 'hatake-kakashi', 'rock-lee', 'gaara-of-the-desert', 'nara-shikamaru', 'yamanaka-ino', 'tenten', 'sarutobi-hiruzen', 'aburame-shino', 'shiore-orochimaru'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -2985,6 +2987,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                 [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                 [`completed.${UNIQUE_SKILLS_MIGRATION_ID}`]: now,
+                [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3054,6 +3057,7 @@ const getStoredCharacters = async () => {
                     [`completed.${KANKURO_TRAP_POISON_FIX_MIGRATION_ID}`]: now,
                     [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                     [`completed.${UNIQUE_SKILLS_MIGRATION_ID}`]: now,
+                    [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3102,6 +3106,7 @@ const getStoredCharacters = async () => {
     const shouldApplyKankuroTrapPoisonFix = !completedMigrations[KANKURO_TRAP_POISON_FIX_MIGRATION_ID];
     const shouldApplyZabuzaHinataMizukiFix = !completedMigrations[ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID];
     const shouldApplyUniqueSkills = !completedMigrations[UNIQUE_SKILLS_MIGRATION_ID];
+    const shouldApplyBalanceUpdate04 = !completedMigrations[BALANCE_UPDATE_0_4_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3135,6 +3140,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyKankuroTrapPoisonFix ? ['kankuro'] : []),
         ...(shouldApplyZabuzaHinataMizukiFix ? ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS : []),
         ...(shouldApplyUniqueSkills ? UNIQUE_SKILLS_CHARACTER_IDS : []),
+        ...(shouldApplyBalanceUpdate04 ? BALANCE_UPDATE_0_4_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3234,6 +3240,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyKankuroTrapPoisonFix && characterId === 'kankuro') return seedEntry;
             if (shouldApplyZabuzaHinataMizukiFix && ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyUniqueSkills && UNIQUE_SKILLS_CHARACTER_IDS.includes(characterId)) return seedEntry;
+            if (shouldApplyBalanceUpdate04 && BALANCE_UPDATE_0_4_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3276,7 +3283,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3368,6 +3375,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyUniqueSkills) {
             completedMigrationUpdates[`completed.${UNIQUE_SKILLS_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyBalanceUpdate04) {
+            completedMigrationUpdates[`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;

@@ -49,7 +49,7 @@ test('Shikamaru draft kit matches names, costs, cooldowns, and roster', () => {
     assert.equal(shikamaru.passive.name, 'Ninja Tactics, for Dummies');
     assert.deepEqual(shikamaru.skills.map((skill) => [skill.name, skill.energy, skill.cooldown]), [
         ['Meditate', [], 0], ['Shadow-Neck Bind', ['Genjutsu'], 0],
-        ['Shadow Imitation', ['Bloodline', 'Genjutsu'], 2], ['Shikamaru Hide', ['Random'], 4],
+        ['Shadow Imitation', ['Bloodline', 'Genjutsu'], 3], ['Shikamaru Hide', ['Random'], 4],
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('nara-shikamaru'));
     assert.ok(isActiveCharacter(shikamaru));

@@ -10,12 +10,12 @@ module.exports = {
     skills: [
         { id: 'yamanaka-ino-mind-transfer-feint', name: 'Mind Transfer Feint',
             skillimage: 'https://i.imgur.com/1RddcCQ.png',
-            skilldescription: 'Ino deals 20 Chakra damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.',
+            skilldescription: 'Ino deals 20 Chakra damage to one enemy. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Chakra', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target',
-                    metadata: { skillClasses: ['Chakra'], bonusDamageIfTargetStunned: 10 } },
+                    metadata: { skillClasses: ['Chakra'] } },
             ],
         },
         { id: 'yamanaka-ino-mind-body-switch', name: 'Mind Body Switch',

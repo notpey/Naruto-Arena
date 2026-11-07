@@ -1,5 +1,7 @@
 const SAND_FLOW = 'gaara_of_the_desert_sand_flow';
 const SPHERE = 'gaara_sand_sphere';
+const SAND_FLOW_CAP = 8;
+const SAND_FLOW_TOOLTIP = 'Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks (maximum 8).';
 
 module.exports = {
     id: 'gaara-of-the-desert',
@@ -10,14 +12,15 @@ module.exports = {
     passive: {
         name: 'Sand Flow',
         icon: 'https://i.imgur.com/qOFhrZc.png',
-        description: 'Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage.',
+        description: 'Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage, up to 8 stacks.',
         unpierceableDamageReductionFlat: 5,
         onDamageStackMetadataKey: 'sandFlowStacks',
         onDamageStackAmount: 1,
         onUndamagedTurnStackMetadataKey: 'sandFlowStacks',
         onUndamagedTurnStackAmount: 2,
         sandFlowStacks: 0,
-        stackTooltipTextTemplate: 'Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks.',
+        stackCapsByKey: { sandFlowStacks: SAND_FLOW_CAP },
+        stackTooltipTextTemplate: SAND_FLOW_TOOLTIP,
     },
     skills: [
         {
@@ -36,22 +39,22 @@ module.exports = {
                         tooltipText: 'This character is stunned.' } },
                 { type: 'apply_status', statusId: SAND_FLOW, duration: 99, scope: 'self',
                     metadata: { stackMetadataKey: 'sandFlowStacks', stackDelta: 2,
-                        stackMax: 9999,
-                        tooltipTextTemplate: 'Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks.' } },
+                        stackMax: SAND_FLOW_CAP, stackCapsByKey: { sandFlowStacks: SAND_FLOW_CAP },
+                        tooltipTextTemplate: SAND_FLOW_TOOLTIP } },
             ],
         },
         {
             id: 'gaara-of-the-desert-desert-funeral',
             name: 'Desert Funeral',
             skillimage: 'https://i.imgur.com/9do9XxC.png',
-            skilldescription: 'Gaara deals 20 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.',
+            skilldescription: 'Gaara deals 20 physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.',
             energy: ['Bloodline', 'Bloodline'],
             target: 'single-enemy',
             damage: 20,
             cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [{ type: 'damage', amount: 20, scope: 'target',
-                metadata: { ignoreDamageReduction: true, executeBelowHpThreshold: 10,
+                metadata: { executeBelowHpThreshold: 10,
                     bonusPerStatusMetadata: { scope: 'self', statusId: SAND_FLOW,
                         metadataKey: 'sandFlowStacks', multiplier: 5, consumeStacks: true } } }],
         },
@@ -59,7 +62,7 @@ module.exports = {
             id: 'gaara-of-the-desert-sand-sphere',
             name: 'Sand Sphere',
             skillimage: 'https://i.imgur.com/eUfA1nN.png',
-            skilldescription: 'Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.',
+            skilldescription: 'Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. All stacks are consumed. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.',
             energy: ['Ninjutsu', 'Ninjutsu'],
             target: 'self',
             damage: 0,
@@ -77,7 +80,12 @@ module.exports = {
                         'gaara-of-the-desert-desert-funeral',
                         'gaara-of-the-desert-sand-shield',
                     ],
-                    tooltipTextTemplate: 'This character has {destructibleDefensePoints} destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill.' } }],
+                    tooltipTextTemplate: 'This character has {destructibleDefensePoints} destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill.' } },
+                // Consumes Sand Flow after the defense above has scaled from it.
+                { type: 'apply_status', statusId: SAND_FLOW, duration: 99, scope: 'self',
+                    metadata: { stackMetadataKey: 'sandFlowStacks', stackDelta: -SAND_FLOW_CAP,
+                        stackMax: SAND_FLOW_CAP, stackCapsByKey: { sandFlowStacks: SAND_FLOW_CAP },
+                        tooltipTextTemplate: SAND_FLOW_TOOLTIP } }],
         },
         {
             id: 'gaara-of-the-desert-sand-shield',

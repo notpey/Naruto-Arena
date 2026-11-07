@@ -52,10 +52,14 @@ module.exports = {
         {
             id: 'aburame-shino-infestation', name: 'Infestation',
             skillimage: 'https://i.imgur.com/vPf2DKk.png',
-            skilldescription: 'Shino infests one enemy who is not already affected by Infestation. That enemy takes 5 affliction damage each turn until Shino dies. If they are affected by Female Bug, they also deal 5 less non-affliction damage.',
+            skilldescription: 'Shino infests one enemy who is not already affected by Infestation. That enemy takes 10 affliction damage on the first turn, then 5 affliction damage each turn until Shino dies. If they are affected by Female Bug, they also deal 5 less non-affliction damage.',
             energy: ['Random'], target: 'single-enemy', targetCondition: { missingStatusId: 'aburame_shino_infestation' }, damage: 0, cooldown: 1,
             classes: ['Affliction', 'Instant'],
             effects: [
+                // The first turn's tick lands this turn; this extra 5 makes that first turn 10.
+                { type: 'damage', amount: 5, scope: 'target',
+                    metadata: { afflictionDamage: true, ignoreDamageReduction: true,
+                        ignoreDestructibleDefense: true } },
                 { type: 'apply_status', statusId: 'aburame_shino_infestation', duration: 99, scope: 'target',
                     metadata: { harmful: true, afflictionDamage: true, turnEndDamage: 5,
                         turnEndTrigger: 'source_turn', removeOnSourceDeath: true,

@@ -48,7 +48,7 @@ test('Hokage Hiruzen replaces the old character in the Land of Waves roster', ()
     ]);
     assert.deepEqual(hiruzen.skills.map((skill) => skill.energy),
         [['Random'], ['Random'], ['Random'], ['Random']]);
-    assert.deepEqual(hiruzen.skills.map((skill) => skill.cooldown), [1, 1, 1, 4]);
+    assert.deepEqual(hiruzen.skills.map((skill) => skill.cooldown), [1, 1, 0, 4]);
 });
 
 test('Crystal Ball observes one enemy, suppresses their first harmful skill, and enables Search Party piercing', () => {

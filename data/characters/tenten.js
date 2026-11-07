@@ -17,15 +17,15 @@ module.exports = {
             id: 'tenten-twin-rising-dragons',
             name: 'Twin Rising Dragons',
             skillimage: 'https://i.imgur.com/g4ksO57.png',
-            skilldescription: "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it.",
+            skilldescription: "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it. These marks are permanent and end when Tenten dies.",
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target' },
                 { type: 'damage', amount: 10, scope: 'all-other-enemy' },
                 { type: 'apply_status', statusId: 'tenten_twin_rising_dragons_mark',
-                    duration: 2, scope: 'all-enemy', metadata: {
-                        harmful: true, turnDurationAnchor: 'source_turn',
+                    duration: 99, scope: 'all-enemy', metadata: {
+                        harmful: true, permanent: true, removeOnSourceDeath: true,
                         bonusDamageFromSourceSkillsFlat: 5,
                         mergeNumericAddKeys: ['bonusDamageFromSourceSkillsFlat'],
                         bonusDamageFromSourceCharacterId: 'tenten',
@@ -33,10 +33,10 @@ module.exports = {
                         tooltipTextTemplate: 'Twin Rising Dragons Trap deals {bonusDamageFromSourceSkillsFlat} additional damage and lowers Physical and Chakra damage by {bonusDamageFromSourceSkillsFlat} additional points.',
                     } },
                 { type: 'apply_status', statusId: 'tenten_twin_rising_dragons_mark',
-                    duration: 2, scope: 'all-enemy',
+                    duration: 99, scope: 'all-enemy',
                     condition: { scope: 'self', statusId: 'tenten_full_release_active' },
                     metadata: {
-                        harmful: true, turnDurationAnchor: 'source_turn',
+                        harmful: true, permanent: true, removeOnSourceDeath: true,
                         bonusDamageFromSourceSkillsFlat: 5,
                         mergeNumericAddKeys: ['bonusDamageFromSourceSkillsFlat'],
                         bonusDamageFromSourceCharacterId: 'tenten',

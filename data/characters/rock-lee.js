@@ -27,7 +27,7 @@ const fifthGateEffects = () => [
 ];
 const physicalDefense = {
     type: 'apply_status', scope: 'self', statusId: 'rock_lee_high_speed_physical_invulnerable',
-    duration: 1, metadata: { helpful: true, invulnerableToPhysicalSkills: true,
+    duration: 1, metadata: { helpful: true, invulnerableToSkillClasses: ['physical'],
         tooltipText: 'Lee is invulnerable to physical skills.' },
 };
 const gateDamage = (amount) => ({
@@ -66,17 +66,13 @@ module.exports = {
                             helpful: true, cannotBeCleansed: true,
                             onOwnerKillSourceSkillIdsAny: [FINAL_LOTUS],
                             onOwnerKillTargetRelation: 'enemy',
-                            onOwnerKillGainChakra: { chakraType: 'taijutsu', amount: 1 },
                             onOwnerKillApplyStatusToSelf: {
                                 statusId: 'rock_lee_final_lotus_immortal', duration: 1,
                                 metadata: { helpful: true, minimumHp: 1,
                                     tooltipText: 'Lee cannot be killed for 1 turn.' },
                             },
-                            skillCooldownOverridesBySkillId: {
-                                [HIGH_SPEED]: 0, [FRONT_LOTUS]: 0,
-                            },
                             skillReplacements: { [WEIGHT_SKILL]: FINAL_LOTUS },
-                            tooltipText: 'High Speed Taijutsu and Front Lotus have no cooldown. Remove Training Weights is replaced by Final Lotus.',
+                            tooltipText: 'Remove Training Weights is replaced by Final Lotus.',
                         },
                     },
                 },
@@ -87,7 +83,7 @@ module.exports = {
         {
             id: HIGH_SPEED, name: 'High Speed Taijutsu',
             skillimage: 'https://i.imgur.com/roHIgPj.jpg',
-            skilldescription: 'Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.',
+            skilldescription: 'Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra.',
             energy: ['Taijutsu', 'Random'],
             energyBySourceStatusMetadata: { statusId: GATES, metadataKey: 'gateCount',
                 tiers: [{ min: 3, energy: ['Taijutsu'] }] },
@@ -105,7 +101,7 @@ module.exports = {
         {
             id: FRONT_LOTUS, name: 'Front Lotus',
             skillimage: 'https://i.imgur.com/xTW0rSg.jpg',
-            skilldescription: 'Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.',
+            skilldescription: 'Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra.',
             energy: ['Taijutsu', 'Taijutsu'],
             energyBySourceStatusMetadata: { statusId: GATES, metadataKey: 'gateCount',
                 tiers: [{ min: 3, energy: ['Taijutsu', 'Random'] }] },
@@ -116,7 +112,7 @@ module.exports = {
         {
             id: WEIGHT_SKILL, name: 'Remove Training Weights',
             skillimage: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-048-gaara-vs-rock-lee-the-power-of-youth-explodes_/cap_13-42_678c.jpg',
-            skilldescription: 'Lee removes his training weights, causing his physical skills to deal 10 less damage but ignore counters, reflects, and invulnerability for the rest of the battle. Lee also gains 1 taijutsu chakra. This skill cannot be used while active. At 5 Gate Openings, this skill is replaced by Final Lotus.',
+            skilldescription: 'Lee removes his training weights, causing his physical skills to deal 10 less damage but ignore counters, reflects, and invulnerability for the rest of the battle. Lee also gains 1 random chakra. This skill cannot be used while active. At 5 Gate Openings, this skill is replaced by Final Lotus.',
             energy: [], target: 'self', damage: 0, cooldown: 0,
             actorCondition: { missingStatusId: WEIGHTS },
             classes: ['Strategic', 'Instant'],
@@ -130,7 +126,7 @@ module.exports = {
                         ignoreInvulnerabilityForSkillIds: [HIGH_SPEED, FOLLOW_UP, FRONT_LOTUS, FINAL_LOTUS],
                         tooltipText: 'Lee deals 10 less physical damage and ignores counters, reflects, and invulnerability with his physical skills.',
                     } },
-                { type: 'gain_chakra', scope: 'self', chakraType: 'taijutsu', amount: 1 },
+                { type: 'gain_chakra', scope: 'self', chakraType: 'random', amount: 1 },
             ],
         },
         {
@@ -146,7 +142,7 @@ module.exports = {
         {
             id: FINAL_LOTUS, name: 'Final Lotus', hiddenFromSelectionViewer: true,
             skillimage: 'https://www.animehistory.org/uploads/screencaps/naruto-episode-050-the-fifth-gate-a-splendid-ninja-is-born/cap_04-41_363a.jpg',
-            skilldescription: 'Lee executes one enemy. If successful, he gains 1 taijutsu chakra and becomes immortal for 1 turn.',
+            skilldescription: 'Lee executes one enemy. If successful, he becomes immortal for 1 turn.',
             energy: ['Taijutsu', 'Taijutsu', 'Taijutsu'],
             target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant', 'Unique'],

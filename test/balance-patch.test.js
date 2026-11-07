@@ -119,7 +119,7 @@ test('Ino stun prepares one boosted Chakra Feint, while Switch no longer breaks 
     assert.ok(status(enemy, 'ino_mind_body_switch_target'));
     assert.ok(status(match.board.p1[0], 'yamanaka-ino-mind-transfer-feint_stun_bonus'));
     cast(match, 'p1', 0, 0, 0);
-    assert.equal(enemy.hp, 65);
+    assert.equal(enemy.hp, 75, 'Feint deals 20 + 5 from the stun bonus, with no extra damage against stunned targets');
     assert.equal(status(match.board.p1[0], 'yamanaka-ino-mind-transfer-feint_stun_bonus'), undefined);
 });
 

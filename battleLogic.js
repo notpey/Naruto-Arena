@@ -142,6 +142,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           onDamageStackAmount: Math.max(0, Number(passive.onDamageStackAmount) || 0),
                           onUndamagedTurnStackMetadataKey: passive.onUndamagedTurnStackMetadataKey || null,
                           onUndamagedTurnStackAmount: Math.max(0, Number(passive.onUndamagedTurnStackAmount) || 0),
+                          stackCapsByKey: passive.stackCapsByKey && typeof passive.stackCapsByKey === 'object'
+                              ? passive.stackCapsByKey : null,
                           growPerTurn: Array.isArray(passive.growPerTurn) ? passive.growPerTurn : [],
                           onEnemyDeathDelayedDamage: passive.onEnemyDeathDelayedDamage || null,
                           onEnemyDeathHealSelfAmount: Math.max(0, Number(passive.onEnemyDeathHealSelfAmount) || 0),
@@ -1418,7 +1420,11 @@ const changeStatusMetadataStack = (status, key, amount) => {
     if (!status || typeof key !== 'string' || !key || !Number.isFinite(Number(amount))) return;
     const metadata = status.metadata || {};
     const current = Math.max(0, Number(metadata[key]) || 0);
-    status.metadata = { ...metadata, [key]: Math.max(0, current + Number(amount)) };
+    // Optional per-key ceiling (e.g. Gaara's Sand Flow) for stacks gained outside applyStatus.
+    const capValue = Number(metadata?.stackCapsByKey?.[key]);
+    let nextValue = Math.max(0, current + Number(amount));
+    if (Number.isFinite(capValue) && capValue >= 0) nextValue = Math.min(capValue, nextValue);
+    status.metadata = { ...metadata, [key]: nextValue };
     if (typeof status.metadata.tooltipTextTemplate === 'string' && status.metadata.tooltipTextTemplate) {
         status.metadata.tooltipText = renderTooltipTemplate(status.metadata.tooltipTextTemplate, status.metadata);
     }
@@ -3271,8 +3277,15 @@ const maybeTriggerReactiveDefenses = ({
     }
 
     if (!trapMetadata?.trapReappliesSelf) {
-        statuses.splice(trapIndex, 1);
-        targetState.statuses = statuses;
+        if (targetState.statuses === statuses) {
+            statuses.splice(trapIndex, 1);
+        } else {
+            // A status-group removal above replaced this unit's list; drop the trap from
+            // the current list instead of restoring the stale one (which would revive
+            // the grouped statuses that were just removed).
+            targetState.statuses = (Array.isArray(targetState.statuses) ? targetState.statuses : [])
+                .filter((status) => status !== trapStatus);
+        }
     }
     return Boolean(trapMetadata?.counterCancelsSkill ?? true);
 };

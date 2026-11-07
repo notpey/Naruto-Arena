@@ -15,7 +15,7 @@ module.exports = {
             id: 'hatake-kakashi-sharingan-counter',
             name: 'Sharingan Insight',
             skillimage: 'https://i.imgur.com/wrowrxL.png',
-            skilldescription: 'Kakashi reveals hidden enemy effects for 1 turn and invisibly counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn.',
+            skilldescription: 'Kakashi reveals hidden enemy effects for 1 turn and invisibly counters the first harmful skill used against him during this time. Copy Ninja may replace this skill with the countered skill for 1 turn. If no skill is countered, this skill becomes Raikiri for 1 turn, costing 1 Bloodline and 1 Random chakra.',
             energy: ['Bloodline'], target: 'self', damage: 0, cooldown: 2,
             classes: ['Strategic', 'Instant', 'Unique'],
             effects: [
@@ -37,7 +37,28 @@ module.exports = {
                         counterCopyRequiresPassiveName: 'Copy Ninja',
                         counterCopyExcludeUniqueAndPreparation: true,
                         counterCopiedSkillEnergy: ['Random'],
+                        statusGroupId: 'kakashi_sharingan_insight_group',
+                        removeStatusGroupIdOnTrigger: 'kakashi_sharingan_insight_group',
                         tooltipText: 'Kakashi counters the first harmful skill used against him. Copy Ninja can then copy that skill.',
+                    },
+                },
+                {
+                    // Runs out at the end of the enemy's turn. If the counter was not
+                    // triggered by then, Sharingan Insight becomes Raikiri for Kakashi's next turn.
+                    type: 'apply_status', statusId: 'kakashi_sharingan_insight_watch', duration: 1, scope: 'self',
+                    metadata: {
+                        helpful: true, invisible: true, hideTooltip: true, hideTooltipFromEnemy: true,
+                        turnDurationAnchor: 'any_turn',
+                        statusGroupId: 'kakashi_sharingan_insight_group',
+                        onExpireApplyStatusToSelf: {
+                            statusId: 'kakashi_insight_raikiri_ready', duration: 1,
+                            metadata: {
+                                helpful: true,
+                                skillReplacements: { 'hatake-kakashi-sharingan-counter': 'hatake-kakashi-raikiri' },
+                                skillCostOverridesBySkillId: { 'hatake-kakashi-raikiri': { energy: ['Bloodline', 'Random'] } },
+                                tooltipText: 'Sharingan Insight is replaced by Raikiri for 1 turn. It costs 1 Bloodline and 1 Random chakra.',
+                            },
+                        },
                     },
                 },
             ],
@@ -47,7 +68,7 @@ module.exports = {
             name: 'Nin-Dogs Summoning',
             skillimage: 'https://i.imgur.com/PFMVHdp.png',
             skilldescription: 'Kakashi deals 20 physical damage to one enemy and stuns their Physical and Affliction skills for 1 turn. Nin-Dogs Summoning becomes Raikiri for 1 turn, costing 1 Ninjutsu and 1 Random chakra.',
-            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
+            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target', metadata: { skillClasses: ['Physical'] } },
@@ -74,7 +95,7 @@ module.exports = {
             name: 'Earth Style: Headhunter Jutsu',
             skillimage: 'https://i.imgur.com/m9r8Dpo.png',
             skilldescription: 'Kakashi deals 20 physical damage to one enemy and stuns their Chakra and Strategic skills for 1 turn. This skill becomes Raikiri for 1 turn, costing 1 Taijutsu and 1 Random chakra.',
-            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
+            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target' },

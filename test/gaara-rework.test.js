@@ -91,7 +91,7 @@ test('Desert Funeral scales by stacks, consumes them, and executes at ten health
     noStacks.board.p2[0].state.statuses.push({ id: 'normal_reduction', remainingTurns: 2,
         metadata: { damageReductionFlat: 20 } });
     cast(noStacks, 'p1', 1, target('p2'));
-    assert.equal(noStacks.board.p2[0].hp, 80, 'piercing damage ignores ordinary reduction');
+    assert.equal(noStacks.board.p2[0].hp, 100, 'Desert Funeral deals regular damage, so 20 reduction absorbs all 20');
 });
 
 test('Sand Sphere scales defense, retaliates once per targeted skill, and ends on another skill', () => {

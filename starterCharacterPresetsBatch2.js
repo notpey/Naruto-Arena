@@ -30,7 +30,7 @@
                     "id": "yamanaka-ino-mind-transfer-feint",
                     "name": "Mind Transfer Feint",
                     "skillimage": "https://i.imgur.com/1RddcCQ.png",
-                    "skilldescription": "Ino deals 20 Chakra damage to one enemy. If that enemy is stunned, this skill deals 10 additional damage. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.",
+                    "skilldescription": "Ino deals 20 Chakra damage to one enemy. After Ino stuns an enemy, its next use deals 5 additional Chakra damage.",
                     "energy": [
                         "Random"
                     ],
@@ -49,8 +49,7 @@
                             "metadata": {
                                 "skillClasses": [
                                     "Chakra"
-                                ],
-                                "bonusDamageIfTargetStunned": 10
+                                ]
                             }
                         }
                     ]
@@ -277,10 +276,6 @@
                                             "rock-lee-final-lotus"
                                         ],
                                         "onOwnerKillTargetRelation": "enemy",
-                                        "onOwnerKillGainChakra": {
-                                            "chakraType": "taijutsu",
-                                            "amount": 1
-                                        },
                                         "onOwnerKillApplyStatusToSelf": {
                                             "statusId": "rock_lee_final_lotus_immortal",
                                             "duration": 1,
@@ -290,14 +285,10 @@
                                                 "tooltipText": "Lee cannot be killed for 1 turn."
                                             }
                                         },
-                                        "skillCooldownOverridesBySkillId": {
-                                            "rock-lee-high-speed-taijutsu": 0,
-                                            "rock-lee-front-lotus": 0
-                                        },
                                         "skillReplacements": {
                                             "rock-lee-remove-training-weights": "rock-lee-final-lotus"
                                         },
-                                        "tooltipText": "High Speed Taijutsu and Front Lotus have no cooldown. Remove Training Weights is replaced by Final Lotus."
+                                        "tooltipText": "Remove Training Weights is replaced by Final Lotus."
                                     }
                                 }
                             }
@@ -310,7 +301,7 @@
                     "id": "rock-lee-high-speed-taijutsu",
                     "name": "High Speed Taijutsu",
                     "skillimage": "https://i.imgur.com/roHIgPj.jpg",
-                    "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                    "skilldescription": "Lee deals 15 physical damage to one enemy and becomes invulnerable to physical skills for 1 turn. On the following turn, this skill can be used again for 1 random chakra. At 3 or more Gate Openings, its first use costs 1 less random chakra.",
                     "energy": [
                         "Taijutsu",
                         "Random"
@@ -469,7 +460,9 @@
                             "duration": 1,
                             "metadata": {
                                 "helpful": true,
-                                "invulnerableToPhysicalSkills": true,
+                                "invulnerableToSkillClasses": [
+                                    "physical"
+                                ],
                                 "tooltipText": "Lee is invulnerable to physical skills."
                             }
                         },
@@ -493,7 +486,7 @@
                     "id": "rock-lee-front-lotus",
                     "name": "Front Lotus",
                     "skillimage": "https://i.imgur.com/xTW0rSg.jpg",
-                    "skilldescription": "Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra. At 5 Gate Openings, this skill has no cooldown.",
+                    "skilldescription": "Lee deals 35 physical damage to one enemy. At 3 or more Gate Openings, this skill costs 1 taijutsu chakra and 1 random chakra.",
                     "energy": [
                         "Taijutsu",
                         "Taijutsu"
@@ -652,7 +645,7 @@
                     "id": "rock-lee-remove-training-weights",
                     "name": "Remove Training Weights",
                     "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-048-gaara-vs-rock-lee-the-power-of-youth-explodes_/cap_13-42_678c.jpg",
-                    "skilldescription": "Lee removes his training weights, causing his physical skills to deal 10 less damage but ignore counters, reflects, and invulnerability for the rest of the battle. Lee also gains 1 taijutsu chakra. This skill cannot be used while active. At 5 Gate Openings, this skill is replaced by Final Lotus.",
+                    "skilldescription": "Lee removes his training weights, causing his physical skills to deal 10 less damage but ignore counters, reflects, and invulnerability for the rest of the battle. Lee also gains 1 random chakra. This skill cannot be used while active. At 5 Gate Openings, this skill is replaced by Final Lotus.",
                     "energy": [],
                     "target": "self",
                     "damage": 0,
@@ -700,7 +693,7 @@
                         {
                             "type": "gain_chakra",
                             "scope": "self",
-                            "chakraType": "taijutsu",
+                            "chakraType": "random",
                             "amount": 1
                         }
                     ]
@@ -739,7 +732,7 @@
                     "name": "Final Lotus",
                     "hiddenFromSelectionViewer": true,
                     "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-050-the-fifth-gate-a-splendid-ninja-is-born/cap_04-41_363a.jpg",
-                    "skilldescription": "Lee executes one enemy. If successful, he gains 1 taijutsu chakra and becomes immortal for 1 turn.",
+                    "skilldescription": "Lee executes one enemy. If successful, he becomes immortal for 1 turn.",
                     "energy": [
                         "Taijutsu",
                         "Taijutsu",
@@ -1034,12 +1027,17 @@
                             "duration": 1,
                             "metadata": {
                                 "helpful": true,
-                                "invulnerableToPhysicalSkills": true,
+                                "invulnerableToSkillClasses": [
+                                    "physical"
+                                ],
                                 "tooltipText": "Lee is invulnerable to physical skills."
                             }
                         }
                     ]
                 }
+            ],
+            "tags": [
+                "konoha-genin"
             ]
         },
         "tenten": {
@@ -1063,7 +1061,7 @@
                     "id": "tenten-twin-rising-dragons",
                     "name": "Twin Rising Dragons",
                     "skillimage": "https://i.imgur.com/g4ksO57.png",
-                    "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it.",
+                    "skilldescription": "Tenten deals 20 damage to one enemy and 10 damage to all others. All enemies will take 5 additional damage from 'Twin Rising Dragons Trap' and will have their Physical and Chakra damage lowered by 5 additional points from it. These marks are permanent and end when Tenten dies.",
                     "energy": [
                         "Taijutsu"
                     ],
@@ -1088,11 +1086,12 @@
                         {
                             "type": "apply_status",
                             "statusId": "tenten_twin_rising_dragons_mark",
-                            "duration": 2,
+                            "duration": 99,
                             "scope": "all-enemy",
                             "metadata": {
                                 "harmful": true,
-                                "turnDurationAnchor": "source_turn",
+                                "permanent": true,
+                                "removeOnSourceDeath": true,
                                 "bonusDamageFromSourceSkillsFlat": 5,
                                 "mergeNumericAddKeys": [
                                     "bonusDamageFromSourceSkillsFlat"
@@ -1107,7 +1106,7 @@
                         {
                             "type": "apply_status",
                             "statusId": "tenten_twin_rising_dragons_mark",
-                            "duration": 2,
+                            "duration": 99,
                             "scope": "all-enemy",
                             "condition": {
                                 "scope": "self",
@@ -1115,7 +1114,8 @@
                             },
                             "metadata": {
                                 "harmful": true,
-                                "turnDurationAnchor": "source_turn",
+                                "permanent": true,
+                                "removeOnSourceDeath": true,
                                 "bonusDamageFromSourceSkillsFlat": 5,
                                 "mergeNumericAddKeys": [
                                     "bonusDamageFromSourceSkillsFlat"
@@ -1460,14 +1460,17 @@
             "passive": {
                 "name": "Sand Flow",
                 "icon": "https://i.imgur.com/qOFhrZc.png",
-                "description": "Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage.",
+                "description": "Gaara has 5 unpierceable damage reduction. He gains 1 Sand Flow stack when damaged and 2 after a turn without taking damage, up to 8 stacks.",
                 "unpierceableDamageReductionFlat": 5,
                 "onDamageStackMetadataKey": "sandFlowStacks",
                 "onDamageStackAmount": 1,
                 "onUndamagedTurnStackMetadataKey": "sandFlowStacks",
                 "onUndamagedTurnStackAmount": 2,
                 "sandFlowStacks": 0,
-                "stackTooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
+                "stackCapsByKey": {
+                    "sandFlowStacks": 8
+                },
+                "stackTooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks (maximum 8)."
             },
             "skills": [
                 {
@@ -1505,8 +1508,11 @@
                             "metadata": {
                                 "stackMetadataKey": "sandFlowStacks",
                                 "stackDelta": 2,
-                                "stackMax": 9999,
-                                "tooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks."
+                                "stackMax": 8,
+                                "stackCapsByKey": {
+                                    "sandFlowStacks": 8
+                                },
+                                "tooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks (maximum 8)."
                             }
                         }
                     ]
@@ -1515,7 +1521,7 @@
                     "id": "gaara-of-the-desert-desert-funeral",
                     "name": "Desert Funeral",
                     "skillimage": "https://i.imgur.com/9do9XxC.png",
-                    "skilldescription": "Gaara deals 20 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
+                    "skilldescription": "Gaara deals 20 physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
                     "energy": [
                         "Bloodline",
                         "Bloodline"
@@ -1533,7 +1539,6 @@
                             "amount": 20,
                             "scope": "target",
                             "metadata": {
-                                "ignoreDamageReduction": true,
                                 "executeBelowHpThreshold": 10,
                                 "bonusPerStatusMetadata": {
                                     "scope": "self",
@@ -1550,7 +1555,7 @@
                     "id": "gaara-of-the-desert-sand-sphere",
                     "name": "Sand Sphere",
                     "skillimage": "https://i.imgur.com/eUfA1nN.png",
-                    "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
+                    "skilldescription": "Gaara gains 25 destructible defense for 3 turns, plus 5 for each Sand Flow stack. All stacks are consumed. Enemies who use a skill on Gaara take 15 physical damage. This effect ends when Gaara uses another skill.",
                     "energy": [
                         "Ninjutsu",
                         "Ninjutsu"
@@ -1592,6 +1597,21 @@
                                     "gaara-of-the-desert-sand-shield"
                                 ],
                                 "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense. Enemies who use a skill on them take 15 physical damage. This effect ends when this character uses another skill."
+                            }
+                        },
+                        {
+                            "type": "apply_status",
+                            "statusId": "gaara_of_the_desert_sand_flow",
+                            "duration": 99,
+                            "scope": "self",
+                            "metadata": {
+                                "stackMetadataKey": "sandFlowStacks",
+                                "stackDelta": -8,
+                                "stackMax": 8,
+                                "stackCapsByKey": {
+                                    "sandFlowStacks": 8
+                                },
+                                "tooltipTextTemplate": "Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks (maximum 8)."
                             }
                         }
                     ]

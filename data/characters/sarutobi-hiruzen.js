@@ -59,7 +59,7 @@ module.exports = {
             name: 'Search Party',
             skillimage: 'https://i.imgur.com/OdtmZna.png',
             skilldescription: 'Hiruzen deals 20 physical damage to one enemy. If that enemy is affected by Crystal Ball Technique, this skill also deals 15 piercing damage.',
-            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
+            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 20, scope: 'target' },

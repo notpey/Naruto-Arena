@@ -41,7 +41,7 @@ test('roster tooltips describe every visible effect without generic defensive bo
     const gaara = characters.find((character) => character.id === 'gaara-of-the-desert');
     assert.equal(neji.passive.description, "Neji's skills cannot be countered.");
     assert.equal(gaara.passive.stackTooltipTextTemplate,
-        'Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks.');
+        'Gaara has 5 unpierceable damage reduction and {sandFlowStacks} Sand Flow stacks (maximum 8).');
 
     const tenten = characters.find((character) => character.id === 'tenten');
     const match = { players: [{ username: 'p1', team: [characters.indexOf(tenten)] }] };

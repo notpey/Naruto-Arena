@@ -29,7 +29,7 @@ module.exports = {
             id: 'shiore-orochimaru-devour', name: 'Devour',
             skillimage: 'https://i.imgur.com/Jp5mx0x.png',
             skilldescription: 'Orochimaru marks an enemy for 3 turns. When this effect ends, the target takes 20 affliction damage, increased by 5 for each turn it remained active, and has their physical skills stunned for 1 turn. During this time, Orochimaru gains 10 damage reduction, and this skill cannot be used again.',
-            energy: ['Bloodline', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
+            energy: ['Bloodline'], target: 'single-enemy', damage: 0, cooldown: 0,
             actorCondition: { missingStatusId: DEVOUR_GUARD },
             classes: ['Physical', 'Affliction', 'Control'],
             effects: [
@@ -61,11 +61,11 @@ module.exports = {
         {
             id: 'shiore-orochimaru-cursed-seal-bite', name: 'Cursed Seal Bite',
             skillimage: 'https://i.imgur.com/LWpHTiQ.png',
-            skilldescription: 'Orochimaru bites an enemy, dealing 10 affliction damage with Lifesteal and applying Cursed Seal.',
+            skilldescription: 'Orochimaru bites an enemy, dealing 15 affliction damage with Lifesteal and applying Cursed Seal.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
             classes: ['Physical', 'Affliction', 'Instant', 'Unique'],
             effects: [
-                { type: 'health_steal_damage', amount: 10, scope: 'target',
+                { type: 'health_steal_damage', amount: 15, scope: 'target',
                     metadata: { afflictionDamage: true } },
                 { type: 'apply_status', statusId: CURSED_SEAL, duration: 99, scope: 'target',
                     metadata: {

@@ -42,7 +42,7 @@ test('Shiore Orochimaru draft kit matches names, costs, cooldowns, and roster', 
     const orochimaru = characters[indexOf('shiore-orochimaru')];
     assert.equal(orochimaru.passive.name, 'Cursed Seal');
     assert.deepEqual(orochimaru.skills.map((skill) => [skill.name, skill.energy, skill.cooldown]), [
-        ['Five Elements Seal', ['Ninjutsu'], 3], ['Devour', ['Bloodline', 'Random'], 0],
+        ['Five Elements Seal', ['Ninjutsu'], 3], ['Devour', ['Bloodline'], 0],
         ['Cursed Seal Bite', ['Random'], 1], ['Skin Shed', ['Random'], 4],
     ]);
     assert.ok(ACTIVE_ROSTER_IDS.includes('shiore-orochimaru'));
@@ -60,12 +60,12 @@ test('Five Elements Seal raises all enemy skill costs by 1 random chakra', () =>
     assert.equal(cost(), before + 1);
 });
 
-test('Cursed Seal Bite steals 10 health and seals the target permanently', () => {
+test('Cursed Seal Bite steals 15 health and seals the target permanently', () => {
     const match = matchFor(['shiore-orochimaru'], ['haruno-sakura']);
     match.board.p1[0].hp = 80;
     cast(match, 'p1', 0, 2, 'p2');
-    assert.equal(match.board.p2[0].hp, 90);
-    assert.equal(match.board.p1[0].hp, 90, 'Lifesteal heals Orochimaru');
+    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p1[0].hp, 95, 'Lifesteal heals Orochimaru');
     const seal = status(match.board.p2[0], 'shiore_orochimaru_cursed_seal');
     assert.equal(seal.remainingTurns, 99);
     assert.equal(battle.cleanseHarmfulStatuses(match.board.p2[0], 99), 0, 'the seal cannot be cleansed');
@@ -75,12 +75,12 @@ test('Cursed Seal deals 5 affliction at the end of the marked enemy turn only wh
     const match = matchFor(['shiore-orochimaru'], ['haruno-sakura']);
     cast(match, 'p1', 0, 2, 'p2');
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(match.board.p2[0].hp, 90, 'no damage while the enemy team has chakra');
+    assert.equal(match.board.p2[0].hp, 85, 'no damage while the enemy team has chakra');
     match.chakraPools.p2 = empty();
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    assert.equal(match.board.p2[0].hp, 90, "Orochimaru's own turn end does not trigger it");
+    assert.equal(match.board.p2[0].hp, 85, "Orochimaru's own turn end does not trigger it");
     battle.tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[0].hp, 80);
     cast(match, 'p1', 0, 2, 'p2');
     match.board.p1[0].hp = 0;
     match.board.p1[0].alive = false;

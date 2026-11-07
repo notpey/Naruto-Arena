@@ -64,45 +64,54 @@ test('sound genin drafts match their skill names, costs, and cooldowns', () => {
     }
 });
 
-test('Unnerving Bells taxes genjutsu, ticks affliction, ends on use, and fuels Sound Trio', () => {
+test('Unnerving Bells taxes genjutsu, ticks affliction, fuels Sound Trio, and lasts at least 2 turns', () => {
     const match = matchFor(['tsuchi-kin', 'zaku-abumi'], ['haruno-sakura']);
+    const sakura = match.board.p2[0];
     const sakuraBase = cost(match, 'p2', 0, 0);
     cast(match, 'p1', 0, 2, 'p2');
-    assert.ok(status(match.board.p2[0], 'tsuchi_kin_unnerving_bells'));
+    assert.ok(status(sakura, 'tsuchi_kin_unnerving_bells'));
     assert.equal(cost(match, 'p2', 0, 0).reservedSpecific.genjutsu,
         sakuraBase.reservedSpecific.genjutsu + 1);
     assert.equal(battle.computeTargetOptions({
         characters, match, actingUsername: 'p1', actorSlot: 0, skillIndex: 2,
     }).targets.length, 0, 'Unnerving Bells cannot be reapplied to an affected enemy');
     endTurn(match, 'p1');
-    assert.equal(match.board.p2[0].hp, 90, 'Unnerving Bells deals 10 affliction damage on Kin\'s turn');
-    endTurn(match, 'p2');
-    endTurn(match, 'p1');
-    assert.equal(match.board.p2[0].hp, 80, 'Unnerving Bells is permanent');
+    assert.equal(sakura.hp, 90, "Unnerving Bells deals 10 affliction damage on Kin's turn");
 
     cast(match, 'p2', 0, 0, 'p1', 0);
-    assert.equal(status(match.board.p2[0], 'tsuchi_kin_unnerving_bells'), undefined,
-        'Unnerving Bells ends when the target uses a skill');
+    assert.ok(status(sakura, 'tsuchi_kin_unnerving_bells'),
+        'using a skill on the first turn does not end Unnerving Bells');
     for (const unit of match.board.p1) {
         assert.ok(status(unit, 'sound_trio_physical_bonus'), 'each Sound Trio member is empowered');
     }
     endTurn(match, 'p2');
-    const zakuTarget = match.board.p2[0].hp;
+    const zakuTarget = sakura.hp;
     cast(match, 'p1', 1, 0, 'p2');
-    assert.equal(match.board.p2[0].hp, zakuTarget - 25, 'Air Cutter gains the Sound Trio bonus');
+    assert.equal(sakura.hp, zakuTarget - 25, 'Air Cutter gains the Sound Trio bonus');
     endTurn(match, 'p1');
     assert.equal(status(match.board.p1[1], 'sound_trio_physical_bonus'), undefined,
         'the Sound Trio bonus lasts one turn');
+
+    sakura.state.cooldowns = {};
+    cast(match, 'p2', 0, 0, 'p1', 0);
+    assert.ok(status(sakura, 'tsuchi_kin_unnerving_bells'),
+        'using a skill on the second turn does not end Unnerving Bells');
+    endTurn(match, 'p2');
+    endTurn(match, 'p1');
+    sakura.state.cooldowns = {};
+    cast(match, 'p2', 0, 0, 'p1', 0);
+    assert.equal(status(sakura, 'tsuchi_kin_unnerving_bells'), undefined,
+        'after 2 turns, Unnerving Bells ends when the target uses a skill');
 });
 
 test('Needle and Bell Trap pierces and punishes Unnerving Bells targets', () => {
     const match = matchFor(['tsuchi-kin'], ['haruno-sakura', 'tenten']);
     cast(match, 'p1', 0, 1, 'p2', 1);
-    assert.equal(match.board.p2[1].hp, 90);
+    assert.equal(match.board.p2[1].hp, 85, 'Needle and Bell Trap deals 15 piercing damage');
     assert.equal(status(match.board.p2[1], 'tsuchi_kin_needle_and_bell_trap_stun'), undefined);
     cast(match, 'p1', 0, 2, 'p2', 0);
     cast(match, 'p1', 0, 1, 'p2', 0);
-    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[0].hp, 80, 'Unnerving Bells targets take 5 extra damage');
     assert.deepEqual(status(match.board.p2[0], 'tsuchi_kin_needle_and_bell_trap_stun')
         .metadata.cannotUseSkillClasses, ['strategic']);
 });
@@ -119,25 +128,37 @@ test('Illusion Bell Needles persists until it counters the next enemy skill on K
     assert.equal(status(match.board.p1[0], 'tsuchi_kin_illusion_bell_needles'), undefined);
 });
 
-test('Sound Manipulation only hits Drill-marked enemies, through invulnerability, and taxes physical skills', () => {
+test('Vibrating Sound Drill marks permanently and taxes all skills; Sound Manipulation hits marked enemies through invulnerability', () => {
     const match = matchFor(['dosu-kinuta'], ['haruno-sakura', 'tenten']);
+    const sakuraHideBase = cost(match, 'p2', 0, 3).requiredRandom;
     cast(match, 'p1', 0, 0, 'p2', 0);
     assert.equal(match.board.p2[0].hp, 80);
-    assert.equal(status(match.board.p2[0], 'dosu_kinuta_vibrating_sound_drill').remainingTurns, 4);
+    assert.equal(status(match.board.p2[0], 'dosu_kinuta_vibrating_sound_drill').remainingTurns, 99,
+        'the Drill mark is permanent');
+    assert.equal(cost(match, 'p2', 0, 3).requiredRandom, sakuraHideBase + 1,
+        'Drill makes every skill cost 1 additional random chakra');
+    endTurn(match, 'p1');
+    assert.equal(cost(match, 'p2', 0, 3).requiredRandom, sakuraHideBase + 1,
+        'the tax applies on the enemy turn');
+    endTurn(match, 'p2');
+    endTurn(match, 'p1');
+    assert.equal(cost(match, 'p2', 0, 3).requiredRandom, sakuraHideBase, 'the Drill tax lasts 1 turn');
+
     match.board.p2[0].state.statuses.push({ id: 'test_invulnerable', remainingTurns: 1,
         metadata: { invulnerable: true } });
     const tentenBase = cost(match, 'p2', 1, 0);
     cast(match, 'p1', 0, 1);
     assert.equal(match.board.p2[0].hp, 70, 'invulnerability is ignored');
     assert.equal(match.board.p2[1].hp, 100, 'unmarked enemies are unaffected');
-    const sakura = effective(match, 'p2', 0, 0);
-    assert.ok(sakura.classes.includes('Physical'));
-    assert.equal(cost(match, 'p2', 0, 0).requiredRandom,
-        battle.computeEffectiveEnergyCost({ skill: sakura, actorState: { statuses: [] } })
-            .requiredRandom + 1);
+    assert.equal(cost(match, 'p2', 0, 3).requiredRandom, sakuraHideBase + 1,
+        'Sound Manipulation makes every skill cost 1 additional random chakra');
     assert.deepEqual(cost(match, 'p2', 1, 0), tentenBase);
     endTurn(match, 'p1');
     assert.equal(match.board.p2[0].hp, 70, 'the unenhanced skill does not deal damage over time');
+    endTurn(match, 'p2');
+    endTurn(match, 'p1');
+    assert.equal(cost(match, 'p2', 0, 3).requiredRandom, sakuraHideBase,
+        'the unenhanced tax lasts 1 turn');
 });
 
 test('Melody Arm Tuning enhances one Drill or Manipulation and cannot be recast while active', () => {
@@ -163,16 +184,17 @@ test('Melody Arm Tuning enhances one Drill or Manipulation and cannot be recast 
     const sakuraHide = effective(match, 'p2', 0, 3);
     assert.equal(cost(match, 'p2', 0, 3).requiredRandom,
         battle.computeEffectiveEnergyCost({ skill: sakuraHide, actorState: { statuses: [] } })
-            .requiredRandom + 1, 'the enhanced tax affects non-physical skills');
+            .requiredRandom + 1, 'the enhanced tax affects every skill once, without stacking with Drill');
     endTurn(match, 'p1');
     endTurn(match, 'p2');
     endTurn(match, 'p1');
     assert.equal(match.board.p2[0].hp, 40, 'enhanced Sound Manipulation hits again the following turn');
-    assert.ok(status(match.board.p2[0], 'dosu_kinuta_sound_manipulation_enhanced'));
+    assert.ok(status(match.board.p2[0], 'dosu_kinuta_sound_cost_increase'),
+        'the enhanced tax lasts 1 additional turn');
     endTurn(match, 'p2');
     endTurn(match, 'p1');
     assert.equal(match.board.p2[0].hp, 40, 'the damage lasts two turns in total');
-    assert.equal(status(match.board.p2[0], 'dosu_kinuta_sound_manipulation_enhanced'), undefined);
+    assert.equal(status(match.board.p2[0], 'dosu_kinuta_sound_cost_increase'), undefined);
 });
 
 test('Extreme Air Cutter requires Air Cutter on the previous turn', () => {

@@ -49,7 +49,7 @@ module.exports = {
             id: 'nara-shikamaru-shadow-imitation', name: 'Shadow Imitation',
             skillimage: 'https://i.imgur.com/jlKHCbs.png',
             skilldescription: 'Shikamaru binds his enemies with their own shadows, stunning the physical and chakra skills of all marked enemies for 2 turns.',
-            energy: ['Bloodline', 'Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
+            energy: ['Bloodline', 'Genjutsu'], target: 'all-enemy', damage: 0, cooldown: 3,
             targetCondition: markedEnemies,
             classes: ['Chakra', 'Control'],
             effects: [{ type: 'apply_status', statusId: 'nara_shikamaru_shadow_imitation', duration: 2,
