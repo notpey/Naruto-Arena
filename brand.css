@@ -909,7 +909,7 @@ button {
 
 .ca-hero-banners {
   z-index: 1;
-  background-image: url("assets/home-banners/leaf.png");
+  background-image: url("assets/home-banners/leaf.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -928,22 +928,22 @@ button {
 
 .ca-hero-banner--cloud {
   animation-delay: 0s;
-  background-image: url("assets/home-banners/cloud.png") !important;
+  background-image: url("assets/home-banners/cloud.jpg") !important;
 }
 
 .ca-hero-banner--leaf {
   animation-delay: -18s;
-  background-image: url("assets/home-banners/leaf.png") !important;
+  background-image: url("assets/home-banners/leaf.jpg") !important;
 }
 
 .ca-hero-banner--sound {
   animation-delay: -12s;
-  background-image: url("assets/home-banners/sound.png") !important;
+  background-image: url("assets/home-banners/sound.jpg") !important;
 }
 
 .ca-hero-banner--sand {
   animation-delay: -6s;
-  background-image: url("assets/home-banners/sand.png") !important;
+  background-image: url("assets/home-banners/sand.jpg") !important;
 }
 
 @keyframes ca-hero-banner-rotation {
