@@ -149,7 +149,7 @@ module.exports = {
             skilldescription: 'Lee executes one enemy. If successful, he gains 1 taijutsu chakra and becomes immortal for 1 turn.',
             energy: ['Taijutsu', 'Taijutsu', 'Taijutsu'],
             target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'],
+            classes: ['Physical', 'Instant', 'Unique'],
             effects: [...fifthGateEffects(), gateDamage(9999)],
         },
         {

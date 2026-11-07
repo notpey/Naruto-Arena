@@ -133,6 +133,35 @@ test('Copy Ninja still counters Unique and preparation skills without copying th
     }
 });
 
+test('Designated Unique skills carry the Unique class and Copy Ninja does not copy them', () => {
+    const uniqueSkills = {
+        'inuzuka-kiba': ['inuzuka-kiba-dynamic-air-marking'],
+        'akimichi-chouji': ['akimichi-chouji-butterfly-finale', 'akimichi-chouji-butterfly-reflexes'],
+        'yamanaka-ino': ['yamanaka-ino-forced-betrayal'],
+        'rock-lee': ['rock-lee-final-lotus'],
+        'shiore-orochimaru': ['shiore-orochimaru-cursed-seal-bite'],
+        'mitarashi-anko': ['mitarashi-anko-twin-snakes-mutual-death'],
+        'hatake-kakashi': ['hatake-kakashi-sharingan-counter'],
+    };
+    for (const [characterId, skillIds] of Object.entries(uniqueSkills)) {
+        const character = characters[index(characterId)];
+        for (const skillId of skillIds) {
+            const skill = [...character.skills, ...(character.alternateSkills || [])]
+                .find((entry) => entry.id === skillId);
+            assert.ok(skill?.classes.includes('Unique'), `${skillId} should be Unique`);
+        }
+    }
+
+    const orochimaru = characters[index('shiore-orochimaru')];
+    const biteIndex = orochimaru.skills.findIndex((skill) => skill.id === 'shiore-orochimaru-cursed-seal-bite');
+    const match = makeMatch([index('hatake-kakashi')], [index('shiore-orochimaru')]);
+    cast(match, 'p1', 0, 0);
+    cast(match, 'p2', 0, biteIndex, ['p1', 0]);
+    assert.equal(match.board.p1[0].hp, 100);
+    assert.equal(status(match, 'p1', 0, 'kakashi_sharingan_insight'), undefined);
+    assert.equal(status(match, 'p1', 0, 'hatake-kakashi-sharingan-counter_copied_skill'), undefined);
+});
+
 test('Beloved Sensei grants allied Konoha Genin 10 maximum health and healing respects it', () => {
     const match = makeMatch([index('umino-iruka'), index('uzumaki-naruto'), index('hatake-kakashi')],
         [index('uchiha-sasuke')]);

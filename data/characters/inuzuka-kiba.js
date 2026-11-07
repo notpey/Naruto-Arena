@@ -15,7 +15,7 @@ module.exports = {
             skillimage: 'https://i.imgur.com/ImizG0d.png',
             skilldescription: 'Kiba marks an enemy for 4 turns. During this time, they cannot reduce incoming damage or become invulnerable, and their counter effects are ignored. This skill cannot be used on an enemy already affected by it.',
             energy: [], target: 'single-enemy', damage: 0, cooldown: 0,
-            classes: ['Strategic', 'Instant'],
+            classes: ['Strategic', 'Instant', 'Unique'],
             targetCondition: { missingStatusId: 'inuzuka_kiba_dynamic_air_marking' },
             effects: [{
                 type: 'apply_status', statusId: 'inuzuka_kiba_dynamic_air_marking', duration: 4,

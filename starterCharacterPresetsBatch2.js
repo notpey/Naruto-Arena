@@ -209,7 +209,8 @@
                     "cooldown": 0,
                     "classes": [
                         "Physical",
-                        "Instant"
+                        "Instant",
+                        "Unique"
                     ],
                     "effects": [
                         {
@@ -749,7 +750,8 @@
                     "cooldown": 1,
                     "classes": [
                         "Physical",
-                        "Instant"
+                        "Instant",
+                        "Unique"
                     ],
                     "effects": [
                         {

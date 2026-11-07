@@ -69,7 +69,7 @@ module.exports = {
             energy: ['Random'], target: 'single-enemy',
             targetCondition: { statusId: 'ino_mind_body_switch_target', statusFromActor: true },
             damage: 0, cooldown: 0,
-            classes: ['Physical', 'Instant'], effects: [
+            classes: ['Physical', 'Instant', 'Unique'], effects: [
                 { type: 'damage', amount: 30, scope: 'target',
                     metadata: { damageSourceControlledStatusId: 'ino_mind_body_switch_target' } },
             ],

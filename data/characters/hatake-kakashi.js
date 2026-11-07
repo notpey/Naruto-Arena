@@ -8,7 +8,7 @@ module.exports = {
     passive: {
         name: 'Copy Ninja',
         icon: 'https://i.imgur.com/xg8yXfM.png',
-        description: 'When Sharingan Insight counters a skill, Kakashi copies it for 1 turn at a cost of 1 Random chakra. Unique skills and skills requiring preparation cannot be copied.',
+        description: 'When Sharingan Insight counters a non-unique skill, Kakashi copies it for 1 turn at a cost of 1 Random chakra.',
     },
     skills: [
         {

@@ -90,7 +90,7 @@ module.exports = {
             skillimage: 'https://i.imgur.com/moJAxL6.png',
             skilldescription: 'Chouji concentrates his strength into a devastating strike, dealing 50 physical damage to an enemy. If this skill kills the target, Chouji heals 10 health.',
             energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
-            classes: ['Physical', 'Instant'],
+            classes: ['Physical', 'Instant', 'Unique'],
             effects: [{ type: 'damage', amount: 50, scope: 'target' }],
         },
         {
@@ -99,7 +99,7 @@ module.exports = {
             skillimage: 'https://i.imgur.com/xnrPRos.png',
             skilldescription: 'Chouji moves with incredible speed, dealing 40 physical damage to an enemy and becoming invulnerable for 1 turn. For 1 turn, Butterfly Finale deals 10 additional damage to that enemy.',
             energy: ['Bloodline'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'],
+            classes: ['Physical', 'Instant', 'Unique'],
             effects: [
                 { type: 'damage', amount: 40, scope: 'target' },
                 { type: 'apply_status', statusId: 'akimichi_chouji_butterfly_reflexes_mark', duration: 1,

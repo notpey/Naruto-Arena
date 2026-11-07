@@ -32,7 +32,8 @@
             "cooldown": 0,
             "classes": [
                 "Strategic",
-                "Instant"
+                "Instant",
+                "Unique"
             ],
             "targetCondition": {
                 "missingStatusId": "inuzuka_kiba_dynamic_air_marking"
@@ -1041,7 +1042,8 @@
                                 "cooldown": 0,
                                 "classes": [
                                         "Physical",
-                                        "Instant"
+                                        "Instant",
+                                        "Unique"
                                 ],
                                 "effects": [
                                         {
@@ -1066,7 +1068,8 @@
                                 "cooldown": 1,
                                 "classes": [
                                         "Physical",
-                                        "Instant"
+                                        "Instant",
+                                        "Unique"
                                 ],
                                 "effects": [
                                         {

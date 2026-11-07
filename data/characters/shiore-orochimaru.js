@@ -63,7 +63,7 @@ module.exports = {
             skillimage: 'https://i.imgur.com/LWpHTiQ.png',
             skilldescription: 'Orochimaru bites an enemy, dealing 10 affliction damage with Lifesteal and applying Cursed Seal.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Affliction', 'Instant'],
+            classes: ['Physical', 'Affliction', 'Instant', 'Unique'],
             effects: [
                 { type: 'health_steal_damage', amount: 10, scope: 'target',
                     metadata: { afflictionDamage: true } },

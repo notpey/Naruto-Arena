@@ -78,7 +78,7 @@ module.exports = {
             skilldescription: 'Anko performs a forbidden technique, executing an enemy affected by Dual Pin. Anko is executed afterward.',
             energy: ['Ninjutsu', 'Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             targetCondition: { statusId: DUAL_PIN },
-            classes: ['Affliction', 'Instant'],
+            classes: ['Affliction', 'Instant', 'Unique'],
             effects: [
                 { type: 'instant_kill', scope: 'target' },
                 { type: 'instant_kill', scope: 'self' },
