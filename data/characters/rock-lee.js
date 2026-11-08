@@ -67,7 +67,8 @@ module.exports = {
                             onOwnerKillSourceSkillIdsAny: [FINAL_LOTUS],
                             onOwnerKillTargetRelation: 'enemy',
                             onOwnerKillApplyStatusToSelf: {
-                                statusId: 'rock_lee_final_lotus_immortal', duration: 1,
+                                // fresh: lasts through the enemy's next turn, not just Lee's own.
+                                statusId: 'rock_lee_final_lotus_immortal', duration: 1, fresh: true,
                                 metadata: { helpful: true, minimumHp: 1,
                                     tooltipText: 'Lee cannot be killed for 1 turn.' },
                             },

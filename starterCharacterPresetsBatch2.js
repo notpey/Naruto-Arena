@@ -279,6 +279,7 @@
                                         "onOwnerKillApplyStatusToSelf": {
                                             "statusId": "rock_lee_final_lotus_immortal",
                                             "duration": 1,
+                                            "fresh": true,
                                             "metadata": {
                                                 "helpful": true,
                                                 "minimumHp": 1,

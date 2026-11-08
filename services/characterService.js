@@ -38,8 +38,10 @@ const BALANCE_UPDATE_0_4_MIGRATION_ID = 'balance-update-0-4-2026-11-07';
 const BALANCE_UPDATE_0_4_CHARACTER_IDS = ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin', 'hatake-kakashi', 'rock-lee', 'gaara-of-the-desert', 'nara-shikamaru', 'yamanaka-ino', 'tenten', 'sarutobi-hiruzen', 'aburame-shino', 'shiore-orochimaru'];
 const TEAM_MINATO_DRAFTS_MIGRATION_ID = 'team-minato-drafts-2026-11-08';
 const TEAM_MINATO_REVIEW_MIGRATION_ID = 'team-minato-review-2026-11-08';
+const ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID = 'rock-lee-final-lotus-immortality-2026-11-08';
 const TEAM_MINATO_DRAFTS_CHARACTER_IDS = ['young-kakashi', 'uchiha-obito', 'nohara-rin'];
 const TEAM_MINATO_REVIEW_CHARACTER_IDS = ['young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato'];
+const ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS = ['rock-lee'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -290,6 +292,7 @@ class CharacterService {
                     [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                     [`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`]: now,
                     [`completed.${TEAM_MINATO_REVIEW_MIGRATION_ID}`]: now,
+                    [`completed.${ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -369,6 +372,7 @@ class CharacterService {
                         [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_MINATO_REVIEW_MIGRATION_ID}`]: now,
+                        [`completed.${ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
@@ -417,6 +421,7 @@ class CharacterService {
         const shouldApplyBalanceUpdate04 = !completedMigrations[BALANCE_UPDATE_0_4_MIGRATION_ID];
         const shouldApplyTeamMinatoDrafts = !completedMigrations[TEAM_MINATO_DRAFTS_MIGRATION_ID];
         const shouldApplyTeamMinatoReview = !completedMigrations[TEAM_MINATO_REVIEW_MIGRATION_ID];
+        const shouldApplyRockLeeImmortalityFix = !completedMigrations[ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
@@ -451,6 +456,7 @@ class CharacterService {
             ...(shouldApplyBalanceUpdate04 ? BALANCE_UPDATE_0_4_CHARACTER_IDS : []),
             ...(shouldApplyTeamMinatoDrafts ? TEAM_MINATO_DRAFTS_CHARACTER_IDS : []),
             ...(shouldApplyTeamMinatoReview ? TEAM_MINATO_REVIEW_CHARACTER_IDS : []),
+            ...(shouldApplyRockLeeImmortalityFix ? ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
             ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
         ]);
@@ -547,6 +553,7 @@ class CharacterService {
                 if (shouldApplyBalanceUpdate04 && BALANCE_UPDATE_0_4_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplyTeamMinatoDrafts && TEAM_MINATO_DRAFTS_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplyTeamMinatoReview && TEAM_MINATO_REVIEW_CHARACTER_IDS.includes(characterId)) return seedEntry;
+                if (shouldApplyRockLeeImmortalityFix && ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                     (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                     return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -608,6 +615,7 @@ class CharacterService {
             shouldApplyBalanceUpdate04 ||
             shouldApplyTeamMinatoDrafts ||
             shouldApplyTeamMinatoReview ||
+            shouldApplyRockLeeImmortalityFix ||
             shouldApplyLaunchUnlocks ||
             shouldApplyNewMissionUnlocks ||
             newSeedCharacters.length > 0 ||
@@ -655,6 +663,7 @@ class CharacterService {
                         [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_MINATO_REVIEW_MIGRATION_ID}`]: now,
+                        [`completed.${ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,

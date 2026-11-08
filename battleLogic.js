@@ -4777,7 +4777,9 @@ const triggerSourceKillHooks = ({
                 sourceUsername,
                 sourceSlot,
                 metadata: isPassiveStatus(status) ? markFromPassive(applyStatusToSelf.metadata) : applyStatusToSelf.metadata || {},
-                fresh: false,
+                // fresh: the status survives the end of the turn it was gained in, so a 1-turn
+                // effect lasts through the enemy's next turn.
+                fresh: Boolean(applyStatusToSelf.fresh),
             });
         }
     });
