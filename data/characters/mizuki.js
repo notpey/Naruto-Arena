@@ -9,7 +9,8 @@ module.exports = {
         onOwnerKillTargetRelation: 'enemy',
         onOwnerKillGrantSkillUse: { skillId: 'mizuki-execution-shuriken', amount: 1 },
         onOwnerKillApplyStatusToSelf: {
-            statusId: 'mizuki_windmill_invulnerable', duration: 1,
+            // fresh: lasts through the enemy's next turn, not just Mizuki's own.
+            statusId: 'mizuki_windmill_invulnerable', duration: 1, fresh: true,
             metadata: { helpful: true, invulnerable: true,
                 tooltipText: 'Mizuki is invulnerable for 1 turn after an Execution Shuriken kill.' },
         },
