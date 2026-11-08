@@ -60,6 +60,10 @@ HTTPS_CERT_PATH=
 PORT=4002
 ```
 
+With battle bots on, a quick or ladder search that finds nobody after 3–10 seconds pairs the player with a bot. The bot appears as an ordinary player: a generated username, a level near the player's, a matching win/loss record and ladder rank, and sometimes a shop avatar, border or title (`services/battleBotPersona.js`). Its name also opens a profile built from that match.
+
+About one ladder bot match in ten is an elite encounter: a boss whose units have 1.5x HP and whose AI plays sharper. Winning doubles the EXP, ryo and mission progress; losing changes nothing (no EXP, ryo, loss, streak reset or clan EXP).
+
 ### 3. Start the app
 
 ```bash
@@ -213,6 +217,8 @@ Useful fields:
 - `metadata.amountFromSourceCurrentHp`: Adds the user's current HP to damage.
 - `metadata.amountFromTargetCurrentHp`: Adds the target's current HP to damage.
 - `metadata.amountFromTargetMissingHp`: Adds the target's missing HP to damage.
+- `metadata.splitAmountEvenlyAmongRecipients`: Divides `amount` evenly among the units hit (rounded down) before per-hit bonuses.
+- `metadata.alsoTargetMarkedStatusId`: With `scope: "target"`, also hits every character carrying this status from the caster (works on `apply_status` too).
 
 ### `health_steal_damage`
 
@@ -589,6 +595,8 @@ Triggered status effects currently support:
 - `damage`
 - `health_steal_damage`
 - `apply_status`
+- `heal` (adds the status source's passive healing bonuses, such as Nohara Rin's Caretaker)
+- `gain_chakra`
 - `cleanse_statuses`
 
 ### `swap_positions`

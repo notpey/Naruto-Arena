@@ -39,16 +39,39 @@ const wsConnections = new Set();
 app.use(compression());
 // Static files are served below, after page access checks and cache headers.
 
+const { buildBattleBotPersona, generatePersonaName } = require('./services/battleBotPersona');
+
 const PORT = process.env.PORT || 4000;
 const TURN_DURATION_MS = 60 * 1000;
 const MATCH_FOUND_HOLD_MS = 3 * 1000;
 const BATTLE_BOT_QUEUE_TIMEOUT_MS = 3 * 1000;
+// A bot "opponent" turns up after a varied wait so it reads like someone else
+// entering the queue rather than a fixed timer.
+const BATTLE_BOT_QUEUE_JITTER_MS = 7 * 1000;
+const pickBattleBotQueueWaitMs = () =>
+    BATTLE_BOT_QUEUE_TIMEOUT_MS + Math.floor(Math.random() * (BATTLE_BOT_QUEUE_JITTER_MS + 1));
+const getBattleBotQueueWaitMs = (entry) => {
+    const waitMs = Number(entry?.battleBotWaitMs);
+    return Number.isFinite(waitMs) && waitMs >= BATTLE_BOT_QUEUE_TIMEOUT_MS ? waitMs : BATTLE_BOT_QUEUE_TIMEOUT_MS;
+};
 const BATTLE_BOT_ACTION_DELAY_MIN_MS = 3 * 1000;
 const BATTLE_BOT_ACTION_DELAY_MAX_MS = 7 * 1000;
 const getBattleBotActionDelayMs = () =>
     BATTLE_BOT_ACTION_DELAY_MIN_MS +
     Math.floor(Math.random() * (BATTLE_BOT_ACTION_DELAY_MAX_MS - BATTLE_BOT_ACTION_DELAY_MIN_MS + 1));
 const BATTLE_BOTS_ENABLED = process.env.ENABLE_BATTLE_BOTS !== 'false';
+// Elite encounters: about one ladder bot match in ten is a boss fight. Bosses have
+// tougher units and a sharper AI; winning doubles the rewards, losing costs nothing.
+const ELITE_ENCOUNTER_CHANCE = 0.1;
+const ELITE_ENCOUNTER_HP_MULTIPLIER = 1.5;
+const ELITE_ENCOUNTER_REWARD_MULTIPLIER = 2;
+const ELITE_BOSS_NAMES = [
+    'The Ashen Fang', 'Hollow Mask', 'Crimson Moon Wanderer', 'The Nameless Jonin',
+    'Shade of the Valley', 'Grey Heron', 'The Last Lantern', 'Mourning Blade',
+    'Widow of the Mist', 'The Ninth Shadow', 'Iron Lotus', 'The Silent Bell',
+];
+const rollEliteEncounter = (mode, random = Math.random) => mode === 'ladder' && random() < ELITE_ENCOUNTER_CHANCE;
+const isEliteEncounterMatch = (match) => Boolean(match?.eliteEncounter);
 const DEFAULT_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.MONGODB_DB || 'naruto-arena';
 const USERS_COLLECTION = process.env.MONGODB_USERS_COLLECTION || 'users';
@@ -73,7 +96,7 @@ const LADDER_RANK_RULES_STATE_KEY = 'ladder_rank_rules';
 const DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const LEGACY_DEFAULT_PROFILE_AVATAR = 'found-remaster.png';
 const MISSION_CATALOG_STATE_KEY = 'missions';
-const LAUNCH_MISSION_CATALOG_VERSION = 4;
+const LAUNCH_MISSION_CATALOG_VERSION = 5;
 let missionCatalogCache = null;
 const CHARACTERS_STATE_KEY = 'characters';
 const CHARACTER_MIGRATIONS_STATE_KEY = 'character_migrations';
@@ -112,6 +135,8 @@ const UNIQUE_SKILLS_MIGRATION_ID = 'unique-skills-2026-11-05';
 const UNIQUE_SKILLS_CHARACTER_IDS = ['hatake-kakashi', 'inuzuka-kiba', 'akimichi-chouji', 'yamanaka-ino', 'rock-lee', 'shiore-orochimaru', 'mitarashi-anko'];
 const BALANCE_UPDATE_0_4_MIGRATION_ID = 'balance-update-0-4-2026-11-07';
 const BALANCE_UPDATE_0_4_CHARACTER_IDS = ['dosu-kinuta', 'zaku-abumi', 'tsuchi-kin', 'hatake-kakashi', 'rock-lee', 'gaara-of-the-desert', 'nara-shikamaru', 'yamanaka-ino', 'tenten', 'sarutobi-hiruzen', 'aburame-shino', 'shiore-orochimaru'];
+const TEAM_MINATO_DRAFTS_MIGRATION_ID = 'team-minato-drafts-2026-11-08';
+const TEAM_MINATO_DRAFTS_CHARACTER_IDS = ['young-kakashi', 'uchiha-obito', 'nohara-rin'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -452,6 +477,17 @@ const deriveLadderStateFromExperience = (experiencePoints) => {
             ? Math.max(0, cumulativeForLevel + experienceForNextLevel - normalizedExperience)
             : 0,
     };
+};
+
+// Ladder EXP and ryo for one player's result. Elite encounters double a win's EXP and
+// ryo and make a loss free: no EXP, ryo, loss, or streak reset.
+const resolveLadderRewardsForResult = ({ elite = false, didWin, hasWinner, playerLevel, opponentLevel }) => {
+    if (!hasWinner) return { expChange: 0, ryoDelta: 0, recordsResult: false };
+    if (elite && !didWin) return { expChange: 0, ryoDelta: 0, recordsResult: false };
+    const multiplier = elite ? ELITE_ENCOUNTER_REWARD_MULTIPLIER : 1;
+    const expChange = resolveLadderExperienceDelta({ playerLevel, opponentLevel, didWin }) * multiplier;
+    const ryoDelta = (didWin ? LADDER_WIN_RYO : LADDER_LOSS_RYO) * multiplier;
+    return { expChange, ryoDelta, recordsResult: true };
 };
 
 const resolveLadderExperienceDelta = ({ playerLevel, opponentLevel, didWin }) => {
@@ -1379,10 +1415,18 @@ const resolveMissionCatalogState = (storedState, defaultCatalog = getDefaultMiss
             };
         });
     }
-    if (!(Number(storedState.catalogVersion) >= LAUNCH_MISSION_CATALOG_VERSION)) {
+    if (!(Number(storedState.catalogVersion) >= 4)) {
         const known = new Set(catalog.map((mission) => mission.missionId));
         catalog.push(...defaultCatalog.filter((mission) => !known.has(mission.missionId) &&
             mission.sortOrder > 11));
+    }
+    if (!(Number(storedState.catalogVersion) >= 5)) {
+        // Version 5 adds only The Yellow Flash, so missions an admin removed stay removed.
+        const known = new Set(catalog.map((mission) => mission.missionId));
+        catalog.push(...defaultCatalog.filter((mission) => !known.has(mission.missionId) &&
+            mission.missionId === 'the-yellow-flash'));
+    }
+    if (!(Number(storedState.catalogVersion) >= LAUNCH_MISSION_CATALOG_VERSION)) {
         return { missions: catalog, migrate: true };
     }
     return { missions: catalog, migrate: false };
@@ -2252,6 +2296,11 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
             const unlockedIds = new Set(missionState.unlockedCharacterIds || []);
             const userLevel = Number(profile?.ladder?.level) || 1;
             const didWin = Boolean(winnerUsername) && winnerUsername === username;
+            // Elite encounters: a win counts double; a loss changes no mission progress at all.
+            if (isEliteEncounterMatch(match) && !didWin) {
+                return;
+            }
+            const progressMultiplier = isEliteEncounterMatch(match) ? ELITE_ENCOUNTER_REWARD_MULTIPLIER : 1;
             let mutated = false;
             const completedMissionIds = [];
             const unlockedCharacterIds = [];
@@ -2355,14 +2404,14 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         if (didWin && hasGoalCharacter) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + progressMultiplier
                             );
                         }
                     } else if (goalType === 'win_streak') {
                         if (didWin && hasGoalCharacter) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + progressMultiplier
                             );
                         } else if (winnerUsername) {
                             nextGoalProgress.count = 0;
@@ -2373,14 +2422,14 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         if (didWin && hasSameTeamCharacters) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + progressMultiplier
                             );
                         }
                     } else if (goalType === 'win_streak_any') {
                         if (didWin && hasAnyStreakCharacter) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + progressMultiplier
                             );
                         } else if (winnerUsername) {
                             nextGoalProgress.count = 0;
@@ -2389,7 +2438,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         if (didWin && hasAnyStreakCharacter) {
                             nextGoalProgress.count = Math.min(
                                 targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + 1
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + progressMultiplier
                             );
                         }
                     } else if (goalType === 'win_matches_tag' ||
@@ -2399,7 +2448,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                         const increment = getMissionTagGoalIncrement(match, username, goal);
                         if (didWin && increment > 0) {
                             nextGoalProgress.count = Math.min(targetCount,
-                                Math.max(0, Number(existingGoalProgress.count) || 0) + increment);
+                                Math.max(0, Number(existingGoalProgress.count) || 0) + increment * progressMultiplier);
                         }
                     } else if (goalType === 'use_skill') {
                         const skillId = String(goal.skill_id || '').trim().toLowerCase();
@@ -2413,7 +2462,7 @@ const applyMissionProgressForUsers = async (match, winnerUsername, endedAt) => {
                             if (usesThisMatch > 0) {
                                 nextGoalProgress.count = Math.min(
                                     targetCount,
-                                    Math.max(0, Number(existingGoalProgress.count) || 0) + usesThisMatch
+                                    Math.max(0, Number(existingGoalProgress.count) || 0) + usesThisMatch * progressMultiplier
                                 );
                             }
                         }
@@ -2741,22 +2790,23 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         }
 
         const didWin = Boolean(winnerUsername) && winnerUsername === username;
-        const expChange = winnerUsername
-            ? resolveLadderExperienceDelta({
-                  playerLevel: profile.ladder.level,
-                  opponentLevel: opponentProfile.ladder.level,
-                  didWin,
-              })
-            : 0;
+        const { expChange, ryoDelta, recordsResult } = resolveLadderRewardsForResult({
+            elite: isEliteEncounterMatch(match),
+            didWin,
+            hasWinner: Boolean(winnerUsername),
+            playerLevel: profile.ladder.level,
+            opponentLevel: opponentProfile.ladder.level,
+        });
         const previousExperiencePoints = profile.ladder.experiencePoints;
         const nextExperiencePoints = Math.min(
             LADDER_MAX_EXPERIENCE_POINTS,
             Math.max(0, previousExperiencePoints + expChange)
         );
-        const ryoDelta = didWin ? LADDER_WIN_RYO : winnerUsername ? LADDER_LOSS_RYO : 0;
         profile.ladder.experiencePoints = nextExperiencePoints;
         profile.ryo = Math.max(0, Number(profile.ryo) || 0) + ryoDelta;
-        if (didWin) {
+        if (!recordsResult) {
+            // An elite loss leaves the record, streak, EXP and clan EXP untouched.
+        } else if (didWin) {
             profile.ladder.wins += 1;
             profile.ladder.streak = Math.max(0, Number(profile.ladder.streak) || 0) + 1;
             profile.ladder.highestStreak = Math.max(
@@ -2812,6 +2862,7 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
 
         preliminaryResults.set(username, {
             didWin,
+            elite: isEliteEncounterMatch(match),
             expDelta,
             clanExpDelta,
             ryoDelta,
@@ -2832,6 +2883,7 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         }
         results[username] = {
             didWin: prelim.didWin,
+            elite: Boolean(prelim.elite),
             expDelta: prelim.expDelta,
             clanExpDelta: prelim.clanExpDelta || 0,
             ryoDelta: prelim.ryoDelta || 0,
@@ -2988,6 +3040,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                 [`completed.${UNIQUE_SKILLS_MIGRATION_ID}`]: now,
                 [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
+                [`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3058,6 +3111,7 @@ const getStoredCharacters = async () => {
                     [`completed.${ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID}`]: now,
                     [`completed.${UNIQUE_SKILLS_MIGRATION_ID}`]: now,
                     [`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`]: now,
+                    [`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3107,6 +3161,7 @@ const getStoredCharacters = async () => {
     const shouldApplyZabuzaHinataMizukiFix = !completedMigrations[ZABUZA_HINATA_MIZUKI_FIX_MIGRATION_ID];
     const shouldApplyUniqueSkills = !completedMigrations[UNIQUE_SKILLS_MIGRATION_ID];
     const shouldApplyBalanceUpdate04 = !completedMigrations[BALANCE_UPDATE_0_4_MIGRATION_ID];
+    const shouldApplyTeamMinatoDrafts = !completedMigrations[TEAM_MINATO_DRAFTS_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3141,6 +3196,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyZabuzaHinataMizukiFix ? ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS : []),
         ...(shouldApplyUniqueSkills ? UNIQUE_SKILLS_CHARACTER_IDS : []),
         ...(shouldApplyBalanceUpdate04 ? BALANCE_UPDATE_0_4_CHARACTER_IDS : []),
+        ...(shouldApplyTeamMinatoDrafts ? TEAM_MINATO_DRAFTS_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3241,6 +3297,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyZabuzaHinataMizukiFix && ZABUZA_HINATA_MIZUKI_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyUniqueSkills && UNIQUE_SKILLS_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyBalanceUpdate04 && BALANCE_UPDATE_0_4_CHARACTER_IDS.includes(characterId)) return seedEntry;
+            if (shouldApplyTeamMinatoDrafts && TEAM_MINATO_DRAFTS_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3283,7 +3340,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3378,6 +3435,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyBalanceUpdate04) {
             completedMigrationUpdates[`completed.${BALANCE_UPDATE_0_4_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyTeamMinatoDrafts) {
+            completedMigrationUpdates[`completed.${TEAM_MINATO_DRAFTS_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
@@ -4588,6 +4648,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'overrideAllSkillsToAllRandomSkillIdsAny',
     'permanent',
     'randomCostIncrease',
+    'randomCostIncreaseForSkillIds',
     'randomCostReduction',
     'skillCostOverridesByRemainingTurns',
     'skillCostOverridesBySkillId',
@@ -4800,6 +4861,7 @@ const buildMatchPayloadForUser = (match, username) => {
         pendingTurn: getPendingTurn(match, username),
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
+        eliteEncounter: match.eliteEncounter || null,
     };
 };
 
@@ -5337,7 +5399,9 @@ const buildMatch = (players, aliveLookup = {}, options = {}) => {
         if (!isGameBotUsername(p)) {
             userToMatch.set(p, {
                 matchId,
-                opponent: isGameBotUsername(opponent) ? GAME_BOT_DISPLAY_NAME : opponent,
+                opponent: isGameBotUsername(opponent)
+                    ? options.displayNames?.[opponent] || GAME_BOT_DISPLAY_NAME
+                    : opponent,
             });
         }
     });
@@ -5407,17 +5471,118 @@ const buildBattleBotLadderPresentation = (level = 1) => {
     };
 };
 
-const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1, displayName = GAME_BOT_DISPLAY_NAME }) => ({
-    username: createGameBotUsername(matchId),
-    displayName: displayName || GAME_BOT_DISPLAY_NAME,
-    isBot: true,
-    team,
-    aliveCount: Array.isArray(team) ? team.length : 3,
-    ladderLevel: Math.max(1, Number(ladderLevel) || 1),
-    profile: {
-        ladder: buildBattleBotLadderPresentation(ladderLevel),
-    },
-});
+const createBattleBotPlayer = ({ matchId, team, ladderLevel = 1, displayName = GAME_BOT_DISPLAY_NAME, persona = null }) => {
+    const level = Math.max(1, Number(persona?.level || ladderLevel) || 1);
+    const name = persona?.displayName || displayName || GAME_BOT_DISPLAY_NAME;
+    const ladder = buildBattleBotLadderPresentation(level);
+    if (persona) {
+        const intoLevel = ladder.experienceForNextLevel
+            ? Math.floor(ladder.experienceForNextLevel * Math.max(0, Math.min(0.99, Number(persona.experienceProgress) || 0)))
+            : 0;
+        Object.assign(ladder, {
+            experiencePoints: ladder.experiencePoints + intoLevel,
+            experienceIntoLevel: intoLevel,
+            experienceToNextLevel: Math.max(0, ladder.experienceForNextLevel - intoLevel),
+            ladderRank: Number.isInteger(persona.ladderRank) && persona.ladderRank > 0 ? persona.ladderRank : null,
+            wins: Math.max(0, Number(persona.wins) || 0),
+            losses: Math.max(0, Number(persona.losses) || 0),
+            streak: Math.max(0, Number(persona.streak) || 0),
+            highestStreak: Math.max(0, Number(persona.highestStreak) || 0),
+        });
+    }
+    return {
+        username: createGameBotUsername(matchId),
+        displayName: name,
+        ...(persona ? { displayNameLower: name.toLowerCase() } : {}),
+        isBot: true,
+        team,
+        aliveCount: Array.isArray(team) ? team.length : 3,
+        ladderLevel: level,
+        profile: {
+            ...(persona
+                ? {
+                      avatarUrl: persona.avatarUrl || DEFAULT_PROFILE_AVATAR,
+                      equippedBorder: persona.equippedBorder || '',
+                      equippedTitle: persona.equippedTitle || '',
+                      createdAt: persona.createdAt || null,
+                  }
+                : {}),
+            ladder,
+        },
+    };
+};
+
+// Builds a fake-player identity for a matchmaking bot. The name must not belong
+// to a real account, and the ladder rank is placed among real players at that level.
+const createBattleBotPersona = async (playerProfile = null) => {
+    const persona = buildBattleBotPersona({
+        playerLevel: Number(playerProfile?.ladder?.level) || 1,
+        maxLevel: LADDER_MAX_LEVEL,
+        catalog: cosmeticsService?.getCatalogSync?.() || {},
+    });
+    if (!usersCollection) return persona;
+    try {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            const taken = await usersCollection.findOne(
+                { usernameLower: persona.displayName.toLowerCase() },
+                { projection: { _id: 1 } }
+            );
+            if (!taken) break;
+            persona.displayName = generatePersonaName();
+        }
+        const [above, sameLevel] = await Promise.all([
+            usersCollection.countDocuments({ 'profile.ladder.level': { $gt: persona.level } }),
+            usersCollection.countDocuments({ 'profile.ladder.level': persona.level }),
+        ]);
+        persona.ladderRank = above + 1 + Math.floor(Math.random() * (sameLevel + 1));
+    } catch (error) {
+        console.error('Battle bot persona lookup failed:', error);
+    }
+    return persona;
+};
+
+// Lets a bot's fake name open a profile like any other player's, built from the
+// most recent match that bot played.
+const findBattleBotPublicProfile = async (requestedName) => {
+    const nameLower = typeof requestedName === 'string' ? requestedName.trim().toLowerCase() : '';
+    if (!nameLower || !matchesCollection) return null;
+    const match = await matchesCollection.findOne(
+        { players: { $elemMatch: { isBot: true, displayNameLower: nameLower } } },
+        { sort: { createdAt: -1 }, projection: { players: 1, mode: 1, status: 1, winner: 1, createdAt: 1, endedAt: 1 } }
+    );
+    const bot = (match?.players || []).find((player) => player?.isBot && player.displayNameLower === nameLower);
+    if (!bot) return null;
+    const human = (match.players || []).find((player) => player && !player.isBot);
+    const botProfile = bot.profile || {};
+    const ladder = { ...(botProfile.ladder || {}) };
+    const ended = match.status === 'ended';
+    const playedAt = ended ? match.endedAt || match.createdAt : null;
+    const recentGame = ended && human?.username && match.winner
+        ? [{ playedAt, opponentUsername: human.username, winnerUsername: match.winner === bot.username ? bot.displayName : human.username }]
+        : [];
+    if (ended && match.winner) {
+        if (match.winner === bot.username) {
+            ladder.wins = (Number(ladder.wins) || 0) + 1;
+            ladder.streak = (Number(ladder.streak) || 0) + 1;
+            ladder.highestStreak = Math.max(Number(ladder.highestStreak) || 0, ladder.streak);
+        } else {
+            ladder.losses = (Number(ladder.losses) || 0) + 1;
+            ladder.streak = 0;
+        }
+    }
+    const createdAt = botProfile.createdAt || match.createdAt;
+    const profile = {
+        ...buildDefaultUserProfile({ createdAt }),
+        avatarUrl: botProfile.avatarUrl || DEFAULT_PROFILE_AVATAR,
+        equippedBorder: botProfile.equippedBorder || '',
+        equippedTitle: botProfile.equippedTitle || '',
+        ladder,
+        activity: { lastOnlineAt: ended ? playedAt : new Date(), currentPage: ended ? '' : 'Naruto Arena > In Game' },
+        recentLadderGames: match.mode === 'ladder' ? recentGame : [],
+        recentQuickGames: match.mode === 'quick' ? recentGame : [],
+    };
+    return serializePublicUserProfile({ username: bot.displayName, role: 'player', createdAt, profile });
+};
 
 const resolveRosterIndicesForCharacterIds = (characterIds = []) =>
     (Array.isArray(characterIds) ? characterIds : [])
@@ -5429,18 +5594,56 @@ const resolveRosterIndicesForCharacterIds = (characterIds = []) =>
         })
         .filter((rosterIndex) => rosterIndex >= 0);
 
-const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
-    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const botPlayer = createBattleBotPlayer({
-        matchId,
-        team: buildBattleBotTeam(),
-        ladderLevel: getRandomBattleBotLevel(),
+// The boss fights at the player's own level, so its doubled EXP is exactly twice
+// an even ladder win. Its avatar is its lead character.
+const createEliteBossPlayer = ({ matchId, playerProfile }) => {
+    const botTeam = buildBattleBotTeam();
+    const level = Math.max(1, Math.min(LADDER_MAX_LEVEL, Number(playerProfile?.ladder?.level) || 1));
+    const bossName = ELITE_BOSS_NAMES[Math.floor(Math.random() * ELITE_BOSS_NAMES.length)];
+    const leadFace = charactersData?.[botTeam[0]]?.facePicture || '';
+    const botPlayer = createBattleBotPlayer({ matchId, team: botTeam, ladderLevel: level, displayName: bossName });
+    botPlayer.isEliteBoss = true;
+    botPlayer.profile = {
+        ...botPlayer.profile,
+        avatarUrl: leadFace || DEFAULT_PROFILE_AVATAR,
+        equippedTitle: 'Elite',
+        equippedBorder: '',
+    };
+    return botPlayer;
+};
+
+// Raises each boss unit's maximum and current HP. Everything else follows the normal rules.
+const applyEliteBossVitality = (board, botUsername) => {
+    (Array.isArray(board?.[botUsername]) ? board[botUsername] : []).forEach((unit) => {
+        if (!unit) return;
+        const baseCap = Math.max(1, Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100);
+        unit.hpCap = Math.round(baseCap * ELITE_ENCOUNTER_HP_MULTIPLIER);
+        unit.hp = unit.hpCap;
     });
+};
+
+const buildBattleBotMatch = async ({ username, team, mode, playerProfile, elite = rollEliteEncounter(mode) }) => {
+    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    let botPlayer;
+    if (elite) {
+        botPlayer = createEliteBossPlayer({ matchId, playerProfile });
+    } else {
+        const persona = await createBattleBotPersona(playerProfile);
+        botPlayer = createBattleBotPlayer({
+            matchId,
+            team: buildBattleBotTeam(),
+            ladderLevel: persona?.level || getRandomBattleBotLevel(),
+            persona,
+        });
+    }
     const aliveLookup = {
         [username]: Array.isArray(team) ? team.length : 3,
         [botPlayer.username]: Array.isArray(botPlayer.team) ? botPlayer.team.length : 3,
     };
-    const built = buildMatch([username, botPlayer.username], aliveLookup, { matchId });
+    const built = buildMatch([username, botPlayer.username], aliveLookup, {
+        matchId,
+        displayNames: { [botPlayer.username]: botPlayer.displayName },
+    });
     const playerDocs = [
         {
             username,
@@ -5450,6 +5653,7 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
         botPlayer,
     ];
     const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
+    if (elite) applyEliteBossVitality(board, botPlayer.username);
     const matchDocument = {
         matchId: built.matchId,
         mode,
@@ -5467,8 +5671,18 @@ const buildBattleBotMatch = async ({ username, team, mode, playerProfile }) => {
         players: playerDocs,
         botMatch: {
             enabled: true,
-            displayName: GAME_BOT_DISPLAY_NAME,
+            displayName: botPlayer.displayName,
+            ...(elite ? { elite: true } : {}),
         },
+        ...(elite
+            ? {
+                  eliteEncounter: {
+                      bossName: botPlayer.displayName,
+                      rewardMultiplier: ELITE_ENCOUNTER_REWARD_MULTIPLIER,
+                      hpCap: board[botPlayer.username]?.[0]?.hpCap || null,
+                  },
+              }
+            : {}),
     };
     await insertMatchActive(matchDocument);
     return matchDocument;
@@ -5584,7 +5798,7 @@ const scheduleBattleBotQueueCheck = ({ username, mode = 'quick', userProfile = n
     }
     const queuedAtMs = new Date(queued.entry.queuedAt || Date.now()).getTime();
     const elapsedMs = Number.isNaN(queuedAtMs) ? 0 : Date.now() - queuedAtMs;
-    const delayMs = Math.max(0, BATTLE_BOT_QUEUE_TIMEOUT_MS - elapsedMs);
+    const delayMs = Math.max(0, getBattleBotQueueWaitMs(queued.entry) - elapsedMs);
     const timer = setTimeout(async () => {
         battleBotQueueTimers.delete(normalizedUsername);
         try {
@@ -5640,7 +5854,7 @@ const maybeCreateBattleBotMatch = async ({ username, mode, userProfile = null })
         return null;
     }
     const queuedAtMs = new Date(queued.entry.queuedAt || Date.now()).getTime();
-    if (Number.isNaN(queuedAtMs) || Date.now() - queuedAtMs < BATTLE_BOT_QUEUE_TIMEOUT_MS) {
+    if (Number.isNaN(queuedAtMs) || Date.now() - queuedAtMs < getBattleBotQueueWaitMs(queued.entry)) {
         return null;
     }
     if (queued.entry.allowBattleBot === false) {
@@ -6037,6 +6251,7 @@ const runBattleBotTurn = async (matchId) => {
             battleBot.planBattleBotTurn({
                 match: hydrated,
                 username,
+                elite: isEliteEncounterMatch(hydrated),
                 characters: charactersData,
                 battleLogic,
                 canAfford: ({ skill, actorState }) => botCanAffordSkill({ match: hydrated, username, skill, actorState }),
@@ -6746,6 +6961,7 @@ async function initDb() {
     await matchesCollection.createIndex({ status: 1, createdAt: -1 });
     await matchesCollection.createIndex({ mode: 1, status: 1, createdAt: -1 });
     await matchesCollection.createIndex({ 'players.username': 1, status: 1 });
+    await matchesCollection.createIndex({ 'players.displayNameLower': 1 }, { sparse: true });
     await matchesCollection.createIndex({ mode: 1, createdAt: -1 });
     await appStateCollection.createIndex({ key: 1 }, { unique: true });
     await newsPostsCollection.createIndex({ createdAt: -1 });
@@ -7248,7 +7464,8 @@ async function initDb() {
         validateBackgroundUrl,
         getExperienceRequiredForNextLevel,
         recalculatePlayerLadderStandings,
-        cosmeticsService
+        cosmeticsService,
+        findBattleBotPublicProfile,
     });
     app.use(profileRouter);
 
@@ -7673,7 +7890,8 @@ app.post('/api/team/save', requireSession, async (req, res) => {
                 matchFound: true,
                 matchId: queuedBotMatch.matchId,
                 mode: queuedBotMatch.mode || mode,
-                opponent: GAME_BOT_DISPLAY_NAME,
+                opponent: getPlayerDisplayName(getBattleBotPlayer(queuedBotMatch)),
+                elite: isEliteEncounterMatch(queuedBotMatch),
                 matchStartsAt: queuedBotMatch.matchStartsAt || queuedBotMatch.createdAt || null,
                 matchReady:
                     !queuedBotMatch.matchStartsAt ||
@@ -7698,6 +7916,7 @@ app.post('/api/team/save', requireSession, async (req, res) => {
             warCharacterIds: warBattle?.characterIds || [],
             queuedAt: new Date(),
             allowBattleBot: Boolean(profile.matchmaking?.battleBotEnabled),
+            battleBotWaitMs: pickBattleBotQueueWaitMs(),
             ladderLevel: Number(profile.ladder?.level) || 1,
         });
         scheduleBattleBotQueueCheck({
@@ -7745,6 +7964,7 @@ app.get('/api/match/status', requireSession, async (req, res) => {
                 matchId: mapping.matchId,
                 mode: hydrated.mode || 'quick',
                 opponent: mapping.opponent,
+                elite: isEliteEncounterMatch(hydrated),
                 matchStartsAt: hydrated.matchStartsAt || hydrated.createdAt || null,
                 matchReady:
                     !hydrated.matchStartsAt ||
@@ -7774,7 +7994,8 @@ app.get('/api/match/status', requireSession, async (req, res) => {
                 matchFound: true,
                 matchId: botMatch.matchId,
                 mode: botMatch.mode || 'quick',
-                opponent: GAME_BOT_DISPLAY_NAME,
+                opponent: getPlayerDisplayName(getBattleBotPlayer(botMatch)),
+                elite: isEliteEncounterMatch(botMatch),
                 matchStartsAt: botMatch.matchStartsAt || botMatch.createdAt || null,
                 matchReady:
                     !botMatch.matchStartsAt ||
@@ -8617,6 +8838,10 @@ app.get('/api/users/:username/profile', async (req, res) => {
         }
     }
     if (!user) {
+        const botProfile = await findBattleBotPublicProfile(requestedUsername).catch(() => null);
+        if (botProfile) {
+            return res.json({ ok: true, user: botProfile });
+        }
         return res.status(404).json({ error: 'Player not found.' });
     }
 
@@ -10133,6 +10358,19 @@ module.exports = {
     awardMissionCompletion,
     buildDefaultUserProfile,
     getCharacterAvailability,
+    createBattleBotPlayer,
+    getBattleBotQueueWaitMs,
+    pickBattleBotQueueWaitMs,
+    resolveLadderRewardsForResult,
+    rollEliteEncounter,
+    createEliteBossPlayer,
+    applyEliteBossVitality,
+    ELITE_ENCOUNTER_CHANCE,
+    applyMissionProgressForUsers,
+    applyMatchCompletionRewards,
+    resolveRosterIndicesForCharacterIds,
+    // Tests only: lets mission and reward code run against an in-memory users collection.
+    __setTestUsersCollection: (collection) => { usersCollection = collection; },
     app,
 };
 

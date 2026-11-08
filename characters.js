@@ -4135,14 +4135,26 @@ const characters = [
         "id": "young-kakashi",
         "characterId": "young-kakashi",
         "name": "Young Kakashi",
-        "facePicture": "https://i.imgur.com/U3Ivdp4.png",
-        "characterdeescription": "A jounin at the age of 13 and the son of the legendary White Fang, Kakashi is a member of Team Minato. Using his early ninjutsu, and borrowed sharingan, Kakashi can fight any adult on an equal level.",
+        "facePicture": "https://i.imgur.com/e0OCi7n.png",
+        "characterdeescription": "A jounin at just thirteen and the son of Konoha's legendary White Fang, Kakashi is a gifted member of Team Minato. Skilled with both a blade and ninjutsu, he uses his newly implanted Sharingan to fight even when left on his own.",
+        "passive": {
+            "name": "Lone Wolf",
+            "icon": "https://i.imgur.com/MmyKEoD.png",
+            "description": "Young Kakashi deals 5 additional physical and chakra damage for each dead ally.",
+            "damageBonusPerDeadAlly": {
+                "amount": 5,
+                "skillClassesAny": [
+                    "Physical",
+                    "Chakra"
+                ]
+            }
+        },
         "skills": [
             {
                 "id": "young-kakashi-white-fang-slash",
                 "name": "White Fang Slash",
-                "skillimage": "https://i.imgur.com/UOC5Fsb.png",
-                "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
+                "skillimage": "https://i.imgur.com/qm9sNZL.png",
+                "skilldescription": "Young Kakashi deals 20 piercing physical damage to an enemy. This turn, that enemy's chakra removal and stealing effects remove or steal 1 less chakra. Amateur Raikiri deals 5 additional damage for 1 turn.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -4159,30 +4171,73 @@ const characters = [
                         "amount": 20,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDestructibleDefense": true
+                            "ignoreDamageReduction": true
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "young_kakashi_white_fang_slash_debuff",
+                        "statusId": "young_kakashi_white_fang_slash_mark",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less non-affliction damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "outgoingChakraLossReduction": 1,
+                            "onOutgoingControlEffectExtendSourceStatus": {
+                                "statusId": "young_kakashi_implanted_sharingan",
+                                "amount": 1
+                            },
+                            "tooltipText": "This character's chakra removal and stealing effects remove or steal 1 less chakra."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "young_kakashi_white_fang_slash_bonus",
+                        "statusId": "young_kakashi_amateur_raikiri_empowered",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "damageBonusFlat": 5,
-                            "tooltipText": "Young Kakashi deals 5 additional damage with his skills."
+                            "skillDamageBonuses": {
+                                "young-kakashi-amateur-raikiri": 5
+                            },
+                            "tooltipText": "Amateur Raikiri deals 5 additional damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_amateur_raikiri_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "outgoingStunDurationReduction": 1,
+                            "onOutgoingControlEffectExtendSourceStatus": {
+                                "statusId": "young_kakashi_implanted_sharingan",
+                                "amount": 1
+                            },
+                            "tooltipText": "This character's stun effects stun for 1 less turn."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "young_kakashi_implanted_sharingan"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_white_fang_slash_empowered",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "young-kakashi-white-fang-slash": 5
+                            },
+                            "tooltipText": "White Fang Slash deals 5 additional damage."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "young_kakashi_implanted_sharingan"
                         }
                     }
                 ]
@@ -4190,8 +4245,8 @@ const characters = [
             {
                 "id": "young-kakashi-amateur-raikiri",
                 "name": "Amateur Raikiri",
-                "skillimage": "https://i.imgur.com/uy8jRiS.png",
-                "skilldescription": "Young Kakashi deals 20 piercing damage to one enemy. For 1 turn, this enemy will deal 5 less non-affliction damage. The following turn, Young Kakashi will deal 5 additional damage with his skills.",
+                "skillimage": "https://i.imgur.com/AB0oyRm.png",
+                "skilldescription": "Young Kakashi deals 20 piercing chakra damage to an enemy. This turn, that enemy's stun effects stun for 1 less turn. White Fang Slash deals 5 additional damage for 1 turn.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -4199,7 +4254,7 @@ const characters = [
                 "damage": 0,
                 "cooldown": 0,
                 "classes": [
-                    "Ninjutsu",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
@@ -4208,30 +4263,73 @@ const characters = [
                         "amount": 20,
                         "scope": "target",
                         "metadata": {
-                            "ignoreDestructibleDefense": true
+                            "ignoreDamageReduction": true
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "young_kakashi_amateur_raikiri_debuff",
+                        "statusId": "young_kakashi_amateur_raikiri_mark",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "nonAfflictionDamageDebuffFlat": 5,
-                            "tooltipText": "This character deals 5 less non-affliction damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnDurationAnchor": "source_turn",
+                            "outgoingStunDurationReduction": 1,
+                            "onOutgoingControlEffectExtendSourceStatus": {
+                                "statusId": "young_kakashi_implanted_sharingan",
+                                "amount": 1
+                            },
+                            "tooltipText": "This character's stun effects stun for 1 less turn."
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "young_kakashi_amateur_raikiri_bonus",
+                        "statusId": "young_kakashi_white_fang_slash_empowered",
                         "duration": 1,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "damageBonusFlat": 5,
-                            "tooltipText": "Young Kakashi deals 5 additional damage with his skills."
+                            "skillDamageBonuses": {
+                                "young-kakashi-white-fang-slash": 5
+                            },
+                            "tooltipText": "White Fang Slash deals 5 additional damage."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_white_fang_slash_mark",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "turnDurationAnchor": "source_turn",
+                            "outgoingChakraLossReduction": 1,
+                            "onOutgoingControlEffectExtendSourceStatus": {
+                                "statusId": "young_kakashi_implanted_sharingan",
+                                "amount": 1
+                            },
+                            "tooltipText": "This character's chakra removal and stealing effects remove or steal 1 less chakra."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "young_kakashi_implanted_sharingan"
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "young_kakashi_amateur_raikiri_empowered",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "skillDamageBonuses": {
+                                "young-kakashi-amateur-raikiri": 5
+                            },
+                            "tooltipText": "Amateur Raikiri deals 5 additional damage."
+                        },
+                        "condition": {
+                            "scope": "self",
+                            "statusId": "young_kakashi_implanted_sharingan"
                         }
                     }
                 ]
@@ -4239,12 +4337,15 @@ const characters = [
             {
                 "id": "young-kakashi-implanted-sharingan",
                 "name": "Implanted Sharingan",
-                "skillimage": "https://i.imgur.com/VrPbW1z.png",
-                "skilldescription": "For 2 turns, if one enemy uses a new skill on Young Kakashi, his skills will deal 10 additional damage for 1 turn. This skill is invisible and ends when triggered.",
+                "skillimage": "https://i.imgur.com/b4nAfIo.png",
+                "skilldescription": "For 2 turns, White Fang Slash and Amateur Raikiri share their non-damage effects. If an enemy affected by these effects uses a chakra removal, chakra stealing, or stun effect, Implanted Sharingan lasts 1 additional turn. Cannot be used while active.",
                 "energy": [],
                 "target": "self",
                 "damage": 0,
-                "cooldown": 1,
+                "cooldown": 3,
+                "actorCondition": {
+                    "missingStatusId": "young_kakashi_implanted_sharingan"
+                },
                 "classes": [
                     "Strategic",
                     "Instant"
@@ -4252,23 +4353,12 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "young_kakashi_implanted_sharingan_trap",
+                        "statusId": "young_kakashi_implanted_sharingan",
                         "duration": 2,
                         "scope": "self",
                         "metadata": {
                             "helpful": true,
-                            "hideTooltipFromEnemy": true,
-                            "triggerOnEnemyHarmfulSkill": true,
-                            "counterApplyStatusToRecipient": {
-                                "statusId": "young_kakashi_implanted_sharingan_bonus",
-                                "duration": 1,
-                                "metadata": {
-                                    "helpful": true,
-                                    "damageBonusFlat": 10,
-                                    "tooltipText": "Young Kakashi deals 10 additional damage with his skills."
-                                }
-                            },
-                            "tooltipText": "If an enemy uses a new skill on this character, his skills deal 10 additional damage for 1 turn."
+                            "tooltipText": "White Fang Slash and Amateur Raikiri share their non-damage effects. An affected enemy who uses a chakra removal, chakra stealing, or stun effect makes this last 1 additional turn."
                         }
                     }
                 ]
@@ -4276,7 +4366,7 @@ const characters = [
             {
                 "id": "young-kakashi-sword-parry",
                 "name": "Sword Parry",
-                "skillimage": "https://i.imgur.com/V9vfQQQ.png",
+                "skillimage": "https://i.imgur.com/BM6zhus.png",
                 "skilldescription": "Young Kakashi becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
@@ -4308,14 +4398,54 @@ const characters = [
         "id": "uchiha-obito",
         "characterId": "uchiha-obito",
         "name": "Uchiha Obito",
-        "facePicture": "https://i.imgur.com/JbvGcwk.png",
-        "characterdeescription": "A minor member of the Uchiha clan and a chuunin, Obito is a member of Team Minato. While Obito does not possess any singular powerful ability, he can use all of what he knows with his developing sharingan to put up a fight.",
+        "facePicture": "https://i.imgur.com/6lzbx9E.png",
+        "characterdeescription": "A chuunin of the Uchiha clan and a member of Team Minato, Obito is an inexperienced ninja determined to prove himself. Despite his shortcomings, he fights with unwavering resolve, awakening his Sharingan when pushed to his limits and supporting his allies at great personal cost.",
+        "passive": {
+            "name": "Obito Sharingan",
+            "icon": "https://i.imgur.com/Mx3geZe.png",
+            "description": "If Obito falls to 50 health or less, he permanently gains 10 damage reduction, and his damaging skills ignore destructible defense, damage reduction, invulnerability, counters, and reflects.",
+            "onFirstHpAtMost": {
+                "threshold": 50,
+                "applyStatusToSelf": {
+                    "statusId": "uchiha_obito_sharingan_awakened",
+                    "duration": 99,
+                    "metadata": {
+                        "helpful": true,
+                        "permanent": true,
+                        "damageReductionFlat": 10,
+                        "ignoreDamageReductionForSkillIds": [
+                            "uchiha-obito-piercing-stab",
+                            "uchiha-obito-goukakyuu-no-jutsu"
+                        ],
+                        "ignoreDestructibleDefenseForSkillIds": [
+                            "uchiha-obito-piercing-stab",
+                            "uchiha-obito-goukakyuu-no-jutsu"
+                        ],
+                        "ignoreInvulnerabilityForSkillIds": [
+                            "uchiha-obito-piercing-stab",
+                            "uchiha-obito-goukakyuu-no-jutsu"
+                        ],
+                        "uncounterableSkillIds": [
+                            "uchiha-obito-piercing-stab",
+                            "uchiha-obito-goukakyuu-no-jutsu"
+                        ],
+                        "unreflectableSkillIds": [
+                            "uchiha-obito-piercing-stab",
+                            "uchiha-obito-goukakyuu-no-jutsu"
+                        ],
+                        "sourceSkillName": "Obito Sharingan",
+                        "statusIcon": "https://i.imgur.com/Mx3geZe.png",
+                        "tooltipText": "This character has 10 damage reduction. Piercing Stab and Obito Goukakyuu no Jutsu ignore destructible defense, damage reduction, invulnerability, counters, and reflects."
+                    }
+                }
+            }
+        },
         "skills": [
             {
                 "id": "uchiha-obito-piercing-stab",
                 "name": "Piercing Stab",
-                "skillimage": "https://i.imgur.com/YjvbfdY.png",
-                "skilldescription": "Uchiha Obito deals 15 piercing damage to one enemy. During 'Obito Sharingan', this skill will deal 10 additional damage and ignore invulnerability.",
+                "skillimage": "https://i.imgur.com/3Mp49Qg.png",
+                "skilldescription": "Obito deals 15 physical damage to an enemy. That enemy permanently takes 5 additional damage from Piercing Stab until Obito dies.",
                 "energy": [
                     "Random"
                 ],
@@ -4330,119 +4460,103 @@ const characters = [
                     {
                         "type": "damage",
                         "amount": 15,
+                        "scope": "target"
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "uchiha_obito_piercing_stab_mark",
+                        "duration": 99,
                         "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "uchiha_obito_sharingan",
-                            "conditionalAmount": 25
-                        },
                         "metadata": {
-                            "ignoreDestructibleDefense": true
+                            "harmful": true,
+                            "permanent": true,
+                            "removeOnSourceDeath": true,
+                            "bonusDamageFromSourceSkillsFlat": 5,
+                            "bonusDamageFromSourceCharacterId": "uchiha-obito",
+                            "bonusDamageAppliesToSkillIds": [
+                                "uchiha-obito-piercing-stab"
+                            ],
+                            "tooltipText": "Piercing Stab deals 5 additional damage to this character until Obito dies."
                         }
                     }
                 ]
             },
             {
-                "id": "uchiha-obito-great-fireball",
-                "name": "Obito Great Fireball",
-                "skillimage": "https://i.imgur.com/YQwIDCR.png",
-                "skilldescription": "Uchiha Obito deals 15 affliction damage to one enemy for 2 turns. During 'Obito Sharingan', this skill will deal 30 affliction damage instantly.",
+                "id": "uchiha-obito-goukakyuu-no-jutsu",
+                "name": "Obito Goukakyuu no Jutsu",
+                "skillimage": "https://i.imgur.com/Z9H5tUb.png",
+                "skilldescription": "Obito deals 30 chakra damage, evenly distributed among all enemies.",
                 "energy": [
                     "Ninjutsu"
                 ],
-                "target": "single-enemy",
+                "target": "all-enemy",
                 "damage": 0,
                 "cooldown": 1,
                 "classes": [
-                    "Affliction",
+                    "Chakra",
                     "Instant"
                 ],
                 "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "uchiha_obito_great_fireball_dot",
-                        "duration": 2,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "missingStatusId": "uchiha_obito_sharingan"
-                        },
-                        "metadata": {
-                            "harmful": true,
-                            "turnEndDamage": 15,
-                            "afflictionDamage": true,
-                            "turnEndTrigger": "source_turn",
-                            "turnDurationAnchor": "source_turn",
-                            "ongoingClass": "action",
-                            "triggerOnApply": true,
-                            "tooltipText": "This character takes 15 affliction damage each turn from Obito Great Fireball."
-                        }
-                    },
                     {
                         "type": "damage",
                         "amount": 30,
-                        "scope": "target",
-                        "condition": {
-                            "scope": "self",
-                            "statusId": "uchiha_obito_sharingan"
-                        },
+                        "scope": "all-enemy",
                         "metadata": {
-                            "afflictionDamage": true,
-                            "ignoreDamageReduction": true
+                            "splitAmountEvenlyAmongRecipients": true
                         }
                     }
                 ]
             },
             {
-                "id": "uchiha-obito-sharingan",
-                "name": "Obito Sharingan",
-                "skillimage": "https://i.imgur.com/HB5GL7k.png",
-                "skilldescription": "For 4 turns, Uchiha Obito will gain 15 points of damage reduction. This skill becomes 'Sharingan-Enhanced Parry' for 4 turns after used.",
+                "id": "uchiha-obito-parting-gift",
+                "name": "Parting Gift",
+                "skillimage": "https://i.imgur.com/T6295by.png",
+                "skilldescription": "Obito takes 10 affliction* damage. For the rest of the game, an ally deals 5 additional non-affliction damage. This effect cannot be removed, and Parting Gift can only be used once.",
                 "energy": [
-                    "Random"
+                    "Bloodline"
                 ],
-                "target": "self",
+                "target": "single-ally",
                 "damage": 0,
-                "cooldown": 4,
+                "cooldown": 0,
+                "maxUses": 1,
                 "classes": [
                     "Strategic",
+                    "Affliction*",
                     "Instant"
                 ],
                 "effects": [
                     {
-                        "type": "apply_status",
-                        "statusId": "uchiha_obito_sharingan",
-                        "duration": 4,
+                        "type": "damage",
+                        "amount": 10,
                         "scope": "self",
                         "metadata": {
-                            "helpful": true,
-                            "damageReductionFlat": 15,
-                            "ignoreInvulnerabilityForSkillIds": [
-                                "uchiha-obito-piercing-stab"
-                            ],
-                            "tooltipText": "Uchiha Obito has 15 points of damage reduction from Obito Sharingan and Piercing Stab ignores invulnerability."
+                            "afflictionDamage": true,
+                            "skillClasses": [
+                                "Affliction"
+                            ]
                         }
                     },
                     {
                         "type": "apply_status",
-                        "statusId": "uchiha_obito_sharingan_replacement",
-                        "duration": 4,
-                        "scope": "self",
+                        "statusId": "uchiha_obito_parting_gift",
+                        "duration": 99,
+                        "scope": "target",
                         "metadata": {
                             "helpful": true,
-                            "skillReplacements": {
-                                "uchiha-obito-sharingan": "uchiha-obito-sharingan-enhanced-parry"
-                            },
-                            "tooltipText": "Obito Sharingan is replaced by Sharingan-Enhanced Parry."
+                            "permanent": true,
+                            "cannotBeCleansed": true,
+                            "cannotBeRemoved": true,
+                            "nonAfflictionDamageBonusFlat": 5,
+                            "tooltipText": "This character deals 5 additional non-affliction damage."
                         }
                     }
                 ]
             },
             {
-                "id": "uchiha-obito-flee",
-                "name": "Obito Flee",
-                "skillimage": "https://i.imgur.com/WJAbDGt.png",
-                "skilldescription": "Uchiha Obito becomes invulnerable for 1 turn.",
+                "id": "uchiha-obito-sparkling-parry",
+                "name": "Sparkling Parry",
+                "skillimage": "https://i.imgur.com/ZuHjPMI.png",
+                "skilldescription": "Obito becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],
@@ -4456,40 +4570,9 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "uchiha_obito_flee",
+                        "statusId": "uchiha_obito_sparkling_parry",
                         "duration": 1,
                         "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "invulnerable": true,
-                            "tooltipText": "This character is invulnerable."
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "uchiha-obito-sharingan-enhanced-parry",
-                "name": "Sharingan-Enhanced Parry",
-                "hiddenFromSelectionViewer": true,
-                "skillimage": "https://i.imgur.com/HB5GL7k.png",
-                "skilldescription": "Uchiha Obito makes his allies invulnerable for 1 turn.",
-                "energy": [
-                    "Random",
-                    "Random"
-                ],
-                "target": "all-allies",
-                "damage": 0,
-                "cooldown": 1,
-                "classes": [
-                    "Strategic",
-                    "Instant"
-                ],
-                "effects": [
-                    {
-                        "type": "apply_status",
-                        "statusId": "uchiha_obito_sharingan_enhanced_parry",
-                        "duration": 1,
-                        "scope": "all-allies",
                         "metadata": {
                             "helpful": true,
                             "invulnerable": true,
@@ -4504,21 +4587,29 @@ const characters = [
         "id": "nohara-rin",
         "characterId": "nohara-rin",
         "name": "Nohara Rin",
-        "facePicture": "https://i.imgur.com/nVN2Va7.png",
-        "characterdeescription": "A chuunin medical nin assigned to Team Minato, Rin is a quiet and passive girl who focuses on keeping her team mates alive. Using her healing abilities, and her intelligence, Rin is able to heal her allies while trapping her enemies.",
+        "facePicture": "https://i.imgur.com/2Yeevq9.png",
+        "characterdeescription": "A chuunin medical ninja assigned to Team Minato, Rin is a kind and resourceful shinobi who puts her teammates' safety first. She uses her medical ninjutsu to heal allies and carefully placed traps to catch enemies off guard.",
+        "passive": {
+            "name": "Caretaker",
+            "icon": "https://i.imgur.com/dRvfEpT.png",
+            "description": "Rin's skills heal an additional 5 health if the target has 50 health or less.",
+            "healBonusWhenTargetHpAtMost": {
+                "threshold": 50,
+                "amount": 5
+            }
+        },
         "skills": [
             {
                 "id": "nohara-rin-pit-trap",
                 "name": "Pit Trap",
-                "skillimage": "https://i.imgur.com/h7PnmYi.png",
-                "skilldescription": "For 1 turn, Nohara Rin will gain 15 points of damage reduction and one target enemy will take 15 piercing damage that ignores invulnerability at the end of their turn. If that enemy uses a new skill, they will also take another 15 damage from this skill. This skill is invisible and ignores invulnerability. This skill's damage isn't increased nor decreased by effects used on Nohara Rin.",
+                "skillimage": "https://i.imgur.com/up1Gi06.png",
+                "skilldescription": "Rin places an invisible trap on an enemy. At the end of their turn, the trap deals 15 piercing physical damage. If that enemy uses a physical skill this turn, they also take 5 piercing damage each turn for 3 turns. Rin has 10 damage reduction during this skill.",
                 "energy": [
                     "Genjutsu"
                 ],
                 "target": "single-enemy",
                 "damage": 0,
                 "cooldown": 0,
-                "ignoreInvulnerability": true,
                 "classes": [
                     "Physical",
                     "Instant"
@@ -4526,41 +4617,70 @@ const characters = [
                 "effects": [
                     {
                         "type": "apply_status",
-                        "statusId": "nohara_rin_pit_trap_defense",
-                        "duration": 1,
-                        "scope": "self",
-                        "metadata": {
-                            "helpful": true,
-                            "hideTooltipFromEnemy": true,
-                            "damageReductionFlat": 15,
-                            "tooltipText": "Nohara Rin has 15 points of damage reduction from Pit Trap."
-                        }
-                    },
-                    {
-                        "type": "apply_status",
                         "statusId": "nohara_rin_pit_trap",
                         "duration": 1,
                         "scope": "target",
                         "metadata": {
                             "harmful": true,
-                            "hideTooltipFromEnemy": true,
+                            "invisible": true,
+                            "hideTooltipFromUnitOwner": true,
                             "turnEndDamage": 15,
-                            "ignoreSourceNonAfflictionDamageBonus": true,
-                            "ignoreTargetDestructibleDefense": true,
-                            "triggerOnEnemyHarmfulSkill": true,
-                            "counterDamage": 15,
-                            "counterDamageIgnoresDestructibleDefense": true,
-                            "tooltipText": "This character takes 15 piercing damage that ignores invulnerability at the end of their turn. If they use a new skill, they take another 15 damage.",
-                            "turnDurationAnchor": "source_turn"
+                            "turnEndSkillClasses": [
+                                "Physical"
+                            ],
+                            "ignoreTargetDamageReduction": true,
+                            "tooltipText": "This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, they also take 5 piercing damage each turn for 3 turns."
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_pit_trap_trigger",
+                        "duration": 1,
+                        "scope": "target",
+                        "metadata": {
+                            "harmful": true,
+                            "invisible": true,
+                            "hideTooltip": true,
+                            "onOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillClassesAny": [
+                                "Physical"
+                            ],
+                            "onOwnerUseSkillEffects": [
+                                {
+                                    "type": "apply_status",
+                                    "statusId": "nohara_rin_pit_trap_wound",
+                                    "duration": 3,
+                                    "metadata": {
+                                        "harmful": true,
+                                        "turnEndDamage": 5,
+                                        "ignoreTargetDamageReduction": true,
+                                        "tooltipText": "This character takes 5 piercing damage each turn."
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "apply_status",
+                        "statusId": "nohara_rin_pit_trap_guard",
+                        "duration": 1,
+                        "scope": "self",
+                        "metadata": {
+                            "helpful": true,
+                            "invisible": true,
+                            "hideTooltipFromEnemy": true,
+                            "damageReductionFlat": 10,
+                            "turnDurationAnchor": "any_turn",
+                            "tooltipText": "This character has 10 damage reduction while Pit Trap is set."
                         }
                     }
                 ]
             },
             {
-                "id": "nohara-rin-mystical-palm-healing",
-                "name": "Rin Mystical Palm Healing",
-                "skillimage": "https://i.imgur.com/vMIpkz6.png",
-                "skilldescription": "Nohara Rin heals herself or an ally for 25 health and removes all enemy affliction skills on this character.",
+                "id": "nohara-rin-healing-touch",
+                "name": "Healing Touch",
+                "skillimage": "https://i.imgur.com/Hywvj4g.png",
+                "skilldescription": "Rin heals an ally for 20 health and removes enemy afflictions from them.",
                 "energy": [
                     "Ninjutsu"
                 ],
@@ -4574,27 +4694,24 @@ const characters = [
                 "effects": [
                     {
                         "type": "heal",
-                        "amount": 25,
+                        "amount": 20,
                         "scope": "target"
                     },
                     {
-                        "type": "apply_status",
-                        "statusId": "nohara_rin_mystical_palm_healing_cleanse",
-                        "duration": 1,
+                        "type": "cleanse_statuses",
                         "scope": "target",
-                        "metadata": {
-                            "helpful": true,
-                            "hideTooltip": true,
-                            "removeEnemyAfflictionStatusesOnApply": true
-                        }
+                        "sourceRelation": "enemy",
+                        "metadataAny": [
+                            "afflictionDamage"
+                        ]
                     }
                 ]
             },
             {
                 "id": "nohara-rin-medical-kit",
                 "name": "Medical Kit",
-                "skillimage": "https://i.imgur.com/uLva4cB.png",
-                "skilldescription": "Nohara Rin targets herself or an ally. For 3 turns, that character will be healed for 10 health each turn. During this time, they will deal 5 additional damage with physical and energy skills.",
+                "skillimage": "https://i.imgur.com/gfTD7t7.png",
+                "skilldescription": "Rin heals an ally for 10 health each turn for 3 turns. Whenever that ally uses a physical or chakra skill during this time, they heal an additional 10 health.",
                 "energy": [
                     "Random",
                     "Random"
@@ -4615,20 +4732,31 @@ const characters = [
                         "metadata": {
                             "helpful": true,
                             "turnEndHealFlat": 10,
-                            "damageBonusBySkillClass": {
-                                "physical": 5,
-                                "energy": 5
-                            },
-                            "tooltipText": "This character heals 10 health each turn and deals 5 additional damage with physical and energy skills from Medical Kit."
+                            "turnEndTrigger": "source_turn",
+                            "triggerOnApply": true,
+                            "turnDurationAnchor": "source_turn",
+                            "onOwnerUseSkillTrigger": true,
+                            "persistOnOwnerUseSkillTrigger": true,
+                            "onOwnerUseSkillClassesAny": [
+                                "Physical",
+                                "Chakra"
+                            ],
+                            "onOwnerUseSkillEffects": [
+                                {
+                                    "type": "heal",
+                                    "amount": 10
+                                }
+                            ],
+                            "tooltipText": "This character heals 10 health each turn. Whenever they use a physical or chakra skill, they heal an additional 10 health."
                         }
                     }
                 ]
             },
             {
                 "id": "nohara-rin-flee",
-                "name": "Flee",
-                "skillimage": "https://i.imgur.com/10ydruj.png",
-                "skilldescription": "Nohara Rin becomes invulnerable for 1 turn.",
+                "name": "Rin Flee",
+                "skillimage": "https://i.imgur.com/LqYCr2e.png",
+                "skilldescription": "Rin becomes invulnerable for 1 turn.",
                 "energy": [
                     "Random"
                 ],

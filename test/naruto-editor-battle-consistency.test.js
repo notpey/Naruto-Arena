@@ -1385,27 +1385,3 @@ test('Meditate can mark an unmarked enemy immediately and Water Assault costs on
     );
 });
 
-test('Young Kakashi removes chakra and stuns chakra skills for one turn', () => {
-    const match = makeMatch([getCharIndex('young-kakashi')], [getCharIndex('edo-tensei-tobirama')]);
-    match.chakraPools.p2.ninjutsu = 1;
-    queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.chakraPools.p2.ninjutsu, 0);
-    assert.equal(
-        match.board.p2[0].state.statuses.some((status) =>
-            status.id === 'young_kakashi_implanted_sharingan_stun' &&
-            status.metadata.cannotUseSkillClasses.includes('ninjutsu')
-        ),
-        true
-    );
-    match.chakraPools.p2.ninjutsu = 1;
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 100, 'Water Assault should be stunned even with chakra available');
-    tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
-    tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 85, 'Water Assault should be usable after the stun');
-});

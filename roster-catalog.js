@@ -6,6 +6,7 @@ const NarutoRosterCatalog = (() => {
         { id: 'land-of-waves', series: 'Naruto', label: 'Land of Waves', order: 1 },
         { id: 'chunin-exams', series: 'Naruto', label: 'Chūnin Exams', order: 2 },
         { id: 'konoha-crush', series: 'Naruto', label: 'Konoha Crush', order: 3 },
+        { id: 'kakashi-gaiden', series: 'Naruto', label: 'Kakashi Gaiden', order: 4 },
     ];
 
     const characters = [
@@ -46,6 +47,10 @@ const NarutoRosterCatalog = (() => {
         ['sarutobi-konohamaru', 'prologue'],
         ['ebisu', 'prologue'],
         ['sarutobi-hiruzen', 'land-of-waves'],
+        ['young-kakashi', 'kakashi-gaiden'],
+        ['uchiha-obito', 'kakashi-gaiden'],
+        ['nohara-rin', 'kakashi-gaiden'],
+        ['namikaze-minato', 'kakashi-gaiden'],
     ];
 
     // Display order for the selection grid: starters first, grouped by team, then mission
@@ -57,6 +62,7 @@ const NarutoRosterCatalog = (() => {
         'nara-shikamaru', 'akimichi-chouji', 'yamanaka-ino',
         'rock-lee', 'neji-hyuuga', 'tenten',
         'gaara-of-the-desert', 'kankuro', 'temari', 'baki',
+        'young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato',
         'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
         'akadou-yoroi', 'tsurugi-misumi',
         'oboro', 'shigure',

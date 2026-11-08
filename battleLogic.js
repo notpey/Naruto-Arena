@@ -147,6 +147,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           growPerTurn: Array.isArray(passive.growPerTurn) ? passive.growPerTurn : [],
                           onEnemyDeathDelayedDamage: passive.onEnemyDeathDelayedDamage || null,
                           onEnemyDeathHealSelfAmount: Math.max(0, Number(passive.onEnemyDeathHealSelfAmount) || 0),
+                          healBonusWhenTargetHpAtMost: passive.healBonusWhenTargetHpAtMost || null,
+                          damageBonusPerDeadAlly: passive.damageBonusPerDeadAlly || null,
                           ...(typeof passive.stackMetadataKey === 'string' && passive.stackMetadataKey ? {
                               [passive.stackMetadataKey]: Math.max(0, Number(passive[passive.stackMetadataKey]) || 0),
                           } : {}),
@@ -1226,6 +1228,13 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
         0
     );
     randomIncrease += classScopedIncrease;
+    // A skill can raise its own later cost (Minato's Flying Thunder God) without replacing it.
+    randomIncrease += (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce(
+        (sum, status) => (Number(status?.remainingTurns) || 0) > 0
+            ? sum + Math.max(0, Number(status?.metadata?.randomCostIncreaseForSkillIds?.[skill?.id]) || 0)
+            : sum,
+        0
+    );
     if (skillHasHarmfulEffects(skill)) {
         randomIncrease += (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce(
             (sum, status) => (Number(status?.remainingTurns) || 0) > 0
@@ -1271,12 +1280,115 @@ const isUnitImmuneToChakraLoss = (unit) => {
         hasStatusMetadataFlag(state, 'ignoreHarmfulNonDamageEffects');
 };
 
+// The match whose turn is being resolved. applyStatus has no match argument, so stun
+// adjustments that depend on the unit applying the stun read the board from here. It is set
+// only while resolvePendingTurnSkills or tickStatusesForTurnEnd runs (both synchronous).
+let activeResolution = null;
+const runWithActiveResolution = (match, run) => {
+    const previous = activeResolution;
+    activeResolution = match && typeof match === 'object'
+        ? { match, controlEffectUsers: new Set() }
+        : null;
+    try {
+        return run();
+    } finally {
+        activeResolution = previous;
+    }
+};
+
+const sumActiveStatusMetadata = (state, metadataKey, ownerUnit = null) =>
+    (Array.isArray(state?.statuses) ? state.statuses : []).reduce((sum, status) =>
+        isStatusActiveForMetadata(status, ownerUnit)
+            ? sum + Math.max(0, Number(status?.metadata?.[metadataKey]) || 0) : sum, 0);
+
+const isStunStatusMetadata = (statusId, metadata = {}) =>
+    statusId === 'stunned' ||
+    Boolean(metadata?.cannotUseSkills) ||
+    Boolean(metadata?.cannotUseHarmfulSkills) ||
+    Boolean(metadata?.cannotUseHelpfulSkills) ||
+    Boolean(metadata?.cannotUseNonMentalSkills) ||
+    Boolean(metadata?.cannotUseNonStrategicSkills) ||
+    (Array.isArray(metadata?.cannotUseSkillClasses) && metadata.cannotUseSkillClasses.length > 0) ||
+    (Array.isArray(metadata?.cannotUseSkillIndices) && metadata.cannotUseSkillIndices.length > 0);
+
+// A unit marked with onOutgoingControlEffectExtendSourceStatus (Young Kakashi's White Fang
+// Slash and Amateur Raikiri) lengthens the marking character's status whenever it uses a
+// chakra removal, chakra stealing, or stun effect. Each marked unit counts once per resolution.
+const noteOutgoingControlEffectUse = ({ match, sourceUsername, sourceSlot }) => {
+    if (!match || !sourceUsername || !Number.isInteger(sourceSlot)) return;
+    const sourceUnit = match.board?.[sourceUsername]?.[sourceSlot];
+    if (!sourceUnit || sourceUnit.alive === false) return;
+    const marks = ensureUnitStateShape(sourceUnit).statuses.filter((status) =>
+        isStatusActiveForMetadata(status, sourceUnit) &&
+        status?.metadata?.onOutgoingControlEffectExtendSourceStatus?.statusId);
+    if (!marks.length) return;
+    const userKey = `${sourceUsername}:${sourceSlot}`;
+    const tracked = activeResolution?.match === match ? activeResolution.controlEffectUsers : null;
+    if (tracked?.has(userKey)) return;
+    tracked?.add(userKey);
+    const extendedKeys = new Set();
+    marks.forEach((mark) => {
+        const config = mark.metadata.onOutgoingControlEffectExtendSourceStatus;
+        const amount = Math.max(0, Number(config.amount) || 0);
+        const ownerUnit = Number.isInteger(mark.sourceSlot)
+            ? match.board?.[mark.sourceUsername]?.[mark.sourceSlot] : null;
+        const extendKey = `${mark.sourceUsername}:${mark.sourceSlot}:${config.statusId}`;
+        if (!amount || !ownerUnit || ownerUnit.alive === false || extendedKeys.has(extendKey)) return;
+        const extended = ensureUnitStateShape(ownerUnit).statuses.find((status) =>
+            status?.id === config.statusId && (Number(status.remainingTurns) || 0) > 0);
+        if (!extended) return;
+        extendedKeys.add(extendKey);
+        extended.remainingTurns = (Number(extended.remainingTurns) || 0) + amount;
+    });
+};
+
+// Chakra a removal or stealing effect actually takes after the user's outgoing reductions.
+const reduceOutgoingChakraLoss = ({ match, sourceUsername, sourceSlot, amount }) => {
+    const requested = Math.max(0, Number(amount) || 0);
+    const sourceUnit = Number.isInteger(sourceSlot) ? match?.board?.[sourceUsername]?.[sourceSlot] : null;
+    if (!sourceUnit) return requested;
+    noteOutgoingControlEffectUse({ match, sourceUsername, sourceSlot });
+    const reduction = sumActiveStatusMetadata(
+        ensureUnitStateShape(sourceUnit), 'outgoingChakraLossReduction', sourceUnit);
+    return Math.max(0, requested - reduction);
+};
+
+// Nohara Rin's Caretaker: a healer's passive adds healing when the recipient is at or below a
+// health threshold at the moment it is healed.
+const getSourceLowHealthHealingBonus = ({ match, sourceUsername, sourceSlot, targetUnit }) => {
+    if (!match || !targetUnit || !sourceUsername || !Number.isInteger(sourceSlot)) return 0;
+    const sourceUnit = match.board?.[sourceUsername]?.[sourceSlot];
+    if (!sourceUnit || sourceUnit.alive === false) return 0;
+    const targetHp = Math.max(0, Number(targetUnit.hp) || 0);
+    return ensureUnitStateShape(sourceUnit).statuses.reduce((sum, status) => {
+        const bonus = status?.metadata?.healBonusWhenTargetHpAtMost;
+        if (!bonus || !isStatusActiveForMetadata(status, sourceUnit)) return sum;
+        return targetHp <= Math.max(0, Number(bonus.threshold) || 0)
+            ? sum + Math.max(0, Number(bonus.amount) || 0) : sum;
+    }, 0);
+};
+
+// Young Kakashi's Lone Wolf: extra damage for each fallen ally.
+const getDeadAllyDamageBonus = ({ match, actorUnit, actorState, actorUsername, skillClasses = [] }) => {
+    const allies = Array.isArray(match?.board?.[actorUsername]) ? match.board[actorUsername] : [];
+    const deadAllies = allies.filter((unit) => unit && unit !== actorUnit && unit.alive === false).length;
+    if (!deadAllies) return 0;
+    return (Array.isArray(actorState?.statuses) ? actorState.statuses : []).reduce((sum, status) => {
+        const config = status?.metadata?.damageBonusPerDeadAlly;
+        if (!config || !isStatusActiveForMetadata(status, actorUnit)) return sum;
+        const classes = Array.isArray(config.skillClassesAny) ? config.skillClassesAny : [];
+        if (classes.length > 0 && !classes.some((entry) => hasSkillClass(skillClasses, entry))) return sum;
+        return sum + deadAllies * Math.max(0, Number(config.amount) || 0);
+    }, 0);
+};
+
 // Metadata a harmful status keeps when its owner ignores enemy non-damage effects.
 const DAMAGE_ONLY_STATUS_KEYS = [
     'harmful', 'afflictionDamage', 'turnEndDamage', 'turnEndTrigger', 'turnEndSkillClasses',
-    'turnEndDamageRequiresNoTeamChakra',
+    'turnEndDamageRequiresNoTeamChakra', 'ignoreTargetDamageReduction', 'ignoreTargetDestructibleDefense',
     'turnDurationAnchor', 'ongoingClass', 'removeOnSourceDeath', 'endsOnSourceDeath', 'triggerOnApply',
-    'invisible', 'hideTooltipFromEnemy', 'onOwnerUseSkillTrigger', 'ownerUseTriggerRequiresLivingSource',
+    'invisible', 'hideTooltipFromEnemy', 'hideTooltipFromUnitOwner',
+    'onOwnerUseSkillTrigger', 'ownerUseTriggerRequiresLivingSource',
     'sharedFirstTriggerUnlessSourceStatusId', 'statusIcon', 'sourceSkillName',
 ];
 
@@ -1659,6 +1771,21 @@ const applyStatus = ({
     }
     if (metadata?.ignoreHarmfulNonDamageEffects) {
         ignoreExistingEnemyNonDamageStatuses(targetState, sourceUsername);
+    }
+    // Stuns from a unit with outgoingStunDurationReduction last fewer turns, and may not land.
+    const resolutionMatch = activeResolution?.match;
+    const stunSourceUnit = resolutionMatch && metadata?.harmful && isStunStatusMetadata(statusId, metadata) &&
+        sourceUsername && Number.isInteger(sourceSlot)
+        ? resolutionMatch.board?.[sourceUsername]?.[sourceSlot] || null
+        : null;
+    if (stunSourceUnit) {
+        noteOutgoingControlEffectUse({ match: resolutionMatch, sourceUsername, sourceSlot });
+        const stunReduction = sumActiveStatusMetadata(
+            ensureUnitStateShape(stunSourceUnit), 'outgoingStunDurationReduction', stunSourceUnit);
+        if (stunReduction > 0 && Math.max(0, Number(duration) || 0) < 99) {
+            duration = Math.max(0, Number(duration) || 0) - stunReduction;
+            if (duration <= 0) return;
+        }
     }
     const applyStackDerivedNumericKeys = (nextMetadata) => {
         if (!nextMetadata || typeof nextMetadata !== 'object') return nextMetadata;
@@ -3482,7 +3609,10 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
                     removeRandomChakraFromMatch({
                         match: context.match,
                         username: context.sourceUsername,
-                        amount: 1,
+                        amount: reduceOutgoingChakraLoss({
+                            match: context.match, sourceUsername: status?.sourceUsername,
+                            sourceSlot: status?.sourceSlot, amount: 1,
+                        }),
                     });
                 }
                 const onBreakApplyStatusToSource = status?.metadata?.onBreakApplyStatusToSource;
@@ -3730,6 +3860,20 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         if (awakening) {
             awakening.metadata._onFirstHpAtMostTriggered = true;
             applyHealToUnit(unit, Math.max(0, Number(awakening.metadata.onFirstHpAtMost.heal) || 0));
+            const awakenedStatus = awakening.metadata.onFirstHpAtMost.applyStatusToSelf;
+            if (awakenedStatus?.statusId) {
+                applyStatus({
+                    targetState,
+                    statusId: awakenedStatus.statusId,
+                    duration: awakenedStatus.duration,
+                    sourceSkillId: null,
+                    sourceUsername: context?.targetUsername || null,
+                    sourceSlot: Number.isInteger(unit.slot) ? unit.slot
+                        : Number.isInteger(context?.targetSlot) ? context.targetSlot : null,
+                    metadata: markFromPassive(awakenedStatus.metadata),
+                    fresh: false,
+                });
+            }
             if (context?.match && context?.targetUsername) {
                 const chakraCount = Math.max(0, Number(awakening.metadata.onFirstHpAtMost.randomChakra) || 0);
                 for (let i = 0; i < chakraCount; i += 1) {
@@ -4199,7 +4343,11 @@ const destroyAllDestructibleDefenseOnUnit = (unit, maxPoints = Infinity, context
             context.sourceUsername !== context.targetUsername) {
             if (status?.metadata?.loseRandomChakraOnBreakByEnemy) {
                 removeRandomChakraFromMatch({ match: context.match,
-                    username: context.sourceUsername, amount: 1 });
+                    username: context.sourceUsername,
+                    amount: reduceOutgoingChakraLoss({
+                        match: context.match, sourceUsername: status?.sourceUsername,
+                        sourceSlot: status?.sourceSlot, amount: 1,
+                    }) });
             }
             const onBreakApplyStatusToSource = status?.metadata?.onBreakApplyStatusToSource;
             const sourceUnit = Number.isInteger(context.sourceSlot)
@@ -4937,7 +5085,10 @@ const cleanseEnemyAfflictionStatuses = (unit, ownerUsername, count = 0) => {
 const getSkillByIndices = (characters, rosterIndex, skillIndex, actorState = null) =>
     resolveEffectiveSkill({ characters, rosterIndex, skillIndex, actorState });
 
-const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
+const resolvePendingTurnSkills = (args = {}) =>
+    runWithActiveResolution(args?.match, () => resolveQueuedTurnSkills(args));
+
+const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
     if (!match || !actingUsername) return;
     syncLinkedStatuses(match);
     const pending = match.pendingTurns?.[actingUsername];
@@ -5804,9 +5955,20 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                 return filterHelpfulImmuneRecipients({ effect, recipients: actorAllies, actingUsername });
             }
             if (scope === 'target') {
+                // Units carrying the caster's mark (Minato's Flying Thunder God) are targeted too.
+                const markStatusId = effect?.metadata?.alsoTargetMarkedStatusId;
+                const selectedKeys = new Set(selectedTargets.map((entry) => `${entry.username}:${entry.slot}`));
+                const markedTargets = markStatusId
+                    ? [...actorAllies, ...opponentUnits].filter((entry) =>
+                        !(entry.username === actingUsername && entry.slot === actorSlot) &&
+                        !selectedKeys.has(`${entry.username}:${entry.slot}`) &&
+                        (entry.unit.state?.statuses || []).some((status) =>
+                            status?.id === markStatusId && (Number(status.remainingTurns) || 0) > 0 &&
+                            status.sourceUsername === actingUsername && status.sourceSlot === actorSlot))
+                    : [];
                 return filterHelpfulImmuneRecipients({
                     effect,
-                    recipients: reflectRecipients(selectedTargets),
+                    recipients: reflectRecipients([...selectedTargets, ...markedTargets]),
                     actingUsername,
                 });
             }
@@ -5990,7 +6152,9 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
             const ignoreDamageReduction =
                 Boolean(effect?.metadata?.ignoreDamageReduction) ||
                 hasSkillSpecificStatusFlag(actorState, skill.id || null, 'ignoreDamageReductionForSkillIds');
-            const ignoreDestructibleDefense = Boolean(effect?.metadata?.ignoreDestructibleDefense);
+            const ignoreDestructibleDefense =
+                Boolean(effect?.metadata?.ignoreDestructibleDefense) ||
+                hasSkillSpecificStatusFlag(actorState, skill.id || null, 'ignoreDestructibleDefenseForSkillIds');
             const effectSkillClasses = Array.isArray(effect?.metadata?.skillClasses)
                 ? effect.metadata.skillClasses
                       .map((entry) => (typeof entry === 'string' ? entry.trim().toLowerCase() : ''))
@@ -6235,7 +6399,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
         const actorSilencedToNonDamage = hasStatusMetadataFlag(actorState, 'silenceNonDamageEffects');
         const chosenSkillClass = resolveSkillClassChoiceForCast({ skill, queued });
         effects.forEach((rawEffect) => {
-            const effect = materializeEffectWithSkillClassChoice(rawEffect, chosenSkillClass);
+            let effect = materializeEffectWithSkillClassChoice(rawEffect, chosenSkillClass);
             if (skillCancelledByEvade) return;
             const effectType = effect?.type;
             if (actorSilencedToNonDamage && effectType !== 'damage') return;
@@ -6287,6 +6451,17 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     : null;
                 if (delegatedStatusId && !controlledSource) return;
                 const recipients = resolveRecipients(effect);
+                if (Boolean(effect?.metadata?.splitAmountEvenlyAmongRecipients)) {
+                    // The base amount is shared evenly by every hit (a reflected share still counts);
+                    // bonuses then apply per hit.
+                    const hitCount = recipients
+                        .filter((recipient) => recipient?.unit && recipient.unit.alive !== false).length;
+                    if (hitCount <= 0) return;
+                    effect = {
+                        ...effect,
+                        amount: Math.floor(Math.max(0, Number(effect.amount) || 0) / hitCount),
+                    };
+                }
                 recipients.forEach((recipient) => {
                     if (skillCancelledByEvade) return;
                     if (!recipient?.unit || recipient.unit.alive === false) return;
@@ -6395,6 +6570,12 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         actorUsername: actingUsername,
                         actorSlot,
                         targetState,
+                        skillClasses: damageSkillClasses,
+                    }) + getDeadAllyDamageBonus({
+                        match,
+                        actorUnit,
+                        actorState,
+                        actorUsername: actingUsername,
                         skillClasses: damageSkillClasses,
                     });
                     const samePreviousTargetBonus = controlledSource ? 0 : getSamePreviousTargetDamageBonus({
@@ -7042,7 +7223,13 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             effect,
                             actorUnit,
                             targetUnit: recipient.unit,
-                        }) + getSkillSpecificHealingBonus(actorState, skill.id)
+                        }) + getSkillSpecificHealingBonus(actorState, skill.id) +
+                            getSourceLowHealthHealingBonus({
+                                match,
+                                sourceUsername: actingUsername,
+                                sourceSlot: actorSlot,
+                                targetUnit: recipient.unit,
+                            })
                     );
                 });
                 return;
@@ -7323,10 +7510,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             consumeStatus(scopedState, condition.statusId);
                         }
                     }
+                    const lossAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount,
+                    });
+                    if (lossAmount <= 0) return;
                     removeRandomChakraFromMatch({
                         match,
                         username: recipient.username,
-                        amount,
+                        amount: lossAmount,
                     });
                 });
                 return;
@@ -7600,6 +7791,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             consumeStatus(scopedState, condition.statusId);
                         }
                     }
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount: maxAmount,
+                    });
+                    if (stealAmount <= 0) return;
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
@@ -7607,7 +7802,7 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         (type) => (Number(targetPool[type]) || 0) > 0
                     );
                     if (!nonBloodlineTypes.length) return;
-                    for (let i = 0; i < maxAmount; i += 1) {
+                    for (let i = 0; i < stealAmount; i += 1) {
                         const available = ['taijutsu', 'ninjutsu', 'genjutsu'].filter(
                             (type) => (Number(targetPool[type]) || 0) > 0
                         );
@@ -7657,11 +7852,15 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                             consumeStatus(scopedState, condition.statusId);
                         }
                     }
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount: maxAmount,
+                    });
+                    if (stealAmount <= 0) return;
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
                     let transferred = 0;
-                    for (let i = 0; i < maxAmount; i += 1) {
+                    for (let i = 0; i < stealAmount; i += 1) {
                         const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
                         if (!available.length) break;
                         const picked = available[Math.floor(Math.random() * available.length)];
@@ -7719,9 +7918,12 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount: maxAmount,
+                    });
                     const available = Math.max(0, Number(targetPool[drainType]) || 0);
-                    if (available <= 0) return;
-                    const drainAmount = Math.min(maxAmount, available);
+                    if (available <= 0 || stealAmount <= 0) return;
+                    const drainAmount = Math.min(stealAmount, available);
                     targetPool[drainType] = available - drainAmount;
                     sourcePool[drainType] = (Number(sourcePool[drainType]) || 0) + drainAmount;
                     match.chakraPools[recipient.username] = targetPool;
@@ -7829,10 +8031,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         targetUnit: recipient.unit,
                         targetUsername: recipient.username,
                     })) return;
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount,
+                    });
+                    if (stealAmount <= 0) return;
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[recipient.username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[actingUsername] || createEmptyChakraCost();
-                    for (let i = 0; i < amount; i += 1) {
+                    for (let i = 0; i < stealAmount; i += 1) {
                         const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
                         if (!available.length) break;
                         const picked = available[Math.floor(Math.random() * available.length)];
@@ -7863,10 +8069,14 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
                         targetUnit: recipient.unit,
                         targetUsername: recipient.username,
                     })) return;
+                    const lossAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: actingUsername, sourceSlot: actorSlot, amount,
+                    });
+                    if (lossAmount <= 0) return;
                     if (chakraType === 'random') {
-                        removeRandomChakraFromMatch({ match, username: recipient.username, amount });
+                        removeRandomChakraFromMatch({ match, username: recipient.username, amount: lossAmount });
                     } else {
-                        removeChakraFromMatch({ match, username: recipient.username, chakraType, amount });
+                        removeChakraFromMatch({ match, username: recipient.username, chakraType, amount: lossAmount });
                     }
                 });
                 return;
@@ -8210,7 +8420,10 @@ const resolvePendingTurnSkills = ({ match, actingUsername, characters }) => {
     });
 };
 
-const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
+const tickStatusesForTurnEnd = (args = {}) =>
+    runWithActiveResolution(args?.match, () => tickStatusesAtTurnEnd(args));
+
+const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
     if (!match || !endingUsername) return;
     syncLinkedStatuses(match);
     const players = Array.isArray(match.players) ? match.players : [];
@@ -8793,10 +9006,14 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     status.sourceUsername !== username &&
                     !isUnitImmuneToChakraLoss(unit)
                 ) {
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: status.sourceUsername, sourceSlot: status.sourceSlot,
+                        amount: turnEndDrainNonBloodlineToSource,
+                    });
                     match.chakraPools = match.chakraPools || {};
                     const ownerPool = match.chakraPools[username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[status.sourceUsername] || createEmptyChakraCost();
-                    for (let i = 0; i < turnEndDrainNonBloodlineToSource; i += 1) {
+                    for (let i = 0; i < stealAmount; i += 1) {
                         const available = ['taijutsu', 'ninjutsu', 'genjutsu'].filter(
                             (type) => (Number(ownerPool[type]) || 0) > 0
                         );
@@ -8819,10 +9036,14 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     status?.sourceUsername !== username && !isUnitImmuneToChakraLoss(unit) &&
                     (!requiredSourceStatusId || ensureUnitStateShape(drainSource).statuses.some((entry) =>
                         entry?.id === requiredSourceStatusId && (Number(entry?.remainingTurns) || 0) > 0))) {
+                    const stealAmount = reduceOutgoingChakraLoss({
+                        match, sourceUsername: status.sourceUsername, sourceSlot: status.sourceSlot,
+                        amount: turnEndDrainRandomToSource,
+                    });
                     match.chakraPools = match.chakraPools || {};
                     const targetPool = match.chakraPools[username] || createEmptyChakraCost();
                     const sourcePool = match.chakraPools[status.sourceUsername] || createEmptyChakraCost();
-                    for (let i = 0; i < turnEndDrainRandomToSource; i += 1) {
+                    for (let i = 0; i < stealAmount; i += 1) {
                         const available = chakraTypes.filter((type) => (Number(targetPool[type]) || 0) > 0);
                         if (!available.length) break;
                         const picked = available[Math.floor(Math.random() * available.length)];
@@ -8841,7 +9062,10 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                     removeRandomChakraFromMatch({
                         match,
                         username,
-                        amount: turnEndRemoveRandomChakra,
+                        amount: reduceOutgoingChakraLoss({
+                            match, sourceUsername: status?.sourceUsername, sourceSlot: status?.sourceSlot,
+                            amount: turnEndRemoveRandomChakra,
+                        }),
                     });
                 }
 
@@ -8853,7 +9077,12 @@ const tickStatusesForTurnEnd = ({ match, endingUsername }) => {
                 }
                 const turnEndHealFlat = Math.max(0, Number(status?.metadata?.turnEndHealFlat) || 0);
                 if (turnEndHealFlat > 0) {
-                    applyHealToUnit(unit, turnEndHealFlat, { excludeStatusId: status.id });
+                    applyHealToUnit(unit, turnEndHealFlat + getSourceLowHealthHealingBonus({
+                        match,
+                        sourceUsername: status?.sourceUsername,
+                        sourceSlot: status?.sourceSlot,
+                        targetUnit: unit,
+                    }), { excludeStatusId: status.id });
                 }
                 const turnEndHealthLoss = Math.max(0, Number(status?.metadata?.turnEndHealthLoss) || 0);
                 if (turnEndHealthLoss > 0) {
@@ -9730,6 +9959,17 @@ const applyTriggeredEffectsFromStatus = ({
                     targetUnit, targetUsername, targetSlot, statusId: effect.statusId,
                 });
             }
+            return;
+        }
+        if (effect.type === 'heal') {
+            const amount = Math.max(0, Number(effect?.amount) || 0);
+            if (amount <= 0) return;
+            applyHealToUnit(targetUnit, amount + getSourceLowHealthHealingBonus({
+                match,
+                sourceUsername: status?.sourceUsername,
+                sourceSlot: status?.sourceSlot,
+                targetUnit,
+            }));
             return;
         }
         if (effect.type === 'gain_chakra') {

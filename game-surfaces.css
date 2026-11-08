@@ -1849,3 +1849,179 @@
 .game-remaster .profile-val { color: #f1f3ee; font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .game-remaster .profile-team-header { margin-bottom: 6px; color: #b9c8cc; font-size: 10px; letter-spacing: .1em; text-shadow: none; }
 .game-remaster .profile-team-face-box { border: 1px solid #71858e; }
+
+/* Elite encounters: ink, bone and a single vermilion. The seal is a hanko stamp,
+   set slightly off-square the way a hand-pressed stamp lands. */
+:root {
+    --elite-ink: #100e0d;
+    --elite-bone: #efe6d4;
+    --elite-vermilion: #c2362b;
+    --elite-vermilion-deep: #8f241c;
+}
+.game-remaster .elite-seal {
+    display: inline-grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    box-sizing: border-box;
+    border: 2px solid var(--elite-bone);
+    border-radius: 3px;
+    background: var(--elite-vermilion);
+    color: var(--elite-bone);
+    font: 700 15px/1 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'MS Mincho', serif;
+    letter-spacing: .02em;
+    writing-mode: vertical-rl;
+    transform: rotate(-4deg);
+    outline: 2px solid var(--elite-vermilion);
+    outline-offset: 0;
+}
+
+/* Matchmaking: the found screen turns to ink with the seal in place of the check. */
+.game-remaster .searchingscroll.is-elite {
+    border-color: var(--elite-vermilion-deep);
+    background: var(--elite-ink);
+}
+.game-remaster .searchingscroll.is-elite .match-dialog-kicker { color: #d9a59c; }
+.game-remaster .searchingscroll.is-elite .searching {
+    color: var(--elite-bone);
+    letter-spacing: .01em;
+}
+.game-remaster .searchingscroll.is-elite .searching-detail { color: #c9bfae; max-width: 34ch; margin-inline: auto; }
+.game-remaster .searchingscroll.is-elite .match-search-ring { border-color: rgba(194, 54, 43, .55); }
+.game-remaster .searchingscroll.is-elite .match-search-ring-outer::before,
+.game-remaster .searchingscroll.is-elite .match-search-ring-outer::after { background: var(--elite-vermilion); box-shadow: none; }
+.game-remaster .searchingscroll.is-elite .match-search-found-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    border: 2px solid var(--elite-bone);
+    border-radius: 3px;
+    background: var(--elite-vermilion);
+    color: var(--elite-bone);
+    font: 700 21px/1 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'MS Mincho', serif;
+    writing-mode: vertical-rl;
+    transform: rotate(-4deg);
+    animation: elite-stamp .38s cubic-bezier(.2, .9, .3, 1.25) both;
+}
+.game-remaster .searchingscroll.is-elite .match-search-footer { border-top-color: rgba(194, 54, 43, .35); }
+.game-remaster .searchingscroll.is-elite .match-search-opening { color: #d9a59c; }
+
+/* Battle intro: a torn ink band across the field, read in a few seconds. */
+.elite-encounter-band {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 38%;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 26px 24px 28px;
+    background: var(--elite-ink);
+    color: var(--elite-bone);
+    clip-path: polygon(0 9%, 6% 0, 19% 6%, 33% 1%, 48% 7%, 63% 0, 79% 5%, 92% 1%, 100% 8%,
+        100% 90%, 94% 100%, 81% 94%, 66% 99%, 51% 93%, 36% 100%, 21% 94%, 8% 99%, 0 92%);
+    cursor: pointer;
+    animation: elite-band-in .55s cubic-bezier(.2, .8, .2, 1) both;
+}
+.elite-encounter-band::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--elite-vermilion-deep);
+    opacity: .6;
+    z-index: -1;
+}
+.elite-encounter-band.is-leaving { animation: elite-band-out .45s ease-in both; }
+.elite-encounter-band .elite-seal { width: 58px; height: 58px; font-size: 19px; flex: none; }
+.elite-band-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 6px 14px;
+    background: var(--elite-ink);
+    font-family: 'Libre Franklin', Arial, sans-serif;
+}
+.elite-band-kicker {
+    color: #d9a59c;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+}
+.elite-band-name {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+}
+.elite-band-stakes { color: #c9bfae; font-size: 13px; line-height: 1.4; }
+
+/* HUD: the boss's side carries the vermilion. */
+.game-remaster.is-elite-encounter .player-right .player-name { color: #ef8f82; }
+.game-remaster.is-elite-encounter .player-right .player-status,
+.game-remaster.is-elite-encounter .player-right .player-status.is-equipped-title {
+    color: var(--elite-bone);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+.game-remaster.is-elite-encounter .player-avatar-right { outline: 2px solid var(--elite-vermilion); outline-offset: 1px; }
+.game-remaster.is-elite-encounter .enemy-characters .character-face {
+    box-shadow: inset 0 0 0 2px var(--elite-vermilion-deep);
+    outline: 1px solid var(--elite-vermilion);
+}
+
+/* End screen. */
+.game-remaster .battle-end-overlay.is-elite .battle-end-panel {
+    border-color: var(--elite-vermilion-deep);
+    background: var(--elite-ink);
+}
+.game-remaster .battle-end-overlay.is-elite .battle-end-copy { position: relative; }
+.game-remaster .battle-end-overlay.is-elite .battle-end-title { color: var(--elite-bone); }
+.game-remaster .battle-end-overlay.is-elite.is-victory .battle-end-reward-value { color: #ef8f82; }
+.game-remaster .battle-end-overlay.is-elite .battle-end-reward-row { border-bottom-color: #3a2a26; }
+.game-remaster .battle-end-overlay.is-elite .battle-end-summary { position: relative; padding-right: 64px; }
+.game-remaster .battle-end-overlay.is-elite .elite-seal-stamp {
+    position: absolute;
+    top: -66px;
+    right: 0;
+    animation: elite-stamp .38s .25s cubic-bezier(.2, .9, .3, 1.25) both;
+}
+.game-remaster .battle-end-overlay.is-elite.is-defeat .elite-seal-stamp { filter: grayscale(.65); opacity: .8; }
+.game-remaster .battle-end-overlay.is-elite .battle-end-continue {
+    border-color: var(--elite-bone);
+    background: var(--elite-bone);
+    color: var(--elite-ink);
+}
+.game-remaster .battle-end-overlay.is-elite .battle-end-continue:hover { background: #fff8ea; }
+
+@keyframes elite-stamp {
+    0% { transform: rotate(-4deg) scale(1.6); opacity: 0; }
+    70% { transform: rotate(-4deg) scale(.94); opacity: 1; }
+    100% { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+@keyframes elite-band-in {
+    from { clip-path: polygon(0 9%, 0 9%, 0 92%, 0 92%); opacity: .4; }
+}
+@keyframes elite-band-out {
+    to { opacity: 0; transform: translateY(-8px); }
+}
+@media (max-width: 640px) {
+    .elite-encounter-band { gap: 14px; padding: 20px 16px 22px; }
+    .elite-encounter-band .elite-seal { width: 44px; height: 44px; font-size: 15px; }
+    .elite-band-name { font-size: 24px; }
+    .elite-band-stakes { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .elite-encounter-band,
+    .elite-encounter-band.is-leaving,
+    .game-remaster .searchingscroll.is-elite .match-search-found-icon,
+    .game-remaster .battle-end-overlay.is-elite .elite-seal-stamp { animation: none; }
+}

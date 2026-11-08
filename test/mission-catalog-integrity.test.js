@@ -38,10 +38,10 @@ function goalCanUseRoster(goal, available) {
 test('every default mission has valid, trackable goals and a distinct character reward', () => {
     const missions = getDefaultMissionCatalog();
     const rewardIds = new Set();
-    assert.equal(missions.length, 20);
+    assert.equal(missions.length, 21);
     assert.deepEqual(missions.map((mission) => mission.level_requirement),
         [1, 1, 1, 1, 6, 6, 11, 6, 6, 16, 11,
-            6, 6, 11, 11, 11, 11, 11, 11, 16]);
+            6, 6, 11, 11, 11, 11, 11, 11, 16, 26]);
 
     for (const mission of missions) {
         const rewards = mission.reward_characters || [mission.reward_character];
@@ -78,7 +78,8 @@ test('mission rewards are reachable except the Forest of Death team requiring hi
     const rewardIds = new Set(missions.flatMap((mission) => mission.reward_characters || [mission.reward_character]));
     const available = new Set(['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru']);
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
+        'young-kakashi', 'uchiha-obito', 'nohara-rin']);
     assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
         [...available]);
     const remaining = new Map(missions.map((mission) => [mission.missionId, mission]));
@@ -109,7 +110,8 @@ test('new Members get the mission-free roster; staff see and use all active char
     }).unlocked);
     assert.deepEqual(member, ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura',
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
-        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru']);
+        'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
+        'young-kakashi', 'uchiha-obito', 'nohara-rin']);
     const guest = ACTIVE_ROSTER_IDS.filter((characterId) => getCharacterAvailability({
         policies: INITIAL_POLICIES, user: null, profile: null,
         characterId, lockedCharacterIds,
@@ -142,16 +144,24 @@ test('launch migration replaces the old mission catalog once and preserves later
         { missionId: 'old-mission', title: 'Old Mission', reward_character: 'rock-lee' },
     ] });
     assert.equal(old.migrate, true);
-    assert.equal(old.missions.length, 20);
+    assert.equal(old.missions.length, 21);
     const edited = resolveMissionCatalogState({ catalogVersion: 2, missions: [
         { missionId: 'edited', title: 'Edited', reward_character: 'ebisu',
             goals: [{ type: 'win_matches', character_id: 'uzumaki-naruto', wins: 2 }] },
     ] });
     assert.equal(edited.migrate, true);
     assert.equal(edited.missions[0].missionId, 'edited');
-    const latest = resolveMissionCatalogState({ catalogVersion: 4, missions: edited.missions });
+    const latest = resolveMissionCatalogState({ catalogVersion: 5, missions: edited.missions });
     assert.equal(latest.migrate, false);
-    assert.equal(edited.missions.length, 10, 'version 2 adds only the nine new missions');
+    assert.equal(edited.missions.length, 11, 'version 2 adds only the ten new missions');
+
+    // Version 5 adds The Yellow Flash alone; missions an admin removed are not brought back.
+    const withoutDoubleLucky = getDefaultMissionCatalog()
+        .filter((mission) => !['double-lucky', 'the-yellow-flash'].includes(mission.missionId));
+    const v5 = resolveMissionCatalogState({ catalogVersion: 4, missions: withoutDoubleLucky });
+    assert.equal(v5.migrate, true);
+    assert.ok(v5.missions.some((mission) => mission.missionId === 'the-yellow-flash'));
+    assert.equal(v5.missions.some((mission) => mission.missionId === 'double-lucky'), false);
 
     const previous = getDefaultMissionCatalog();
     const customized = previous.map((mission) => ({ ...mission }));

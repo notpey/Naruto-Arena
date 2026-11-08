@@ -440,6 +440,7 @@ for (const [label, ids, migrationId] of [
         'sarutobi-konohamaru', 'ebisu', 'momochi-zabuza'], 'balance-update-0-3-2026-11-02'],
     ['Kankuro trap and poison fix', ['kankuro'], 'kankuro-trap-poison-fix-2026-11-03'],
     ['Zabuza, Hinata and Mizuki fix', ['momochi-zabuza', 'hyuuga-hinata', 'mizuki'], 'zabuza-hinata-mizuki-fix-2026-11-03'],
+    ['Team Minato drafts', ['young-kakashi', 'uchiha-obito', 'nohara-rin'], 'team-minato-drafts-2026-11-08'],
 ]) test(`${label} replace stored kits once`, async () => {
     const seeds = require('../data/characters');
     let storedCharacters = ids.map((id) => ({

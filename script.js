@@ -880,6 +880,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         typeof username === 'string' && username.trim().toLowerCase().startsWith('__game_bot__:');
 
     let latestOpponentProfileLadder = null;
+    // Matchmaking bots carry a fake-player profile in the match state instead of an account.
+    let latestBotOpponentProfile = null;
 
     const getPublicOpponentDisplayName = (opponent = null) => {
         const explicitName =
@@ -902,10 +904,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (isGameBotUsername(username)) {
             const fallbackName = displayName || getPublicOpponentDisplayName({ username });
+            const botProfile = latestBotOpponentProfile || {};
+            publicProfileCacheByUsername.set(username.trim().toLowerCase(), {
+                username: fallbackName,
+                profile: { ...botProfile, ladder: latestOpponentProfileLadder || botProfile.ladder || null },
+            });
             applyOpponentIdentity({
                 name: fallbackName,
-                avatarUrl: defaultProfileAvatar,
+                avatarUrl: botProfile.avatarUrl || defaultProfileAvatar,
                 ladder: latestOpponentProfileLadder || null,
+                title: botProfile.equippedTitle || '',
+                borderUrl: botProfile.equippedBorder || '',
             });
             return null;
         }
@@ -943,6 +952,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let currentOpponentUsername = null;
         let currentOpponentDisplayName = null;
         let currentMatchMode = 'quick';
+        let currentEliteEncounter = null;
         let currentPlayerTeamIndices = [];
         let currentOpponentTeamIndices = [];
         const startFirstSound = new Audio('sounds/start-first.mp3');
@@ -1374,6 +1384,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         classScopedRandomIncreaseMaps: classScopedMap
                             ? [...totals.classScopedRandomIncreaseMaps, classScopedMap]
                             : totals.classScopedRandomIncreaseMaps,
+                        skillScopedRandomIncreaseMaps:
+                            metadata.randomCostIncreaseForSkillIds &&
+                            typeof metadata.randomCostIncreaseForSkillIds === 'object'
+                                ? [...totals.skillScopedRandomIncreaseMaps, metadata.randomCostIncreaseForSkillIds]
+                                : totals.skillScopedRandomIncreaseMaps,
                     };
                 },
                 {
@@ -1390,6 +1405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     nonMentalRandomIncrease: 0,
                     harmfulRandomIncrease: 0,
                     classScopedRandomIncreaseMaps: [],
+                    skillScopedRandomIncreaseMaps: [],
                 }
             );
         };
@@ -1486,11 +1502,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 0
             );
+            const skillScopedIncrease = (reductions.skillScopedRandomIncreaseMaps || []).reduce(
+                (sum, map) => sum + Math.max(0, Number(map?.[skill?.id]) || 0),
+                0
+            );
             const randomIncrease =
                 Math.max(0, reductions.randomIncrease) +
                 (skillIsMental ? 0 : Math.max(0, reductions.nonMentalRandomIncrease)) +
                 (skillIsHarmful ? reductions.harmfulRandomIncrease : 0) +
-                classScopedIncrease;
+                classScopedIncrease + skillScopedIncrease;
             const effective = [];
             chakraTypes.forEach((type) => {
                 const amount = Math.max(0,
@@ -2769,6 +2789,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 0);
         };
 
+        const presentEliteEncounter = (encounter = {}, matchId = '') => {
+            document.body.classList.add('is-elite-encounter');
+            const storageKey = `eliteIntroShown:${matchId || 'current'}`;
+            try {
+                if (window.sessionStorage.getItem(storageKey)) return;
+                window.sessionStorage.setItem(storageKey, '1');
+            } catch (_) {
+                // Storage is optional; the intro may simply show again after a reload.
+            }
+            const multiplier = Math.max(2, Number(encounter.rewardMultiplier) || 2);
+            const band = document.createElement('div');
+            band.className = 'elite-encounter-band';
+            band.setAttribute('role', 'status');
+            band.innerHTML =
+                '<span class="elite-seal" aria-hidden="true">精鋭</span>' +
+                '<div class="elite-band-copy">' +
+                '<span class="elite-band-kicker">Elite encounter</span>' +
+                `<strong class="elite-band-name">${escapeHtml(encounter.bossName || 'Unknown shinobi')}</strong>` +
+                `<span class="elite-band-stakes">Win for ${multiplier}× EXP, ryo and mission progress. Lose and nothing is taken.</span>` +
+                '</div>';
+            const dismiss = () => {
+                band.classList.add('is-leaving');
+                window.setTimeout(() => band.remove(), 450);
+            };
+            band.addEventListener('click', dismiss);
+            document.body.appendChild(band);
+            window.setTimeout(dismiss, 5200);
+        };
+
         const showBattleEndOverlay = ({
             didWin,
             opponentUsername,
@@ -2780,6 +2829,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!battleEndOverlayEl || battleEndShown) return;
             const opponent = (opponentUsername || currentOpponentUsername || 'UNKNOWN').trim();
             const isLadderMatch = currentMatchMode === 'ladder';
+            const isElite = Boolean(currentEliteEncounter);
+            const eliteMultiplier = Math.max(2, Number(currentEliteEncounter?.rewardMultiplier) || 2);
             const normalizedExpDelta = Number.isFinite(Number(expDelta)) ? Number(expDelta) : 0;
             const normalizedClanExpDelta = Math.max(0, Number(clanExpDelta) || 0);
             const normalizedRyoDelta = Math.max(0, Number(ryoDelta) || 0);
@@ -2789,7 +2840,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unlockNames = unlockedCharacters
                 .map((entry) => (typeof entry?.name === 'string' ? entry.name.trim() : ''))
                 .filter(Boolean);
-            const outcomeText = didWin
+            const outcomeText = isElite
+                ? didWin
+                    ? `You defeated ${opponent}, an elite encounter. Your rewards are doubled.`
+                    : `${opponent} held its ground. An elite loss costs nothing: your EXP, record and streak are unchanged.`
+                : didWin
                 ? isLadderMatch
                     ? `You won a ladder battle against ${opponent}.`
                     : currentMatchMode === 'war'
@@ -2809,9 +2864,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ? `You lost a training dummy battle against ${opponent}.`
                             : `You lost a quick battle against ${opponent}.`;
             const rewardRows = [];
-            if (isLadderMatch) {
+            const rewardLabel = (label) => (isElite && didWin ? `${label} ×${eliteMultiplier}` : label);
+            if (isLadderMatch && !(isElite && !didWin)) {
                 rewardRows.push({
-                    label: 'EXP',
+                    label: rewardLabel('EXP'),
                     value:
                         normalizedExpDelta >= 0
                             ? `+${normalizedExpDelta.toLocaleString()}`
@@ -2820,13 +2876,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (normalizedClanExpDelta > 0) {
                 rewardRows.push({
-                    label: 'Clan EXP',
+                    label: rewardLabel('Clan EXP'),
                     value: `+${normalizedClanExpDelta.toLocaleString()}`,
                 });
             }
             if (normalizedRyoDelta > 0) {
                 rewardRows.push({
-                    label: 'Ryo',
+                    label: rewardLabel('Ryo'),
                     value: `+${normalizedRyoDelta.toLocaleString()}`,
                 });
             }
@@ -2850,11 +2906,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
-                battleEndTitleEl.textContent = didWin ? 'Victory' : 'Defeat';
+                battleEndTitleEl.textContent = isElite
+                    ? (didWin ? 'Elite defeated' : 'The elite stands')
+                    : (didWin ? 'Victory' : 'Defeat');
             }
             if (battleEndMessageEl) {
                 battleEndMessageEl.innerHTML =
                     `<div class="battle-end-summary">` +
+                    (isElite ? '<span class="elite-seal elite-seal-stamp" aria-hidden="true">精鋭</span>' : '') +
                     `<div class="battle-end-outcome">${escapeHtml(outcomeText)}</div>` +
                     rewardsHtml +
                     unlocksHtml +
@@ -2862,6 +2921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             battleEndOverlayEl.classList.toggle('is-victory', didWin);
             battleEndOverlayEl.classList.toggle('is-defeat', !didWin);
+            battleEndOverlayEl.classList.toggle('is-elite', isElite);
             battleEndOverlayEl.classList.add('visible');
             battleEndOverlayEl.setAttribute('aria-hidden', 'false');
             battleEndContinueButton?.focus({ preventScroll: true });
@@ -3746,6 +3806,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof data.mode === 'string' && data.mode.trim()) {
                 currentMatchMode = data.mode.trim().toLowerCase();
             }
+            if (data.eliteEncounter && !currentEliteEncounter) {
+                currentEliteEncounter = data.eliteEncounter;
+                presentEliteEncounter(data.eliteEncounter, data.matchId);
+            }
             if (data.opponent) {
                 if (typeof data.opponent === 'string') {
                     currentOpponentDisplayName = data.opponent;
@@ -3753,6 +3817,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nextOpponentUsername = data.opponent.username;
                     currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
                     latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
+                    latestBotOpponentProfile = data.opponent?.isBot ? data.opponent.profile || null : null;
                     const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                     currentOpponentUsername = nextOpponentUsername;
                     if (opponentChanged || isGameBotUsername(nextOpponentUsername)) {
@@ -4550,6 +4615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nextOpponentUsername = data.opponent.username;
                     currentOpponentDisplayName = getPublicOpponentDisplayName(data.opponent);
                     latestOpponentProfileLadder = data.opponent?.profile?.ladder || null;
+                    latestBotOpponentProfile = data.opponent?.isBot ? data.opponent.profile || null : null;
                     enemyNameEl.textContent = currentOpponentDisplayName || nextOpponentUsername;
                     const opponentChanged = nextOpponentUsername !== currentOpponentUsername;
                     currentOpponentUsername = nextOpponentUsername;
@@ -5183,14 +5249,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         soundManager.play(audio);
     };
 
-    const setSearchingState = (state = 'searching', mode = activeSearchMode) => {
+    const setSearchingState = (state = 'searching', mode = activeSearchMode, { elite = false } = {}) => {
         if (!searchingMessage) return;
         const modeLabels = { ladder: 'Ranked match', quick: 'Quick match', private: 'Private match', training: 'Training' };
         if (searchingModeLabel) searchingModeLabel.textContent = modeLabels[mode] || modeLabels.quick;
         searchingOverlay?.classList.toggle('is-found', state === 'found');
+        const isEliteFound = state === 'found' && elite;
+        searchingOverlay?.classList.toggle('is-elite', isEliteFound);
+        const foundIcon = searchingOverlay?.querySelector('.match-search-found-icon');
+        if (foundIcon) foundIcon.textContent = isEliteFound ? '精鋭' : '✓';
         if (searchingWaiting) searchingWaiting.hidden = state === 'found';
         if (searchingOpening) searchingOpening.hidden = state !== 'found';
         if (cancelSearchingButton) cancelSearchingButton.disabled = state === 'found';
+        if (isEliteFound) {
+            searchingMessage.textContent = 'Elite encounter';
+            if (searchingDetail) {
+                searchingDetail.textContent = 'A far stronger shinobi has answered. Win for double EXP, ryo and mission progress. Lose and nothing is taken.';
+            }
+            searchingMessage.focus({ preventScroll: true });
+            playOneShotSound(foundMatchSound);
+            return;
+        }
         if (state === 'found') {
             searchingMessage.textContent = mode === 'training' ? 'Training battle ready' : 'Opponent found';
             if (searchingDetail) searchingDetail.textContent = 'Your battle is about to begin.';
@@ -5281,7 +5360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return true;
         }
         openSearching();
-        setSearchingState('found', activeSearchMode);
+        setSearchingState('found', activeSearchMode, { elite: Boolean(data.elite) });
         isSearching = false;
         if (matchmakingPoll) {
             clearInterval(matchmakingPoll);

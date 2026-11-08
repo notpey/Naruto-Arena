@@ -1,155 +1,84 @@
+const PIT_TRAP = 'nohara_rin_pit_trap';
+
 module.exports = {
-    "id": "nohara-rin",
-    "characterId": "nohara-rin",
-    "name": "Nohara Rin",
-    "facePicture": "https://i.imgur.com/nVN2Va7.png",
-    "characterdeescription": "A chuunin medical nin assigned to Team Minato, Rin is a quiet and passive girl who focuses on keeping her team mates alive. Using her healing abilities, and her intelligence, Rin is able to heal her allies while trapping her enemies.",
-    "skills": [
+    id: 'nohara-rin',
+    characterId: 'nohara-rin',
+    name: 'Nohara Rin',
+    facePicture: 'https://i.imgur.com/2Yeevq9.png',
+    characterdeescription: "A chuunin medical ninja assigned to Team Minato, Rin is a kind and resourceful shinobi who puts her teammates' safety first. She uses her medical ninjutsu to heal allies and carefully placed traps to catch enemies off guard.",
+    passive: {
+        name: 'Caretaker',
+        icon: 'https://i.imgur.com/dRvfEpT.png',
+        description: "Rin's skills heal an additional 5 health if the target has 50 health or less.",
+        healBonusWhenTargetHpAtMost: { threshold: 50, amount: 5 },
+    },
+    skills: [
         {
-            "id": "nohara-rin-pit-trap",
-            "name": "Pit Trap",
-            "skillimage": "https://i.imgur.com/h7PnmYi.png",
-            "skilldescription": "For 1 turn, Nohara Rin will gain 15 points of damage reduction and one target enemy will take 15 piercing damage that ignores invulnerability at the end of their turn. If that enemy uses a new skill, they will also take another 15 damage from this skill. This skill is invisible and ignores invulnerability. This skill's damage isn't increased nor decreased by effects used on Nohara Rin.",
-            "energy": [
-                "Genjutsu"
+            id: 'nohara-rin-pit-trap', name: 'Pit Trap',
+            skillimage: 'https://i.imgur.com/up1Gi06.png',
+            skilldescription: 'Rin places an invisible trap on an enemy. At the end of their turn, the trap deals 15 piercing physical damage. If that enemy uses a physical skill this turn, they also take 5 piercing damage each turn for 3 turns. Rin has 10 damage reduction during this skill.',
+            energy: ['Genjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
+            classes: ['Physical', 'Instant'],
+            effects: [
+                // The trap springs at the end of the trapped enemy's next turn, then ends.
+                { type: 'apply_status', statusId: PIT_TRAP, duration: 1, scope: 'target', metadata: {
+                    harmful: true, invisible: true, hideTooltipFromUnitOwner: true,
+                    turnEndDamage: 15, turnEndSkillClasses: ['Physical'], ignoreTargetDamageReduction: true,
+                    tooltipText: 'This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, they also take 5 piercing damage each turn for 3 turns.',
+                } },
+                { type: 'apply_status', statusId: `${PIT_TRAP}_trigger`, duration: 1, scope: 'target', metadata: {
+                    harmful: true, invisible: true, hideTooltip: true,
+                    onOwnerUseSkillTrigger: true, onOwnerUseSkillClassesAny: ['Physical'],
+                    onOwnerUseSkillEffects: [
+                        { type: 'apply_status', statusId: `${PIT_TRAP}_wound`, duration: 3, metadata: {
+                            harmful: true, turnEndDamage: 5, ignoreTargetDamageReduction: true,
+                            tooltipText: 'This character takes 5 piercing damage each turn.',
+                        } },
+                    ],
+                } },
+                // Lasts exactly as long as the trap: through the trapped enemy's turn.
+                { type: 'apply_status', statusId: `${PIT_TRAP}_guard`, duration: 1, scope: 'self', metadata: {
+                    helpful: true, invisible: true, hideTooltipFromEnemy: true,
+                    damageReductionFlat: 10, turnDurationAnchor: 'any_turn',
+                    tooltipText: 'This character has 10 damage reduction while Pit Trap is set.',
+                } },
             ],
-            "target": "single-enemy",
-            "damage": 0,
-            "cooldown": 0,
-            "ignoreInvulnerability": true,
-            "classes": [
-                "Physical",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nohara_rin_pit_trap_defense",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "hideTooltipFromEnemy": true,
-                        "damageReductionFlat": 15,
-                        "tooltipText": "Nohara Rin has 15 points of damage reduction from Pit Trap."
-                    }
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "nohara_rin_pit_trap",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "harmful": true,
-                        "hideTooltipFromEnemy": true,
-                        "turnEndDamage": 15,
-                        "ignoreSourceNonAfflictionDamageBonus": true,
-                        "ignoreTargetDestructibleDefense": true,
-                        "triggerOnEnemyHarmfulSkill": true,
-                        "counterDamage": 15,
-                        "counterDamageIgnoresDestructibleDefense": true,
-                        "tooltipText": "This character takes 15 piercing damage that ignores invulnerability at the end of their turn. If they use a new skill, they take another 15 damage.",
-                        "turnDurationAnchor": "source_turn"
-                    }
-                }
-            ]
         },
         {
-            "id": "nohara-rin-mystical-palm-healing",
-            "name": "Rin Mystical Palm Healing",
-            "skillimage": "https://i.imgur.com/vMIpkz6.png",
-            "skilldescription": "Nohara Rin heals herself or an ally for 25 health and removes all enemy affliction skills on this character.",
-            "energy": [
-                "Ninjutsu"
+            id: 'nohara-rin-healing-touch', name: 'Healing Touch',
+            skillimage: 'https://i.imgur.com/Hywvj4g.png',
+            skilldescription: 'Rin heals an ally for 20 health and removes enemy afflictions from them.',
+            energy: ['Ninjutsu'], target: 'single-ally', damage: 0, cooldown: 0,
+            classes: ['Strategic', 'Instant'],
+            effects: [
+                { type: 'heal', amount: 20, scope: 'target' },
+                { type: 'cleanse_statuses', scope: 'target', sourceRelation: 'enemy', metadataAny: ['afflictionDamage'] },
             ],
-            "target": "single-ally",
-            "damage": 0,
-            "cooldown": 0,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "heal",
-                    "amount": 25,
-                    "scope": "target"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "nohara_rin_mystical_palm_healing_cleanse",
-                    "duration": 1,
-                    "scope": "target",
-                    "metadata": {
-                        "helpful": true,
-                        "hideTooltip": true,
-                        "removeEnemyAfflictionStatusesOnApply": true
-                    }
-                }
-            ]
         },
         {
-            "id": "nohara-rin-medical-kit",
-            "name": "Medical Kit",
-            "skillimage": "https://i.imgur.com/uLva4cB.png",
-            "skilldescription": "Nohara Rin targets herself or an ally. For 3 turns, that character will be healed for 10 health each turn. During this time, they will deal 5 additional damage with physical and energy skills.",
-            "energy": [
-                "Random",
-                "Random"
-            ],
-            "target": "single-ally",
-            "damage": 0,
-            "cooldown": 3,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nohara_rin_medical_kit",
-                    "duration": 3,
-                    "scope": "target",
-                    "metadata": {
-                        "helpful": true,
-                        "turnEndHealFlat": 10,
-                        "damageBonusBySkillClass": {
-                            "physical": 5,
-                            "energy": 5
-                        },
-                        "tooltipText": "This character heals 10 health each turn and deals 5 additional damage with physical and energy skills from Medical Kit."
-                    }
-                }
-            ]
+            id: 'nohara-rin-medical-kit', name: 'Medical Kit',
+            skillimage: 'https://i.imgur.com/gfTD7t7.png',
+            skilldescription: 'Rin heals an ally for 10 health each turn for 3 turns. Whenever that ally uses a physical or chakra skill during this time, they heal an additional 10 health.',
+            energy: ['Random', 'Random'], target: 'single-ally', damage: 0, cooldown: 3,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'nohara_rin_medical_kit', duration: 3, scope: 'target', metadata: {
+                helpful: true, turnEndHealFlat: 10, turnEndTrigger: 'source_turn', triggerOnApply: true,
+                turnDurationAnchor: 'source_turn',
+                onOwnerUseSkillTrigger: true, persistOnOwnerUseSkillTrigger: true,
+                onOwnerUseSkillClassesAny: ['Physical', 'Chakra'],
+                onOwnerUseSkillEffects: [{ type: 'heal', amount: 10 }],
+                tooltipText: 'This character heals 10 health each turn. Whenever they use a physical or chakra skill, they heal an additional 10 health.',
+            } }],
         },
         {
-            "id": "nohara-rin-flee",
-            "name": "Flee",
-            "skillimage": "https://i.imgur.com/10ydruj.png",
-            "skilldescription": "Nohara Rin becomes invulnerable for 1 turn.",
-            "energy": [
-                "Random"
-            ],
-            "target": "self",
-            "damage": 0,
-            "cooldown": 4,
-            "classes": [
-                "Strategic",
-                "Instant"
-            ],
-            "effects": [
-                {
-                    "type": "apply_status",
-                    "statusId": "nohara_rin_flee",
-                    "duration": 1,
-                    "scope": "self",
-                    "metadata": {
-                        "helpful": true,
-                        "invulnerable": true,
-                        "tooltipText": "This character is invulnerable."
-                    }
-                }
-            ]
-        }
-    ]
+            id: 'nohara-rin-flee', name: 'Rin Flee',
+            skillimage: 'https://i.imgur.com/LqYCr2e.png',
+            skilldescription: 'Rin becomes invulnerable for 1 turn.',
+            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
+            classes: ['Strategic', 'Instant'],
+            effects: [{ type: 'apply_status', statusId: 'nohara_rin_flee', duration: 1, scope: 'self', metadata: {
+                helpful: true, invulnerable: true, tooltipText: 'This character is invulnerable.',
+            } }],
+        },
+    ],
 };

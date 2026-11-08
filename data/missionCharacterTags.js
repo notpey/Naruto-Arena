@@ -6,7 +6,9 @@ const team7Ids = new Set([
 const otherKonohaNinjaIds = new Set([
     'sarutobi-konohamaru', 'umino-iruka', 'mizuki', 'ebisu',
     'hatake-kakashi', 'sarutobi-hiruzen', 'gekko-hayate', 'mitarashi-anko',
+    'young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato',
 ]);
+const teamMinatoStudentIds = new Set(['young-kakashi', 'uchiha-obito', 'nohara-rin']);
 const examTeams = {
     'exam-team-7': ['uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura'],
     'exam-team-8': ['inuzuka-kiba', 'aburame-shino', 'hyuuga-hinata'],
@@ -23,6 +25,7 @@ const getMissionCharacterTags = (character) => {
     const id = character?.characterId;
     const tags = new Set(character?.tags || []);
     if (tags.has('konoha-genin') || otherKonohaNinjaIds.has(id)) tags.add('konoha-ninja');
+    if (tags.has('konoha-ninja') && !teamMinatoStudentIds.has(id)) tags.add('konoha-ninja-outside-team-minato');
     if (team7Ids.has(id)) tags.add('team-7');
     for (const [teamTag, ids] of Object.entries(examTeams)) {
         if (ids.includes(id)) tags.add(teamTag);

@@ -58,6 +58,9 @@ const launchMissions = [
         [winWith('baki', 5), winWith('gekko-hayate', 5)], 'b'],
     ['hostile-takeover', 'Hostile Takeover', 16, 'shiore-orochimaru',
         [winWith('uchiha-sasuke', 5), winWith('mitarashi-anko', 5)], 'b'],
+    ['the-yellow-flash', 'The Yellow Flash', 26, 'namikaze-minato',
+        [winWith('nohara-rin', 5), winWith('uchiha-obito', 5), winWith('young-kakashi', 5),
+            winWithTag('konoha-ninja-outside-team-minato', 20, 'any other Konoha ninja')]],
 ].map(([missionId, title, level, reward, goals, rank], index) => {
     const rewardIds = Array.isArray(reward) ? reward : [reward];
     const characterId = rewardIds[0];

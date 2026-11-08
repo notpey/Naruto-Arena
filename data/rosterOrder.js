@@ -103,6 +103,7 @@ const CANONICAL_ROSTER_ORDER = [
     'zori-and-waraji',          // 98: Zōri & Waraji
     'sarutobi-konohamaru',      // 99: Konohamaru
     'ebisu',                    // 100: Ebisu
+    'namikaze-minato',          // 101: Namikaze Minato
 ];
 
 const ORDER_MAP = new Map(

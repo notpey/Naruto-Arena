@@ -14,6 +14,7 @@ module.exports = function(context) {
         validateBackgroundUrl = () => ({ valid: true }),
         getExperienceRequiredForNextLevel = () => 200,
         recalculatePlayerLadderStandings = () => {},
+        findBattleBotPublicProfile = async () => null,
     } = context || {};
     const requireSession = typeof context?.requireSession === 'function' ? context.requireSession : (req, res, next) => next();
 
@@ -64,6 +65,10 @@ module.exports = function(context) {
             }
         }
         if (!user) {
+            const botProfile = await Promise.resolve(findBattleBotPublicProfile(requestedUsername)).catch(() => null);
+            if (botProfile) {
+                return res.json({ ok: true, user: botProfile });
+            }
             return res.status(404).json({ error: 'Player not found.' });
         }
 

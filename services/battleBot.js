@@ -67,7 +67,7 @@ const describeSkill = (skill) => {
     return summary;
 };
 
-const scoreTarget = ({ summary, targetUnit, isEnemy }) => {
+const scoreTarget = ({ summary, targetUnit, isEnemy, elite = false }) => {
     if (!targetUnit) return 0;
     const hp = hpOf(targetUnit);
     const missing = hpCapOf(targetUnit) - hp;
@@ -77,10 +77,10 @@ const scoreTarget = ({ summary, targetUnit, isEnemy }) => {
         if (hit > 0) {
             score += Math.min(hit, hp);
             if (hit >= hp) score += 60; // A likely kill is worth the most.
-            score += (100 - hp) * 0.3; // Focus the most hurt enemy.
+            score += (100 - hp) * (elite ? 0.5 : 0.3); // Focus the most hurt enemy.
         }
         if (summary.instantKill) score += hp <= 30 ? 70 : 10;
-        if (summary.stun) score += isStunned(targetUnit) ? 2 : 25 + hp * 0.1;
+        if (summary.stun) score += isStunned(targetUnit) ? 2 : 25 + hp * (elite ? 0.25 : 0.1);
         if (summary.enemyDebuff && !summary.stun) score += 8;
         if (summary.chakraDenial) score += 12;
         return score;
@@ -91,7 +91,8 @@ const scoreTarget = ({ summary, targetUnit, isEnemy }) => {
 };
 
 // Scores one legal play. options.targets are the server's legal targets for the skill.
-const scorePlay = ({ match, username, actorSlot, skill, options, random = Math.random }) => {
+// Elite bosses play sharper: harder focus fire, earlier stuns and defense, and far less randomness.
+const scorePlay = ({ match, username, actorSlot, skill, options, random = Math.random, elite = false }) => {
     const summary = describeSkill(skill);
     const actorUnit = match.board?.[username]?.[actorSlot];
     const targets = Array.isArray(options?.targets) ? options.targets : [];
@@ -99,7 +100,7 @@ const scorePlay = ({ match, username, actorSlot, skill, options, random = Math.r
     const resolveUnit = (target) => match.board?.[target?.username]?.[target?.slot];
     const scored = targets.map((target) => ({
         target,
-        score: scoreTarget({ summary, targetUnit: resolveUnit(target), isEnemy: target.username !== username }),
+        score: scoreTarget({ summary, targetUnit: resolveUnit(target), isEnemy: target.username !== username, elite }),
     }));
     let selection;
     let score;
@@ -117,8 +118,8 @@ const scorePlay = ({ match, username, actorSlot, skill, options, random = Math.r
     if (summary.defense && (selfTargeted || options.mode === 'self')) {
         // Defend when hurt and not already protected; otherwise defensive skills mostly wait.
         if (isInvulnerable(actorUnit)) score += 0;
-        else if (actorHpRatio <= 0.35) score += 45;
-        else if (actorHpRatio <= 0.6) score += 18;
+        else if (actorHpRatio <= (elite ? 0.45 : 0.35)) score += 45;
+        else if (actorHpRatio <= (elite ? 0.7 : 0.6)) score += 18;
         else score += 3;
     }
     if (summary.counter) score += 14;
@@ -126,7 +127,7 @@ const scorePlay = ({ match, username, actorSlot, skill, options, random = Math.r
         score += 10; // Setup skills (stance changes, empowerments) are worth using early.
     }
     // A little variety, so the bot is not perfectly predictable.
-    score += random() * 6;
+    score += random() * (elite ? 1.5 : 6);
     return { selection, score };
 };
 
@@ -137,7 +138,7 @@ const MIN_PLAY_SCORE = 6;
  * Plays are chosen greedily by score and re-scored after each queue, since chakra changes.
  */
 const planBattleBotTurn = ({
-    match, username, characters, battleLogic, canAfford, queue, random = Math.random,
+    match, username, characters, battleLogic, canAfford, queue, random = Math.random, elite = false,
 }) => {
     const team = Array.isArray(match.board?.[username]) ? match.board[username] : [];
     const remainingActors = new Set(team
@@ -162,7 +163,7 @@ const planBattleBotTurn = ({
                     characters, rosterIndex: actorUnit.rosterIndex, skillIndex, actorState,
                 });
                 if (!canAfford({ skill, actorState })) return;
-                const play = scorePlay({ match, username, actorSlot, skill, options, random });
+                const play = scorePlay({ match, username, actorSlot, skill, options, random, elite });
                 if (!play || play.score < MIN_PLAY_SCORE) return;
                 if (!best || play.score > best.score) best = { ...play, actorSlot, skillIndex, skill };
             });

@@ -42,6 +42,10 @@ test('arc sorting changes display order without changing canonical roster indice
         ['mitarashi-anko', 'Mitarashi Anko'],
         ['sarutobi-konohamaru', 'Sarutobi Konohamaru'],
         ['ebisu', 'Ebisu'],
+        ['young-kakashi', 'Young Kakashi'],
+        ['uchiha-obito', 'Uchiha Obito'],
+        ['nohara-rin', 'Nohara Rin'],
+        ['namikaze-minato', 'Namikaze Minato'],
     ]);
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({
         characterId,
@@ -50,7 +54,7 @@ test('arc sorting changes display order without changing canonical roster indice
     }));
 
     assert.deepEqual(catalog.listAvailableArcs(roster).map((arc) => arc.label), [
-        'Prologue', 'Land of Waves', 'Chūnin Exams',
+        'Prologue', 'Land of Waves', 'Chūnin Exams', 'Kakashi Gaiden',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster).map((index) => roster[index].characterId), [
         'uzumaki-naruto', 'uchiha-sasuke', 'haruno-sakura', 'hatake-kakashi',
@@ -61,7 +65,10 @@ test('arc sorting changes display order without changing canonical roster indice
         'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga', 'gaara-of-the-desert',
         'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
         'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate', 'mitarashi-anko',
+        'young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato',
     ]);
+    assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'kakashi-gaiden' })
+        .map((index) => roster[index].characterId), ['young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato']);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'land-of-waves' }).map((index) => roster[index].characterId), [
         'demon-brothers', 'momochi-zabuza', 'haku', 'gato', 'zori-and-waraji',
         'sarutobi-hiruzen',
@@ -88,6 +95,7 @@ test('roster order preserves team groups as new mission rewards are added', () =
         'nara-shikamaru', 'akimichi-chouji', 'yamanaka-ino',
         'rock-lee', 'neji-hyuuga', 'tenten',
         'gaara-of-the-desert', 'kankuro', 'temari', 'baki',
+        'young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato',
         'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
         'akadou-yoroi', 'tsurugi-misumi',
         'oboro', 'shigure',

@@ -38,6 +38,10 @@ const ACTIVE_ROSTER_IDS = [
     'baki',
     'gekko-hayate',
     'mitarashi-anko',
+    'young-kakashi',
+    'uchiha-obito',
+    'nohara-rin',
+    'namikaze-minato',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);
