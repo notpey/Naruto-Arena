@@ -1983,7 +1983,6 @@
     border-color: var(--elite-vermilion-deep);
     background: var(--elite-ink);
 }
-.game-remaster .battle-end-overlay.is-elite .battle-end-copy { position: relative; }
 .game-remaster .battle-end-overlay.is-elite .battle-end-title { color: var(--elite-bone); }
 .game-remaster .battle-end-overlay.is-elite.is-victory .battle-end-reward-value { color: #ef8f82; }
 .game-remaster .battle-end-overlay.is-elite .battle-end-reward-row { border-bottom-color: #3a2a26; }
