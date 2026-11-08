@@ -13,6 +13,7 @@
     ].join(",");
     var ALPHA_THRESHOLD = 96; // Measure the solid frame, not its soft glow.
     var MAX_OUTSIDE = 0.06; // Most a frame may extend past the avatar, as a share of its size.
+    var MAX_INSIDE = 0.03; // Most a frame's band covers the avatar while it can still hang outside.
     var SAMPLE_SIZE = 256;
     var MAX_BAND_GAP = 0.03; // Gaps this small (double-line frames) still count as one band.
     var cache = new Map();
@@ -127,26 +128,30 @@
     // Image-space placement: scale `a` (box units per image unit) and offsets for the image's origin.
     function placement(frame) {
         var inner = frame.inner;
-        var outer = frame.outer;
-        if (!inner) {
-            // No opening: line the art's outer bounds up with the avatar.
-            var span = Math.max(outer.right - outer.left, outer.bottom - outer.top);
-            var solidScale = 1 / span;
-            return { scale: solidScale, x: 0.5 - ((outer.left + outer.right) / 2) * solidScale, y: 0.5 - ((outer.top + outer.bottom) / 2) * solidScale };
-        }
+        // No opening: the art is an overlay drawn over the whole avatar (a haze, floating hearts),
+        // so the image itself is the avatar's box. Fitting its visible pixels instead would shift it.
+        if (!inner) return { scale: 1, x: 0, y: 0 };
         var band = frame.band;
-        var thickness = ((inner.left - band.left) + (band.right - inner.right) + (inner.top - band.top) + (band.bottom - inner.bottom)) / 4;
         var opening = ((inner.right - inner.left) + (inner.bottom - inner.top)) / 2;
-        // Centre the frame's band on the avatar's edge: half over it, half outside.
-        var scale = 1 / (opening + thickness);
-        if ((thickness * scale) / 2 > MAX_OUTSIDE) {
-            // Thick frames would hang too far out; cap the overhang and let the rest sit on the avatar.
-            scale = (1 + 2 * MAX_OUTSIDE) / (opening + 2 * thickness);
+        // How far past the opening's edge the avatar reaches on one side, in image units. Each side
+        // uses its own band, so a window's title bar or a lower ribbon doesn't shift the other sides.
+        // Thin bands are centred on the avatar's edge; thicker ones cover at most MAX_INSIDE of the
+        // avatar and hang outside, until the overhang reaches MAX_OUTSIDE and the rest sits inside.
+        var insideCap = (MAX_INSIDE * opening) / (1 - 2 * MAX_INSIDE);
+        function reach(thickness) {
+            var t = Math.max(0, thickness);
+            var leastForOverhang = (t - MAX_OUTSIDE * opening) / (1 + 2 * MAX_OUTSIDE);
+            return Math.max(leastForOverhang, Math.min(t / 2, insideCap));
         }
+        var left = inner.left - reach(inner.left - band.left);
+        var right = inner.right + reach(band.right - inner.right);
+        var top = inner.top - reach(inner.top - band.top);
+        var bottom = inner.bottom + reach(band.bottom - inner.bottom);
+        var scale = 2 / ((right - left) + (bottom - top));
         return {
             scale: scale,
-            x: 0.5 - ((inner.left + inner.right) / 2) * scale,
-            y: 0.5 - ((inner.top + inner.bottom) / 2) * scale
+            x: 0.5 - ((left + right) / 2) * scale,
+            y: 0.5 - ((top + bottom) / 2) * scale
         };
     }
 
