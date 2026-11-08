@@ -44,6 +44,9 @@ module.exports = {
         icon: 'https://i.imgur.com/MmyKEoD.png',
         description: 'Young Kakashi deals 5 additional physical and chakra damage for each dead ally.',
         damageBonusPerDeadAlly: { amount: 5, skillClassesAny: ['Physical', 'Chakra'] },
+        // Tooltip only: the server keeps deadAllyDamageBonus current as allies die or revive.
+        deadAllyDamageBonus: 0,
+        stackTooltipTextTemplate: 'Young Kakashi deals 5 additional physical and chakra damage for each dead ally. Current damage bonus: {deadAllyDamageBonus}.',
     },
     skills: [
         {

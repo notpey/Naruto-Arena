@@ -35,17 +35,20 @@ module.exports = {
         {
             id: PIERCING_STAB, name: 'Piercing Stab',
             skillimage: 'https://i.imgur.com/3Mp49Qg.png',
-            skilldescription: 'Obito deals 15 physical damage to an enemy. That enemy permanently takes 5 additional damage from Piercing Stab until Obito dies.',
+            skilldescription: 'Obito deals 15 physical damage to an enemy. That enemy permanently takes 5 additional damage from Piercing Stab until Obito dies. This effect stacks.',
             energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 15, scope: 'target' },
                 { type: 'apply_status', statusId: 'uchiha_obito_piercing_stab_mark', duration: 99, scope: 'target', metadata: {
                     harmful: true, permanent: true, removeOnSourceDeath: true,
+                    // Each stab adds another 5, with no cap.
                     bonusDamageFromSourceSkillsFlat: 5,
+                    mergeNumericAddKeys: ['bonusDamageFromSourceSkillsFlat'],
                     bonusDamageFromSourceCharacterId: 'uchiha-obito',
                     bonusDamageAppliesToSkillIds: [PIERCING_STAB],
                     tooltipText: 'Piercing Stab deals 5 additional damage to this character until Obito dies.',
+                    tooltipTextTemplate: 'Piercing Stab deals {bonusDamageFromSourceSkillsFlat} additional damage to this character until Obito dies.',
                 } },
             ],
         },
@@ -53,7 +56,7 @@ module.exports = {
             id: GOUKAKYUU, name: 'Obito Goukakyuu no Jutsu',
             skillimage: 'https://i.imgur.com/Z9H5tUb.png',
             skilldescription: 'Obito deals 30 chakra damage, evenly distributed among all enemies.',
-            energy: ['Ninjutsu'], target: 'all-enemy', damage: 0, cooldown: 1,
+            energy: ['Bloodline'], target: 'all-enemy', damage: 0, cooldown: 1,
             classes: ['Chakra', 'Instant'],
             effects: [{ type: 'damage', amount: 30, scope: 'all-enemy', metadata: { splitAmountEvenlyAmongRecipients: true } }],
         },

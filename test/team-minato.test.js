@@ -75,7 +75,7 @@ test('Team Minato kits match the drafts and join the playable roster', () => {
     ]);
     assert.deepEqual(kit('uchiha-obito'), [
         ['Piercing Stab', ['Random'], 0, 'single-enemy', ['Physical', 'Instant']],
-        ['Obito Goukakyuu no Jutsu', ['Ninjutsu'], 1, 'all-enemy', ['Chakra', 'Instant']],
+        ['Obito Goukakyuu no Jutsu', ['Bloodline'], 1, 'all-enemy', ['Chakra', 'Instant']],
         ['Parting Gift', ['Bloodline'], 0, 'single-ally', ['Strategic', 'Affliction*', 'Instant']],
         ['Sparkling Parry', ['Random'], 4, 'self', ['Strategic', 'Instant']],
     ]);
@@ -107,24 +107,43 @@ test('Pit Trap is hidden from the trapped team and springs for 15 piercing damag
     cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
     assert.equal(rin.hp, 85, 'Rin has 10 damage reduction while the trap is set');
     endTurn(match, 'p2');
-    assert.equal(naruto.hp, 80, '15 piercing from the trap plus 5 from using a physical skill');
+    assert.equal(naruto.hp, 75, '15 piercing from the trap plus 10 for using a physical skill');
     assert.equal(status(naruto, 'nohara_rin_pit_trap'), undefined, 'the trap ends once it springs');
     assert.equal(status(rin, 'nohara_rin_pit_trap_guard'), undefined, 'the damage reduction ends with the trap');
 
-    for (const expected of [75, 70, 70]) {
+    for (let turn = 0; turn < 3; turn += 1) {
         endTurn(match, 'p1');
         endTurn(match, 'p2');
-        assert.equal(naruto.hp, expected, 'the wound deals 5 piercing damage on each of 3 turns');
+        assert.equal(naruto.hp, 75, 'nothing lingers after the trap springs');
     }
 });
 
-test('Pit Trap only wounds an enemy who uses a physical skill', () => {
+test('Pit Trap adds its 10 bonus only once, however many physical skills are used', () => {
+    const match = matchFor(['nohara-rin'], ['uzumaki-naruto']);
+    const [naruto] = match.board.p2;
+    cast(match, 'p1', 0, 'nohara-rin-pit-trap', 'p2', 0);
+    const trap = status(naruto, 'nohara_rin_pit_trap');
+    assert.equal(trap.metadata.tooltipText,
+        'This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, the trap deals 10 additional damage.');
+    endTurn(match, 'p1');
+    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+    assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.turnEndDamage, 25);
+    assert.match(status(naruto, 'nohara_rin_pit_trap').metadata.tooltipText, /takes 25 piercing/);
+    assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.invisible, true, 'the trap stays hidden');
+    match.board.p2[0].state.cooldowns = {};
+    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+    assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.turnEndDamage, 25);
+    endTurn(match, 'p2');
+    assert.equal(naruto.hp, 75);
+});
+
+test('Pit Trap only adds its bonus against an enemy who uses a physical skill', () => {
     const match = matchFor(['nohara-rin'], ['nara-shikamaru']);
     const [shikamaru] = match.board.p2;
     cast(match, 'p1', 0, 'nohara-rin-pit-trap', 'p2', 0);
     endTurn(match, 'p1');
     cast(match, 'p2', 0, 'nara-shikamaru-meditate', 'p1', 0);
-    assert.equal(status(shikamaru, 'nohara_rin_pit_trap_wound'), undefined);
+    assert.equal(status(shikamaru, 'nohara_rin_pit_trap').metadata.turnEndDamage, 15);
     endTurn(match, 'p2');
     assert.equal(shikamaru.hp, 85);
     endTurn(match, 'p1');
@@ -337,7 +356,23 @@ test('Lone Wolf adds 5 physical and chakra damage per dead ally', () => {
     assert.equal(sasuke.hp, 45);
 });
 
-test('Piercing Stab permanently marks for 5 extra Piercing Stab damage that does not stack and ends when Obito dies', () => {
+test('Lone Wolf tooltip shows the damage bonus it currently grants', () => {
+    const match = matchFor(['young-kakashi', 'haruno-sakura', 'uzumaki-naruto'], ['uchiha-sasuke']);
+    const kakashi = match.board.p1[0];
+    const loneWolf = () => kakashi.state.statuses.find((entry) => entry?.metadata?.sourceSkillName === 'Lone Wolf');
+    assert.match(loneWolf().metadata.tooltipText, /Current damage bonus: 0.$/);
+    battle.applyDamageToUnit(match.board.p1[1], 200, { match, sourceUsername: 'p2', sourceSlot: 0,
+        targetUsername: 'p1', targetSlot: 1 });
+    assert.match(loneWolf().metadata.tooltipText, /Current damage bonus: 5.$/, 'updates as soon as an ally dies');
+    kill(match.board.p1[2]);
+    cast(match, 'p1', 0, 'young-kakashi-white-fang-slash', 'p2', 0);
+    assert.match(loneWolf().metadata.tooltipText, /Current damage bonus: 10.$/);
+    battle.reviveUnitToHp(match.board.p1[2], 50);
+    cast(match, 'p1', 0, 'young-kakashi-white-fang-slash', 'p2', 0);
+    assert.match(loneWolf().metadata.tooltipText, /Current damage bonus: 5.$/, 'a revived ally lowers it again');
+});
+
+test('Piercing Stab permanently marks for 5 extra Piercing Stab damage that stacks without limit and ends when Obito dies', () => {
     const match = matchFor(['uchiha-obito'], ['haruno-sakura']);
     const [obito] = match.board.p1;
     const [sakura] = match.board.p2;
@@ -347,7 +382,11 @@ test('Piercing Stab permanently marks for 5 extra Piercing Stab damage that does
     cast(match, 'p1', 0, 'uchiha-obito-piercing-stab', 'p2', 0);
     assert.equal(sakura.hp, 65);
     cast(match, 'p1', 0, 'uchiha-obito-piercing-stab', 'p2', 0);
-    assert.equal(sakura.hp, 45, 'the mark does not stack');
+    assert.equal(sakura.hp, 40, 'the mark stacks: 15 + 10');
+    assert.equal(status(sakura, 'uchiha_obito_piercing_stab_mark').metadata.bonusDamageFromSourceSkillsFlat, 15);
+    assert.match(status(sakura, 'uchiha_obito_piercing_stab_mark').metadata.tooltipText, /deals 15 additional/);
+    cast(match, 'p1', 0, 'uchiha-obito-piercing-stab', 'p2', 0);
+    assert.equal(sakura.hp, 10, 'and keeps stacking: 15 + 15');
     battle.applyDamageToUnit(obito, 200, { match, sourceUsername: 'p2', sourceSlot: 0,
         targetUsername: 'p1', targetSlot: 0 });
     assert.equal(obito.alive, false);

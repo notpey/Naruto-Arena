@@ -64,7 +64,7 @@ test('Namikaze Minato matches the draft and is unlocked by The Yellow Flash', ()
     assert.deepEqual(minato.skills.map((skill) =>
         [skill.name, skill.energy, skill.cooldown, skill.target, skill.classes]), [
         ['Flying Thunder God', ['Genjutsu'], 0, 'single-character', ['Physical', 'Instant']],
-        ['Chakra Surveillance', ['Random'], 2, 'all-enemy', ['Strategic', 'Instant']],
+        ['Chakra Surveillance', ['Ninjutsu'], 2, 'all-enemy', ['Strategic', 'Instant']],
         ['Custom Kunai', ['Taijutsu'], 2, 'single-ally', ['Strategic', 'Instant']],
         ['Reroute', ['Random'], 4, 'self', ['Strategic', 'Instant']],
     ]);
@@ -161,6 +161,14 @@ test('Flying Thunder God also targets every character Minato has marked', () => 
     assert.equal(sasuke.hp, 80);
     assert.equal(kiba.hp, 60, "Kiba's mark ended after Minato's turn");
     assert.ok(isInvulnerable(ally), 'the marked ally is also targeted and becomes invulnerable');
+});
+
+test('Chakra Surveillance gives Minato 1 random chakra', () => {
+    const match = matchFor(['namikaze-minato'], ['uzumaki-naruto']);
+    const total = () => Object.values(match.chakraPools.p1).reduce((sum, value) => sum + (Number(value) || 0), 0);
+    const before = total();
+    cast(match, 'p1', 0, 'namikaze-minato-chakra-surveillance');
+    assert.equal(total(), before + 1);
 });
 
 test('Chakra Surveillance invisibly marks enemies who use a skill', () => {

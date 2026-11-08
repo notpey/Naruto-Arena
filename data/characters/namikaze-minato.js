@@ -64,10 +64,10 @@ module.exports = {
         {
             id: 'namikaze-minato-chakra-surveillance', name: 'Chakra Surveillance',
             skillimage: 'https://i.imgur.com/2j02iq5.png',
-            skilldescription: 'For 1 turn, any enemy who uses a skill will be marked. This skill is invisible.',
-            energy: ['Random'], target: 'all-enemy', damage: 0, cooldown: 2,
+            skilldescription: 'For 1 turn, any enemy who uses a skill will be marked. Minato gains 1 random chakra. This skill is invisible.',
+            energy: ['Ninjutsu'], target: 'all-enemy', damage: 0, cooldown: 2,
             classes: ['Strategic', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'namikaze_minato_chakra_surveillance', duration: 1,
+            effects: [{ type: 'gain_chakra', chakraType: 'random', amount: 1, scope: 'self' }, { type: 'apply_status', statusId: 'namikaze_minato_chakra_surveillance', duration: 1,
                 scope: 'all-enemy', metadata: {
                     harmful: true, invisible: true, hideTooltipFromUnitOwner: true,
                     turnDurationAnchor: 'source_turn',

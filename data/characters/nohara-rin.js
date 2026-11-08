@@ -1,4 +1,10 @@
 const PIT_TRAP = 'nohara_rin_pit_trap';
+const pitTrapMetadata = (turnEndDamage) => ({
+    harmful: true, invisible: true, hideTooltipFromUnitOwner: true,
+    turnEndDamage, turnEndSkillClasses: ['Physical'], ignoreTargetDamageReduction: true,
+    tooltipText: 'This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, the trap deals 10 additional damage.',
+    tooltipTextTemplate: 'This character takes {turnEndDamage} piercing physical damage at the end of their turn. If they use a physical skill this turn, the trap deals 10 additional damage.',
+});
 
 module.exports = {
     id: 'nohara-rin',
@@ -16,23 +22,19 @@ module.exports = {
         {
             id: 'nohara-rin-pit-trap', name: 'Pit Trap',
             skillimage: 'https://i.imgur.com/up1Gi06.png',
-            skilldescription: 'Rin places an invisible trap on an enemy. At the end of their turn, the trap deals 15 piercing physical damage. If that enemy uses a physical skill this turn, they also take 5 piercing damage each turn for 3 turns. Rin has 10 damage reduction during this skill.',
+            skilldescription: 'Rin places an invisible trap on an enemy. At the end of their turn, the trap deals 15 piercing physical damage. If that enemy uses a physical skill this turn, the trap deals 10 additional damage. Rin has 10 damage reduction during this skill.',
             energy: ['Genjutsu'], target: 'single-enemy', damage: 0, cooldown: 0,
             classes: ['Physical', 'Instant'],
             effects: [
                 // The trap springs at the end of the trapped enemy's next turn, then ends.
-                { type: 'apply_status', statusId: PIT_TRAP, duration: 1, scope: 'target', metadata: {
-                    harmful: true, invisible: true, hideTooltipFromUnitOwner: true,
-                    turnEndDamage: 15, turnEndSkillClasses: ['Physical'], ignoreTargetDamageReduction: true,
-                    tooltipText: 'This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, they also take 5 piercing damage each turn for 3 turns.',
-                } },
+                { type: 'apply_status', statusId: PIT_TRAP, duration: 1, scope: 'target', metadata: pitTrapMetadata(15) },
+                // The first physical skill the trapped enemy uses adds 10 to the same hit.
                 { type: 'apply_status', statusId: `${PIT_TRAP}_trigger`, duration: 1, scope: 'target', metadata: {
                     harmful: true, invisible: true, hideTooltip: true,
                     onOwnerUseSkillTrigger: true, onOwnerUseSkillClassesAny: ['Physical'],
                     onOwnerUseSkillEffects: [
-                        { type: 'apply_status', statusId: `${PIT_TRAP}_wound`, duration: 3, metadata: {
-                            harmful: true, turnEndDamage: 5, ignoreTargetDamageReduction: true,
-                            tooltipText: 'This character takes 5 piercing damage each turn.',
+                        { type: 'apply_status', statusId: PIT_TRAP, duration: 1, metadata: {
+                            ...pitTrapMetadata(10), mergeNumericAddKeys: ['turnEndDamage'],
                         } },
                     ],
                 } },

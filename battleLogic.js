@@ -149,6 +149,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           onEnemyDeathHealSelfAmount: Math.max(0, Number(passive.onEnemyDeathHealSelfAmount) || 0),
                           healBonusWhenTargetHpAtMost: passive.healBonusWhenTargetHpAtMost || null,
                           damageBonusPerDeadAlly: passive.damageBonusPerDeadAlly || null,
+                          ...(passive.damageBonusPerDeadAlly ? { deadAllyDamageBonus: 0 } : {}),
                           ...(typeof passive.stackMetadataKey === 'string' && passive.stackMetadataKey ? {
                               [passive.stackMetadataKey]: Math.max(0, Number(passive[passive.stackMetadataKey]) || 0),
                           } : {}),
@@ -4566,8 +4567,31 @@ const purgeTetheredStatusesOnSourceDeath = ({ match, sourceUsername, sourceSlot 
     });
 };
 
+// Keeps Lone Wolf's tooltip showing the bonus it currently grants. Display only: the damage
+// itself is always computed live by getDeadAllyDamageBonus.
+const syncDeadAllyBonusTooltips = (match, usernames = null) => {
+    const board = match?.board;
+    if (!board || typeof board !== 'object') return;
+    (Array.isArray(usernames) ? usernames : Object.keys(board)).forEach((username) => {
+        const team = Array.isArray(board[username]) ? board[username] : [];
+        team.forEach((unit) => {
+            if (!unit) return;
+            const statuses = Array.isArray(unit.state?.statuses) ? unit.state.statuses : [];
+            statuses.forEach((status) => {
+                const config = status?.metadata?.damageBonusPerDeadAlly;
+                if (!config || typeof status.metadata.tooltipTextTemplate !== 'string') return;
+                const deadAllies = team.filter((ally) => ally && ally !== unit && ally.alive === false).length;
+                const bonus = deadAllies * Math.max(0, Number(config.amount) || 0);
+                status.metadata = { ...status.metadata, deadAllyDamageBonus: bonus };
+                status.metadata.tooltipText = renderTooltipTemplate(status.metadata.tooltipTextTemplate, status.metadata);
+            });
+        });
+    });
+};
+
 const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
     if (!unit || !match || !username || !Number.isInteger(slot)) return;
+    syncDeadAllyBonusTooltips(match, [username]);
     const targetState = ensureUnitStateShape(unit);
     let changed = false;
     (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
@@ -5085,8 +5109,12 @@ const cleanseEnemyAfflictionStatuses = (unit, ownerUsername, count = 0) => {
 const getSkillByIndices = (characters, rosterIndex, skillIndex, actorState = null) =>
     resolveEffectiveSkill({ characters, rosterIndex, skillIndex, actorState });
 
-const resolvePendingTurnSkills = (args = {}) =>
-    runWithActiveResolution(args?.match, () => resolveQueuedTurnSkills(args));
+const resolvePendingTurnSkills = (args = {}) => {
+    const result = runWithActiveResolution(args?.match, () => resolveQueuedTurnSkills(args));
+    // Catches revives as well as deaths.
+    syncDeadAllyBonusTooltips(args?.match);
+    return result;
+};
 
 const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
     if (!match || !actingUsername) return;
