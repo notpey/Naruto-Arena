@@ -28,6 +28,9 @@ const selectActiveRoster = (entries) => (Array.isArray(entries) ? entries : [])
     .sort((a, b) => (activeRosterOrder.get(a.characterId) ?? 9999) - (activeRosterOrder.get(b.characterId) ?? 9999));
 const canonicalCharacters = require('./data/characters/index.js');
 const battleBot = require('./services/battleBot');
+const towerRun = require('./services/tower/towerRun');
+const towerBoss = require('./services/tower/towerBoss');
+const { buildScrollStatus } = require('./services/tower/towerScrolls');
 const missionCharacterTagsById = new Map(canonicalCharacters.map((character) =>
     [character.characterId, getMissionCharacterTags(character)]));
 let charactersData = selectActiveRoster(canonicalCharacters);
@@ -238,6 +241,9 @@ let newsPostsCollection;
 let clanWarsCollection;
 // Set once the database is ready; the match endpoints use it for war battles.
 let clanWarsRouter = null;
+// Set once the database is ready; Tower matches report their results through it.
+let towerRunsCollection;
+let towerRouter = null;
 let cosmeticsService = require('./services/cosmeticsService.js')({});
 const matchSocketRooms = new Map();
 
@@ -2711,6 +2717,17 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
         return null;
     }
 
+    // Tower battles only advance the Tower run: no EXP, ladder record, missions or recent games.
+    if (match.mode === 'tower') {
+        try {
+            await towerRouter?.recordTowerBattleResult(match, winnerUsername);
+        } catch (error) {
+            // The run reconciles from the ended match the next time it is read.
+            console.error('Tower battle result error:', error);
+        }
+        return null;
+    }
+
     const missionResults = await applyMissionProgressForUsers(match, winnerUsername, endedAt);
     match.missionResults =
         missionResults && Object.keys(missionResults).length > 0 ? missionResults : null;
@@ -4223,6 +4240,7 @@ const PUBLIC_ROOT_SCRIPTS = new Set([
     'selectionStore.js',
     'selectionWar.js',
     'skill-description-format.js',
+    'tower.js',
 ]);
 const PUBLIC_MEDIA_DIRS = new Set(['assets', 'avatars', 'borders', 'hats', 'sounds']);
 const isPublicStaticPath = (requestPath = '') => {
@@ -4892,8 +4910,23 @@ const buildMatchPayloadForUser = (match, username) => {
         ladderResult: match.ladderResults?.[username] || null,
         missionResult: match.missionResults?.[username] || null,
         eliteEncounter: match.eliteEncounter || null,
+        towerEncounter: serializeTowerEncounter(match.towerEncounter),
     };
 };
+
+// What the battle screen shows about a Tower fight: floor, enemy affixes and the boss's telegraph.
+const serializeTowerEncounter = (encounter) => (encounter ? {
+    runId: encounter.runId || null,
+    kind: encounter.kind || 'battle',
+    floor: Number(encounter.floor) || 0,
+    totalFloors: towerRun.TOTAL_FLOORS,
+    name: encounter.name || '',
+    affixes: (encounter.affixes || []).map(towerRun.describeAffix).filter(Boolean),
+    boss: encounter.boss ? {
+        ...towerBoss.describeBossStateForClient(encounter.boss),
+        ...towerBoss.describeBossForClient(),
+    } : null,
+} : null);
 
 const hydrateMatchForBroadcast = async (matchOrMatchId) => {
     const match =
@@ -5805,6 +5838,180 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
     return matchDocument;
 };
 
+// ---------------------------------------------------------------- Tower matches
+const TOWER_KIND_TITLES = { battle: 'Tower', elite: 'Elite', boss: 'Boss' };
+
+const resolveTowerRosterIndex = (characterId) =>
+    (Array.isArray(charactersData) ? charactersData : []).findIndex((character) => character?.characterId === characterId);
+
+const isTowerMatch = (match) => match?.mode === 'tower' && Boolean(match?.towerEncounter);
+const isTowerBossMatch = (match) => isTowerMatch(match) && Boolean(match.towerEncounter.boss);
+const isTowerEliteMatch = (match) => isTowerMatch(match) && match.towerEncounter.kind !== 'battle';
+const getTowerPlayerUsername = (match) =>
+    (Array.isArray(match?.players) ? match.players.find((player) => player && !player.isBot)?.username : null) || null;
+
+const applyTowerStatus = (unit, status, sourceUsername, sourceSlot) => {
+    if (!unit || !status) return;
+    battleLogic.applyStatus({
+        targetState: unit.state,
+        statusId: status.statusId,
+        duration: status.duration,
+        sourceSkillId: null,
+        sourceUsername,
+        sourceSlot,
+        metadata: { ...status.metadata },
+    });
+};
+
+// Carries the run into the board: each ninja's health and scrolls, and the enemy's scaling.
+const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
+    (board[username] || []).forEach((unit, slot) => {
+        const member = setup.team[slot];
+        if (!unit || !member) return;
+        unit.hpCap = Math.max(1, (Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100) + (member.maxHp - towerRun.BASE_MAX_HP));
+        unit.hp = Math.max(1, Math.min(unit.hpCap, Number(member.hp) || unit.hpCap));
+        member.scrolls.forEach((key) => applyTowerStatus(unit, buildScrollStatus(key), username, slot));
+    });
+    const { encounter } = setup;
+    if (encounter.kind === 'boss') {
+        towerBoss.applyBossVitality(board, botUsername);
+    } else {
+        const multiplier = Math.max(1, Number(encounter.hpMultiplier) || 1);
+        (board[botUsername] || []).forEach((unit) => {
+            if (!unit) return;
+            unit.hpCap = Math.round((Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100) * multiplier);
+            unit.hp = unit.hpCap;
+        });
+    }
+    (encounter.affixes || []).forEach((affixId) => {
+        const affix = towerRun.AFFIXES[affixId];
+        if (!affix) return;
+        (board[botUsername] || []).forEach((unit, slot) => applyTowerStatus(unit, {
+            statusId: `tower_affix_${affix.id}`,
+            duration: 99,
+            metadata: {
+                helpful: true, permanent: true, cannotBeCleansed: true, fromPassive: true,
+                sourceSkillName: `${affix.name} (Tower Affix)`,
+                statusIcon: `assets/tower/affix-${affix.id}.svg`,
+                tooltipText: affix.description,
+                ...affix.metadata,
+            },
+        }, botUsername, slot));
+    });
+};
+
+const buildTowerMatch = async ({ username, runId, setup }) => {
+    const team = setup.team.map((member) => resolveTowerRosterIndex(member.characterId));
+    const enemyTeam = setup.encounter.enemyIds.map(resolveTowerRosterIndex);
+    if (team.length !== 3 || enemyTeam.length !== 3 || [...team, ...enemyTeam].some((index) => index < 0)) {
+        throw new Error('A Tower battle could not resolve its characters.');
+    }
+    const { encounter } = setup;
+    const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const botPlayer = createBattleBotPlayer({
+        matchId, team: enemyTeam, ladderLevel: 1, displayName: encounter.name,
+    });
+    botPlayer.profile = {
+        ...botPlayer.profile,
+        avatarUrl: charactersData?.[enemyTeam[0]]?.facePicture || DEFAULT_PROFILE_AVATAR,
+        equippedTitle: `${TOWER_KIND_TITLES[encounter.kind] || 'Tower'} · Floor ${encounter.floor}`,
+        equippedBorder: '',
+    };
+    const aliveLookup = { [username]: 3, [botPlayer.username]: 3 };
+    const playerDocs = [{ username, team, aliveCount: 3 }, botPlayer];
+    const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
+    if (board[username]?.length !== 3 || board[botPlayer.username]?.length !== 3) {
+        throw new Error('A Tower battle could not initialize both teams.');
+    }
+    applyTowerSetupToBoard({ board, username, botUsername: botPlayer.username, setup });
+
+    // The player always opens a Tower battle, so a boss's first telegraph is seen before it acts.
+    const built = buildMatch([username, botPlayer.username], aliveLookup, {
+        matchId, displayNames: { [botPlayer.username]: botPlayer.displayName },
+    });
+    if (built.currentTurn !== username) {
+        built.turnOrder = [username, botPlayer.username];
+        built.currentTurn = username;
+        const initialized = initializeEconomyState(built.turnOrder, username);
+        built.chakraPools = initialized.chakraPools;
+        built.economy = initialized.economy;
+        built.turnExpiresAt = initialized.turnExpiresAt
+            ? new Date(new Date(initialized.turnExpiresAt).getTime() + MATCH_FOUND_HOLD_MS)
+            : built.matchStartsAt;
+    }
+
+    const matchDocument = {
+        matchId: built.matchId,
+        mode: 'tower',
+        status: 'active',
+        createdAt: new Date(),
+        matchStartsAt: built.matchStartsAt,
+        chakraPools: built.chakraPools,
+        economy: built.economy,
+        pendingTurns: built.pendingTurns,
+        currentTurn: built.currentTurn,
+        turnStartedAt: built.turnStartedAt,
+        turnOrder: built.turnOrder,
+        turnExpiresAt: built.turnExpiresAt,
+        board,
+        players: playerDocs,
+        botMatch: {
+            enabled: true,
+            displayName: botPlayer.displayName,
+            ...(encounter.kind !== 'battle' ? { elite: true } : {}),
+        },
+        towerEncounter: {
+            runId,
+            kind: encounter.kind,
+            floor: encounter.floor,
+            name: encounter.name,
+            affixes: (encounter.affixes || []).slice(),
+            boss: encounter.kind === 'boss' ? towerBoss.createBossState() : null,
+        },
+    };
+    if (matchDocument.towerEncounter.boss) {
+        matchDocument.towerEncounter.boss.intent = towerBoss.computeNextIntent({
+            state: matchDocument.towerEncounter.boss,
+            match: matchDocument,
+            botUsername: botPlayer.username,
+            playerUsername: username,
+            characters: charactersData,
+            battleLogic,
+        });
+    }
+    quickMatches.set(matchDocument.matchId, {
+        players: built.turnOrder,
+        createdAt: matchDocument.createdAt,
+        matchStartsAt: matchDocument.matchStartsAt,
+        turnOrder: matchDocument.turnOrder,
+        currentTurn: matchDocument.currentTurn,
+        turnStartedAt: matchDocument.turnStartedAt,
+        chakraPools: matchDocument.chakraPools,
+        economy: matchDocument.economy,
+        pendingTurns: matchDocument.pendingTurns,
+        turnExpiresAt: matchDocument.turnExpiresAt,
+    });
+    await insertMatchActive(matchDocument);
+    userToMatch.set(username, { matchId: matchDocument.matchId, opponent: botPlayer.displayName });
+    return matchDocument;
+};
+
+// A boss's telegraphed technique is always fuelled: grant exactly the chakra it is missing.
+const fundTowerBossSkill = ({ match, username, skill, actorState }) => {
+    const pool = match.chakraPools?.[username];
+    if (!pool || !skill) return;
+    const pending = getPendingTurn(match, username);
+    const { reservedSpecific, requiredRandom } = battleLogic.computeEffectiveEnergyCost({ skill, actorState });
+    chakraTypes.forEach((type) => {
+        const need = Number(reservedSpecific[type]) || 0;
+        if ((Number(pool[type]) || 0) < need) pool[type] = need;
+    });
+    const spare = chakraTypes.reduce((sum, type) =>
+        sum + Math.max(0, (Number(pool[type]) || 0) - (Number(reservedSpecific[type]) || 0)), 0);
+    const deficit = (Number(pending.unresolvedRandom) || 0) + (Number(requiredRandom) || 0) - spare;
+    if (deficit > 0) pool.taijutsu = (Number(pool.taijutsu) || 0) + deficit;
+};
+
 const clearScheduledBattleBotQueueCheck = (username) => {
     const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
     if (!normalizedUsername) return;
@@ -6277,13 +6484,32 @@ const runBattleBotTurn = async (matchId) => {
             }
         }
 
+        const towerBossTurn = isTowerBossMatch(hydrated);
         if (!passiveBot) {
+            let skipActorSlots = [];
+            if (towerBossTurn) {
+                // The scripted boss acts first; the regular bot plays every unit it did not move.
+                const scripted = towerBoss.runScriptedBossTurn({
+                    state: hydrated.towerEncounter.boss,
+                    match: hydrated,
+                    botUsername: username,
+                    playerUsername: getTowerPlayerUsername(hydrated),
+                    characters: charactersData,
+                    battleLogic,
+                    fundSkill: ({ skill, actorState }) => fundTowerBossSkill({ match: hydrated, username, skill, actorState }),
+                    queue: ({ actorSlot, skillIndex, targetSelection }) => queueSkillForActorSlot({
+                        match: hydrated, username, actorSlot, skillIndex, targetSelection, classChoice: null,
+                    }),
+                });
+                skipActorSlots = scripted.usedSlots;
+            }
             battleBot.planBattleBotTurn({
                 match: hydrated,
                 username,
-                elite: isEliteEncounterMatch(hydrated),
+                elite: isEliteEncounterMatch(hydrated) || isTowerEliteMatch(hydrated),
                 characters: charactersData,
                 battleLogic,
+                skipActorSlots,
                 canAfford: ({ skill, actorState }) => botCanAffordSkill({ match: hydrated, username, skill, actorState }),
                 queue: ({ actorSlot, skillIndex, targetSelection, classChoice }) => queueSkillForActorSlot({
                     match: hydrated, username, actorSlot, skillIndex, targetSelection, classChoice,
@@ -6293,6 +6519,21 @@ const runBattleBotTurn = async (matchId) => {
 
         assignBattleBotRandomChakra({ match: hydrated, username });
         const updated = await finalizeTurn(hydrated, username);
+        if (towerBossTurn) {
+            const after = updated || hydrated;
+            const bossState = after.towerEncounter?.boss;
+            if (bossState && after.status !== 'ended') {
+                bossState.intent = towerBoss.computeNextIntent({
+                    state: bossState,
+                    match: after,
+                    botUsername: username,
+                    playerUsername: getTowerPlayerUsername(after),
+                    characters: charactersData,
+                    battleLogic,
+                });
+            }
+            await updateMatchActive(after.matchId, { $set: { towerEncounter: after.towerEncounter } });
+        }
         await broadcastMatchState(updated || hydrated);
         if (updated && isBattleBotTurn(updated)) {
             scheduleBattleBotTurn(updated);
@@ -7512,6 +7753,21 @@ async function initDb() {
     });
     await clanWarsRouter.ensureIndexes();
     app.use(clanWarsRouter);
+
+    towerRunsCollection = db.collection('tower_runs');
+    await towerRunsCollection.createIndex({ runId: 1 }, { unique: true });
+    await towerRunsCollection.createIndex({ username: 1, createdAt: -1 });
+    towerRouter = require('./routes/tower.js')({
+        requireSession,
+        towerRunsCollection,
+        usersCollection,
+        getCharacters: () => charactersData,
+        getMatchActive,
+        buildTowerMatch,
+        userToMatch,
+        removeQueuedEntry,
+    });
+    app.use('/api/tower', towerRouter);
 }
 
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
@@ -10260,6 +10516,11 @@ app.get(['/selection', '/selection.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'selection.html'));
 });
 
+app.get(['/tower', '/tower.html'], (req, res) => {
+    if (req.path === '/tower') return res.redirect(308, req.originalUrl.replace('/tower', '/tower.html'));
+    res.sendFile(path.join(__dirname, 'tower.html'));
+});
+
 app.get(['/ingame', '/ingame.html'], (req, res) => {
     if (req.path === '/ingame') return res.redirect(308, req.originalUrl.replace('/ingame', '/ingame.html'));
     res.sendFile(path.join(__dirname, 'ingame.html'));
@@ -10399,6 +10660,8 @@ module.exports = {
     applyMissionProgressForUsers,
     applyMatchCompletionRewards,
     resolveRosterIndicesForCharacterIds,
+    applyTowerSetupToBoard,
+    serializeTowerEncounter,
     // Tests only: lets mission and reward code run against an in-memory users collection.
     __setTestUsersCollection: (collection) => { usersCollection = collection; },
     app,

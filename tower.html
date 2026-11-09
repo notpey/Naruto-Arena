@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>The Tower · Naruto-Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png?v=3">
+    <link rel="shortcut icon" href="favicon.ico?v=3">
+    <link rel="stylesheet" href="account.css?v=2">
+    <link rel="stylesheet" href="tower.css?v=2">
+</head>
+<body class="tower-page" data-scene="waves">
+<div class="tower-backdrop" aria-hidden="true">
+    <div class="tower-backdrop-art"></div>
+    <div class="tower-mist is-far"></div>
+    <div class="tower-mist is-near"></div>
+</div>
+<header class="tower-topbar">
+    <a class="tower-back" href="selection.html" aria-label="Back to the selection hub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+        <span>Hub</span>
+    </a>
+    <div class="tower-title">
+        <span class="tower-title-mark" aria-hidden="true">塔</span>
+        <div>
+            <strong>The Tower</strong>
+            <small>Act I · Land of Waves</small>
+        </div>
+    </div>
+    <div class="tower-run-meta" data-run-meta hidden>
+        <span class="tower-meta-chip" data-floor-chip></span>
+        <span class="tower-meta-chip is-ryo" data-ryo-chip title="Run ryō: spent at merchants, lost when the run ends"></span>
+        <button type="button" class="tower-text-button" data-abandon>Abandon run</button>
+    </div>
+</header>
+
+<main class="tower-layout">
+    <aside class="tower-team" data-team-panel hidden aria-label="Your team">
+        <h2 class="tower-panel-title">Your team</h2>
+        <div class="tower-pick-banner" data-pick-banner hidden>
+            <span data-pick-label></span>
+            <button type="button" class="tower-text-button" data-pick-cancel>Cancel</button>
+        </div>
+        <ol class="tower-team-list" data-team-list></ol>
+        <div class="tower-team-scrolls" data-team-scrolls></div>
+        <h2 class="tower-panel-title">Journal</h2>
+        <ol class="tower-log" data-log></ol>
+    </aside>
+
+    <section class="tower-stage" data-stage aria-live="polite">
+        <div class="tower-card tower-skeleton" aria-label="Opening the Tower">
+            <span></span><span></span><span></span>
+        </div>
+    </section>
+</main>
+
+<dialog class="tower-confirm" data-confirm aria-labelledby="tower-confirm-title">
+    <span class="tower-confirm-seal" aria-hidden="true">退</span>
+    <h2 id="tower-confirm-title" data-confirm-title></h2>
+    <p data-confirm-body></p>
+    <div class="tower-actions">
+        <button type="button" class="tower-button" data-confirm-cancel>Keep climbing</button>
+        <button type="button" class="tower-button is-danger" data-confirm-ok></button>
+    </div>
+</dialog>
+
+<div class="tower-toast" data-toast role="status" hidden></div>
+
+<script src="account-client.js?v=4"></script>
+<script src="tower.js?v=2"></script>
+</body>
+</html>

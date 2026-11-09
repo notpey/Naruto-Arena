@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const protectedPage = /\/(selection|ingame)\.html$/.test(location.pathname);
+    const protectedPage = /\/(selection|ingame|tower)\.html$/.test(location.pathname);
     const storage = {
         getItem(key) { try { return localStorage.getItem(key); } catch { return null; } },
         setItem(key, value) { try { localStorage.setItem(key, value); } catch {} },

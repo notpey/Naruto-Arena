@@ -139,10 +139,12 @@ const MIN_PLAY_SCORE = 6;
  */
 const planBattleBotTurn = ({
     match, username, characters, battleLogic, canAfford, queue, random = Math.random, elite = false,
+    skipActorSlots = [],
 }) => {
     const team = Array.isArray(match.board?.[username]) ? match.board[username] : [];
+    // skipActorSlots: actors that already queued a skill this turn (a scripted boss move).
     const remainingActors = new Set(team
-        .map((unit, slot) => (unit && unit.alive !== false ? slot : null))
+        .map((unit, slot) => (unit && unit.alive !== false && !skipActorSlots.includes(slot) ? slot : null))
         .filter((slot) => Number.isInteger(slot)));
     const queued = [];
     while (remainingActors.size > 0) {

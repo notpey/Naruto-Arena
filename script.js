@@ -953,6 +953,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let currentOpponentDisplayName = null;
         let currentMatchMode = 'quick';
         let currentEliteEncounter = null;
+        let currentTowerEncounter = null;
+        // Tower battles return to the Tower; every other match returns to the selection hub.
+        const getMatchExitUrl = () => (currentMatchMode === 'tower' ? 'tower.html' : 'selection.html');
         let currentPlayerTeamIndices = [];
         let currentOpponentTeamIndices = [];
         const startFirstSound = new Audio('sounds/start-first.mp3');
@@ -2691,6 +2694,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const openSurrenderConfirm = () => {
             if (!surrenderConfirmEl) return;
+            const title = surrenderConfirmEl.querySelector('.surrender-confirm-title');
+            if (title) {
+                title.textContent = currentMatchMode === 'tower'
+                    ? 'Surrender? This ends your Tower run.'
+                    : 'Surrender this match?';
+            }
             surrenderConfirmEl.style.visibility = 'visible';
             setModalBackdropVisible(true);
         };
@@ -2714,7 +2723,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             surrenderConfirmOkButton.addEventListener('click', async () => {
                 if (!matchIdFromUrl) {
                     closeSurrenderConfirm();
-                    window.location.href = 'selection.html';
+                    window.location.href = getMatchExitUrl();
                     return;
                 }
                 surrenderConfirmOkButton.disabled = true;
@@ -2737,15 +2746,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 unlocks: data.missionResult?.unlockedCharacters || null,
                             });
                         } else {
-                            window.location.href = 'selection.html';
+                            window.location.href = getMatchExitUrl();
                         }
                     } else {
-                        window.location.href = 'selection.html';
+                        window.location.href = getMatchExitUrl();
                     }
                 } catch (err) {
                     console.error('Surrender request failed:', err);
                     closeSurrenderConfirm();
-                    window.location.href = 'selection.html';
+                    window.location.href = getMatchExitUrl();
                 } finally {
                     surrenderConfirmOkButton.disabled = false;
                     surrenderConfirmOkButton.textContent = 'OK';
@@ -2765,7 +2774,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }).catch(() => {});
                     } catch (_) {}
                 }
-                window.location.href = 'selection.html';
+                window.location.href = getMatchExitUrl();
             });
         }
 
@@ -2818,6 +2827,98 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.setTimeout(dismiss, 5200);
         };
 
+        // Tower battles: an intro band once per match, then a small persistent panel with the
+        // floor, the enemy affixes and, in the boss fight, the boss's telegraphed technique.
+        let lastTowerEventText = '';
+        const presentTowerEncounter = (encounter = {}, matchId = '') => {
+            const kind = encounter.kind || 'battle';
+            document.body.classList.add('is-tower-match', `is-tower-${kind}`);
+            if (kind !== 'battle') document.body.classList.add('is-elite-encounter');
+            const storageKey = `towerIntroShown:${matchId || 'current'}`;
+            let showIntro = true;
+            try {
+                showIntro = !window.sessionStorage.getItem(storageKey);
+                window.sessionStorage.setItem(storageKey, '1');
+            } catch (_) {
+                // Storage is optional; the intro may simply show again after a reload.
+            }
+            if (!showIntro) return;
+            const kicker = kind === 'boss'
+                ? (encounter.boss?.title || 'Tower boss')
+                : `Tower · Floor ${encounter.floor} of ${encounter.totalFloors || 10}${kind === 'elite' ? ' · Elite' : ''}`;
+            const stakes = kind === 'boss'
+                ? (encounter.boss?.intro || '')
+                : (encounter.affixes || []).length
+                    ? encounter.affixes.map((affix) => `${affix.name}: ${affix.description}`).join(' ')
+                    : 'Win to claim a Forbidden Scroll. Lose and the run ends.';
+            const band = document.createElement('div');
+            band.className = 'elite-encounter-band tower-encounter-band';
+            band.setAttribute('role', 'status');
+            band.innerHTML =
+                `<span class="elite-seal" aria-hidden="true">${kind === 'boss' ? '鬼' : kind === 'elite' ? '精鋭' : '塔'}</span>` +
+                '<div class="elite-band-copy">' +
+                `<span class="elite-band-kicker">${escapeHtml(kicker)}</span>` +
+                `<strong class="elite-band-name">${escapeHtml(encounter.name || 'Unknown shinobi')}</strong>` +
+                `<span class="elite-band-stakes">${escapeHtml(stakes)}</span>` +
+                '</div>';
+            const dismiss = () => {
+                band.classList.add('is-leaving');
+                window.setTimeout(() => band.remove(), 450);
+            };
+            band.addEventListener('click', dismiss);
+            document.body.appendChild(band);
+            window.setTimeout(dismiss, 5200);
+        };
+
+        const renderTowerPanel = (encounter) => {
+            if (!encounter) return;
+            let panel = document.querySelector('.tower-battle-panel');
+            if (!panel) {
+                panel = document.createElement('aside');
+                panel.className = 'tower-battle-panel';
+                panel.setAttribute('aria-label', 'Tower battle');
+                // Mounted inside the battle stage so it scales with the board.
+                (document.querySelector('.backgroundingame') || document.body).appendChild(panel);
+            }
+            const affixes = (encounter.affixes || [])
+                .map((affix) => `<span class="tower-affix-chip" title="${escapeHtml(affix.description)}">${escapeHtml(affix.name)}</span>`)
+                .join('');
+            const boss = encounter.boss;
+            const intent = boss?.intent;
+            const intentHtml = boss
+                ? `<div class="tower-intent${intent ? '' : ' is-empty'}">` +
+                  '<span class="tower-intent-label">Next boss turn</span>' +
+                  (intent
+                      ? `<div class="tower-intent-row">${intent.skillImage
+                          ? `<img class="tower-intent-icon" src="${escapeHtml(intent.skillImage)}" alt="">` : ''}` +
+                        `<span class="tower-intent-text" title="${escapeHtml(intent.skillDescription || '')}">${escapeHtml(intent.text)}</span></div>` +
+                        '<span class="tower-intent-hint">Stun the caster to interrupt it.</span>'
+                      : '<span class="tower-intent-text">No technique prepared.</span>') +
+                  '</div>'
+                : '';
+            const phase = boss ? (boss.enraged ? 'Enraged' : boss.phase >= 2 ? 'Mirrors raised' : '') : '';
+            panel.classList.toggle('is-boss', Boolean(boss));
+            panel.innerHTML =
+                `<div class="tower-panel-head"><span class="tower-panel-floor">Floor ${escapeHtml(String(encounter.floor))}/${escapeHtml(String(encounter.totalFloors || 10))}</span>` +
+                `<span class="tower-panel-name">${escapeHtml(encounter.name || '')}</span>` +
+                (phase ? `<span class="tower-panel-phase">${escapeHtml(phase)}</span>` : '') + '</div>' +
+                (affixes ? `<div class="tower-affixes">${affixes}</div>` : '') +
+                intentHtml;
+            // A new telegraph flashes once so it is not missed between turns.
+            const intentText = intent?.text || '';
+            if (intentText && panel.dataset.intent !== intentText) {
+                const intentEl = panel.querySelector('.tower-intent');
+                if (panel.dataset.intent !== undefined) intentEl?.classList.add('is-fresh');
+                panel.dataset.intent = intentText;
+            }
+            const eventText = boss?.lastEvent?.text || '';
+            const eventKey = eventText ? `${boss.lastEvent.turn}:${eventText}` : '';
+            if (eventKey && eventKey !== lastTowerEventText) {
+                lastTowerEventText = eventKey;
+                showGameToast(eventText, /Interrupted/.test(eventText) ? 'success' : 'warning', 5200);
+            }
+        };
+
         const showBattleEndOverlay = ({
             didWin,
             opponentUsername,
@@ -2829,6 +2930,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!battleEndOverlayEl || battleEndShown) return;
             const opponent = (opponentUsername || currentOpponentUsername || 'UNKNOWN').trim();
             const isLadderMatch = currentMatchMode === 'ladder';
+            const tower = currentMatchMode === 'tower' ? currentTowerEncounter : null;
             const isElite = Boolean(currentEliteEncounter);
             const eliteMultiplier = Math.max(2, Number(currentEliteEncounter?.rewardMultiplier) || 2);
             const normalizedExpDelta = Number.isFinite(Number(expDelta)) ? Number(expDelta) : 0;
@@ -2840,7 +2942,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unlockNames = unlockedCharacters
                 .map((entry) => (typeof entry?.name === 'string' ? entry.name.trim() : ''))
                 .filter(Boolean);
-            const outcomeText = isElite
+            const towerOutcomeText = tower
+                ? didWin
+                    ? tower.kind === 'boss'
+                        ? `You defeated ${tower.name} and conquered the Tower.`
+                        : `You cleared floor ${tower.floor} of the Tower. Return to claim your reward.`
+                    : `${opponent} stopped your climb on floor ${tower.floor}. The run is over.`
+                : '';
+            const outcomeText = tower
+                ? towerOutcomeText
+                : isElite
                 ? didWin
                     ? `You defeated ${opponent}, an elite encounter. Your rewards are doubled.`
                     : `${opponent} held its ground. An elite loss costs nothing: your EXP, record and streak are unchanged.`
@@ -2894,7 +3005,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                       )
                       .join('')}</div>`
                 : '';
-            const unlocksHtml = unlockNames.length
+            const unlocksHtml = tower
+                ? `<div class="battle-end-unlocks">${didWin ? 'Your run continues in the Tower.' : 'See your run summary in the Tower.'}</div>`
+                : unlockNames.length
                 ? `<div class="battle-end-unlocks">Unlocked: ${escapeHtml(unlockNames.join(', '))}</div>`
                 : `<div class="battle-end-unlocks">No new character unlocks.</div>`;
             if (battleEndPortraitEl) {
@@ -2906,7 +3019,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
-                battleEndTitleEl.textContent = isElite
+                battleEndTitleEl.textContent = tower
+                    ? (didWin ? (tower.kind === 'boss' ? 'Tower conquered' : `Floor ${tower.floor} cleared`) : 'Run over')
+                    : isElite
                     ? (didWin ? 'Elite defeated' : 'The elite stands')
                     : (didWin ? 'Victory' : 'Defeat');
             }
@@ -3809,6 +3924,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.eliteEncounter && !currentEliteEncounter) {
                 currentEliteEncounter = data.eliteEncounter;
                 presentEliteEncounter(data.eliteEncounter, data.matchId);
+            }
+            if (data.towerEncounter) {
+                if (!currentTowerEncounter) presentTowerEncounter(data.towerEncounter, data.matchId);
+                currentTowerEncounter = data.towerEncounter;
+                renderTowerPanel(data.towerEncounter);
             }
             if (data.opponent) {
                 if (typeof data.opponent === 'string') {
@@ -5156,7 +5276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             } catch (error) {
                 console.warn('Failed to surrender.', error);
-                window.location.href = 'selection.html';
+                window.location.href = getMatchExitUrl();
             }
         };
 
@@ -5169,7 +5289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (battleEndContinueButton) {
             battleEndContinueButton.addEventListener('click', () => {
-                window.location.href = 'selection.html';
+                window.location.href = getMatchExitUrl();
             });
         }
 

@@ -2024,3 +2024,69 @@
     .game-remaster .searchingscroll.is-elite .match-search-found-icon,
     .game-remaster .battle-end-overlay.is-elite .elite-seal-stamp { animation: none; }
 }
+
+/* ---------------------------------------------------------------- Tower battles
+   A compact panel with the floor, enemy affixes and the boss's telegraphed technique.
+   It floats over the board without moving any of the fixed layout. */
+.tower-battle-panel {
+    position: fixed;
+    left: 50%;
+    top: 12px;
+    z-index: 800;
+    transform: translateX(-50%);
+    width: min(440px, calc(100vw - 24px));
+    padding: 8px 12px 9px;
+    border: 1px solid #4b5f69;
+    border-radius: 6px;
+    background: rgba(13, 22, 28, .93);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .45);
+    color: var(--arena-text);
+    font: 400 12px/1.35 'Libre Franklin', sans-serif;
+    pointer-events: auto;
+}
+.tower-battle-panel.is-boss { border-color: #a0332c; background: rgba(36, 12, 12, .94); }
+.tower-panel-head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tower-panel-floor { padding: 1px 7px; border-radius: 3px; background: #e3ad68; color: #1b1209; font-weight: 800; font-size: 11px; white-space: nowrap; }
+.tower-battle-panel.is-boss .tower-panel-floor { background: #ff5a4f; color: #1d0605; }
+.tower-panel-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.tower-panel-phase { margin-left: auto; color: #ff9a8f; font-weight: 800; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.tower-affixes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.tower-affix-chip { padding: 1px 6px; border-radius: 3px; border: 1px solid #7a3a44; color: #ffc6cf; font-size: 10.5px; font-weight: 700; cursor: help; }
+.tower-intent { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, .1); }
+.tower-intent-label { display: block; color: #ff9a8f; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.tower-intent-row { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.tower-intent-icon { width: 30px; height: 30px; border-radius: 3px; border: 1px solid #a0332c; flex: none; object-fit: cover; }
+.tower-intent-text { font-weight: 700; font-size: 12.5px; }
+.tower-intent-hint { display: block; margin-top: 3px; color: #b9c5c8; font-size: 10.5px; }
+.tower-intent.is-empty .tower-intent-text { color: #b9c5c8; font-weight: 400; }
+.tower-encounter-band .elite-seal { font-size: 22px; }
+/* Inside the battle stage the panel sits in the open column over the decorative render,
+   between the skill rows and the enemy status icons, and scales with the board. */
+.game-remaster .backgroundingame > .tower-battle-panel {
+    position: absolute;
+    left: 704px;
+    top: 170px;
+    z-index: 6;
+    width: 178px;
+    transform: none;
+    padding: 8px 10px;
+}
+.game-remaster .backgroundingame > .tower-battle-panel .tower-panel-head { flex-wrap: wrap; row-gap: 3px; }
+.game-remaster .backgroundingame > .tower-battle-panel .tower-panel-name { white-space: normal; flex-basis: 100%; }
+.game-remaster .backgroundingame > .tower-battle-panel .tower-panel-phase { margin-left: 0; }
+.game-remaster .backgroundingame > .tower-battle-panel .tower-intent-row { align-items: flex-start; }
+/* The Tower tab is a link out of the hub; five tabs share the space four used to. */
+.game-remaster .selection-hub-tabs:has(.selection-hub-tab-tower) .selection-hub-tab { width: 128px; }
+.selection-hub-tab-tower { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+.selection-hub-tab-new { padding: 1px 5px; border-radius: 3px; background: #e3ad68; color: #1b1209; font-size: 9px; font-weight: 800; letter-spacing: .06em; }
+.tower-battle-panel { animation: tower-panel-in .5s cubic-bezier(.2, .8, .2, 1) both; }
+.tower-intent.is-fresh { animation: tower-intent-flash 1.2s ease-out; border-radius: 4px; }
+.tower-battle-panel.is-boss .tower-intent-icon { box-shadow: 0 0 10px rgba(255, 90, 79, .45); }
+@keyframes tower-panel-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes tower-intent-flash {
+    0% { background: rgba(255, 90, 79, .35); }
+    100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tower-battle-panel, .tower-intent.is-fresh { animation: none; }
+}
