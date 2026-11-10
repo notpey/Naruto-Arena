@@ -20,7 +20,9 @@ const LANES = 3;
 const BASE_MAX_HP = 100;
 const STARTING_RYO = 40;
 const WOUNDED_HP_FRACTION = 0.25;
-const DRAFT_REROLLS = 1;
+const DRAFT_REROLLS_PER_SLOT = 1;
+// Survivors of a won fight recover this much health before the next node.
+const POST_BATTLE_REGEN = 25;
 
 const RYO_REWARDS = { battle: 30, elite: 60, skipScroll: 15 };
 const RAMEN = { feastPercent: 40, restSlotPercent: 100 };
@@ -111,24 +113,55 @@ const fail = (message, status) => { throw new TowerError(message, status); };
 const memberMaxHp = (member) => BASE_MAX_HP +
     (member.scrolls || []).reduce((sum, key) => sum + getScrollMaxHpBonus(key), 0);
 
-const createMember = (characterId) => ({ characterId, hp: BASE_MAX_HP, scrolls: [] });
+// fallen: died once and was carried out at 1 health. dead: died a second time; the
+// ninja stays dead for the rest of the run (a recruit can still take the slot).
+// carriedStatuses: the ninja's own stacks, carried from one Tower battle to the next.
+const createMember = (characterId) => ({
+    characterId, hp: BASE_MAX_HP, scrolls: [], fallen: false, dead: false, carriedStatuses: [],
+});
+
+const isDead = (member) => Boolean(member?.dead);
 
 const healMember = (member, amount) => {
+    if (isDead(member)) return;
     member.hp = Math.min(memberMaxHp(member), Math.max(0, Number(member.hp) || 0) + Math.max(0, amount));
 };
 
-const isWounded = (member) => member.hp <= memberMaxHp(member) * WOUNDED_HP_FRACTION;
+const isWounded = (member) => !isDead(member) && member.hp <= memberMaxHp(member) * WOUNDED_HP_FRACTION;
 
 const requireSlot = (run, slot) => {
     if (!Number.isInteger(slot) || slot < 0 || slot >= run.team.length) fail('Choose one of your ninjas.');
     return run.team[slot];
 };
 
+const requireLivingSlot = (run, slot) => {
+    const member = requireSlot(run, slot);
+    if (isDead(member)) fail('That ninja has fallen for good.');
+    return member;
+};
+
 // ---------------------------------------------------------------- run creation and draft
-const buildDraftOffers = (seed, rosterIds, round) => {
-    const pool = shuffled(rosterIds, createRng(seed, `draft:${round}`));
+// The draft offers three candidates for each of the three team slots, nine distinct
+// ninjas in all. Each slot can be rerolled on its own.
+const buildDraftOffers = (seed, rosterIds) => {
+    const pool = shuffled(rosterIds, createRng(seed, 'draft:0'));
     if (pool.length < 9) fail('The roster is too small for a Tower draft.', 500);
     return [pool.slice(0, 3), pool.slice(3, 6), pool.slice(6, 9)];
+};
+
+const buildSlotReroll = (seed, rosterIds, slot, round, exclude) => {
+    const pool = shuffled(rosterIds.filter((id) => !exclude.includes(id)), createRng(seed, `draft:slot${slot}:${round}`));
+    if (pool.length < 3) fail('No more ninjas to offer for that slot.');
+    return pool.slice(0, 3);
+};
+
+// Runs drafted before per-slot rerolls carry { round, rerollsLeft } instead.
+const normalizeDraft = (draft) => {
+    if (!Array.isArray(draft.rerolls)) {
+        draft.rerolls = draft.offers.map(() => DRAFT_REROLLS_PER_SLOT);
+        draft.rerollRounds = draft.offers.map(() => 0);
+    }
+    return draft;
 };
 
 const createRun = ({ username, rosterIds, seed, now = new Date(), runId }) => ({
@@ -143,10 +176,16 @@ const createRun = ({ username, rosterIds, seed, now = new Date(), runId }) => ({
     currentNodeId: null,
     path: [],
     map: null,
-    draft: { round: 0, rerollsLeft: DRAFT_REROLLS, offers: buildDraftOffers(seed, rosterIds, 0) },
+    draft: {
+        offers: buildDraftOffers(seed, rosterIds),
+        rerolls: [DRAFT_REROLLS_PER_SLOT, DRAFT_REROLLS_PER_SLOT, DRAFT_REROLLS_PER_SLOT],
+        rerollRounds: [0, 0, 0],
+    },
     team: [],
     teamScrolls: [],
     ryo: STARTING_RYO,
+    // Chakra left over from the last won battle; it opens the next one. No cap.
+    chakra: null,
     pending: null,
     battle: null,
     stats: { battlesWon: 0, elitesWon: 0, scrollsTaken: 0 },
@@ -154,24 +193,30 @@ const createRun = ({ username, rosterIds, seed, now = new Date(), runId }) => ({
     accountReward: null,
 });
 
-const rerollDraft = (run, rosterIds) => {
+const rerollDraft = (run, rosterIds, slot) => {
     if (run.status !== 'draft') fail('The draft is already over.');
-    if (run.draft.rerollsLeft <= 0) fail('No draft rerolls left.');
-    run.draft.round += 1;
-    run.draft.rerollsLeft -= 1;
-    run.draft.offers = buildDraftOffers(run.seed, rosterIds, run.draft.round);
+    const draft = normalizeDraft(run.draft);
+    if (!Number.isInteger(slot) || !draft.offers[slot]) fail('Choose a slot to reroll.');
+    if (draft.rerolls[slot] <= 0) fail('No rerolls left for that slot.');
+    draft.rerollRounds[slot] += 1;
+    draft.rerolls[slot] -= 1;
+    // Never offer a ninja already shown in this slot or still offered in another one.
+    draft.offers[slot] = buildSlotReroll(run.seed, rosterIds, slot, draft.rerollRounds[slot], draft.offers.flat());
     return run;
 };
 
-const chooseDraft = (run, offerIndex) => {
+// picks: for each slot, the index of the chosen candidate.
+const chooseDraft = (run, picks) => {
     if (run.status !== 'draft') fail('The draft is already over.');
-    const offer = run.draft.offers[offerIndex];
-    if (!offer) fail('Choose one of the offered teams.');
-    run.team = offer.map(createMember);
+    const offers = run.draft.offers;
+    if (!Array.isArray(picks) || picks.length !== offers.length) fail('Choose one ninja for every slot.');
+    const chosen = offers.map((candidates, slot) => candidates[Number(picks[slot])]);
+    if (chosen.some((id) => !id)) fail('Choose one of the offered ninjas for every slot.');
+    run.team = chosen.map(createMember);
     run.map = generateMap(run.seed);
     run.status = 'map';
     run.draft = null;
-    addLog(run, `The climb begins with ${offer.length} ninjas.`);
+    addLog(run, `The climb begins with ${chosen.length} ninjas.`);
     return run;
 };
 
@@ -270,7 +315,7 @@ const canTakeScroll = (run, key) => {
     const parsed = parseScrollKey(key);
     if (!parsed) return false;
     if (parsed.scroll.scope === 'team') return !run.teamScrolls.includes(key);
-    return run.team.some((member) => !member.scrolls.includes(key));
+    return run.team.some((member) => !isDead(member) && !member.scrolls.includes(key));
 };
 
 const rollScrollKeys = (run, rng, weights, count, exclude = []) => {
@@ -295,7 +340,7 @@ const grantScroll = (run, key, slot) => {
         if (run.teamScrolls.includes(key)) fail('Your team already has that scroll.');
         run.teamScrolls.push(key);
     } else {
-        const member = requireSlot(run, slot);
+        const member = requireLivingSlot(run, slot);
         if (member.scrolls.includes(key)) fail('That ninja already has this scroll.');
         member.scrolls.push(key);
         const bonus = getScrollMaxHpBonus(key);
@@ -354,7 +399,7 @@ const applyRamen = (run, option, slot) => {
         run.team.forEach((member) => healMember(member, Math.round(memberMaxHp(member) * RAMEN.feastPercent / 100)));
         addLog(run, `Ichiraku feast: every ninja recovered ${RAMEN.feastPercent}% health.`);
     } else if (option === 'rest') {
-        const member = requireSlot(run, slot);
+        const member = requireLivingSlot(run, slot);
         healMember(member, memberMaxHp(member));
         addLog(run, 'One ninja rested to full health.');
     } else {
@@ -389,8 +434,12 @@ const recruit = (run, offerIndex, slot) => {
     const characterId = run.pending.offers[offerIndex];
     if (!characterId) fail('Choose one of the offered ninjas.');
     const member = requireSlot(run, slot);
-    // The newcomer inherits the departing ninja's scrolls and arrives fully rested.
+    // The newcomer inherits the departing ninja's scrolls (not their stacks) and arrives
+    // fully rested. Recruiting is the one way to fill a slot whose ninja has died for good.
     member.characterId = characterId;
+    member.fallen = false;
+    member.dead = false;
+    member.carriedStatuses = [];
     member.hp = memberMaxHp(member);
     addLog(run, 'A recruit joined the team and inherited the departing ninja\'s scrolls.');
     return completeNode(run);
@@ -404,11 +453,64 @@ const buildBattleSetup = (run) => {
         encounter: run.battle.encounter,
         team: run.team.map((member) => ({
             characterId: member.characterId,
-            hp: Math.max(1, Math.round(member.hp)),
+            dead: isDead(member),
+            hp: isDead(member) ? 0 : Math.max(1, Math.round(member.hp)),
             maxHp: memberMaxHp(member),
             scrolls: [...run.teamScrolls, ...member.scrolls],
+            carriedStatuses: isDead(member) ? [] : (member.carriedStatuses || []),
         })),
+        chakra: run.chakra || null,
     };
+};
+
+// ---------------------------------------------------------------- carried stacks
+// A ninja's self-stacks survive from one Tower battle to the next: helpful statuses the
+// ninja applied to itself that count up (stackable, stackMetadataKey, merged numeric
+// keys), plus the stack counters on its own passive. Everything else (timed buffs,
+// enemy effects, counters, invulnerability) is left behind when the battle ends.
+const STACK_EVIDENCE_KEYS = ['stackable', 'stackMetadataKey', 'mergeNumericAddKeys', 'mergeObjectNumericAddKeys'];
+const clone = (value) => JSON.parse(JSON.stringify(value));
+
+const passiveStackKeys = (metadata) => {
+    const keys = new Set(['tooltipText']);
+    ['stackMetadataKey', 'onDamageStackMetadataKey', 'onUndamagedTurnStackMetadataKey'].forEach((field) => {
+        if (typeof metadata[field] === 'string' && metadata[field]) keys.add(metadata[field]);
+    });
+    (Array.isArray(metadata.growPerTurn) ? metadata.growPerTurn : []).forEach((entry) => {
+        if (typeof entry?.key === 'string' && entry.key) keys.add(entry.key);
+    });
+    Object.keys(metadata.stackDerivedNumericKeys || {}).forEach((key) => keys.add(key));
+    return [...keys];
+};
+
+const extractCarriedStatuses = (unit, username, slot) => {
+    const statuses = Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [];
+    const carried = [];
+    statuses.forEach((status) => {
+        const metadata = status?.metadata;
+        if (!status?.id || !metadata || typeof metadata !== 'object' || metadata.harmful) return;
+        if (metadata.passive) {
+            const values = {};
+            passiveStackKeys(metadata).forEach((key) => {
+                if (metadata[key] !== undefined) values[key] = clone(metadata[key]);
+            });
+            const hasCounter = Object.keys(values).some((key) => key !== 'tooltipText');
+            if (hasCounter) carried.push({ id: status.id, passive: true, metadata: values });
+            return;
+        }
+        const selfApplied = status.sourceUsername === username && status.sourceSlot === slot;
+        const stacks = STACK_EVIDENCE_KEYS.some((key) => Boolean(metadata[key]));
+        if (!selfApplied || !stacks) return;
+        carried.push({
+            id: status.id,
+            passive: false,
+            remainingTurns: Math.max(0, Number(status.remainingTurns) || 0),
+            stacks: status.stacks || null,
+            sourceSkillId: status.sourceSkillId || null,
+            metadata: clone(metadata),
+        });
+    });
+    return carried;
 };
 
 const offerRewards = (run, kind) => {
@@ -418,7 +520,8 @@ const offerRewards = (run, kind) => {
 };
 
 // units: the player's board units at the end of the match, in team order.
-const recordBattleResult = (run, { won, units = [] }) => {
+// chakra: the player's chakra pool at the end of the match.
+const recordBattleResult = (run, { won, units = [], chakra = null, username = run.username }) => {
     if (run.status !== 'battle' || !run.battle) return run;
     const { encounter } = run.battle;
     if (!won) {
@@ -429,14 +532,31 @@ const recordBattleResult = (run, { won, units = [] }) => {
         return run;
     }
     run.team.forEach((member, slot) => {
+        if (isDead(member)) return;
         const unit = units[slot];
         const maxHp = memberMaxHp(member);
         const alive = unit && unit.alive !== false && Number(unit.hp) > 0;
-        // A fallen ninja is carried out wounded rather than lost.
-        member.hp = alive
-            ? Math.min(maxHp, Math.max(1, Math.round(Number(unit.hp))))
-            : Math.max(1, Math.round(maxHp * WOUNDED_HP_FRACTION));
+        if (alive) {
+            // Survivors recover a little before the next node and keep their stacks.
+            member.hp = Math.min(maxHp, Math.max(1, Math.round(Number(unit.hp))) + POST_BATTLE_REGEN);
+            member.carriedStatuses = extractCarriedStatuses(unit, username, slot);
+        } else if (!member.fallen) {
+            // The first death is survived at 1 health; the second is permanent.
+            member.fallen = true;
+            member.hp = 1;
+            member.carriedStatuses = [];
+            addLog(run, 'A ninja was carried out at 1 health. Another fall will be their last.');
+        } else {
+            member.dead = true;
+            member.hp = 0;
+            member.carriedStatuses = [];
+            addLog(run, 'A ninja fell for the second time and will not rise again.');
+        }
     });
+    if (chakra && typeof chakra === 'object') {
+        run.chakra = Object.fromEntries(Object.entries(chakra)
+            .map(([type, amount]) => [type, Math.max(0, Math.floor(Number(amount) || 0))]));
+    }
     run.floor = encounter.floor;
     run.stats.battlesWon += 1;
     if (encounter.kind === 'elite') run.stats.elitesWon += 1;
@@ -509,6 +629,7 @@ const serializeRun = (run, describeCharacter) => {
         floor: run.floor,
         totalFloors: TOTAL_FLOORS,
         ryo: run.ryo,
+        chakra: run.chakra || null,
         currentNodeId: run.currentNodeId,
         path: run.path || [],
         boss: { name: towerBoss.BOSS_DEFINITION.name, leader: character(towerBoss.BOSS_DEFINITION.enemyIds[0]) },
@@ -519,6 +640,9 @@ const serializeRun = (run, describeCharacter) => {
             hp: Math.round(member.hp),
             maxHp: memberMaxHp(member),
             wounded: isWounded(member),
+            fallen: Boolean(member.fallen),
+            dead: isDead(member),
+            stackCount: (member.carriedStatuses || []).length,
             scrolls: member.scrolls.map(describeScroll).filter(Boolean),
         })),
         teamScrolls: (run.teamScrolls || []).map(describeScroll).filter(Boolean),
@@ -530,12 +654,14 @@ const serializeRun = (run, describeCharacter) => {
         constants: {
             ramenFeastPercent: RAMEN.feastPercent, medkitHealPercent: MEDKIT_HEAL_PERCENT,
             skipScrollRyo: RYO_REWARDS.skipScroll, woundedPercent: WOUNDED_HP_FRACTION * 100,
+            postBattleRegen: POST_BATTLE_REGEN,
         },
     };
     if (run.status === 'draft' && run.draft) {
+        const draft = normalizeDraft({ ...run.draft });
         view.draft = {
-            rerollsLeft: run.draft.rerollsLeft,
-            offers: run.draft.offers.map((trio) => trio.map(character)),
+            rerolls: draft.rerolls,
+            offers: draft.offers.map((candidates) => candidates.map(character)),
         };
     }
     if (run.status === 'battle' && run.battle) {
@@ -576,6 +702,8 @@ const serializeRun = (run, describeCharacter) => {
 
 module.exports = {
     TOTAL_FLOORS, ELITE_FLOOR, REST_FLOOR, BOSS_FLOOR, BASE_MAX_HP, STARTING_RYO, WOUNDED_HP_FRACTION,
+    POST_BATTLE_REGEN, DRAFT_REROLLS_PER_SLOT,
+    extractCarriedStatuses,
     RYO_REWARDS, MERCHANT_PRICES, AFFIXES, NODE_TYPES, ACTIVE_STATUSES, ENDED_STATUSES, SCROLL_TIERS,
     TowerError,
     createRng,

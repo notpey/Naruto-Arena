@@ -88,7 +88,12 @@ test('a run starts, drafts, scouts a battle and starts its match only on /battle
     assert.equal(response.body.run.status, 'draft');
     assert.equal(response.body.run.draft.offers.length, 3);
     assert.ok(response.body.run.draft.offers[0][0].name, 'offers carry character names');
-    response = await call('post', '/draft', { offerIndex: 0 });
+    assert.deepEqual(response.body.run.draft.rerolls, [1, 1, 1]);
+    const before = response.body.run.draft.offers[2].map((character) => character.characterId);
+    response = await call('post', '/draft/reroll', { slot: 2 });
+    assert.notDeepEqual(response.body.run.draft.offers[2].map((character) => character.characterId), before);
+    assert.deepEqual(response.body.run.draft.rerolls, [1, 1, 0]);
+    response = await call('post', '/draft', { picks: [0, 0, 0] });
     assert.equal(response.body.run.status, 'map');
     const nodeId = response.body.run.availableNodeIds[0];
     response = await call('post', '/node', { nodeId });
@@ -105,18 +110,21 @@ test('a run starts, drafts, scouts a battle and starts its match only on /battle
 test('a won battle carries health and offers a reward; a later loss pays account ryo once', async () => {
     const { router, call, liveMatches, usersCollection } = setup();
     await call('post', '/start');
-    let { body } = await call('post', '/draft', { offerIndex: 1 });
+    let { body } = await call('post', '/draft', { picks: [1, 1, 1] });
     await call('post', '/node', { nodeId: body.run.availableNodeIds[0] });
     await call('post', '/battle');
     const match = liveMatches.get('m1');
     match.board.p = [{ hp: 55, alive: true }, { hp: 0, alive: false }, { hp: 80, alive: true }];
+    match.chakraPools = { ...(match.chakraPools || {}), p: { taijutsu: 2, ninjutsu: 0, bloodline: 1, genjutsu: 3 } };
     match.status = 'ended';
     match.winner = 'p';
     await router.recordTowerBattleResult(match, 'p');
     ({ body } = await call('get', '/run'));
     assert.equal(body.run.status, 'reward');
-    assert.deepEqual(body.run.team.map((member) => member.hp), [55, 25, 80]);
+    assert.deepEqual(body.run.team.map((member) => member.hp), [80, 1, 100]);
     assert.equal(body.run.team[1].wounded, true);
+    assert.equal(body.run.team[1].fallen, true);
+    assert.deepEqual(body.run.chakra, { taijutsu: 2, ninjutsu: 0, bloodline: 1, genjutsu: 3 }, 'leftover chakra is kept');
     assert.equal(await router.recordTowerBattleResult(match, 'p'), null, 'a result is recorded once');
 
     ({ body } = await call('post', '/reward/skip'));
@@ -158,7 +166,7 @@ test('stale writes are refused instead of overwriting the run', async () => {
         if (doc) doc.version -= 5;
         return doc;
     };
-    const response = await call('post', '/draft', { offerIndex: 0 });
+    const response = await call('post', '/draft', { picks: [0, 0, 0] });
     assert.equal(response.status, 409);
     assert.match(response.body.error, /changed/);
 });

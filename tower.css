@@ -204,6 +204,9 @@ body[data-scene='boss'] .tower-backdrop::after {
     align-items: start;
 }
 .tower-layout:has(.tower-team[hidden]) { grid-template-columns: minmax(0, 940px); justify-content: center; }
+.tower-layout > .tower-team { grid-column: 1; grid-row: 1; }
+.tower-layout > .tower-stage { grid-column: 2; grid-row: 1; }
+.tower-layout:has(.tower-team[hidden]) > .tower-stage { grid-column: 1; }
 
 .tower-card, .tower-team {
     position: relative;
@@ -352,6 +355,13 @@ body[data-scene='boss'] .tower-backdrop::after {
     letter-spacing: .05em;
 }
 .tower-tag.is-wounded { background: #4c1f1c; color: #ffb3aa; }
+.tower-tag.is-fallen { background: #4a3413; color: var(--tw-accent-hi); }
+.tower-tag.is-dead { background: #1d2328; color: var(--tw-faint); }
+.tower-tag.is-stacks { background: #1c3340; color: #a9d6f0; text-transform: none; letter-spacing: 0; }
+.tower-member.is-dead { border-style: dashed; background: rgba(7, 15, 20, .25); }
+.tower-member.is-dead .tower-portrait { filter: grayscale(1) brightness(.45); }
+.tower-member.is-dead .tower-member-name strong { color: var(--tw-faint); text-decoration: line-through; text-decoration-color: rgba(138, 156, 162, .6); }
+.tower-member.is-dead .tower-wound-mark { background: #1d2328; border-color: var(--tw-faint); color: var(--tw-muted); }
 .tower-hp {
     position: relative;
     height: 16px;
@@ -505,7 +515,7 @@ body[data-scene='boss'] .tower-backdrop::after {
 
 /* Cards deal in one after another. */
 .tower-card.is-entering .tower-shop > *,
-.tower-card.is-entering .tower-trio,
+.tower-card.is-entering .tower-slot,
 .tower-card.is-entering .tower-recruit,
 .tower-card.is-entering .tower-enemy,
 .tower-card.is-entering .tower-choice {
@@ -570,21 +580,95 @@ body[data-scene='boss'] .tower-backdrop::after {
 .tower-best span { font: 700 15px/1 var(--tw-kanji); }
 
 /* ---------------------------------------------------------------- draft */
-.tower-draft { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-bottom: 18px; }
-.tower-trio {
+/* Three slots side by side; each lists three candidates and you keep one per slot. */
+.tower-draft { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.tower-slot {
+    min-width: 0;
+    margin: 0;
     display: grid;
-    gap: 10px;
-    padding: 14px;
-    border: 1px solid var(--tw-edge);
+    align-content: start;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--tw-edge-soft);
     border-radius: 8px;
     background: rgba(7, 15, 20, .5);
-    transition: border-color .15s ease, transform .2s var(--tw-ease), box-shadow .2s ease;
 }
-.tower-trio:hover, .tower-trio:focus-within { border-color: var(--tw-accent); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0, 0, 0, .4); }
-.tower-trio-index { color: var(--tw-faint); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.tower-trio-member { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; align-items: center; }
-.tower-trio-member .tower-portrait { width: 56px; height: 56px; }
-.tower-trio-member strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.tower-slot-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    color: var(--tw-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+.tower-slot-mark { color: var(--tw-accent); font: 700 17px/1 var(--tw-kanji); }
+.tower-candidate {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--tw-edge-soft);
+    border-radius: 6px;
+    background: rgba(16, 26, 34, .7);
+    color: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, box-shadow .2s ease;
+}
+.tower-candidate:hover { border-color: var(--tw-edge); background: rgba(24, 37, 46, .85); }
+.tower-candidate:has(.tower-candidate-pick:focus-visible) { outline: 2px solid var(--tw-accent); outline-offset: 2px; }
+.tower-candidate-pick {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-height: 52px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.tower-candidate-pick:focus-visible { outline: none; }
+.tower-candidate-pick strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tower-candidate > .tower-skills { padding-left: 62px; }
+.tower-candidate.is-selected {
+    border-color: var(--tw-accent);
+    background: rgba(227, 173, 104, .1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(227, 173, 104, .35);
+}
+/* The kept ninja wears a small seal; the others in the slot step back. */
+.tower-candidate.is-selected::after {
+    content: '選';
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--tw-accent);
+    color: #1b1209;
+    font: 700 12px/1 var(--tw-kanji);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+}
+.tower-slot:has(.is-selected) .tower-candidate:not(.is-selected) .tower-portrait { filter: saturate(.45) brightness(.75); }
+.tower-candidate .tower-portrait { width: 52px; height: 52px; }
+.tower-button.is-quiet { justify-self: start; min-height: 32px; padding: 6px 12px; font-size: 12px; background: transparent; }
+.tower-draft-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--tw-edge-soft);
+}
+.tower-draft-footer .tower-chakra-mix, .tower-draft-footer .tower-muted { flex: 1 1 260px; margin: 0; }
 
 .tower-chakra-mix { display: grid; gap: 5px; }
 .tower-chakra-bar { display: flex; gap: 2px; height: 7px; border-radius: 4px; overflow: hidden; background: #0a1216; }
@@ -902,6 +986,54 @@ body[data-scene='boss'] .tower-backdrop::after {
 .tower-toast[data-tone='error'] { border-left-color: var(--tw-danger); color: #ffc2bb; }
 .tower-error { text-align: center; }
 
+/* ---------------------------------------------------------------- phone pick sheet */
+.tower-pick-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    gap: 12px;
+    max-height: 75vh;
+    overflow: auto;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, #1c2d37, #0f1a21);
+    border-top: 1px solid var(--tw-accent);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -14px 34px rgba(0, 0, 0, .55);
+    animation: tower-sheet-in .28s var(--tw-ease) both;
+}
+@keyframes tower-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
+.tower-pick-sheet-head h2 { margin: 0; font-size: 17px; }
+.tower-pick-sheet-head p { margin: 4px 0 0; color: var(--tw-muted); font-size: 13px; }
+.tower-pick-sheet-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tower-pick-option {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 60px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid var(--tw-edge);
+    border-radius: 8px;
+    background: rgba(7, 15, 20, .6);
+    color: var(--tw-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.tower-pick-option:active:not(:disabled) { border-color: var(--tw-accent); background: rgba(227, 173, 104, .12); }
+.tower-pick-option:focus-visible { outline: 2px solid var(--tw-accent); outline-offset: 2px; }
+.tower-pick-option:disabled { opacity: .5; cursor: not-allowed; }
+.tower-pick-option .tower-portrait { width: 48px; height: 48px; }
+.tower-pick-option.is-dead .tower-portrait { filter: grayscale(1) brightness(.45); }
+.tower-pick-option-body { min-width: 0; display: grid; gap: 2px; }
+.tower-pick-option-body strong { font-size: 14px; }
+.tower-pick-option-body span { color: var(--tw-muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.tower-pick-sheet > .tower-button { width: 100%; }
+
 /* ---------------------------------------------------------------- narrow screens */
 @media (max-width: 980px) {
     .tower-intro { grid-template-columns: minmax(0, 1fr); padding-right: 24px; }
@@ -910,8 +1042,15 @@ body[data-scene='boss'] .tower-backdrop::after {
 @media (max-width: 860px) {
     .tower-layout, .tower-layout:has(.tower-team[hidden]) { grid-template-columns: minmax(0, 1fr); }
     .tower-team { position: static; max-height: none; }
-    /* The current step comes first on phones; picking a ninja scrolls the team into view. */
-    .tower-stage { order: -1; }
+    .tower-layout > .tower-team, .tower-layout > .tower-stage { grid-column: 1; grid-row: auto; }
+    /* Touch targets: at least 44px on phones. */
+    .tower-back { min-height: 44px; }
+    .tower-run-meta .tower-text-button { min-height: 44px; padding: 4px 10px; }
+    .tower-button, .tower-button.is-quiet { min-height: 44px; }
+    .tower-node { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+    /* The team panel's picker is replaced by the sheet. */
+    .tower-team .tower-pick-banner { display: none; }
+    body.has-pick-sheet .tower-layout { padding-bottom: 340px; }
     .tower-topbar { flex-wrap: wrap; gap: 10px; }
     .tower-run-meta { width: 100%; justify-content: flex-start; }
     .tower-card { padding: 18px 16px; }
@@ -919,6 +1058,8 @@ body[data-scene='boss'] .tower-backdrop::after {
     .tower-intro h1 { font-size: 30px; }
     .tower-intro { padding-right: 16px; }
     .tower-steps { grid-template-columns: minmax(0, 1fr); }
+    .tower-draft { grid-template-columns: minmax(0, 1fr); }
+    .tower-draft-footer .tower-button { width: 100%; }
     .tower-enemies { grid-template-columns: minmax(0, 1fr); }
     .tower-enemy { grid-template-columns: 64px minmax(0, 1fr); justify-items: start; text-align: left; align-items: center; column-gap: 12px; }
     .tower-enemy .tower-portrait { width: 64px; height: 64px; grid-row: span 3; }

@@ -118,7 +118,12 @@ module.exports = function createTowerRouter(context) {
         if (!run || run.status !== 'battle' || run.battle?.matchId !== match.matchId) return null;
         const player = (match.players || []).find((entry) => entry && !entry.isBot);
         const won = Boolean(winnerUsername) && winnerUsername === player?.username;
-        towerRun.recordBattleResult(run, { won, units: match.board?.[player?.username] || [] });
+        towerRun.recordBattleResult(run, {
+            won,
+            units: match.board?.[player?.username] || [],
+            chakra: match.chakraPools?.[player?.username] || null,
+            username: player?.username,
+        });
         await saveRun(run);
         await settleRun(run);
         return run;
@@ -212,13 +217,13 @@ module.exports = function createTowerRouter(context) {
         }
     });
 
-    router.post('/draft/reroll', requireSession, withRun(async (run) => {
-        towerRun.rerollDraft(run, rosterIds());
+    router.post('/draft/reroll', requireSession, withRun(async (run, body) => {
+        towerRun.rerollDraft(run, rosterIds(), Number(body.slot));
         await saveRun(run);
     }));
 
     router.post('/draft', requireSession, withRun(async (run, body) => {
-        towerRun.chooseDraft(run, Number(body.offerIndex));
+        towerRun.chooseDraft(run, Array.isArray(body.picks) ? body.picks.map(Number) : null);
         await saveRun(run);
     }));
 

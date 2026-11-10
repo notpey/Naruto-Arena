@@ -14,7 +14,7 @@ const index = (id) => characters.findIndex((character) => character.characterId 
 const pool = () => ({ taijutsu: 20, ninjutsu: 20, bloodline: 20, genjutsu: 20 });
 
 const newRun = (seed = 12345) => towerRun.createRun({ username: 'p', rosterIds, seed, runId: 'run-1' });
-const draftedRun = (seed) => towerRun.chooseDraft(newRun(seed), 0);
+const draftedRun = (seed) => towerRun.chooseDraft(newRun(seed), [0, 0, 0]);
 
 // Plays the run to the given status by always taking the first open node of that type.
 const walkTo = (run, wanted) => {
@@ -50,15 +50,25 @@ test('the map is seeded, ten floors tall, with an elite floor, a rest floor and 
     assert.ok(map.floors[8].every((node) => node.next[0] === 'f10-0'));
 });
 
-test('the draft offers three distinct trios, one reroll, and builds a full-health team', () => {
+test('the draft offers three candidates per slot, one reroll per slot, and builds a full-health team', () => {
     const run = newRun();
     const ids = run.draft.offers.flat();
     assert.equal(new Set(ids).size, 9);
-    towerRun.rerollDraft(run, rosterIds);
-    assert.notDeepEqual(run.draft.offers.flat(), ids);
-    assert.throws(() => towerRun.rerollDraft(run, rosterIds), /No draft rerolls/);
-    const chosen = run.draft.offers[2];
-    towerRun.chooseDraft(run, 2);
+    const [slot0, slot1, slot2] = run.draft.offers.map((candidates) => candidates.slice());
+    towerRun.rerollDraft(run, rosterIds, 1);
+    assert.deepEqual(run.draft.offers[0], slot0, 'other slots are untouched');
+    assert.deepEqual(run.draft.offers[2], slot2);
+    assert.equal(run.draft.offers[1].length, 3);
+    assert.ok(run.draft.offers[1].every((id) => !ids.includes(id)), 'a reroll never repeats an offered ninja');
+    assert.equal(new Set(run.draft.offers.flat()).size, 9);
+    assert.throws(() => towerRun.rerollDraft(run, rosterIds, 1), /No rerolls left/);
+    towerRun.rerollDraft(run, rosterIds, 0);
+    assert.notDeepEqual(run.draft.offers[0], slot0);
+    assert.throws(() => towerRun.chooseDraft(run, [0, 1]), /every slot/);
+    assert.throws(() => towerRun.chooseDraft(run, [0, 5, 1]), /every slot/);
+    const chosen = [run.draft.offers[0][2], run.draft.offers[1][0], run.draft.offers[2][1]];
+    assert.ok(!slot1.includes(chosen[1]));
+    towerRun.chooseDraft(run, [2, 0, 1]);
     assert.equal(run.status, 'map');
     assert.deepEqual(run.team.map((member) => member.characterId), chosen);
     assert.ok(run.team.every((member) => member.hp === 100));
@@ -66,7 +76,7 @@ test('the draft offers three distinct trios, one reroll, and builds a full-healt
     assert.equal(towerRun.getAvailableNodeIds(run).length, 3);
 });
 
-test('only open paths can be chosen, and battles carry health forward with wounded ninjas', () => {
+test('only open paths can be chosen, and survivors carry health forward plus regen', () => {
     const run = draftedRun();
     assert.throws(() => towerRun.chooseNode(run, 'f3-0', rosterIds), /not open/);
     towerRun.chooseNode(run, 'f1-1', rosterIds);
@@ -74,8 +84,11 @@ test('only open paths can be chosen, and battles carry health forward with wound
     const setup = towerRun.buildBattleSetup(run);
     assert.equal(setup.encounter.kind, 'battle');
     assert.equal(setup.encounter.enemyIds.length, 3);
-    towerRun.recordBattleResult(run, { won: true, units: [{ hp: 63, alive: true }, { hp: 0, alive: false }, { hp: 100 }] });
-    assert.deepEqual(run.team.map((member) => member.hp), [63, 25, 100], 'the fallen ninja returns at 25%');
+    towerRun.recordBattleResult(run, { won: true, units: [{ hp: 63, alive: true }, { hp: 0, alive: false }, { hp: 90 }] });
+    assert.deepEqual(run.team.map((member) => member.hp), [88, 1, 100],
+        'survivors regain 25 (capped at max); the fallen ninja is carried out at 1');
+    assert.equal(run.team[1].fallen, true);
+    assert.equal(run.team[1].dead, false);
     assert.equal(run.floor, 1);
     assert.equal(run.status, 'reward');
     assert.equal(run.ryo, towerRun.STARTING_RYO + towerRun.RYO_REWARDS.battle);
@@ -353,4 +366,112 @@ test('the battle payload describes the tower encounter and boss telegraph', () =
     assert.equal(payload.boss.intent.skillName, 'Water Prison Technique');
     assert.ok(payload.boss.mechanics.length >= 3);
     assert.equal(serializeTowerEncounter(null), null);
+});
+
+test('a second death is permanent; dead ninjas cannot be healed or take scrolls, but can be replaced', () => {
+    const run = draftedRun();
+    towerRun.chooseNode(run, 'f1-0', rosterIds);
+    towerRun.recordBattleResult(run, { won: true, units: [{ hp: 40 }, { hp: 0, alive: false }, { hp: 0, alive: false }] });
+    assert.deepEqual(run.team.map((member) => member.hp), [65, 1, 1]);
+    towerRun.skipReward(run);
+    // Fight again: slot 1 dies a second time, slot 2 survives on its last life.
+    run.status = 'battle';
+    run.battle = { nodeId: 'f2-0', matchId: null, encounter: { kind: 'battle', floor: 2, name: 'x', enemyIds: [] } };
+    towerRun.recordBattleResult(run, { won: true, units: [{ hp: 50 }, { hp: 0, alive: false }, { hp: 30 }] });
+    assert.equal(run.team[1].dead, true);
+    assert.equal(run.team[1].hp, 0);
+    assert.equal(run.team[2].dead, false);
+    assert.equal(run.team[2].hp, 55);
+    towerRun.skipReward(run);
+    const setup = (() => {
+        run.status = 'battle';
+        run.battle = { nodeId: 'f3-0', matchId: null, encounter: { kind: 'battle', floor: 3, name: 'x', enemyIds: [] } };
+        return towerRun.buildBattleSetup(run);
+    })();
+    assert.equal(setup.team[1].dead, true);
+    assert.equal(setup.team[1].hp, 0);
+    // Winning again does not raise the dead.
+    towerRun.recordBattleResult(run, { won: true, units: [{ hp: 50 }, { hp: 100 }, { hp: 50 }] });
+    assert.equal(run.team[1].dead, true);
+    assert.equal(run.team[1].hp, 0);
+    const view = towerRun.serializeRun(run, () => null);
+    assert.equal(view.team[1].dead, true);
+    assert.equal(view.team[1].wounded, false);
+
+    run.status = 'ramen';
+    run.currentNodeId = 'f4-0';
+    assert.throws(() => towerRun.applyRamen(run, 'rest', 1), /fallen for good/);
+    towerRun.applyRamen(run, 'feast');
+    assert.equal(run.team[1].hp, 0, 'a feast does not feed the dead');
+
+    run.status = 'recruit';
+    run.pending = { nodeId: 'f5-0', offers: [rosterIds.find((id) => !run.team.some((m) => m.characterId === id))] };
+    towerRun.recruit(run, 0, 1);
+    assert.equal(run.team[1].dead, false);
+    assert.equal(run.team[1].fallen, false);
+    assert.equal(run.team[1].hp, 100, 'a recruit fills the dead slot at full health');
+});
+
+test('leftover chakra carries into the next battle setup without a cap', () => {
+    const run = draftedRun();
+    towerRun.chooseNode(run, 'f1-0', rosterIds);
+    towerRun.recordBattleResult(run, {
+        won: true, units: [{ hp: 90 }, { hp: 90 }, { hp: 90 }],
+        chakra: { taijutsu: 7, ninjutsu: 5, bloodline: 0, genjutsu: 4 },
+    });
+    towerRun.skipReward(run);
+    const next = towerRun.getAvailableNodeIds(run).map((id) => towerRun.findNode(run, id)).find((node) => node.type === 'battle');
+    towerRun.chooseNode(run, next.id, rosterIds);
+    assert.deepEqual(towerRun.buildBattleSetup(run).chakra, { taijutsu: 7, ninjutsu: 5, bloodline: 0, genjutsu: 4 });
+});
+
+test('only self-applied stacks are carried out of a battle', () => {
+    const unit = { state: { statuses: [
+        { id: 'own_stacks', sourceUsername: 'p', sourceSlot: 0, remainingTurns: 99,
+            metadata: { helpful: true, stackMetadataKey: 'charges', charges: 3 } },
+        { id: 'own_stackable', sourceUsername: 'p', sourceSlot: 0, remainingTurns: 2, stacks: 2,
+            metadata: { helpful: true, stackable: true } },
+        { id: 'ally_stacks', sourceUsername: 'p', sourceSlot: 1, remainingTurns: 99,
+            metadata: { helpful: true, stackMetadataKey: 'charges', charges: 1 } },
+        { id: 'timed_buff', sourceUsername: 'p', sourceSlot: 0, remainingTurns: 1, metadata: { helpful: true, damageBonusFlat: 10 } },
+        { id: 'enemy_debuff', sourceUsername: 'bot', sourceSlot: 0, remainingTurns: 99,
+            metadata: { harmful: true, stackMetadataKey: 'marks', marks: 4 } },
+        { id: 'my_passive', remainingTurns: 99,
+            metadata: { passive: true, stackMetadataKey: 'rage', rage: 6, tooltipText: 'Rage 6', damageReductionFlat: 5 } },
+        { id: 'flat_passive', remainingTurns: 99, metadata: { passive: true, damageReductionFlat: 5 } },
+    ] } };
+    const carried = towerRun.extractCarriedStatuses(unit, 'p', 0);
+    assert.deepEqual(carried.map((entry) => entry.id), ['own_stacks', 'own_stackable', 'my_passive']);
+    assert.deepEqual(carried[2].metadata, { tooltipText: 'Rage 6', rage: 6 }, 'only the passive counter is carried');
+});
+
+test('a real stack survives the battle and is restored on the next board', () => {
+    const allies = ['gekko-hayate', 'haku', 'momochi-zabuza'];
+    const first = towerMatch({ allies, enemies: WAVES });
+    cast(first, 'p', 0, 0, ['bot', 0]);
+    cast(first, 'p', 0, 0, ['bot', 1]);
+    const charges = (unit) => unit.state.statuses.find((status) => status.id === 'gekko_hayate_crescent_moon')?.metadata?.charges;
+    assert.equal(charges(first.board.p[0]), 2);
+
+    const run = draftedRun();
+    run.team[0].characterId = 'gekko-hayate';
+    towerRun.chooseNode(run, 'f1-0', rosterIds);
+    towerRun.recordBattleResult(run, { won: true, units: first.board.p });
+    assert.equal(run.team[0].carriedStatuses.length, 1);
+
+    const players = [{ username: 'p', team: allies.map(index) }, { username: 'bot', team: WAVES.map(index) }];
+    const board = battleLogic.buildInitialBoard(players, characters);
+    applyTowerSetupToBoard({
+        board, username: 'p', botUsername: 'bot',
+        setup: {
+            team: allies.map((id, slot) => ({
+                characterId: id, hp: 80, maxHp: 100, scrolls: [], dead: slot === 2,
+                carriedStatuses: slot === 0 ? run.team[0].carriedStatuses : [],
+            })),
+            encounter: { kind: 'battle', hpMultiplier: 1, affixes: [] },
+        },
+    });
+    assert.equal(charges(board.p[0]), 2, 'Hayate opens the next battle with his charges');
+    assert.equal(board.p[2].alive, false, 'a permanently dead ninja starts the battle dead');
+    assert.equal(board.p[2].hp, 0);
 });

@@ -38,6 +38,12 @@
 </header>
 
 <main class="tower-layout">
+    <section class="tower-stage" data-stage aria-live="polite">
+        <div class="tower-card tower-skeleton" aria-label="Opening the Tower">
+            <span></span><span></span><span></span>
+        </div>
+    </section>
+
     <aside class="tower-team" data-team-panel hidden aria-label="Your team">
         <h2 class="tower-panel-title">Your team</h2>
         <div class="tower-pick-banner" data-pick-banner hidden>
@@ -49,13 +55,17 @@
         <h2 class="tower-panel-title">Journal</h2>
         <ol class="tower-log" data-log></ol>
     </aside>
-
-    <section class="tower-stage" data-stage aria-live="polite">
-        <div class="tower-card tower-skeleton" aria-label="Opening the Tower">
-            <span></span><span></span><span></span>
-        </div>
-    </section>
 </main>
+
+<!-- On phones, choosing a ninja happens here, within thumb reach, instead of on the team panel far below. -->
+<section class="tower-pick-sheet" data-pick-sheet hidden aria-labelledby="tower-pick-sheet-title">
+    <div class="tower-pick-sheet-head">
+        <h2 id="tower-pick-sheet-title" data-pick-sheet-title></h2>
+        <p data-pick-sheet-detail></p>
+    </div>
+    <ol class="tower-pick-sheet-list" data-pick-sheet-list></ol>
+    <button type="button" class="tower-button" data-pick-sheet-cancel>Cancel</button>
+</section>
 
 <dialog class="tower-confirm" data-confirm aria-labelledby="tower-confirm-title">
     <span class="tower-confirm-seal" aria-hidden="true">退</span>

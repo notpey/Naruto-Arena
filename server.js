@@ -5863,13 +5863,48 @@ const applyTowerStatus = (unit, status, sourceUsername, sourceSlot) => {
     });
 };
 
+// Puts a ninja's carried self-stacks back on its unit exactly as they ended the last
+// battle. Passive counters are written onto the freshly built passive status; other
+// stack statuses are restored whole (not re-applied, which would add another stack).
+const restoreTowerCarriedStatuses = (unit, carried, username, slot) => {
+    if (!unit?.state || !Array.isArray(unit.state.statuses) || !Array.isArray(carried)) return;
+    carried.forEach((entry) => {
+        if (!entry?.id) return;
+        const existing = unit.state.statuses.find((status) => status?.id === entry.id);
+        if (entry.passive) {
+            if (existing?.metadata) Object.assign(existing.metadata, JSON.parse(JSON.stringify(entry.metadata || {})));
+            return;
+        }
+        const restored = {
+            id: entry.id,
+            remainingTurns: entry.remainingTurns,
+            sourceSkillId: entry.sourceSkillId || null,
+            sourceUsername: username,
+            sourceSlot: slot,
+            metadata: JSON.parse(JSON.stringify(entry.metadata || {})),
+            fresh: false,
+            ...(entry.stacks ? { stacks: entry.stacks } : {}),
+        };
+        if (existing) Object.assign(existing, restored);
+        else unit.state.statuses.push(restored);
+    });
+};
+
 // Carries the run into the board: each ninja's health and scrolls, and the enemy's scaling.
 const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
     (board[username] || []).forEach((unit, slot) => {
         const member = setup.team[slot];
         if (!unit || !member) return;
         unit.hpCap = Math.max(1, (Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100) + (member.maxHp - towerRun.BASE_MAX_HP));
+        if (member.dead) {
+            // A ninja who has died twice in this run starts the battle already dead.
+            unit.hp = 0;
+            unit.alive = false;
+            if (unit.state) unit.state.statuses = [];
+            return;
+        }
         unit.hp = Math.max(1, Math.min(unit.hpCap, Number(member.hp) || unit.hpCap));
+        restoreTowerCarriedStatuses(unit, member.carriedStatuses, username, slot);
         member.scrolls.forEach((key) => applyTowerStatus(unit, buildScrollStatus(key), username, slot));
     });
     const { encounter } = setup;
@@ -5917,8 +5952,9 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
         equippedTitle: `${TOWER_KIND_TITLES[encounter.kind] || 'Tower'} · Floor ${encounter.floor}`,
         equippedBorder: '',
     };
-    const aliveLookup = { [username]: 3, [botPlayer.username]: 3 };
-    const playerDocs = [{ username, team, aliveCount: 3 }, botPlayer];
+    const livingCount = setup.team.filter((member) => !member.dead).length;
+    const aliveLookup = { [username]: livingCount, [botPlayer.username]: 3 };
+    const playerDocs = [{ username, team, aliveCount: livingCount }, botPlayer];
     const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
     if (board[username]?.length !== 3 || board[botPlayer.username]?.length !== 3) {
         throw new Error('A Tower battle could not initialize both teams.');
@@ -5938,6 +5974,14 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
         built.turnExpiresAt = initialized.turnExpiresAt
             ? new Date(new Date(initialized.turnExpiresAt).getTime() + MATCH_FOUND_HOLD_MS)
             : built.matchStartsAt;
+    }
+    // Chakra left over from the last Tower battle opens this one, on top of the opening gain.
+    if (setup.chakra && built.chakraPools?.[username]) {
+        const pool = { ...built.chakraPools[username] };
+        Object.entries(setup.chakra).forEach(([type, amount]) => {
+            if (pool[type] !== undefined) pool[type] += Math.max(0, Math.floor(Number(amount) || 0));
+        });
+        built.chakraPools[username] = pool;
     }
 
     const matchDocument = {

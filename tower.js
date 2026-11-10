@@ -15,6 +15,12 @@
     const pickBanner = document.querySelector('[data-pick-banner]');
     const pickLabel = document.querySelector('[data-pick-label]');
     const pickCancel = document.querySelector('[data-pick-cancel]');
+    const pickSheet = document.querySelector('[data-pick-sheet]');
+    const pickSheetTitle = pickSheet.querySelector('[data-pick-sheet-title]');
+    const pickSheetDetail = pickSheet.querySelector('[data-pick-sheet-detail]');
+    const pickSheetList = pickSheet.querySelector('[data-pick-sheet-list]');
+    const pickSheetCancel = pickSheet.querySelector('[data-pick-sheet-cancel]');
+    const phoneLayout = window.matchMedia('(max-width: 860px)');
     const toastEl = document.querySelector('[data-toast]');
     const confirmEl = document.querySelector('[data-confirm]');
 
@@ -44,6 +50,7 @@
     let lastStatusKey = '';
     let lastTeamHp = null; // previous health per slot, to float +/- changes
     let lastRyo = null;
+    let draftPicks = { key: '', ids: [] }; // the candidate kept in each draft slot
 
     // ------------------------------------------------------------ helpers
     const escapeHtml = (value) => String(value ?? '')
@@ -85,10 +92,14 @@
         if (button) button.classList.add('is-loading');
         try {
             const data = await api(path, body);
+            const wasPicking = Boolean(pick);
             pick = null;
             selectedNodeId = null;
             state = { run: data.run, bestFloor: data.bestFloor };
             render();
+            if (wasPicking && phoneLayout.matches && stage.getBoundingClientRect().top < 0) {
+                stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+            }
             if (onSuccess) onSuccess(data);
         } catch (error) {
             showToast(error.message, 'error');
@@ -170,20 +181,70 @@
         `<span class="tower-scroll-scope">${scroll.scope === 'team' ? 'Whole team' : 'Choose a ninja'}</span>` +
         footer + '</button>';
 
-    // Ask the player to pick a ninja on the team panel, then run the action.
-    const startPick = ({ label, onPick, disabledFor = () => '' }) => {
-        pick = { label, onPick, disabledFor };
+    // Ask the player to pick a ninja, then run the action. On wide screens the team panel
+    // beside the stage becomes the picker; on phones a sheet opens at the bottom of the
+    // screen, repeating what is being chosen and the fact that matters for each ninja.
+    // detail: what the choice does. factFor(member): a short line shown per ninja.
+    const startPick = ({ label, detail = '', onPick, disabledFor = () => '', factFor = null, allowDead = false }) => {
+        pick = { label, detail, onPick, disabledFor, factFor, allowDead };
         renderTeam();
+        if (phoneLayout.matches) {
+            pickSheetList.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+            return;
+        }
         teamPanel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
         teamList.querySelector('.tower-member:not(.is-disabled)')?.focus({ preventScroll: true });
+    };
+
+    const memberHp = (member) => (member.dead ? 'Dead' : `${member.hp} / ${member.maxHp} HP`);
+
+    // Chakra Weave names one chakra type; count how many of each ninja's skills use it.
+    const scrollFactFor = (scroll) => {
+        const weave = /^chakra-weave:(\w+)$/.exec(scroll.key || '');
+        if (!weave) return memberHp;
+        const type = weave[1].toLowerCase();
+        const label = CHAKRA.find((entry) => entry.key.toLowerCase() === type)?.label || weave[1];
+        return (member) => {
+            const count = (member.skills || []).filter((skill) =>
+                (skill.energy || []).some((cost) => String(cost).toLowerCase() === type)).length;
+            return `${count} ${label} skill${count === 1 ? '' : 's'} · ${memberHp(member)}`;
+        };
     };
 
     const withScrollTarget = (scroll, action) => {
         if (scroll.scope === 'team') return action(null);
         return startPick({
-            label: `Choose a ninja for ${scroll.name}.`,
+            label: `Choose a ninja for ${scroll.name}`,
+            detail: scroll.description,
             onPick: action,
             disabledFor: (member) => (member.scrolls.some((owned) => owned.key === scroll.key) ? 'Already learned' : ''),
+            factFor: scrollFactFor(scroll),
+        });
+    };
+
+    const cancelPick = () => {
+        pick = null;
+        renderTeam();
+    };
+
+    const renderPickSheet = () => {
+        const open = Boolean(pick) && phoneLayout.matches && Boolean(state.run?.team?.length);
+        pickSheet.hidden = !open;
+        document.body.classList.toggle('has-pick-sheet', open);
+        if (!open) return;
+        pickSheetTitle.textContent = pick.label;
+        pickSheetDetail.textContent = pick.detail || '';
+        pickSheetDetail.hidden = !pick.detail;
+        pickSheetList.innerHTML = state.run.team.map((member, slot) => {
+            const reason = member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot);
+            const fact = pick.factFor ? pick.factFor(member) : memberHp(member);
+            return '<li><button type="button" class="tower-pick-option' + (member.dead ? ' is-dead' : '') + '" ' +
+                `data-sheet-slot="${slot}" ${reason ? 'disabled' : ''}>` + portrait(member) +
+                `<span class="tower-pick-option-body"><strong>${escapeHtml(member.name)}</strong>` +
+                `<span>${escapeHtml(reason || fact)}</span></span></button></li>`;
+        }).join('');
+        pickSheetList.querySelectorAll('[data-sheet-slot]').forEach((button) => {
+            button.onclick = () => pick?.onPick(Number(button.dataset.sheetSlot));
         });
     };
 
@@ -206,16 +267,22 @@
         pickBanner.hidden = !pick;
         if (pick) pickLabel.textContent = pick.label;
         teamPanel.classList.toggle('is-picking', Boolean(pick));
+        renderPickSheet();
         teamList.innerHTML = team.map((member, slot) => {
-            const disabled = pick ? pick.disabledFor(member, slot) : '';
+            const disabled = pick ? (member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot)) : '';
             const percent = hpPercent(member);
             const tone = member.wounded ? 'is-low' : percent < 60 ? 'is-mid' : '';
-            return `<li class="tower-member${member.wounded ? ' is-wounded' : ''}${disabled ? ' is-disabled' : ''}" ` +
+            const mark = member.dead ? '死' : member.wounded ? '傷' : '';
+            const stateClass = member.dead ? ' is-dead' : member.wounded ? ' is-wounded' : '';
+            return `<li class="tower-member${stateClass}${disabled ? ' is-disabled' : ''}" ` +
                 `data-slot="${slot}" ${pick && !disabled ? 'tabindex="0" role="button"' : ''}>` +
-                `<div class="tower-member-face">${portrait(member)}${member.wounded ? '<span class="tower-wound-mark" aria-hidden="true">傷</span>' : ''}</div>` +
+                `<div class="tower-member-face">${portrait(member)}${mark ? `<span class="tower-wound-mark" aria-hidden="true">${mark}</span>` : ''}</div>` +
                 '<div class="tower-member-body">' +
                 `<div class="tower-member-name"><strong>${escapeHtml(member.name)}</strong>` +
-                (member.wounded ? '<span class="tower-tag is-wounded">Wounded</span>' : '') +
+                (member.dead ? '<span class="tower-tag is-dead">Dead</span>'
+                    : member.fallen ? '<span class="tower-tag is-fallen" tabindex="0" data-tip="Fell once this run. The next fall is permanent.">Last life</span>'
+                    : member.wounded ? '<span class="tower-tag is-wounded">Wounded</span>' : '') +
+                (member.stackCount && !member.dead ? `<span class="tower-tag is-stacks" tabindex="0" data-tip="Stacks this ninja carries into the next battle.">${member.stackCount} carried</span>` : '') +
                 (disabled ? `<span class="tower-tag">${escapeHtml(disabled)}</span>` : '') + '</div>' +
                 `<div class="tower-hp ${tone}" role="meter" aria-valuemin="0" aria-valuemax="${member.maxHp}" aria-valuenow="${member.hp}" aria-label="Health">` +
                 `<span class="tower-hp-fill" style="width:${percent}%"></span>` +
@@ -263,14 +330,15 @@
             '<span class="tower-kicker">PvE roguelike · Act I · Land of Waves</span>' +
             '<h1>Climb the Tower</h1>' +
             '<p class="tower-lead">Draft a random squad, fight up ten floors of the Land of Waves, and shape your team ' +
-            'with Forbidden Scrolls along the way. Health carries between battles. One loss ends the run.</p>' +
+            'with Forbidden Scrolls along the way. Health, leftover chakra and stacks carry between battles. One loss ends the run.</p>' +
             '<ol class="tower-steps">' +
-            '<li><span class="tower-step-mark" aria-hidden="true">選</span><div><b>Draft</b><span>Pick one of three random teams from the whole roster. Mission locks do not apply.</span></div></li>' +
+            '<li><span class="tower-step-mark" aria-hidden="true">選</span><div><b>Draft</b><span>Keep one of three random ninjas for each slot. Mission locks do not apply.</span></div></li>' +
             '<li><span class="tower-step-mark" aria-hidden="true">道</span><div><b>Choose a path</b><span>Battles, ramen stands, merchants and recruits. Floor 5 is guarded by elites.</span></div></li>' +
             '<li><span class="tower-step-mark" aria-hidden="true">巻</span><div><b>Collect scrolls</b><span>Every win offers a Forbidden Scroll. Genin, Jōnin and Kage rarities.</span></div></li>' +
             '<li><span class="tower-step-mark is-boss" aria-hidden="true">鬼</span><div><b>Face the Demon</b><span>Floor 10: Zabuza telegraphs his next move. Stun him to interrupt it.</span></div></li>' +
             '</ol>' +
-            '<p class="tower-fineprint">Fallen ninjas return wounded at 25% health. Tower battles never touch your ladder record. ' +
+            '<p class="tower-fineprint">Survivors recover 25 health after every win. A ninja who falls is carried out at 1 health; ' +
+            'a second fall is permanent. Tower battles never touch your ladder record. ' +
             'A finished run pays 15 account ryō per floor cleared, plus 150 for the boss.</p>' +
             '<div class="tower-actions">' +
             '<button type="button" class="tower-button is-primary is-large" data-start>Begin the climb</button>' +
@@ -281,28 +349,59 @@
         stage.querySelector('[data-start]').onclick = (event) => act('/start', {}, { button: event.currentTarget });
     };
 
+    // The draft offers three candidates per slot; the player keeps one from each.
     const renderDraft = (run) => {
+        const { offers, rerolls } = run.draft;
+        const offersKey = offers.map((candidates) => candidates.map((c) => c.characterId).join(',')).join('|');
+        if (draftPicks.key !== offersKey) {
+            // A reroll replaces one slot's candidates; keep the picks made in the other slots.
+            const previous = draftPicks.ids || [];
+            draftPicks = {
+                key: offersKey,
+                ids: offers.map((candidates, slot) =>
+                    candidates.some((c) => c.characterId === previous[slot]) ? previous[slot] : null),
+            };
+        }
+        const chosen = offers.map((candidates, slot) => candidates.find((c) => c.characterId === draftPicks.ids[slot]) || null);
+        const ready = chosen.every(Boolean);
         stage.innerHTML =
             '<div class="tower-card">' +
             '<span class="tower-kicker">Draft</span><h1>Choose your squad</h1>' +
-            '<p class="tower-lead">Hover or tap a skill to read it. The bar shows the chakra each team asks for. You can reroll the offers once.</p>' +
+            '<p class="tower-lead">Keep one ninja from each slot. Hover or tap a skill to read it. Each slot can be rerolled once.</p>' +
             '<div class="tower-draft">' +
-            run.draft.offers.map((trio, index) =>
-                `<div class="tower-trio" style="--i:${index}">` +
-                `<span class="tower-trio-index">Team ${['一', '二', '三'][index]}</span>` +
-                trio.map((character) =>
-                    '<div class="tower-trio-member">' + portrait(character) +
-                    `<div><strong>${escapeHtml(character.name)}</strong><div class="tower-skills">${skillStrip(character)}</div></div></div>`
-                ).join('') +
-                chakraMix(trio) +
-                `<button type="button" class="tower-button is-primary" data-offer="${index}">Take this team</button></div>`).join('') +
+            offers.map((candidates, slot) =>
+                `<fieldset class="tower-slot" style="--i:${slot}">` +
+                `<legend class="tower-slot-head"><span class="tower-slot-mark" aria-hidden="true">${['一', '二', '三'][slot]}</span>Slot ${slot + 1}</legend>` +
+                candidates.map((character) => {
+                    const selected = draftPicks.ids[slot] === character.characterId;
+                    return `<div class="tower-candidate${selected ? ' is-selected' : ''}" ` +
+                        `data-slot="${slot}" data-id="${escapeHtml(character.characterId)}">` +
+                        `<button type="button" class="tower-candidate-pick" aria-pressed="${selected}">` +
+                        portrait(character) + `<strong>${escapeHtml(character.name)}</strong></button>` +
+                        `<span class="tower-skills">${skillStrip(character)}</span></div>`;
+                }).join('') +
+                `<button type="button" class="tower-button is-quiet" data-reroll="${slot}" ${rerolls[slot] > 0 ? '' : 'disabled'}>` +
+                `<span aria-hidden="true">↻</span> ${rerolls[slot] > 0 ? 'Reroll slot' : 'No rerolls left'}</button>` +
+                '</fieldset>').join('') +
             '</div>' +
-            `<button type="button" class="tower-button" data-reroll ${run.draft.rerollsLeft ? '' : 'disabled'}>` +
-            `<span aria-hidden="true">↻</span> Reroll offers (${run.draft.rerollsLeft} left)</button></div>`;
-        stage.querySelectorAll('[data-offer]').forEach((button) => {
-            button.onclick = () => act('/draft', { offerIndex: Number(button.dataset.offer) }, { button });
+            '<div class="tower-draft-footer">' +
+            (ready ? chakraMix(chosen) : '<p class="tower-muted">Pick a ninja in every slot to see the chakra your squad asks for.</p>') +
+            `<button type="button" class="tower-button is-primary is-large" data-confirm ${ready ? '' : 'disabled'}>Take this squad</button>` +
+            '</div></div>';
+        stage.querySelectorAll('.tower-candidate').forEach((element) => {
+            // A tap anywhere on the card picks the ninja; tapping a skill also shows its tip.
+            element.addEventListener('click', () => {
+                draftPicks.ids[Number(element.dataset.slot)] = element.dataset.id;
+                renderDraft(run);
+                stage.querySelector(`.tower-candidate[data-id="${CSS.escape(element.dataset.id)}"] .tower-candidate-pick`)?.focus();
+            });
         });
-        stage.querySelector('[data-reroll]').onclick = (event) => act('/draft/reroll', {}, { button: event.currentTarget });
+        stage.querySelectorAll('[data-reroll]').forEach((button) => {
+            button.onclick = () => act('/draft/reroll', { slot: Number(button.dataset.reroll) }, { button });
+        });
+        stage.querySelector('[data-confirm]').onclick = (event) => act('/draft', {
+            picks: offers.map((candidates, slot) => candidates.findIndex((c) => c.characterId === draftPicks.ids[slot])),
+        }, { button: event.currentTarget });
     };
 
     const renderMap = (run, { entering = false } = {}) => {
@@ -410,7 +509,7 @@
                 `<div class="tower-skills">${skillStrip(enemy)}</div></div>`).join('') +
             '</div>' +
             '<ul class="tower-encounter-facts">' +
-            encounter.affixes.map((affix) => `<li><span class="tower-fact-mark is-affix" aria-hidden="true">${escapeHtml(affix.kanji || '!')}</span><b>${escapeHtml(affix.name)}</b> ${escapeHtml(affix.description)}</li>`).join('') +
+            encounter.affixes.map((affix) => `<li><span class="tower-fact-mark is-affix" aria-hidden="true">${escapeHtml(affix.kanji || '!')}</span><span><b>${escapeHtml(affix.name)}</b> ${escapeHtml(affix.description)}</span></li>`).join('') +
             (boss ? boss.mechanics.map((line) => `<li><span class="tower-fact-mark is-boss" aria-hidden="true">鬼</span>${escapeHtml(line)}</li>`).join('') : '') +
             (!boss && encounter.hpMultiplier <= 1 && !encounter.affixes.length
                 ? '<li><span class="tower-fact-mark" aria-hidden="true">戦</span>A plain squad. Win to claim a scroll.</li>' : '') +
@@ -432,7 +531,8 @@
             '</div></div>';
         stage.querySelector('[data-feast]').onclick = (event) => act('/ramen', { option: 'feast' }, { button: event.currentTarget });
         stage.querySelector('[data-rest]').onclick = () => startPick({
-            label: 'Choose a ninja to rest.',
+            label: 'Choose a ninja to rest',
+            detail: 'They recover to full health.',
             onPick: (slot) => act('/ramen', { option: 'rest', slot }),
             disabledFor: (member) => (member.hp >= member.maxHp ? 'Full health' : ''),
         });
@@ -485,8 +585,11 @@
             button.onclick = () => {
                 const offer = run.recruit.offers[Number(button.dataset.recruit)];
                 startPick({
-                    label: `Choose who ${offer.name} replaces.`,
+                    label: `Choose who ${offer.name} replaces`,
+                    detail: `${offer.name} arrives at full health and inherits the departing ninja's scrolls.`,
+                    factFor: (member) => `${memberHp(member)} · ${member.scrolls.length} scroll${member.scrolls.length === 1 ? '' : 's'}`,
                     onPick: (slot) => act('/recruit', { offerIndex: Number(button.dataset.recruit), slot }),
+                    allowDead: true,
                 });
             };
         });
@@ -616,10 +719,13 @@
             image.src = 'found-remaster.png';
         }
     }, true);
-    pickCancel.onclick = () => { pick = null; renderTeam(); };
+    pickCancel.onclick = cancelPick;
+    pickSheetCancel.onclick = cancelPick;
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && pick) { pick = null; renderTeam(); }
+        if (event.key === 'Escape' && pick) cancelPick();
     });
+    // Rotating or resizing across the phone breakpoint moves an open pick between sheet and panel.
+    phoneLayout.addEventListener('change', () => { if (pick) renderTeam(); });
     abandonButton.onclick = async () => {
         if (!state.run) return;
         const confirmed = await confirmAction({
