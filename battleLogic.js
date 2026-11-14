@@ -3434,6 +3434,11 @@ const getTurnMitigationKey = (mitigation, unit) => {
     return mitigation.unitKeys.get(unit);
 };
 
+// HP is whole numbers only. Percent-based effects round to the nearest point
+// (halves round up); percent reduction rounds its running total, so a series of
+// hits loses no more than half a point overall.
+const roundHpAmount = (value) => Math.round(Math.max(0, Number(value) || 0));
+
 const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const turnMitigation = context?.match ? turnMitigationByMatch.get(context.match) : null;
@@ -3497,7 +3502,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
         incoming = 0;
     }
     const incomingMultiplier = Math.max(0, Number(getStatusMetadataTotals(targetState, unit).damageTakenMultiplier) || 1);
-    incoming *= incomingMultiplier;
+    incoming = roundHpAmount(incoming * incomingMultiplier);
     if (incoming <= 0 && !ignoreEnemyNonMentalDamage) return 0;
     const skillClasses = Array.isArray(context?.skillClasses) ? context.skillClasses : [];
     const afflictionDamage =
@@ -3719,7 +3724,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             Math.min(100, Number(state.percent) || standardPercentReduction)
         );
         const nextGross = Math.max(0, Number(state.gross) || 0) + incoming;
-        const targetPreventedTotal = nextGross * (stablePercent / 100);
+        const targetPreventedTotal = Math.round(nextGross * (stablePercent / 100));
         const preventedThisHit = Math.max(
             0,
             targetPreventedTotal - Math.max(0, Number(state.prevented) || 0)
@@ -3749,7 +3754,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
             Math.min(100, Number(state.percent) || unpierceablePercentReduction)
         );
         const nextGross = Math.max(0, Number(state.gross) || 0) + afterStandardPercent;
-        const targetPreventedTotal = nextGross * (stablePercent / 100);
+        const targetPreventedTotal = Math.round(nextGross * (stablePercent / 100));
         const preventedThisHit = Math.max(
             0,
             targetPreventedTotal - Math.max(0, Number(state.prevented) || 0)
@@ -3810,7 +3815,7 @@ const applyDamageToUnit = (unit, rawAmount, context = {}) => {
     } else {
         appliedUnpierceableMitigation = Math.min(baseUnpierceableMitigation, postStandardMitigation);
     }
-    const dealt = Math.max(0, postStandardMitigation - appliedUnpierceableMitigation);
+    const dealt = roundHpAmount(postStandardMitigation - appliedUnpierceableMitigation);
     const hpBeforeDamage = Math.max(0, Number(unit.hp) || 0);
     const hpAfterDamage = Math.max(contextualMinimumHp, hpBeforeDamage - dealt);
     const executeThreshold = Number.isFinite(context?.executeBelowHpThreshold)
@@ -4195,7 +4200,7 @@ const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
         : 0;
     const bonus = baseHeal > 0
         ? Math.max(0, totals.healReceivedBonusFlat - excludedBonus) : 0;
-    const heal = (baseHeal + bonus) * Math.max(0, Number(totals.healReceivedMultiplier) || 0);
+    const heal = roundHpAmount((baseHeal + bonus) * Math.max(0, Number(totals.healReceivedMultiplier) || 0));
     const before = Number(unit.hp) || 0;
     const cap = Math.max(0, Number(unit?.hpCap) || DEFAULT_HP);
     unit.hp = Math.min(cap, before + heal);
@@ -4204,7 +4209,7 @@ const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
 
 const applyDirectHpGainToUnit = (unit, rawAmount) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
-    const gain = Math.max(0, Number(rawAmount) || 0);
+    const gain = roundHpAmount(rawAmount);
     if (gain <= 0) return 0;
     const before = Number(unit.hp) || 0;
     const cap = Math.max(0, Number(unit?.hpCap) || DEFAULT_HP);
@@ -4232,7 +4237,7 @@ const applyHealthStealToUnit = ({ targetUnit, sourceUnit, rawAmount, context = {
 const applyHealthLossToUnit = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const wasAlive = unit.alive !== false;
-    const loss = Math.max(0, Number(rawAmount) || 0);
+    const loss = roundHpAmount(rawAmount);
     if (loss <= 0) return 0;
     const before = Math.max(0, Number(unit.hp) || 0);
     const targetState = ensureUnitStateShape(unit);
@@ -4272,7 +4277,7 @@ const applyHealthLossToUnit = (unit, rawAmount, context = {}) => {
 const applyHealthCapLossToUnit = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const wasAlive = unit.alive !== false;
-    const loss = Math.max(0, Number(rawAmount) || 0);
+    const loss = roundHpAmount(rawAmount);
     if (loss <= 0) return 0;
     const beforeCap = Math.max(0, Number(unit.hpCap) || DEFAULT_HP);
     const nextCap = Math.max(0, beforeCap - loss);

@@ -172,7 +172,7 @@ test('Flying Thunder God doubles cooldown recovery; Konoha Herb Salve multiplies
 
     const salve = towerMatch({ allies: ALLIES, enemies: ENEMIES, scrolls: [['konoha-herb-salve', 'medical-ninjutsu'], [], []], hp: [50, 100, 100] });
     endTurn(salve, 'p');
-    assert.equal(salve.board.p[0].hp, 57.5, 'Medical Ninjutsu heals 5, x1.5');
+    assert.equal(salve.board.p[0].hp, 58, 'Medical Ninjutsu heals 5, x1.5 = 7.5, rounded to 8');
 });
 
 test('reward offers lean toward a scroll that pairs with one you own', () => {
