@@ -94,7 +94,14 @@ test('a run starts, drafts, scouts a battle and starts its match only on /battle
     assert.notDeepEqual(response.body.run.draft.offers[2].map((character) => character.characterId), before);
     assert.deepEqual(response.body.run.draft.rerolls, [1, 1, 0]);
     response = await call('post', '/draft', { picks: [0, 0, 0] });
+    assert.equal(response.body.run.status, 'reward');
+    assert.equal(response.body.run.reward.starting, true);
+    assert.equal(response.body.run.reward.offers.length, 3);
+    const starting = response.body.run.reward.offers[0];
+    response = await call('post', '/reward', { offerIndex: 0, slot: 0 });
     assert.equal(response.body.run.status, 'map');
+    const owned = starting.scope === 'team' ? response.body.run.teamScrolls : response.body.run.team[0].scrolls;
+    assert.ok(owned.some((scroll) => scroll.key === starting.key), 'the starting scroll is learned');
     const nodeId = response.body.run.availableNodeIds[0];
     response = await call('post', '/node', { nodeId });
     assert.equal(response.body.run.status, 'battle');
@@ -110,7 +117,8 @@ test('a run starts, drafts, scouts a battle and starts its match only on /battle
 test('a won battle carries health and offers a reward; a later loss pays account ryo once', async () => {
     const { router, call, liveMatches, usersCollection } = setup();
     await call('post', '/start');
-    let { body } = await call('post', '/draft', { picks: [1, 1, 1] });
+    await call('post', '/draft', { picks: [1, 1, 1] });
+    let { body } = await call('post', '/reward/skip');
     await call('post', '/node', { nodeId: body.run.availableNodeIds[0] });
     await call('post', '/battle');
     const match = liveMatches.get('m1');
@@ -169,4 +177,43 @@ test('stale writes are refused instead of overwriting the run', async () => {
     const response = await call('post', '/draft', { picks: [0, 0, 0] });
     assert.equal(response.status, 409);
     assert.match(response.body.error, /changed/);
+});
+
+test('Act II over the API: continue past Zabuza, resolve the exam, and name a duel champion', async () => {
+    const { call, towerRunsCollection, liveMatches } = setup();
+    await call('post', '/start');
+    await call('post', '/draft', { picks: [0, 0, 0] });
+    const doc = towerRunsCollection.docs[0];
+    Object.assign(doc, { status: 'interlude', pending: { nextAct: 2 }, floor: 10, currentNodeId: 'f10-0',
+        stats: { ...doc.stats, actsCleared: 1 } });
+    let response = await call('post', '/continue', { choice: 'sideways' });
+    assert.equal(response.status, 400);
+    response = await call('post', '/continue', { choice: 'continue' });
+    assert.equal(response.body.run.act.title, 'The Chūnin Exams');
+    assert.equal(response.body.run.totalFloors, 20);
+    assert.deepEqual(response.body.run.availableNodeIds, ['f11-0']);
+
+    response = await call('post', '/node', { nodeId: 'f11-0' });
+    assert.equal(response.body.run.status, 'event');
+    assert.equal(response.body.run.event.title, 'The First Exam');
+    const ryo = response.body.run.ryo;
+    response = await call('post', '/event', { optionId: 'cheat' });
+    assert.equal(response.body.run.ryo, ryo + 40);
+    assert.equal(response.body.run.status, 'map');
+    const forest = response.body.run.map.floors[11].filter((node) => response.body.run.availableNodeIds.includes(node.id));
+    const fights = forest.filter((node) => ['battle', 'elite'].includes(node.type));
+    assert.ok(fights.length >= 1, 'every forest floor has a battle');
+    assert.deepEqual(Object.keys(response.body.run.previews).sort(), fights.map((node) => node.id).sort(), 'and its battles are scouted');
+
+    // Jump to the preliminaries.
+    Object.assign(towerRunsCollection.docs[0], { currentNodeId: 'f15-0', floor: 15, status: 'map' });
+    response = await call('post', '/node', { nodeId: 'f16-1' });
+    assert.equal(response.body.run.battle.encounter.duel, true);
+    response = await call('post', '/battle');
+    assert.equal(response.status, 400, 'a duel needs a champion');
+    assert.match(response.body.error, /champion/);
+    response = await call('post', '/battle', { slot: 2 });
+    assert.ok(response.body.matchId);
+    assert.equal(response.body.run.battle.championSlot, 2);
+    assert.equal(liveMatches.size, 1);
 });

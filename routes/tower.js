@@ -26,6 +26,8 @@ module.exports = function createTowerRouter(context) {
             Array.isArray(character.skills) && character.skills.length > 0)
         .map((character) => character.characterId);
 
+    const nameOf = (characterId) => describeCharacter(characterId)?.name || '';
+
     const describeCharacter = (characterId) => {
         const character = (getCharacters() || []).find((entry) => entry?.characterId === characterId);
         if (!character) return null;
@@ -92,7 +94,7 @@ module.exports = function createTowerRouter(context) {
 
     const respond = async (res, username, run, extra = {}) => res.json({
         ok: true,
-        run: towerRun.serializeRun(run, describeCharacter),
+        run: towerRun.serializeRun(run, describeCharacter, { rosterIds: rosterIds() }),
         bestFloor: await bestFloorFor(username),
         ...extra,
     });
@@ -123,6 +125,7 @@ module.exports = function createTowerRouter(context) {
             units: match.board?.[player?.username] || [],
             chakra: match.chakraPools?.[player?.username] || null,
             username: player?.username,
+            bossState: match.towerEncounter?.boss || null,
         });
         await saveRun(run);
         await settleRun(run);
@@ -229,17 +232,32 @@ module.exports = function createTowerRouter(context) {
 
     // Choosing a combat node only scouts it; the match (and its turn timer) starts on /battle.
     router.post('/node', requireSession, withRun(async (run, body) => {
-        towerRun.chooseNode(run, String(body.nodeId || ''), rosterIds());
+        towerRun.chooseNode(run, String(body.nodeId || ''), rosterIds(), { nameOf });
         await saveRun(run);
     }));
 
-    router.post('/battle', requireSession, withRun(async (run) => {
+    // A duel names its champion here, before the match exists.
+    router.post('/battle', requireSession, withRun(async (run, body) => {
         const reconciled = await reconcileBattle(run);
         if (reconciled.status !== 'battle') {
             Object.assign(run, reconciled);
             return null;
         }
+        if (run.battle?.encounter?.duel && !run.battle.matchId && slotOf(body) !== null) {
+            towerRun.chooseChampion(run, slotOf(body));
+        }
         return { matchId: await ensureBattleMatch(run) };
+    }));
+
+    router.post('/event', requireSession, withRun(async (run, body) => {
+        towerRun.resolveEvent(run, String(body.optionId || ''), slotOf(body), rosterIds(), { nameOf });
+        await saveRun(run);
+    }));
+
+    // After an act's boss: continue to the next act, or retire with the reward so far.
+    router.post('/continue', requireSession, withRun(async (run, body) => {
+        towerRun.continueRun(run, String(body.choice || ''));
+        await saveRun(run);
     }));
 
     router.post('/ramen', requireSession, withRun(async (run, body) => {

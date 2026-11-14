@@ -14,7 +14,14 @@ const index = (id) => characters.findIndex((character) => character.characterId 
 const pool = () => ({ taijutsu: 20, ninjutsu: 20, bloodline: 20, genjutsu: 20 });
 
 const newRun = (seed = 12345) => towerRun.createRun({ username: 'p', rosterIds, seed, runId: 'run-1' });
-const draftedRun = (seed) => towerRun.chooseDraft(newRun(seed), [0, 0, 0]);
+// Drafts, then sets the starting scroll aside without taking it or its skip ryō, so tests
+// begin on the map with a plain team.
+const draftedRun = (seed) => {
+    const run = towerRun.chooseDraft(newRun(seed), [0, 0, 0]);
+    run.status = 'map';
+    run.pending = null;
+    return run;
+};
 
 // Plays the run to the given status by always taking the first open node of that type.
 const walkTo = (run, wanted) => {
@@ -69,10 +76,34 @@ test('the draft offers three candidates per slot, one reroll per slot, and build
     const chosen = [run.draft.offers[0][2], run.draft.offers[1][0], run.draft.offers[2][1]];
     assert.ok(!slot1.includes(chosen[1]));
     towerRun.chooseDraft(run, [2, 0, 1]);
-    assert.equal(run.status, 'map');
     assert.deepEqual(run.team.map((member) => member.characterId), chosen);
     assert.ok(run.team.every((member) => member.hp === 100));
     assert.equal(run.ryo, towerRun.STARTING_RYO);
+    // A starting scroll comes before the first fight.
+    assert.equal(run.status, 'reward');
+    assert.deepEqual(towerRun.getAvailableNodeIds(run), [], 'no path opens until it is settled');
+    const offers = run.pending.offers;
+    assert.equal(offers.length, 3);
+    assert.equal(new Set(offers.map((key) => key.split(':')[0])).size, 3);
+    assert.ok(offers.every((key) => ['jonin', 'kage'].includes(towerScrolls.parseScrollKey(key).scroll.tier)),
+        'starting scrolls are Jōnin or Kage');
+    assert.equal(towerRun.serializeRun(run, () => null).reward.starting, true);
+    const key = offers[0];
+    const scope = towerScrolls.parseScrollKey(key).scroll.scope;
+    towerRun.chooseReward(run, 0, 1);
+    assert.ok((scope === 'team' ? run.teamScrolls : run.team[1].scrolls).includes(key));
+    assert.equal(run.status, 'map');
+    assert.equal(run.floor, 0, 'the starting scroll clears no floor');
+    assert.deepEqual(towerRun.getAvailableNodeIds(run), ['f1-0', 'f1-1', 'f1-2']);
+});
+
+test('the starting scroll is seeded, and skipping it pays ryō and opens floor 1', () => {
+    const offersFor = (seed) => towerRun.chooseDraft(newRun(seed), [0, 0, 0]).pending.offers;
+    assert.deepEqual(offersFor(5), offersFor(5));
+    const run = towerRun.chooseDraft(newRun(6), [0, 0, 0]);
+    towerRun.skipReward(run);
+    assert.equal(run.ryo, towerRun.STARTING_RYO + towerRun.RYO_REWARDS.skipScroll);
+    assert.equal(run.status, 'map');
     assert.equal(towerRun.getAvailableNodeIds(run).length, 3);
 });
 
@@ -129,7 +160,9 @@ test('elites are tougher and roll Jonin or Kage scrolls', () => {
     const { encounter } = towerRun.buildBattleSetup(run);
     assert.equal(encounter.kind, 'elite');
     assert.equal(encounter.hpMultiplier, 1.6);
-    assert.deepEqual(encounter.affixes.sort(), ['fortified', 'frenzied']);
+    assert.equal(encounter.affixes.length, 2);
+    assert.equal(new Set(encounter.affixes).size, 2);
+    encounter.affixes.forEach((id) => assert.ok(towerRun.AFFIXES[id].acts.includes(1), `${id} is an Act I affix`));
     towerRun.recordBattleResult(run, { won: true, units: [{ hp: 50 }, { hp: 50 }, { hp: 50 }] });
     assert.ok(run.pending.offers.every((key) => towerScrolls.parseScrollKey(key).scroll.tier !== 'genin'));
 });
@@ -186,6 +219,10 @@ test('every scroll builds a permanent, uncleansable status the engine reads', ()
         const info = towerScrolls.describeScroll(key);
         assert.ok(info.name && info.description && info.icon, key);
         const status = towerScrolls.buildScrollStatus(key);
+        if (towerScrolls.parseScrollKey(key).scroll.runOnly) {
+            assert.equal(status, null, `${key} changes the run, not battles`);
+            continue;
+        }
         assert.equal(status.duration, 99);
         assert.equal(status.metadata.cannotBeCleansed, true);
         assert.notEqual(status.metadata.passive, true, 'scrolls never replace a character passive');

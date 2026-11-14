@@ -2848,6 +2848,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : `Tower · Floor ${encounter.floor} of ${encounter.totalFloors || 10}${kind === 'elite' ? ' · Elite' : ''}`;
             const stakes = kind === 'boss'
                 ? (encounter.boss?.intro || '')
+                : encounter.duel
+                ? 'A duel. Lose and your champion is carried out of the arena, but the run goes on.'
                 : (encounter.affixes || []).length
                     ? encounter.affixes.map((affix) => `${affix.name}: ${affix.description}`).join(' ')
                     : 'Win to claim a Forbidden Scroll. Lose and the run ends.';
@@ -2896,7 +2898,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                       : '<span class="tower-intent-text">No technique prepared.</span>') +
                   '</div>'
                 : '';
-            const phase = boss ? (boss.enraged ? 'Enraged' : boss.phase >= 2 ? 'Mirrors raised' : '') : '';
+            const phase = boss
+                ? (boss.phaseLabel || (boss.enraged ? 'Enraged' : boss.phase >= 2 ? 'Mirrors raised' : ''))
+                : encounter.duel ? 'Duel' : '';
             panel.classList.toggle('is-boss', Boolean(boss));
             panel.innerHTML =
                 `<div class="tower-panel-head"><span class="tower-panel-floor">Floor ${escapeHtml(String(encounter.floor))}/${escapeHtml(String(encounter.totalFloors || 10))}</span>` +
@@ -2942,7 +2946,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unlockNames = unlockedCharacters
                 .map((entry) => (typeof entry?.name === 'string' ? entry.name.trim() : ''))
                 .filter(Boolean);
-            const towerOutcomeText = tower
+            const towerOutcome = tower?.outcome || null;
+            const towerOutcomeText = towerOutcome
+                ? (didWin ? towerOutcome.winText : towerOutcome.loseText)
+                : tower
                 ? didWin
                     ? tower.kind === 'boss'
                         ? `You defeated ${tower.name} and conquered the Tower.`
@@ -3006,7 +3013,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                       .join('')}</div>`
                 : '';
             const unlocksHtml = tower
-                ? `<div class="battle-end-unlocks">${didWin ? 'Your run continues in the Tower.' : 'See your run summary in the Tower.'}</div>`
+                ? `<div class="battle-end-unlocks">${didWin || (tower.duel && tower.kind !== 'boss') ? 'Your run continues in the Tower.' : 'See your run summary in the Tower.'}</div>`
                 : unlockNames.length
                 ? `<div class="battle-end-unlocks">Unlocked: ${escapeHtml(unlockNames.join(', '))}</div>`
                 : `<div class="battle-end-unlocks">No new character unlocks.</div>`;
@@ -3019,7 +3026,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 battleEndPortraitEl.alt = didWin ? 'Victory portrait' : 'Defeated portrait';
             }
             if (battleEndTitleEl) {
-                battleEndTitleEl.textContent = tower
+                battleEndTitleEl.textContent = towerOutcome
+                    ? (didWin ? towerOutcome.winTitle : towerOutcome.loseTitle)
+                    : tower
                     ? (didWin ? (tower.kind === 'boss' ? 'Tower conquered' : `Floor ${tower.floor} cleared`) : 'Run over')
                     : isElite
                     ? (didWin ? 'Elite defeated' : 'The elite stands')

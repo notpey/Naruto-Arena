@@ -1070,3 +1070,116 @@ body[data-scene='boss'] .tower-backdrop::after {
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------------------------------------------------------------- Act II and events */
+:root {
+    --tw-node-event: #d6a6c9;
+    --tw-node-exam: #e8e2cf;
+    --tw-node-duel: #f08a4b;
+    --tw-node-training: #8fd1b0;
+    --tw-cursed: #d04a5a;
+    --tw-heaven: #f2d27a;
+    --tw-earth: #9fc27a;
+}
+[class*='type-event'] { --node: var(--tw-node-event); }
+[class*='type-exam'] { --node: var(--tw-node-exam); }
+[class*='type-duel'] { --node: var(--tw-node-duel); }
+[class*='type-training'] { --node: var(--tw-node-training); }
+
+/* The Forest of Death is darker and greener; Konoha (exam hall, training, stadium) is daylight. */
+body[data-scene='forest'] .tower-backdrop-art {
+    background-image: url('ingamebg_2.jpg');
+    filter: blur(2px) saturate(.7) brightness(.5) hue-rotate(28deg);
+}
+body[data-scene='konoha'] .tower-backdrop-art {
+    background-image: url('selectionbg_1.jpg');
+    filter: blur(2px) saturate(.85) brightness(.62);
+}
+body[data-scene='forest'] .tower-mist,
+body[data-scene='konoha'] .tower-mist { opacity: .35; }
+
+.tower-scroll-card.tier-cursed { --tier: var(--tw-cursed); }
+.tower-scroll-pairs { color: var(--tw-accent-hi); font-size: 11.5px; font-weight: 600; }
+
+/* Exam scrolls held in Act II. */
+.tower-meta-chip.is-exam { gap: 8px; font-family: var(--tw-kanji); }
+.tower-meta-chip.is-exam span { color: var(--tw-faint); }
+.tower-meta-chip.is-exam span.is-held:first-child { color: var(--tw-heaven); }
+.tower-meta-chip.is-exam span.is-held:last-child { color: var(--tw-earth); }
+.tower-fact-mark.is-heaven { border-color: #7a6528; color: var(--tw-heaven); }
+.tower-fact-mark.is-earth { border-color: #4f6a30; color: var(--tw-earth); }
+
+/* Scouting: the squad behind the selected node. */
+.tower-preview { display: grid; gap: 6px; margin-top: 8px; }
+.tower-preview-name { color: var(--tw-text) !important; font-weight: 700; font-size: 13px !important; }
+.tower-preview-line { display: block; margin-top: 6px; color: var(--tw-node-training) !important; font-weight: 700; }
+.tower-preview-enemies { display: flex; flex-wrap: wrap; gap: 8px; }
+.tower-preview-enemy { display: inline-flex; align-items: center; gap: 5px; }
+.tower-preview-enemy .tower-portrait { width: 30px; height: 30px; border-radius: 4px; }
+.tower-preview-enemy b { color: var(--tw-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.tower-preview-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.tower-preview-chip {
+    padding: 2px 8px;
+    border: 1px solid var(--tw-edge);
+    border-radius: 999px;
+    color: var(--tw-muted) !important;
+    font-size: 11px !important;
+    font-weight: 700;
+}
+.tower-preview-chip.is-affix { border-color: #7a3a44; color: #ffc6cf !important; }
+.tower-preview-chip.is-heaven { border-color: #7a6528; color: var(--tw-heaven) !important; }
+.tower-preview-chip.is-earth { border-color: #4f6a30; color: var(--tw-earth) !important; }
+
+/* Duels: pick a champion before entering the arena. */
+.tower-battle.is-duel { --card-accent: var(--tw-node-duel); }
+.tower-champions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; padding: 0; border: 0; }
+.tower-champions legend { margin-bottom: 8px; color: var(--tw-muted); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.tower-champion {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border: 1px solid var(--tw-edge);
+    border-radius: 8px;
+    background: rgba(7, 15, 20, .55);
+    cursor: pointer;
+    transition: border-color .15s ease, transform .2s var(--tw-ease);
+}
+.tower-champion .tower-portrait { width: 56px; height: 56px; border-radius: 6px; }
+.tower-champion span { color: var(--tw-muted); font-size: 12px; }
+.tower-champion:hover:not(:disabled), .tower-champion:focus-visible { border-color: var(--tw-node-duel); }
+.tower-champion.is-selected { border-color: var(--tw-node-duel); border-top: 3px solid var(--tw-node-duel); transform: translateY(-2px); }
+.tower-champion:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Events. */
+.tower-event-head { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.tower-event-seal {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--tw-node-event);
+    border-radius: 50%;
+    color: var(--tw-node-event);
+    font: 700 24px/1 var(--tw-kanji);
+}
+.tower-event.is-training .tower-event-seal { border-color: var(--tw-node-training); color: var(--tw-node-training); }
+.tower-event.is-exam .tower-event-seal { border-color: var(--tw-node-exam); color: var(--tw-node-exam); }
+.tower-event-text { max-width: 62ch; }
+.tower-event .tower-choice { border-top-color: var(--tw-node-event); }
+.tower-event.is-training .tower-choice { border-top-color: var(--tw-node-training); }
+.tower-event.is-exam .tower-choice { border-top-color: var(--tw-node-exam); }
+.tower-event .tower-choice:hover:not(:disabled), .tower-event .tower-choice:focus-visible { border-color: var(--tw-node-event); }
+.tower-choice:disabled { cursor: not-allowed; opacity: .5; transform: none; }
+.tower-choice-blocked { color: var(--tw-danger) !important; font-size: 12px; font-weight: 700; }
+
+/* Between acts. */
+.tower-interlude { --card-accent: var(--tw-node-exam); }
+
+@media (max-width: 860px) {
+    .tower-champions { grid-template-columns: minmax(0, 1fr); }
+    .tower-champion { grid-template-columns: 48px minmax(0, 1fr); justify-items: start; text-align: left; min-height: 44px; }
+    .tower-champion .tower-portrait { width: 48px; height: 48px; grid-row: span 2; }
+    .tower-node-detail { flex-wrap: wrap; }
+}

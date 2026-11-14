@@ -4914,17 +4914,50 @@ const buildMatchPayloadForUser = (match, username) => {
     };
 };
 
+// How a Tower battle's end screen reads, decided here so the battle client only renders it.
+const describeTowerOutcome = (encounter) => {
+    const floor = Number(encounter.floor) || 0;
+    const boss = encounter.boss ? towerBoss.getBossDefinition(encounter.boss.bossId) : null;
+    // Matches from before acts existed only had the one, final boss.
+    const final = Boolean(encounter.final) || (boss && boss.bossId === towerBoss.BOSS_ID);
+    if (boss && final) {
+        return {
+            winTitle: boss.act >= 2 ? 'The finals are interrupted' : 'Act I cleared',
+            winText: boss.victoryText,
+            loseTitle: 'Run over',
+            loseText: `${boss.name} ended your climb on floor ${floor}. The run is over.`,
+        };
+    }
+    if (encounter.duel) {
+        return {
+            winTitle: 'Bout won',
+            winText: `You won ${encounter.name}. Return to the Tower to claim your reward.`,
+            loseTitle: 'Bout lost',
+            loseText: 'Your champion was carried out of the arena. The run continues in the Tower.',
+        };
+    }
+    return {
+        winTitle: `Floor ${floor} cleared`,
+        winText: `You cleared floor ${floor} of the Tower. Return to claim your reward.`,
+        loseTitle: 'Run over',
+        loseText: `${encounter.name || 'The enemy'} stopped your climb on floor ${floor}. The run is over.`,
+    };
+};
+
 // What the battle screen shows about a Tower fight: floor, enemy affixes and the boss's telegraph.
 const serializeTowerEncounter = (encounter) => (encounter ? {
     runId: encounter.runId || null,
     kind: encounter.kind || 'battle',
     floor: Number(encounter.floor) || 0,
-    totalFloors: towerRun.TOTAL_FLOORS,
+    totalFloors: Number(encounter.totalFloors) || towerRun.TOTAL_FLOORS,
     name: encounter.name || '',
+    duel: Boolean(encounter.duel),
+    carries: encounter.carries || null,
     affixes: (encounter.affixes || []).map(towerRun.describeAffix).filter(Boolean),
+    outcome: describeTowerOutcome(encounter),
     boss: encounter.boss ? {
         ...towerBoss.describeBossStateForClient(encounter.boss),
-        ...towerBoss.describeBossForClient(),
+        ...towerBoss.describeBossForClient(encounter.boss.bossId),
     } : null,
 } : null);
 
@@ -5839,7 +5872,7 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
 };
 
 // ---------------------------------------------------------------- Tower matches
-const TOWER_KIND_TITLES = { battle: 'Tower', elite: 'Elite', boss: 'Boss' };
+const TOWER_KIND_TITLES = { battle: 'Tower', elite: 'Elite', boss: 'Boss', duel: 'Duel' };
 
 const resolveTowerRosterIndex = (characterId) =>
     (Array.isArray(charactersData) ? charactersData : []).findIndex((character) => character?.characterId === characterId);
@@ -5890,17 +5923,24 @@ const restoreTowerCarriedStatuses = (unit, carried, username, slot) => {
     });
 };
 
+// A unit that takes no part in a Tower battle: a ninja dead for the run, a ninja watching a
+// duel from the stands, or an empty enemy slot in a smaller squad.
+const removeTowerUnitFromBattle = (unit) => {
+    unit.hp = 0;
+    unit.alive = false;
+    if (unit.state) unit.state.statuses = [];
+};
+
 // Carries the run into the board: each ninja's health and scrolls, and the enemy's scaling.
 const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
     (board[username] || []).forEach((unit, slot) => {
         const member = setup.team[slot];
         if (!unit || !member) return;
         unit.hpCap = Math.max(1, (Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100) + (member.maxHp - towerRun.BASE_MAX_HP));
-        if (member.dead) {
-            // A ninja who has died twice in this run starts the battle already dead.
-            unit.hp = 0;
-            unit.alive = false;
-            if (unit.state) unit.state.statuses = [];
+        if (member.dead || member.benched) {
+            // A ninja who has died twice in this run starts the battle already dead, and a
+            // duel's spectators sit it out.
+            removeTowerUnitFromBattle(unit);
             return;
         }
         unit.hp = Math.max(1, Math.min(unit.hpCap, Number(member.hp) || unit.hpCap));
@@ -5908,20 +5948,33 @@ const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
         member.scrolls.forEach((key) => applyTowerStatus(unit, buildScrollStatus(key), username, slot));
     });
     const { encounter } = setup;
-    if (encounter.kind === 'boss') {
+    const enemyIds = Array.isArray(encounter.enemyIds) ? encounter.enemyIds : [];
+    (board[botUsername] || []).forEach((unit, slot) => {
+        if (unit && enemyIds.length && !enemyIds[slot]) removeTowerUnitFromBattle(unit);
+    });
+    if (Array.isArray(encounter.hpCaps) && encounter.hpCaps.length) {
+        towerBoss.applyBossVitality(board, botUsername, encounter.hpCaps);
+    } else if (encounter.kind === 'boss') {
         towerBoss.applyBossVitality(board, botUsername);
     } else {
         const multiplier = Math.max(1, Number(encounter.hpMultiplier) || 1);
         (board[botUsername] || []).forEach((unit) => {
-            if (!unit) return;
+            if (!unit || unit.alive === false) return;
             unit.hpCap = Math.round((Number(unit.hpCap) || battleLogic.DEFAULT_HP || 100) * multiplier);
             unit.hp = unit.hpCap;
+        });
+    }
+    if (encounter.duel) {
+        [[username, board[username]], [botUsername, board[botUsername]]].forEach(([owner, units]) => {
+            (units || []).forEach((unit, slot) => {
+                if (unit && unit.alive !== false) applyTowerStatus(unit, towerRun.DUEL_RULE_STATUS, owner, slot);
+            });
         });
     }
     (encounter.affixes || []).forEach((affixId) => {
         const affix = towerRun.AFFIXES[affixId];
         if (!affix) return;
-        (board[botUsername] || []).forEach((unit, slot) => applyTowerStatus(unit, {
+        (board[botUsername] || []).forEach((unit, slot) => unit?.alive !== false && applyTowerStatus(unit, {
             statusId: `tower_affix_${affix.id}`,
             duration: 99,
             metadata: {
@@ -5937,7 +5990,10 @@ const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
 
 const buildTowerMatch = async ({ username, runId, setup }) => {
     const team = setup.team.map((member) => resolveTowerRosterIndex(member.characterId));
-    const enemyTeam = setup.encounter.enemyIds.map(resolveTowerRosterIndex);
+    // An empty enemy slot still needs a unit on the board; it is removed from the battle
+    // before the match starts (applyTowerSetupToBoard).
+    const leaderId = setup.encounter.enemyIds.find(Boolean);
+    const enemyTeam = setup.encounter.enemyIds.map((id) => resolveTowerRosterIndex(id || leaderId));
     if (team.length !== 3 || enemyTeam.length !== 3 || [...team, ...enemyTeam].some((index) => index < 0)) {
         throw new Error('A Tower battle could not resolve its characters.');
     }
@@ -5952,8 +6008,10 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
         equippedTitle: `${TOWER_KIND_TITLES[encounter.kind] || 'Tower'} · Floor ${encounter.floor}`,
         equippedBorder: '',
     };
-    const livingCount = setup.team.filter((member) => !member.dead).length;
-    const aliveLookup = { [username]: livingCount, [botPlayer.username]: 3 };
+    const livingCount = setup.team.filter((member) => !member.dead && !member.benched).length;
+    const enemyCount = setup.encounter.enemyIds.filter(Boolean).length;
+    const aliveLookup = { [username]: livingCount, [botPlayer.username]: enemyCount };
+    botPlayer.aliveCount = enemyCount;
     const playerDocs = [{ username, team, aliveCount: livingCount }, botPlayer];
     const board = battleLogic.buildInitialBoard(playerDocs, charactersData);
     if (board[username]?.length !== 3 || board[botPlayer.username]?.length !== 3) {
@@ -6008,9 +6066,13 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
             runId,
             kind: encounter.kind,
             floor: encounter.floor,
+            totalFloors: encounter.totalFloors || towerRun.TOTAL_FLOORS,
             name: encounter.name,
+            duel: Boolean(encounter.duel),
+            final: Boolean(encounter.final) || (encounter.kind === 'boss' && !encounter.bossId),
+            carries: encounter.carries || null,
             affixes: (encounter.affixes || []).slice(),
-            boss: encounter.kind === 'boss' ? towerBoss.createBossState() : null,
+            boss: encounter.kind === 'boss' ? towerBoss.createBossState(encounter.bossId) : null,
         },
     };
     if (matchDocument.towerEncounter.boss) {
