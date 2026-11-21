@@ -120,6 +120,7 @@ test('launch unlock migration aligns starter and mission requirements without re
                 'balance-update-0-3-2026-11-02': new Date(),
                 'uzumaki-naruto-kyuubi-awakening-rework-2026-11-21': new Date(),
                 'team-7-quest-progress-2026-11-22': new Date(),
+                'zori-and-waraji-rework-2026-11-21': new Date(),
             } },
         updateOne: async (filter, update) => { writes.push({ filter, update }); },
     };
@@ -715,4 +716,47 @@ test('Team 7 quest progress migration changes only the passive quest and keeps s
     }
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.team-7-quest-progress-2026-11-22']));
+});
+
+test('Zori & Waraji rework migration replaces the stored old kit', async () => {
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [{ characterId: 'zori-and-waraji', id: 'zori-and-waraji',
+                name: 'Zōri & Waraji', passive: { name: 'Coordinated Blades' },
+                skills: [{ id: 'zori-and-waraji-forced-entry', name: 'Forced Entry', effects: [] }] }] }
+            : { key, completed: {} },
+        updateOne: async () => ({ acknowledged: true }),
+    };
+    const stored = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const duo = stored.find((entry) => entry.characterId === 'zori-and-waraji');
+    assert.equal(duo.passive.name, 'Forced Entry');
+    assert.deepEqual(duo.skills.map((skill) => skill.name), [
+        "Zōri's Iaidō", "Waraji's Savage Slash", 'Bodyguards', 'Take Cover',
+    ]);
+});
+
+test('Sasuke Shadow Shuriken fix replaces only that skill and keeps stored art', async () => {
+    const seed = require('../data/characters/uchiha-sasuke');
+    const storedSkills = seed.skills.map((skill) => ({ ...skill, skillimage: `https://i.imgur.com/stored-${skill.id}.png` }));
+    storedSkills[0] = { ...storedSkills[0], effects: [] };
+    storedSkills[1] = { ...storedSkills[1], skilldescription: 'Admin edit' };
+    // Every migration defined in characterService (all older Sasuke reworks included) has run.
+    const otherMigrationsCompleted = Object.fromEntries(
+        (require('fs').readFileSync(require('path').join(__dirname, '..', 'services', 'characterService.js'), 'utf8')
+            .match(/_MIGRATION_ID = '([^']+)'/g) || [])
+            .map((entry) => [entry.match(/'([^']+)'/)[1], new Date()])
+    );
+    const collection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [{ ...seed, characterId: 'uchiha-sasuke', skills: storedSkills }] }
+            : { key, completed: otherMigrationsCompleted },
+        updateOne: async () => ({ acknowledged: true }),
+    };
+    const stored = await new CharacterService({ appStateCollection: collection }).getStoredCharacters();
+    const sasuke = stored.find((entry) => entry.characterId === 'uchiha-sasuke');
+    const shuriken = sasuke.skills[0];
+    assert.equal(shuriken.skillimage, `https://i.imgur.com/stored-${shuriken.id}.png`);
+    assert.equal(shuriken.effects[1].metadata.counterApplyStatusToRecipient.statusId,
+        'uchiha_sasuke_dragon_flame_ready');
+    assert.equal(sasuke.skills[1].skilldescription, 'Admin edit');
 });

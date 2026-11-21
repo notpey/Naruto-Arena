@@ -77,11 +77,19 @@ test('Gato keeps one bounty and No Loose Ends consumes its mark', () => {
 test('Zori and Waraji grant the other sword attack 10 damage without stacking', () => {
     const match = makeMatch();
     cast(match, 1, 0);
-    assert.equal(match.board.p2[0].hp, 80);
+    assert.equal(match.board.p2[0].hp, 75);
     cast(match, 1, 1);
-    assert.equal(match.board.p2[0].hp, 45);
+    assert.equal(match.board.p2[0].hp, 50);
     cast(match, 1, 1);
-    assert.equal(match.board.p2[0].hp, 10);
+    assert.equal(match.board.p2[0].hp, 25);
+});
+
+test("Zori's Iaido pierces damage reduction", () => {
+    const match = makeMatch();
+    match.board.p2[0].state.statuses.push({ id: 'test-reduction', remainingTurns: 3,
+        metadata: { damageReductionFlat: 10 } });
+    cast(match, 1, 0);
+    assert.equal(match.board.p2[0].hp, 75);
 });
 
 test('Bounty Contract adds five damage only to allies non-affliction attacks', () => {
@@ -90,7 +98,7 @@ test('Bounty Contract adds five damage only to allies non-affliction attacks', (
     cast(match, 0, 0);
     assert.equal(match.board.p2[0].hp, 75, 'Gatō does not receive his allies bonus');
     cast(match, 1, 0);
-    assert.equal(match.board.p2[0].hp, 50, 'an ally receives five extra damage');
+    assert.equal(match.board.p2[0].hp, 45, 'an ally receives five extra damage');
 
     const afflictionSkill = {
         id: 'test-affliction', name: 'Test Affliction', energy: [],
@@ -102,7 +110,7 @@ test('Bounty Contract adds five damage only to allies non-affliction attacks', (
     };
     const testCharacters = [gato, { ...duo, skills: [afflictionSkill] }];
     cast(match, 1, 0, 0, testCharacters);
-    assert.equal(match.board.p2[0].hp, 40, 'affliction receives no bounty bonus');
+    assert.equal(match.board.p2[0].hp, 35, 'affliction receives no bounty bonus');
 });
 
 test('marked enemy death awards two chakra once, including on No Loose Ends', () => {
@@ -128,19 +136,20 @@ test('an ally killing a marked enemy grants chakra only once for that contract',
     assert.equal(gainedChakra(match), 2);
 });
 
-test('Forced Entry destroys all defense on every enemy before damage', () => {
+test("Waraji's Savage Slash destroys only its target's defense before damage", () => {
     const match = makeMatch();
     match.board.p2[0].state.statuses.push({ id: 'defense-a', remainingTurns: 3,
         metadata: { destructibleDefensePoints: 40 } });
     match.board.p2[1].state.statuses.push({ id: 'defense-b', remainingTurns: 3,
         metadata: { destructibleDefensePoints: 5 } });
-    cast(match, 1, 2);
+    cast(match, 1, 1);
     assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'defense-a'), false);
     assert.equal(match.board.p2[0].hp, 85);
-    assert.equal(match.board.p2[1].hp, 85);
+    assert.equal(match.board.p2[1].hp, 100);
+    assert.ok(match.board.p2[1].state.statuses.some(status => status.id === 'defense-b'));
 });
 
-test('Forced Entry fires a defense break effect when it removes the last points', () => {
+test('Savage Slash fires a defense break effect when it removes the last points', () => {
     const match = makeMatch();
     match.board.p2[0].state.statuses.push({ id: 'breakable', remainingTurns: 3,
         metadata: { destructibleDefensePoints: 5, onBreakApplyStatusToSelf: {
@@ -148,8 +157,54 @@ test('Forced Entry fires a defense break effect when it removes the last points'
         }, onBreakApplyStatusToSource: {
             statusId: 'attacker-penalty', duration: 1, metadata: { harmful: true },
         } } });
-    cast(match, 1, 2);
+    cast(match, 1, 1);
     assert.ok(match.board.p2[0].state.statuses.some(status => status.id === 'defense-broken'));
     assert.ok(match.board.p1[1].state.statuses.some(status => status.id === 'attacker-penalty'));
     assert.equal(match.board.p2[0].hp, 85);
+});
+
+test('Forced Entry deals 10 physical damage to every enemy at the start of the battle', () => {
+    const board = battleLogic.buildInitialBoard([
+        { username: 'p1', team: [0, 1] },
+        { username: 'p2', team: [0, 0] },
+    ], characters);
+    assert.deepEqual(board.p1.map(unit => unit.hp), [100, 100]);
+    assert.deepEqual(board.p2.map(unit => unit.hp), [90, 90]);
+});
+
+const areaSkill = {
+    id: 'test-area', name: 'Test Area', energy: [], target: 'all-enemy', damage: 0, cooldown: 0,
+    classes: ['Physical', 'Instant'],
+    effects: [{ type: 'damage', amount: 20, scope: 'all-enemy' }],
+};
+
+function castBodyguards(match) {
+    // p2's Zori & Waraji (slot 0) use Bodyguards.
+    match.pendingTurns = { p2: { queueOrder: [0], queuedByActorSlot: {
+        0: { skillIndex: 2, targetSelection: [{ username: 'p2', slot: 0 }] },
+    } } };
+    battleLogic.resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
+}
+
+test('Bodyguards makes enemy all-enemy skills hit only Zori & Waraji, with 5 damage reduction', () => {
+    const match = makeMatch();
+    castBodyguards(match);
+    const areaCharacters = [{ ...gato, skills: [areaSkill] }, duo];
+    const options = battleLogic.computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
+        skillIndex: 0, characters: areaCharacters });
+    assert.deepEqual(options.targets.map(target => target.slot), [0]);
+    cast(match, 0, 0, 0, areaCharacters);
+    assert.equal(match.board.p2[0].hp, 85);
+    assert.equal(match.board.p2[1].hp, 100);
+});
+
+test('Bodyguards ends when Zori & Waraji die', () => {
+    const match = makeMatch();
+    castBodyguards(match);
+    match.board.p2[0].hp = 10;
+    const areaCharacters = [{ ...gato, skills: [areaSkill] }, duo];
+    cast(match, 0, 0, 0, areaCharacters);
+    assert.equal(match.board.p2[0].alive, false);
+    cast(match, 0, 0, 0, areaCharacters);
+    assert.equal(match.board.p2[1].hp, 80);
 });

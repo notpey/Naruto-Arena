@@ -100,29 +100,19 @@
                                 "tooltipText": "If this character does not use a new skill, their Physical skills will be stunned for 1 turn."
                             },
                             "counterApplyStatusToRecipient": {
-                                "statusId": "uchiha_sasuke_dragon_flame_delay",
-                                "duration": 2,
+                                "statusId": "uchiha_sasuke_dragon_flame_ready",
+                                "duration": 1,
                                 "metadata": {
                                     "helpful": true,
                                     "invisible": true,
                                     "hideTooltipFromEnemy": true,
-                                    "turnDurationAnchor": "any_turn",
-                                    "onExpireApplyStatusToSelf": {
-                                        "statusId": "uchiha_sasuke_dragon_flame_ready",
-                                        "duration": 1,
-                                        "metadata": {
-                                            "helpful": true,
-                                            "invisible": true,
-                                            "hideTooltipFromEnemy": true,
-                                            "ongoingClass": "control",
-                                            "controlIgnoresOwnerInvulnerability": true,
-                                            "skillReplacements": {
-                                                "uchiha-sasuke-ninja-wire-trap": "uchiha-sasuke-dragon-flame-jutsu"
-                                            },
-                                            "tooltipText": "Ninja Wire Trap is replaced by Dragon Flame Jutsu."
-                                        }
+                                    "ongoingClass": "control",
+                                    "controlIgnoresOwnerInvulnerability": true,
+                                    "skillReplacements": {
+                                        "uchiha-sasuke-ninja-wire-trap": "uchiha-sasuke-dragon-flame-jutsu"
                                     },
-                                    "tooltipText": "Ninja Wire Trap will be replaced by Dragon Flame Jutsu after the trapped enemy's next turn."
+                                    "tooltipText": "Ninja Wire Trap is replaced by Dragon Flame Jutsu.",
+                                    "turnDurationAnchor": "any_turn"
                                 }
                             },
                             "tooltipText": "The first enemy to use a harmful skill on Sasuke will be affected by Ninja Wire Trap."

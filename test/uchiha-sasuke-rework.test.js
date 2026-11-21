@@ -145,7 +145,7 @@ test('Ninja Wire Trap does nothing if the target uses a skill; Dragon Flame stil
     assert.equal(before - target.hp, 20, 'no +15 without the stun');
 });
 
-test('Shadow Shuriken: first harmful attacker is trapped, their skill still lands, Dragon Flame comes up when the stun is active', () => {
+test("Shadow Shuriken: first harmful attacker is trapped, their skill still lands, Ninja Wire Trap becomes Dragon Flame on Sasuke's next turn", () => {
     const match = matchFor([SASUKE], ['haruno-sakura', 'tenten']);
     const sasuke = match.board.p1[0];
     const [attacker, second] = match.board.p2;
@@ -165,14 +165,15 @@ test('Shadow Shuriken: first harmful attacker is trapped, their skill still land
     assert.ok(status(attacker, MARK), 'the first attacker is marked');
     assert.equal(status(second, MARK), undefined, 'only the first enemy is affected');
 
-    turn(match, 'p1');
-    assert.equal(effectiveSkillName(match, WIRE_TRAP), 'Ninja Wire Trap', 'no Dragon Flame before the trap resolves');
+    assert.equal(effectiveSkillName(match, WIRE_TRAP), 'Dragon Flame Jutsu',
+        'being trapped by Shadow Shuriken replaces Ninja Wire Trap, as using it does');
+    const before = [attacker.hp, second.hp];
+    turn(match, 'p1', { skill: WIRE_TRAP, target: onEnemy(0) });
+    assert.equal(before[0] - attacker.hp, 20, 'no +15 before the trap has stunned them');
+    assert.equal(before[1] - second.hp, 10);
+    assert.equal(effectiveSkillName(match, WIRE_TRAP), 'Ninja Wire Trap', 'it switches back afterwards');
     turn(match, 'p2'); // the marked enemy now skips
     assert.ok(status(attacker, STUN));
-    assert.equal(effectiveSkillName(match, WIRE_TRAP), 'Dragon Flame Jutsu');
-    const before = attacker.hp;
-    turn(match, 'p1', { skill: WIRE_TRAP, target: onEnemy(0) });
-    assert.equal(before - attacker.hp, 35);
     assert.equal(effectiveSkillName(match, WIRE_TRAP), 'Ninja Wire Trap');
 });
 

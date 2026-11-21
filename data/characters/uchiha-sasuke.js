@@ -79,20 +79,11 @@ module.exports = {
                         triggerOnEnemyHarmfulSkill: true, counterCancelsSkill: false,
                         counterStatusId: WIRE_TRAP_MARK, counterStatusDuration: 1,
                         counterStatusMetadata: wireTrapMarkMetadata,
-                        // The marked enemy has already acted this turn, so the trap checks their next turn.
-                        // This delay ends with that check, then Dragon Flame Jutsu replaces Ninja Wire Trap
-                        // for Sasuke's following turn, when the stun (if any) is active.
+                        // Like using Ninja Wire Trap, Dragon Flame Jutsu replaces it on Sasuke's next turn.
+                        // Granted during the enemy's turn, so it ticks on any turn to end after Sasuke's.
                         counterApplyStatusToRecipient: {
-                            statusId: 'uchiha_sasuke_dragon_flame_delay', duration: 2,
-                            metadata: {
-                                helpful: true, invisible: true, hideTooltipFromEnemy: true,
-                                turnDurationAnchor: 'any_turn',
-                                onExpireApplyStatusToSelf: {
-                                    statusId: 'uchiha_sasuke_dragon_flame_ready', duration: 1,
-                                    metadata: dragonFlameReadyMetadata,
-                                },
-                                tooltipText: 'Ninja Wire Trap will be replaced by Dragon Flame Jutsu after the trapped enemy\'s next turn.',
-                            },
+                            statusId: 'uchiha_sasuke_dragon_flame_ready', duration: 1,
+                            metadata: { ...dragonFlameReadyMetadata, turnDurationAnchor: 'any_turn' },
                         },
                         tooltipText: 'The first enemy to use a harmful skill on Sasuke will be affected by Ninja Wire Trap.',
                     },

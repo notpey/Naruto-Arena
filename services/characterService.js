@@ -51,6 +51,13 @@ const MIZUKI_WINDMILL_FIX_CHARACTER_IDS = ['mizuki'];
 const SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS = ['uchiha-sasuke'];
 const SAKURA_INNER_SAKURA_REWORK_CHARACTER_IDS = ['haruno-sakura'];
 const NARUTO_KYUUBI_REWORK_CHARACTER_IDS = ['uzumaki-naruto'];
+const ZORI_WARAJI_REWORK_MIGRATION_ID = 'zori-and-waraji-rework-2026-11-21';
+const ZORI_WARAJI_REWORK_CHARACTER_IDS = ['zori-and-waraji'];
+const {
+    SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID,
+    SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS,
+    applySasukeShadowShurikenFix,
+} = require('./sasukeShadowShurikenFix');
 const TEAM_7_QUEST_PROGRESS_CHARACTER_IDS = ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'];
 const {
     BALANCE_UPDATE_0_5_MIGRATION_ID,
@@ -314,6 +321,8 @@ class CharacterService {
                     [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
                     [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
+                    [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
+                    [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -400,6 +409,8 @@ class CharacterService {
                         [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
                         [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
+                        [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
@@ -455,6 +466,8 @@ class CharacterService {
         const shouldApplyNarutoKyuubiRework = !completedMigrations[NARUTO_KYUUBI_REWORK_MIGRATION_ID];
         const shouldApplyTeam7QuestProgress = !completedMigrations[TEAM_7_QUEST_PROGRESS_MIGRATION_ID];
         const shouldApplyBalanceUpdate05 = !completedMigrations[BALANCE_UPDATE_0_5_MIGRATION_ID];
+        const shouldApplyZoriWarajiRework = !completedMigrations[ZORI_WARAJI_REWORK_MIGRATION_ID];
+        const shouldApplySasukeShadowShurikenFix = !completedMigrations[SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
@@ -496,6 +509,8 @@ class CharacterService {
             ...(shouldApplyNarutoKyuubiRework ? NARUTO_KYUUBI_REWORK_CHARACTER_IDS : []),
             ...(shouldApplyTeam7QuestProgress ? TEAM_7_QUEST_PROGRESS_CHARACTER_IDS : []),
             ...(shouldApplyBalanceUpdate05 ? BALANCE_UPDATE_0_5_CHARACTER_IDS : []),
+            ...(shouldApplyZoriWarajiRework ? ZORI_WARAJI_REWORK_CHARACTER_IDS : []),
+            ...(shouldApplySasukeShadowShurikenFix ? SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
             ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
         ]);
@@ -597,6 +612,12 @@ class CharacterService {
                 if (shouldApplySasukeTwoTomoeRework && SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplySakuraInnerSakuraRework && SAKURA_INNER_SAKURA_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplyNarutoKyuubiRework && NARUTO_KYUUBI_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
+                if (shouldApplyZoriWarajiRework && ZORI_WARAJI_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
+                // Only Shadow Shuriken Technique changes; stored art and other edits are kept, and
+                // later migrations below still apply to the patched entry.
+                if (shouldApplySasukeShadowShurikenFix && SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS.includes(characterId)) {
+                    entry = applySasukeShadowShurikenFix(entry, seedEntry);
+                }
                 // Only the rebalanced skills change; stored art and other edits are kept.
                 if (shouldApplyBalanceUpdate05 && BALANCE_UPDATE_0_5_CHARACTER_IDS.includes(characterId)) {
                     return applyBalanceUpdate05(entry, seedEntry);
@@ -674,6 +695,8 @@ class CharacterService {
             shouldApplyNarutoKyuubiRework ||
             shouldApplyTeam7QuestProgress ||
             shouldApplyBalanceUpdate05 ||
+            shouldApplyZoriWarajiRework ||
+            shouldApplySasukeShadowShurikenFix ||
             shouldApplyLaunchUnlocks ||
             shouldApplyNewMissionUnlocks ||
             newSeedCharacters.length > 0 ||
@@ -728,6 +751,8 @@ class CharacterService {
                         [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
                         [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
+                        [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
+                        [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,

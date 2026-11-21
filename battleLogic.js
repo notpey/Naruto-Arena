@@ -283,6 +283,22 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
             });
         });
     });
+    // startDamageAllEnemies (Zōri & Waraji's Forced Entry): damage every enemy before turn 1.
+    Object.entries(board).forEach(([username, units]) => {
+        units.forEach((unit, slot) => {
+            const config = characters?.[unit.rosterIndex]?.passive?.startDamageAllEnemies;
+            const amount = Math.max(0, Number(config?.amount) || 0);
+            if (!amount) return;
+            Object.entries(board)
+                .filter(([enemyUsername]) => enemyUsername !== username)
+                .forEach(([enemyUsername, enemyUnits]) => enemyUnits.forEach((enemy) => {
+                    applyDamageToUnit(enemy, amount, {
+                        sourceUsername: username, sourceSlot: slot, targetUsername: enemyUsername,
+                        skillClasses: Array.isArray(config.classes) ? config.classes : [],
+                    });
+                }));
+        });
+    });
     // Awakenings that trigger when a specific ally is on the team are granted before turn 1.
     Object.entries(board).forEach(([username, units]) => {
         const teamCharacterIds = units.map((unit) => {
@@ -470,6 +486,18 @@ const resolveEffectiveSkill = ({ characters, rosterIndex, skillIndex, actorState
         }
     }
     return effectiveSkill || baseSkill;
+};
+
+// Bodyguards (Zōri & Waraji): while a living unit carries this flag, enemy skills that
+// target all enemies hit only the units carrying it. Returns their slots, or null when none do.
+const getAreaSkillGuardSlots = (units = []) => {
+    const slots = (Array.isArray(units) ? units : []).flatMap((unit, slot) =>
+        unit && unit.alive !== false && !isUnitBanished(unit) &&
+        (Array.isArray(unit.state?.statuses) ? unit.state.statuses : []).some((status) =>
+            (Number(status?.remainingTurns) || 0) > 0 &&
+            Boolean(status?.metadata?.redirectEnemyAreaSkillsToSelf))
+            ? [slot] : []);
+    return slots.length > 0 ? new Set(slots) : null;
 };
 
 const isStatusActiveForMetadata = (status, ownerUnit = null) => {
@@ -1013,10 +1041,11 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
         }
         case 'all-enemy': {
             result.mode = 'all';
+            const guardSlots = getAreaSkillGuardSlots(opponentBoard);
             result.targets = mapTargets(opponentUsername, opponentBoard, {
                 enemyTargeting: true,
                 skillClasses: effectiveSkill?.classes || [],
-            });
+            }).filter((target) => !guardSlots || guardSlots.has(target.slot));
             break;
         }
         case 'self': {
@@ -5771,6 +5800,8 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
         const actorAllies = (match.board?.[actingUsername] || [])
             .map((unit, slot) => ({ username: actingUsername, slot, unit }))
             .filter((entry) => entry.unit && entry.unit.alive !== false && !isUnitBanished(entry.unit));
+        const areaGuardSlots = String(skill?.target || '').trim().toLowerCase() === 'all-enemy'
+            ? getAreaSkillGuardSlots(match.board?.[opponentUsername] || []) : null;
         const opponentUnits = (match.board?.[opponentUsername] || [])
             .map((unit, slot) => ({ username: opponentUsername, slot, unit }))
             .filter((entry) => {
@@ -5796,7 +5827,8 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     }) ||
                     !isUnitInvulnerableForSkill(entry.unit, skill.classes || [])
                 );
-            });
+            })
+            .filter((entry) => !areaGuardSlots || areaGuardSlots.has(entry.slot));
         const allAliveUnits = [...actorAllies, ...opponentUnits];
         const actorHasHarmfulBlind = hasStatusMetadataFlag(actorState, 'harmfulBlind');
         const actorHasHelpfulBlind = hasStatusMetadataFlag(actorState, 'helpfulBlind');
