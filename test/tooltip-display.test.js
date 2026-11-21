@@ -134,3 +134,10 @@ test('skill states tell the panel what is locked, cooling down or replaced', () 
     const enemyView = buildMatchPayloadForUser(match, 'p2').board.p1[0].state;
     assert.equal(enemyView.skillStates, undefined, 'only your own skills get live state');
 });
+
+test('damage over time says "each turn" only when it will tick more than once', () => {
+    const metadata = { harmful: true, afflictionDamage: true, turnEndDamage: 10 };
+    const text = (turnEnds) => display.totalChips(display.buildStatusChips(metadata, { turnEnds }))[0].text;
+    assert.equal(text(1), '10 affliction damage');
+    assert.equal(text(3), '10 affliction damage each turn');
+});

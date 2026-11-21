@@ -3412,11 +3412,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skillName: (skillId) => findSkillById(skillId)?.name || '',
                 skillNameAt: (skillIndex) => getRosterData()?.[unit?.rosterIndex]?.skills?.[skillIndex]?.name || '',
             };
+            // Per status: how many turn ends it still has, so chips can say "each turn" only when true.
+            const chipContextFor = (status) => ({
+                ...chipContext,
+                turnEnds: status?.display?.duration?.turnEnds ?? status?.remainingTurns,
+            });
             // Each stat summed over every effect on this character, for "15 total" notes.
             const unitChipTotals = new Map(
                 (statusDisplay
                     ? statusDisplay.totalChips(statuses.flatMap((status) =>
-                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContext)))
+                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContextFor(status))))
                     : []
                 ).map((chip) => [chip.stat, chip])
             );
@@ -3839,7 +3844,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (tidyLine && !group.lines.includes(tidyLine)) group.lines.push(tidyLine);
                     });
                 });
-                const proseHtml = durationGroups
+                // withDurations: false when the prose sits in the details under a duration already shown.
+                const renderProse = (withDurations) => durationGroups
                     .map((group, idx) => {
                         const line = group.lines
                             .map(
@@ -3854,18 +3860,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                             idx < durationGroups.length - 1
                                 ? `<div class="status-tooltip-line-divider"></div>`
                                 : '';
-                        const meta = group.label
+                        const meta = withDurations && group.label
                             ? `<div class="status-tooltip-row-meta">${escapeHtml(group.label)}</div>`
                             : '';
                         return `<div class="status-tooltip-row">${line}${meta}</div>${divider}`;
                     })
                     .join('');
+                const proseHtml = renderProse(true);
 
                 // Short effect chips built from the canonical status metadata, with totals
                 // when the same stat also comes from this character's other effects.
                 const groupChips = statusDisplay
                     ? statusDisplay.totalChips(groupStatuses.flatMap((status) =>
-                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContext)))
+                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContextFor(status))))
                     : [];
                 const chipsHtml = groupChips.length
                     ? `<div class="status-chips">${groupChips.map((chip) => {
@@ -3889,7 +3896,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Details on demand: folded prose, the source skill's full text, and keyword definitions.
                 const detailParts = [];
-                if (chipsSayEverything && proseHtml) detailParts.push(`<div class="status-tooltip-desc">${proseHtml}</div>`);
+                if (chipsSayEverything && proseHtml) detailParts.push(`<div class="status-tooltip-desc">${renderProse(false)}</div>`);
                 const sourceDescription = String(statusSkill?.skilldescription || '').trim();
                 if (sourceDescription) {
                     detailParts.push(
@@ -3900,9 +3907,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (statusDisplay) {
                     const haystack = `${durationGroups.flatMap((group) => group.lines).join(' ')} ` +
                         `${groupChips.map((chip) => chip.text).join(' ')} ${sourceDescription}`.toLowerCase();
-                    const definitions = [...new Set(Object.keys(statusDisplay.GLOSSARY)
-                        .filter((term) => new RegExp(`\\b${term}\\b`).test(haystack))
+                    const classTerms = ['physical', 'chakra', 'mental', 'strategic'];
+                    const matchedTerms = Object.keys(statusDisplay.GLOSSARY)
+                        .filter((term) => new RegExp(`\\b${term}\\b`).test(haystack));
+                    const definitions = [...new Set(matchedTerms
+                        .filter((term) => !classTerms.includes(term))
                         .map((term) => statusDisplay.GLOSSARY[term]))];
+                    // Skill classes share one line instead of repeating the same definition.
+                    const matchedClasses = classTerms.filter((term) => matchedTerms.includes(term))
+                        .map((term) => statusDisplay.classLabel(term));
+                    if (matchedClasses.length) {
+                        const names = matchedClasses.length > 1
+                            ? `${matchedClasses.slice(0, -1).join(', ')} and ${matchedClasses[matchedClasses.length - 1]} are`
+                            : `${matchedClasses[0]} is`;
+                        definitions.push(`${names} ${matchedClasses.length > 1 ? 'skill classes' : 'a skill class'}. ` +
+                            'Some effects only affect certain classes.');
+                    }
                     if (definitions.length) {
                         detailParts.push(`<ul class="status-tooltip-glossary">${definitions
                             .map((definition) => `<li>${escapeHtml(definition)}</li>`).join('')}</ul>`);
@@ -4513,6 +4533,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .map((fact) => `<span class="status-chip status-chip--${fact.tone}">${escapeHtml(fact.text)}</span>`)
                 .join('');
             factsEl.style.display = facts.length ? '' : 'none';
+            // The facts share the skill name's line; drop trailing chips that would be cut off.
+            const factsRight = factsEl.getBoundingClientRect().right;
+            let overflowed = false;
+            factsEl.querySelectorAll('.status-chip').forEach((chip) => {
+                overflowed = overflowed || chip.getBoundingClientRect().right > factsRight + 0.5;
+                if (overflowed) chip.style.display = 'none';
+            });
         };
 
         let enemySkillBrowseState = null; // { side: 'opponent' | 'player', charSlot: 0..2, skillIdx: 0..3 }

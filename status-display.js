@@ -113,11 +113,15 @@
         ]),
         { keys: ['overrideAllSkillsToAllRandom'], chips: (m) =>
             (m.overrideAllSkillsToAllRandom ? [{ stat: 'all-random', text: 'All skills cost Random chakra' }] : []) },
-        { keys: ['turnEndDamage', 'afflictionDamage', 'turnEndTrigger'], chips: (m) => {
+        { keys: ['turnEndDamage', 'afflictionDamage', 'turnEndTrigger'], chips: (m, ctx) => {
             const value = positive(m.turnEndDamage);
             if (!value) return [];
+            // A status with one tick left hits once; "each turn" would overstate it. The
+            // duration label already says when.
+            const once = Number(ctx?.turnEnds) === 1;
+            const kind = m.afflictionDamage ? 'affliction damage' : 'damage';
             return [{ stat: m.afflictionDamage ? 'dot-affliction' : 'dot', value,
-                text: m.afflictionDamage ? '{value} affliction damage each turn' : '{value} damage each turn', good: false }];
+                text: once ? `{value} ${kind}` : `{value} ${kind} each turn`, good: false }];
         } },
         { keys: ['skillDamageBonuses'], chips: (m, ctx) => classMapEntries(m.skillDamageBonuses).map(([skillId, amount]) =>
             ({ stat: `skill-bonus:${skillId}`, value: positive(amount),
