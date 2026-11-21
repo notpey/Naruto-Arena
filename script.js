@@ -83,6 +83,88 @@ document.addEventListener('DOMContentLoaded', async () => {
             persist();
             syncUi();
         });
+
+        // Background music: the Naruto main theme, streamed from archive.org (not stored here).
+        // It follows the volume slider and mute button at a softer level than sound effects,
+        // starts on the first click or key press (browsers block sound before that), and
+        // resumes where it left off when moving between the hub and a battle.
+        const MUSIC_SRC = 'https://archive.org/download/tvtunes_8670/Naruto%20-%20Main%20Theme.mp3';
+        const MUSIC_VOLUME_SCALE = 0.35;
+        const MUSIC_POSITION_KEY = 'narutoMusicPosition';
+        let music = null;
+        let musicUnlocked = false;
+        const saveMusicPosition = () => {
+            if (!music || !Number.isFinite(music.currentTime)) return;
+            try {
+                window.sessionStorage.setItem(MUSIC_POSITION_KEY, String(music.currentTime));
+            } catch (error) {
+                // Ignore storage failures.
+            }
+        };
+        const ensureMusic = () => {
+            if (music) return music;
+            music = new Audio();
+            music.loop = true;
+            music.preload = 'none';
+            music.src = MUSIC_SRC;
+            try {
+                const saved = Number(window.sessionStorage.getItem(MUSIC_POSITION_KEY));
+                if (Number.isFinite(saved) && saved > 0) {
+                    music.addEventListener('loadedmetadata', () => {
+                        if (Number.isFinite(music.duration) && saved < music.duration) music.currentTime = saved;
+                    }, { once: true });
+                }
+            } catch (error) {
+                // Ignore storage failures.
+            }
+            return music;
+        };
+        const syncMusic = () => {
+            if (!musicUnlocked) return;
+            const volume = clampVolume(settings.volume) * MUSIC_VOLUME_SCALE;
+            if (volume <= 0) {
+                if (music && !music.paused) {
+                    saveMusicPosition();
+                    music.pause();
+                }
+                return;
+            }
+            const track = ensureMusic();
+            track.volume = volume;
+            if (track.paused) {
+                const playback = track.play();
+                if (playback && typeof playback.catch === 'function') {
+                    // Blocked until the player interacts with this page: wait for a click or key.
+                    playback.catch(() => {
+                        musicUnlocked = false;
+                        armMusicUnlock();
+                    });
+                }
+            }
+        };
+        const unlockMusic = () => {
+            if (musicUnlocked) return;
+            musicUnlocked = true;
+            window.removeEventListener('pointerdown', unlockMusic, true);
+            window.removeEventListener('keydown', unlockMusic, true);
+            syncMusic();
+        };
+        const armMusicUnlock = () => {
+            window.addEventListener('pointerdown', unlockMusic, true);
+            window.addEventListener('keydown', unlockMusic, true);
+        };
+        armMusicUnlock();
+        // Music already playing in this tab (hub -> battle): try to continue without a click.
+        try {
+            if (window.sessionStorage.getItem(MUSIC_POSITION_KEY) !== null) unlockMusic();
+        } catch (error) {
+            // Ignore storage failures.
+        }
+        soundVolumeInput?.addEventListener('input', syncMusic);
+        soundToggleButton?.addEventListener('click', syncMusic);
+        window.addEventListener('pagehide', saveMusicPosition);
+        setInterval(saveMusicPosition, 5000);
+
         return {
             play(audio) {
                 if (!audio || settings.volume <= 0) return;

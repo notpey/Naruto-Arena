@@ -4295,6 +4295,8 @@ app.use(
                 styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
                 fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
                 imgSrc: ["'self'", 'data:', '*'],
+                // Background music streams from archive.org, which redirects to its storage hosts.
+                mediaSrc: ["'self'", 'https://archive.org', 'https://*.archive.org'],
                 connectSrc: ["'self'", ...allowedOrigins],
                 objectSrc: ["'none'"],
                 frameAncestors: ["'self'"],
