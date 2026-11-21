@@ -142,10 +142,12 @@ const TEAM_MINATO_DRAFTS_MIGRATION_ID = 'team-minato-drafts-2026-11-08';
 const TEAM_MINATO_REVIEW_MIGRATION_ID = 'team-minato-review-2026-11-08';
 const ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID = 'rock-lee-final-lotus-immortality-2026-11-08';
 const MIZUKI_WINDMILL_FIX_MIGRATION_ID = 'mizuki-windmill-invulnerability-2026-11-08';
+const SASUKE_TWO_TOMOE_REWORK_MIGRATION_ID = 'uchiha-sasuke-two-tomoe-rework-2026-11-20';
 const TEAM_MINATO_DRAFTS_CHARACTER_IDS = ['young-kakashi', 'uchiha-obito', 'nohara-rin'];
 const TEAM_MINATO_REVIEW_CHARACTER_IDS = ['young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato'];
 const ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS = ['rock-lee'];
 const MIZUKI_WINDMILL_FIX_CHARACTER_IDS = ['mizuki'];
+const SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS = ['uchiha-sasuke'];
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -3067,6 +3069,7 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${TEAM_MINATO_REVIEW_MIGRATION_ID}`]: now,
                 [`completed.${ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID}`]: now,
                 [`completed.${MIZUKI_WINDMILL_FIX_MIGRATION_ID}`]: now,
+                [`completed.${SASUKE_TWO_TOMOE_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 updatedAt: now,
@@ -3141,6 +3144,7 @@ const getStoredCharacters = async () => {
                     [`completed.${TEAM_MINATO_REVIEW_MIGRATION_ID}`]: now,
                     [`completed.${ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID}`]: now,
                     [`completed.${MIZUKI_WINDMILL_FIX_MIGRATION_ID}`]: now,
+                    [`completed.${SASUKE_TWO_TOMOE_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -3194,6 +3198,7 @@ const getStoredCharacters = async () => {
     const shouldApplyTeamMinatoReview = !completedMigrations[TEAM_MINATO_REVIEW_MIGRATION_ID];
     const shouldApplyRockLeeImmortalityFix = !completedMigrations[ROCK_LEE_IMMORTALITY_FIX_MIGRATION_ID];
     const shouldApplyMizukiWindmillFix = !completedMigrations[MIZUKI_WINDMILL_FIX_MIGRATION_ID];
+    const shouldApplySasukeTwoTomoeRework = !completedMigrations[SASUKE_TWO_TOMOE_REWORK_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const characterIdsToRefresh = new Set([
@@ -3232,6 +3237,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyTeamMinatoReview ? TEAM_MINATO_REVIEW_CHARACTER_IDS : []),
         ...(shouldApplyRockLeeImmortalityFix ? ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS : []),
         ...(shouldApplyMizukiWindmillFix ? MIZUKI_WINDMILL_FIX_CHARACTER_IDS : []),
+        ...(shouldApplySasukeTwoTomoeRework ? SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3336,6 +3342,7 @@ const getStoredCharacters = async () => {
             if (shouldApplyTeamMinatoReview && TEAM_MINATO_REVIEW_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyRockLeeImmortalityFix && ROCK_LEE_IMMORTALITY_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if (shouldApplyMizukiWindmillFix && MIZUKI_WINDMILL_FIX_CHARACTER_IDS.includes(characterId)) return seedEntry;
+            if (shouldApplySasukeTwoTomoeRework && SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
             if ((shouldApplyLaunchUnlocks && LAUNCH_UNLOCK_RULE_CHARACTER_IDS.has(characterId)) ||
                 (shouldApplyNewMissionUnlocks && NEW_MISSION_UNLOCK_CHARACTER_IDS.has(characterId))) {
                 return { ...entry, requiredMissionId: seedEntry.requiredMissionId || null };
@@ -3378,7 +3385,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3485,6 +3492,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyMizukiWindmillFix) {
             completedMigrationUpdates[`completed.${MIZUKI_WINDMILL_FIX_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplySasukeTwoTomoeRework) {
+            completedMigrationUpdates[`completed.${SASUKE_TWO_TOMOE_REWORK_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;

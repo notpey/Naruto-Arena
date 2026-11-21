@@ -96,6 +96,9 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           statusIcon: passive.icon || '',
                           tooltipText: passive.stackTooltipTextTemplate
                               ? renderTooltipTemplate(passive.stackTooltipTextTemplate, passive)
+                              : passive.awakening?.progressTooltipTextTemplate
+                              ? renderTooltipTemplate(passive.awakening.progressTooltipTextTemplate,
+                                  { awakeningSkillUses: 0 })
                               : (passive.description || '').trim(),
                           physicalDamageBonusWhileHelpful:
                               Math.max(0, Number(passive.physicalDamageBonusWhileHelpful) || 0),
@@ -157,8 +160,11 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                               [passive.onDamageStackMetadataKey]:
                                   Math.max(0, Number(passive[passive.onDamageStackMetadataKey]) || 0),
                           } : {}),
-                          tooltipTextTemplate: passive.stackTooltipTextTemplate || null,
+                          tooltipTextTemplate: passive.stackTooltipTextTemplate ||
+                              passive.awakening?.progressTooltipTextTemplate || null,
                           awakening: passive.awakening || null,
+                          ...(Number(passive.awakening?.afterOwnerSkillUses) > 0
+                              ? { awakeningSkillUses: 0 } : {}),
                       },
                   }
                 : null;
@@ -274,6 +280,25 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                 metadata: markFromPassive(config.metadata),
                 fresh: false,
             });
+        });
+    });
+    // Awakenings that trigger when a specific ally is on the team are granted before turn 1.
+    Object.entries(board).forEach(([username, units]) => {
+        const teamCharacterIds = units.map((unit) => {
+            const character = characters?.[unit.rosterIndex];
+            return character?.characterId || character?.id || null;
+        });
+        units.forEach((unit, slot) => {
+            const allyIds = characters?.[unit.rosterIndex]?.passive?.awakening?.allyCharacterIdsAny;
+            if (!Array.isArray(allyIds) || allyIds.length === 0) return;
+            const allyPresent = teamCharacterIds.some((id, allySlot) =>
+                allySlot !== slot && id && allyIds.includes(id));
+            if (!allyPresent) return;
+            const passiveStatus = unit.state.statuses.find((status) =>
+                status?.metadata?.passive === true && status?.metadata?.awakening?.statusId);
+            if (passiveStatus) {
+                grantPassiveAwakening({ state: unit.state, passive: passiveStatus, username, slot });
+            }
         });
     });
     return board;
@@ -2010,18 +2035,40 @@ const updateTeamPassiveAwakenings = ({ match, username, ownerTurnEnded = false }
         const allyHpBelow = Math.max(0, Number(awakening.allyHpBelow) || 0);
         const allyReady = allyHpBelow > 0 && units.some((ally, allySlot) =>
             allySlot !== slot && ally && Number(ally.hp) < allyHpBelow);
-        if (!turnsReady && !allyReady) return;
-        applyStatus({
-            targetState: state, statusId: awakening.statusId, duration: 99,
-            sourceUsername: username, sourceSlot: slot,
-            metadata: { helpful: true, permanent: true, statusIcon: passive.metadata.statusIcon || '',
-                ...(awakening.metadata || {}) }, fresh: false,
-        });
-        (Array.isArray(awakening.clearCooldownSkillIds) ? awakening.clearCooldownSkillIds : [])
-            .forEach((skillId) => {
-                if (typeof skillId === 'string' && skillId) delete state.cooldowns[skillId];
-            });
+        // Quest-style awakening: counts every skill this unit has used this match.
+        const skillUsesRequired = Math.max(0, Number(awakening.afterOwnerSkillUses) || 0);
+        const skillUses = Math.max(0, Number(state.totalSkillUseCount) || 0);
+        if (skillUsesRequired > 0) {
+            passive.metadata.awakeningSkillUses = Math.min(skillUses, skillUsesRequired);
+            if (typeof passive.metadata.tooltipTextTemplate === 'string' && passive.metadata.tooltipTextTemplate) {
+                passive.metadata.tooltipText =
+                    renderTooltipTemplate(passive.metadata.tooltipTextTemplate, passive.metadata);
+            }
+        }
+        const skillUsesReady = skillUsesRequired > 0 && skillUses >= skillUsesRequired;
+        if (!turnsReady && !allyReady && !skillUsesReady) return;
+        grantPassiveAwakening({ state, passive, username, slot });
     });
+};
+
+const grantPassiveAwakening = ({ state, passive, username, slot }) => {
+    const awakening = passive?.metadata?.awakening;
+    if (!awakening?.statusId || hasStatus(state, awakening.statusId)) return;
+    applyStatus({
+        targetState: state, statusId: awakening.statusId, duration: 99,
+        sourceUsername: username, sourceSlot: slot,
+        metadata: { helpful: true, permanent: true, statusIcon: passive.metadata.statusIcon || '',
+            ...(awakening.metadata || {}) }, fresh: false,
+    });
+    (Array.isArray(awakening.clearCooldownSkillIds) ? awakening.clearCooldownSkillIds : [])
+        .forEach((skillId) => {
+            if (typeof skillId === 'string' && skillId) delete state.cooldowns[skillId];
+        });
+    // Optional: the passive's own tooltip switches from quest progress to a completed note.
+    if (typeof awakening.completedTooltipText === 'string' && awakening.completedTooltipText) {
+        passive.metadata.tooltipTextTemplate = null;
+        passive.metadata.tooltipText = awakening.completedTooltipText;
+    }
 };
 
 const applyExpireReplacementStatus = ({
@@ -3098,6 +3145,15 @@ const maybeTriggerReactiveDefenses = ({
             trapMetadata?.counterStatusMetadata && typeof trapMetadata.counterStatusMetadata === 'object'
                 ? { ...trapMetadata.counterStatusMetadata }
                 : {};
+        // Snapshot the countered unit's skill count (its triggering skill is already counted)
+        // so onExpireEffectsIfNoNewSkillUsed only fires if it skips using a new skill.
+        (Array.isArray(counterStatusMetadata.copyTargetTotalSkillUseCountToKeys)
+            ? counterStatusMetadata.copyTargetTotalSkillUseCountToKeys : [])
+            .forEach((key) => {
+                if (typeof key === 'string' && key) {
+                    counterStatusMetadata[key] = Number(actorState?.totalSkillUseCount) || 0;
+                }
+            });
         if (Boolean(counterStatusMetadata?.taunt) && trapStatus?.sourceUsername) {
             counterStatusMetadata.cannotTargetAlliesOfUsername = trapStatus.sourceUsername;
             if (Number.isInteger(trapStatus?.sourceSlot)) {

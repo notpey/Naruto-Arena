@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
 const battle = require('../battleLogic');
 const { CharacterService } = require('../services/characterService');
 
@@ -146,7 +147,7 @@ test('Dosu: enhanced Vibrating Sound Drill taxes skills for 2 turns', () => {
 });
 
 test('Zaku: Sound Wall ignores non-physical skills', () => {
-    const match = matchFor(['zaku-abumi', 'uzumaki-naruto'], ['uchiha-sasuke']);
+    const match = matchFor(['zaku-abumi', 'uzumaki-naruto'], ['test-sasuke-dummy']);
     cast(match, 'p1', 0, 1);
     endTurn(match, 'p1');
     cast(match, 'p2', 0, 1, 'p1', 1);

@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
 const { ACTIVE_ROSTER_IDS } = require('../data/activeRoster');
 const { buildMatchPayloadForUser } = require('../server');
 const battle = require('../battleLogic');
@@ -130,7 +131,7 @@ test('Double Headed Wolf protects the team for one turn and replaces Garouga onl
 });
 
 test('Double Headed Wolf stops enemy physical damage but not chakra damage', () => {
-    const match = makeMatch([kibaIndex, indexOf('haruno-sakura')], [indexOf('uchiha-sasuke')]);
+    const match = makeMatch([kibaIndex, indexOf('haruno-sakura')], [indexOf('test-sasuke-dummy')]);
     cast(match, 'p1', 0, 2);
     cast(match, 'p2', 0, 0, target('p1', 1));
     assert.equal(match.board.p1[1].hp, 100);

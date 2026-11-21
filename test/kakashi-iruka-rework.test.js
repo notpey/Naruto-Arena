@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
 const { buildMatchPayloadForUser } = require('../server');
 const {
     buildInitialBoard,
@@ -193,7 +194,7 @@ test('Shuriken Throw gains 10 damage at 50 HP and the protection skills use thei
 });
 
 test('Sealed Bomb Square triggers on damaging skills, deals 20 affliction, and stuns at 50 HP', () => {
-    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    const match = makeMatch([index('umino-iruka')], [index('test-sasuke-dummy')]);
     cast(match, 'p1', 0, 2, ['p2', 0]);
     assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap').remainingTurns, 1);
     cast(match, 'p2', 0, 1, ['p1', 0]);
@@ -202,7 +203,7 @@ test('Sealed Bomb Square triggers on damaging skills, deals 20 affliction, and s
     assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_trap'), undefined);
     assert.equal(status(match, 'p2', 0, 'iruka_sealed_bomb_stun'), undefined);
 
-    const low = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    const low = makeMatch([index('umino-iruka')], [index('test-sasuke-dummy')]);
     low.board.p2[0].hp = 70;
     cast(low, 'p1', 0, 2, ['p2', 0]);
     cast(low, 'p2', 0, 1, ['p1', 0]);
@@ -211,7 +212,7 @@ test('Sealed Bomb Square triggers on damaging skills, deals 20 affliction, and s
 });
 
 test('Sealed Bomb Square respects invulnerability without cancelling the triggering skill', () => {
-    const match = makeMatch([index('umino-iruka')], [index('uchiha-sasuke')]);
+    const match = makeMatch([index('umino-iruka')], [index('test-sasuke-dummy')]);
     cast(match, 'p1', 0, 2, ['p2', 0]);
     match.board.p2[0].state.statuses.push({
         id: 'test_invulnerability', remainingTurns: 1,

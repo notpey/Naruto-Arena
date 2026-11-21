@@ -532,102 +532,6 @@ test('Sakura rework keeps four skills and a visible passive that strengthens Gua
     assert.equal(sakuraState.statuses.some(status => status.id === 'invulnerable' && status.metadata.invulnerable), true);
 });
 
-test('Sasuke Fireball burn drives his passive bonus and Shadow Shuriken follow-up', () => {
-    const sasuke = getSasuke();
-    assert.deepEqual(sasuke.skills.map(skill => skill.name), [
-        'Shadow Shuriken Technique', 'Fire Style: Great Fireball Jutsu', 'Sharingan', 'Stealth',
-    ]);
-    const match = makeMatch([2], [1]);
-    const passive = match.board.p1[0].state.statuses.find(status => status.metadata?.passive);
-    assert.equal(passive.metadata.sourceSkillName, 'Uchiha Prodigy');
-    assert.equal(passive.metadata.statusIcon, sasuke.passive.icon);
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 80, 'unmarked Shuriken deals 20');
-
-    queueSkill(match, 'p1', 1, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 60, 'Fireball deals 20 chakra damage');
-    const burn = match.board.p2[0].state.statuses.find(status => status.id === 'uchiha_sasuke_great_fireball_burn');
-    assert.equal(burn.remainingTurns, 3);
-    assert.equal(burn.sourceUsername, 'p1');
-    assert.equal(burn.metadata.turnEndDamage, 5);
-    assert.equal(burn.metadata.afflictionDamage, true);
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(match.board.p2[0].hp, 35, 'marked Shuriken deals 20 plus 5 from passive');
-    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === 'uchiha_sasuke_shadow_shuriken_stun'), true);
-    assert.equal(match.board.p2[0].state.statuses.some(status => status.id === burn.id), false, 'Shuriken ends remaining Fireball effect');
-
-    const tickMatch = makeMatch([2], [1]);
-    queueSkill(tickMatch, 'p1', 1, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match: tickMatch, actingUsername: 'p1', characters });
-    for (const hp of [75, 70, 65]) {
-        tickStatusesForTurnEnd({ match: tickMatch, endingUsername: 'p1' });
-        assert.equal(tickMatch.board.p2[0].hp, hp, 'Fireball burn ticks for 5 affliction damage');
-    }
-    assert.equal(tickMatch.board.p2[0].state.statuses.some(status => status.id === burn.id), false);
-
-    const foreignBurnMatch = makeMatch([2], [1]);
-    foreignBurnMatch.board.p2[0].state.statuses.push({
-        id: burn.id, remainingTurns: 2, sourceUsername: 'p2', sourceSlot: 0,
-        metadata: { harmful: true, afflictionDamage: true },
-    });
-    queueSkill(foreignBurnMatch, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match: foreignBurnMatch, actingUsername: 'p1', characters });
-    assert.equal(foreignBurnMatch.board.p2[0].hp, 80, 'another source’s Fireball does not activate Sasuke’s passive');
-    assert.equal(foreignBurnMatch.board.p2[0].state.statuses.some(status => status.id === burn.id), true);
-    assert.equal(foreignBurnMatch.board.p2[0].state.statuses.some(status => status.id === 'uchiha_sasuke_shadow_shuriken_stun'), false);
-});
-
-test('Sasuke Sharingan hides its counter and ends after countering a Physical skill', () => {
-    const match = makeMatch([2], [2]);
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    const state = match.board.p1[0].state;
-    const sharingan = state.statuses.find(status => status.id === 'uchiha_sasuke_sharingan');
-    assert.equal(sharingan.remainingTurns, 3);
-    assert.equal(sharingan.metadata.damageReductionFlat, 10);
-    assert.equal(buildMatchPayloadForUser(match, 'p2').board.p1[0].state.statuses.some(status => status.id === sharingan.id), false);
-    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.some(status => status.id === sharingan.id), true);
-
-    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 90, 'Sharingan reduces Chakra damage but does not counter it');
-    assert.equal(state.statuses.some(status => status.id === sharingan.id), true);
-
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 90, 'Sharingan counters the Physical skill');
-    assert.equal(state.statuses.some(status => status.id === sharingan.id), false, 'Sharingan ends after countering');
-
-    queueSkill(match, 'p1', 3);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-    assert.equal(state.statuses.some(status => status.id === 'invulnerable' && status.metadata.invulnerable), true);
-});
-
-test('Sasuke Sharingan does not counter his own Physical skill', () => {
-    const match = makeMatch([2], [2]);
-    queueSkill(match, 'p1', 2);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
-
-    assert.equal(match.board.p2[0].hp, 80, 'Shadow Shuriken reaches the enemy');
-    assert.equal(match.board.p1[0].state.statuses.some(status =>
-        status.id === 'uchiha_sasuke_sharingan'), true, 'Sharingan remains ready for an enemy skill');
-    assert.equal(Boolean(match.combatEvents?.some(event => event.outcome === 'countered')), false);
-
-    queueSkill(match, 'p2', 0, [{ username: 'p1', slot: 0 }]);
-    resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 100, 'the next enemy Physical skill is countered');
-    assert.equal(match.board.p1[0].state.statuses.some(status =>
-        status.id === 'uchiha_sasuke_sharingan'), false, 'enemy counter consumes Sharingan');
-});
-
 test('battleLogic resolves Kiba draft mark, damage, and discount', () => {
     const kibaIndex = getCharIndex('inuzuka-kiba');
     const match = makeMatch([kibaIndex], [getCharIndex('haruno-sakura')]);
@@ -1052,7 +956,7 @@ test('Tenten Trap reductions lower a target’s next non-affliction attack', () 
 });
 
 test('Tenten Trap also reduces Chakra damage by its base value plus Dragon marks', () => {
-    const match = makeMatch([getCharIndex('tenten')], [getCharIndex('uchiha-sasuke')]);
+    const match = makeMatch([getCharIndex('tenten')], [getCharIndex('itachi-body-double')]);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     queueSkill(match, 'p1', 1);
@@ -1060,9 +964,9 @@ test('Tenten Trap also reduces Chakra damage by its base value plus Dragon marks
     const debuff = match.board.p2[0].state.statuses.find((entry) =>
         entry.id === 'tenten_twin_rising_dragons_trap_debuff');
     assert.deepEqual(debuff.metadata.damageDebuffBySkillClass, { physical: 10, chakra: 10 });
-    queueSkill(match, 'p2', 1, [{ username: 'p1', slot: 0 }]);
+    queueSkill(match, 'p2', 2, [{ username: 'p1', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p2', characters });
-    assert.equal(match.board.p1[0].hp, 90, 'Sasuke Fireball deals 20 minus 10 Chakra damage');
+    assert.equal(match.board.p1[0].hp, 90, 'a 20-damage Chakra Fireball deals 20 minus 10');
 });
 
 test('battleLogic resolves Neji draft damage, chakra costs, and passive', () => {

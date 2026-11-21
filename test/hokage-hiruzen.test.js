@@ -1,13 +1,14 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
 const battle = require('../battleLogic');
 const { buildMatchPayloadForUser } = require('../server');
 const rosterCatalog = require('../roster-catalog');
 
 const indexOf = (id) => characters.findIndex((character) => character?.characterId === id);
 const hiruzenIndex = indexOf('sarutobi-hiruzen');
-const sasukeIndex = indexOf('uchiha-sasuke');
+const sasukeIndex = indexOf('test-sasuke-dummy');
 const sakuraIndex = indexOf('haruno-sakura');
 const ebisuIndex = indexOf('ebisu');
 

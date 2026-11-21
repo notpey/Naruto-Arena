@@ -195,7 +195,7 @@ test('Sakura and Sasuke rework replaces stale stored character concepts once', a
     assert.equal(sakura.skills[0].name, 'Kunai Interference');
     assert.equal(sakura.passive.name, 'Exceptional Chakra Control');
     assert.equal(sasuke.skills[0].name, 'Shadow Shuriken Technique');
-    assert.equal(sasuke.passive.name, 'Uchiha Prodigy');
+    assert.equal(sasuke.passive.name, 'Two-Tomoe Sharingan');
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.team-7-sakura-sasuke-rework-2026-10-24-v2']));
 });
@@ -575,4 +575,36 @@ test('the Kankuro trap and poison fix replaces a stored Kankuro once', async () 
     const kankuro = loaded.find((character) => character.characterId === 'kankuro');
     assert.ok(kankuro.skills[1].effects.some((effect) => effect.statusId === 'kankuro_poison_bomb_poison'));
     assert.ok(writes.some((update) => update.$set?.['completed.kankuro-trap-poison-fix-2026-11-03']));
+});
+
+test('Two-Tomoe Sharingan rework replaces a stored Sasuke kit once', async () => {
+    const oldSasuke = {
+        id: 'uchiha-sasuke', characterId: 'uchiha-sasuke', name: 'Uchiha Sasuke',
+        facePicture: 'https://i.imgur.com/bwuEwsM.png',
+        passive: { name: 'Uchiha Prodigy' },
+        skills: [{ id: 'uchiha-sasuke-great-fireball-jutsu', name: 'Fire Style: Great Fireball Jutsu' }],
+    };
+    const writes = [];
+    const allCompletedButSasuke = Object.fromEntries(
+        (require('fs').readFileSync(require('path').join(__dirname, '..', 'services', 'characterService.js'), 'utf8')
+            .match(/_MIGRATION_ID = '([^']+)'/g) || [])
+            .map((entry) => entry.match(/'([^']+)'/)[1])
+            .filter((id) => id !== 'uchiha-sasuke-two-tomoe-rework-2026-11-20')
+            .map((id) => [id, new Date()])
+    );
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldSasuke] }
+            : { key, completed: allCompletedButSasuke },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const sasuke = stored.find((character) => character.id === 'uchiha-sasuke');
+    assert.equal(sasuke.passive.name, 'Two-Tomoe Sharingan');
+    assert.deepEqual(sasuke.skills.map((skill) => skill.name), [
+        'Shadow Shuriken Technique', 'Ninja Wire Trap', 'Chidori', 'Sasuke Evasion', 'Dragon Flame Jutsu',
+    ]);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.uchiha-sasuke-two-tomoe-rework-2026-11-20']));
 });
