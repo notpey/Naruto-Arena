@@ -510,6 +510,8 @@
 
         document.addEventListener("click", function (event) {
             if (settings && settings.contains(event.target)) return;
+            // The settings panel closes itself (X button or a backdrop click), not on clicks inside it.
+            if (event.target instanceof Element && event.target.closest("#settings-modal")) return;
             if (typeof setSettingsOpen === "function") setSettingsOpen(false);
         });
 

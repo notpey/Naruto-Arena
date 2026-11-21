@@ -126,6 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (typeof listener === 'function') changeListeners.push(listener);
             },
         };
+        // Page scripts load before this point (it waits on the session), so tell them it's ready.
+        document.dispatchEvent(new CustomEvent('arena:sound-ready'));
 
         // Background music: the Naruto main theme, streamed from archive.org (not stored here).
         // It follows the volume slider and mute button at a softer level than sound effects,

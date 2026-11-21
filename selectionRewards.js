@@ -106,7 +106,7 @@
                 var settingsPanel = document.querySelector(".arena-settings");
                 if (settingsPanel) settingsPanel.classList.toggle("is-master-muted", !(Number(levels.volume) > 0));
             };
-            if (window.ArenaSound) {
+            var wireAudio = function() {
                 audioChannels.forEach(function(entry) {
                     var slider = document.getElementById(entry.slider);
                     // Master's own slider is also the sound manager's input, which saves it itself.
@@ -122,6 +122,12 @@
                 });
                 window.ArenaSound.onChange(renderAudio);
                 renderAudio(window.ArenaSound.getSettings());
+            };
+            // script.js defines ArenaSound only after the session check, which is usually after this runs.
+            if (window.ArenaSound) {
+                wireAudio();
+            } else {
+                document.addEventListener("arena:sound-ready", wireAudio, { once: true });
             }
 
             // Training Dummy & Bug Report Diverted Actions
@@ -224,9 +230,17 @@
             }
 
             // Backdrop Click & Escape Key Dismissal
+            // Only a press that starts AND ends on the backdrop closes: dragging a slider out of the
+            // panel and releasing on the backdrop must not.
             document.querySelectorAll(".shinobi-modal-overlay, .settings-modal-overlay").forEach(function(overlay) {
+                var pressedOnBackdrop = false;
+                overlay.addEventListener("pointerdown", function(e) {
+                    pressedOnBackdrop = e.target === overlay;
+                });
                 overlay.addEventListener("click", function(e) {
-                    if (e.target === overlay) {
+                    var startedOnBackdrop = pressedOnBackdrop;
+                    pressedOnBackdrop = false;
+                    if (e.target === overlay && startedOnBackdrop) {
                         overlay.classList.add("hidden");
                     }
                 });
