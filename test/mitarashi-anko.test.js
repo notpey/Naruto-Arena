@@ -42,7 +42,7 @@ test('Anko draft kit matches names, costs, cooldowns, and roster', () => {
     const anko = characters[indexOf('mitarashi-anko')];
     assert.equal(anko.passive.name, "Anko's Cursed Seal");
     assert.deepEqual(anko.skills.map((skill) => [skill.name, skill.energy, skill.cooldown]), [
-        ['Dual Pin', ['Random'], 2], ['Dragon Fire', ['Ninjutsu'], 2],
+        ['Dual Pin', [], 2], ['Dragon Fire', ['Ninjutsu'], 2],
         ['Hidden Shadow Snake Hand', ['Ninjutsu', 'Random'], 1], ['Quick Reflexes', ['Random'], 4],
         ['Twin Snakes Mutual Death', ['Ninjutsu', 'Ninjutsu'], 0],
     ]);

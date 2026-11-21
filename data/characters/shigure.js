@@ -25,8 +25,9 @@ module.exports = {
         {
             id: 'shigure-sprinkling-needles', name: 'Sprinkling Needles',
             skillimage: 'https://i.imgur.com/2OSrQPb.png',
-            skilldescription: 'Shigure deals 10 physical damage to all enemies each turn for 3 turns. Needle Barrage can be used during this time.',
+            skilldescription: 'Shigure deals 10 physical damage to all enemies each turn for 3 turns. Needle Barrage can be used during this time. This skill cannot be countered or reflected.',
             energy: ['Random', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
+            cannotBeCountered: true, cannotBeReflected: true, ignoreDamageReflection: true,
             classes: ['Physical', 'Action'],
             effects: [
                 { type: 'apply_status', statusId: NEEDLES, duration: 3,

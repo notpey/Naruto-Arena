@@ -17,7 +17,7 @@ module.exports = {
             id: DUAL_PIN_SKILL, name: 'Dual Pin',
             skillimage: 'https://i.imgur.com/IZFaSKq.png',
             skilldescription: 'Anko pins an enemy with her kunai, dealing 5 piercing physical damage. For 1 turn, the target cannot reduce incoming damage or become invulnerable, and takes 5 additional damage from affliction effects. This skill is replaced by Twin Snakes Mutual Death for 1 turn.',
-            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 2,
+            energy: [], target: 'single-enemy', damage: 0, cooldown: 2,
             classes: ['Physical', 'Instant'],
             effects: [
                 { type: 'damage', amount: 5, scope: 'target', metadata: { ignoreDamageReduction: true } },

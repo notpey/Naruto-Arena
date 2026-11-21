@@ -76,6 +76,8 @@ test('Flak Jacket raises the execute threshold against enemies who use physical 
     cast(match, 'p2', 0, 0, 'p1');
     assert.equal(status(match.board.p2[0], THRESHOLD).metadata.executeThresholdBonusForSource, 10,
         'the increase stacks permanently');
+    assert.match(status(match.board.p2[0], THRESHOLD).metadata.tooltipText, /at 10 more health/,
+        'the tooltip shows the stacked total');
     cast(match, 'p2', 1, 0, 'p1');
     assert.equal(status(match.board.p2[1], THRESHOLD), undefined, 'strategic skills do not raise it');
 

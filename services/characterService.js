@@ -52,6 +52,11 @@ const SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS = ['uchiha-sasuke'];
 const SAKURA_INNER_SAKURA_REWORK_CHARACTER_IDS = ['haruno-sakura'];
 const NARUTO_KYUUBI_REWORK_CHARACTER_IDS = ['uzumaki-naruto'];
 const TEAM_7_QUEST_PROGRESS_CHARACTER_IDS = ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'];
+const {
+    BALANCE_UPDATE_0_5_MIGRATION_ID,
+    BALANCE_UPDATE_0_5_CHARACTER_IDS,
+    applyBalanceUpdate05,
+} = require('./balanceUpdate05');
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
@@ -308,6 +313,7 @@ class CharacterService {
                     [`completed.${SAKURA_INNER_SAKURA_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
+                    [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     updatedAt: now,
@@ -393,6 +399,7 @@ class CharacterService {
                         [`completed.${SAKURA_INNER_SAKURA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
+                        [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,
@@ -447,6 +454,7 @@ class CharacterService {
         const shouldApplySakuraInnerSakuraRework = !completedMigrations[SAKURA_INNER_SAKURA_REWORK_MIGRATION_ID];
         const shouldApplyNarutoKyuubiRework = !completedMigrations[NARUTO_KYUUBI_REWORK_MIGRATION_ID];
         const shouldApplyTeam7QuestProgress = !completedMigrations[TEAM_7_QUEST_PROGRESS_MIGRATION_ID];
+        const shouldApplyBalanceUpdate05 = !completedMigrations[BALANCE_UPDATE_0_5_MIGRATION_ID];
         const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
         const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
         const characterIdsToRefresh = new Set([
@@ -487,6 +495,7 @@ class CharacterService {
             ...(shouldApplySakuraInnerSakuraRework ? SAKURA_INNER_SAKURA_REWORK_CHARACTER_IDS : []),
             ...(shouldApplyNarutoKyuubiRework ? NARUTO_KYUUBI_REWORK_CHARACTER_IDS : []),
             ...(shouldApplyTeam7QuestProgress ? TEAM_7_QUEST_PROGRESS_CHARACTER_IDS : []),
+            ...(shouldApplyBalanceUpdate05 ? BALANCE_UPDATE_0_5_CHARACTER_IDS : []),
             ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
             ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
         ]);
@@ -588,6 +597,10 @@ class CharacterService {
                 if (shouldApplySasukeTwoTomoeRework && SASUKE_TWO_TOMOE_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplySakuraInnerSakuraRework && SAKURA_INNER_SAKURA_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
                 if (shouldApplyNarutoKyuubiRework && NARUTO_KYUUBI_REWORK_CHARACTER_IDS.includes(characterId)) return seedEntry;
+                // Only the rebalanced skills change; stored art and other edits are kept.
+                if (shouldApplyBalanceUpdate05 && BALANCE_UPDATE_0_5_CHARACTER_IDS.includes(characterId)) {
+                    return applyBalanceUpdate05(entry, seedEntry);
+                }
                 // Only the quest rules change; stored art, icons and other edits are kept.
                 if (shouldApplyTeam7QuestProgress && TEAM_7_QUEST_PROGRESS_CHARACTER_IDS.includes(characterId) && seedEntry.passive) {
                     return { ...entry, passive: { ...(entry.passive || {}),
@@ -660,6 +673,7 @@ class CharacterService {
             shouldApplySakuraInnerSakuraRework ||
             shouldApplyNarutoKyuubiRework ||
             shouldApplyTeam7QuestProgress ||
+            shouldApplyBalanceUpdate05 ||
             shouldApplyLaunchUnlocks ||
             shouldApplyNewMissionUnlocks ||
             newSeedCharacters.length > 0 ||
@@ -713,6 +727,7 @@ class CharacterService {
                         [`completed.${SAKURA_INNER_SAKURA_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${NARUTO_KYUUBI_REWORK_MIGRATION_ID}`]: now,
                         [`completed.${TEAM_7_QUEST_PROGRESS_MIGRATION_ID}`]: now,
+                        [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
                         [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                         [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                         updatedAt: now,

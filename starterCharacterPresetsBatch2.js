@@ -1522,10 +1522,10 @@
                     "id": "gaara-of-the-desert-desert-funeral",
                     "name": "Desert Funeral",
                     "skillimage": "https://i.imgur.com/9do9XxC.png",
-                    "skilldescription": "Gaara deals 20 physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
+                    "skilldescription": "Gaara deals 20 piercing physical damage to one enemy, plus 5 for each Sand Flow stack. All stacks are consumed. If the enemy falls to 10 health or less, they are executed.",
                     "energy": [
                         "Bloodline",
-                        "Bloodline"
+                        "Random"
                     ],
                     "target": "single-enemy",
                     "damage": 20,
@@ -1540,6 +1540,7 @@
                             "amount": 20,
                             "scope": "target",
                             "metadata": {
+                                "ignoreDamageReduction": true,
                                 "executeBelowHpThreshold": 10,
                                 "bonusPerStatusMetadata": {
                                     "scope": "self",

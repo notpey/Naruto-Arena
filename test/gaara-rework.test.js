@@ -31,7 +31,7 @@ test('Gaara draft is playable and starts with permanent unpierceable reduction',
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.name),
         ['Sand Binding Coffin', 'Desert Funeral', 'Sand Sphere', 'Sand Shield']);
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.energy),
-        [['Ninjutsu'], ['Bloodline', 'Bloodline'], ['Ninjutsu', 'Ninjutsu'], ['Random']]);
+        [['Ninjutsu'], ['Bloodline', 'Random'], ['Ninjutsu', 'Ninjutsu'], ['Random']]);
     assert.deepEqual(characters[gaaraIndex].skills.map(skill => skill.cooldown), [1, 1, 5, 4]);
     const match = makeMatch();
     const gaara = match.board.p1[0];
@@ -91,7 +91,7 @@ test('Desert Funeral scales by stacks, consumes them, and executes at ten health
     noStacks.board.p2[0].state.statuses.push({ id: 'normal_reduction', remainingTurns: 2,
         metadata: { damageReductionFlat: 20 } });
     cast(noStacks, 'p1', 1, target('p2'));
-    assert.equal(noStacks.board.p2[0].hp, 100, 'Desert Funeral deals regular damage, so 20 reduction absorbs all 20');
+    assert.equal(noStacks.board.p2[0].hp, 80, 'Desert Funeral pierces, so 20 reduction does not absorb it');
 });
 
 test('Sand Sphere scales defense, retaliates once per targeted skill, and ends on another skill', () => {

@@ -70,7 +70,7 @@ module.exports = {
             id: 'dosu-kinuta-melody-arm-tuning', name: 'Melody Arm Tuning',
             skillimage: 'https://i.imgur.com/mcaE8De.png',
             skilldescription: 'The next use of Vibrating Sound Drill or Sound Manipulation will be enhanced. Vibrating Sound Drill: its chakra cost increase lasts 1 additional turn. Sound Manipulation: its affliction damage and chakra cost increase last 1 additional turn. This skill ends when Dosu uses any of those skills and cannot be used while active.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 2,
+            energy: [], target: 'self', damage: 0, cooldown: 0,
             actorCondition: { missingStatusId: TUNING },
             classes: ['Strategic', 'Instant'],
             effects: [{ type: 'apply_status', statusId: TUNING, duration: 99, scope: 'self',

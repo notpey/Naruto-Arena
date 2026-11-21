@@ -50,7 +50,7 @@ test('sound genin drafts match their skill names, costs, and cooldowns', () => {
             ['Needle and Bell Trap', ['Random'], 0], ['Unnerving Bells', ['Genjutsu'], 1],
             ['Sharp Analysis', ['Random'], 4]],
         'dosu-kinuta': [['Vibrating Sound Drill', ['Taijutsu'], 0],
-            ['Sound Manipulation', ['Genjutsu'], 2], ['Melody Arm Tuning', ['Random'], 2],
+            ['Sound Manipulation', ['Genjutsu'], 2], ['Melody Arm Tuning', [], 0],
             ['Dosu Dodge', ['Random'], 4]],
         'zaku-abumi': [['Air Cutter', ['Bloodline'], 0], ['Sound Wall', ['Bloodline'], 2],
             ['Extreme Air Cutter', ['Bloodline', 'Random', 'Random'], 0],

@@ -50,7 +50,8 @@ module.exports = {
                             executeThresholdBonusForSource: 5,
                             mergeNumericAddKeys: ['executeThresholdBonusForSource'],
                             statusIcon: PASSIVE_ICON, sourceSkillName: 'No Witnesses',
-                            tooltipText: "Baki's No Witnesses executes this character at 5 more health for each physical or chakra skill they used on him during Flak Jacket.",
+                            // Live total, so the tooltip grows with each stack.
+                            tooltipTextTemplate: "Baki's No Witnesses executes this character at {executeThresholdBonusForSource} more health (5 for each physical or chakra skill they used on him during Flak Jacket).",
                         },
                     },
                     tooltipText: 'Baki has 50 destructible defense. While it remains, he ignores enemy non-damage effects, and enemies who use physical or chakra skills on him become easier to execute.',

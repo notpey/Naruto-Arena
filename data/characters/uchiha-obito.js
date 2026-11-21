@@ -55,10 +55,15 @@ module.exports = {
         {
             id: GOUKAKYUU, name: 'Obito Goukakyuu no Jutsu',
             skillimage: 'https://i.imgur.com/Z9H5tUb.png',
-            skilldescription: 'Obito deals 30 chakra damage, evenly distributed among all enemies.',
+            skilldescription: 'Obito deals 30 chakra damage, evenly distributed among all enemies. They cannot be healed for 1 turn.',
             energy: ['Bloodline'], target: 'all-enemy', damage: 0, cooldown: 1,
             classes: ['Chakra', 'Instant'],
-            effects: [{ type: 'damage', amount: 30, scope: 'all-enemy', metadata: { splitAmountEvenlyAmongRecipients: true } }],
+            effects: [
+                { type: 'damage', amount: 30, scope: 'all-enemy', metadata: { splitAmountEvenlyAmongRecipients: true } },
+                { type: 'apply_status', statusId: 'uchiha_obito_goukakyuu_no_heal', duration: 1, scope: 'all-enemy',
+                    metadata: { harmful: true, turnDurationAnchor: 'source_turn', healReceivedMultiplier: 0,
+                        tooltipText: 'This character cannot be healed.' } },
+            ],
         },
         {
             id: 'uchiha-obito-parting-gift', name: 'Parting Gift',
