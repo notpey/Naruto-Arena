@@ -202,3 +202,24 @@ test('payloads hide the Wire Trap mark and Dragon Flame setup from the enemy, bu
         'the Shadow Shuriken trap is hidden from enemies');
     assert.equal(visible(trapMatch, 'p1', 'p1', 'uchiha_sasuke_shadow_shuriken_trap'), true);
 });
+
+test('with Genin Naruto, the match-start payload already shows Sasuke awakened under one passive', () => {
+    const { buildMatchPayloadForUser } = require('../server.js');
+    const match = matchFor(['uzumaki-naruto', SASUKE], ['haruno-sakura']);
+    const statuses = buildMatchPayloadForUser(match, 'p1').board.p1[1].state.statuses;
+    const passive = statuses.find((entry) => entry.id === 'uchiha_sasuke_two_tomoe_sharingan');
+    const awakened = statuses.find((entry) => entry.id === AWAKENED);
+    assert.ok(awakened, 'awakened before any turn is played');
+    // The client groups these two into one icon by passive name and hides the merged row.
+    assert.equal(awakened.metadata.passiveAwakening, 'merged');
+    assert.equal(awakened.sourceSkillId, null);
+    assert.equal(passive.sourceSkillId, null);
+    assert.equal(awakened.metadata.sourceSkillName, passive.metadata.sourceSkillName);
+    assert.match(passive.metadata.tooltipText, /has awakened/);
+    assert.ok(!passive.metadata.tooltipTextTemplate, 'no stale progress template');
+
+    const solo = matchFor([SASUKE], ['haruno-sakura']);
+    const soloPassive = buildMatchPayloadForUser(solo, 'p1').board.p1[0].state.statuses
+        .find((entry) => entry.id === 'uchiha_sasuke_two_tomoe_sharingan');
+    assert.match(soloPassive.metadata.tooltipText, /Skills used: 0\/4/, 'quest progress reaches the client');
+});

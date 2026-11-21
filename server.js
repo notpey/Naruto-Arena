@@ -16,6 +16,7 @@ const bcrypt = require('bcryptjs');
 const { WebSocketServer, WebSocket } = require('ws');
 const battleLogic = require('./battleLogic');
 const { reconcileUnitPassive } = require('./services/matchPassives');
+const statusDisplay = require('./status-display');
 const { sortCharactersByRosterOrder, CANONICAL_ROSTER_ORDER } = require('./data/rosterOrder');
 const { localizeArtwork } = require('./services/characterImages');
 const { AvatarImageError, prepareAvatarDataUrl, prepareAvatarFromRemote } = require('./services/avatarImage');
@@ -4250,6 +4251,7 @@ const PUBLIC_ROOT_SCRIPTS = new Set([
     'selectionStore.js',
     'selectionWar.js',
     'skill-description-format.js',
+    'status-display.js',
     'tower.js',
 ]);
 const PUBLIC_MEDIA_DIRS = new Set(['assets', 'avatars', 'borders', 'hats', 'sounds']);
@@ -4704,6 +4706,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'ongoingClass',
     'overrideAllSkillsToAllRandom',
     'overrideAllSkillsToAllRandomSkillIdsAny',
+    'passiveAwakening',
     'permanent',
     'randomCostIncrease',
     'randomCostIncreaseForSkillIds',
@@ -4775,11 +4778,41 @@ const shouldHideStatusFromViewer = ({ status, unitUsername, viewerUsername, reve
     return false;
 };
 
-const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername, revealInvisibleSkills = false }) => {
+// How long a status lasts, in the turn ends that count it down, from the viewer's side.
+// Mirrors the engine's ticking: a status counts down at the end of its anchor player's turns
+// (owner by default, source for 'source_turn', every turn for 'any_turn'), and a fresh status
+// skips its first count.
+const describeStatusDuration = ({ status, unitUsername, viewerUsername, currentTurn }) => {
+    const metadata = status?.metadata || {};
+    const remaining = Math.max(0, Number(status?.remainingTurns) || 0);
+    if (remaining >= 99 || metadata.infiniteDuration || metadata.passive) return { permanent: true };
+    const anchor = metadata.turnDurationAnchor;
+    const anchorUsername = anchor === 'any_turn'
+        ? null
+        : anchor === 'source_turn' ? (status?.sourceUsername || unitUsername) : unitUsername;
+    const turnEnds = remaining +
+        (status?.fresh && !metadata.triggerOnApply ? 1 : 0) +
+        (metadata.skipFirstTurnEndTick && !metadata._skipFirstTurnEndTickConsumed ? 1 : 0);
+    const whose = anchorUsername === null ? 'any' : anchorUsername === viewerUsername ? 'viewer' : 'opponent';
+    return {
+        permanent: false,
+        whose,
+        turnEnds,
+        endsThisTurn: turnEnds === 1 && (whose === 'any' || anchorUsername === currentTurn),
+    };
+};
+
+const sanitizeStatusForViewer = ({
+    status, unitUsername, viewerUsername, revealInvisibleSkills = false,
+    opponentUsername = null, opponentRevealsInvisible = false, currentTurn = null,
+}) => {
     if (!status || typeof status !== 'object') return null;
     if (shouldHideStatusFromViewer({ status, unitUsername, viewerUsername, revealInvisibleSkills })) {
         return null;
     }
+    const hiddenFromOpponent = Boolean(opponentUsername) && shouldHideStatusFromViewer({
+        status, unitUsername, viewerUsername: opponentUsername, revealInvisibleSkills: opponentRevealsInvisible,
+    });
     return {
         id: typeof status.id === 'string' ? status.id : '',
         remainingTurns: Math.max(0, Number(status.remainingTurns) || 0),
@@ -4787,13 +4820,25 @@ const sanitizeStatusForViewer = ({ status, unitUsername, viewerUsername, revealI
         sourceUsername: typeof status.sourceUsername === 'string' ? status.sourceUsername : null,
         sourceSlot: Number.isInteger(status.sourceSlot) ? status.sourceSlot : null,
         metadata: sanitizeStatusMetadataForClient(status.metadata),
+        // Presentation only: what the tooltip should say about this status.
+        display: {
+            duration: describeStatusDuration({ status, unitUsername, viewerUsername, currentTurn }),
+            described: statusDisplay.chipsDescribeMetadata(status.metadata),
+            ...(hiddenFromOpponent ? { hiddenFromOpponent: true } : {}),
+        },
     };
 };
 
-const sanitizeUnitStateForViewer = ({ unit, unitUsername, viewerUsername, revealInvisibleSkills = false }) => {
+const sanitizeUnitStateForViewer = ({
+    unit, unitUsername, viewerUsername, revealInvisibleSkills = false,
+    opponentUsername = null, opponentRevealsInvisible = false, currentTurn = null,
+}) => {
     const statuses = Array.isArray(unit?.state?.statuses)
         ? unit.state.statuses
-              .map((status) => sanitizeStatusForViewer({ status, unitUsername, viewerUsername, revealInvisibleSkills }))
+              .map((status) => sanitizeStatusForViewer({
+                  status, unitUsername, viewerUsername, revealInvisibleSkills,
+                  opponentUsername, opponentRevealsInvisible, currentTurn,
+              }))
               .filter(Boolean)
         : [];
     const state = { statuses };
@@ -4810,15 +4855,26 @@ const sanitizeUnitStateForViewer = ({ unit, unitUsername, viewerUsername, reveal
     return state;
 };
 
-const sanitizeBoardForViewer = (board, viewerUsername) => {
-    if (!board || typeof board !== 'object' || !viewerUsername) return null;
-    const revealInvisibleSkills = (Array.isArray(board[viewerUsername]) ? board[viewerUsername] : []).some((unit) =>
+const teamRevealsInvisibleSkills = (board, username) =>
+    (Array.isArray(board?.[username]) ? board[username] : []).some((unit) =>
         unit?.alive !== false &&
         (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : []).some((status) =>
             (Number(status?.remainingTurns) || 0) > 0 &&
             Boolean(status?.metadata?.revealInvisibleSkills)
         )
     );
+const unitRevealsInvisibleTo = (unit, username) =>
+    (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : []).some((status) =>
+        (Number(status?.remainingTurns) || 0) > 0 &&
+        status?.sourceUsername === username &&
+        Boolean(status?.metadata?.revealInvisibleSkillsToSourceTeam)
+    );
+
+const sanitizeBoardForViewer = (board, viewerUsername, { currentTurn = null } = {}) => {
+    if (!board || typeof board !== 'object' || !viewerUsername) return null;
+    const revealInvisibleSkills = teamRevealsInvisibleSkills(board, viewerUsername);
+    const opponentUsername = Object.keys(board).find((username) => username !== viewerUsername) || null;
+    const opponentTeamReveals = opponentUsername ? teamRevealsInvisibleSkills(board, opponentUsername) : false;
     return Object.fromEntries(
         Object.entries(board).map(([unitUsername, units]) => [
             unitUsername,
@@ -4831,12 +4887,11 @@ const sanitizeBoardForViewer = (board, viewerUsername) => {
                       hpCap: Math.max(1, Number(unit?.hpCap) || battleLogic.DEFAULT_HP),
                       state: sanitizeUnitStateForViewer({
                           unit, unitUsername, viewerUsername,
-                          revealInvisibleSkills: revealInvisibleSkills ||
-                              (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : []).some((status) =>
-                                  (Number(status?.remainingTurns) || 0) > 0 &&
-                                  status?.sourceUsername === viewerUsername &&
-                                  Boolean(status?.metadata?.revealInvisibleSkillsToSourceTeam)
-                              ),
+                          revealInvisibleSkills: revealInvisibleSkills || unitRevealsInvisibleTo(unit, viewerUsername),
+                          opponentUsername,
+                          opponentRevealsInvisible: opponentTeamReveals ||
+                              (opponentUsername ? unitRevealsInvisibleTo(unit, opponentUsername) : false),
+                          currentTurn,
                       }),
                   }))
                 : [],
@@ -4887,6 +4942,40 @@ const attachSkillsWithoutTargets = (board, match, username) => {
     return board;
 };
 
+// What the skill panel shows about each of the viewer's own skills right now, read from the
+// engine: the skill currently in the slot, its effective cooldown and target, turns left on
+// cooldown, and why it is locked if its requirement is not met. Presentation only.
+const attachSkillStates = (board, match, username) => {
+    if (!board || !Array.isArray(board[username]) || match?.status === 'finished') return board;
+    board[username].forEach((viewUnit, actorSlot) => {
+        const unit = match?.board?.[username]?.[actorSlot];
+        if (!viewUnit || !viewUnit.state || !unit || unit.alive === false || !unit.state) return;
+        const character = Number.isInteger(unit.rosterIndex) ? charactersData[unit.rosterIndex] : null;
+        const skills = Array.isArray(character?.skills) ? character.skills : [];
+        viewUnit.state.skillStates = skills.map((baseSkill, skillIndex) => {
+            try {
+                const skill = battleLogic.resolveEffectiveSkill({
+                    characters: charactersData, rosterIndex: unit.rosterIndex, skillIndex, actorState: unit.state,
+                }) || baseSkill;
+                const requirementMet = battleLogic.doesActorSatisfySkillCondition(unit, unit.state, skill);
+                const requirement = /^(Requires [^.]+)\./.exec(String(skill?.skilldescription || ''));
+                return {
+                    skillId: skill?.id || null,
+                    name: skill?.name || '',
+                    replaced: Boolean(skill?.id && baseSkill?.id && skill.id !== baseSkill.id),
+                    cooldown: Number.isFinite(Number(skill?.cooldown)) ? Number(skill.cooldown) : null,
+                    cooldownRemaining: battleLogic.getSkillCooldownRemaining(unit.state, skill?.id),
+                    target: skill?.target || null,
+                    lockedReason: requirementMet ? null : (requirement ? requirement[1] : 'Requirement not met'),
+                };
+            } catch (_) {
+                return null;
+            }
+        });
+    });
+    return board;
+};
+
 const buildMatchPayloadForUser = (match, username) => {
     if (!match || !username) return null;
     const playerEntry = Array.isArray(match.players)
@@ -4912,7 +5001,9 @@ const buildMatchPayloadForUser = (match, username) => {
         turnStartedAt: match.turnStartedAt || null,
         turnExpiresAt: match.turnExpiresAt || null,
         turnDurationMs: getTurnDurationMsForUser(match, match?.currentTurn),
-        board: attachSkillsWithoutTargets(sanitizeBoardForViewer(match.board, username), match, username),
+        board: attachSkillStates(attachSkillsWithoutTargets(
+            sanitizeBoardForViewer(match.board, username, { currentTurn: match.currentTurn || null }),
+            match, username), match, username),
         chakraPools: sanitizeChakraPoolsForViewer(match.chakraPools, username),
         lastChakraGain: sanitizeLastChakraGainForViewer(match.economy?.lastChakraGain, username),
         combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-15) : [],

@@ -1153,6 +1153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             classPickerWrapEl: document.querySelector('.ingameclasspicker'),
             classPickerEl: document.querySelector('.ingame-class-picker-field'),
             descEl: document.querySelector('.ingameskilldescription'),
+            factsEl: document.querySelector('.skill-info-facts'),
             metaEl: document.querySelector('.skill-info-meta'),
             browseNavEl: document.querySelector('.skill-browse-nav'),
             browsePrevEl: document.querySelector('.skill-browse-prev'),
@@ -3286,6 +3287,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             tooltip.style.display = 'none';
             tooltip.addEventListener('mouseenter', cancelGlobalStatusTooltipHide);
             tooltip.addEventListener('mouseleave', scheduleGlobalStatusTooltipHide);
+            // Details on demand: the "More details" button (mouse or touch) or holding Shift.
+            tooltip.addEventListener('click', (event) => {
+                if (!event.target.closest('.status-tooltip-more')) return;
+                event.preventDefault();
+                event.stopPropagation();
+                tooltip.classList.toggle('is-expanded');
+            });
+            const setShiftExpanded = (event) => {
+                if (event.key !== 'Shift' || tooltip.style.display === 'none') return;
+                tooltip.classList.toggle('is-expanded', event.type === 'keydown');
+            };
+            document.addEventListener('keydown', setShiftExpanded);
+            document.addEventListener('keyup', setShiftExpanded);
             document.body.appendChild(tooltip);
             globalStatusTooltipEl = tooltip;
             return tooltip;
@@ -3393,6 +3407,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         )
                 )
                 : [];
+            const statusDisplay = window.NarutoStatusDisplay || null;
+            const chipContext = {
+                skillName: (skillId) => findSkillById(skillId)?.name || '',
+                skillNameAt: (skillIndex) => getRosterData()?.[unit?.rosterIndex]?.skills?.[skillIndex]?.name || '',
+            };
+            // Each stat summed over every effect on this character, for "15 total" notes.
+            const unitChipTotals = new Map(
+                (statusDisplay
+                    ? statusDisplay.totalChips(statuses.flatMap((status) =>
+                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContext)))
+                    : []
+                ).map((chip) => [chip.stat, chip])
+            );
             const statusSignature = JSON.stringify(
                 statuses.map((status) => ({
                     id: status?.id || '',
@@ -3400,6 +3427,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     sourceUsername: status?.sourceUsername || '',
                     remainingTurns: Math.max(0, Number(status?.remainingTurns) || 0),
                     metadata: status?.metadata || {},
+                    display: status?.display || null,
                 }))
             );
             const renderSignature = `${dead ? 'dead' : 'alive'}:${currentPlayerUsername || ''}:${unitUsername || ''}:${isEnemySide ? 'enemy' : 'ally'}:${statusSignature}`;
@@ -3421,9 +3449,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             tooltipWrap.classList.add('has-status');
             const groupedStatuses = [];
             const groupByKey = new Map();
+            // A passive and the status its awakening grants share one icon. Both carry the
+            // passive's name and no source skill.
+            const awakenedPassiveNames = new Set(statuses
+                .filter((status) => status?.metadata?.passiveAwakening && status?.metadata?.sourceSkillName)
+                .map((status) => status.metadata.sourceSkillName));
             statuses.forEach((status, index) => {
                 const sourceKey = `${status?.sourceUsername || unitUsername}:${status?.sourceSlot ?? ''}`;
-                const key = status?.sourceSkillId ? `skill:${sourceKey}:${status.sourceSkillId}` : `status:${status?.id}:${index}`;
+                const passiveName = !status?.sourceSkillId && status?.metadata?.sourceSkillName;
+                const key = passiveName && awakenedPassiveNames.has(passiveName)
+                    ? `passive:${unitUsername}:${passiveName}`
+                    : status?.sourceSkillId ? `skill:${sourceKey}:${status.sourceSkillId}` : `status:${status?.id}:${index}`;
                 if (!groupByKey.has(key)) {
                     const group = {
                         key,
@@ -3634,6 +3670,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const textRows = [];
                 groupStatuses.forEach((status) => {
                     const statusMetadata = status?.metadata || {};
+                    // 'merged': the passive's own text already describes the awakened state.
+                    if (statusMetadata.passiveAwakening === 'merged' && groupStatuses.length > 1) return;
                     const currentCopy = findCurrentStatusCopy(status, unit);
                     let text =
                         currentCopy?.text ||
@@ -3755,12 +3793,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                     const remaining = Math.max(0, Number(status?.remainingTurns) || 0);
-                    const key = `${text}::${remaining}`;
+                    const durationLabel = statusDisplay && status?.display?.duration
+                        ? statusDisplay.describeDuration(status.display.duration)
+                        : formatTurnsLabel(remaining);
+                    const key = `${text}::${durationLabel}`;
                     if (textRows.some((row) => row.key === key)) return;
                     textRows.push({
                         key,
                         text,
-                        remaining,
+                        durationLabel,
                         lines: splitTooltipTextIntoLines(text, statusMetadata),
                     });
                 });
@@ -3771,16 +3812,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                         '<strong class="status-tooltip-emphasis">$1</strong>'
                     );
                 };
+                // Prose lines grouped by how long they last, with the words the title and icon
+                // already say trimmed away.
                 const durationGroups = [];
-                const durationGroupByRemaining = new Map();
+                const durationGroupByLabel = new Map();
                 textRows.forEach((row) => {
-                    const remaining = Math.max(0, Number(row.remaining) || 0);
-                    if (!durationGroupByRemaining.has(remaining)) {
-                        const group = { remaining, lines: [] };
-                        durationGroupByRemaining.set(remaining, group);
+                    const label = row.durationLabel || '';
+                    if (!durationGroupByLabel.has(label)) {
+                        const group = { label, lines: [] };
+                        durationGroupByLabel.set(label, group);
                         durationGroups.push(group);
                     }
-                    const group = durationGroupByRemaining.get(remaining);
+                    const group = durationGroupByLabel.get(label);
                     const rowLines = Array.isArray(row.lines) && row.lines.length ? row.lines : [row.text];
                     rowLines.forEach((line) => {
                         const normalizedLine = String(line || '').trim();
@@ -3790,12 +3833,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ) {
                             return;
                         }
-                        if (normalizedLine) group.lines.push(normalizedLine);
+                        const tidyLine = statusDisplay
+                            ? statusDisplay.tidyTooltipLine(normalizedLine, skillName)
+                            : normalizedLine;
+                        if (tidyLine && !group.lines.includes(tidyLine)) group.lines.push(tidyLine);
                     });
                 });
-                const textLinesHtml = durationGroups
+                const proseHtml = durationGroups
                     .map((group, idx) => {
-                        const turns = escapeHtml(formatTurnsLabel(group.remaining));
                         const line = group.lines
                             .map(
                                 (sub) =>
@@ -3809,19 +3854,90 @@ document.addEventListener('DOMContentLoaded', async () => {
                             idx < durationGroups.length - 1
                                 ? `<div class="status-tooltip-line-divider"></div>`
                                 : '';
-                        return (
-                            `<div class="status-tooltip-row">` +
-                                line +
-                                `<div class="status-tooltip-row-meta">${turns}</div>` +
-                            `</div>` +
-                            divider
-                        );
+                        const meta = group.label
+                            ? `<div class="status-tooltip-row-meta">${escapeHtml(group.label)}</div>`
+                            : '';
+                        return `<div class="status-tooltip-row">${line}${meta}</div>${divider}`;
                     })
                     .join('');
+
+                // Short effect chips built from the canonical status metadata, with totals
+                // when the same stat also comes from this character's other effects.
+                const groupChips = statusDisplay
+                    ? statusDisplay.totalChips(groupStatuses.flatMap((status) =>
+                        statusDisplay.buildStatusChips(status?.metadata || {}, chipContext)))
+                    : [];
+                const chipsHtml = groupChips.length
+                    ? `<div class="status-chips">${groupChips.map((chip) => {
+                        const unitTotal = unitChipTotals.get(chip.stat);
+                        const showUnitTotal = chip.value !== undefined && unitTotal &&
+                            unitTotal.value > chip.value;
+                        const tone = chip.tag ? 'tag' : chip.good === true ? 'good' : chip.good === false ? 'bad' : 'neutral';
+                        return `<span class="status-chip status-chip--${tone}">${escapeHtml(chip.text)}` +
+                            (chip.breakdown ? ` <span class="status-chip-note">(${escapeHtml(chip.breakdown)})</span>` : '') +
+                            (showUnitTotal ? ` <span class="status-chip-note">· ${escapeHtml(String(unitTotal.value))} total</span>` : '') +
+                            `</span>`;
+                    }).join('')}</div>`
+                    : '';
+                // When the chips already say everything, the prose moves into the details.
+                const chipsSayEverything = groupChips.length > 0 &&
+                    groupStatuses.every((status) => status?.display?.described);
+                const durationLabels = [...new Set(durationGroups.map((group) => group.label).filter(Boolean))];
+                const compactDurationHtml = chipsSayEverything && durationLabels.length
+                    ? `<div class="status-tooltip-row-meta status-tooltip-duration">${escapeHtml(durationLabels.join(' · '))}</div>`
+                    : '';
+
+                // Details on demand: folded prose, the source skill's full text, and keyword definitions.
+                const detailParts = [];
+                if (chipsSayEverything && proseHtml) detailParts.push(`<div class="status-tooltip-desc">${proseHtml}</div>`);
+                const sourceDescription = String(statusSkill?.skilldescription || '').trim();
+                if (sourceDescription) {
+                    detailParts.push(
+                        `<p class="status-tooltip-source"><span>${escapeHtml(statusSkill.name || 'Skill')}:</span> ` +
+                        `${escapeHtml(sourceDescription)}</p>`
+                    );
+                }
+                if (statusDisplay) {
+                    const haystack = `${durationGroups.flatMap((group) => group.lines).join(' ')} ` +
+                        `${groupChips.map((chip) => chip.text).join(' ')} ${sourceDescription}`.toLowerCase();
+                    const definitions = [...new Set(Object.keys(statusDisplay.GLOSSARY)
+                        .filter((term) => new RegExp(`\\b${term}\\b`).test(haystack))
+                        .map((term) => statusDisplay.GLOSSARY[term]))];
+                    if (definitions.length) {
+                        detailParts.push(`<ul class="status-tooltip-glossary">${definitions
+                            .map((definition) => `<li>${escapeHtml(definition)}</li>`).join('')}</ul>`);
+                    }
+                }
+                const detailsHtml = detailParts.length
+                    ? `<div class="status-tooltip-details">${detailParts.join('')}</div>` +
+                        `<button type="button" class="status-tooltip-more">` +
+                            `<span class="status-tooltip-more-closed">More details</span>` +
+                            `<span class="status-tooltip-more-open">Fewer details</span>` +
+                            `<kbd>Shift</kbd>` +
+                        `</button>`
+                    : '';
+
+                // Who it came from at a glance: colored edge, the source icon, and whether the enemy can see it.
+                const sources = groupStatuses.map((status) => status?.sourceUsername || unitUsername);
+                const allegiance = sources.some((username) => username && username !== currentPlayerUsername)
+                    ? 'enemy'
+                    : sources.some((username) => username === currentPlayerUsername) ? 'ally' : '';
+                const headIcon = resolveStatusIconSrc(group, statusSkill);
+                const hiddenFromOpponent = groupStatuses.some((status) => status?.display?.hiddenFromOpponent);
                 return (
-                    `<div class="status-tooltip-item">` +
-                        `<div class="status-tooltip-title">${escapeHtml(skillName)}</div>` +
-                        `<div class="status-tooltip-desc">${textLinesHtml}</div>` +
+                    `<div class="status-tooltip-item${allegiance ? ` status-tooltip-item--${allegiance}` : ''}">` +
+                        `<div class="status-tooltip-head">` +
+                            (headIcon ? `<img class="status-tooltip-icon" src="${escapeHtml(headIcon)}" alt="">` : '') +
+                            `<div class="status-tooltip-title">${escapeHtml(skillName)}</div>` +
+                            (hiddenFromOpponent
+                                ? `<span class="status-tooltip-hidden" title="The enemy can't see this effect">Hidden from enemy</span>`
+                                : '') +
+                        `</div>` +
+                        chipsHtml +
+                        (chipsSayEverything
+                            ? compactDurationHtml
+                            : `<div class="status-tooltip-desc">${proseHtml}</div>`) +
+                        detailsHtml +
                     `</div>`
                 );
             };
@@ -3853,6 +3969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 iconEl.onmouseenter = (event) => {
                     cancelGlobalStatusTooltipHide();
                     const tooltip = ensureGlobalStatusTooltip();
+                    tooltip.classList.toggle('is-expanded', Boolean(event.shiftKey));
                     tooltip.innerHTML = tooltipHtml;
                     tooltip.style.display = 'block';
                     const anchor = iconEl;
@@ -3967,6 +4084,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 );
                 if (selectedSkill) {
                     renderSkillEnergyCost(selectedSkill, selectedPlayerSkill.actorSlot);
+                    const selectedUnit = getActorUnitForSlot(currentPlayerUsername, selectedPlayerSkill.actorSlot);
+                    const selectedCharacter = getRosterData()?.[selectedUnit?.rosterIndex];
+                    if (selectedCharacter) {
+                        renderSkillFacts(selectedCharacter, selectedSkill,
+                            selectedPlayerSkill.actorSlot, selectedPlayerSkill.skillIdx);
+                    }
                 }
             }
             renderBoardStatuses(data);
@@ -4307,6 +4430,89 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             renderSkillEnergyCost(skill, actorSlot);
+            renderSkillFacts(character, skill, actorSlot, skillIdx);
+        };
+
+        // Name of the skill that applies a status, searched through nested effects, so a skill
+        // can say "35 vs. Ninja Wire Trap" instead of a status id.
+        const statusSourceNameCache = new Map();
+        const findStatusSourceName = (statusId) => {
+            if (!statusId) return '';
+            if (statusSourceNameCache.has(statusId)) return statusSourceNameCache.get(statusId);
+            const appliesStatus = (value, depth = 0) => {
+                if (!value || typeof value !== 'object' || depth > 8) return false;
+                if (Array.isArray(value)) return value.some((entry) => appliesStatus(entry, depth + 1));
+                if (value.statusId === statusId && value.type !== 'remove_status') return true;
+                return Object.values(value).some((entry) => appliesStatus(entry, depth + 1));
+            };
+            let name = '';
+            for (const entry of getRosterData() || []) {
+                const found = (entry?.skills || []).find((skill) => appliesStatus(skill?.effects));
+                if (found) { name = found.name || ''; break; }
+            }
+            statusSourceNameCache.set(statusId, name);
+            return name;
+        };
+
+        // Short facts under a skill's description: its live state (from the server), its target,
+        // and the damage and healing its definition lists. Describes data; predicts nothing.
+        const describeSkillEffects = (skill) => {
+            const facts = [];
+            const skillClasses = (Array.isArray(skill?.classes) ? skill.classes : [])
+                .map((entry) => String(entry || '').toLowerCase().replace(/\*$/, ''));
+            const scopeText = {
+                'other-enemies': ' to other enemies', 'all-enemy': ' to all enemies',
+                'random-enemy': ' to a random enemy', self: ' to self',
+            };
+            (Array.isArray(skill?.effects) ? skill.effects : []).forEach((effect) => {
+                const amount = Number(effect?.amount) || 0;
+                if (amount <= 0) return;
+                const condition = effect?.condition && typeof effect.condition === 'object' ? effect.condition : null;
+                const conditionalAmount = Number(condition?.conditionalAmount);
+                const describedCondition = condition && condition.statusId && condition.scope === 'target' &&
+                    Number.isFinite(conditionalAmount);
+                // Other conditional effects are left to the description text.
+                if (condition && !describedCondition) return;
+                if (effect.type === 'damage') {
+                    const affliction = Boolean(effect?.metadata?.afflictionDamage) || skillClasses.includes('affliction');
+                    const kind = affliction ? 'affliction ' : effect?.metadata?.ignoreDamageReduction ? 'piercing ' : '';
+                    const where = scopeText[effect.scope] || '';
+                    facts.push({ tone: 'neutral', text: `${amount} ${kind}damage${where}` });
+                    if (describedCondition) {
+                        const source = findStatusSourceName(condition.statusId);
+                        if (source) facts.push({ tone: 'good', text: `${conditionalAmount}${where} vs. ${source}` });
+                    }
+                } else if (effect.type === 'heal' && !condition) {
+                    const where = { 'all-allies': ' all allies', self: ' self' }[effect.scope] || '';
+                    facts.push({ tone: 'good', text: `Heals${where} ${amount}` });
+                }
+            });
+            return facts;
+        };
+
+        const renderSkillFacts = (character, skill, actorSlot = null, skillIdx = null) => {
+            const factsEl = skillInfo.factsEl;
+            if (!factsEl) return;
+            const statusDisplay = window.NarutoStatusDisplay || null;
+            const facts = [];
+            const unit = Number.isInteger(actorSlot) ? getActorUnitForSlot(currentPlayerUsername, actorSlot) : null;
+            const live = Number.isInteger(skillIdx) ? unit?.state?.skillStates?.[skillIdx] : null;
+            if (live) {
+                if (live.lockedReason) facts.push({ tone: 'bad', text: `Locked: ${live.lockedReason}` });
+                else if (live.cooldownRemaining > 0) {
+                    facts.push({ tone: 'bad',
+                        text: `On cooldown: ${live.cooldownRemaining} turn${live.cooldownRemaining === 1 ? '' : 's'}` });
+                } else facts.push({ tone: 'good', text: 'Ready' });
+                const baseName = character?.skills?.[skillIdx]?.name;
+                if (live.replaced && baseName) facts.push({ tone: 'tag', text: `Replaces ${baseName}` });
+            }
+            const target = statusDisplay ? statusDisplay.targetLabel(live?.target || skill?.target) : '';
+            if (target) facts.push({ tone: 'tag', text: target });
+            facts.push(...describeSkillEffects(skill));
+            factsEl.innerHTML = facts
+                .map((fact) => `<span class="status-chip status-chip--${fact.tone}">${escapeHtml(fact.text)}</span>`)
+                .join('');
+            factsEl.style.display = facts.length ? '' : 'none';
         };
 
         let enemySkillBrowseState = null; // { side: 'opponent' | 'player', charSlot: 0..2, skillIdx: 0..3 }

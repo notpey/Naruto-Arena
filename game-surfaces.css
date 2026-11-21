@@ -2090,3 +2090,68 @@
 @media (prefers-reduced-motion: reduce) {
     .tower-battle-panel, .tower-intent.is-fresh { animation: none; }
 }
+
+/* ---- Tooltips: chips, durations, allegiance, details on demand ---------------------------- */
+/* The page body is uppercase in style.css; tooltip and skill text read in sentence case. */
+.game-remaster .global-status-tooltip,
+.game-remaster .status-tooltip-content,
+.keyword-popover { text-transform: none; }
+.game-remaster .status-tooltip-item { padding-left: 10px; border-left: 3px solid #5d7079; }
+.game-remaster .status-tooltip-item--ally { border-left-color: #42c969; }
+.game-remaster .status-tooltip-item--enemy { border-left-color: #e94e4e; }
+.game-remaster .status-tooltip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.game-remaster .status-tooltip-icon {
+    flex: none; width: 26px; height: 26px; border-radius: 3px; object-fit: cover;
+    border: 1px solid #687b83;
+}
+.game-remaster .status-tooltip-head .status-tooltip-title,
+.game-remaster .global-status-tooltip .status-tooltip-head .status-tooltip-title { margin: 0; flex: 1 1 auto; min-width: 0; }
+.game-remaster .status-tooltip-hidden {
+    flex: none; padding: 2px 6px; border: 1px dashed #9fb3ba; border-radius: 3px;
+    color: #d7e2e4; font: 700 11px/1.2 'Libre Franklin', Arial, sans-serif;
+}
+.game-remaster .status-chips,
+.game-remaster .skill-info-facts { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 8px; }
+.game-remaster .skill-info-facts { margin: 8px 0 0; }
+.game-remaster .status-chip {
+    display: inline-flex; align-items: baseline; gap: 3px; padding: 3px 7px;
+    border: 1px solid #5d7079; border-radius: 3px; background: #22343e;
+    color: #eef3f1; font: 700 11px/1.3 'Libre Franklin', Arial, sans-serif; text-transform: none;
+}
+.game-remaster .status-chip--good { border-color: #3f9d67; background: #1d3a2d; color: #c9f2d8; }
+.game-remaster .status-chip--bad { border-color: #b65a52; background: #3d2226; color: #ffd3cc; }
+.game-remaster .status-chip--tag { background: transparent; color: #d4e0e2; font-weight: 600; }
+.game-remaster .status-chip-note { color: #b9c9cc; font-weight: 500; }
+.game-remaster .status-tooltip-duration { display: inline-block; margin: 0; }
+.game-remaster .global-status-tooltip .status-tooltip-row-meta { text-transform: none; }
+.game-remaster .status-tooltip-details { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #465b64; }
+.game-remaster .global-status-tooltip.is-expanded .status-tooltip-details { display: block; }
+.game-remaster .status-tooltip-source { margin: 0 0 6px; color: #d9e3e3; font-size: 11.5px; }
+.game-remaster .status-tooltip-source span { color: #efc28e; font-weight: 700; }
+.game-remaster .status-tooltip-glossary { margin: 6px 0 0; padding-left: 16px; color: #c7d4d6; font-size: 11px; }
+.game-remaster .status-tooltip-glossary li + li { margin-top: 2px; }
+.game-remaster .status-tooltip-more {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 3px 8px;
+    border: 1px solid #687b83; border-radius: 3px; background: #22343e; color: #e7d6c1;
+    font: 700 11px/1.2 'Libre Franklin', Arial, sans-serif; text-transform: none; cursor: pointer;
+}
+.game-remaster .status-tooltip-more:hover,
+.game-remaster .status-tooltip-more:focus-visible { border-color: #efc28e; outline: none; }
+.game-remaster .status-tooltip-more kbd {
+    padding: 0 4px; border: 1px solid #687b83; border-radius: 2px; color: #b9c9cc;
+    font: 600 11px/1.3 'Libre Franklin', Arial, sans-serif;
+}
+.game-remaster .status-tooltip-more-open,
+.game-remaster .global-status-tooltip.is-expanded .status-tooltip-more-closed { display: none; }
+.game-remaster .global-status-tooltip.is-expanded .status-tooltip-more-open { display: inline; }
+@media (hover: none) { .game-remaster .status-tooltip-more kbd { display: none; } }
+
+/* Rules keywords with a definition: dotted underline, popover on hover, focus or tap. */
+.has-definition { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.has-definition:focus-visible { outline: 1px solid #efc28e; outline-offset: 1px; }
+.keyword-popover {
+    position: fixed; z-index: 100000; display: none; max-width: min(280px, calc(100vw - 16px));
+    padding: 7px 9px; border: 1px solid #6e8188; border-radius: 5px; background: #192933;
+    color: #e9eeeb; box-shadow: 0 8px 20px rgba(0, 0, 0, .45);
+    font: 500 12px/1.4 'Libre Franklin', Arial, sans-serif; pointer-events: none;
+}

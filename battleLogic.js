@@ -2057,8 +2057,12 @@ const grantPassiveAwakening = ({ state, passive, username, slot }) => {
     applyStatus({
         targetState: state, statusId: awakening.statusId, duration: 99,
         sourceUsername: username, sourceSlot: slot,
+        // passiveAwakening lets the client show this under the passive's own icon; 'merged'
+        // means the passive's completed text already describes it, so it adds no tooltip row.
         metadata: { helpful: true, permanent: true, statusIcon: passive.metadata.statusIcon || '',
-            ...(awakening.metadata || {}) }, fresh: false,
+            sourceSkillName: passive.metadata.sourceSkillName || '',
+            ...(awakening.metadata || {}),
+            passiveAwakening: awakening.completedTooltipText ? 'merged' : true }, fresh: false,
     });
     (Array.isArray(awakening.clearCooldownSkillIds) ? awakening.clearCooldownSkillIds : [])
         .forEach((skillId) => {
@@ -10466,6 +10470,7 @@ module.exports = {
     tickStatusesForTurnEnd,
     tickCooldownsForTurnEnd,
     getSkillCooldownRemaining,
+    doesActorSatisfySkillCondition,
     isSkillIndexBlockedForActor,
     isActorUnableToUseSkills,
     isUnitInvulnerableForSkill,
