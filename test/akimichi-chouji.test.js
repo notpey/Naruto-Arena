@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const characters = require('../data/characters');
+// The pre-rework Sakura kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sakura-dummy')];
 const battle = require('../battleLogic');
 
 const indexOf = (id) => characters.findIndex((character) => character.id === id);
@@ -53,7 +54,7 @@ test('Chouji draft kit matches names, costs, and cooldowns', () => {
 });
 
 test('Akimichi Pills cost 15 affliction health and add 10 damage per pill', () => {
-    const match = matchFor(['akimichi-chouji'], ['haruno-sakura']);
+    const match = matchFor(['akimichi-chouji'], ['test-sakura-dummy']);
     takePills(match, 2);
     assert.equal(match.board.p1[0].hp, 70);
     assert.equal(status(match.board.p1[0], 'akimichi_chouji_akimichi_pills').metadata.pillCount, 2);
@@ -63,7 +64,7 @@ test('Akimichi Pills cost 15 affliction health and add 10 damage per pill', () =
 });
 
 test('Meat Tank hits a random enemy and grants physical and chakra invulnerability', () => {
-    const match = matchFor(['akimichi-chouji'], ['haruno-sakura', 'tenten']);
+    const match = matchFor(['akimichi-chouji'], ['test-sakura-dummy', 'tenten']);
     takePills(match, 1);
     cast(match, 'p1', 0, 1);
     assert.deepEqual(match.board.p2.map((unit) => unit.hp).sort(), [100, 70]);
@@ -74,7 +75,7 @@ test('Meat Tank hits a random enemy and grants physical and chakra invulnerabili
 });
 
 test('the third pill enters Butterfly Mode with replaced skills, reduction, and face picture', () => {
-    const match = matchFor(['akimichi-chouji'], ['haruno-sakura']);
+    const match = matchFor(['akimichi-chouji'], ['test-sakura-dummy']);
     takePills(match, 3);
     const butterfly = status(match.board.p1[0], 'akimichi_chouji_butterfly_mode_active');
     assert.ok(butterfly);
@@ -90,7 +91,7 @@ test('the third pill enters Butterfly Mode with replaced skills, reduction, and 
 });
 
 test('Butterfly Mode ignores enemy non-damage effects but keeps their damage', () => {
-    const match = matchFor(['akimichi-chouji'], ['haruno-sakura', 'tsuchi-kin']);
+    const match = matchFor(['akimichi-chouji'], ['test-sakura-dummy', 'tsuchi-kin']);
     cast(match, 'p2', 0, 0, 'p1');
     assert.ok(status(match.board.p1[0], 'haruno_sakura_kunai_interference_debuff')
         || match.board.p1[0].state.statuses.some((entry) => entry.sourceUsername === 'p2'),
@@ -119,7 +120,7 @@ test('Butterfly Mode ignores enemy non-damage effects but keeps their damage', (
 });
 
 test('Butterfly Reflexes marks its target and Finale heals Chouji on a kill', () => {
-    const match = matchFor(['akimichi-chouji'], ['haruno-sakura']);
+    const match = matchFor(['akimichi-chouji'], ['test-sakura-dummy']);
     takePills(match, 3);
     match.board.p1[0].state.cooldowns = {};
     cast(match, 'p1', 0, 1, 'p2');

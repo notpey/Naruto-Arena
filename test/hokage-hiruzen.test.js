@@ -1,7 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-// The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
-const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
+// The pre-rework Sasuke and Sakura kits are kept as test-only sparring partners for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy'),
+    require('./fixtures/legacy-sakura-dummy')];
 const battle = require('../battleLogic');
 const { buildMatchPayloadForUser } = require('../server');
 const rosterCatalog = require('../roster-catalog');
@@ -9,7 +10,7 @@ const rosterCatalog = require('../roster-catalog');
 const indexOf = (id) => characters.findIndex((character) => character?.characterId === id);
 const hiruzenIndex = indexOf('sarutobi-hiruzen');
 const sasukeIndex = indexOf('test-sasuke-dummy');
-const sakuraIndex = indexOf('haruno-sakura');
+const sakuraIndex = indexOf('test-sakura-dummy');
 const ebisuIndex = indexOf('ebisu');
 
 function makeMatch(team1 = [hiruzenIndex, sasukeIndex], team2 = [sasukeIndex, sakuraIndex]) {

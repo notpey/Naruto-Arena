@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Sakura kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sakura-dummy')];
 const seed = require('../characters.js');
 const { buildInitialBoard, resolvePendingTurnSkills, resolveEffectiveSkill, tickStatusesForTurnEnd } = require('../battleLogic');
 
@@ -44,7 +45,7 @@ test('Demon Brothers roster seed, passive, costs, and visible skills match the d
 });
 
 test('Chain Wrap stuns Physical skills, binds one target, and Chain Shred pierces then ends it', () => {
-    const match = matchFor(['haruno-sakura', 'uchiha-sasuke']);
+    const match = matchFor(['test-sakura-dummy', 'uchiha-sasuke']);
     cast(match, 0, 0);
     assert.equal(match.board.b[0].hp, 85);
     assert.deepEqual(status(match, 'b', 0, 'demon_brothers_chain_wrap_stun').metadata.cannotUseSkillClasses, ['physical']);

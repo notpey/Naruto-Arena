@@ -2,7 +2,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
-const characters = require('../data/characters');
+// The pre-rework Sakura kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sakura-dummy')];
 const battle = require('../battleLogic');
 
 const indexOf = (id) => characters.findIndex((character) => character.id === id);
@@ -45,7 +46,7 @@ for (const [characterId, skillIndex, statusId, starting, phrase] of [
     ['baki', 2, 'baki_flak_jacket', 50, 'Baki has {n} destructible defense.'],
     ['demon-brothers', null, 'demon_brothers_water_melding_defense', 15,
         'Demon Brothers have {n} destructible defense'],
-    ['haruno-sakura', null, 'haruno_sakura_guard_duty_defense', 25, 'This character has {n} destructible defense.'],
+    ['test-sakura-dummy', null, 'haruno_sakura_guard_duty_defense', 25, 'This character has {n} destructible defense.'],
 ]) {
     test(`${characterId} destructible defense tooltip tracks the remaining points`, () => {
         const match = matchFor([characterId], ['tenten']);

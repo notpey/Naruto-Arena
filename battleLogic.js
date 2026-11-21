@@ -117,6 +117,7 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           allyFollowupDamageMark:
                               passive.allyFollowupDamageMark || null,
                           healingBlockOnStun: passive.healingBlockOnStun || null,
+                          recordEnemyStunners: passive.recordEnemyStunners || null,
                           piercingDamageOnStun: Math.max(0, Number(passive.piercingDamageOnStun) || 0),
                           lifestealPercent: Math.max(0, Number(passive.lifestealPercent) || 0),
                           piercingDamageOnStunSkillIds: Array.isArray(passive.piercingDamageOnStunSkillIds)
@@ -1337,6 +1338,83 @@ const isStunStatusMetadata = (statusId, metadata = {}) =>
     (Array.isArray(metadata?.cannotUseSkillClasses) && metadata.cannotUseSkillClasses.length > 0) ||
     (Array.isArray(metadata?.cannotUseSkillIndices) && metadata.cannotUseSkillIndices.length > 0);
 
+// A stun that locks only some skills (by class, harmful/helpful, or slot), not every skill.
+const isPartialStunMetadata = (statusId, metadata = {}) =>
+    statusId !== 'stunned' && !metadata?.cannotUseSkills && isStunStatusMetadata(statusId, metadata);
+
+// The stun locks a status carries, in the shape Mental Overwhelm copies onto the stunner.
+const STUN_LOCK_FLAG_KEYS = ['cannotUseSkills', 'cannotUseHarmfulSkills', 'cannotUseHelpfulSkills',
+    'cannotUseNonMentalSkills', 'cannotUseNonStrategicSkills'];
+const STUN_LOCK_LIST_KEYS = ['cannotUseSkillClasses', 'cannotUseSkillIndices'];
+const mergeStunLocks = (base = {}, incoming = {}) => {
+    const merged = {};
+    STUN_LOCK_FLAG_KEYS.forEach((key) => {
+        if (base?.[key] || incoming?.[key] || (key === 'cannotUseSkills' && incoming?.statusId === 'stunned')) {
+            merged[key] = true;
+        }
+    });
+    STUN_LOCK_LIST_KEYS.forEach((key) => {
+        const values = [...(Array.isArray(base?.[key]) ? base[key] : []),
+            ...(Array.isArray(incoming?.[key]) ? incoming[key] : [])];
+        const unique = Array.from(new Set(values.map((value) =>
+            (typeof value === 'string' ? value.trim().toLowerCase() : value))))
+            .filter((value) => value !== '' && value !== null && value !== undefined);
+        if (unique.length) merged[key] = unique;
+    });
+    return merged;
+};
+
+const describeStunLocks = (locks = {}) => {
+    if (locks.cannotUseSkills) return 'all skills';
+    const parts = [];
+    (Array.isArray(locks.cannotUseSkillClasses) ? locks.cannotUseSkillClasses : []).forEach((entry) => {
+        if (typeof entry === 'string' && entry) parts.push(`${entry.charAt(0).toUpperCase()}${entry.slice(1)} skills`);
+    });
+    if (locks.cannotUseHarmfulSkills) parts.push('harmful skills');
+    if (locks.cannotUseHelpfulSkills) parts.push('helpful skills');
+    if (locks.cannotUseNonMentalSkills) parts.push('non-Mental skills');
+    if (locks.cannotUseNonStrategicSkills) parts.push('non-Strategic skills');
+    if (Array.isArray(locks.cannotUseSkillIndices) && locks.cannotUseSkillIndices.length) {
+        parts.push(locks.cannotUseSkillIndices.length === 1 ? 'one skill' : 'some skills');
+    }
+    if (!parts.length) return 'no skills';
+    return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+};
+
+// A passive with recordEnemyStunners ({ statusId, tooltipText }) marks each enemy that stuns its
+// owner's team. The mark keeps the union of the stun locks used and lasts until the end of the
+// watcher's next turn, so skills like Mental Overwhelm can target that enemy and copy the stun.
+const recordEnemyStunner = ({ match, targetState, sourceUsername, sourceSlot, statusId, metadata }) => {
+    if (!match?.board || !sourceUsername || !Number.isInteger(sourceSlot)) return;
+    const targetUsername = Object.keys(match.board).find((username) =>
+        (match.board[username] || []).some((unit) => unit?.state === targetState));
+    if (!targetUsername || targetUsername === sourceUsername) return;
+    const stunner = match.board?.[sourceUsername]?.[sourceSlot];
+    if (!stunner || stunner.alive === false) return;
+    const locks = mergeStunLocks({}, { ...(metadata || {}), statusId });
+    (match.board[targetUsername] || []).forEach((watcher, watcherSlot) => {
+        if (!watcher || watcher.alive === false) return;
+        const config = ensureUnitStateShape(watcher).statuses.find((status) =>
+            isStatusActiveForMetadata(status, watcher) &&
+            status?.metadata?.recordEnemyStunners?.statusId)?.metadata?.recordEnemyStunners;
+        if (!config) return;
+        const stunnerState = ensureUnitStateShape(stunner);
+        const previous = stunnerState.statuses.find((status) =>
+            status?.id === config.statusId && (Number(status.remainingTurns) || 0) > 0);
+        applyStatus({
+            targetState: stunnerState, statusId: config.statusId, duration: 1,
+            sourceUsername: targetUsername, sourceSlot: watcherSlot,
+            metadata: {
+                cannotBeCleansed: true, turnDurationAnchor: 'source_turn',
+                ...(config.statusIcon ? { statusIcon: config.statusIcon } : {}),
+                recordedStunLocks: mergeStunLocks(previous?.metadata?.recordedStunLocks, locks),
+                tooltipText: config.tooltipText || 'This character stunned an enemy this turn.',
+            },
+            fresh: false,
+        });
+    });
+};
+
 // A unit marked with onOutgoingControlEffectExtendSourceStatus (Young Kakashi's White Fang
 // Slash and Amateur Raikiri) lengthens the marking character's status whenever it uses a
 // chakra removal, chakra stealing, or stun effect. Each marked unit counts once per resolution.
@@ -1812,6 +1890,15 @@ const applyStatus = ({
             duration = Math.max(0, Number(duration) || 0) - stunReduction;
             if (duration <= 0) return;
         }
+    }
+    // Units with ignoresPartialStuns (Inner Sakura) shrug off stuns that only lock some skills.
+    if (metadata?.harmful && isPartialStunMetadata(statusId, metadata) && !metadata?.cannotIgnoreStuns &&
+        hasStatusMetadataFlag(targetState, 'ignoresPartialStuns') &&
+        !hasStatusMetadataFlag(targetState, 'cannotIgnoreStuns')) {
+        return;
+    }
+    if (stunSourceUnit) {
+        recordEnemyStunner({ match: resolutionMatch, targetState, sourceUsername, sourceSlot, statusId, metadata });
     }
     const applyStackDerivedNumericKeys = (nextMetadata) => {
         if (!nextMetadata || typeof nextMetadata !== 'object') return nextMetadata;
@@ -6935,6 +7022,21 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                             };
                         }
                     }
+                    // Mental Overwhelm: stun the target with the same locks it used on the caster's team.
+                    const copyStunLocksFrom = runtimeMetadata?.copyStunLocksFromTargetStatusId;
+                    if (typeof copyStunLocksFrom === 'string' && copyStunLocksFrom) {
+                        const recorded = (targetState.statuses || []).find((entry) =>
+                            entry?.id === copyStunLocksFrom && (Number(entry.remainingTurns) || 0) > 0);
+                        const {
+                            copyStunLocksFromTargetStatusId: _copyKey, tooltipTextTemplate: template, ...rest
+                        } = runtimeMetadata;
+                        const locks = mergeStunLocks({}, recorded?.metadata?.recordedStunLocks || {});
+                        runtimeMetadata = { ...rest, ...locks };
+                        if (typeof template === 'string' && template) {
+                            runtimeMetadata.tooltipText = renderTooltipTemplate(template,
+                                { stunLocks: describeStunLocks(locks) });
+                        }
+                    }
                     const extraDuration = getAdditionalIncomingStatusDuration({
                         targetState: destinationState,
                         incomingStatusId: runtimeStatusId,
@@ -6973,9 +7075,12 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     const stunImmunityDisabled =
                         Boolean(runtimeMetadata?.cannotIgnoreStuns) ||
                         hasStatusMetadataFlag(destinationState, 'cannotIgnoreStuns');
+                    const ignoresThisPartialStun = applyingStun &&
+                        isPartialStunMetadata(runtimeStatusId, runtimeMetadata) &&
+                        hasStatusMetadataFlag(destinationState, 'ignoresPartialStuns');
                     if (
                         applyingStun &&
-                        hasStatusMetadataFlag(destinationState, 'cannotBeStunned') &&
+                        (hasStatusMetadataFlag(destinationState, 'cannotBeStunned') || ignoresThisPartialStun) &&
                         !stunImmunityDisabled
                     ) {
                         // Keep stun feedback visible, but strip all functional stun locks.
@@ -10004,7 +10109,9 @@ const applyTriggeredEffectsFromStatus = ({
                     effectMetadata.cannotUseSkillClasses.length > 0) ||
                 (Array.isArray(effectMetadata.cannotUseSkillIndices) &&
                     effectMetadata.cannotUseSkillIndices.length > 0);
-            if (appliesStun && hasStatusMetadataFlag(targetState, 'cannotBeStunned') &&
+            if (appliesStun && (hasStatusMetadataFlag(targetState, 'cannotBeStunned') ||
+                (isPartialStunMetadata(effect.statusId, effectMetadata) &&
+                    hasStatusMetadataFlag(targetState, 'ignoresPartialStuns'))) &&
                 !effectMetadata.cannotIgnoreStuns &&
                 !hasStatusMetadataFlag(targetState, 'cannotIgnoreStuns')) {
                 applyStatus({

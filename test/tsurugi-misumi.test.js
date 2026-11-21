@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const characters = require('../data/characters');
+// The pre-rework Sakura kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sakura-dummy')];
 const battle = require('../battleLogic');
 const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('../data/activeRoster');
 
@@ -51,7 +52,7 @@ test('Misumi draft kit matches names, costs, cooldowns, and roster', () => {
 });
 
 test('Flexible Twisting Joints deals 15 and prepares only its target for Tighten Joints', () => {
-    const match = matchFor(['tsurugi-misumi'], ['haruno-sakura', 'tenten']);
+    const match = matchFor(['tsurugi-misumi'], ['test-sakura-dummy', 'tenten']);
     assert.deepEqual(targetSlots(match, 2), []);
     cast(match, 'p1', 0, 0, 'p2', 1);
     assert.equal(match.board.p2[1].hp, 85);
@@ -60,7 +61,7 @@ test('Flexible Twisting Joints deals 15 and prepares only its target for Tighten
 
 test('Soft Physique reflects enemy physical skills onto the secret mark and grants chakra once each', () => {
     const { buildMatchPayloadForUser } = require('../server.js');
-    const match = matchFor(['tsurugi-misumi'], ['haruno-sakura', 'tenten']);
+    const match = matchFor(['tsurugi-misumi'], ['test-sakura-dummy', 'tenten']);
     cast(match, 'p1', 0, 1, 'p2', 1);
     assert.deepEqual(targetSlots(match, 2), [1], 'the marked enemy can be Tightened');
     const markVisibleTo = (username) => buildMatchPayloadForUser(match, username).board.p2[1].state.statuses
@@ -91,7 +92,7 @@ test('Soft Physique does not reflect non-physical skills', () => {
 });
 
 test('Tighten Joints damages for 2 turns, stuns physical and strategic skills, and locks Misumi', () => {
-    const match = matchFor(['tsurugi-misumi'], ['haruno-sakura']);
+    const match = matchFor(['tsurugi-misumi'], ['test-sakura-dummy']);
     cast(match, 'p1', 0, 0, 'p2');
     cast(match, 'p1', 0, 2, 'p2');
     assert.deepEqual(status(match.board.p2[0], 'tsurugi_misumi_tighten_joints_stun').metadata

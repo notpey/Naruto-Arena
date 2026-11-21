@@ -33,7 +33,7 @@ test('repairs swapped Sakura and Sasuke passives on both sides of an existing ma
     }
     assert.equal(board.ally[0].hp, 75);
     assert.equal(board.ally[0].state.cooldowns.test_skill, 2);
-    assert.equal(board.ally[0].state.statuses[1], extraStatus);
+    assert.ok(board.ally[0].state.statuses.includes(extraStatus), 'other statuses are kept');
 });
 
 test('removes an invalid passive from a living character without one', () => {

@@ -25,6 +25,9 @@ const {
     isUnitInvulnerableForSkill,
 } = require('../battleLogic.js');
 
+// The pre-rework Sakura kit, kept as a test-only fixture (not part of the roster checks above).
+const legacySakura = require('./fixtures/legacy-sakura-dummy');
+const withLegacySakura = [...characters, legacySakura];
 const getCharIndex = (id) => characters.findIndex(c => (c && (c.id === id || c.characterId === id)));
 
 const emptyPool = () => ({
@@ -34,14 +37,14 @@ const emptyPool = () => ({
     genjutsu: 0,
 });
 
-const makeMatch = (team1 = [0], team2 = [1]) => {
+const makeMatch = (team1 = [0], team2 = [1], roster = characters) => {
     const players = [
         { username: 'p1', team: team1 },
         { username: 'p2', team: team2 },
     ];
     const match = {
         players,
-        board: buildInitialBoard(players, characters),
+        board: buildInitialBoard(players, roster),
         chakraPools: {
             p1: emptyPool(),
             p2: emptyPool(),
@@ -134,7 +137,7 @@ const collectCharacterStatusReferences = () => {
     const producedStatusIds = new Set(['invulnerable', 'stunned']);
     const referencedStatusIds = [];
     const isStatusProducerPath = (pathParts) =>
-        /applystatus|startstatuses|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense|awakening/i.test(pathParts.join('.'));
+        /applystatus|startstatuses|onexpireeffects|onowneruseskilleffects|counterapplystatus|allyfollowupdamagemark|healingblockonstun|teamskillcostdefense|awakening|recordenemystunners/i.test(pathParts.join('.'));
     const addReference = (statusId) => {
         if (typeof statusId === 'string' && statusId.trim()) {
             referencedStatusIds.push(statusId.trim());
@@ -464,14 +467,16 @@ test('Naruto Assault damage remains the same with helpful and harmful effects', 
     assert.equal(match.board.p2[0].hp, 40);
 });
 
-test('Sakura rework keeps four skills and a visible passive that strengthens Guard Duty', () => {
-    const sakura = getSakura();
+test('legacy Sakura fixture: Guard Duty passive defense bonus and Clone Technique target overrides', () => {
+    const characters = withLegacySakura;
+    const sakura = legacySakura;
+    const legacyIndex = characters.indexOf(legacySakura);
     assert.equal(sakura.skills[0].cooldown, 1);
     assert.equal(sakura.skills[1].cooldown, 1);
     assert.deepEqual(sakura.skills.map(skill => skill.name), [
         'Kunai Interference', 'Guard Duty', 'Clone Technique', 'Sakura Hide',
     ]);
-    const match = makeMatch([1, 0], [2, 3]);
+    const match = makeMatch([legacyIndex, 0], [2, 3], characters);
     const passive = match.board.p1[0].state.statuses.find(status => status.metadata?.passive);
     assert.equal(passive.metadata.sourceSkillName, 'Exceptional Chakra Control');
     assert.equal(passive.metadata.statusIcon, sakura.passive.icon);
@@ -481,14 +486,14 @@ test('Sakura rework keeps four skills and a visible passive that strengthens Gua
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 85);
-    assert.ok(match.board.p1[0].state.cooldowns['haruno-sakura-kunai-interference'] > 0);
+    assert.ok(match.board.p1[0].state.cooldowns['test-sakura-dummy-kunai-interference'] > 0);
     assert.equal(match.board.p2[1].hp, 100);
     assert.equal(match.board.p2[0].state.statuses.find(status => status.id === 'haruno_sakura_kunai_interference')?.metadata.nonAfflictionDamageDebuffFlat, 10);
 
     queueSkill(match, 'p1', 1, [{ username: 'p1', slot: 1 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     const guardDefense = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_defense');
-    assert.ok(match.board.p1[0].state.cooldowns['haruno-sakura-guard-duty'] > 0);
+    assert.ok(match.board.p1[0].state.cooldowns['test-sakura-dummy-guard-duty'] > 0);
     const guardReduction = match.board.p1[1].state.statuses.find(status => status.id === 'haruno_sakura_guard_duty_reduction');
     assert.equal(guardDefense.metadata.destructibleDefensePoints, 30, '25 base defense plus 5 from passive');
     assert.equal(guardReduction.metadata.damageReductionFlat, 10);
@@ -505,14 +510,14 @@ test('Sakura rework keeps four skills and a visible passive that strengthens Gua
     const sakuraState = match.board.p1[0].state;
     const clone = sakuraState.statuses.find(status => status.id === 'haruno_sakura_clone_technique');
     assert.equal(clone.metadata.damageReductionFlat, 10);
-    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: 1, skillIndex: 0, actorState: sakuraState }).target, 'all-enemy');
-    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: 1, skillIndex: 1, actorState: sakuraState }).target, 'all-allies');
+    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: legacyIndex, skillIndex: 0, actorState: sakuraState }).target, 'all-enemy');
+    assert.equal(resolveEffectiveSkill({ characters, rosterIndex: legacyIndex, skillIndex: 1, actorState: sakuraState }).target, 'all-allies');
     assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0, skillIndex: 0, characters }).mode, 'all');
     assert.equal(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0, skillIndex: 1, characters }).mode, 'all');
-    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.find(status => status.id === clone.id).metadata.skillTargetOverrides['haruno-sakura-guard-duty'], 'all-allies');
+    assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses.find(status => status.id === clone.id).metadata.skillTargetOverrides['test-sakura-dummy-guard-duty'], 'all-allies');
 
-    delete sakuraState.cooldowns['haruno-sakura-kunai-interference'];
-    delete sakuraState.cooldowns['haruno-sakura-guard-duty'];
+    delete sakuraState.cooldowns['test-sakura-dummy-kunai-interference'];
+    delete sakuraState.cooldowns['test-sakura-dummy-guard-duty'];
     queueSkill(match, 'p1', 0);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 75, 'Clone Kunai deals 10 instead of 15');
@@ -569,8 +574,9 @@ test('Shino starts Chakra Leech on cooldown and can steal after his first turn',
 });
 
 test('Shino Female Bug and Infestation work together without stacking marks', () => {
+    const characters = withLegacySakura;
     const match = makeMatch([getCharIndex('aburame-shino')],
-        [getCharIndex('haruno-sakura'), getCharIndex('uzumaki-naruto')]);
+        [characters.indexOf(legacySakura), getCharIndex('uzumaki-naruto')], characters);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.deepEqual(computeTargetOptions({ match, actingUsername: 'p1', actorSlot: 0,
@@ -631,7 +637,8 @@ test('Hinata awakens immediately when another ally falls below 50 health', () =>
 });
 
 test('battleLogic resolves Shikamaru draft kit behavior used by the editor data', () => {
-    const match = makeMatch([getCharIndex('nara-shikamaru')], [1, 2]);
+    const match = makeMatch([getCharIndex('nara-shikamaru')],
+        [getCharIndex('uzumaki-naruto'), getCharIndex('uchiha-sasuke')]);
     // Clear the passive's random secret mark so only Meditate decides the targets.
     match.board.p2.forEach((unit) => {
         unit.state.statuses = unit.state.statuses.filter((status) =>

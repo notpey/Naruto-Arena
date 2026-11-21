@@ -192,8 +192,8 @@ test('Sakura and Sasuke rework replaces stale stored character concepts once', a
     const stored = await service.getStoredCharacters();
     const sakura = stored.find(character => character.id === 'haruno-sakura');
     const sasuke = stored.find(character => character.id === 'uchiha-sasuke');
-    assert.equal(sakura.skills[0].name, 'Kunai Interference');
-    assert.equal(sakura.passive.name, 'Exceptional Chakra Control');
+    assert.equal(sakura.skills[0].name, 'Sakura Kick');
+    assert.equal(sakura.passive.name, 'Inner Sakura');
     assert.equal(sasuke.skills[0].name, 'Shadow Shuriken Technique');
     assert.equal(sasuke.passive.name, 'Two-Tomoe Sharingan');
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
@@ -607,4 +607,36 @@ test('Two-Tomoe Sharingan rework replaces a stored Sasuke kit once', async () =>
     ]);
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.uchiha-sasuke-two-tomoe-rework-2026-11-20']));
+});
+
+test('Inner Sakura rework replaces a stored Sakura kit once', async () => {
+    const oldSakura = {
+        id: 'haruno-sakura', characterId: 'haruno-sakura', name: 'Haruno Sakura',
+        facePicture: 'https://i.imgur.com/q2K5CEj.png',
+        passive: { name: 'Exceptional Chakra Control' },
+        skills: [{ id: 'haruno-sakura-kunai-interference', name: 'Kunai Interference' }],
+    };
+    const writes = [];
+    const allCompletedButSakura = Object.fromEntries(
+        (require('fs').readFileSync(require('path').join(__dirname, '..', 'services', 'characterService.js'), 'utf8')
+            .match(/_MIGRATION_ID = '([^']+)'/g) || [])
+            .map((entry) => entry.match(/'([^']+)'/)[1])
+            .filter((id) => id !== 'haruno-sakura-inner-sakura-rework-2026-11-21')
+            .map((id) => [id, new Date()])
+    );
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldSakura] }
+            : { key, completed: allCompletedButSakura },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const sakura = stored.find((character) => character.id === 'haruno-sakura');
+    assert.equal(sakura.passive.name, 'Inner Sakura');
+    assert.deepEqual(sakura.skills.map((skill) => skill.name), [
+        'Sakura Kick', 'Mental Overwhelm', 'Rudimentary Healing', 'Clone Technique', 'Mental Overwhelm',
+    ]);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.haruno-sakura-inner-sakura-rework-2026-11-21']));
 });

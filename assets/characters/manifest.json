@@ -2970,5 +2970,13 @@
   "https://i.imgur.com/MHXulZd.png": {
     "local": "/assets/characters/MHXulZd.png",
     "sha256": "08bdea28bd29acab126526e3b440c37da28ca3beb522f614e920afac84e8078b"
+  },
+  "https://i.imgur.com/In5poGk.png": {
+    "local": "/assets/characters/In5poGk.png",
+    "sha256": "38948db251b28d7f5c0b760684f85f2bf78ac96c6db089482250ae0b071bea77"
+  },
+  "https://i.imgur.com/JT9UvYv.png": {
+    "local": "/assets/characters/JT9UvYv.png",
+    "sha256": "c9445e42a50e5aa63f24bebbdb24408fe28be0f6eece48a986e8a1bae8601f55"
   }
 }
