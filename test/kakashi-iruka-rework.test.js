@@ -1,7 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 // The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
-const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy'),
+    require('./fixtures/legacy-naruto-dummy')];
 const { buildMatchPayloadForUser } = require('../server');
 const {
     buildInitialBoard,
@@ -58,7 +59,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
         [1, { ninjutsu: 1, random: 1 }, 'kakashi_nin_dogs_stun'],
         [2, { taijutsu: 1, random: 1 }, 'kakashi_headhunter_stun'],
     ]) {
-        const match = makeMatch([index('hatake-kakashi')], [index('uzumaki-naruto')]);
+        const match = makeMatch([index('hatake-kakashi')], [index('test-naruto-dummy')]);
         cast(match, 'p1', 0, slot, ['p2', 0]);
         assert.equal(match.board.p2[0].hp, 80);
         assert.ok(status(match, 'p2', 0, expectedStun));
@@ -85,7 +86,7 @@ test('Kakashi prepares Raikiri from either skill with the right cost and 45 pier
 });
 
 test('Sharingan Insight reveals hidden traps and copies only eligible countered skills for one turn', () => {
-    const match = makeMatch([index('hatake-kakashi')], [index('umino-iruka'), index('uzumaki-naruto')]);
+    const match = makeMatch([index('hatake-kakashi')], [index('umino-iruka'), index('test-naruto-dummy')]);
     cast(match, 'p2', 0, 2, ['p1', 0]);
     assert.equal(buildMatchPayloadForUser(match, 'p1').board.p1[0].state.statuses
         .some((entry) => entry.id === 'iruka_sealed_bomb_trap'), false);
@@ -108,7 +109,7 @@ test('Sharingan Insight reveals hidden traps and copies only eligible countered 
         characters, rosterIndex: index('hatake-kakashi'),
         skillIndex: 0, actorState: match.board.p1[0].state,
     });
-    assert.equal(copied.id, 'uzumaki-naruto-shadow-clone-assault');
+    assert.equal(copied.id, 'test-naruto-dummy-shadow-clone-assault');
     assert.equal(computeEffectiveEnergyCost({ skill: copied, actorState: match.board.p1[0].state }).requiredRandom, 1);
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });

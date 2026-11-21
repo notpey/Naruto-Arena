@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const characters = require('../data/characters');
+// The pre-rework Naruto kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-naruto-dummy')];
 const battle = require('../battleLogic');
 const { ACTIVE_ROSTER_IDS } = require('../data/activeRoster');
 const { CANONICAL_ROSTER_ORDER } = require('../data/rosterOrder');
@@ -188,7 +189,7 @@ test('Chakra Surveillance invisibly marks enemies who use a skill', () => {
 });
 
 test('Custom Kunai marks enemies who use harmful skills on its holder and ends when Minato dies', () => {
-    const match = matchFor(['namikaze-minato', 'haruno-sakura'], ['uzumaki-naruto', 'nara-shikamaru']);
+    const match = matchFor(['namikaze-minato', 'haruno-sakura'], ['test-naruto-dummy', 'nara-shikamaru']);
     const [minato, ally] = match.board.p1;
     const [naruto, shikamaru] = match.board.p2;
     assert.deepEqual(targets(match, 'p1', 0, 'namikaze-minato-custom-kunai'), ['p1:1']);
@@ -199,7 +200,7 @@ test('Custom Kunai marks enemies who use harmful skills on its holder and ends w
         'cannot be used on an already affected ally');
     endTurn(match, 'p1');
 
-    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 1);
+    cast(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint', 'p1', 1);
     cast(match, 'p2', 1, 'nara-shikamaru-meditate', 'p1', 0);
     assert.ok(status(naruto, MARK));
     assert.equal(status(naruto, MARK).sourceUsername, 'p1');
@@ -210,13 +211,13 @@ test('Custom Kunai marks enemies who use harmful skills on its holder and ends w
     battle.applyDamageToUnit(minato, 200, { match, sourceUsername: 'p2', sourceSlot: 0,
         targetUsername: 'p1', targetSlot: 0 });
     assert.equal(status(ally, 'namikaze_minato_custom_kunai'), undefined);
-    cast(match, 'p2', 0, 'uzumaki-naruto-shadow-clone-assault', 'p1', 1);
+    cast(match, 'p2', 0, 'test-naruto-dummy-shadow-clone-assault', 'p1', 1);
     assert.equal(status(naruto, MARK), undefined);
 });
 
 test('Reroute makes Minato invulnerable for 1 turn', () => {
-    const match = matchFor(['namikaze-minato'], ['uzumaki-naruto']);
+    const match = matchFor(['namikaze-minato'], ['test-naruto-dummy']);
     cast(match, 'p1', 0, 'namikaze-minato-reroute');
     assert.ok(isInvulnerable(match.board.p1[0]));
-    assert.deepEqual(targets(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint'), []);
+    assert.deepEqual(targets(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint'), []);
 });

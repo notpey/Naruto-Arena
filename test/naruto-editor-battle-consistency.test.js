@@ -28,6 +28,8 @@ const {
 // The pre-rework Sakura kit, kept as a test-only fixture (not part of the roster checks above).
 const legacySakura = require('./fixtures/legacy-sakura-dummy');
 const withLegacySakura = [...characters, legacySakura];
+const legacyNaruto = require('./fixtures/legacy-naruto-dummy');
+const withLegacyNaruto = [...characters, legacyNaruto];
 const getCharIndex = (id) => characters.findIndex(c => (c && (c.id === id || c.characterId === id)));
 
 const emptyPool = () => ({
@@ -342,23 +344,24 @@ test('character editor presets match starter kits in characters.js', () => {
     });
 });
 
-test('Naruto rework keeps four active skills and a separate passive', () => {
+test('Naruto rework keeps four active skills and a separate quest passive', () => {
     const naruto = getNaruto();
     assert.deepEqual(
         naruto.skills.map((skill) => skill.id),
         [
-            'uzumaki-naruto-shadow-clone-assault',
-            'uzumaki-naruto-shadow-clone-technique',
-            'uzumaki-naruto-demon-wind-shuriken-feint',
+            'uzumaki-naruto-uzumaki-naruto-combo',
+            'uzumaki-naruto-shadow-clones',
+            'uzumaki-naruto-rasengan',
             'uzumaki-naruto-sexy-technique',
         ]
     );
     assert.equal(naruto.passive.name, 'Kyuubi Awakening');
-    assert.deepEqual(naruto.passive.onFirstHpAtMost, { threshold: 40, heal: 20, randomChakra: 1 });
+    assert.equal(naruto.passive.awakening.afterOwnerSkillUses, 4);
+    assert.deepEqual(naruto.passive.awakening.allyCharacterIdsAny, ['haruno-sakura']);
     assert.deepEqual(naruto.skills.map(skill => skill.energy), [
-        ['Taijutsu'], ['Random'], ['Taijutsu', 'Random'], ['Random'],
+        ['Taijutsu'], ['Random'], ['Ninjutsu', 'Taijutsu'], ['Random'],
     ]);
-    assert.deepEqual(naruto.skills.map(skill => skill.cooldown), [0, 3, 2, 4]);
+    assert.deepEqual(naruto.skills.map(skill => skill.cooldown), [0, 2, 1, 4]);
 });
 
 test('Naruto passive is a permanent visible match effect, outside the skill tray', () => {
@@ -369,8 +372,8 @@ test('Naruto passive is a permanent visible match effect, outside the skill tray
     assert.equal(passive.remainingTurns, 99);
     assert.equal(passive.metadata.sourceSkillName, 'Kyuubi Awakening');
     assert.equal(passive.metadata.statusIcon, getNaruto().passive.icon);
-    assert.ok(passive.metadata.tooltipText.startsWith(getNaruto().passive.description));
-    assert.equal(passive.metadata.tooltipText, getNaruto().passive.description);
+    assert.ok(passive.metadata.tooltipText.startsWith('Quest: Naruto uses 4 skills'));
+    assert.match(passive.metadata.tooltipText, /Skills used: 0\/4/);
     assert.equal(getNaruto().skills.length, 4, 'passive does not occupy a skill slot');
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });
@@ -406,8 +409,9 @@ test('Naruto passive survives status cleansing and explicit status removal', () 
     assert.equal(match.board.p1[0].state.statuses.some(status => status.id === passiveId), true);
 });
 
-test('Naruto rework applies Shadow Clone Technique and consumes it after empowered Feint', () => {
-    let match = makeMatch();
+test('legacy Naruto fixture: Shadow Clone Technique empowers Feint and is consumed by it', () => {
+    const characters = withLegacyNaruto;
+    let match = makeMatch([characters.indexOf(legacyNaruto)], [1], characters);
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].hp, 80, 'Assault starts at 20 damage without a helpful effect');
@@ -444,8 +448,9 @@ test('Naruto rework applies Shadow Clone Technique and consumes it after empower
     assert.equal(narutoState.statuses.some(status => status.id === 'uzumaki_naruto_shadow_clone_technique'), false);
 });
 
-test('Naruto Assault damage remains the same with helpful and harmful effects', () => {
-    const match = makeMatch();
+test('legacy Naruto fixture: Assault damage stays the same with helpful and harmful effects', () => {
+    const characters = withLegacyNaruto;
+    const match = makeMatch([characters.indexOf(legacyNaruto)], [1], characters);
     const narutoState = match.board.p1[0].state;
     narutoState.statuses.push({ id: 'test_harmful', remainingTurns: 1, metadata: { harmful: true } });
     queueSkill(match, 'p1', 0, [{ username: 'p2', slot: 0 }]);

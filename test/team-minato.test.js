@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const characters = require('../data/characters');
+// The pre-rework Naruto kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-naruto-dummy')];
 const battle = require('../battleLogic');
 const { ACTIVE_ROSTER_IDS } = require('../data/activeRoster');
 const { buildMatchPayloadForUser } = require('../server');
@@ -88,7 +89,7 @@ test('Team Minato kits match the drafts and join the playable roster', () => {
 });
 
 test('Pit Trap is hidden from the trapped team and springs for 15 piercing damage at the end of their turn', () => {
-    const match = matchFor(['nohara-rin'], ['uzumaki-naruto']);
+    const match = matchFor(['nohara-rin'], ['test-naruto-dummy']);
     const [rin] = match.board.p1;
     const [naruto] = match.board.p2;
     addStatus(naruto, 'test_reduction', { helpful: true, damageReductionFlat: 10 }, { username: 'p2', slot: 0 });
@@ -104,7 +105,7 @@ test('Pit Trap is hidden from the trapped team and springs for 15 piercing damag
 
     endTurn(match, 'p1');
     assert.equal(naruto.hp, 100, "the trap does not spring at the end of Rin's turn");
-    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+    cast(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint', 'p1', 0);
     assert.equal(rin.hp, 85, 'Rin has 10 damage reduction while the trap is set');
     endTurn(match, 'p2');
     assert.equal(naruto.hp, 75, '15 piercing from the trap plus 10 for using a physical skill');
@@ -119,19 +120,19 @@ test('Pit Trap is hidden from the trapped team and springs for 15 piercing damag
 });
 
 test('Pit Trap adds its 10 bonus only once, however many physical skills are used', () => {
-    const match = matchFor(['nohara-rin'], ['uzumaki-naruto']);
+    const match = matchFor(['nohara-rin'], ['test-naruto-dummy']);
     const [naruto] = match.board.p2;
     cast(match, 'p1', 0, 'nohara-rin-pit-trap', 'p2', 0);
     const trap = status(naruto, 'nohara_rin_pit_trap');
     assert.equal(trap.metadata.tooltipText,
         'This character takes 15 piercing physical damage at the end of their turn. If they use a physical skill this turn, the trap deals 10 additional damage.');
     endTurn(match, 'p1');
-    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+    cast(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint', 'p1', 0);
     assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.turnEndDamage, 25);
     assert.match(status(naruto, 'nohara_rin_pit_trap').metadata.tooltipText, /takes 25 piercing/);
     assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.invisible, true, 'the trap stays hidden');
     match.board.p2[0].state.cooldowns = {};
-    cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+    cast(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint', 'p1', 0);
     assert.equal(status(naruto, 'nohara_rin_pit_trap').metadata.turnEndDamage, 25);
     endTurn(match, 'p2');
     assert.equal(naruto.hp, 75);
@@ -216,9 +217,9 @@ test('Medical Kit heals for 3 turns and on physical or chakra skill use, with Ca
 });
 
 test('Rin Flee makes Rin invulnerable for 1 turn', () => {
-    const match = matchFor(['nohara-rin'], ['uzumaki-naruto']);
+    const match = matchFor(['nohara-rin'], ['test-naruto-dummy']);
     cast(match, 'p1', 0, 'nohara-rin-flee');
-    assert.deepEqual(targets(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint'), []);
+    assert.deepEqual(targets(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint'), []);
 });
 
 test('White Fang Slash and Amateur Raikiri pierce and empower each other for 1 turn', () => {
@@ -275,7 +276,7 @@ test("White Fang Slash makes an enemy's chakra removal and stealing take 1 less 
 
 test("Amateur Raikiri makes an enemy's stuns last 1 less turn", () => {
     const setup = (marked) => {
-        const match = matchFor(['young-kakashi', 'haruno-sakura'], ['uzumaki-naruto', 'nara-shikamaru']);
+        const match = matchFor(['young-kakashi', 'haruno-sakura'], ['test-naruto-dummy', 'nara-shikamaru']);
         match.board.p1.forEach((unit) => addStatus(unit, TACTICS_MARK, { harmful: true },
             { username: 'p2', slot: 1 }, 99));
         if (marked) {
@@ -283,7 +284,7 @@ test("Amateur Raikiri makes an enemy's stuns last 1 less turn", () => {
             cast(match, 'p1', 0, 'young-kakashi-amateur-raikiri', 'p2', 1);
         }
         endTurn(match, 'p1');
-        cast(match, 'p2', 0, 'uzumaki-naruto-demon-wind-shuriken-feint', 'p1', 0);
+        cast(match, 'p2', 0, 'test-naruto-dummy-demon-wind-shuriken-feint', 'p1', 0);
         cast(match, 'p2', 1, 'nara-shikamaru-shadow-imitation');
         return match;
     };

@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const characters = require('../data/characters');
+// The pre-rework Naruto kit is kept as a test-only sparring partner for these older tests.
+const characters = [...require('../data/characters'), require('./fixtures/legacy-naruto-dummy')];
 const battle = require('../battleLogic');
 
 const index = (id) => characters.findIndex((character) => character.characterId === id);
@@ -35,7 +36,7 @@ const status = (unit, id) => unit.state.statuses.find((entry) =>
 const total = (chakra) => Object.values(chakra).reduce((sum, amount) => sum + amount, 0);
 
 test('Naruto awakens once when damage first leaves him at 40 or less', () => {
-    const match = matchFor(['uzumaki-naruto'], ['haruno-sakura']);
+    const match = matchFor(['test-naruto-dummy'], ['haruno-sakura']);
     const naruto = match.board.p1[0];
     const before = total(match.chakraPools.p1);
     battle.applyDamageToUnit(naruto, 60, {

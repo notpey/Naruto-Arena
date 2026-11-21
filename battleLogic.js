@@ -876,6 +876,14 @@ const doesActorSatisfySkillCondition = (actorUnit, actorState, skill) => {
         return false;
     }
     if (condition?.missingStatusId && hasStatus(actorState, condition.missingStatusId)) return false;
+    // e.g. Rasengan: { statusId, metadataKey: 'shadowClones', value: 2 } needs 2+ Shadow Clones.
+    const metadataAtLeast = condition?.statusMetadataAtLeast;
+    if (metadataAtLeast?.statusId && metadataAtLeast?.metadataKey) {
+        const status = (Array.isArray(actorState?.statuses) ? actorState.statuses : []).find((entry) =>
+            entry?.id === metadataAtLeast.statusId && (Number(entry.remainingTurns) || 0) > 0);
+        if ((Number(status?.metadata?.[metadataAtLeast.metadataKey]) || 0) <
+            Math.max(0, Number(metadataAtLeast.value) || 0)) return false;
+    }
     const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
     const hpAtMost = Number(condition?.sourceCurrentHpAtMost);
     if (Number.isFinite(hpAtMost) && currentHp > hpAtMost) return false;
@@ -1643,6 +1651,40 @@ const changeStatusMetadataStack = (status, key, amount) => {
     status.metadata = { ...metadata, [key]: nextValue };
     if (typeof status.metadata.tooltipTextTemplate === 'string' && status.metadata.tooltipTextTemplate) {
         status.metadata.tooltipText = renderTooltipTemplate(status.metadata.tooltipTextTemplate, status.metadata);
+    }
+};
+
+// consumeStackOnEnemyDamagingSkill: { metadataKey, amount = 1 } — the stack shrinks each time a
+// damaging enemy skill reaches the owner. Derived values (stackDerivedNumericKeys) follow the
+// new count, and the status ends when no stacks remain.
+const consumeStacksOnEnemyDamagingSkill = (unit) => {
+    const state = ensureUnitStateShape(unit);
+    let removedAny = false;
+    state.statuses.forEach((status) => {
+        const config = status?.metadata?.consumeStackOnEnemyDamagingSkill;
+        if (!config?.metadataKey || !isStatusActiveForMetadata(status, unit)) return;
+        const key = config.metadataKey;
+        const amount = Math.max(1, Number(config.amount) || 1);
+        const nextValue = Math.max(0, (Number(status.metadata[key]) || 0) - amount);
+        const metadata = { ...status.metadata, [key]: nextValue };
+        const derived = metadata.stackDerivedNumericKeys;
+        if (metadata.stackMetadataKey === key && derived && typeof derived === 'object') {
+            Object.entries(derived).forEach(([derivedKey, multiplier]) => {
+                if (derivedKey) metadata[derivedKey] = nextValue * (Number(multiplier) || 0);
+            });
+        }
+        if (typeof metadata.tooltipTextTemplate === 'string' && metadata.tooltipTextTemplate) {
+            metadata.tooltipText = renderTooltipTemplate(metadata.tooltipTextTemplate, metadata);
+        }
+        status.metadata = metadata;
+        if (nextValue <= 0) {
+            status.remainingTurns = 0;
+            removedAny = true;
+        }
+    });
+    if (removedAny) {
+        state.statuses = state.statuses.filter((status) =>
+            !(status?.metadata?.consumeStackOnEnemyDamagingSkill && (Number(status.remainingTurns) || 0) <= 0));
     }
 };
 
@@ -8462,6 +8504,18 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     sourceSlot: actorSlot,
                 });
             }
+        });
+
+        // Stacks like Naruto's Shadow Clones are used up once per damaging enemy skill that
+        // reached their owner, after that skill's damage (so the lost stack still reduced it).
+        const stackConsumersThisCast = new Set();
+        pendingDamage.forEach((entry) => {
+            const recipient = entry?.recipient;
+            if (!recipient?.unit || !recipient.username || recipient.username === actingUsername) return;
+            const recipientKey = `${recipient.username}:${recipient.slot}`;
+            if (stackConsumersThisCast.has(recipientKey)) return;
+            stackConsumersThisCast.add(recipientKey);
+            consumeStacksOnEnemyDamagingSkill(recipient.unit);
         });
 
         deferredStatusRemovals.forEach(({ recipient, targetStatusId, sourceUsername, sourceSlot }) => {

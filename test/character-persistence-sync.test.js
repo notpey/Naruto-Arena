@@ -118,6 +118,7 @@ test('launch unlock migration aligns starter and mission requirements without re
                 'demon-brothers-rework-2026-10-25': new Date(),
                 'hokage-hiruzen-rework-2026-10-26': new Date(),
                 'balance-update-0-3-2026-11-02': new Date(),
+                'uzumaki-naruto-kyuubi-awakening-rework-2026-11-21': new Date(),
             } },
         updateOne: async (filter, update) => { writes.push({ filter, update }); },
     };
@@ -160,7 +161,7 @@ test('Naruto rework replaces stale stored artwork and skills once', async () => 
     const stored = await service.getStoredCharacters();
     const naruto = stored.find(character => character.id === 'uzumaki-naruto');
     assert.equal(naruto.facePicture, 'https://i.imgur.com/NwbpKdo.png');
-    assert.equal(naruto.skills[0].name, 'Shadow Clone Assault');
+    assert.equal(naruto.skills[0].name, 'Uzumaki Naruto Combo');
     assert.equal(naruto.passive.name, 'Kyuubi Awakening');
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.uzumaki-naruto-rework-2026-10-23']));
@@ -639,4 +640,36 @@ test('Inner Sakura rework replaces a stored Sakura kit once', async () => {
     ]);
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.haruno-sakura-inner-sakura-rework-2026-11-21']));
+});
+
+test('Kyuubi Awakening rework replaces a stored Naruto kit once', async () => {
+    const oldNaruto = {
+        id: 'uzumaki-naruto', characterId: 'uzumaki-naruto', name: 'Uzumaki Naruto',
+        facePicture: 'https://i.imgur.com/NwbpKdo.png',
+        passive: { name: 'Kyuubi Awakening', onFirstHpAtMost: { threshold: 40, heal: 20, randomChakra: 1 } },
+        skills: [{ id: 'uzumaki-naruto-shadow-clone-assault', name: 'Shadow Clone Assault' }],
+    };
+    const writes = [];
+    const allCompletedButNaruto = Object.fromEntries(
+        (require('fs').readFileSync(require('path').join(__dirname, '..', 'services', 'characterService.js'), 'utf8')
+            .match(/_MIGRATION_ID = '([^']+)'/g) || [])
+            .map((entry) => entry.match(/'([^']+)'/)[1])
+            .filter((id) => id !== 'uzumaki-naruto-kyuubi-awakening-rework-2026-11-21')
+            .map((id) => [id, new Date()])
+    );
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: [oldNaruto] }
+            : { key, completed: allCompletedButNaruto },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const service = new CharacterService({ appStateCollection: mockCollection });
+    const stored = await service.getStoredCharacters();
+    const naruto = stored.find((character) => character.id === 'uzumaki-naruto');
+    assert.equal(naruto.passive.awakening.afterOwnerSkillUses, 4);
+    assert.deepEqual(naruto.skills.map((skill) => skill.name), [
+        'Uzumaki Naruto Combo', 'Shadow Clones', 'Rasengan', 'Sexy Technique',
+    ]);
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.uzumaki-naruto-kyuubi-awakening-rework-2026-11-21']));
 });

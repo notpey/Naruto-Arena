@@ -1,7 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 // The pre-rework Sasuke kit is kept as a test-only sparring partner for these older tests.
-const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy')];
+const characters = [...require('../data/characters'), require('./fixtures/legacy-sasuke-dummy'),
+    require('./fixtures/legacy-naruto-dummy')];
 const battle = require('../battleLogic');
 const { CharacterService } = require('../services/characterService');
 
@@ -63,13 +64,13 @@ test('Kakashi: Sharingan Insight becomes Raikiri for 1 turn when it counters not
 });
 
 test('Kakashi: a successful counter keeps the copied skill instead of Raikiri', () => {
-    const match = matchFor(['hatake-kakashi'], ['uzumaki-naruto']);
+    const match = matchFor(['hatake-kakashi'], ['test-naruto-dummy']);
     cast(match, 'p1', 0, 0);
     endTurn(match, 'p1');
     cast(match, 'p2', 0, 0, 'p1', 0);
     assert.equal(match.board.p1[0].hp, 100, 'the counter cancels the attack');
     endTurn(match, 'p2');
-    assert.equal(effective(match, 'p1', 0, 0).id, 'uzumaki-naruto-shadow-clone-assault');
+    assert.equal(effective(match, 'p1', 0, 0).id, 'test-naruto-dummy-shadow-clone-assault');
     assert.equal(status(match.board.p1[0], 'kakashi_insight_raikiri_ready'), undefined);
 });
 

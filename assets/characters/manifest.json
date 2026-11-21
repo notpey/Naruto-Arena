@@ -2978,5 +2978,21 @@
   "https://i.imgur.com/JT9UvYv.png": {
     "local": "/assets/characters/JT9UvYv.png",
     "sha256": "c9445e42a50e5aa63f24bebbdb24408fe28be0f6eece48a986e8a1bae8601f55"
+  },
+  "https://i.imgur.com/vlSUp0N.png": {
+    "local": "/assets/characters/vlSUp0N.png",
+    "sha256": "6404e9b7e81a3065d328086eeb6fab626dde01b1ceb11fc32c1c7aa0f392ed1e"
+  },
+  "https://i.imgur.com/WldaOa7.png": {
+    "local": "/assets/characters/WldaOa7.png",
+    "sha256": "cb3413f202e7de452926410f61051373b1af9c187411c15a41a801d49db965fe"
+  },
+  "https://i.imgur.com/9QWZkQg.png": {
+    "local": "/assets/characters/9QWZkQg.png",
+    "sha256": "3f95d0c019120315add518bfd8b10d5fa6fd4e02acaf01f2ad11ff974b99cdca"
+  },
+  "https://i.imgur.com/LpWfxe9.png": {
+    "local": "/assets/characters/LpWfxe9.png",
+    "sha256": "e04fea5cdce39b00d0430de9c6bad4696a21187232aff5488228155e2e29c38e"
   }
 }
