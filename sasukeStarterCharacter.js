@@ -16,17 +16,18 @@
         "passive": {
             "name": "Two-Tomoe Sharingan",
             "icon": "https://i.imgur.com/IkTLWta.png",
-            "description": "Quest: Sasuke uses 4 skills, or Naruto is on his team.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.",
+            "description": "Quest: Sasuke uses 4 skills. Each other member of Team 7 on his team counts as 1 skill.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.",
             "awakening": {
                 "statusId": "uchiha_sasuke_two_tomoe_sharingan_awakened",
                 "afterOwnerSkillUses": 4,
-                "allyCharacterIdsAny": [
-                    "uzumaki-naruto"
+                "allyCharacterIdsProgress": [
+                    "uzumaki-naruto",
+                    "haruno-sakura"
                 ],
                 "clearCooldownSkillIds": [
                     "uchiha-sasuke-shadow-shuriken-technique"
                 ],
-                "progressTooltipTextTemplate": "Quest: Sasuke uses 4 skills, or Naruto is on his team. Skills used: {awakeningSkillUses}/4.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.",
+                "progressTooltipTextTemplate": "Quest: Sasuke uses 4 skills. Each other member of Team 7 on his team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.",
                 "completedTooltipText": "Two-Tomoe Sharingan has awakened. Chidori is available, and Shadow Shuriken Technique and Sasuke Evasion have 1 less cooldown.",
                 "metadata": {
                     "helpful": true,

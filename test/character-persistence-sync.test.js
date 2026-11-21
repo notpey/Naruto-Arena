@@ -119,6 +119,7 @@ test('launch unlock migration aligns starter and mission requirements without re
                 'hokage-hiruzen-rework-2026-10-26': new Date(),
                 'balance-update-0-3-2026-11-02': new Date(),
                 'uzumaki-naruto-kyuubi-awakening-rework-2026-11-21': new Date(),
+                'team-7-quest-progress-2026-11-22': new Date(),
             } },
         updateOne: async (filter, update) => { writes.push({ filter, update }); },
     };
@@ -672,4 +673,46 @@ test('Kyuubi Awakening rework replaces a stored Naruto kit once', async () => {
     ]);
     assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
         update.$set['completed.uzumaki-naruto-kyuubi-awakening-rework-2026-11-21']));
+});
+
+test('Team 7 quest progress migration changes only the passive quest and keeps stored art', async () => {
+    const seeded = ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'].map((id) =>
+        JSON.parse(JSON.stringify(require('../data/characters').find((character) => character.id === id))));
+    const storedTeam7 = seeded.map((character) => ({
+        ...character,
+        facePicture: `https://example.com/${character.id}-face.png`,
+        passive: {
+            ...character.passive,
+            icon: `https://example.com/${character.id}-passive.png`,
+            awakening: { ...character.passive.awakening, allyCharacterIdsProgress: undefined,
+                allyCharacterIdsAny: ['old-instant-ally'] },
+        },
+        skills: character.skills.map((skill) => ({ ...skill, skillimage: `https://example.com/${skill.id}.png` })),
+    }));
+    const writes = [];
+    const allCompletedButTeam7 = Object.fromEntries(
+        (require('fs').readFileSync(require('path').join(__dirname, '..', 'services', 'characterService.js'), 'utf8')
+            .match(/_MIGRATION_ID = '([^']+)'/g) || [])
+            .map((entry) => entry.match(/'([^']+)'/)[1])
+            .filter((id) => id !== 'team-7-quest-progress-2026-11-22')
+            .map((id) => [id, new Date()])
+    );
+    const mockCollection = {
+        findOne: async ({ key }) => key === 'characters'
+            ? { key, characters: storedTeam7 }
+            : { key, completed: allCompletedButTeam7 },
+        updateOne: async (query, update) => { writes.push({ query, update }); },
+    };
+    const stored = await new CharacterService({ appStateCollection: mockCollection }).getStoredCharacters();
+    for (const id of ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke']) {
+        const character = stored.find((entry) => entry.id === id);
+        assert.equal(character.facePicture, `https://example.com/${id}-face.png`, `${id} keeps its picture`);
+        assert.equal(character.passive.icon, `https://example.com/${id}-passive.png`, `${id} keeps its passive icon`);
+        assert.ok(character.skills.every((skill) => skill.skillimage === `https://example.com/${skill.id}.png`));
+        assert.equal(character.passive.awakening.allyCharacterIdsAny, undefined, `${id} loses the instant awakening`);
+        assert.equal(character.passive.awakening.allyCharacterIdsProgress.length, 2);
+        assert.match(character.passive.description, /Each other member of Team 7/);
+    }
+    assert.ok(writes.some(({ query, update }) => query.key === 'character_migrations' &&
+        update.$set['completed.team-7-quest-progress-2026-11-22']));
 });

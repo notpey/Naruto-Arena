@@ -290,7 +290,30 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
             return character?.characterId || character?.id || null;
         });
         units.forEach((unit, slot) => {
-            const allyIds = characters?.[unit.rosterIndex]?.passive?.awakening?.allyCharacterIdsAny;
+            const awakening = characters?.[unit.rosterIndex]?.passive?.awakening;
+            // allyCharacterIdsProgress (Team 7): each other listed ally on the team counts as one
+            // skill already used toward afterOwnerSkillUses.
+            const progressIds = awakening?.allyCharacterIdsProgress;
+            if (Array.isArray(progressIds) && progressIds.length > 0) {
+                const bonus = teamCharacterIds.filter((id, allySlot) =>
+                    allySlot !== slot && id && progressIds.includes(id)).length;
+                const passiveStatus = unit.state.statuses.find((status) =>
+                    status?.metadata?.passive === true && status?.metadata?.awakening?.statusId);
+                if (passiveStatus && bonus > 0) {
+                    passiveStatus.metadata.awakeningBonusProgress = bonus;
+                    const required = Math.max(0, Number(awakening.afterOwnerSkillUses) || 0);
+                    passiveStatus.metadata.awakeningSkillUses = Math.min(bonus, required || bonus);
+                    if (typeof passiveStatus.metadata.tooltipTextTemplate === 'string' &&
+                        passiveStatus.metadata.tooltipTextTemplate) {
+                        passiveStatus.metadata.tooltipText = renderTooltipTemplate(
+                            passiveStatus.metadata.tooltipTextTemplate, passiveStatus.metadata);
+                    }
+                    if (required > 0 && bonus >= required) {
+                        grantPassiveAwakening({ state: unit.state, passive: passiveStatus, username, slot });
+                    }
+                }
+            }
+            const allyIds = awakening?.allyCharacterIdsAny;
             if (!Array.isArray(allyIds) || allyIds.length === 0) return;
             const allyPresent = teamCharacterIds.some((id, allySlot) =>
                 allySlot !== slot && id && allyIds.includes(id));
@@ -2166,7 +2189,8 @@ const updateTeamPassiveAwakenings = ({ match, username, ownerTurnEnded = false }
             allySlot !== slot && ally && Number(ally.hp) < allyHpBelow);
         // Quest-style awakening: counts every skill this unit has used this match.
         const skillUsesRequired = Math.max(0, Number(awakening.afterOwnerSkillUses) || 0);
-        const skillUses = Math.max(0, Number(state.totalSkillUseCount) || 0);
+        const skillUses = Math.max(0, Number(state.totalSkillUseCount) || 0) +
+            Math.max(0, Number(passive.metadata.awakeningBonusProgress) || 0);
         if (skillUsesRequired > 0) {
             passive.metadata.awakeningSkillUses = Math.min(skillUses, skillUsesRequired);
             if (typeof passive.metadata.tooltipTextTemplate === 'string' && passive.metadata.tooltipTextTemplate) {

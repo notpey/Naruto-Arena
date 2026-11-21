@@ -16,14 +16,15 @@
         "passive": {
             "name": "Kyuubi Awakening",
             "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-016-the-broken-seal/cap_19-38_b1b8.jpg",
-            "description": "Quest: Naruto uses 4 skills, or Sakura is on his team.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.",
+            "description": "Quest: Naruto uses 4 skills. Each other member of Team 7 on his team counts as 1 skill.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.",
             "awakening": {
                 "statusId": "uzumaki_naruto_kyuubi_awakening_awakened",
                 "afterOwnerSkillUses": 4,
-                "allyCharacterIdsAny": [
+                "allyCharacterIdsProgress": [
+                    "uchiha-sasuke",
                     "haruno-sakura"
                 ],
-                "progressTooltipTextTemplate": "Quest: Naruto uses 4 skills, or Sakura is on his team. Skills used: {awakeningSkillUses}/4.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.",
+                "progressTooltipTextTemplate": "Quest: Naruto uses 4 skills. Each other member of Team 7 on his team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.",
                 "completedTooltipText": "The Kyuubi has awakened. Naruto heals 5 health each turn, Shadow Clones gives an extra Shadow Clone, and Rasengan gives 1 random chakra.",
                 "metadata": {
                     "helpful": true,

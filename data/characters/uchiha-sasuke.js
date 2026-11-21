@@ -46,13 +46,13 @@ module.exports = {
     characterdeescription: "One of the last surviving members of the Uchiha clan, Sasuke is a gifted young shinobi driven by a single ambition: to avenge his family's massacre at the hands of his older brother, Itachi. A member of Team 7, Sasuke combines his natural talent with relentless training, mastering his clan's Fire Release techniques while gradually awakening the formidable power of the Sharingan.",
     passive: {
         name: 'Two-Tomoe Sharingan', icon: PASSIVE_ICON,
-        description: 'Quest: Sasuke uses 4 skills, or Naruto is on his team.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.',
+        description: 'Quest: Sasuke uses 4 skills. Each other member of Team 7 on his team counts as 1 skill.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.',
         awakening: {
             statusId: SHARINGAN_AWAKENED,
             afterOwnerSkillUses: 4,
-            allyCharacterIdsAny: ['uzumaki-naruto'],
+            allyCharacterIdsProgress: ['uzumaki-naruto', 'haruno-sakura'],
             clearCooldownSkillIds: [SHADOW_SHURIKEN],
-            progressTooltipTextTemplate: 'Quest: Sasuke uses 4 skills, or Naruto is on his team. Skills used: {awakeningSkillUses}/4.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.',
+            progressTooltipTextTemplate: 'Quest: Sasuke uses 4 skills. Each other member of Team 7 on his team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Sasuke awakens his Sharingan, unlocking Chidori and enhancing Shadow Shuriken Technique and Sasuke Evasion.',
             completedTooltipText: AWAKENED_TOOLTIP,
             metadata: {
                 helpful: true, permanent: true, cannotBeCleansed: true,

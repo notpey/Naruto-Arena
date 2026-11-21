@@ -32,7 +32,7 @@ module.exports = {
     characterdeescription: "A young kunoichi with exceptional chakra control and a sharp mind, Sakura Haruno joins Team 7 alongside Naruto Uzumaki and Sasuke Uchiha, hoping to prove herself as a capable shinobi. Though initially inexperienced in combat and often overshadowed by her teammates, Sakura's early encounters with dangerous enemies begin to test her courage and strengthen her resolve to protect those she cares about.",
     passive: {
         name: 'Inner Sakura', icon: PASSIVE_ICON,
-        description: 'Quest: Sakura uses 4 skills, or Sasuke is on her team.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.',
+        description: 'Quest: Sakura uses 4 skills. Each other member of Team 7 on her team counts as 1 skill.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.',
         recordEnemyStunners: {
             statusId: STUNNED_SAKURAS_TEAM, statusIcon: OVERWHELM_ICON,
             tooltipText: "This character stunned Sakura's team this turn. Mental Overwhelm can target them.",
@@ -40,8 +40,8 @@ module.exports = {
         awakening: {
             statusId: INNER_SAKURA,
             afterOwnerSkillUses: 4,
-            allyCharacterIdsAny: ['uchiha-sasuke'],
-            progressTooltipTextTemplate: 'Quest: Sakura uses 4 skills, or Sasuke is on her team. Skills used: {awakeningSkillUses}/4.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.',
+            allyCharacterIdsProgress: ['uzumaki-naruto', 'uchiha-sasuke'],
+            progressTooltipTextTemplate: 'Quest: Sakura uses 4 skills. Each other member of Team 7 on her team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.',
             completedTooltipText: INNER_SAKURA_TOOLTIP,
             metadata: {
                 helpful: true, permanent: true, cannotBeCleansed: true,

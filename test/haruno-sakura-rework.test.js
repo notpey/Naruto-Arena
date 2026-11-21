@@ -48,6 +48,14 @@ const turn = (match, username, action = null) => {
 const overwhelmTargets = (match, slot = 0) => battle.computeTargetOptions({
     match, actingUsername: 'p1', actorSlot: slot, skillIndex: OVERWHELM, characters,
 }).targets.map((target) => `${target.username}:${target.slot}`);
+// With both other Team 7 members (2/4), two Rudimentary Healings complete Sakura's quest.
+const awakenWithTeam7 = (match) => {
+    [0, 1].forEach(() => {
+        turn(match, 'p1', { skill: HEALING, target: { username: 'p1', slot: 0 } });
+        turn(match, 'p2');
+    });
+    assert.ok(status(match.board.p1[0], INNER), 'Inner Sakura awakened after 2 skills');
+};
 const enemy = (slot = 0) => ({ username: 'p2', slot });
 const ally = (slot = 0) => ({ username: 'p1', slot });
 
@@ -62,7 +70,7 @@ test('Sakura kit: names, costs, cooldowns, and a quest passive', () => {
         ['Mental Overwhelm', ['Genjutsu'], 0],
     ]);
     const match = matchFor([SAKURA], ['haku']);
-    assert.match(passiveOf(match.board.p1[0]).metadata.tooltipText, /Skills used: 0\/4/);
+    assert.match(passiveOf(match.board.p1[0]).metadata.tooltipText, /Progress: 0\/4/);
     assert.deepEqual(overwhelmTargets(match), [], 'no enemy has stunned Sakura\'s team yet');
 });
 
@@ -151,7 +159,7 @@ test('the quest awakens Inner Sakura after 4 skills', () => {
     [KICK, KICK, CLONE].forEach((skill, index) => {
         turn(match, 'p1', { skill, target: skill === CLONE ? ally() : enemy() });
         assert.equal(status(sakura, INNER), undefined, `not awakened after skill ${index + 1}`);
-        assert.match(passiveOf(sakura).metadata.tooltipText, new RegExp(`Skills used: ${index + 1}/4`));
+        assert.match(passiveOf(sakura).metadata.tooltipText, new RegExp(`Progress: ${index + 1}/4`));
         turn(match, 'p2');
     });
     turn(match, 'p1', { skill: KICK, target: enemy() });
@@ -159,13 +167,21 @@ test('the quest awakens Inner Sakura after 4 skills', () => {
     assert.match(passiveOf(sakura).metadata.tooltipText, /Inner Sakura has awakened/);
 });
 
-test('Sasuke on the team awakens Inner Sakura from turn 1; other allies do not', () => {
-    assert.ok(status(matchFor([SAKURA, 'uchiha-sasuke'], ['haku']).board.p1[0], INNER));
-    assert.equal(status(matchFor([SAKURA, 'uzumaki-naruto'], ['haku']).board.p1[0], INNER), undefined);
+test('each other Team 7 member adds 1 quest progress; none awakens Inner Sakura at once', () => {
+    const progressOf = (allies) => passiveOf(matchFor(allies, ['haku']).board.p1[0]).metadata.awakeningSkillUses || 0;
+    assert.equal(progressOf([SAKURA, 'haku']), 0);
+    assert.equal(progressOf([SAKURA, 'uchiha-sasuke']), 1);
+    assert.equal(progressOf([SAKURA, 'uzumaki-naruto']), 1);
+    assert.equal(progressOf([SAKURA, 'uchiha-sasuke', 'uzumaki-naruto']), 2);
+    const match = matchFor([SAKURA, 'uchiha-sasuke', 'uzumaki-naruto'], ['haku']);
+    assert.equal(status(match.board.p1[0], INNER), undefined, 'not awakened before any skill');
+    assert.match(passiveOf(match.board.p1[0]).metadata.tooltipText, /Progress: 2\/4/);
+    awakenWithTeam7(match);
 });
 
 test('Inner Sakura ignores partial stuns but not full stuns', () => {
-    const match = matchFor([SAKURA, 'uchiha-sasuke'], ['haku', 'gaara-of-the-desert']);
+    const match = matchFor([SAKURA, 'uchiha-sasuke', 'uzumaki-naruto'], ['haku', 'gaara-of-the-desert']);
+    awakenWithTeam7(match);
     const sakura = match.board.p1[0];
     turn(match, 'p1');
     turn(match, 'p2', { skill: HAKU_ACUPUNCTURE, target: ally() });
@@ -176,7 +192,8 @@ test('Inner Sakura ignores partial stuns but not full stuns', () => {
 });
 
 test('Inner Sakura\'s Mental Overwhelm fully stuns and deals 20 affliction damage', () => {
-    const match = matchFor([SAKURA, 'uchiha-sasuke'], ['haku']);
+    const match = matchFor([SAKURA, 'uchiha-sasuke', 'uzumaki-naruto'], ['haku']);
+    awakenWithTeam7(match);
     const haku = match.board.p2[0];
     const effective = battle.resolveEffectiveSkill({
         characters, rosterIndex: match.board.p1[0].rosterIndex, skillIndex: OVERWHELM,

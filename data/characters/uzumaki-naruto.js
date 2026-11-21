@@ -32,12 +32,12 @@ module.exports = {
     characterdeescription: "Shunned by the Hidden Leaf Village for the Nine-Tailed Fox sealed within him, Naruto Uzumaki is a mischievous young genin determined to earn everyone's recognition and one day become Hokage. Armed with his newly learned Shadow Clone Technique and an unshakable spirit, Naruto begins his journey alongside Team 7, eager to prove that he's more than the village outcast.",
     passive: {
         name: 'Kyuubi Awakening', icon: PASSIVE_ICON,
-        description: 'Quest: Naruto uses 4 skills, or Sakura is on his team.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.',
+        description: 'Quest: Naruto uses 4 skills. Each other member of Team 7 on his team counts as 1 skill.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.',
         awakening: {
             statusId: KYUUBI_AWAKENED,
             afterOwnerSkillUses: 4,
-            allyCharacterIdsAny: ['haruno-sakura'],
-            progressTooltipTextTemplate: 'Quest: Naruto uses 4 skills, or Sakura is on his team. Skills used: {awakeningSkillUses}/4.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.',
+            allyCharacterIdsProgress: ['uchiha-sasuke', 'haruno-sakura'],
+            progressTooltipTextTemplate: 'Quest: Naruto uses 4 skills. Each other member of Team 7 on his team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.',
             completedTooltipText: KYUUBI_TOOLTIP,
             metadata: {
                 helpful: true, permanent: true, cannotBeCleansed: true,

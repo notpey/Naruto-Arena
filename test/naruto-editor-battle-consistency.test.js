@@ -357,7 +357,7 @@ test('Naruto rework keeps four active skills and a separate quest passive', () =
     );
     assert.equal(naruto.passive.name, 'Kyuubi Awakening');
     assert.equal(naruto.passive.awakening.afterOwnerSkillUses, 4);
-    assert.deepEqual(naruto.passive.awakening.allyCharacterIdsAny, ['haruno-sakura']);
+    assert.deepEqual(naruto.passive.awakening.allyCharacterIdsProgress, ['uchiha-sasuke', 'haruno-sakura']);
     assert.deepEqual(naruto.skills.map(skill => skill.energy), [
         ['Taijutsu'], ['Random'], ['Ninjutsu', 'Taijutsu'], ['Random'],
     ]);
@@ -373,7 +373,7 @@ test('Naruto passive is a permanent visible match effect, outside the skill tray
     assert.equal(passive.metadata.sourceSkillName, 'Kyuubi Awakening');
     assert.equal(passive.metadata.statusIcon, getNaruto().passive.icon);
     assert.ok(passive.metadata.tooltipText.startsWith('Quest: Naruto uses 4 skills'));
-    assert.match(passive.metadata.tooltipText, /Skills used: 0\/4/);
+    assert.match(passive.metadata.tooltipText, /Progress: 0\/4/);
     assert.equal(getNaruto().skills.length, 4, 'passive does not occupy a skill slot');
     tickStatusesForTurnEnd({ match, endingUsername: 'p1' });
     tickStatusesForTurnEnd({ match, endingUsername: 'p2' });

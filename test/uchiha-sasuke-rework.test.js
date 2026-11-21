@@ -72,17 +72,17 @@ test('Sasuke kit: names, costs, cooldowns, and Chidori locked until the quest co
 test('the quest tracks skills used and awakens after the 4th, enhancing cooldowns', () => {
     const match = matchFor([SASUKE], ['haruno-sakura']);
     const sasuke = match.board.p1[0];
-    assert.match(passiveOf(sasuke).metadata.tooltipText, /Skills used: 0\/4/);
+    assert.match(passiveOf(sasuke).metadata.tooltipText, /Progress: 0\/4/);
     const plan = [EVASION, WIRE_TRAP, SHURIKEN, WIRE_TRAP];
     plan.forEach((skill, index) => {
         assert.equal(status(sasuke, AWAKENED), undefined, `not awakened before skill ${index + 1}`);
         // Wire Trap turns into Dragon Flame the turn after it is used; slot 1 is then Dragon Flame.
         turn(match, 'p1', { skill, target: skill === EVASION ? onSasuke : onEnemy() });
-        if (index < 3) assert.match(passiveOf(sasuke).metadata.tooltipText, new RegExp(`Skills used: ${index + 1}/4`));
+        if (index < 3) assert.match(passiveOf(sasuke).metadata.tooltipText, new RegExp(`Progress: ${index + 1}/4`));
         turn(match, 'p2');
     });
     assert.ok(status(sasuke, AWAKENED), 'awakened after the 4th skill');
-    assert.doesNotMatch(passiveOf(sasuke).metadata.tooltipText, /Skills used/);
+    assert.doesNotMatch(passiveOf(sasuke).metadata.tooltipText, /Progress:/);
     const effective = (skillIndex) => battle.resolveEffectiveSkill({
         characters, rosterIndex: sasuke.rosterIndex, skillIndex, actorState: sasuke.state,
     });
@@ -96,13 +96,16 @@ test('the quest tracks skills used and awakens after the 4th, enhancing cooldown
     assert.equal(before - enemy.hp, 45, 'Chidori deals 45 once unlocked');
 });
 
-test('Genin Naruto on the team awakens Sasuke from turn 1; other Narutos do not', () => {
-    const withNaruto = matchFor([SASUKE, 'uzumaki-naruto'], ['haruno-sakura']);
-    assert.ok(status(withNaruto.board.p1[0], AWAKENED));
-    const withNarutoS = matchFor([SASUKE, 'uzumaki-naruto-s'], ['haruno-sakura']);
-    assert.equal(status(withNarutoS.board.p1[0], AWAKENED), undefined);
-    const alone = matchFor([SASUKE], ['uzumaki-naruto']);
-    assert.equal(status(alone.board.p1[0], AWAKENED), undefined, 'an enemy Naruto does not count');
+test('each other Team 7 member adds 1 quest progress; other Narutos and enemies do not', () => {
+    const progressOf = (allies, enemies = ['tenten']) =>
+        passiveOf(matchFor(allies, enemies).board.p1[0]).metadata.awakeningSkillUses || 0;
+    assert.equal(progressOf([SASUKE, 'uzumaki-naruto']), 1);
+    assert.equal(progressOf([SASUKE, 'haruno-sakura']), 1);
+    assert.equal(progressOf([SASUKE, 'uzumaki-naruto', 'haruno-sakura']), 2);
+    assert.equal(progressOf([SASUKE, 'uzumaki-naruto-s']), 0, 'Naruto (S) is not Team 7 for this quest');
+    assert.equal(progressOf([SASUKE], ['uzumaki-naruto']), 0, 'an enemy Naruto does not count');
+    assert.equal(status(matchFor([SASUKE, 'uzumaki-naruto', 'haruno-sakura'], ['tenten']).board.p1[0], AWAKENED),
+        undefined, 'never awakened before a skill is used');
 });
 
 test('Ninja Wire Trap: hidden mark, stun if the target skips, Dragon Flame next turn with +15', () => {
@@ -203,23 +206,24 @@ test('payloads hide the Wire Trap mark and Dragon Flame setup from the enemy, bu
     assert.equal(visible(trapMatch, 'p1', 'p1', 'uchiha_sasuke_shadow_shuriken_trap'), true);
 });
 
-test('with Genin Naruto, the match-start payload already shows Sasuke awakened under one passive', () => {
+test('with all of Team 7, Sasuke awakens after 2 skills and the payload shows one merged passive', () => {
     const { buildMatchPayloadForUser } = require('../server.js');
-    const match = matchFor(['uzumaki-naruto', SASUKE], ['haruno-sakura']);
-    const statuses = buildMatchPayloadForUser(match, 'p1').board.p1[1].state.statuses;
+    const match = matchFor(['uzumaki-naruto', SASUKE, 'haruno-sakura'], ['tenten']);
+    const payloadStatuses = () => buildMatchPayloadForUser(match, 'p1').board.p1[1].state.statuses;
+    assert.match(payloadStatuses().find((entry) => entry.id === 'uchiha_sasuke_two_tomoe_sharingan')
+        .metadata.tooltipText, /Progress: 2\/4/, 'quest progress reaches the client');
+    [0, 1].forEach(() => {
+        turn(match, 'p1', { slot: 1, skill: WIRE_TRAP, target: onEnemy() });
+        turn(match, 'p2');
+    });
+    const statuses = payloadStatuses();
     const passive = statuses.find((entry) => entry.id === 'uchiha_sasuke_two_tomoe_sharingan');
     const awakened = statuses.find((entry) => entry.id === AWAKENED);
-    assert.ok(awakened, 'awakened before any turn is played');
+    assert.ok(awakened, 'awakened after 2 skills');
     // The client groups these two into one icon by passive name and hides the merged row.
     assert.equal(awakened.metadata.passiveAwakening, 'merged');
-    assert.equal(awakened.sourceSkillId, null);
-    assert.equal(passive.sourceSkillId, null);
     assert.equal(awakened.metadata.sourceSkillName, passive.metadata.sourceSkillName);
     assert.match(passive.metadata.tooltipText, /has awakened/);
     assert.ok(!passive.metadata.tooltipTextTemplate, 'no stale progress template');
-
-    const solo = matchFor([SASUKE], ['haruno-sakura']);
-    const soloPassive = buildMatchPayloadForUser(solo, 'p1').board.p1[0].state.statuses
-        .find((entry) => entry.id === 'uchiha_sasuke_two_tomoe_sharingan');
-    assert.match(soloPassive.metadata.tooltipText, /Skills used: 0\/4/, 'quest progress reaches the client');
 });
+

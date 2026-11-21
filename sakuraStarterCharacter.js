@@ -16,7 +16,7 @@
         "passive": {
             "name": "Inner Sakura",
             "icon": "https://i.imgur.com/srHzKvO.png",
-            "description": "Quest: Sakura uses 4 skills, or Sasuke is on her team.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.",
+            "description": "Quest: Sakura uses 4 skills. Each other member of Team 7 on her team counts as 1 skill.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.",
             "recordEnemyStunners": {
                 "statusId": "haruno_sakura_stunned_sakuras_team",
                 "statusIcon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-042-the-ultimate-battle-cha_/cap_14-45_f141.jpg",
@@ -25,10 +25,11 @@
             "awakening": {
                 "statusId": "haruno_sakura_inner_sakura_awakened",
                 "afterOwnerSkillUses": 4,
-                "allyCharacterIdsAny": [
+                "allyCharacterIdsProgress": [
+                    "uzumaki-naruto",
                     "uchiha-sasuke"
                 ],
-                "progressTooltipTextTemplate": "Quest: Sakura uses 4 skills, or Sasuke is on her team. Skills used: {awakeningSkillUses}/4.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.",
+                "progressTooltipTextTemplate": "Quest: Sakura uses 4 skills. Each other member of Team 7 on her team counts as 1 skill. Progress: {awakeningSkillUses}/4.\n\nReward: Sakura awakens her Inner Sakura, ignoring partial stuns.",
                 "completedTooltipText": "Inner Sakura has awakened. Sakura ignores partial stuns, and Mental Overwhelm fully stuns and deals 20 affliction damage.",
                 "metadata": {
                     "helpful": true,

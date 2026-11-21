@@ -64,7 +64,7 @@ test('Naruto kit: names, costs, cooldowns, and a quest passive', () => {
         ['Sexy Technique', ['Random'], 4],
     ]);
     const match = matchFor([NARUTO], ['haku']);
-    assert.match(passiveOf(match.board.p1[0]).metadata.tooltipText, /Skills used: 0\/4/);
+    assert.match(passiveOf(match.board.p1[0]).metadata.tooltipText, /Progress: 0\/4/);
 });
 
 test('Uzumaki Naruto Combo counts clones before gaining one', () => {
@@ -152,7 +152,7 @@ test('the quest awakens the Kyuubi after 4 skills', () => {
     [COMBO, COMBO, COMBO].forEach((skill, index) => {
         turn(match, 'p1', { skill, target: enemy() });
         assert.equal(status(naruto, KYUUBI), undefined, `not awakened after skill ${index + 1}`);
-        assert.match(passiveOf(naruto).metadata.tooltipText, new RegExp(`Skills used: ${index + 1}/4`));
+        assert.match(passiveOf(naruto).metadata.tooltipText, new RegExp(`Progress: ${index + 1}/4`));
         turn(match, 'p2');
     });
     turn(match, 'p1', { skill: COMBO, target: enemy() });
@@ -160,18 +160,26 @@ test('the quest awakens the Kyuubi after 4 skills', () => {
     assert.match(passiveOf(naruto).metadata.tooltipText, /The Kyuubi has awakened/);
 });
 
-test('Sakura on the team awakens the Kyuubi from turn 1; Sasuke does not', () => {
-    assert.ok(status(matchFor([NARUTO, 'haruno-sakura'], ['haku']).board.p1[0], KYUUBI));
-    assert.equal(status(matchFor([NARUTO, 'uchiha-sasuke'], ['haku']).board.p1[0], KYUUBI), undefined);
+test('each other Team 7 member adds 1 quest progress; none awakens the Kyuubi at once', () => {
+    const progressOf = (allies) => passiveOf(matchFor(allies, ['haku']).board.p1[0]).metadata.awakeningSkillUses || 0;
+    assert.equal(progressOf([NARUTO, 'haku']), 0);
+    assert.equal(progressOf([NARUTO, 'haruno-sakura']), 1);
+    assert.equal(progressOf([NARUTO, 'uchiha-sasuke']), 1);
+    assert.equal(progressOf([NARUTO, 'haruno-sakura', 'uchiha-sasuke']), 2);
+    assert.equal(status(matchFor([NARUTO, 'haruno-sakura', 'uchiha-sasuke'], ['haku']).board.p1[0], KYUUBI), undefined);
 });
 
 test('Kyuubi Awakening heals 5 each turn and enhances Shadow Clones and Rasengan', () => {
-    const match = matchFor([NARUTO, 'haruno-sakura'], ['haku']);
+    const match = matchFor([NARUTO, 'haruno-sakura', 'uchiha-sasuke'], ['haku']);
     const naruto = match.board.p1[0];
+    // With both other Team 7 members (2/4), two Combos complete the quest.
+    [0, 1].forEach(() => { turn(match, 'p1', { skill: COMBO, target: enemy() }); turn(match, 'p2'); });
+    assert.ok(status(naruto, KYUUBI), 'the Kyuubi awakened after 2 skills');
     naruto.hp = 50;
+    const clonesBefore = clonesOf(naruto);
     turn(match, 'p1', { skill: SHADOW_CLONES, target: ally() });
     assert.equal(naruto.hp, 55, 'heals 5 at the end of Naruto\'s turn');
-    assert.equal(clonesOf(naruto), 4, 'an extra clone during Kyuubi Awakening');
+    assert.equal(clonesOf(naruto) - clonesBefore, 4, 'an extra clone during Kyuubi Awakening');
     turn(match, 'p2');
     assert.equal(naruto.hp, 55, 'no heal on the enemy turn');
     const chakraBefore = chakraTotal(match, 'p1');
