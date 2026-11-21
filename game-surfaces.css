@@ -1044,15 +1044,30 @@
 }
 .game-remaster .sharingan {
     position: absolute;
-    top: 39px;
-    left: 93px;
+    /* The tomoe art is not centred in its 92px canvas: spin around the tomoe
+       centre (44.4px, 45px) and pin that point on the pupil of the eye art. */
+    top: 38.3px;
+    left: 99.6px;
     z-index: 2;
     display: block;
     width: 92px;
     height: 92px;
     margin: 0;
     object-fit: contain;
+    transform-origin: 44.4px 45px;
     animation: spin 1s linear infinite;
+}
+.game-remaster .sharingan-activated {
+    position: absolute;
+    top: 41.5px;
+    left: 100.5px;
+    z-index: 3;
+    display: none;
+    width: 88px;
+    height: 88px;
+    margin: 0;
+    object-fit: contain;
+    pointer-events: none;
 }
 .game-remaster .sasukesearch {
     position: absolute;
@@ -1075,11 +1090,22 @@
     font-weight: 400;
     line-height: 1;
 }
+/* Found: the tomoe stop and the Sharingan activates over the same eye. */
 .game-remaster .searchingscroll.is-found .sharingan { display: none; }
-.game-remaster .searchingscroll.is-found .sasukesearch { display: none; }
-.game-remaster .searchingscroll.is-found .match-search-visual { width: 126px; height: 126px; margin: 23px auto 22px; }
-.game-remaster .searchingscroll.is-found .match-search-found-icon { display: block; }
-.game-remaster .searchingscroll.is-found .match-search-ring { display: block; animation: none; border-color: rgba(227, 173, 104, .58); }
+.game-remaster .searchingscroll.is-found:not(.is-elite) .sharingan-activated {
+    display: block;
+    animation: sharingan-activate .55s cubic-bezier(.2, .8, .3, 1) both;
+}
+@keyframes sharingan-activate {
+    from { opacity: 0; transform: rotate(-240deg) scale(.82); }
+    60% { opacity: 1; }
+    to { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+/* Elite encounters keep their seal screen in place of the eye. */
+.game-remaster .searchingscroll.is-elite .sasukesearch { display: none; }
+.game-remaster .searchingscroll.is-elite .match-search-visual { width: 126px; height: 126px; margin: 23px auto 22px; }
+.game-remaster .searchingscroll.is-elite .match-search-found-icon { display: block; }
+.game-remaster .searchingscroll.is-elite .match-search-ring { display: block; animation: none; border-color: rgba(227, 173, 104, .58); }
 .game-remaster .match-search-footer {
     display: flex;
     align-items: center;
@@ -1202,6 +1228,7 @@
 @media (prefers-reduced-motion: reduce) {
     .game-remaster .match-search-ring,
     .game-remaster .sharingan,
+    .game-remaster .searchingscroll.is-found .sharingan-activated,
     .game-remaster .match-search-dots::after { animation: none; }
 }
 
