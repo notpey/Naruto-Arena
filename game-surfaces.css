@@ -1226,10 +1226,16 @@
 .game-remaster .private-match-ok:hover { background: #f0c58d; border-color: #f0c58d; }
 @keyframes arena-search-dots { from { width: 0; } to { width: 1.3em; } }
 @media (prefers-reduced-motion: reduce) {
-    .game-remaster .match-search-ring,
-    .game-remaster .sharingan,
-    .game-remaster .searchingscroll.is-found .sharingan-activated,
+    .game-remaster .match-search-ring { animation: none; }
+    /* The spinning tomoe are the search progress indicator, so they keep
+       turning (more gently); the activation fades in instead of spinning. */
+    .game-remaster .sharingan { animation-duration: 2s; }
+    .game-remaster .searchingscroll.is-found:not(.is-elite) .sharingan-activated { animation: sharingan-fade-in .3s ease-out both; }
     .game-remaster .match-search-dots::after { animation: none; }
+}
+@keyframes sharingan-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .game-remaster .battle-end-copy,
