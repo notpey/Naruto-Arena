@@ -20,12 +20,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.sound-volume') || document.querySelector('.ingame-sound-volume');
     const soundToggleButton = document.getElementById('ingame-sound-toggle');
     const soundManager = (() => {
+        // Three channels: `volume` is master; `music` and `effects` are each a share of master.
         const defaultSettings = {
             volume: 0.7,
+            music: 0.5,
+            effects: 1,
         };
-        const clampVolume = (value) => {
+        const CHANNELS = ['volume', 'music', 'effects'];
+        const clampVolume = (value, fallback = defaultSettings.volume) => {
             const numeric = Number(value);
-            if (!Number.isFinite(numeric)) return defaultSettings.volume;
+            if (!Number.isFinite(numeric)) return fallback;
             return Math.min(1, Math.max(0, numeric));
         };
         const readSettings = () => {
@@ -33,15 +37,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const raw = window.ArenaSession.storage.getItem(SOUND_SETTINGS_STORAGE_KEY);
                 if (!raw) return { ...defaultSettings };
                 const parsed = JSON.parse(raw);
-                return {
-                    volume: clampVolume(parsed?.volume),
-                };
+                return Object.fromEntries(CHANNELS.map((channel) =>
+                    [channel, clampVolume(parsed?.[channel], defaultSettings[channel])]));
             } catch (error) {
                 return { ...defaultSettings };
             }
         };
         let settings = readSettings();
         let lastAudibleVolume = settings.volume > 0 ? settings.volume : defaultSettings.volume;
+        const lastAudible = Object.fromEntries(CHANNELS.map((channel) =>
+            [channel, settings[channel] > 0 ? settings[channel] : defaultSettings[channel]]));
+        const changeListeners = [];
+        const notifyChange = () => {
+            changeListeners.forEach((listener) => {
+                try {
+                    listener({ ...settings });
+                } catch (error) {
+                    // A broken listener must not stop sound.
+                }
+            });
+        };
         const syncUi = () => {
             if (soundVolumeInput) {
                 soundVolumeInput.value = String(Math.round(settings.volume * 100));
@@ -71,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (settings.volume > 0) lastAudibleVolume = settings.volume;
                 persist();
                 syncUi();
+                notifyChange();
             });
         }
         soundToggleButton?.addEventListener('click', () => {
@@ -82,14 +98,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             persist();
             syncUi();
+            notifyChange();
         });
+        // For settings screens: read, set or mute a channel; everything persists here, in one place.
+        const setChannel = (channel, value) => {
+            if (!CHANNELS.includes(channel)) return;
+            settings = { ...settings, [channel]: clampVolume(value, defaultSettings[channel]) };
+            if (settings[channel] > 0) lastAudible[channel] = settings[channel];
+            if (channel === 'volume' && settings.volume > 0) lastAudibleVolume = settings.volume;
+            persist();
+            syncUi();
+            notifyChange();
+        };
+        window.ArenaSound = {
+            getSettings: () => ({ ...settings }),
+            setChannel,
+            toggleMute: (channel) => {
+                if (!CHANNELS.includes(channel)) return;
+                if (settings[channel] > 0) {
+                    lastAudible[channel] = settings[channel];
+                    setChannel(channel, 0);
+                } else {
+                    setChannel(channel, channel === 'volume' ? lastAudibleVolume : lastAudible[channel]);
+                }
+            },
+            onChange: (listener) => {
+                if (typeof listener === 'function') changeListeners.push(listener);
+            },
+        };
 
         // Background music: the Naruto main theme, streamed from archive.org (not stored here).
         // It follows the volume slider and mute button at a softer level than sound effects,
         // starts on the first click or key press (browsers block sound before that), and
         // resumes where it left off when moving between the hub and a battle.
         const MUSIC_SRC = 'https://archive.org/download/tvtunes_8670/Naruto%20-%20Main%20Theme.mp3';
-        const MUSIC_VOLUME_SCALE = 0.35;
+        // Music sits under effects: at the default 50% music level it plays at 0.35 of master.
+        const MUSIC_VOLUME_SCALE = 0.7;
         const MUSIC_POSITION_KEY = 'narutoMusicPosition';
         let music = null;
         let musicUnlocked = false;
@@ -121,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         const syncMusic = () => {
             if (!musicUnlocked) return;
-            const volume = clampVolume(settings.volume) * MUSIC_VOLUME_SCALE;
+            const volume = clampVolume(settings.volume) * clampVolume(settings.music, 0) * MUSIC_VOLUME_SCALE;
             if (volume <= 0) {
                 if (music && !music.paused) {
                     saveMusicPosition();
@@ -160,16 +204,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             // Ignore storage failures.
         }
-        soundVolumeInput?.addEventListener('input', syncMusic);
-        soundToggleButton?.addEventListener('click', syncMusic);
+        changeListeners.push(syncMusic);
         window.addEventListener('pagehide', saveMusicPosition);
         setInterval(saveMusicPosition, 5000);
 
         return {
             play(audio) {
-                if (!audio || settings.volume <= 0) return;
+                const effectsVolume = clampVolume(settings.volume) * clampVolume(settings.effects, 0);
+                if (!audio || effectsVolume <= 0) return;
                 try {
-                    audio.volume = clampVolume(settings.volume);
+                    audio.volume = effectsVolume;
                     audio.currentTime = 0;
                     const playback = audio.play();
                     if (playback && typeof playback.catch === 'function') {

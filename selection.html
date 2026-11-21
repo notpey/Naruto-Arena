@@ -16,7 +16,7 @@
     <script src="character-images.js?v=1"></script>
     <script src="border-fit.js?v=7" defer></script>
     <link rel="stylesheet" href="mobile-layout.css?v=6">
-    <link rel="stylesheet" href="game-surfaces.css?v=30">
+    <link rel="stylesheet" href="game-surfaces.css?v=32">
     <link rel="stylesheet" href="missions.css?v=2">
     <link rel="stylesheet" href="hub-store.css?v=5">
     <link rel="stylesheet" href="daily-spin.css?v=4">
@@ -541,66 +541,145 @@
     </div>
 </div>
 
-<!-- Settings Modal: sound, practice and support -->
+<!-- Settings Modal: audio, practice and support -->
 <div id="settings-modal" class="shinobi-modal-overlay settings-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-    <div class="shinobi-modal-panel settings-modal-dialog">
-        <button type="button" class="shinobi-modal-close settings-modal-close" id="settings-modal-close" aria-label="Close">&times;</button>
-        
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
-                    <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">設</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title" id="settings-modal-title">Settings</h2>
-                <p class="settings-modal-subtitle">Sound, practice &amp; support</p>
-            </div>
-        </div>
+    <div class="shinobi-modal-panel settings-modal-dialog arena-settings">
+        <header class="as-header">
+            <button type="button" class="as-back" id="settings-back" aria-label="Back to settings" hidden>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5l-5 5 5 5" /></svg>
+            </button>
+            <h2 class="as-title" id="settings-modal-title">Settings</h2>
+            <button type="button" class="as-close" id="settings-modal-close" aria-label="Close settings">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+            </button>
+        </header>
 
-        <div class="settings-modal-content">
-            <!-- Sound Chamber -->
-            <div class="settings-section-card sound-card">
-                <div class="settings-section-title">Sound &amp; Audio Chamber</div>
-                <div class="settings-audio-row">
-                    <div class="audio-label-group">
-                        <span class="audio-name">Master Volume</span>
-                        <span class="audio-val-badge" id="settings-volume-val">70%</span>
-                    </div>
-                    <div class="settings-slider-wrap">
-                        <span class="slider-endpoint-label">0%</span>
-                        <input type="range" class="settings-slider sound-volume" id="settings-master-volume" min="0" max="100" step="1" value="70" aria-label="Master volume slider">
-                        <span class="slider-endpoint-label">100%</span>
-                    </div>
+        <div class="as-view" data-settings-view="main">
+        <section class="as-section" aria-labelledby="as-audio-title">
+            <h3 class="as-section-title" id="as-audio-title">Audio</h3>
+            <div class="as-audio">
+                <div class="as-audio-row" data-sound-channel="volume">
+                    <button type="button" class="as-mute" data-sound-mute="volume" aria-pressed="false" aria-label="Mute all sound">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M3.5 7.5h2.8L10 4.5v11l-3.7-3H3.5z" />
+                            <path class="as-wave" d="M13 7.2a3.6 3.6 0 0 1 0 5.6M15.2 5a6.6 6.6 0 0 1 0 10" />
+                            <path class="as-slash" d="M3 3l14 14" />
+                        </svg>
+                    </button>
+                    <label class="as-audio-label" for="settings-master-volume">
+                        <span class="as-audio-name">Master</span>
+                        <span class="as-audio-hint">All game sound</span>
+                    </label>
+                    <input type="range" class="as-slider sound-volume" id="settings-master-volume" min="0" max="100" step="1" value="70">
+                    <output class="as-audio-value" id="settings-volume-val" for="settings-master-volume">70%</output>
+                </div>
+                <div class="as-audio-row" data-sound-channel="music">
+                    <button type="button" class="as-mute" data-sound-mute="music" aria-pressed="false" aria-label="Mute music">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M8 14.5V4.8l8-1.8v9.6" />
+                            <circle cx="5.8" cy="14.6" r="2.2" />
+                            <circle cx="13.8" cy="12.7" r="2.2" />
+                            <path class="as-slash" d="M3 3l14 14" />
+                        </svg>
+                    </button>
+                    <label class="as-audio-label" for="settings-music-volume">
+                        <span class="as-audio-name">Music</span>
+                        <span class="as-audio-hint">Main theme</span>
+                    </label>
+                    <input type="range" class="as-slider" id="settings-music-volume" min="0" max="100" step="1" value="50">
+                    <output class="as-audio-value" id="settings-music-val" for="settings-music-volume">50%</output>
+                </div>
+                <div class="as-audio-row" data-sound-channel="effects">
+                    <button type="button" class="as-mute" data-sound-mute="effects" aria-pressed="false" aria-label="Mute sound effects">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M10 2.8l1.6 4.4 4.6.4-3.6 2.9 1.2 4.5L10 12.4l-3.8 2.6 1.2-4.5-3.6-2.9 4.6-.4z" />
+                            <path class="as-slash" d="M3 3l14 14" />
+                        </svg>
+                    </button>
+                    <label class="as-audio-label" for="settings-effects-volume">
+                        <span class="as-audio-name">Effects</span>
+                        <span class="as-audio-hint">Skills, alerts and menus</span>
+                    </label>
+                    <input type="range" class="as-slider" id="settings-effects-volume" min="0" max="100" step="1" value="100">
+                    <output class="as-audio-value" id="settings-effects-val" for="settings-effects-volume">100%</output>
                 </div>
             </div>
+        </section>
 
-            <!-- Field Support -->
-            <div class="settings-section-card">
-                <div class="settings-section-title">Training Grounds &amp; Support</div>
-                <div class="settings-grid">
-                    <button type="button" class="settings-hub-card-btn practice" id="modal-training-dummy-btn">
-                        <div class="card-crest-badge dummy">
-                            <span>練</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Training Dummy</strong>
-                            <span>Practice match vs target</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
+        <section class="as-section" aria-labelledby="as-support-title">
+            <h3 class="as-section-title" id="as-support-title">Practice &amp; support</h3>
+            <div class="as-list">
+                <button type="button" class="as-list-row" id="modal-training-dummy-btn">
+                    <span class="as-list-icon">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <circle cx="10" cy="10" r="6.6" />
+                            <circle cx="10" cy="10" r="3" />
+                            <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" />
+                        </svg>
+                    </span>
+                    <span class="as-list-text">
+                        <strong>Training Dummy</strong>
+                        <span>Practice a match against a target dummy</span>
+                    </span>
+                    <svg class="as-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5l5 5-5 5" /></svg>
+                </button>
+                <button type="button" class="as-list-row" id="modal-bug-report-btn">
+                    <span class="as-list-icon">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M5 17.5V3" />
+                            <path d="M5 3.8c3.4-1.6 6 1.6 10 0v7.4c-4 1.6-6.6-1.6-10 0" />
+                        </svg>
+                    </span>
+                    <span class="as-list-text">
+                        <strong>Report a bug</strong>
+                        <span>Tell the developers what went wrong</span>
+                    </span>
+                    <svg class="as-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 5l5 5-5 5" /></svg>
+                </button>
+            </div>
+        </section>
+        </div>
 
-                    <button type="button" class="settings-hub-card-btn bug" id="modal-bug-report-btn">
-                        <div class="card-crest-badge bug-crest">
-                            <span>報</span>
-                        </div>
-                        <div class="card-text-wrap">
-                            <strong>Report Field Bug</strong>
-                            <span>Submit issue to Hokage</span>
-                        </div>
-                        <span class="card-arrow">›</span>
-                    </button>
+        <!-- Bug report: opens inside the panel instead of a browser prompt. -->
+        <div class="as-view" data-settings-view="bug" hidden>
+            <form class="as-section as-bug-form" id="settings-bug-form" novalidate>
+                <fieldset class="as-field">
+                    <legend class="as-field-label">What kind of problem?</legend>
+                    <div class="as-segments">
+                        <label class="as-segment"><input type="radio" name="bug-category" value="battle" checked><span>Battle</span></label>
+                        <label class="as-segment"><input type="radio" name="bug-category" value="balance"><span>Balance</span></label>
+                        <label class="as-segment"><input type="radio" name="bug-category" value="ui"><span>Interface</span></label>
+                        <label class="as-segment"><input type="radio" name="bug-category" value="other"><span>Other</span></label>
+                    </div>
+                </fieldset>
+                <div class="as-field">
+                    <label class="as-field-label" for="settings-bug-title">Summary</label>
+                    <input type="text" class="as-input" id="settings-bug-title" name="title" minlength="3" maxlength="120" required
+                        placeholder="Chidori stayed locked after Sharingan awakened" autocomplete="off">
+                </div>
+                <div class="as-field">
+                    <div class="as-field-head">
+                        <label class="as-field-label" for="settings-bug-details">What happened?</label>
+                        <span class="as-count" id="settings-bug-count" aria-hidden="true">0 / 3000</span>
+                    </div>
+                    <textarea class="as-input as-textarea" id="settings-bug-details" name="description" rows="5" minlength="5" maxlength="3000" required
+                        placeholder="What you did, what you expected, and what happened instead."></textarea>
+                    <p class="as-field-note">The page you're on and your browser are sent with the report.</p>
+                </div>
+                <p class="as-form-status" id="settings-bug-status" role="status" aria-live="polite"></p>
+                <div class="as-form-actions">
+                    <button type="button" class="as-button as-button--quiet" data-settings-back>Cancel</button>
+                    <button type="submit" class="as-button as-button--primary" id="settings-bug-submit">Send report</button>
+                </div>
+            </form>
+            <div class="as-section as-bug-done" id="settings-bug-done" hidden>
+                <span class="as-done-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20"><path d="M4.5 10.5l3.5 3.5 7.5-8" /></svg>
+                </span>
+                <p class="as-done-title">Report sent</p>
+                <p class="as-done-text">Thanks. The developers will look into it.</p>
+                <div class="as-form-actions">
+                    <button type="button" class="as-button as-button--quiet" data-settings-back>Back to settings</button>
                 </div>
             </div>
         </div>
@@ -612,11 +691,11 @@
 <script src="roster-catalog.js?v=3"></script>
 <script src="status-display.js?v=2"></script>
 <script src="skill-description-format.js?v=3"></script>
-<script src="script.js?v=72"></script>
+<script src="script.js?v=73"></script>
 <script src="selectionWar.js?v=1"></script>
-<script src="selectionRewards.js?v=3"></script>
-<script src="selectionStore.js?v=7"></script>
-<script src="selectionSpin.js?v=3"></script>
+<script src="selectionRewards.js?v=5"></script>
+<script src="selectionStore.js?v=8"></script>
+<script src="selectionSpin.js?v=4"></script>
 <script src="selectionHub.js?v=47"></script>
 <script>
     (function() {

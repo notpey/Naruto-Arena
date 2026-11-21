@@ -75,29 +75,53 @@
             var pClose = document.getElementById("promo-code-modal-close");
             if (pClose) pClose.addEventListener("click", function() { if (promoCodeModal) promoCodeModal.classList.add("hidden"); });
 
-            // Volume Slider Sync
-            var volSlider = document.getElementById("settings-master-volume") || document.querySelector(".settings-slider.sound-volume");
-            var volBadge = document.getElementById("settings-volume-val");
-            if (volSlider) {
-                try {
-                    var rawSound = window.ArenaSession.storage.getItem("narutoSoundSettings");
-                    if (rawSound) {
-                        var parsedSound = JSON.parse(rawSound);
-                        if (parsedSound && typeof parsedSound.volume === 'number') {
-                            var pct = Math.round(parsedSound.volume * 100);
-                            volSlider.value = pct;
-                            if (volBadge) volBadge.textContent = pct + "%";
-                        }
+            // Audio: Master, Music and Effects. The sound manager in script.js owns and saves the
+            // levels; these controls only read and change them through window.ArenaSound.
+            var audioChannels = [
+                { channel: "volume", slider: "settings-master-volume", value: "settings-volume-val", name: "all sound" },
+                { channel: "music", slider: "settings-music-volume", value: "settings-music-val", name: "music" },
+                { channel: "effects", slider: "settings-effects-volume", value: "settings-effects-val", name: "sound effects" }
+            ];
+            var renderAudio = function(levels) {
+                audioChannels.forEach(function(entry) {
+                    var pct = Math.round((Number(levels[entry.channel]) || 0) * 100);
+                    var slider = document.getElementById(entry.slider);
+                    var output = document.getElementById(entry.value);
+                    var mute = document.querySelector('[data-sound-mute="' + entry.channel + '"]');
+                    var row = slider ? slider.closest(".as-audio-row") : null;
+                    if (slider) {
+                        slider.value = String(pct);
+                        // The filled part of the track follows the value.
+                        slider.style.setProperty("--fill", pct + "%");
+                        slider.setAttribute("aria-valuetext", pct === 0 ? "Muted" : pct + "%");
                     }
-                } catch(e) {}
-
-                volSlider.addEventListener("input", function(e) {
-                    var val = parseInt(e.target.value, 10) || 0;
-                    if (volBadge) volBadge.textContent = val + "%";
-                    try {
-                        window.ArenaSession.storage.setItem("narutoSoundSettings", JSON.stringify({ volume: val / 100 }));
-                    } catch(err) {}
+                    if (output) output.textContent = pct === 0 ? "Off" : pct + "%";
+                    if (row) row.classList.toggle("is-muted", pct === 0);
+                    if (mute) {
+                        mute.setAttribute("aria-pressed", String(pct === 0));
+                        mute.setAttribute("aria-label", (pct === 0 ? "Unmute " : "Mute ") + entry.name);
+                    }
                 });
+                // Music and Effects play as a share of Master, so they read as off while Master is.
+                var settingsPanel = document.querySelector(".arena-settings");
+                if (settingsPanel) settingsPanel.classList.toggle("is-master-muted", !(Number(levels.volume) > 0));
+            };
+            if (window.ArenaSound) {
+                audioChannels.forEach(function(entry) {
+                    var slider = document.getElementById(entry.slider);
+                    // Master's own slider is also the sound manager's input, which saves it itself.
+                    if (slider && entry.channel !== "volume") {
+                        slider.addEventListener("input", function() {
+                            window.ArenaSound.setChannel(entry.channel, (parseInt(slider.value, 10) || 0) / 100);
+                        });
+                    }
+                    var mute = document.querySelector('[data-sound-mute="' + entry.channel + '"]');
+                    if (mute) {
+                        mute.addEventListener("click", function() { window.ArenaSound.toggleMute(entry.channel); });
+                    }
+                });
+                window.ArenaSound.onChange(renderAudio);
+                renderAudio(window.ArenaSound.getSettings());
             }
 
             // Training Dummy & Bug Report Diverted Actions
@@ -108,19 +132,94 @@
                 });
             }
 
+            // Bug report: a second view inside the settings panel.
             var bugBtn = document.getElementById("modal-bug-report-btn");
-            if (bugBtn) {
-                bugBtn.addEventListener("click", function() {
-                    var desc = prompt("Describe the bug or issue you encountered:");
-                    if (desc && desc.trim()) {
-                        window.ArenaSession.fetch("/api/bugs", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ title: desc.trim(), category: "general", description: desc.trim() })
-                        }).then(function(r) { return r.json(); }).then(function(d) {
-                            alert(d.ok ? "Thank you! Your bug report has been submitted." : (d.error || "Failed to submit report."));
-                        }).catch(function() { alert("Failed to submit bug report."); });
+            var settingsTitle = document.getElementById("settings-modal-title");
+            var settingsBack = document.getElementById("settings-back");
+            var bugForm = document.getElementById("settings-bug-form");
+            var bugDone = document.getElementById("settings-bug-done");
+            var bugTitle = document.getElementById("settings-bug-title");
+            var bugDetails = document.getElementById("settings-bug-details");
+            var bugCount = document.getElementById("settings-bug-count");
+            var bugStatus = document.getElementById("settings-bug-status");
+            var bugSubmit = document.getElementById("settings-bug-submit");
+            var showSettingsView = function(name) {
+                document.querySelectorAll("#settings-modal [data-settings-view]").forEach(function(view) {
+                    view.hidden = view.getAttribute("data-settings-view") !== name;
+                });
+                if (settingsTitle) settingsTitle.textContent = name === "bug" ? "Report a bug" : "Settings";
+                if (settingsBack) settingsBack.hidden = name !== "bug";
+                if (name === "bug") {
+                    if (bugForm) bugForm.hidden = false;
+                    if (bugDone) bugDone.hidden = true;
+                    if (bugTitle) bugTitle.focus();
+                } else if (bugBtn) {
+                    bugBtn.focus();
+                }
+            };
+            var setBugStatus = function(text, tone) {
+                if (!bugStatus) return;
+                bugStatus.textContent = text || "";
+                bugStatus.className = "as-form-status" + (tone ? " is-" + tone : "");
+            };
+            var updateBugCount = function() {
+                if (bugCount && bugDetails) bugCount.textContent = bugDetails.value.length + " / 3000";
+            };
+            if (bugBtn) bugBtn.addEventListener("click", function() { setBugStatus(""); showSettingsView("bug"); });
+            if (settingsBack) settingsBack.addEventListener("click", function() { showSettingsView("main"); });
+            document.querySelectorAll("#settings-modal [data-settings-back]").forEach(function(btn) {
+                btn.addEventListener("click", function() { showSettingsView("main"); });
+            });
+            // Reopening settings always starts on the main view.
+            document.querySelectorAll("[data-settings-trigger]").forEach(function(btn) {
+                btn.addEventListener("click", function() { showSettingsView("main"); });
+            });
+            if (bugDetails) bugDetails.addEventListener("input", updateBugCount);
+            if (bugForm) {
+                bugForm.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    var title = bugTitle ? bugTitle.value.trim() : "";
+                    var description = bugDetails ? bugDetails.value.trim() : "";
+                    // Same limits the server enforces, checked first so the player gets a quick answer.
+                    if (title.length < 3) {
+                        setBugStatus("Add a short summary (at least 3 characters).", "error");
+                        if (bugTitle) bugTitle.focus();
+                        return;
                     }
+                    if (description.length < 5) {
+                        setBugStatus("Describe what happened (at least 5 characters).", "error");
+                        if (bugDetails) bugDetails.focus();
+                        return;
+                    }
+                    var picked = bugForm.querySelector('input[name="bug-category"]:checked');
+                    if (bugSubmit) { bugSubmit.disabled = true; bugSubmit.textContent = "Sending…"; }
+                    setBugStatus("");
+                    window.ArenaSession.fetch("/api/bugs", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            category: picked ? picked.value : "other",
+                            title: title,
+                            description: description,
+                            pageUrl: window.location.pathname,
+                            clientMetadata: { userAgent: navigator.userAgent || "" }
+                        })
+                    }).then(function(r) {
+                        return r.json().catch(function() { return {}; }).then(function(d) { return { ok: r.ok && d.ok, data: d }; });
+                    }).then(function(result) {
+                        if (!result.ok) {
+                            setBugStatus((result.data && result.data.error) || "The report couldn't be sent. Try again in a moment.", "error");
+                            return;
+                        }
+                        bugForm.reset();
+                        updateBugCount();
+                        bugForm.hidden = true;
+                        if (bugDone) bugDone.hidden = false;
+                    }).catch(function() {
+                        setBugStatus("The report couldn't be sent. Check your connection and try again.", "error");
+                    }).then(function() {
+                        if (bugSubmit) { bugSubmit.disabled = false; bugSubmit.textContent = "Send report"; }
+                    });
                 });
             }
 

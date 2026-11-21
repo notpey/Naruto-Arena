@@ -60,7 +60,11 @@
     function soundVolume() {
         try {
             var saved = JSON.parse(storage("getItem", "narutoSoundSettings") || "null");
-            if (saved && typeof saved.volume === "number") return Math.min(1, Math.max(0, saved.volume));
+            if (saved && typeof saved.volume === "number") {
+                // Effects play at master volume times the Effects share.
+                var effects = typeof saved.effects === "number" ? Math.min(1, Math.max(0, saved.effects)) : 1;
+                return Math.min(1, Math.max(0, saved.volume)) * effects;
+            }
         } catch (error) {}
         return 0.7;
     }

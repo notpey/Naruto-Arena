@@ -2096,7 +2096,7 @@
 .game-remaster .global-status-tooltip,
 .game-remaster .status-tooltip-content,
 .keyword-popover { text-transform: none; }
-.game-remaster .status-tooltip-item { padding-left: 10px; border-left: 3px solid #5d7079; }
+.game-remaster .status-tooltip-item { padding-left: 10px; border-left: 1px solid #5d7079; }
 .game-remaster .status-tooltip-item--ally { border-left-color: #42c969; }
 .game-remaster .status-tooltip-item--enemy { border-left-color: #e94e4e; }
 .game-remaster .status-tooltip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -2162,3 +2162,407 @@
     color: #e9eeeb; box-shadow: 0 8px 20px rgba(0, 0, 0, .45);
     font: 500 12px/1.4 'Libre Franklin', Arial, sans-serif; pointer-events: none;
 }
+
+/* ---- Settings panel (hub) ------------------------------------------------------------------
+   A game settings screen in the remaster's own materials: slate panel, warm amber accent,
+   drawn icons, real headings in sentence case. Scoped to #settings-modal so the other hub
+   dialogs that share the older settings-* classes are untouched. */
+.selection-client-page.game-remaster #settings-modal .arena-settings {
+    --as-line: #34484f;
+    --as-raised: #1d313b;
+    --as-raised-hover: #253c47;
+    --as-edge: #50656e;
+    --as-text: #eef1eb;
+    --as-muted: #b5c4c7;
+    --as-accent: #e3ad68;
+    --as-accent-soft: #f2dfc3;
+    width: min(480px, 100%) !important;
+    max-width: 480px !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+    border-radius: 10px !important;
+    /* The battle panels' own material, so settings reads as part of the game. */
+    background: linear-gradient(155deg, #22333d 0%, var(--arena-surface) 48%, var(--arena-surface-low) 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 24px 60px rgba(0, 0, 0, .55) !important;
+    text-transform: none;
+    letter-spacing: 0;
+    animation: as-enter 220ms cubic-bezier(.16, 1, .3, 1);
+}
+.selection-client-page.game-remaster #settings-modal .arena-settings * { text-transform: none; }
+.selection-client-page.game-remaster #settings-modal .arena-settings ::selection { background: #6b4a22; color: #fff6e8; }
+@keyframes as-enter {
+    from { opacity: 0; transform: translateY(10px) scale(.985); }
+    to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .selection-client-page.game-remaster #settings-modal .arena-settings { animation: none; }
+}
+
+.selection-client-page.game-remaster #settings-modal .as-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px 16px;
+}
+.selection-client-page.game-remaster #settings-modal .as-title {
+    margin: 0 !important;
+    color: #f1e8dc !important;
+    font: 700 21px/1.2 'Libre Franklin', Arial, sans-serif !important;
+    letter-spacing: -.015em !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    padding: 0;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: var(--as-raised);
+    color: var(--as-text);
+    cursor: pointer;
+    transition: border-color 140ms ease-out, background-color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-close:hover { border-color: var(--as-accent); background: var(--as-raised-hover); }
+.selection-client-page.game-remaster #settings-modal svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.selection-client-page.game-remaster #settings-modal .as-section {
+    padding: 18px 20px 20px;
+    border-top: 1px solid var(--as-line);
+}
+.selection-client-page.game-remaster #settings-modal .as-section-title {
+    margin: 0 0 12px !important;
+    color: var(--as-accent-soft) !important;
+    font: 700 14px/1.3 'Libre Franklin', Arial, sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+/* Audio: mute toggle, name, slider with a filled track, and a tabular readout. */
+.selection-client-page.game-remaster #settings-modal .as-audio { display: grid; gap: 14px; }
+.selection-client-page.game-remaster #settings-modal .as-audio-row {
+    display: grid;
+    grid-template-columns: 34px minmax(96px, 1fr) minmax(120px, 1.6fr) 40px;
+    align-items: center;
+    column-gap: 12px;
+    transition: opacity 160ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-mute {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: var(--as-raised);
+    color: var(--as-accent);
+    cursor: pointer;
+    transition: border-color 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-mute:hover { border-color: var(--as-accent); background: var(--as-raised-hover); }
+.selection-client-page.game-remaster #settings-modal .as-mute .as-slash { display: none; }
+.selection-client-page.game-remaster #settings-modal .as-mute[aria-pressed="true"] { color: var(--as-muted); }
+.selection-client-page.game-remaster #settings-modal .as-mute[aria-pressed="true"] .as-slash { display: inline; }
+.selection-client-page.game-remaster #settings-modal .as-mute[aria-pressed="true"] .as-wave { display: none; }
+.selection-client-page.game-remaster #settings-modal .as-audio-label { display: grid; gap: 1px; min-width: 0; cursor: pointer; }
+.selection-client-page.game-remaster #settings-modal .as-audio-name {
+    color: var(--as-text) !important;
+    font: 700 13.5px/1.25 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-audio-hint {
+    color: var(--as-muted) !important;
+    font: 400 11.5px/1.3 'Libre Franklin', Arial, sans-serif !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.selection-client-page.game-remaster #settings-modal .as-audio-value {
+    color: var(--as-accent-soft);
+    font: 700 12.5px/1 'Libre Franklin', Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+.selection-client-page.game-remaster #settings-modal .as-audio-row.is-muted .as-audio-value { color: var(--as-muted); }
+/* Music and Effects are shares of Master: with Master off they read as inactive. */
+.selection-client-page.game-remaster #settings-modal .arena-settings.is-master-muted .as-audio-row:not([data-sound-channel="volume"]) { opacity: .5; }
+
+.selection-client-page.game-remaster #settings-modal .as-slider {
+    --fill: 0%;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.selection-client-page.game-remaster #settings-modal .as-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--as-accent) var(--fill), #0e1b22 var(--fill));
+    box-shadow: inset 0 0 0 1px #3d525a;
+}
+.selection-client-page.game-remaster #settings-modal .as-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #0e1b22;
+    box-shadow: inset 0 0 0 1px #3d525a;
+}
+.selection-client-page.game-remaster #settings-modal .as-slider::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--as-accent);
+}
+.selection-client-page.game-remaster #settings-modal .as-slider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    margin-top: -5px;
+    border: 2px solid var(--as-accent);
+    border-radius: 50%;
+    background: var(--as-accent-soft);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .4);
+    -webkit-appearance: none;
+    appearance: none;
+    transition: transform 120ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--as-accent);
+    border-radius: 50%;
+    background: var(--as-accent-soft);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .4);
+}
+.selection-client-page.game-remaster #settings-modal .as-slider:hover::-webkit-slider-thumb { transform: scale(1.12); }
+.selection-client-page.game-remaster #settings-modal .as-audio-row.is-muted .as-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #6f8188 var(--fill), #0e1b22 var(--fill));
+}
+.selection-client-page.game-remaster #settings-modal .as-audio-row.is-muted .as-slider::-webkit-slider-thumb {
+    border-color: #8a9ba0;
+    background: #c9d3d4;
+}
+
+/* Practice & support: one grouped list, not a grid of cards. */
+.selection-client-page.game-remaster #settings-modal .as-list {
+    overflow: hidden;
+    border: 1px solid var(--as-line);
+    border-radius: 8px;
+}
+.selection-client-page.game-remaster #settings-modal .as-list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 0;
+    background: var(--as-raised);
+    color: var(--as-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-list-row + .as-list-row { border-top: 1px solid var(--as-line); }
+.selection-client-page.game-remaster #settings-modal .as-list-row:hover { background: var(--as-raised-hover); }
+.selection-client-page.game-remaster #settings-modal .as-list-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: #172832;
+    color: var(--as-accent);
+}
+.selection-client-page.game-remaster #settings-modal .as-list-text { display: grid; gap: 2px; flex: 1 1 auto; min-width: 0; }
+.selection-client-page.game-remaster #settings-modal .as-list-text strong {
+    color: var(--as-text) !important;
+    font: 700 13.5px/1.25 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-list-text span {
+    color: var(--as-muted) !important;
+    font: 400 12px/1.35 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-chevron {
+    flex: none;
+    color: #9fb1b5;
+    transition: transform 140ms ease-out, color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-list-row:hover .as-chevron { color: var(--as-accent); transform: translateX(2px); }
+
+.selection-client-page.game-remaster #settings-modal :is(.as-close, .as-mute, .as-slider, .as-list-row):focus-visible {
+    outline: 2px solid var(--as-accent);
+    outline-offset: 2px;
+}
+.selection-client-page.game-remaster #settings-modal .as-list-row:focus-visible { outline-offset: -2px; }
+
+/* Phones: the label sits above its slider so the track keeps a usable width. */
+@media (max-width: 460px) {
+    .selection-client-page.game-remaster #settings-modal .as-header { padding: 16px 16px 14px; }
+    .selection-client-page.game-remaster #settings-modal .as-section { padding: 16px; }
+    .selection-client-page.game-remaster #settings-modal .as-audio-row {
+        grid-template-columns: 34px minmax(0, 1fr) 40px;
+        grid-template-areas: "mute label value" "mute slider slider";
+        row-gap: 4px;
+    }
+    .selection-client-page.game-remaster #settings-modal .as-mute { grid-area: mute; align-self: start; }
+    .selection-client-page.game-remaster #settings-modal .as-audio-label { grid-area: label; }
+    .selection-client-page.game-remaster #settings-modal .as-audio-value { grid-area: value; }
+    .selection-client-page.game-remaster #settings-modal .as-slider { grid-area: slider; }
+}
+
+/* Settings panel: bug report view. */
+.selection-client-page.game-remaster #settings-modal [hidden] { display: none !important; }
+.selection-client-page.game-remaster #settings-modal .as-title { flex: 1 1 auto; min-width: 0; }
+.selection-client-page.game-remaster #settings-modal .as-back {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    margin-right: -4px;
+    padding: 0;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: var(--as-raised);
+    color: var(--as-text);
+    cursor: pointer;
+    transition: border-color 140ms ease-out, background-color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-back:hover { border-color: var(--as-accent); background: var(--as-raised-hover); }
+.selection-client-page.game-remaster #settings-modal .as-bug-form { display: grid; gap: 16px; }
+.selection-client-page.game-remaster #settings-modal .as-field { display: grid; gap: 7px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.selection-client-page.game-remaster #settings-modal .as-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.selection-client-page.game-remaster #settings-modal .as-field-label {
+    padding: 0;
+    color: var(--as-text) !important;
+    font: 700 13px/1.3 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-count {
+    color: var(--as-muted) !important;
+    font: 400 11.5px/1 'Libre Franklin', Arial, sans-serif !important;
+    font-variant-numeric: tabular-nums;
+}
+.selection-client-page.game-remaster #settings-modal .as-field-note {
+    margin: 0;
+    color: var(--as-muted) !important;
+    font: 400 11.5px/1.4 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-segments {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+.selection-client-page.game-remaster #settings-modal .as-segment { position: relative; display: block; cursor: pointer; }
+.selection-client-page.game-remaster #settings-modal .as-segment input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.selection-client-page.game-remaster #settings-modal .as-segment span {
+    display: block;
+    padding: 8px 6px;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: var(--as-raised);
+    color: var(--as-muted) !important;
+    font: 700 12.5px/1.2 'Libre Franklin', Arial, sans-serif !important;
+    text-align: center;
+    transition: border-color 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-segment:hover span { border-color: #6f848c; color: var(--as-text) !important; }
+.selection-client-page.game-remaster #settings-modal .as-segment input:checked + span {
+    border-color: var(--as-accent);
+    background: #3a2e1f;
+    color: var(--as-accent-soft) !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-segment input:focus-visible + span { outline: 2px solid var(--as-accent); outline-offset: 2px; }
+.selection-client-page.game-remaster #settings-modal .as-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid var(--as-edge);
+    border-radius: 6px;
+    background: #0f1c23;
+    color: var(--as-text);
+    font: 400 13px/1.45 'Libre Franklin', Arial, sans-serif;
+    caret-color: var(--as-accent);
+    transition: border-color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-input::placeholder { color: #8fa2a7; opacity: 1; }
+.selection-client-page.game-remaster #settings-modal .as-input:hover { border-color: #6f848c; }
+.selection-client-page.game-remaster #settings-modal .as-input:focus { border-color: var(--as-accent); outline: none; }
+.selection-client-page.game-remaster #settings-modal .as-textarea { min-height: 112px; resize: vertical; }
+.selection-client-page.game-remaster #settings-modal .as-form-status:empty { display: none; }
+.selection-client-page.game-remaster #settings-modal .as-form-status {
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid #8f4a44;
+    border-radius: 6px;
+    background: #3a2226;
+    color: #ffd6cf !important;
+    font: 400 12.5px/1.4 'Libre Franklin', Arial, sans-serif !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.selection-client-page.game-remaster #settings-modal .as-button {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 6px;
+    font: 700 13px/1 'Libre Franklin', Arial, sans-serif !important;
+    cursor: pointer;
+    transition: border-color 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out;
+}
+.selection-client-page.game-remaster #settings-modal .as-button--quiet {
+    border: 1px solid var(--as-edge);
+    background: var(--as-raised);
+    color: var(--as-text) !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-button--quiet:hover { border-color: var(--as-accent); background: var(--as-raised-hover); }
+.selection-client-page.game-remaster #settings-modal .as-button--primary {
+    border: 1px solid var(--as-accent);
+    background: var(--as-accent);
+    color: #1d1408 !important;
+}
+.selection-client-page.game-remaster #settings-modal .as-button--primary:hover { background: #ecbd80; }
+.selection-client-page.game-remaster #settings-modal .as-button:disabled { opacity: .6; cursor: wait; }
+.selection-client-page.game-remaster #settings-modal :is(.as-back, .as-button):focus-visible { outline: 2px solid var(--as-accent); outline-offset: 2px; }
+.selection-client-page.game-remaster #settings-modal .as-bug-done { display: grid; justify-items: center; gap: 6px; padding-top: 28px; text-align: center; }
+.selection-client-page.game-remaster #settings-modal .as-done-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 6px;
+    border: 1px solid #3f9d67;
+    border-radius: 50%;
+    background: #1d3a2d;
+    color: #a8ebc2;
+}
+.selection-client-page.game-remaster #settings-modal .as-done-icon svg { width: 22px; height: 22px; stroke-width: 2; }
+.selection-client-page.game-remaster #settings-modal .as-done-title { margin: 0; color: var(--as-text) !important; font: 700 16px/1.3 'Libre Franklin', Arial, sans-serif !important; }
+.selection-client-page.game-remaster #settings-modal .as-done-text { margin: 0 0 12px; color: var(--as-muted) !important; font: 400 13px/1.4 'Libre Franklin', Arial, sans-serif !important; }
+.selection-client-page.game-remaster #settings-modal .as-bug-done .as-form-actions { justify-content: center; }
+@media (max-width: 460px) {
+    .selection-client-page.game-remaster #settings-modal .as-segments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.selection-client-page.game-remaster #settings-modal fieldset.as-field > legend { margin-bottom: 7px; }
