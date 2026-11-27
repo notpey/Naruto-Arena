@@ -1,6 +1,6 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
 const cosmeticsRules = require('../services/cosmeticsRules.js');
 const { validateCharacterPayload } = require('../services/characterValidation.js');
 
@@ -22,6 +22,11 @@ module.exports = function(context) {
         charactersData,
         getCharactersData,
         saveCharacters,
+        updateCharacters,
+        characterHistory,
+        characterArtStore,
+        CharacterArtError,
+        getRosterVersion,
         serializeCharactersDataFile,
         ladderRulesCollection,
         charactersCollection,
@@ -51,6 +56,15 @@ module.exports = function(context) {
         saveMissionCatalog,
         cosmeticsService,
     } = context;
+
+    // A short fingerprint of a character's saved data, used to spot conflicting saves.
+    const characterRevision = (character) =>
+        createHash('sha1').update(JSON.stringify(character ?? null)).digest('hex').slice(0, 16);
+    const httpError = (status, message) => Object.assign(new Error(message), { status });
+    // Roster changes go through the server's one-at-a-time queue when it provides one.
+    const applyCharacterUpdate = (buildNext, options) => (typeof updateCharacters === 'function'
+        ? updateCharacters(buildNext, options)
+        : Promise.resolve(buildNext(getCharactersList())).then((next) => saveCharacters(next, options)));
 
     const getCharactersList = () =>
         typeof getCharactersData === 'function'
@@ -768,10 +782,14 @@ module.exports = function(context) {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
         }
-    
+        const characters = getCharactersList();
         return res.json({
             ok: true,
-            characters: getCharactersList(),
+            characters,
+            // The editor sends a character's revision back on save, so a save can't silently
+            // overwrite a change another admin made in the meantime.
+            revisions: Object.fromEntries(characters.map((entry) => [entry.characterId, characterRevision(entry)])),
+            rosterVersion: typeof getRosterVersion === 'function' ? getRosterVersion() : null,
         });
     });
     router.get('/character-access', adminCheck, async (req, res) => {
@@ -809,17 +827,52 @@ module.exports = function(context) {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
         }
-    
+        // ?format=json is what npm run pull-characters downloads.
+        if (req.query?.format === 'json') {
+            return res.json({
+                ok: true,
+                exportedAt: new Date().toISOString(),
+                rosterVersion: typeof getRosterVersion === 'function' ? getRosterVersion() : null,
+                characters: getCharactersList(),
+            });
+        }
         const serialized = serializeCharactersDataFile(getCharactersList());
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="characters.js"');
         return res.send(serialized);
     });
+    router.post('/character-art', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        try {
+            const art = await characterArtStore.upload(req.body?.dataUrl, req.authUser.username);
+            return res.status(201).json({ ok: true, ...art });
+        } catch (error) {
+            if (CharacterArtError && error instanceof CharacterArtError) {
+                return res.status(400).json({ error: error.message });
+            }
+            console.error('Character art upload error:', error);
+            return res.status(500).json({ error: 'Unable to upload that image.' });
+        }
+    });
+    router.get('/characters/:characterId/history', requireSession, async (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        const characterId = typeof req.params?.characterId === 'string' ? req.params.characterId.trim() : '';
+        try {
+            return res.json({ ok: true, entries: await characterHistory.list(characterId) });
+        } catch (error) {
+            console.error('Character history load error:', error);
+            return res.status(500).json({ error: 'Unable to load this character’s history.' });
+        }
+    });
     router.get('/characters/:characterId', requireSession, (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
         }
-    
+
         const characterId = typeof req.params?.characterId === 'string' ? req.params.characterId.trim() : '';
         const character = getCharactersList().find(
             (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
@@ -827,54 +880,54 @@ module.exports = function(context) {
         if (!character) {
             return res.status(404).json({ error: 'Character not found.' });
         }
-    
+
         return res.json({
             ok: true,
             character,
+            revision: characterRevision(character),
         });
     });
     router.put('/characters/:characterId', requireSession, async (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
         }
-    
+
         const characterId = typeof req.params?.characterId === 'string' ? req.params.characterId.trim() : '';
         const nextCharacter = req.body && typeof req.body === 'object' ? req.body : null;
         if (!characterId || !nextCharacter || typeof nextCharacter.characterId !== 'string' || !nextCharacter.characterId.trim()) {
             return res.status(400).json({ error: 'A valid character payload is required.' });
         }
+        if (nextCharacter.characterId.trim() !== characterId) {
+            return res.status(400).json({ error: 'A live character’s id can’t change.' });
+        }
         const characterErrors = validateCharacterPayload(nextCharacter);
         if (characterErrors.length) {
             return res.status(400).json({ error: characterErrors.join(' '), errors: characterErrors });
         }
-    
-        const currentCharacters = getCharactersList();
-        const characterIndex = currentCharacters.findIndex(
-            (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
-        );
-        if (characterIndex === -1) {
-            return res.status(404).json({ error: 'Character not found.' });
-        }
-    
-        const duplicateCharacterIndex = currentCharacters.findIndex(
-            (entry, index) =>
-                index !== characterIndex &&
-                typeof entry?.characterId === 'string' &&
-                entry.characterId === nextCharacter.characterId.trim()
-        );
-        if (duplicateCharacterIndex !== -1) {
-            return res.status(409).json({ error: 'Character id is already in use.' });
-        }
-    
+        const expectedRevision = String(req.headers?.['x-character-revision'] || '').trim();
+
         try {
-            const updatedCharacters = currentCharacters.slice();
-            updatedCharacters[characterIndex] = nextCharacter;
-            await saveCharacters(updatedCharacters);
+            await applyCharacterUpdate((currentCharacters) => {
+                const characterIndex = currentCharacters.findIndex(
+                    (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
+                );
+                if (characterIndex === -1) throw httpError(404, 'Character not found.');
+                const current = currentCharacters[characterIndex];
+                if (expectedRevision && expectedRevision !== characterRevision(current)) {
+                    throw httpError(409, `Someone else saved ${current.name || characterId} after you opened it. ` +
+                        'Copy anything you need, then refresh to see their version.');
+                }
+                const updatedCharacters = currentCharacters.slice();
+                updatedCharacters[characterIndex] = nextCharacter;
+                return updatedCharacters;
+            }, { savedBy: req.authUser.username, action: 'edit' });
             return res.json({
                 ok: true,
-                character: updatedCharacters[characterIndex],
+                character: nextCharacter,
+                revision: characterRevision(nextCharacter),
             });
         } catch (error) {
+            if (error.status) return res.status(error.status).json({ error: error.message });
             console.error('Admin character update error:', error);
             return res.status(500).json({ error: 'Unable to update character.' });
         }
@@ -891,22 +944,40 @@ module.exports = function(context) {
         if (newCharacterErrors.length) {
             return res.status(400).json({ error: newCharacterErrors.join(' '), errors: newCharacterErrors });
         }
-        const currentCharacters = getCharactersList();
-        const duplicate = currentCharacters.find(
-            (entry) => typeof entry?.characterId === 'string' && entry.characterId === newCharacter.characterId.trim()
-        );
-        if (duplicate) {
-            return res.status(409).json({ error: 'Character id is already in use.' });
-        }
+        const characterId = newCharacter.characterId.trim();
         try {
-            const updatedCharacters = [...currentCharacters, newCharacter];
-            await saveCharacters(updatedCharacters);
-            return res.status(201).json({ ok: true, character: newCharacter });
+            // New characters join the end of the roster, so no existing roster index moves.
+            await applyCharacterUpdate((currentCharacters) => {
+                if (currentCharacters.some((entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId)) {
+                    throw httpError(409, 'Character id is already in use.');
+                }
+                return [...currentCharacters, newCharacter];
+            }, { savedBy: req.authUser.username, action: 'create' });
         } catch (error) {
+            if (error.status) return res.status(error.status).json({ error: error.message });
             console.error('Admin character create error:', error);
             return res.status(500).json({ error: 'Unable to create character.' });
         }
+        // A new character is staff-only until it's released to players in Character Access,
+        // so admins can finish and test it first.
+        let hiddenFromPlayers = false;
+        try {
+            const policies = await characterRankAccess.getPolicies();
+            await characterRankAccess.savePolicies(
+                { ...policies, [characterId]: { player: { visibility: 'hidden', unlock: 'inherit' } } },
+                req.authUser.username
+            );
+            hiddenFromPlayers = true;
+        } catch (error) {
+            console.error('Could not hide the new character from players:', error);
+        }
+        return res.status(201).json({
+            ok: true, character: newCharacter, revision: characterRevision(newCharacter), hiddenFromPlayers,
+        });
     });
+    // "Deleting" retires a character: it stays in the roster, because matches, saved teams and
+    // stats refer to roster positions, but it's hidden everywhere and can't be picked. Saving it
+    // with retired turned off brings it back.
     router.delete('/characters/:characterId', requireSession, async (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
@@ -915,20 +986,23 @@ module.exports = function(context) {
         if (!characterId) {
             return res.status(400).json({ error: 'A character id is required.' });
         }
-        const currentCharacters = getCharactersList();
-        const characterIndex = currentCharacters.findIndex(
-            (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
-        );
-        if (characterIndex === -1) {
-            return res.status(404).json({ error: 'Character not found.' });
-        }
+        let retired = null;
         try {
-            const updatedCharacters = currentCharacters.filter((_, i) => i !== characterIndex);
-            await saveCharacters(updatedCharacters);
-            return res.json({ ok: true });
+            await applyCharacterUpdate((currentCharacters) => {
+                const characterIndex = currentCharacters.findIndex(
+                    (entry) => typeof entry?.characterId === 'string' && entry.characterId === characterId
+                );
+                if (characterIndex === -1) throw httpError(404, 'Character not found.');
+                retired = { ...currentCharacters[characterIndex], retired: true };
+                const updatedCharacters = currentCharacters.slice();
+                updatedCharacters[characterIndex] = retired;
+                return updatedCharacters;
+            }, { savedBy: req.authUser.username, action: 'retire' });
+            return res.json({ ok: true, retired: true, character: retired, revision: characterRevision(retired) });
         } catch (error) {
-            console.error('Admin character delete error:', error);
-            return res.status(500).json({ error: 'Unable to delete character.' });
+            if (error.status) return res.status(error.status).json({ error: error.message });
+            console.error('Admin character retire error:', error);
+            return res.status(500).json({ error: 'Unable to retire character.' });
         }
     });
     router.get('/news', requireSession, async (req, res) => {

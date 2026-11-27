@@ -134,7 +134,7 @@ module.exports = function(context) {
                                 actingUsername: data.actingUsername,
                                 actorSlot: data.actorSlot,
                                 skillIndex: data.skillIndex,
-                                characters: getCharactersData()
+                                characters: getCharactersData(match)
                             });
                             
                             sendJsonToSocket(ws, {

@@ -22,6 +22,9 @@ const { localizeArtwork } = require('./services/characterImages');
 const { AvatarImageError, prepareAvatarDataUrl, prepareAvatarFromRemote } = require('./services/avatarImage');
 const { evaluateAccess, createCharacterRankAccessService } = require('./services/characterRankAccess');
 const { ACTIVE_ROSTER_IDS, isActiveCharacter } = require('./data/activeRoster');
+const { createRosterVersions, diffRosters } = require('./services/rosterVersions');
+const { createCharacterHistory } = require('./services/characterHistory');
+const { createCharacterArtStore, CharacterArtError } = require('./services/characterArt');
 const { getMissionCharacterTags } = require('./data/missionCharacterTags');
 const activeRosterOrder = new Map(ACTIVE_ROSTER_IDS.map((id, index) => [id, index]));
 const selectActiveRoster = (entries) => (Array.isArray(entries) ? entries : [])
@@ -171,6 +174,10 @@ const {
 } = require('./services/balanceUpdate05');
 const LAUNCH_UNLOCKS_MIGRATION_ID = 'launch-unlocks-2026-10-26';
 const NEW_MISSION_UNLOCKS_MIGRATION_ID = 'new-mission-unlocks-2026-11-01';
+// From this migration on, the stored roster is the playable roster: characters made in the ACP
+// stay in it, and data/activeRoster.js only decides which code characters a new database starts
+// with. Before it, stored characters missing from data/activeRoster.js were dropped on boot.
+const ROSTER_IN_DB_MIGRATION_ID = 'roster-in-database-2026-11-27';
 const NEW_MISSION_UNLOCK_CHARACTER_IDS = new Set([
     'oboro', 'shigure', 'dosu-kinuta', 'zaku-abumi', 'tsuchi-kin',
     'akadou-yoroi', 'tsurugi-misumi', 'baki', 'gekko-hayate',
@@ -260,6 +267,10 @@ const characterRankAccess = createCharacterRankAccessService({
     getCollection: () => appStateCollection,
     getCharacters: () => charactersData,
 });
+let characterHistoryCollection;
+let characterArtCollection;
+const characterHistory = createCharacterHistory({ getCollection: () => characterHistoryCollection });
+const characterArtStore = createCharacterArtStore({ getCollection: () => characterArtCollection });
 let newsPostsCollection;
 let clanWarsCollection;
 // Set once the database is ready; the match endpoints use it for war battles.
@@ -271,6 +282,22 @@ let cosmeticsService = require('./services/cosmeticsService.js')({});
 const matchSocketRooms = new Map();
 
 const activeMatchesMap = new Map();
+
+// Each match plays on the roster version it started with; ACP balance changes reach new matches only.
+const rosterVersions = createRosterVersions({
+    getAppState: () => appStateCollection,
+    getMatches: () => matchesCollection,
+    getLocalMatches: () => activeMatchesMap.values(),
+});
+const rosterForMatch = (match) => rosterVersions.forMatch(match, charactersData);
+// Retired characters stay in the roster (matches, saved teams and stats refer to roster
+// positions) but are hidden everywhere and can't be picked.
+const isRetiredCharacter = (character) => Boolean(character && character.retired === true);
+const findRosterCharacter = (characterId) => {
+    const id = String(characterId || '').trim().toLowerCase();
+    return id ? (Array.isArray(charactersData) ? charactersData : [])
+        .find((character) => String(character?.characterId || '').toLowerCase() === id) || null : null;
+};
 
 async function getMatchActive(matchId) {
     if (activeMatchesMap.has(matchId)) return activeMatchesMap.get(matchId);
@@ -295,6 +322,7 @@ function updateMatchActive(matchId, updateObj) {
 }
 
 function insertMatchActive(matchObj) {
+    rosterVersions.stamp(matchObj);
     grantOpeningCharacterPassiveChakra(matchObj);
     if (matchObj && matchObj.matchId && matchObj.status !== 'ended') {
         activeMatchesMap.set(matchObj.matchId, matchObj);
@@ -1575,7 +1603,9 @@ const profileHasUnlockedCharacter = (profile, characterId, lockedCharacterIds = 
     return false;
 };
 
+const RETIRED_ACCESS = Object.freeze({ visibility: 'hidden', unlockMode: 'retired', hidden: true, unlocked: false, retired: true });
 const getCharacterAvailability = ({ policies, user, profile, characterId, lockedCharacterIds }) => {
+    if (isRetiredCharacter(findRosterCharacter(characterId))) return RETIRED_ACCESS;
     const role = String(user?.role || 'player').trim().toLowerCase();
     const staffBypass = ['admin', 'global_moderator', 'moderator'].includes(role);
     return evaluateAccess({
@@ -1619,7 +1649,9 @@ const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
         policies, user: { role: normalizedRole }, profile: normalizedProfile,
         characterId: rosterCharacterId, lockedCharacterIds,
     });
-    throw new Error(access.hidden
+    throw new Error(access.retired
+        ? `${rosterCharacterName} is no longer available.`
+        : access.hidden
         ? `${rosterCharacterName} is unavailable for your web rank.`
         : `${rosterCharacterName} is locked.`);
 };
@@ -2225,8 +2257,9 @@ const teamHasCharacterId = (match, username, characterId) => {
 const getMissionTeamCharacters = (match, username) => {
     const player = Array.isArray(match?.players)
         ? match.players.find((entry) => entry?.username === username) : null;
+    const roster = rosterForMatch(match);
     return (Array.isArray(player?.team) ? player.team : [])
-        .map((index) => charactersData[Number(index)])
+        .map((index) => roster[Number(index)])
         .filter(Boolean);
 };
 
@@ -3036,10 +3069,16 @@ const serializeCharactersDataFile = (nextCharacters) =>
     JSON.stringify(nextCharacters, null, 4) +
     ';\n\nif (typeof module !== \'undefined\') {\n    module.exports = characters;\n}\n';
 
-const saveCharacters = async (nextCharacters) => {
+// Saves the live roster from the ACP. The stored roster is the playable roster: its order is
+// the roster index order that matches, saved teams and stats use, so characters are only ever
+// added at the end, and retired rather than removed. Matches already running keep the version
+// they started with. Every changed character is recorded in its version history.
+const saveCharacters = async (nextCharacters, { savedBy = '', action = 'edit' } = {}) => {
     if (!appStateCollection) {
         throw new Error('Database not connected.');
     }
+    const outgoingCharacters = charactersData;
+    const nextVersion = await rosterVersions.prepareNextVersion(outgoingCharacters);
     const now = new Date();
     await appStateCollection.updateOne(
         { key: CHARACTERS_STATE_KEY },
@@ -3047,6 +3086,7 @@ const saveCharacters = async (nextCharacters) => {
             $set: {
                 key: CHARACTERS_STATE_KEY,
                 characters: nextCharacters,
+                rosterVersion: nextVersion,
                 updatedAt: now,
             },
         },
@@ -3099,19 +3139,38 @@ const saveCharacters = async (nextCharacters) => {
                 [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
+                [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
                 updatedAt: now,
             },
         },
         { upsert: true }
     );
-    const sortedCharacters = selectActiveRoster(nextCharacters);
-    charactersData = sortedCharacters;
+    // Switch new matches to the new roster in one step, so none starts on a mix of the two.
+    rosterVersions.activate(nextVersion, outgoingCharacters);
+    charactersData = nextCharacters;
     characterCatalog = buildCharacterCatalog();
+    await characterHistory.record(diffRosters(outgoingCharacters, nextCharacters), {
+        savedBy, action, rosterVersion: nextVersion,
+    });
+    rosterVersions.prune();
     try {
-        fs.writeFileSync(path.join(__dirname, 'characters.js'), serializeCharactersDataFile(sortedCharacters), 'utf-8');
+        fs.writeFileSync(path.join(__dirname, 'characters.js'), serializeCharactersDataFile(nextCharacters), 'utf-8');
     } catch (diskErr) {
         console.warn('Could not write updated characters.js to disk:', diskErr);
     }
+};
+
+// Runs roster changes one at a time, so two admins saving at once can't overwrite each other.
+// buildNext receives the current roster and returns the next one (or throws to cancel).
+let characterSaveQueue = Promise.resolve();
+const updateCharacters = (buildNext, options) => {
+    const run = characterSaveQueue.then(async () => {
+        const next = await buildNext(charactersData);
+        await saveCharacters(next, options);
+        return next;
+    });
+    characterSaveQueue = run.catch(() => {});
+    return run;
 };
 
 // Admin edits made through the Character Editor (including images) are stored in
@@ -3180,6 +3239,7 @@ const getStoredCharacters = async () => {
                     [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
+                    [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
                     updatedAt: now,
                 },
             },
@@ -3240,6 +3300,7 @@ const getStoredCharacters = async () => {
     const shouldApplySasukeShadowShurikenFix = !completedMigrations[SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
+    const rosterManagedInDb = Boolean(completedMigrations[ROSTER_IN_DB_MIGRATION_ID]);
     const characterIdsToRefresh = new Set([
         ...(shouldApplyStarterRebalance ? Array.from(STARTER_REBALANCE_CHARACTER_IDS) : []),
         ...(shouldApplyExamsRebalance ? Array.from(EXAMS_REBALANCE_CHARACTER_IDS) : []),
@@ -3343,7 +3404,9 @@ const getStoredCharacters = async () => {
         }
         return nextEntry;
     };
-    const activeStoredCharacters = storedState.characters.filter(isActiveCharacter);
+    const activeStoredCharacters = rosterManagedInDb
+        ? storedState.characters.filter((entry) => entry && typeof entry === 'object')
+        : storedState.characters.filter(isActiveCharacter);
     const storedIds = new Set(
         activeStoredCharacters
             .map((entry) => (entry && typeof entry.characterId === 'string' ? entry.characterId : ''))
@@ -3431,15 +3494,22 @@ const getStoredCharacters = async () => {
         });
     };
 
-    const sortedStoredCharacters = sortBySeedOrder(migratedStoredCharacters);
+    // Once the roster lives in the database its order is fixed: roster indices never move,
+    // and characters new to the code join at the end.
+    const sortedStoredCharacters = rosterManagedInDb
+        ? migratedStoredCharacters
+        : sortBySeedOrder(migratedStoredCharacters);
     const orderChanged = JSON.stringify(storedState.characters.map(c => c.characterId || c.id)) !== JSON.stringify(sortedStoredCharacters.map(c => c.characterId || c.id));
 
     const seedContentChanged = JSON.stringify(migratedStoredCharacters) !== JSON.stringify(activeStoredCharacters);
-    if (!characterIdsToRefresh.size && !newDefaultCharacters.length && !backfilledMissingImages && !orderChanged && !seedContentChanged) {
+    if (rosterManagedInDb && !characterIdsToRefresh.size && !newDefaultCharacters.length &&
+        !backfilledMissingImages && !orderChanged && !seedContentChanged) {
         return storedState.characters;
     }
 
-    const mergedCharacters = sortBySeedOrder([...sortedStoredCharacters, ...newDefaultCharacters]);
+    const mergedCharacters = rosterManagedInDb
+        ? [...sortedStoredCharacters, ...newDefaultCharacters]
+        : sortBySeedOrder([...sortedStoredCharacters, ...newDefaultCharacters]);
     const updates = {
         [CHARACTERS_STATE_KEY]: appStateCollection.updateOne(
             { key: CHARACTERS_STATE_KEY },
@@ -3447,7 +3517,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks || !rosterManagedInDb) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3581,6 +3651,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyNewMissionUnlocks) {
             completedMigrationUpdates[`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (!rosterManagedInDb) {
+            completedMigrationUpdates[`completed.${ROSTER_IN_DB_MIGRATION_ID}`] = migrationCompletedAt;
         }
         updates[CHARACTER_MIGRATIONS_STATE_KEY] = appStateCollection.updateOne(
             { key: CHARACTER_MIGRATIONS_STATE_KEY },
@@ -4364,6 +4437,20 @@ const serveStaticFile = express.static(path.join(__dirname), {
     },
 });
 app.use((req, res, next) => (isPublicStaticPath(req.path) ? serveStaticFile(req, res, next) : next()));
+// Art uploaded in the Character Editor. A copy on disk (from npm run pull-characters) is served
+// by the static handler above; otherwise it comes from the database. Names are content hashes,
+// so a URL's image never changes.
+app.get('/assets/character-art/:file', async (req, res, next) => {
+    try {
+        const art = await characterArtStore.find(req.params.file);
+        if (!art) return next();
+        res.set('Content-Type', art.mime);
+        res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return res.send(art.data);
+    } catch (error) {
+        return next(error);
+    }
+});
 app.use(
     helmet({
         contentSecurityPolicy: {
@@ -5006,15 +5093,16 @@ const sanitizeLastChakraGainForViewer = (lastChakraGain, viewerUsername) => {
 // these out instead of guessing at targeting itself.
 const attachSkillsWithoutTargets = (board, match, username) => {
     if (!board || !Array.isArray(board[username]) || match?.status === 'finished') return board;
+    const roster = rosterForMatch(match);
     board[username].forEach((unit, actorSlot) => {
         if (!unit || unit.alive === false || !unit.state) return;
-        const character = Number.isInteger(unit.rosterIndex) ? charactersData[unit.rosterIndex] : null;
+        const character = Number.isInteger(unit.rosterIndex) ? roster[unit.rosterIndex] : null;
         const skillCount = Array.isArray(character?.skills) ? character.skills.length : 0;
         const withoutTargets = [];
         for (let skillIndex = 0; skillIndex < skillCount; skillIndex += 1) {
             try {
                 const options = battleLogic.computeTargetOptions({
-                    match, actingUsername: username, actorSlot, skillIndex, characters: charactersData,
+                    match, actingUsername: username, actorSlot, skillIndex, characters: roster,
                 });
                 if (!Array.isArray(options?.targets) || options.targets.length === 0) withoutTargets.push(skillIndex);
             } catch (_) {
@@ -5031,15 +5119,16 @@ const attachSkillsWithoutTargets = (board, match, username) => {
 // cooldown, and why it is locked if its requirement is not met. Presentation only.
 const attachSkillStates = (board, match, username) => {
     if (!board || !Array.isArray(board[username]) || match?.status === 'finished') return board;
+    const roster = rosterForMatch(match);
     board[username].forEach((viewUnit, actorSlot) => {
         const unit = match?.board?.[username]?.[actorSlot];
         if (!viewUnit || !viewUnit.state || !unit || unit.alive === false || !unit.state) return;
-        const character = Number.isInteger(unit.rosterIndex) ? charactersData[unit.rosterIndex] : null;
+        const character = Number.isInteger(unit.rosterIndex) ? roster[unit.rosterIndex] : null;
         const skills = Array.isArray(character?.skills) ? character.skills : [];
         viewUnit.state.skillStates = skills.map((baseSkill, skillIndex) => {
             try {
                 const skill = battleLogic.resolveEffectiveSkill({
-                    characters: charactersData, rosterIndex: unit.rosterIndex, skillIndex, actorState: unit.state,
+                    characters: roster, rosterIndex: unit.rosterIndex, skillIndex, actorState: unit.state,
                 }) || baseSkill;
                 const requirementMet = battleLogic.doesActorSatisfySkillCondition(unit, unit.state, skill);
                 const requirement = /^(Requires [^.]+)\./.exec(String(skill?.skilldescription || ''));
@@ -5232,7 +5321,7 @@ const { attachWebSocketSupport } = require('./sockets/battleSocket.js')({
     buildMatchPayloadForUser,
     sendJsonToSocket,
     battleLogic,
-    getCharactersData: () => charactersData
+    getCharactersData: (match) => rosterForMatch(match)
 });
 
 // In-memory matchmaking queues (demo)
@@ -5388,6 +5477,7 @@ const buildBattleBotTeam = () => {
             .filter(
                 (entry) =>
                     entry.character &&
+                    !isRetiredCharacter(entry.character) &&
                     typeof entry.character.characterId === 'string' &&
                     Array.isArray(entry.character.skills) &&
                     entry.character.skills.length > 0
@@ -5603,7 +5693,7 @@ const grantOpeningCharacterPassiveChakra = (match) => {
     match.economy.lastChakraGain = match.economy.lastChakraGain || {};
     for (const username of Object.keys(match.chakraPools)) {
         const count = battleLogic.getLivingTeamPassiveChakraCount(
-            match, charactersData, username, 'teamRandomChakraAtMatchStart'
+            match, rosterForMatch(match), username, 'teamRandomChakraAtMatchStart'
         );
         if (count <= 0) continue;
         const gains = generateRandomChakra(count, match.chakraPools[username]);
@@ -6295,7 +6385,7 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
     };
     // Per-battle augment memory, battle-start augment statuses, and the player's turn 1.
     towerAugmentEffects.initBattle(matchDocument, {
-        username, botUsername: botPlayer.username, setup, characters: charactersData,
+        username, botUsername: botPlayer.username, setup, characters: rosterForMatch(matchDocument),
     });
     if (matchDocument.towerEncounter.boss) {
         matchDocument.towerEncounter.boss.intent = towerBoss.computeNextIntent({
@@ -6303,7 +6393,7 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
             match: matchDocument,
             botUsername: botPlayer.username,
             playerUsername: username,
-            characters: charactersData,
+            characters: rosterForMatch(matchDocument),
             battleLogic,
         });
     }
@@ -6822,7 +6912,7 @@ const runBattleBotTurn = async (matchId) => {
                     match: hydrated,
                     botUsername: username,
                     playerUsername: getTowerPlayerUsername(hydrated),
-                    characters: charactersData,
+                    characters: rosterForMatch(hydrated),
                     battleLogic,
                     fundSkill: ({ skill, actorState }) => fundTowerBossSkill({ match: hydrated, username, skill, actorState }),
                     queue: ({ actorSlot, skillIndex, targetSelection }) => queueSkillForActorSlot({
@@ -6835,7 +6925,7 @@ const runBattleBotTurn = async (matchId) => {
                 match: hydrated,
                 username,
                 elite: isEliteEncounterMatch(hydrated) || isTowerEliteMatch(hydrated),
-                characters: charactersData,
+                characters: rosterForMatch(hydrated),
                 battleLogic,
                 skipActorSlots,
                 canAfford: ({ skill, actorState }) => botCanAffordSkill({ match: hydrated, username, skill, actorState }),
@@ -6856,7 +6946,7 @@ const runBattleBotTurn = async (matchId) => {
                     match: after,
                     botUsername: username,
                     playerUsername: getTowerPlayerUsername(after),
-                    characters: charactersData,
+                    characters: rosterForMatch(after),
                     battleLogic,
                 });
             }
@@ -6928,8 +7018,9 @@ const queueSkillForActorSlot = ({ match, username, actorSlot, skillIndex, target
         throw new Error('Actor is stunned and cannot use skills.');
     }
     const rosterIndex = actorUnit?.rosterIndex;
+    const roster = rosterForMatch(match);
     const skill = battleLogic.resolveEffectiveSkill({
-        characters: charactersData,
+        characters: roster,
         rosterIndex,
         skillIndex,
         actorState,
@@ -6947,8 +7038,8 @@ const queueSkillForActorSlot = ({ match, username, actorSlot, skillIndex, target
     if (battleLogic.isSkillIndexBlockedForActor(actorState, skillIndex)) {
         throw new Error('This skill is unusable this turn.');
     }
-    const baseSkill = Array.isArray(charactersData?.[rosterIndex]?.skills)
-        ? charactersData[rosterIndex].skills[skillIndex]
+    const baseSkill = Array.isArray(roster?.[rosterIndex]?.skills)
+        ? roster[rosterIndex].skills[skillIndex]
         : null;
     const cooldownSkillId =
         skill?.useBaseSkillCooldown && baseSkill?.id ? baseSkill.id : skill?.id || baseSkill?.id || null;
@@ -7175,8 +7266,9 @@ const ensureBoardState = async (match) => {
     if (!match) return match;
     let changed = false;
     const players = Array.isArray(match.players) ? match.players : [];
+    const roster = rosterForMatch(match);
     if (!match.board) {
-        match.board = battleLogic.buildInitialBoard(players, charactersData);
+        match.board = battleLogic.buildInitialBoard(players, roster);
         changed = true;
     }
     // Backfill aliveCount and board entries
@@ -7186,7 +7278,7 @@ const ensureBoardState = async (match) => {
             changed = true;
         }
         if (!match.board[player.username]) {
-            match.board[player.username] = battleLogic.buildInitialBoard([player], charactersData)[player.username];
+            match.board[player.username] = battleLogic.buildInitialBoard([player], roster)[player.username];
             changed = true;
         }
         const units = Array.isArray(match.board[player.username]) ? match.board[player.username] : [];
@@ -7219,7 +7311,7 @@ const ensureBoardState = async (match) => {
             if (!state || !Array.isArray(state.statuses) || typeof state.cooldowns !== 'object') {
                 changed = true;
             }
-            if (reconcileUnitPassive(unit, charactersData, battleLogic.buildInitialBoard)) {
+            if (reconcileUnitPassive(unit, roster, battleLogic.buildInitialBoard)) {
                 changed = true;
             }
             if (unit.alive !== false) {
@@ -7290,8 +7382,9 @@ const ensureBoardState = async (match) => {
 const finalizeTurn = async (match, username) => {
     if (!match || match.currentTurn !== username) return match;
     if (match.status === 'ended') return match;
+    const roster = rosterForMatch(match);
     if (!match.board) {
-        match.board = battleLogic.buildInitialBoard(match.players || [], charactersData);
+        match.board = battleLogic.buildInitialBoard(match.players || [], roster);
     }
     const econ = match.economy;
     const pools = match.chakraPools;
@@ -7300,7 +7393,7 @@ const finalizeTurn = async (match, username) => {
     battleLogic.resolvePendingTurnSkills({
         match,
         actingUsername: username,
-        characters: charactersData,
+        characters: roster,
     });
     battleLogic.tickStatusesForTurnEnd({
         match,
@@ -7377,7 +7470,7 @@ const finalizeTurn = async (match, username) => {
     );
     const effectiveGainCount = Math.max(0, aliveCount - blockedActorGainCount);
     const periodicPassiveGains = battleLogic.getLivingTeamPassiveChakraCount(
-        match, charactersData, username, 'teamRandomChakraEveryOwnTurns', econ.turnCounts[username] + 1
+        match, roster, username, 'teamRandomChakraEveryOwnTurns', econ.turnCounts[username] + 1
     );
     const turnGains = generateRandomChakra(
         effectiveGainCount + additionalTurnGains + periodicPassiveGains, pools[username]
@@ -7569,8 +7662,21 @@ async function initDb() {
     await newsPostsCollection.createIndex({ createdAt: -1 });
     await bugsCollection.createIndex({ createdAt: -1 });
     await bugsCollection.createIndex({ status: 1 });
+    characterHistoryCollection = db.collection('character_history');
+    characterArtCollection = db.collection('character_art');
+    await characterHistory.ensureIndexes();
+    await characterArtCollection.createIndex({ file: 1 }, { unique: true });
+    // The roster as stored before this boot's code updates: matches already running keep it,
+    // and anything a code update changes is recorded in the characters' version history.
+    const storedRosterBeforeBoot = await appStateCollection.findOne({ key: CHARACTERS_STATE_KEY });
     charactersData = await getStoredCharacters();
     characterCatalog = buildCharacterCatalog();
+    await rosterVersions.initialize({ stored: storedRosterBeforeBoot, characters: charactersData });
+    if (Array.isArray(storedRosterBeforeBoot?.characters)) {
+        await characterHistory.record(diffRosters(storedRosterBeforeBoot.characters, charactersData), {
+            savedBy: 'Code update (deploy)', action: 'code-update', rosterVersion: rosterVersions.version,
+        });
+    }
     await getStoredLadderRankTiers();
     await backfillUserProfiles();
     // News posts are managed in the ACP; restarting must not recreate deleted posts.
@@ -7981,6 +8087,11 @@ async function initDb() {
         charactersData,
         getCharactersData: () => charactersData,
         saveCharacters,
+        updateCharacters,
+        characterHistory,
+        characterArtStore,
+        CharacterArtError,
+        getRosterVersion: () => rosterVersions.version,
         serializeCharactersDataFile,
         latestReleasesUpdateSchema,
         maintenanceModeUpdateSchema,
@@ -8873,7 +8984,7 @@ app.post('/api/match/:matchId/skill/queue', requireSession, async (req, res) => 
         actingUsername: username,
         actorSlot,
         skillIndex,
-        characters: charactersData,
+        characters: rosterForMatch(hydrated),
     });
     if (!options.targetType || options.mode === 'unknown') {
         return res.status(400).json({ error: 'Skill target could not be resolved.' });
@@ -9209,7 +9320,7 @@ app.post('/api/match/:matchId/skill/targets', requireSession, async (req, res) =
         actingUsername: username,
         actorSlot,
         skillIndex,
-        characters: charactersData,
+        characters: rosterForMatch(hydrated),
     });
 
     if (!options.targetType || options.mode === 'unknown') {
@@ -9348,7 +9459,8 @@ app.get('/api/characters/catalog', async (req, res) => {
         const policies = await characterRankAccess.getPolicies();
         return res.json({
             ok: true,
-            characters: characterCatalog.filter((character) => !evaluateAccess({
+            characters: characterCatalog.filter((character) =>
+                !isRetiredCharacter(findRosterCharacter(character.characterId)) && !evaluateAccess({
                 policies, characterId: character.characterId,
                 role: authUser?.role, inheritedUnlocked: true,
             }).hidden),
@@ -9367,7 +9479,13 @@ app.get('/api/characters', async (req, res) => {
         const lockedCharacterIds = await getMissionLockedCharacterIds();
         const policies = await characterRankAccess.getPolicies();
         const profile = authUser ? normalizeUserProfile(authUser) : null;
-        const characterList = Array.isArray(charactersData) ? charactersData : [];
+        // The battle screen asks for its match's roster: a match keeps the character data it
+        // started with, so skills read the same as the server plays them after a balance change.
+        const requestedMatchId = typeof req.query?.matchId === 'string' ? req.query.matchId.trim().slice(0, 100) : '';
+        const requestedMatch = requestedMatchId && matchesCollection ? await getMatchActive(requestedMatchId) : null;
+        const matchRoster = requestedMatch && requestedMatch.status !== 'ended' ? rosterForMatch(requestedMatch) : null;
+        const characterList = Array.isArray(matchRoster) ? matchRoster
+            : Array.isArray(charactersData) ? charactersData : [];
         const missionCatalog = await getStoredMissionCatalog();
         return res.json({
             ok: true,
@@ -10995,6 +11113,12 @@ module.exports = {
     serializeTowerEncounter,
     // Tests only: lets mission and reward code run against an in-memory users collection.
     __setTestUsersCollection: (collection) => { usersCollection = collection; },
+    // Tests only: run the boot-time roster load and retirement rules against in-memory data.
+    getStoredCharacters,
+    ROSTER_IN_DB_MIGRATION_ID,
+    __setTestAppStateCollection: (collection) => { appStateCollection = collection; },
+    __setTestCharacters: (characters) => { charactersData = characters; },
+    __getCharacters: () => charactersData,
     app,
 };
 

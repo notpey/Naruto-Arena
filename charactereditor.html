@@ -6,11 +6,12 @@
   <title>Character Editor — Naruto-Arena ACP</title>
   <link rel="stylesheet" href="brand.css">
   <link rel="stylesheet" href="charactercreator.css">
-  <link rel="stylesheet" href="charactereditor.css?v=1">
+  <link rel="stylesheet" href="charactereditor.css?v=2">
   <script src="character-images.js?v=1"></script>
   <script src="status-display.js?v=2" defer></script>
   <script src="skill-description-format.js?v=3" defer></script>
-  <script src="charactereditor.js?v=1" defer></script>
+  <script src="roster-catalog.js?v=2" defer></script>
+  <script src="charactereditor.js?v=2" defer></script>
 </head>
 <body>
   <div class="creator-shell">
@@ -18,7 +19,7 @@
       <div>
         <a class="back-link" href="admin.html">← Control Panel</a>
         <h1>Character Editor</h1>
-        <p>Tune live characters. Saved changes apply to the playable roster for new matches.</p>
+        <p>Tune live characters. Saved changes go live for new matches; matches already in progress finish on the version they started with.</p>
       </div>
       <div class="header-actions">
         <button type="button" class="button secondary" id="new-character">New character</button>
@@ -43,13 +44,14 @@
           <div class="toolbar-actions">
             <button type="button" class="text-button" id="revert-character" hidden>Discard changes</button>
             <button type="button" class="text-button" id="export-character" hidden>Export JSON</button>
-            <button type="button" class="text-button danger" id="delete-character" hidden>Delete character</button>
+            <button type="button" class="text-button danger" id="delete-character" hidden>Retire character</button>
           </div>
         </div>
         <nav class="creator-tabs" aria-label="Editor views">
           <button type="button" class="creator-tab active" data-view="edit" aria-current="page">Edit</button>
           <button type="button" class="creator-tab" data-view="preview">Preview</button>
           <button type="button" class="creator-tab" data-view="changes">Changes <span id="changes-count" class="ce-tab-count" hidden></span></button>
+          <button type="button" class="creator-tab" data-view="history">History</button>
           <button type="button" class="creator-tab" data-view="raw">Raw data</button>
         </nav>
 
@@ -71,12 +73,18 @@
             <div id="changes-content"></div>
           </section>
 
+          <section class="view-panel ce-history" data-panel="history" aria-label="Version history" hidden>
+            <div class="view-heading"><div><h2>History</h2><p>Every saved version of this character: who saved it and what changed. Load any version into the editor to review it, then save to make it live again.</p></div></div>
+            <div id="history-content"></div>
+          </section>
+
           <section class="view-panel ce-raw" data-panel="raw" aria-label="Raw character data" hidden>
             <div class="view-heading"><div><h2>Raw data</h2><p>The full character, including effect logic the form doesn't show. Apply your edits to the editor, then save as usual.</p></div></div>
             <textarea id="raw-json" spellcheck="false" aria-label="Character JSON"></textarea>
             <div class="ce-raw-actions"><button type="button" class="button secondary" id="raw-apply">Apply to editor</button><button type="button" class="text-button" id="raw-reset">Reload from editor</button><span id="raw-state" role="status" aria-live="polite"></span></div>
           </section>
         </div>
+        <input type="file" id="art-file" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
       </main>
     </div>
   </div>

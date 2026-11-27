@@ -25,8 +25,9 @@ module.exports = function createTowerRouter(context) {
     const ACTIVE = [...towerRun.ACTIVE_STATUSES];
 
     // ------------------------------------------------------------ characters
+    // Retired characters stay in the roster for old matches but can't be recruited.
     const rosterIds = () => (getCharacters() || [])
-        .filter((character) => typeof character?.characterId === 'string' &&
+        .filter((character) => typeof character?.characterId === 'string' && character.retired !== true &&
             Array.isArray(character.skills) && character.skills.length > 0)
         .map((character) => character.characterId);
 

@@ -78,7 +78,10 @@ const NarutoRosterCatalog = (() => {
     const arcsById = new Map(arcs.map((arc) => [arc.id, arc]));
     const characterMeta = new Map(characters.map(([id, arcId], order) => [id, { arcId, order }]));
     const getCharacterId = (character) => character?.characterId || character?.id;
-    const getArc = (character) => arcsById.get(characterMeta.get(getCharacterId(character))?.arcId) || null;
+    // Characters made in the ACP Character Editor carry their own arc.
+    const arcIdOf = (character) => characterMeta.get(getCharacterId(character))?.arcId ||
+        (typeof character?.arc === 'string' ? character.arc : '');
+    const getArc = (character) => arcsById.get(arcIdOf(character)) || null;
 
     const listAvailableArcs = (roster) => {
         const present = new Set(roster.filter((character) => character?.hidden !== true)
@@ -115,8 +118,8 @@ const NarutoRosterCatalog = (() => {
                 }
                 const firstMeta = characterMeta.get(getCharacterId(first));
                 const secondMeta = characterMeta.get(getCharacterId(second));
-                const firstArc = arcsById.get(firstMeta?.arcId);
-                const secondArc = arcsById.get(secondMeta?.arcId);
+                const firstArc = getArc(first);
+                const secondArc = getArc(second);
                 return (firstArc?.order ?? Infinity) - (secondArc?.order ?? Infinity)
                     || (firstMeta?.order ?? Infinity) - (secondMeta?.order ?? Infinity)
                     || String(first.name || '').localeCompare(String(second.name || ''))
@@ -124,7 +127,7 @@ const NarutoRosterCatalog = (() => {
             });
     };
 
-    return { getArc, listAvailableArcs, filterRosterIndices };
+    return { arcs: arcs.map((arc) => ({ ...arc })), getArc, listAvailableArcs, filterRosterIndices };
 })();
 
 if (typeof window !== 'undefined') window.NarutoRosterCatalog = NarutoRosterCatalog;

@@ -85,6 +85,15 @@ Stop and explain the blocker before doing any of the following unless the user e
 
 Do not silently make one of these changes merely because it would make the implementation easier.
 
+## Live Character Data
+
+The live roster is stored in MongoDB and edited by admins in the ACP Character Editor. It is the source of truth on the live site; `data/characters/` only seeds a new database and carries code changes.
+
+- Before changing an existing character in code, run `npm run pull-characters` so the files start from the live version. Admin edits made since your last pull would otherwise be overwritten by your migration.
+- Roster order is roster index order, which matches, saved teams and stats depend on. New characters join the end. Characters are retired (`retired: true`), never removed.
+- Each match plays on the roster version it started with (`match.rosterVersion`). Server code that reads character data during a match must use `rosterForMatch(match)`, not the current roster.
+- A one-time character migration replaces live data on deploy. Prefer migrations that change only the fields they mean to change. Every change a deploy makes is recorded in the character's history in the editor.
+
 ## Validation
 
 After changes:

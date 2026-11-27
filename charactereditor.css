@@ -67,7 +67,7 @@
 .ce-tip { display: grid; gap: 4px; }
 .ce-tip > span { color: #29364b !important; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .inline-editor .ce-tip textarea { width: 100%; min-height: 48px; border: 1px solid #d0d6de; border-radius: 3px; padding: 6px 8px; background: #fff; color: #2d405b; font-size: 12px; line-height: 1.45; resize: vertical; }
-.ce-tip-icon-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 8px; }
+.ce-tip-icon-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
 .ce-tip-thumb { width: 34px; height: 34px; overflow: hidden; border: 1px solid #9ba9bc; border-radius: 3px; background: #ecf0f5; color: #53677f; font-size: 8px; }
 .ce-tip-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .inline-editor .ce-tip input { width: 100%; border: 0; border-bottom: 1px solid #c5cbd4; padding: 4px 0; color: #4b6077; font-size: 11px; }
@@ -82,6 +82,43 @@
 .ce-before { color: #f2a6a0; text-decoration: line-through; text-decoration-color: rgba(242, 166, 160, .5); }
 .ce-after { color: #9ad8b0; }
 
+/* Image upload, beside every art URL field */
+.inline-art .ce-upload { margin-top: 6px; }
+.ce-upload { min-height: 26px; border: 1px solid #9eb0c6; border-radius: 3px; padding: 3px 10px; background: #edf2f8; color: #2d5a94; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; cursor: pointer; }
+.ce-upload:hover { border-color: #2d5a94; background: #e3eaf3; }
+.ce-upload:focus-visible { outline: 2px solid #2f73cf; outline-offset: 2px; }
+
+/* Character info row: id, unlock mission, arc, tags */
+#character-form .inline-character-bottom { grid-template-columns: minmax(110px, .7fr) minmax(0, 1.5fr) minmax(120px, .8fr) minmax(120px, .8fr); }
+
+/* Live status above the form: new, staff only, or retired */
+.ce-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid #3c4553; border-radius: 4px; background: #171e2a; color: #d8dee7; font-size: 13px; line-height: 1.45; }
+.ce-status strong { color: #f3eadb; }
+.ce-status .button { min-height: 34px; padding: 6px 14px; font-size: 12px; }
+.ce-status.is-staff { border-color: #6b5a8a; background: #1e1a2a; }
+.ce-status.is-staff strong { color: #d4c2f0; }
+.ce-status.is-retired { border-color: #7a4a46; background: #251a1b; }
+.ce-status.is-retired strong { color: #f2b3ad; }
+
+/* Retired characters in the roster list */
+.ce-roster-item.is-retired img { filter: grayscale(1); opacity: .55; }
+.ce-roster-item.is-retired strong { color: #9aa3ae; }
+
+/* History */
+.ce-history { max-width: 1000px; }
+.ce-history-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.ce-history-entry { padding: 12px 14px; border: 1px solid #344052; border-radius: 4px; background: #171e2a; }
+.ce-history-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.ce-history-head strong { color: #f3eadb; font-size: 14px; text-transform: uppercase; letter-spacing: .03em; }
+.ce-history-head span { color: #aeb7c4; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ce-history-entry details { margin-top: 10px; }
+.ce-history-entry summary { color: #dda16c; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.ce-history-entry summary:focus-visible { outline: 2px solid #2f73cf; outline-offset: 2px; }
+.ce-history-entry .ce-change-table { margin-top: 10px; }
+.ce-history-entry .ce-muted { margin: 8px 0 0; }
+.ce-history-actions { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 8px; }
+.ce-history-actions:empty { display: none; }
+
 /* Raw data */
 .ce-raw { max-width: 1100px; }
 #raw-json { width: 100%; min-height: 60vh; padding: 14px; border: 1px solid #344052; background: #0c1018; color: #d8e2ee; font: 12px/1.5 ui-monospace, Consolas, monospace; resize: vertical; }
@@ -94,4 +131,5 @@
   .draft-list { max-height: none; }
   .ce-roster-item { min-width: 190px; }
   .ce-skill-footer { grid-template-columns: 1fr; }
+  #character-form .inline-character-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

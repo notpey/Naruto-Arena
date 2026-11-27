@@ -506,7 +506,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let loadedRosterRyoBalance = 0;
     const loadCharacterRoster = async () => {
         try {
-            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters`, {
+            // In battle, ask for the match's own roster: a match keeps the character data it
+            // started with, so skills read the same as the server plays them after a balance change.
+            const rosterMatchId = pageName === 'ingame.html'
+                ? new URLSearchParams(window.location.search).get('matchId') : '';
+            const rosterQuery = rosterMatchId ? `?matchId=${encodeURIComponent(rosterMatchId)}` : '';
+            const response = await window.ArenaSession.fetch(`${API_BASE_URL}/api/characters${rosterQuery}`, {
                 credentials: 'include',
                 cache: 'no-store',
             });

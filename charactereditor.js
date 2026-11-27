@@ -35,7 +35,12 @@
   const changesContent = $('changes-content');
   const raw = $('raw-json');
 
+  const ARCS = (window.NarutoRosterCatalog && window.NarutoRosterCatalog.arcs) || [];
+  const ACTION_LABELS = { create: 'Created', edit: 'Edited', retire: 'Retired', restore: 'Brought back', 'code-update': 'Code update' };
+
   let roster = [];
+  let revisions = {};
+  let accessPolicies = null;
   let missions = [];
   let knownClasses = [];
   let knownTargets = [];
@@ -44,6 +49,8 @@
   let isNew = false;
   let view = 'edit';
   let busy = false;
+  let uploadPath = null;
+  let historyFor = '';
 
   // ---------- helpers ----------
   const clone = value => JSON.parse(JSON.stringify(value));
@@ -150,7 +157,8 @@
     saveButton.disabled = busy || !working || (!count && !isNew);
     saveButton.textContent = busy ? 'Saving…' : isNew ? 'Create character' : count ? `Save ${count} change${count === 1 ? '' : 's'}` : 'Save changes';
     $('revert-character').hidden = !count || isNew;
-    if (!busy && working) setState(isNew ? 'New character · not saved yet' : count ? `${count} unsaved change${count === 1 ? '' : 's'}` : `${working.name} · saved and live`);
+    const savedState = original?.retired ? 'retired' : hiddenFromPlayers(original?.characterId) ? 'saved · staff only' : 'saved and live';
+    if (!busy && working) setState(isNew ? 'New character · not saved yet' : count ? `${count} unsaved change${count === 1 ? '' : 's'}` : `${working.name} · ${savedState}`);
     renderList();
     document.querySelectorAll('[data-stale-hint]').forEach(node => { node.hidden = !staleDescriptions().includes(Number(node.dataset.staleHint)); });
   }
@@ -161,9 +169,9 @@
     const visible = roster.filter(c => `${c.name} ${c.characterId}`.toLowerCase().includes(query));
     if (!visible.length) { list.innerHTML = `<p class="empty">${roster.length ? 'No characters match.' : 'No characters loaded.'}</p>`; return; }
     const dirtyId = working && !isNew && changes().length ? original.characterId : '';
-    list.innerHTML = visible.map(c => `<button type="button" class="draft-item ce-roster-item${working && !isNew && c.characterId === original.characterId ? ' active' : ''}" data-character-id="${escapeHtml(c.characterId)}">
+    list.innerHTML = visible.map(c => `<button type="button" class="draft-item ce-roster-item${working && !isNew && c.characterId === original.characterId ? ' active' : ''}${c.retired ? ' is-retired' : ''}" data-character-id="${escapeHtml(c.characterId)}">
       <img src="${escapeHtml(imageSrc(c.facePicture))}" alt="" loading="lazy">
-      <span><strong>${escapeHtml(c.name)}${c.characterId === dirtyId ? ' <span class="ce-dirty-dot" title="Unsaved changes">●</span>' : ''}</strong><small>${escapeHtml(c.characterId)}${c.requiredMissionId ? ' · mission unlock' : ''}</small></span>
+      <span><strong>${escapeHtml(c.name)}${c.characterId === dirtyId ? ' <span class="ce-dirty-dot" title="Unsaved changes">●</span>' : ''}</strong><small>${escapeHtml(c.characterId)}${c.retired ? ' · retired' : hiddenFromPlayers(c.characterId) ? ' · staff only' : c.requiredMissionId ? ' · mission unlock' : ''}</small></span>
     </button>`).join('');
     list.querySelectorAll('img').forEach(img => img.addEventListener('error', () => { img.style.visibility = 'hidden'; }, { once: true }));
   }
@@ -175,7 +183,10 @@
   }
   function art(path, label) {
     const url = getAt(working, path) || '';
-    return `<div class="inline-art"><div class="inline-art-preview" data-art="${pathAttr(path)}">${url ? `<img src="${escapeHtml(imageSrc(url))}" alt="${escapeHtml(label)}">` : escapeHtml(label)}</div><input type="url" placeholder="https://i.imgur.com/…" aria-label="${escapeHtml(label)} URL" ${field(path, 'text')}></div>`;
+    return `<div class="inline-art"><div class="inline-art-preview" data-art="${pathAttr(path)}">${url ? `<img src="${escapeHtml(imageSrc(url))}" alt="${escapeHtml(label)}">` : escapeHtml(label)}</div><input type="text" placeholder="Image URL or upload" aria-label="${escapeHtml(label)} URL" ${field(path, 'text')}>${uploadButton(path, label)}</div>`;
+  }
+  function uploadButton(path, label) {
+    return `<button type="button" class="ce-upload" data-upload="${pathAttr(path)}" aria-label="Upload ${escapeHtml(label)}">Upload</button>`;
   }
   function stepper(path, label, max) {
     return `<span class="ce-stepper" role="group" aria-label="${escapeHtml(label)}"><button type="button" data-step="${pathAttr(path)}" data-delta="-1" aria-label="Decrease ${escapeHtml(label)}">−</button><input type="number" min="0" max="${max}" inputmode="numeric" aria-label="${escapeHtml(label)}" ${field(path, 'int', `data-max="${max}"`)}><button type="button" data-step="${pathAttr(path)}" data-delta="1" aria-label="Increase ${escapeHtml(label)}">+</button></span>`;
@@ -216,7 +227,7 @@
     const key = path[path.length - 1];
     if (key === 'statusIcon') {
       const url = getAt(working, path) || '';
-      return `<label class="ce-tip ce-tip-icon"><span>${escapeHtml(label)}</span><span class="ce-tip-icon-row"><span class="ce-tip-thumb" data-art="${pathAttr(path)}">${url ? `<img src="${escapeHtml(imageSrc(url))}" alt="">` : ''}</span><input type="url" ${field(path, 'text')}></span></label>`;
+      return `<div class="ce-tip ce-tip-icon"><span>${escapeHtml(label)}</span><span class="ce-tip-icon-row"><span class="ce-tip-thumb" data-art="${pathAttr(path)}">${url ? `<img src="${escapeHtml(imageSrc(url))}" alt="">` : ''}</span><input type="text" aria-label="${escapeHtml(label)} URL" ${field(path, 'text')}>${uploadButton(path, label)}</span></div>`;
     }
     return `<label class="ce-tip"><span>${escapeHtml(label)}</span><textarea rows="2" data-path="${pathAttr(path)}" data-kind="text">${escapeHtml(getAt(working, path))}</textarea></label>`;
   }
@@ -268,15 +279,106 @@
   function renderForm() {
     const missionOptions = [`<option value="">None (always available)</option>`].concat(missions.map(m => `<option value="${escapeHtml(m.missionId)}"${m.missionId === working.requiredMissionId ? ' selected' : ''}>${escapeHtml(m.title || m.name || m.missionId)}</option>`));
     if (working.requiredMissionId && !missions.some(m => m.missionId === working.requiredMissionId)) missionOptions.push(`<option value="${escapeHtml(working.requiredMissionId)}" selected>${escapeHtml(working.requiredMissionId)} (not found)</option>`);
-    form.innerHTML = `<section class="inline-character">
+    const catalogArc = window.NarutoRosterCatalog && window.NarutoRosterCatalog.getArc({ characterId: working.characterId });
+    const arcField = catalogArc
+      ? `<label>Arc <input readonly value="${escapeHtml(catalogArc.label)}" title="This character's arc is set in roster-catalog.js."></label>`
+      : `<label>Arc <select data-path="${pathAttr(['arc'])}" data-kind="optional">${[`<option value="">None</option>`].concat(ARCS.map(arc => `<option value="${escapeHtml(arc.id)}"${arc.id === working.arc ? ' selected' : ''}>${escapeHtml(arc.label)}</option>`)).join('')}</select></label>`;
+    form.innerHTML = `${statusBanner()}<section class="inline-character">
         <div class="inline-card-title"><input maxlength="80" placeholder="Character name" aria-label="Character name" ${field(['name'], 'text')}></div>
         <div class="inline-character-main">${art(['facePicture'], 'Portrait')}<textarea rows="5" maxlength="4000" placeholder="Character description" aria-label="Character description" data-path="${pathAttr(['characterdeescription'])}" data-kind="text">${escapeHtml(working.characterdeescription)}</textarea></div>
-        <div class="inline-character-bottom"><label>Character id <input ${isNew ? '' : 'readonly title="Ids can\'t change on a live character."'} ${field(['characterId'], 'id')}></label><label>Mission to unlock <select data-path="${pathAttr(['requiredMissionId'])}" data-kind="mission">${missionOptions.join('')}</select></label><label>Tags <input placeholder="none" data-path="${pathAttr(['tags'])}" data-kind="list" value="${escapeHtml((working.tags || []).join(', '))}"></label></div>
+        <div class="inline-character-bottom"><label>Character id <input ${isNew ? '' : 'readonly title="Ids can\'t change on a live character."'} ${field(['characterId'], 'id')}></label><label>Mission to unlock <select data-path="${pathAttr(['requiredMissionId'])}" data-kind="mission">${missionOptions.join('')}</select></label>${arcField}<label>Tags <input placeholder="none" data-path="${pathAttr(['tags'])}" data-kind="list" value="${escapeHtml((working.tags || []).join(', '))}"></label></div>
       </section>
       ${passiveSection()}
       <section class="skills-section"><div class="inline-section-bar"><h2>Skills</h2><span class="ce-muted">Add, remove, or reorder skills in Raw data.</span></div><div class="inline-skill-grid">${working.skills.map(skillCard).join('')}</div></section>`;
     form.querySelectorAll('[data-art] img').forEach(img => img.addEventListener('error', () => { img.replaceWith(document.createTextNode('No image')); }, { once: true }));
     fitTextareas(form);
+  }
+
+  // ---------- live status: retired, staff only, or playable ----------
+  function hiddenFromPlayers(characterId) {
+    return accessPolicies?.[characterId]?.player?.visibility === 'hidden';
+  }
+  function statusBanner() {
+    if (isNew) return `<p class="ce-status">New characters start <strong>staff only</strong>: admins and moderators can play them, players can't see them until you release them.</p>`;
+    if (original?.retired) return `<p class="ce-status is-retired"><span><strong>Retired.</strong> Hidden everywhere and can't be picked. Saved teams and match history that use them are untouched.</span><button type="button" class="button secondary" id="restore-character">Bring back</button></p>`;
+    if (accessPolicies && hiddenFromPlayers(original.characterId)) return `<p class="ce-status is-staff"><span><strong>Staff only.</strong> Players can't see or pick this character yet.</span><button type="button" class="button secondary" id="release-character">Release to players</button></p>`;
+    return '';
+  }
+  async function setPlayerVisibility(characterId, visible) {
+    const data = await request('/api/admin/character-access');
+    const policies = { ...(data.policies || {}) };
+    const player = { ...(policies[characterId]?.player || { unlock: 'inherit' }), visibility: visible ? 'visible' : 'hidden' };
+    if (player.visibility === 'visible' && (player.unlock || 'inherit') === 'inherit') delete policies[characterId];
+    else policies[characterId] = { player };
+    accessPolicies = (await request('/api/admin/character-access', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policies }) })).policies || policies;
+  }
+  async function loadAccess() {
+    try { accessPolicies = (await request('/api/admin/character-access')).policies || {}; }
+    catch (_) { accessPolicies = null; }
+  }
+
+  // ---------- image upload ----------
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('That file could not be read.'));
+      reader.readAsDataURL(file);
+    });
+  }
+  async function uploadArt(file) {
+    const path = uploadPath;
+    uploadPath = null;
+    if (!file || !path || !working) return;
+    if (file.size > 2 * 1024 * 1024) { setState('That image is over 2 MB. Pick a smaller one.', 'error'); return; }
+    setState('Uploading image…');
+    try {
+      const data = await request('/api/admin/character-art', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dataUrl: await readFileAsDataUrl(file) }) });
+      setAt(working, path, data.url);
+      const input = form.querySelector(`[data-path="${CSS.escape(JSON.stringify(path))}"]`);
+      if (input) input.value = data.url;
+      updateArt(path);
+      refreshStatus();
+      setState(`Image uploaded (${data.width}×${data.height}). Save to make it live.`, 'success');
+    } catch (error) {
+      setState(error.message || 'The image could not be uploaded.', 'error');
+    }
+  }
+
+  // ---------- history ----------
+  async function renderHistory() {
+    const content = $('history-content');
+    if (isNew || !original) { content.innerHTML = '<p class="ce-muted">History starts when the character is first saved.</p>'; return; }
+    const characterId = original.characterId;
+    historyFor = characterId;
+    content.innerHTML = '<p class="ce-muted">Loading history…</p>';
+    let entries;
+    try { entries = (await request(`/api/admin/characters/${encodeURIComponent(characterId)}/history`)).entries || []; }
+    catch (error) { if (historyFor === characterId) content.innerHTML = `<p class="ce-warning">${escapeHtml(error.message)}</p>`; return; }
+    if (historyFor !== characterId || view !== 'history') return;
+    if (!entries.length) { content.innerHTML = '<p class="ce-muted">No saved versions yet. Versions are recorded from now on, each time someone saves this character or a code update changes it.</p>'; return; }
+    content.innerHTML = `<ol class="ce-history-list">${entries.map((entry, i) => {
+      const changeList = entry.before && entry.after ? diff(entry.before, entry.after, [], []) : [];
+      const when = new Date(entry.savedAt);
+      const rows = changeList.slice(0, 40).map(change => `<tr><td>${escapeHtml(labelFor(change.path))}</td><td class="ce-before">${escapeHtml(formatValue(change.before))}</td><td class="ce-after">${escapeHtml(formatValue(change.after))}</td></tr>`).join('');
+      return `<li class="ce-history-entry">
+        <div class="ce-history-head"><strong>${escapeHtml(ACTION_LABELS[entry.action] || humanize(entry.action))}</strong><span>${escapeHtml(entry.savedBy || 'Unknown')} · <time datetime="${escapeHtml(entry.savedAt)}">${escapeHtml(when.toLocaleString())}</time>${changeList.length ? ` · ${changeList.length} change${changeList.length === 1 ? '' : 's'}` : ''}</span></div>
+        ${rows ? `<details><summary>What changed</summary><table class="ce-change-table"><thead><tr><th>What</th><th>Before</th><th>After</th></tr></thead><tbody>${rows}</tbody></table>${changeList.length > 40 ? `<p class="ce-muted">…and ${changeList.length - 40} more.</p>` : ''}</details>` : ''}
+        <div class="ce-history-actions">${entry.after ? `<button type="button" class="text-button" data-load-version="${i}" data-side="after">Load this version</button>` : ''}${entry.before ? `<button type="button" class="text-button" data-load-version="${i}" data-side="before">Load the version before this</button>` : ''}</div>
+      </li>`;
+    }).join('')}</ol>`;
+    content.querySelectorAll('[data-load-version]').forEach(button => button.addEventListener('click', () => {
+      const entry = entries[Number(button.dataset.loadVersion)];
+      const version = entry && entry[button.dataset.side];
+      if (!version || !confirmLeave()) return;
+      // Retiring and bringing back have their own buttons, so loading a version keeps the current state.
+      working = clone(version);
+      working.characterId = original.characterId;
+      if (original.retired) working.retired = true; else delete working.retired;
+      view = 'changes';
+      renderAll();
+      setState('Version loaded into the editor. Review the Changes tab, then save to make it live.', 'success');
+    }));
   }
 
   // Descriptions grow to show their full text instead of scrolling inside a small box.
@@ -327,12 +429,13 @@
     if (view === 'edit') fitTextareas(form);
     if (view === 'preview') renderPreview();
     if (view === 'changes') renderChanges();
+    if (view === 'history') renderHistory();
     if (view === 'raw') { raw.value = JSON.stringify(working, null, 2); raw.dataset.dirty = 'false'; $('raw-state').textContent = ''; }
   }
 
   function renderAll() {
     $('export-character').hidden = !working;
-    $('delete-character').hidden = !working || isNew;
+    $('delete-character').hidden = !working || isNew || Boolean(original?.retired);
     if (working) renderForm();
     setView(view);
     refreshStatus();
@@ -353,6 +456,7 @@
     try {
       const data = await request('/api/admin/characters');
       roster = Array.isArray(data.characters) ? data.characters : [];
+      revisions = data.revisions || {};
       collectVocabulary();
       renderList();
     } catch (error) {
@@ -409,6 +513,10 @@
     if (kind === 'list') {
       value = value.split(',').map(entry => entry.trim()).filter(Boolean);
       if (!value.length && !getAt(working, path)) return path;
+    }
+    if (kind === 'optional' && !value) {
+      delete getAt(working, path.slice(0, -1))[path[path.length - 1]];
+      return path;
     }
     if (kind === 'mission' && !value) {
       // Keep however "no mission" was stored originally, so it doesn't register as a change.
@@ -495,6 +603,15 @@
       rerenderSkill(index);
       return;
     }
+    const upload = event.target.closest('[data-upload]');
+    if (upload) {
+      uploadPath = JSON.parse(upload.dataset.upload);
+      $('art-file').value = '';
+      $('art-file').click();
+      return;
+    }
+    if (event.target.id === 'restore-character') { restoreCharacter(); return; }
+    if (event.target.id === 'release-character') { releaseCharacter(); return; }
     if (event.target.id === 'toggle-passive') {
       if (working.passive) {
         if (!confirm(`Remove ${working.passive.name || 'this passive'}? Its mechanics go with it.`)) return;
@@ -532,8 +649,12 @@
     setState(isNew ? 'Creating character…' : 'Saving…');
     try {
       const url = isNew ? '/api/admin/characters' : `/api/admin/characters/${encodeURIComponent(original.characterId)}`;
-      const data = await request(url, { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(working) });
+      const headers = { 'Content-Type': 'application/json' };
+      if (!isNew && revisions[original.characterId]) headers['X-Character-Revision'] = revisions[original.characterId];
+      const data = await request(url, { method: isNew ? 'POST' : 'PUT', headers, body: JSON.stringify(working) });
       const saved = data.character || working;
+      if (data.revision) revisions[saved.characterId] = data.revision;
+      if (data.hiddenFromPlayers && accessPolicies) accessPolicies[saved.characterId] = { player: { visibility: 'hidden', unlock: 'inherit' } };
       const count = isNew ? 0 : changes().length;
       const index = roster.findIndex(c => c.characterId === (original ? original.characterId : saved.characterId));
       if (index === -1) roster.push(clone(saved)); else roster[index] = clone(saved);
@@ -545,7 +666,9 @@
       busy = false;
       const pageUrl = new URL(location.href); pageUrl.searchParams.set('character', saved.characterId); history.replaceState(null, '', pageUrl);
       renderAll();
-      setState(wasNew ? `Created ${saved.name}. It's in the live roster.` : `Saved ${count} change${count === 1 ? '' : 's'} to ${saved.name}. Live for new matches.`, 'success');
+      setState(wasNew
+        ? `Created ${saved.name}. ${data.hiddenFromPlayers ? 'Staff can play them now; release them to players when they’re ready.' : 'They’re in the live roster.'}`
+        : `Saved ${count} change${count === 1 ? '' : 's'} to ${saved.name}. Live for new matches; matches in progress finish on the old version.`, 'success');
     } catch (error) {
       busy = false;
       refreshStatus();
@@ -553,20 +676,60 @@
     }
   }
 
+  // Characters are retired, never deleted: matches, saved teams and stats refer to roster
+  // positions, so a retired character keeps its place but is hidden and can't be picked.
   async function removeCharacter() {
     if (!original || busy) return;
-    const typed = prompt(`Deleting ${original.name} removes them from the live roster for everyone, and can shift saved teams.\n\nType ${original.characterId} to confirm.`);
-    if (typed === null) return;
-    if (typed.trim() !== original.characterId) { setState('The id didn’t match, so nothing was deleted.', 'error'); return; }
+    if (!working || changes().length) { setState('Save or discard your changes before retiring this character.', 'error'); return; }
+    if (!confirm(`Retire ${original.name}?
+
+They disappear from character selection, the shop, missions and the Tower for everyone. Matches in progress finish normally. You can bring them back any time.`)) return;
     busy = true;
     try {
-      await request(`/api/admin/characters/${encodeURIComponent(original.characterId)}`, { method: 'DELETE' });
-      roster = roster.filter(c => c.characterId !== original.characterId);
-      const name = original.name;
-      original = null; working = null; busy = false;
-      const url = new URL(location.href); url.searchParams.delete('character'); history.replaceState(null, '', url);
+      const data = await request(`/api/admin/characters/${encodeURIComponent(original.characterId)}`, { method: 'DELETE' });
+      busy = false;
+      applySaved(data);
+      setState(`Retired ${original.name}. Use Bring back to return them to the roster.`, 'success');
+    } catch (error) {
+      busy = false;
+      setState(error.message, 'error');
+    }
+  }
+  async function restoreCharacter() {
+    if (!original || busy) return;
+    if (changes().length) { setState('Save or discard your changes first.', 'error'); return; }
+    const next = clone(original);
+    delete next.retired;
+    busy = true;
+    try {
+      const data = await request(`/api/admin/characters/${encodeURIComponent(original.characterId)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Character-Revision': revisions[original.characterId] || '' }, body: JSON.stringify(next) });
+      busy = false;
+      applySaved(data);
+      setState(`${original.name} is back in the roster for new matches.`, 'success');
+    } catch (error) {
+      busy = false;
+      setState(error.message, 'error');
+    }
+  }
+  function applySaved(data) {
+    const saved = data.character;
+    if (!saved) return;
+    if (data.revision) revisions[saved.characterId] = data.revision;
+    const index = roster.findIndex(c => c.characterId === saved.characterId);
+    if (index !== -1) roster[index] = clone(saved);
+    original = clone(saved);
+    working = clone(saved);
+    renderAll();
+  }
+  async function releaseCharacter() {
+    if (!original || busy) return;
+    if (!confirm(`Release ${original.name} to players? They'll appear on character selection for everyone who has them unlocked.`)) return;
+    busy = true;
+    try {
+      await setPlayerVisibility(original.characterId, true);
+      busy = false;
       renderAll();
-      setState(`Deleted ${name}.`, 'success');
+      setState(`${original.name} is released to players.`, 'success');
     } catch (error) {
       busy = false;
       setState(error.message, 'error');
@@ -594,6 +757,7 @@
     renderAll();
   });
   $('delete-character').addEventListener('click', removeCharacter);
+  $('art-file').addEventListener('change', event => uploadArt(event.target.files && event.target.files[0]));
   $('export-character').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(working, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
@@ -623,7 +787,7 @@
   window.addEventListener('beforeunload', event => { if (working && (changes().length || isNew)) { event.preventDefault(); event.returnValue = ''; } });
 
   (async () => {
-    await Promise.all([loadRoster(), loadMissions()]);
+    await Promise.all([loadRoster(), loadMissions(), loadAccess()]);
     const requested = new URLSearchParams(location.search).get('character');
     if (requested) select(requested);
     else renderAll();
