@@ -84,7 +84,7 @@ const setup = () => {
 
 test('a run starts, drafts, scouts a battle and starts its match only on /battle', async () => {
     const { call, liveMatches } = setup();
-    let response = await call('post', '/start');
+    let response = await call('post', '/start', { mode: 'legacy' });
     assert.equal(response.body.run.status, 'draft');
     assert.equal(response.body.run.draft.offers.length, 3);
     assert.ok(response.body.run.draft.offers[0][0].name, 'offers carry character names');
@@ -116,7 +116,7 @@ test('a run starts, drafts, scouts a battle and starts its match only on /battle
 
 test('a won battle carries health and offers a reward; a later loss pays account ryo once', async () => {
     const { router, call, liveMatches, usersCollection } = setup();
-    await call('post', '/start');
+    await call('post', '/start', { mode: 'legacy' });
     await call('post', '/draft', { picks: [1, 1, 1] });
     let { body } = await call('post', '/reward/skip');
     await call('post', '/node', { nodeId: body.run.availableNodeIds[0] });
@@ -142,6 +142,10 @@ test('a won battle carries health and offers a reward; a later loss pays account
         ({ body } = await call('get', '/run'));
         if (body.run.status === 'battle') break;
         if (body.run.status === 'ramen') await call('post', '/ramen', { option: 'feast' });
+        else if (body.run.status === 'event') {
+            const option = body.run.event.options.find((entry) => !entry.blocked && !entry.needsSlot);
+            await call('post', '/event', { optionId: option.id });
+        } else if (body.run.status === 'reward') await call('post', '/reward/skip');
         else if (body.run.status === 'merchant' || body.run.status === 'recruit') await call('post', '/leave');
         else {
             const open = body.run.map.floors.flat().filter((node) => body.run.availableNodeIds.includes(node.id));
@@ -166,7 +170,7 @@ test('a won battle carries health and offers a reward; a later loss pays account
 
 test('stale writes are refused instead of overwriting the run', async () => {
     const { call, towerRunsCollection } = setup();
-    await call('post', '/start');
+    await call('post', '/start', { mode: 'legacy' });
     towerRunsCollection.docs[0].version += 5; // another request saved in between
     const original = towerRunsCollection.findOne.bind(towerRunsCollection);
     towerRunsCollection.findOne = async (query, options) => {
@@ -181,7 +185,7 @@ test('stale writes are refused instead of overwriting the run', async () => {
 
 test('Act II over the API: continue past Zabuza, resolve the exam, and name a duel champion', async () => {
     const { call, towerRunsCollection, liveMatches } = setup();
-    await call('post', '/start');
+    await call('post', '/start', { mode: 'legacy' });
     await call('post', '/draft', { picks: [0, 0, 0] });
     const doc = towerRunsCollection.docs[0];
     Object.assign(doc, { status: 'interlude', pending: { nextAct: 2 }, floor: 10, currentNodeId: 'f10-0',
@@ -216,4 +220,68 @@ test('Act II over the API: continue past Zabuza, resolve the exam, and name a du
     assert.ok(response.body.matchId);
     assert.equal(response.body.run.battle.championSlot, 2);
     assert.equal(liveMatches.size, 1);
+});
+
+// ---------------------------------------------------------------- Standard mode (Tower 2.0)
+test('a new run is Standard (200 floors) by default; Legacy is chosen explicitly', async () => {
+    let { call } = setup();
+    let response = await call('post', '/start');
+    assert.equal(response.body.run.mode, 'standard');
+    assert.equal(response.body.run.totalFloors, 200);
+    response = await call('post', '/draft', { picks: [0, 0, 0] });
+    assert.equal(response.body.run.standard.checkpoints.length, 20);
+    assert.ok(response.body.run.reward.offers.every((offer) => ['common', 'rare', 'forbidden', 'prismatic'].includes(offer.tier)));
+    ({ call } = setup());
+    response = await call('post', '/start', { mode: 'legacy' });
+    assert.equal(response.body.run.mode, 'legacy');
+    assert.equal(response.body.run.totalFloors, 10);
+});
+
+test('two simultaneous claims of a fusion-completing augment fuse exactly once', async () => {
+    const { call, towerRunsCollection } = setup();
+    await call('post', '/start');
+    await call('post', '/draft', { picks: [0, 0, 0] });
+    const doc = towerRunsCollection.docs[0];
+    Object.assign(doc, { status: 'reward', pending: { nodeId: null, offers: ['a010-reinforced-armor'], ryoGained: 0 },
+        teamScrolls: ['a002-iron-skin'] });
+    const [first, second] = await Promise.all([call('post', '/reward', { offerIndex: 0 }), call('post', '/reward', { offerIndex: 0 })]);
+    assert.deepEqual([first.status, second.status].sort(), [200, 409]);
+    assert.deepEqual(towerRunsCollection.docs[0].teamScrolls, ['f02-fortress-doctrine']);
+    assert.equal(towerRunsCollection.docs[0].fusions.length, 1);
+    const retry = await call('post', '/reward', { offerIndex: 0 });
+    assert.equal(retry.status, 400, 'a replayed claim is refused');
+    assert.deepEqual(towerRunsCollection.docs[0].teamScrolls, ['f02-fortress-doctrine']);
+});
+
+test('the catalog lists all 100 augments, 20 fusions and 40 character augments with statuses', async () => {
+    const { router } = setup();
+    const layer = router.stack.find((entry) => entry.route?.path === '/catalog');
+    let payload;
+    await layer.route.stack.at(-1).handle({ authUser: { username: 'p' } }, { status() { return this; }, json(data) { payload = data; return this; } });
+    assert.equal(payload.augments.length, 100);
+    assert.equal(payload.fusions.length, 20);
+    assert.equal(payload.characterAugments.length, 40);
+    assert.ok(payload.characterAugments.every((entry) => entry.invalid.length === 0));
+    assert.ok(payload.augments.every((entry) => entry.status === 'implemented' ? entry.descriptionNormalized : entry.needs));
+});
+
+test('a lost Standard run pays its account ryō exactly once', async () => {
+    const { router, call, liveMatches, usersCollection, towerRunsCollection } = setup();
+    await call('post', '/start');
+    await call('post', '/draft', { picks: [0, 0, 0] });
+    let { body } = await call('post', '/reward/skip');
+    await call('post', '/node', { nodeId: body.run.availableNodeIds[0] });
+    await call('post', '/battle');
+    towerRunsCollection.docs[0].floor = 57; // as if the climb had reached floor 57
+    const match = liveMatches.get('m1');
+    Object.assign(match, { status: 'ended', winner: 'bot' });
+    await router.recordTowerBattleResult(match, 'bot');
+    await router.recordTowerBattleResult(match, 'bot');
+    ({ body } = await call('get', '/run'));
+    assert.equal(body.run.status, 'defeated');
+    // 57 floors x 5, three champions (10, 30, 50) x 40, two major bosses (20, 40) x 80.
+    assert.deepEqual(body.run.accountReward, { floorsCleared: 57, ryo: 57 * 5 + 3 * 40 + 2 * 80 });
+    assert.equal((await usersCollection.findOne({ username: 'p' })).profile.ryo, 100 + 565);
+    await call('get', '/run');
+    assert.equal((await usersCollection.findOne({ username: 'p' })).profile.ryo, 100 + 565, 'paid exactly once');
 });

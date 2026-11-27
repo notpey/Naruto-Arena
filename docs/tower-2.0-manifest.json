@@ -1,0 +1,1941 @@
+{
+  "generatedFrom": "services/tower/{towerAugments,towerFusions,towerCharacterAugments}.js",
+  "standardTotalFloors": 200,
+  "totals": {
+    "augments": {
+      "implemented": 98,
+      "pending": 0,
+      "blocked": 2
+    },
+    "fusions": {
+      "implemented": 20,
+      "pending": 0,
+      "blocked": 0
+    },
+    "characterAugments": {
+      "implemented": 40,
+      "pending": 0,
+      "blocked": 0
+    }
+  },
+  "augments": [
+    {
+      "code": "A001",
+      "id": "a001-chakra-efficiency",
+      "name": "Chakra Efficiency",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first skill you use each battle that costs 2 or more chakra costs 1 less random chakra.",
+      "descriptionNormalized": "Once per battle, the first skill your team uses that costs 2 or more chakra costs 1 less random chakra."
+    },
+    {
+      "code": "A002",
+      "id": "a002-iron-skin",
+      "name": "Iron Skin",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters begin each battle with 10 destructible defense.",
+      "descriptionNormalized": "Each living ninja starts every battle with 10 destructible defense."
+    },
+    {
+      "code": "A003",
+      "id": "a003-precision-training",
+      "name": "Precision Training",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first damaging skill each character uses deals 5 additional damage.",
+      "descriptionNormalized": "Each ninja's first damaging skill in a battle deals 5 additional damage."
+    },
+    {
+      "code": "A004",
+      "id": "a004-medical-training",
+      "name": "Medical Training",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your healing skills restore 5 additional health.",
+      "descriptionNormalized": "Your ninjas' skills that heal restore 5 additional health (per heal effect)."
+    },
+    {
+      "code": "A005",
+      "id": "a005-chakra-reserves",
+      "name": "Chakra Reserves",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Begin each battle with 1 additional random chakra.",
+      "descriptionNormalized": "Begin each battle with 1 additional random chakra."
+    },
+    {
+      "code": "A006",
+      "id": "a006-steady-hands",
+      "name": "Steady Hands",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters' skills that deal 10 or less damage deal 5 additional damage.",
+      "descriptionNormalized": "Damage effects with a base of 10 or less deal 5 additional damage."
+    },
+    {
+      "code": "A007",
+      "id": "a007-defensive-stance",
+      "name": "Defensive Stance",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character uses a skill that deals no damage, they gain 5 damage reduction for 1 turn.",
+      "descriptionNormalized": "When a ninja uses a skill with no damage effect, they gain 5 damage reduction for 1 turn."
+    },
+    {
+      "code": "A008",
+      "id": "a008-second-wind",
+      "name": "Second Wind",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each character falls below 50 health, they heal 10 health.",
+      "descriptionNormalized": "Once per battle, the first time each ninja drops to 49 health or less from damage, they heal 10."
+    },
+    {
+      "code": "A009",
+      "id": "a009-quick-recovery",
+      "name": "Quick Recovery",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each character is stunned, reduce the duration of that stun by 1 turn, to a minimum of 0.",
+      "descriptionNormalized": "The first time each ninja is stunned (full or partial), that stun lasts 1 turn less; a 1-turn stun is ignored."
+    },
+    {
+      "code": "A010",
+      "id": "a010-reinforced-armor",
+      "name": "Reinforced Armor",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your destructible defense gains 5 additional points whenever it is applied.",
+      "descriptionNormalized": "Destructible defense your ninjas' skills grant to your team gains 5 points."
+    },
+    {
+      "code": "A011",
+      "id": "a011-chakra-discipline",
+      "name": "Chakra Discipline",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Once per battle, spending 3 or more chakra in one turn refunds 1 random chakra.",
+      "descriptionNormalized": "Once per battle, when your team has spent 3 or more chakra in one turn, gain 1 random chakra."
+    },
+    {
+      "code": "A012",
+      "id": "a012-tactical-advantage",
+      "name": "Tactical Advantage",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters deal 5 additional damage to enemies affected by a stun.",
+      "descriptionNormalized": "Your ninjas' skill hits deal 5 additional damage to a stunned enemy."
+    },
+    {
+      "code": "A013",
+      "id": "a013-poisoned-weapons",
+      "name": "Poisoned Weapons",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first physical damaging skill each character uses deals 5 affliction damage for 2 turns.",
+      "descriptionNormalized": "Each ninja's first Physical skill that damages enemies poisons them: 5 affliction damage each turn for 2 turns."
+    },
+    {
+      "code": "A014",
+      "id": "a014-battle-hardened",
+      "name": "Battle Hardened",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters gain 5 damage reduction while below 50 health.",
+      "descriptionNormalized": "Your ninjas have 5 damage reduction while at 49 health or less."
+    },
+    {
+      "code": "A015",
+      "id": "a015-sharpened-kunai",
+      "name": "Sharpened Kunai",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your physical skills deal 5 additional damage.",
+      "descriptionNormalized": "Your ninjas' Physical skills deal 5 additional damage."
+    },
+    {
+      "code": "A016",
+      "id": "a016-focused-chakra",
+      "name": "Focused Chakra",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your chakra skills deal 5 additional damage.",
+      "descriptionNormalized": "Your ninjas' Chakra skills deal 5 additional damage."
+    },
+    {
+      "code": "A017",
+      "id": "a017-mental-clarity",
+      "name": "Mental Clarity",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your mental skills cost 1 less random chakra the first time they are used each battle, if they have a random chakra cost.",
+      "descriptionNormalized": "Each Mental skill with a random cost costs 1 less random chakra the first time that ninja uses it in a battle (minimum 1 total)."
+    },
+    {
+      "code": "A018",
+      "id": "a018-lingering-pain",
+      "name": "Lingering Pain",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your affliction damage is increased by 5 per damage instance, once per target per turn.",
+      "descriptionNormalized": "Once per enemy per turn, your affliction damage to them deals 5 more affliction damage."
+    },
+    {
+      "code": "A019",
+      "id": "a019-protective-instinct",
+      "name": "Protective Instinct",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an ally dies, surviving allies gain 10 destructible defense.",
+      "descriptionNormalized": "When one of your ninjas dies, the survivors gain 10 destructible defense."
+    },
+    {
+      "code": "A020",
+      "id": "a020-opportunist",
+      "name": "Opportunist",
+      "tier": "common",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters deal 5 additional damage to enemies below 50 health.",
+      "descriptionNormalized": "Your ninjas' skill hits deal 5 additional damage to an enemy below 50 health."
+    },
+    {
+      "code": "A021",
+      "id": "a021-chakra-leech",
+      "name": "Chakra Leech",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each turn your team deals affliction damage, gain 1 random chakra.",
+      "descriptionNormalized": "Once per turn, when your team deals affliction damage, gain 1 random chakra."
+    },
+    {
+      "code": "A022",
+      "id": "a022-bloodthirsty",
+      "name": "Bloodthirsty",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character deals direct damage, they heal for 20% of the damage dealt, rounded down. Maximum 15 healing per turn per character.",
+      "descriptionNormalized": "Your ninjas heal 20% (rounded down) of the direct damage they deal, up to 15 per ninja per turn."
+    },
+    {
+      "code": "A023",
+      "id": "a023-shadow-clone-training",
+      "name": "Shadow Clone Training",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first damaging skill used by each character each battle repeats, dealing 50% of its original damage to the same target. Secondary effects do not repeat.",
+      "descriptionNormalized": "Each ninja's first damaging skill in a battle repeats 50% of its damage on the same targets. Only the damage repeats."
+    },
+    {
+      "code": "A024",
+      "id": "a024-explosive-tags",
+      "name": "Explosive Tags",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Every third damaging skill your team uses deals 10 additional damage to all enemies.",
+      "descriptionNormalized": "Every third damaging skill your team uses also deals 10 damage to every enemy (invulnerable enemies are skipped)."
+    },
+    {
+      "code": "A025",
+      "id": "a025-unbreakable-will",
+      "name": "Unbreakable Will",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each character would be stunned, prevent the stun and gain 10 damage reduction for 1 turn.",
+      "descriptionNormalized": "The first stun that would affect each ninja is prevented, and that ninja gains 10 damage reduction for 1 turn."
+    },
+    {
+      "code": "A026",
+      "id": "a026-forbidden-knowledge",
+      "name": "Forbidden Knowledge",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your skills with cooldowns of 3 or more have their cooldowns reduced by 1 turn, excluding invulnerability skills.",
+      "descriptionNormalized": "Skills with a cooldown of 3 or more recover 1 turn sooner, except skills that grant invulnerability."
+    },
+    {
+      "code": "A027",
+      "id": "a027-chain-lightning",
+      "name": "Chain Lightning",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a chakra skill deals direct damage to an enemy, deal 10 damage to a different random enemy. Once per character per turn.",
+      "descriptionNormalized": "Once per ninja per turn, a Chakra skill that deals direct damage also deals 10 damage to a different random enemy."
+    },
+    {
+      "code": "A028",
+      "id": "a028-relentless-assault",
+      "name": "Relentless Assault",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character uses a damaging skill on consecutive turns, increase their direct damage by 5, stacking up to 20. Reset when they use a non-damaging skill.",
+      "descriptionNormalized": "Using a damaging skill on consecutive turns gives that ninja +5 direct damage, up to +20. A non-damaging skill or a skipped turn resets it."
+    },
+    {
+      "code": "A029",
+      "id": "a029-executioners-mark",
+      "name": "Executioner's Mark",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character damages an enemy below 30 health, deal 10 additional piercing damage. Once per target per turn.",
+      "descriptionNormalized": "Once per enemy per turn, hitting an enemy who is left below 30 health deals 10 more piercing damage to them."
+    },
+    {
+      "code": "A030",
+      "id": "a030-emergency-healing",
+      "name": "Emergency Healing",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each battle an ally falls below 25 health, heal them for 20 health.",
+      "descriptionNormalized": "Once per battle, the first time one of your ninjas drops below 25 health and survives, they heal 20."
+    },
+    {
+      "code": "A031",
+      "id": "a031-chakra-conversion",
+      "name": "Chakra Conversion",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Once per turn, when your team spends 2 chakra of the same type, gain 1 random chakra of a different type.",
+      "descriptionNormalized": "Once per turn, when your team has spent 2 chakra of the same type, gain 1 random chakra of another type."
+    },
+    {
+      "code": "A032",
+      "id": "a032-sand-armor",
+      "name": "Sand Armor",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character gains destructible defense, they also gain 10 damage reduction for 1 turn.",
+      "descriptionNormalized": "Whenever a ninja's destructible defense rises (including at battle start), they gain 10 damage reduction for 1 turn."
+    },
+    {
+      "code": "A033",
+      "id": "a033-venomous-touch",
+      "name": "Venomous Touch",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character deals affliction damage, reduce the target's healing received by 25% for 1 turn.",
+      "descriptionNormalized": "Affliction damage from your team cuts the target's healing received by 25% for 1 turn."
+    },
+    {
+      "code": "A034",
+      "id": "a034-sharingan-insight",
+      "name": "Sharingan Insight",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time an enemy successfully damages each character, that character's next damaging skill against that enemy deals 15 additional damage.",
+      "descriptionNormalized": "The first enemy to damage each ninja is marked for them: that ninja's next damaging skill on that enemy deals 15 more damage."
+    },
+    {
+      "code": "A035",
+      "id": "a035-perfect-timing",
+      "name": "Perfect Timing",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character successfully counters an enemy skill, reduce the cooldown of one of their other skills by 1 turn.",
+      "descriptionNormalized": "When one of your counters stops an enemy skill, that ninja's longest remaining cooldown drops by 1."
+    },
+    {
+      "code": "A036",
+      "id": "a036-desperate-measures",
+      "name": "Desperate Measures",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters deal 20% additional direct damage while below 30 health.",
+      "descriptionNormalized": "While at 29 health or less, a ninja's direct (non-affliction) skill hits deal 20% more damage, rounded down."
+    },
+    {
+      "code": "A037",
+      "id": "a037-chakra-overload",
+      "name": "Chakra Overload",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character uses a skill costing 3 or more chakra, deal 10 piercing damage to a random enemy.",
+      "descriptionNormalized": "When a ninja uses a skill that cost 3 or more chakra, a random enemy takes 10 piercing damage."
+    },
+    {
+      "code": "A038",
+      "id": "a038-vengeful-spirit",
+      "name": "Vengeful Spirit",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an ally dies, your surviving characters permanently deal 10 additional damage for the remainder of the battle.",
+      "descriptionNormalized": "Your ninjas deal 10 additional damage for each dead ally in this battle."
+    },
+    {
+      "code": "A039",
+      "id": "a039-guardians-oath",
+      "name": "Guardian's Oath",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character heals an ally, both gain 10 destructible defense.",
+      "descriptionNormalized": "When a ninja heals an ally, both gain 10 destructible defense."
+    },
+    {
+      "code": "A040",
+      "id": "a040-lingering-genjutsu",
+      "name": "Lingering Genjutsu",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first stun each character applies each battle lasts 1 additional turn, to a maximum of 2 turns total.",
+      "descriptionNormalized": "The first stun each ninja applies in a battle lasts 1 turn longer, to at most 2 turns."
+    },
+    {
+      "code": "A041",
+      "id": "a041-predators-instinct",
+      "name": "Predator's Instinct",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an enemy dies, reduce all your living characters' active cooldowns by 1 turn.",
+      "descriptionNormalized": "When an enemy dies, each of your living ninjas' longest remaining cooldown drops by 1."
+    },
+    {
+      "code": "A042",
+      "id": "a042-unstable-chakra",
+      "name": "Unstable Chakra",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the start of each battle, gain 3 random chakra. At the end of your first turn, lose up to 2 unspent chakra.",
+      "descriptionNormalized": "Begin each battle with 3 additional random chakra; at the end of your first turn, lose up to 2 random unspent chakra."
+    },
+    {
+      "code": "A043",
+      "id": "a043-thousand-cuts",
+      "name": "Thousand Cuts",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Each time a character damages the same enemy with a new skill, increase their damage against that enemy by 5, stacking up to 20.",
+      "descriptionNormalized": "Each new skill a ninja hits an enemy with adds +5 damage against that enemy for that ninja, up to +20."
+    },
+    {
+      "code": "A044",
+      "id": "a044-resilient-defense",
+      "name": "Resilient Defense",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "When a character's destructible defense is destroyed, they gain 15 damage reduction for 1 turn.",
+      "descriptionNormalized": "When a ninja's destructible defense is fully destroyed, they gain 15 damage reduction for 1 turn."
+    },
+    {
+      "code": "A045",
+      "id": "a045-chakra-suppression",
+      "name": "Chakra Suppression",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each turn your team stuns an enemy, increase that enemy's next skill cost by 1 random chakra for 1 turn.",
+      "descriptionNormalized": "Once per turn, the first enemy your team stuns has its skills cost 1 additional random chakra for 1 turn."
+    },
+    {
+      "code": "A046",
+      "id": "a046-perfect-synchronization",
+      "name": "Perfect Synchronization",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "When two or more allies damage the same enemy in one turn, the second and subsequent attacks deal 10 additional damage.",
+      "descriptionNormalized": "When an enemy has already been hit by another of your ninjas this turn, further hits on them deal 10 more damage."
+    },
+    {
+      "code": "A047",
+      "id": "a047-rejuvenation",
+      "name": "Rejuvenation",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the end of each turn, heal each character for 5 health if they did not take damage that turn.",
+      "descriptionNormalized": "At the end of each of your turns, each ninja who took no damage since your last turn ended heals 5."
+    },
+    {
+      "code": "A048",
+      "id": "a048-piercing-focus",
+      "name": "Piercing Focus",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters' first direct damaging skill each turn ignores 10 points of damage reduction.",
+      "descriptionNormalized": "Your ninjas' direct hits ignore up to 10 of the target's flat damage reduction."
+    },
+    {
+      "code": "A049",
+      "id": "a049-unfinished-business",
+      "name": "Unfinished Business",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time an enemy survives a damaging skill with 10 or less health, deal 5 additional piercing damage to them.",
+      "descriptionNormalized": "The first time each enemy survives one of your skills at 10 health or less, they take 5 piercing damage."
+    },
+    {
+      "code": "A050",
+      "id": "a050-unrelenting-pressure",
+      "name": "Unrelenting Pressure",
+      "tier": "rare",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Enemies damaged by your team on consecutive turns receive 10% additional direct damage from your team, stacking up to 30%. Resets after a turn without damage.",
+      "descriptionNormalized": "Enemies your team damages on consecutive turns take +10% direct damage per extra turn, up to +30%. A turn without damage resets it."
+    },
+    {
+      "code": "A051",
+      "id": "a051-edo-tensei",
+      "name": "Edo Tensei",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each battle an ally dies, revive them at the start of your next turn with 30 health. Each character can be revived only once.",
+      "descriptionNormalized": "Once per battle, the first of your ninjas to die returns at the start of your next turn with 30 health."
+    },
+    {
+      "code": "A052",
+      "id": "a052-eight-gates",
+      "name": "Eight Gates",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters deal 50% additional direct damage, but take 10 affliction damage that ignores invulnerability at the end of each turn.",
+      "descriptionNormalized": "Your ninjas' direct (non-affliction) skill hits deal 50% more damage, rounded down. Each ninja loses 10 health at the end of your turn (health loss ignores invulnerability, damage reduction and destructible defense)."
+    },
+    {
+      "code": "A053",
+      "id": "a053-infinite-chakra",
+      "name": "Infinite Chakra",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first skill each character uses each turn costs 1 less random chakra, or 1 less chakra of a required type if no random cost exists. Minimum cost: 1 chakra.",
+      "descriptionNormalized": "Each ninja's skills that cost 2 or more cost 1 less chakra (random first, otherwise one required chakra; minimum 1)."
+    },
+    {
+      "code": "A054",
+      "id": "a054-izanagi",
+      "name": "Izanagi",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Once per battle, the first time your team would lose its final living character, prevent that character's death and restore them to 50 health.",
+      "descriptionNormalized": "Once per battle, when your last living ninja would die, they are restored to 50 health instead."
+    },
+    {
+      "code": "A055",
+      "id": "a055-six-paths-power",
+      "name": "Six Paths Power",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters' direct damage ignores damage reduction and destructible defense. It does not ignore invulnerability.",
+      "descriptionNormalized": "Your ninjas' direct skill damage ignores damage reduction and destructible defense, but not invulnerability."
+    },
+    {
+      "code": "A056",
+      "id": "a056-perfect-susanoo",
+      "name": "Perfect Susanoo",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters begin each battle with 30 destructible defense and 10 damage reduction.",
+      "descriptionNormalized": "Each living ninja starts every battle with 30 destructible defense, and your ninjas have 10 damage reduction."
+    },
+    {
+      "code": "A057",
+      "id": "a057-infinite-tsukuyomi",
+      "name": "Infinite Tsukuyomi",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of turn 4, stun all enemies for 1 turn. This effect occurs once per battle and cannot be extended.",
+      "descriptionNormalized": "At the start of your fourth turn, every enemy is stunned for 1 turn (once per battle; cannot be extended)."
+    },
+    {
+      "code": "A058",
+      "id": "a058-rinne-rebirth",
+      "name": "Rinne Rebirth",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an ally dies, all surviving allies heal for 25 health and gain 1 random chakra.",
+      "descriptionNormalized": "When one of your ninjas dies, the survivors heal 25 and your team gains 1 random chakra."
+    },
+    {
+      "code": "A059",
+      "id": "a059-amaterasu",
+      "name": "Amaterasu",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each turn your team damages an enemy, apply 10 affliction damage for 2 turns. This effect does not stack.",
+      "descriptionNormalized": "Once per turn, the first enemy your team damages burns for 10 affliction damage each turn for 2 turns (does not stack)."
+    },
+    {
+      "code": "A060",
+      "id": "a060-flying-thunder-god",
+      "name": "Flying Thunder God",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first harmful skill targeting each character every 3 turns is countered. This does not counter skills that ignore counters.",
+      "descriptionNormalized": "Each ninja starts with a hidden counter against the next harmful skill targeting them; after it triggers it re-arms 3 turns later."
+    },
+    {
+      "code": "A061",
+      "id": "a061-the-will-of-fire",
+      "name": "The Will of Fire",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an ally dies, surviving allies permanently gain 15 additional direct damage and 10 damage reduction for the remainder of the battle.",
+      "descriptionNormalized": "Each dead ally gives your surviving ninjas +15 damage and 10 damage reduction for the rest of the battle."
+    },
+    {
+      "code": "A062",
+      "id": "a062-reaper-death-seal",
+      "name": "Reaper Death Seal",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Once per battle, when an enemy kills one of your characters, that enemy takes 40 piercing damage that ignores invulnerability.",
+      "descriptionNormalized": "Once per battle, the enemy who kills one of your ninjas takes 40 piercing damage that ignores invulnerability."
+    },
+    {
+      "code": "A063",
+      "id": "a063-ten-tails-chakra",
+      "name": "Ten-Tails Chakra",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the start of every third turn, gain 2 random chakra and heal all allies for 10 health.",
+      "descriptionNormalized": "At the start of every third turn of yours, gain 2 random chakra and every ninja heals 10."
+    },
+    {
+      "code": "A064",
+      "id": "a064-forbidden-regeneration",
+      "name": "Forbidden Regeneration",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the start of each turn, your characters heal for 10 health. Healing is doubled while below 30 health.",
+      "descriptionNormalized": "At the start of each of your turns, every ninja heals 10 (20 while below 30 health)."
+    },
+    {
+      "code": "A065",
+      "id": "a065-kotoamatsukami",
+      "name": "Kotoamatsukami",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each battle an enemy uses a harmful skill, counter that skill and stun its user for 1 turn.",
+      "descriptionNormalized": "Once per battle, the first harmful skill an enemy aims at your team is countered and its user is stunned for 1 turn."
+    },
+    {
+      "code": "A066",
+      "id": "a066-indras-wrath",
+      "name": "Indra's Wrath",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Every fourth damaging skill your team uses deals an additional 30 piercing damage to its primary target.",
+      "descriptionNormalized": "Every fourth damaging skill your team uses deals 30 more piercing damage to its first target."
+    },
+    {
+      "code": "A067",
+      "id": "a067-asuras-blessing",
+      "name": "Asura's Blessing",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character heals an ally, all other living allies are healed for 50% of the amount restored, rounded down.",
+      "descriptionNormalized": "When a ninja's skill heals an ally, every other living ally heals half that amount (rounded down)."
+    },
+    {
+      "code": "A068",
+      "id": "a068-sage-mode",
+      "name": "Sage Mode",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters' damaging skills deal 15 additional damage, and their healing skills restore 10 additional health.",
+      "descriptionNormalized": "Your ninjas' skill damage effects deal 15 additional damage, and their skills that heal restore 10 additional health (per heal effect)."
+    },
+    {
+      "code": "A069",
+      "id": "a069-chakra-absorption",
+      "name": "Chakra Absorption",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each turn an enemy uses a skill costing 2 or more chakra, gain 1 random chakra.",
+      "descriptionNormalized": "Once per turn, when an enemy uses a skill that cost 2 or more chakra, gain 1 random chakra."
+    },
+    {
+      "code": "A070",
+      "id": "a070-the-last-stand",
+      "name": "The Last Stand",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "When only one ally remains alive, that character gains 50% additional direct damage, 20 damage reduction, and heals 10 health at the start of each turn.",
+      "descriptionNormalized": "While only one of your ninjas lives, they deal 50% more direct damage, have 20 damage reduction, and heal 10 at the start of your turns."
+    },
+    {
+      "code": "A071",
+      "id": "a071-impure-resurrection",
+      "name": "Impure Resurrection",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first ally to die each battle returns with 50 health after 1 turn, but permanently loses 10 maximum health.",
+      "descriptionNormalized": "Once per battle, the first of your ninjas to die returns at the start of your next turn with 50 health and 10 less maximum health for the battle."
+    },
+    {
+      "code": "A072",
+      "id": "a072-forbidden-experimentation",
+      "name": "Forbidden Experimentation",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of each battle, randomly gain one of three effects: +25% direct damage, +15 damage reduction, or +10 healing per turn.",
+      "descriptionNormalized": "At the start of each battle, a seeded roll gives your ninjas one of: +25% direct damage, 15 damage reduction, or 10 healing at the end of each turn."
+    },
+    {
+      "code": "A073",
+      "id": "a073-heavenly-restriction",
+      "name": "Heavenly Restriction",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your physical skills deal 50% additional direct damage, but your chakra and mental skills cost 1 additional random chakra.",
+      "descriptionNormalized": "Your ninjas' Physical skills deal 50% more direct (non-affliction) damage, rounded down. Their Chakra and Mental skills cost 1 additional random chakra (+1 total for a skill that is both)."
+    },
+    {
+      "code": "A074",
+      "id": "a074-chakra-devourer",
+      "name": "Chakra Devourer",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an enemy dies, gain 2 random chakra and permanently increase your team's direct damage by 5 for the remainder of the battle.",
+      "descriptionNormalized": "When an enemy dies, gain 2 random chakra and your ninjas gain +5 direct damage for the rest of the battle (stacking)."
+    },
+    {
+      "code": "A075",
+      "id": "a075-the-immortal-body",
+      "name": "The Immortal Body",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters cannot be reduced below 1 health during the first 2 turns of each battle.",
+      "descriptionNormalized": "For the first 2 turns of each battle (the engine's 2-turn status timer), your ninjas cannot be reduced below 1 health."
+    },
+    {
+      "code": "A076",
+      "id": "a076-shadow-clone-army",
+      "name": "Shadow Clone Army",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first direct damaging skill each character uses every 3 turns repeats at 50% damage against a random living enemy. Secondary effects do not repeat.",
+      "descriptionNormalized": "A ninja's direct damaging skill repeats 50% of its damage on a random living enemy, at most once every 3 of their turns."
+    },
+    {
+      "code": "A077",
+      "id": "a077-forbidden-pact",
+      "name": "Forbidden Pact",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Your characters deal 40% additional direct damage, but healing received is reduced by 50%.",
+      "descriptionNormalized": "Your ninjas' direct (non-affliction) skill hits deal 40% more damage, rounded down; healing they receive is halved."
+    },
+    {
+      "code": "A078",
+      "id": "a078-the-perfect-vessel",
+      "name": "The Perfect Vessel",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character gains a temporary damage or defense boost, increase its duration by 1 turn, to a maximum of 4 turns.",
+      "descriptionNormalized": "Temporary damage and defense boosts your ninjas gain last 1 turn longer, to at most 4 turns."
+    },
+    {
+      "code": "A079",
+      "id": "a079-chakra-singularity",
+      "name": "Chakra Singularity",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever your team spends 5 chakra, refund 2 random chakra. This can trigger once per turn.",
+      "descriptionNormalized": "Once per turn, when your team has spent 5 chakra, gain 2 random chakra."
+    },
+    {
+      "code": "A080",
+      "id": "a080-the-final-technique",
+      "name": "The Final Technique",
+      "tier": "forbidden",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "When a character dies, they deal 25 piercing damage to all enemies. This effect ignores invulnerability and can trigger only once per character per battle.",
+      "descriptionNormalized": "When one of your ninjas dies, every enemy takes 25 piercing damage that ignores invulnerability (once per ninja)."
+    },
+    {
+      "code": "A081",
+      "id": "a081-chakra-roulette",
+      "name": "Chakra Roulette",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of each turn, randomly select one chakra type. Skills costing that type cost 1 less chakra this turn, minimum 1 total.",
+      "descriptionNormalized": "At the start of each of your turns, a seeded roll picks a chakra type; skills that cost it cost 1 less of it this turn (minimum 1 total)."
+    },
+    {
+      "code": "A082",
+      "id": "a082-cursed-seal",
+      "name": "Cursed Seal",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Each time a character uses a damaging skill, they gain 5 additional direct damage, stacking up to 30. They also take 5 affliction damage at the end of each turn while they have stacks.",
+      "descriptionNormalized": "Each damaging skill gives that ninja +5 direct damage, up to +30; while they have any, they take 5 affliction damage at the end of your turn."
+    },
+    {
+      "code": "A083",
+      "id": "a083-double-casting",
+      "name": "Double Casting",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Every third chakra skill your team uses repeats its direct damage at 50% effectiveness. Secondary effects do not repeat.",
+      "descriptionNormalized": "Every third Chakra skill your team uses repeats 50% of its direct damage on the same targets. Only the damage repeats."
+    },
+    {
+      "code": "A084",
+      "id": "a084-living-weapon",
+      "name": "Living Weapon",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character deals 25 or more direct damage with one skill, they gain 10 destructible defense.",
+      "descriptionNormalized": "When a ninja deals 25 or more direct damage with one skill, they gain 10 destructible defense."
+    },
+    {
+      "code": "A085",
+      "id": "a085-the-gambler",
+      "name": "The Gambler",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of each turn, randomly gain either 2 chakra or take 15 piercing damage to a random ally.",
+      "descriptionNormalized": "At the start of each of your turns, a seeded roll either gives 2 random chakra or deals 15 piercing damage to a random ninja of yours."
+    },
+    {
+      "code": "A086",
+      "id": "a086-blood-sacrifice",
+      "name": "Blood Sacrifice",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "blocked",
+      "needs": "Blocked: \"may instead spend 15 health\" is a choice made while queuing a skill, which needs a new prompt in the battle client and a new WebSocket field. Changing the protocol needs your approval.",
+      "descriptionOriginal": "Whenever a character uses a skill costing 2 or more chakra, they may instead spend 15 health to reduce its cost by 1 random chakra.",
+      "descriptionNormalized": null
+    },
+    {
+      "code": "A087",
+      "id": "a087-reverse-summoning",
+      "name": "Reverse Summoning",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Once per battle, when a character would die, remove them from combat for 1 turn. They return with 25 health.",
+      "descriptionNormalized": "Once per battle, a ninja who would die returns at 25 health but is removed from combat (cannot act or be hit) for 1 turn."
+    },
+    {
+      "code": "A088",
+      "id": "a088-mirror-technique",
+      "name": "Mirror Technique",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character successfully counters a damaging skill, reflect 50% of its original direct damage to the attacker.",
+      "descriptionNormalized": "When one of your counters stops a damaging enemy skill, its user takes half of that skill's base direct damage."
+    },
+    {
+      "code": "A089",
+      "id": "a089-unstable-evolution",
+      "name": "Unstable Evolution",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Every 3 turns, your characters randomly gain +10 direct damage, +10 damage reduction, or 15 destructible defense for 2 turns.",
+      "descriptionNormalized": "At the start of every third turn of yours, a seeded roll gives every ninja +10 direct damage or 10 damage reduction for 2 turns, or 15 destructible defense."
+    },
+    {
+      "code": "A090",
+      "id": "a090-perfect-balance",
+      "name": "Perfect Balance",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever your team uses a physical, chakra, and mental skill in the same turn, refund 2 random chakra.",
+      "descriptionNormalized": "Once per turn, when your team has used a Physical, a Chakra and a Mental skill, gain 2 random chakra."
+    },
+    {
+      "code": "A091",
+      "id": "a091-death-mark",
+      "name": "Death Mark",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever your team damages the same enemy on 3 consecutive turns, deal 30 piercing damage to that enemy. Reset the count afterward.",
+      "descriptionNormalized": "When your team damages the same enemy on 3 consecutive turns, they take 30 piercing damage and the count restarts."
+    },
+    {
+      "code": "A092",
+      "id": "a092-the-puppet-masters-art",
+      "name": "The Puppet Master's Art",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character applies a harmful effect lasting 2 or more turns, extend that effect by 1 turn, maximum once per application.",
+      "descriptionNormalized": "Harmful effects of 2 or more turns that your ninjas apply last 1 turn longer."
+    },
+    {
+      "code": "A093",
+      "id": "a093-forbidden-transfusion",
+      "name": "Forbidden Transfusion",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character receives healing at full health, convert up to 20 excess healing into destructible defense.",
+      "descriptionNormalized": "When a ninja is healed to full, up to 20 of the excess healing becomes destructible defense."
+    },
+    {
+      "code": "A094",
+      "id": "a094-soul-link",
+      "name": "Soul Link",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever a character takes direct damage, distribute 30% of that damage evenly among their living allies instead.",
+      "descriptionNormalized": "30% of each enemy direct hit on one of your ninjas is moved off them and split evenly among their living allies as piercing damage."
+    },
+    {
+      "code": "A095",
+      "id": "a095-chakra-burn",
+      "name": "Chakra Burn",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Whenever an enemy spends chakra, deal 5 affliction damage to them for each chakra spent, up to 15 per turn.",
+      "descriptionNormalized": "When an enemy uses a skill, they take 5 affliction damage per chakra it cost, up to 15 per enemy per turn."
+    },
+    {
+      "code": "A096",
+      "id": "a096-the-copy-ninja",
+      "name": "The Copy Ninja",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "blocked",
+      "needs": "Blocked: granting a temporary copied skill needs a fifth, dynamic skill slot in the battle client and protocol. Changing the protocol needs your approval.",
+      "descriptionOriginal": "The first time each battle an enemy damages one of your characters, grant that character a temporary copy of the direct damage portion of that skill, usable once for 1 random chakra.",
+      "descriptionNormalized": null
+    },
+    {
+      "code": "A097",
+      "id": "a097-elemental-mastery",
+      "name": "Elemental Mastery",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "Each time your team uses a chakra skill, increase subsequent chakra skill damage by 5 for the remainder of the battle, stacking up to 30.",
+      "descriptionNormalized": "Each Chakra skill your team uses gives all your ninjas +5 Chakra-skill damage for the rest of the battle, up to +30."
+    },
+    {
+      "code": "A098",
+      "id": "a098-last-breath",
+      "name": "Last Breath",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "The first time each battle a character would die, they remain alive at 1 health until the end of their next turn, then die unless healed above 1 health.",
+      "descriptionNormalized": "Once per battle, a ninja who would die stays at 1 health until the end of your next turn, then dies unless healed above 1."
+    },
+    {
+      "code": "A099",
+      "id": "a099-forbidden-exchange",
+      "name": "Forbidden Exchange",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of each battle, your team loses 30 total health distributed evenly among living allies and gains 4 random chakra.",
+      "descriptionNormalized": "At the start of each battle, your living ninjas lose 30 health split evenly (rounded down, never below 1 health) and your team gains 4 random chakra."
+    },
+    {
+      "code": "A100",
+      "id": "a100-the-towers-blessing",
+      "name": "The Tower's Blessing",
+      "tier": "prismatic",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null,
+      "descriptionOriginal": "At the beginning of each battle, gain the effects of two random Common Scrolls you do not already possess.",
+      "descriptionNormalized": "At the start of each battle, your team also gains the effects of two operational Common augments it does not own, chosen by the run seed for that floor."
+    }
+  ],
+  "fusions": [
+    {
+      "code": "F01",
+      "resultId": "f01-perfect-channeling",
+      "name": "Perfect Channeling",
+      "tier": "rare",
+      "ingredients": [
+        "A001",
+        "A016"
+      ],
+      "workbookScope": "Ninja",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F02",
+      "resultId": "f02-fortress-doctrine",
+      "name": "Fortress Doctrine",
+      "tier": "rare",
+      "ingredients": [
+        "A002",
+        "A010"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F03",
+      "resultId": "f03-field-medic",
+      "name": "Field Medic",
+      "tier": "rare",
+      "ingredients": [
+        "A004",
+        "A008"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F04",
+      "resultId": "f04-venomcraft",
+      "name": "Venomcraft",
+      "tier": "rare",
+      "ingredients": [
+        "A013",
+        "A018"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F05",
+      "resultId": "f05-finishers-instinct",
+      "name": "Finisher's Instinct",
+      "tier": "rare",
+      "ingredients": [
+        "A003",
+        "A020"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F06",
+      "resultId": "f06-defensive-discipline",
+      "name": "Defensive Discipline",
+      "tier": "rare",
+      "ingredients": [
+        "A007",
+        "A014"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F07",
+      "resultId": "f07-parasitic-chakra",
+      "name": "Parasitic Chakra",
+      "tier": "forbidden",
+      "ingredients": [
+        "A021",
+        "A033"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F08",
+      "resultId": "f08-crimson-rhythm",
+      "name": "Crimson Rhythm",
+      "tier": "forbidden",
+      "ingredients": [
+        "A022",
+        "A028"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F09",
+      "resultId": "f09-storm-of-paper",
+      "name": "Storm of Paper",
+      "tier": "forbidden",
+      "ingredients": [
+        "A024",
+        "A027"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F10",
+      "resultId": "f10-guardians-renewal",
+      "name": "Guardian's Renewal",
+      "tier": "forbidden",
+      "ingredients": [
+        "A039",
+        "A030"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F11",
+      "resultId": "f11-perfect-reflex",
+      "name": "Perfect Reflex",
+      "tier": "forbidden",
+      "ingredients": [
+        "A035",
+        "A025"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F12",
+      "resultId": "f12-relentless-pursuit",
+      "name": "Relentless Pursuit",
+      "tier": "forbidden",
+      "ingredients": [
+        "A043",
+        "A050"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F13",
+      "resultId": "f13-chakra-reactor",
+      "name": "Chakra Reactor",
+      "tier": "forbidden",
+      "ingredients": [
+        "A031",
+        "A037"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F14",
+      "resultId": "f14-blood-moon-contract",
+      "name": "Blood Moon Contract",
+      "tier": "prismatic",
+      "ingredients": [
+        "A077",
+        "A036"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F15",
+      "resultId": "f15-thousand-shadows",
+      "name": "Thousand Shadows",
+      "tier": "prismatic",
+      "ingredients": [
+        "A076",
+        "A046"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F16",
+      "resultId": "f16-infernal-nightmare",
+      "name": "Infernal Nightmare",
+      "tier": "prismatic",
+      "ingredients": [
+        "A059",
+        "A040"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F17",
+      "resultId": "f17-chaotic-wellspring",
+      "name": "Chaotic Wellspring",
+      "tier": "prismatic",
+      "ingredients": [
+        "A063",
+        "A042"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F18",
+      "resultId": "f18-undying-legend",
+      "name": "Undying Legend",
+      "tier": "prismatic",
+      "ingredients": [
+        "A070",
+        "A038"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F19",
+      "resultId": "f19-crimson-gate",
+      "name": "Crimson Gate",
+      "tier": "prismatic",
+      "ingredients": [
+        "A052",
+        "A022"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    },
+    {
+      "code": "F20",
+      "resultId": "f20-mutation-protocol",
+      "name": "Mutation Protocol",
+      "tier": "prismatic",
+      "ingredients": [
+        "A078",
+        "A028"
+      ],
+      "workbookScope": "Team",
+      "scope": "team",
+      "status": "implemented",
+      "needs": null
+    }
+  ],
+  "characterAugments": [
+    {
+      "code": "C01",
+      "id": "c01-clone-coordination",
+      "name": "Clone Coordination",
+      "tier": "rare",
+      "characterId": "uzumaki-naruto",
+      "targetSkillIds": [
+        "uzumaki-naruto-shadow-clones"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C02",
+      "id": "c02-rasengan-mastery",
+      "name": "Rasengan Mastery",
+      "tier": "forbidden",
+      "characterId": "uzumaki-naruto",
+      "targetSkillIds": [
+        "uzumaki-naruto-rasengan"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C03",
+      "id": "c03-clone-uprising",
+      "name": "Clone Uprising",
+      "tier": "prismatic",
+      "characterId": "uzumaki-naruto",
+      "targetSkillIds": [
+        "uzumaki-naruto-uzumaki-naruto-combo"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C04",
+      "id": "c04-wire-specialist",
+      "name": "Wire Specialist",
+      "tier": "rare",
+      "characterId": "uchiha-sasuke",
+      "targetSkillIds": [
+        "uchiha-sasuke-ninja-wire-trap",
+        "uchiha-sasuke-dragon-flame-jutsu"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C05",
+      "id": "c05-precocious-sharingan",
+      "name": "Precocious Sharingan",
+      "tier": "forbidden",
+      "characterId": "uchiha-sasuke",
+      "targetSkillIds": [
+        "passive",
+        "uchiha-sasuke-chidori"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C06",
+      "id": "c06-chidori-storm",
+      "name": "Chidori Storm",
+      "tier": "prismatic",
+      "characterId": "uchiha-sasuke",
+      "targetSkillIds": [
+        "uchiha-sasuke-chidori"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C07",
+      "id": "c07-triage-training",
+      "name": "Triage Training",
+      "tier": "rare",
+      "characterId": "haruno-sakura",
+      "targetSkillIds": [
+        "haruno-sakura-rudimentary-healing"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C08",
+      "id": "c08-inner-sakura-unleashed",
+      "name": "Inner Sakura Unleashed",
+      "tier": "forbidden",
+      "characterId": "haruno-sakura",
+      "targetSkillIds": [
+        "haruno-sakura-inner-mental-overwhelm"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C09",
+      "id": "c09-combat-medic",
+      "name": "Combat Medic",
+      "tier": "prismatic",
+      "characterId": "haruno-sakura",
+      "targetSkillIds": [
+        "haruno-sakura-rudimentary-healing"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C10",
+      "id": "c10-nin-dog-pursuit",
+      "name": "Nin-Dog Pursuit",
+      "tier": "rare",
+      "characterId": "hatake-kakashi",
+      "targetSkillIds": [
+        "hatake-kakashi-summoning-ninja-dogs",
+        "hatake-kakashi-raikiri"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C11",
+      "id": "c11-copy-perfection",
+      "name": "Copy Perfection",
+      "tier": "forbidden",
+      "characterId": "hatake-kakashi",
+      "targetSkillIds": [
+        "hatake-kakashi-sharingan-counter"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C12",
+      "id": "c12-living-arsenal",
+      "name": "Living Arsenal",
+      "tier": "prismatic",
+      "characterId": "hatake-kakashi",
+      "targetSkillIds": [
+        "hatake-kakashi-sharingan-counter"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C13",
+      "id": "c13-kikaichu-queen",
+      "name": "Kikaichū Queen",
+      "tier": "rare",
+      "characterId": "aburame-shino",
+      "targetSkillIds": [
+        "aburame-shino-female-bug"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C14",
+      "id": "c14-living-hive",
+      "name": "Living Hive",
+      "tier": "prismatic",
+      "characterId": "aburame-shino",
+      "targetSkillIds": [
+        "aburame-shino-female-bug"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C15",
+      "id": "c15-lotus-discipline",
+      "name": "Lotus Discipline",
+      "tier": "forbidden",
+      "characterId": "rock-lee",
+      "targetSkillIds": [
+        "rock-lee-front-lotus",
+        "rock-lee-high-speed-taijutsu"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C16",
+      "id": "c16-unbound-gates",
+      "name": "Unbound Gates",
+      "tier": "prismatic",
+      "characterId": "rock-lee",
+      "targetSkillIds": [
+        "rock-lee-remove-training-weights"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C17",
+      "id": "c17-desert-harvest",
+      "name": "Desert Harvest",
+      "tier": "rare",
+      "characterId": "gaara-of-the-desert",
+      "targetSkillIds": [
+        "gaara-of-the-desert-desert-funeral"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C18",
+      "id": "c18-sand-sovereign",
+      "name": "Sand Sovereign",
+      "tier": "forbidden",
+      "characterId": "gaara-of-the-desert",
+      "targetSkillIds": [
+        "gaara-of-the-desert-sand-sphere"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C19",
+      "id": "c19-shukaku-rampage",
+      "name": "Shukaku Rampage",
+      "tier": "prismatic",
+      "characterId": "gaara-of-the-desert",
+      "targetSkillIds": [
+        "gaara-of-the-desert-desert-funeral"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C20",
+      "id": "c20-poisoned-marionette",
+      "name": "Poisoned Marionette",
+      "tier": "rare",
+      "characterId": "kankuro",
+      "targetSkillIds": [
+        "kankuro-poison-bomb",
+        "kankuro-puppet-trap"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C21",
+      "id": "c21-puppet-theater",
+      "name": "Puppet Theater",
+      "tier": "prismatic",
+      "characterId": "kankuro",
+      "targetSkillIds": [
+        "kankuro-puppet-trap"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C22",
+      "id": "c22-needle-precision",
+      "name": "Needle Precision",
+      "tier": "rare",
+      "characterId": "haku",
+      "targetSkillIds": [
+        "haku-flying-needles-of-death",
+        "haku-flying-needles-of-death-mirrors",
+        "haku-acupuncture",
+        "haku-acupuncture-mirrors"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C23",
+      "id": "c23-fractured-mirrors",
+      "name": "Fractured Mirrors",
+      "tier": "prismatic",
+      "characterId": "haku",
+      "targetSkillIds": [
+        "haku-demonic-mirroring-ice-crystals",
+        "haku-flying-needles-of-death-mirrors"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C24",
+      "id": "c24-gentle-fist-precision",
+      "name": "Gentle Fist Precision",
+      "tier": "rare",
+      "characterId": "hyuuga-hinata",
+      "targetSkillIds": [
+        "hyuuga-hinata-hinata-gentle-fist"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C25",
+      "id": "c25-sixty-four-palms-mastery",
+      "name": "Sixty-Four Palms Mastery",
+      "tier": "forbidden",
+      "characterId": "hyuuga-hinata",
+      "targetSkillIds": [
+        "hyuuga-hinata-eight-trigrams-64-palms"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C26",
+      "id": "c26-pack-instinct",
+      "name": "Pack Instinct",
+      "tier": "rare",
+      "characterId": "inuzuka-kiba",
+      "targetSkillIds": [
+        "inuzuka-kiba-dynamic-air-marking",
+        "inuzuka-kiba-garouga"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C27",
+      "id": "c27-twin-fang-assault",
+      "name": "Twin Fang Assault",
+      "tier": "forbidden",
+      "characterId": "inuzuka-kiba",
+      "targetSkillIds": [
+        "inuzuka-kiba-garouga",
+        "inuzuka-kiba-double-garouga"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C28",
+      "id": "c28-calculated-capture",
+      "name": "Calculated Capture",
+      "tier": "rare",
+      "characterId": "nara-shikamaru",
+      "targetSkillIds": [
+        "nara-shikamaru-meditate"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C29",
+      "id": "c29-grand-strategy",
+      "name": "Grand Strategy",
+      "tier": "prismatic",
+      "characterId": "nara-shikamaru",
+      "targetSkillIds": [
+        "nara-shikamaru-meditate",
+        "nara-shikamaru-shadow-imitation"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C30",
+      "id": "c30-marked-refuge",
+      "name": "Marked Refuge",
+      "tier": "rare",
+      "characterId": "namikaze-minato",
+      "targetSkillIds": [
+        "namikaze-minato-custom-kunai"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C31",
+      "id": "c31-thunder-god-relay",
+      "name": "Thunder God Relay",
+      "tier": "prismatic",
+      "characterId": "namikaze-minato",
+      "targetSkillIds": [
+        "namikaze-minato-flying-thunder-god"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C32",
+      "id": "c32-stubborn-promise",
+      "name": "Stubborn Promise",
+      "tier": "rare",
+      "characterId": "uchiha-obito",
+      "targetSkillIds": [
+        "uchiha-obito-piercing-stab"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C33",
+      "id": "c33-last-promise",
+      "name": "Last Promise",
+      "tier": "prismatic",
+      "characterId": "uchiha-obito",
+      "targetSkillIds": [
+        "uchiha-obito-parting-gift"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C34",
+      "id": "c34-emergency-triage",
+      "name": "Emergency Triage",
+      "tier": "rare",
+      "characterId": "nohara-rin",
+      "targetSkillIds": [
+        "nohara-rin-healing-touch"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C35",
+      "id": "c35-mobile-hospital",
+      "name": "Mobile Hospital",
+      "tier": "prismatic",
+      "characterId": "nohara-rin",
+      "targetSkillIds": [
+        "nohara-rin-medical-kit"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C36",
+      "id": "c36-the-hidden-mist",
+      "name": "The Hidden Mist",
+      "tier": "forbidden",
+      "characterId": "momochi-zabuza",
+      "targetSkillIds": [
+        "momochi-zabuza-hidden-mist-technique"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C37",
+      "id": "c37-perfect-ambush",
+      "name": "Perfect Ambush",
+      "tier": "rare",
+      "characterId": "oboro",
+      "targetSkillIds": [
+        "oboro-haze-clones",
+        "oboro-exploding-kunais",
+        "oboro-exploding-kunais-haze"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C38",
+      "id": "c38-seal-hunter",
+      "name": "Seal Hunter",
+      "tier": "forbidden",
+      "characterId": "shiore-orochimaru",
+      "targetSkillIds": [
+        "shiore-orochimaru-five-elements-seal"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C39",
+      "id": "c39-trap-master",
+      "name": "Trap Master",
+      "tier": "rare",
+      "characterId": "tenten",
+      "targetSkillIds": [
+        "tenten-twin-rising-dragons-trap"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    },
+    {
+      "code": "C40",
+      "id": "c40-ninjas-sacrifice",
+      "name": "Ninja's Sacrifice",
+      "tier": "forbidden",
+      "characterId": "umino-iruka",
+      "targetSkillIds": [
+        "umino-iruka-sacrifice"
+      ],
+      "status": "implemented",
+      "needs": null,
+      "rosterProblems": []
+    }
+  ]
+}

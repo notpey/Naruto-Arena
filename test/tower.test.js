@@ -225,7 +225,11 @@ test('every scroll builds a permanent, uncleansable status the engine reads', ()
         }
         assert.equal(status.duration, 99);
         assert.equal(status.metadata.cannotBeCleansed, true);
-        assert.notEqual(status.metadata.passive, true, 'scrolls never replace a character passive');
+        // Legacy scrolls never use passive-only hooks. A few Standard augments set passive: true
+        // to reach passive-only engine hooks; see tower-standard.test.js.
+        if (!towerScrolls.parseScrollKey(key).scroll.standardOnly) {
+            assert.notEqual(status.metadata.passive, true, 'scrolls never replace a character passive');
+        }
     }
     const totalsWith = (key) => {
         const state = { statuses: [] };

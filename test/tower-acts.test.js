@@ -67,7 +67,15 @@ test('every new scroll is described, iconned, and offered unless cursed', () => 
         const info = towerScrolls.describeScroll(key);
         assert.ok(info.name && info.description && info.kanji, key);
         assert.ok(require('node:fs').existsSync(require('node:path').join(__dirname, '..', info.icon)), `${info.icon} exists`);
-        assert.equal(towerScrolls.OFFERED_SCROLL_KEYS.includes(key), scroll.tier !== 'cursed', key);
+        if (scroll.catalog === 'augment' || scroll.catalog === 'character') {
+            // Tower 2.0 augments are offered in Standard runs only, never in Legacy runs.
+            assert.equal(towerScrolls.OFFERED_SCROLL_KEYS.includes(key), false, key);
+            assert.equal(towerScrolls.STANDARD_OFFERED_SCROLL_KEYS.includes(key), true, key);
+        } else if (scroll.catalog === 'fusion') {
+            assert.equal(towerScrolls.OFFERED_SCROLL_KEYS.includes(key) || towerScrolls.STANDARD_OFFERED_SCROLL_KEYS.includes(key), false, 'fusions are only made');
+        } else {
+            assert.equal(towerScrolls.OFFERED_SCROLL_KEYS.includes(key), scroll.tier !== 'cursed', key);
+        }
         (scroll.pairsWith || []).forEach((id) => assert.ok(towerScrolls.parseScrollKey(id), `${key} pairs with a real scroll`));
     }
     const counts = towerScrolls.SCROLL_DEFINITIONS.reduce((tally, scroll) => ({ ...tally, [scroll.tier]: (tally[scroll.tier] || 0) + 1 }), {});

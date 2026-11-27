@@ -165,10 +165,12 @@ const BOSSES = {
 };
 
 const BOSS_DEFINITION = BOSSES[BOSS_ID];
-const getBossDefinition = (bossId) => BOSSES[bossId] || BOSSES[BOSS_ID];
+const getBossDefinition = (bossId, custom = null) => custom || BOSSES[bossId] || BOSSES[BOSS_ID];
+// A Standard-mode boss is synthesized from the roster and carries its definition in its state.
+const defOf = (state) => state?.def || getBossDefinition(state?.bossId);
 
-const buildBossEncounter = ({ floor, bossId = BOSS_ID }) => {
-    const def = getBossDefinition(bossId);
+const buildBossEncounter = ({ floor, bossId = BOSS_ID, def: custom = null }) => {
+    const def = getBossDefinition(bossId, custom);
     return {
         kind: 'boss',
         floor,
@@ -179,12 +181,13 @@ const buildBossEncounter = ({ floor, bossId = BOSS_ID }) => {
         hpMultiplier: 1,
         affixes: [],
         duel: Boolean(def.duel),
+        ...(custom ? { bossDef: custom } : {}),
     };
 };
 
-const describeBossForClient = (bossIdOrEncounter) => {
+const describeBossForClient = (bossIdOrEncounter, custom = null) => {
     const bossId = typeof bossIdOrEncounter === 'string' ? bossIdOrEncounter : bossIdOrEncounter?.bossId;
-    const def = getBossDefinition(bossId);
+    const def = getBossDefinition(bossId, custom || bossIdOrEncounter?.bossDef || null);
     return {
         bossId: def.bossId,
         name: def.name,
@@ -205,8 +208,9 @@ const applyBossVitality = (board, botUsername, hpCaps = BOSS_DEFINITION.hpCaps) 
     });
 };
 
-const createBossState = (bossId = BOSS_ID) => ({
-    bossId: getBossDefinition(bossId).bossId, turn: 0, cycle: 0, phase: 1,
+const createBossState = (bossId = BOSS_ID, custom = null) => ({
+    ...(custom ? { def: custom } : {}),
+    bossId: getBossDefinition(bossId, custom).bossId, turn: 0, cycle: 0, phase: 1,
     triggerFired: false, mirrorsTriggered: false, enraged: false, intent: null, lastEvent: null,
     cursedSlot: null,
 });
@@ -262,7 +266,7 @@ const markTriggerFired = (state, def) => {
 // ---------------------------------------------------------------- telegraph
 // Decides (and describes) the technique the boss will use on its next turn.
 const computeNextIntent = ({ state, match, botUsername, playerUsername, characters, battleLogic }) => {
-    const def = getBossDefinition(state.bossId);
+    const def = defOf(state);
     const bossUnits = match.board?.[botUsername] || [];
     const trigger = def.trigger;
     const fired = state.triggerFired || (trigger?.flag && state[trigger.flag]);
@@ -313,7 +317,7 @@ const computeNextIntent = ({ state, match, botUsername, playerUsername, characte
 const runScriptedBossTurn = ({
     state, match, botUsername, playerUsername, characters, battleLogic, fundSkill, queue,
 }) => {
-    const def = getBossDefinition(state.bossId);
+    const def = defOf(state);
     const usedSlots = [];
     const events = [];
     state.turn += 1;
@@ -403,7 +407,7 @@ const runScriptedBossTurn = ({
 // What the battle screen shows about the boss.
 const describeBossStateForClient = (state) => {
     if (!state) return null;
-    const def = getBossDefinition(state.bossId);
+    const def = defOf(state);
     return {
         bossId: state.bossId,
         phase: state.phase,
@@ -431,6 +435,7 @@ module.exports = {
     ENRAGE_STATUS,
     SHUKAKU_STATUS,
     getBossDefinition,
+    defOf,
     buildBossEncounter,
     describeBossForClient,
     applyBossVitality,

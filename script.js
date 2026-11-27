@@ -1658,7 +1658,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let i = 0; i < effectiveRandom; i += 1) {
                 effective.push('Random');
             }
-            return effective;
+            return applyTowerCostDiscountsToList(effective, actorUnit, skill);
+        };
+
+        // Display mirror of the server's Tower augment discounts (battleLogic
+        // applyTowerCostDiscounts) so Tower costs read correctly; the server still decides.
+        const applyTowerCostDiscountsToList = (list, actorUnit, skill) => {
+            const discounts = (actorUnit?.state?.statuses || [])
+                .filter((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.towerScroll &&
+                    status.metadata.towerCostDiscount)
+                .flatMap((status) => [].concat(status.metadata.towerCostDiscount));
+            if (!discounts.length) return list;
+            const next = list.slice();
+            const classes = (skill?.classes || []).map((entry) => String(entry).toLowerCase());
+            discounts.forEach((discount) => {
+                if (!discount || discount.spent) return;
+                if (Array.isArray(discount.skillClassesAny) && discount.skillClassesAny.length &&
+                    !discount.skillClassesAny.some((entry) => classes.includes(String(entry).toLowerCase()))) return;
+                if (Array.isArray(discount.excludeSkillIds) && discount.excludeSkillIds.includes(skill?.id)) return;
+                if (Array.isArray(discount.skillIds) && !discount.skillIds.includes(skill?.id)) return;
+                if (next.length < Math.max(2, Number(discount.minTotal) || 2)) return;
+                const removeOne = (name) => {
+                    const at = next.findIndex((entry) => String(entry).toLowerCase() === name);
+                    if (at >= 0) next.splice(at, 1);
+                    return at >= 0;
+                };
+                if (discount.chakraType) { removeOne(String(discount.chakraType).toLowerCase()); return; }
+                if (removeOne('random')) return;
+                if (discount.requireRandom || !discount.fallbackSpecific) return;
+                const specific = next.find((entry) => String(entry).toLowerCase() !== 'random');
+                if (specific) removeOne(String(specific).toLowerCase());
+            });
+            return next;
         };
 
         const setSkillInteractivity = (isPlayersTurn) => {

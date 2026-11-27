@@ -888,7 +888,13 @@ const filterHelpfulImmuneRecipients = ({ effect, recipients, actingUsername }) =
         return !isUnitInvulnerableToHelpfulSkills(recipient.unit);
     });
 
-const doesUnitSatisfySkillTargetCondition = (unit, skill, actorUsername = null, actorSlot = null) => {
+const doesUnitSatisfySkillTargetCondition = (unit, skill, actorUsername = null, actorSlot = null, actorState = null) => {
+    // Tower character augments may lift one skill's target condition (towerIgnoreTargetConditionSkillIds;
+    // no character definition uses the key).
+    if (skill?.id && (Array.isArray(actorState?.statuses) ? actorState.statuses : []).some((status) =>
+        status?.metadata?.towerScroll && (Number(status.remainingTurns) || 0) > 0 &&
+        Array.isArray(status.metadata.towerIgnoreTargetConditionSkillIds) &&
+        status.metadata.towerIgnoreTargetConditionSkillIds.includes(skill.id))) return true;
     const condition = skill?.targetCondition;
     const state = ensureUnitStateShape(unit);
     if (condition?.statusId && !hasStatus(state, condition.statusId)) return false;
@@ -930,10 +936,17 @@ const doesActorSatisfySkillCondition = (actorUnit, actorState, skill) => {
     // e.g. Rasengan: { statusId, metadataKey: 'shadowClones', value: 2 } needs 2+ Shadow Clones.
     const metadataAtLeast = condition?.statusMetadataAtLeast;
     if (metadataAtLeast?.statusId && metadataAtLeast?.metadataKey) {
-        const status = (Array.isArray(actorState?.statuses) ? actorState.statuses : []).find((entry) =>
+        const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+        const status = statuses.find((entry) =>
             entry?.id === metadataAtLeast.statusId && (Number(entry.remainingTurns) || 0) > 0);
-        if ((Number(status?.metadata?.[metadataAtLeast.metadataKey]) || 0) <
-            Math.max(0, Number(metadataAtLeast.value) || 0)) return false;
+        // Tower character augments may lower this requirement (towerConditionValueOverride,
+        // keyed "statusId:metadataKey"); no character definition uses the key.
+        const overrideKey = `${metadataAtLeast.statusId}:${metadataAtLeast.metadataKey}`;
+        const override = statuses.find((entry) => entry?.metadata?.towerScroll &&
+            Number.isFinite(Number(entry.metadata.towerConditionValueOverride?.[overrideKey])));
+        const required = override ? Number(override.metadata.towerConditionValueOverride[overrideKey])
+            : Math.max(0, Number(metadataAtLeast.value) || 0);
+        if ((Number(status?.metadata?.[metadataAtLeast.metadataKey]) || 0) < required) return false;
     }
     const currentHp = Math.max(0, Number(actorUnit?.hp) || 0);
     const hpAtMost = Number(condition?.sourceCurrentHpAtMost);
@@ -1019,7 +1032,7 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
                 }
                 if (!canActorTargetUnit({ actorState, targetUsername: username, targetSlot: slot })) return false;
                 if (!doesUnitSatisfySkillTargetCondition(
-                    unit, effectiveSkill, actingUsername, actorSlot
+                    unit, effectiveSkill, actingUsername, actorSlot, actorState
                 )) return false;
                 return true;
             })
@@ -1330,10 +1343,53 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
             0
         );
     }
-    return {
+    return applyTowerCostDiscounts({ skill, actorState, cost: {
         reservedSpecific,
         requiredRandom: Math.max(0, base.requiredRandom + randomIncrease - randomReduction),
-    };
+    } });
+};
+
+// Tower augment cost discounts (`towerCostDiscount` on a Tower scroll status; no character
+// uses the key). Each discount lowers random chakra first, or one chakra of a named or
+// required type, and never takes a skill's total cost below 1.
+//   { amount, minTotal, skillClassesAny, excludeSkillIds, chakraType, requireRandom,
+//     fallbackSpecific, spent }
+const applyTowerCostDiscounts = ({ skill, actorState, cost }) => {
+    const discounts = (Array.isArray(actorState?.statuses) ? actorState.statuses : [])
+        .filter((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.towerScroll &&
+            status.metadata.towerCostDiscount)
+        .flatMap((status) => [].concat(status.metadata.towerCostDiscount));
+    if (!discounts.length) return cost;
+    const reservedSpecific = { ...(cost.reservedSpecific || {}) };
+    let requiredRandom = Math.max(0, Number(cost.requiredRandom) || 0);
+    const total = () => requiredRandom + Object.values(reservedSpecific).reduce((sum, value) => sum + (Number(value) || 0), 0);
+    discounts.forEach((discount) => {
+        if (!discount || discount.spent) return;
+        if (Array.isArray(discount.skillClassesAny) && discount.skillClassesAny.length &&
+            !discount.skillClassesAny.some((entry) => hasSkillClass(skill?.classes || [], entry))) return;
+        if (Array.isArray(discount.excludeSkillIds) && discount.excludeSkillIds.includes(skill?.id)) return;
+        if (Array.isArray(discount.skillIds) && !discount.skillIds.includes(skill?.id)) return;
+        if (total() < Math.max(2, Number(discount.minTotal) || 2)) return;
+        let amount = Math.max(0, Math.min(Number(discount.amount) || 1, total() - 1));
+        if (discount.chakraType) {
+            const type = String(discount.chakraType).toLowerCase();
+            const cut = Math.min(amount, Math.max(0, Number(reservedSpecific[type]) || 0));
+            reservedSpecific[type] = (Number(reservedSpecific[type]) || 0) - cut;
+            return;
+        }
+        if (requiredRandom > 0) {
+            const cut = Math.min(amount, requiredRandom);
+            requiredRandom -= cut;
+            amount -= cut;
+        } else if (discount.requireRandom) {
+            return;
+        }
+        if (amount > 0 && discount.fallbackSpecific) {
+            const type = Object.keys(reservedSpecific).find((key) => (Number(reservedSpecific[key]) || 0) > 0);
+            if (type) reservedSpecific[type] -= 1;
+        }
+    });
+    return { ...cost, reservedSpecific, requiredRandom };
 };
 
 const getEffectiveEnergyCostCountForTypes = (skill, actorState, energyTypes = []) => {
@@ -1371,6 +1427,15 @@ const isUnitImmuneToChakraLoss = (unit) => {
 // adjustments that depend on the unit applying the stun read the board from here. It is set
 // only while resolvePendingTurnSkills or tickStatusesForTurnEnd runs (both synchronous).
 let activeResolution = null;
+
+// Tower augment hooks (services/tower/towerAugmentEffects.js registers them). They are only
+// ever consulted for matches whose mode is 'tower', so ordinary matches never reach them.
+let towerHooks = null;
+const setTowerHooks = (hooks) => { towerHooks = hooks && typeof hooks === 'object' ? hooks : null; };
+const towerHooksFor = (match) => (towerHooks && match && match.mode === 'tower' ? towerHooks : null);
+const sumDestructibleDefense = (unit) => (Array.isArray(unit?.state?.statuses) ? unit.state.statuses : [])
+    .reduce((sum, status) => ((Number(status?.remainingTurns) || 0) > 0
+        ? sum + Math.max(0, Number(status?.metadata?.destructibleDefensePoints) || 0) : sum), 0);
 const runWithActiveResolution = (match, run) => {
     const previous = activeResolution;
     activeResolution = match && typeof match === 'object'
@@ -1544,6 +1609,36 @@ const getDeadAllyDamageBonus = ({ match, actorUnit, actorState, actorUsername, s
         if (classes.length > 0 && !classes.some((entry) => hasSkillClass(skillClasses, entry))) return sum;
         return sum + deadAllies * Math.max(0, Number(config.amount) || 0);
     }, 0);
+};
+
+// Tower augment hooks. Only Tower scroll statuses carry these `tower*` keys (no character
+// definition uses them), so ordinary matches never reach a non-zero adjustment.
+//  towerDirectDamagePercent: extra % on a skill's direct (non-affliction) hits; optionally
+//    limited by towerDirectDamagePercentSkillClassesAny. Honors activeWhileOwnerCurrentHp*.
+//  towerBonusDamageVsStunned: flat bonus on hits against a stunned enemy.
+//  towerBonusDamageVsTargetHpBelow: { below, amount } flat bonus against an enemy whose
+//    health is below `below` before the hit.
+const getTowerAugmentDamageAdjustment = ({ actorUnit, actorState, targetUnit, targetState, amount, afflictionDamage, skillClasses = [] }) => {
+    const base = Math.max(0, Number(amount) || 0);
+    if (base <= 0) return 0;
+    const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
+    let flat = 0;
+    let percent = 0;
+    statuses.forEach((status) => {
+        const metadata = status?.metadata;
+        if (!metadata || !metadata.towerScroll || !isStatusActiveForMetadata(status, actorUnit)) return;
+        const vsStunned = Math.max(0, Number(metadata.towerBonusDamageVsStunned) || 0);
+        if (vsStunned > 0 && isUnitStunned(targetState, targetUnit)) flat += vsStunned;
+        const lowHp = metadata.towerBonusDamageVsTargetHpBelow;
+        if (lowHp && Number(targetUnit?.hp) < Number(lowHp.below)) flat += Math.max(0, Number(lowHp.amount) || 0);
+        const pct = Math.max(0, Number(metadata.towerDirectDamagePercent) || 0);
+        if (pct > 0 && !afflictionDamage) {
+            const classes = Array.isArray(metadata.towerDirectDamagePercentSkillClassesAny)
+                ? metadata.towerDirectDamagePercentSkillClassesAny : [];
+            if (!classes.length || classes.some((entry) => hasSkillClass(skillClasses, entry))) percent += pct;
+        }
+    });
+    return flat + Math.floor(((base + flat) * percent) / 100);
 };
 
 // Metadata a harmful status keeps when its owner ignores enemy non-damage effects.
@@ -1949,7 +2044,19 @@ const chooseRandomOption = (options = [], excludeValue = undefined) => {
     return pool[Math.floor(Math.random() * pool.length)];
 };
 
-const applyStatus = ({
+// Tower matches let augments adjust or cancel a status as it is applied (stun duration,
+// stun prevention, duration extensions).
+const applyStatus = (args = {}) => {
+    const tower = towerHooksFor(activeResolution?.match);
+    if (tower?.onStatusApply && args?.targetState && args?.statusId) {
+        const next = tower.onStatusApply({ match: activeResolution.match, args });
+        if (!next) return undefined;
+        return applyStatusCore(next);
+    }
+    return applyStatusCore(args);
+};
+
+const applyStatusCore = ({
     targetState,
     statusId,
     duration,
@@ -3646,6 +3753,7 @@ const maybeTriggerReactiveDefenses = ({
         });
     }
 
+    towerHooksFor(match)?.onCounter?.({ match, actingUsername, actorUnit, recipient, trapStatus, skill });
     if (!trapMetadata?.trapReappliesSelf) {
         if (targetState.statuses === statuses) {
             statuses.splice(trapIndex, 1);
@@ -3681,7 +3789,20 @@ const getTurnMitigationKey = (mitigation, unit) => {
 // hits loses no more than half a point overall.
 const roundHpAmount = (value) => Math.round(Math.max(0, Number(value) || 0));
 
+// Tower matches report every damage instance to the augment hooks after it lands.
 const applyDamageToUnit = (unit, rawAmount, context = {}) => {
+    const match = context?.match || activeResolution?.match || null;
+    const tower = towerHooksFor(match);
+    if (!tower?.onDamage || !unit) return applyDamageToUnitCore(unit, rawAmount, context);
+    const hpBefore = Math.max(0, Number(unit.hp) || 0);
+    const wasAlive = unit.alive !== false;
+    const ddBefore = sumDestructibleDefense(unit);
+    const dealt = applyDamageToUnitCore(unit, rawAmount, context);
+    tower.onDamage({ match, unit, rawAmount, context, dealt, hpBefore, wasAlive, ddBefore, ddAfter: sumDestructibleDefense(unit) });
+    return dealt;
+};
+
+const applyDamageToUnitCore = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const turnMitigation = context?.match ? turnMitigationByMatch.get(context.match) : null;
     const turnMitigationKey = turnMitigation ? getTurnMitigationKey(turnMitigation, unit) : null;
@@ -4430,7 +4551,17 @@ const applyPassiveStunDamage = ({
     }
 };
 
-const applyHealToUnit = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
+const applyHealToUnit = (unit, rawAmount, options = {}) => {
+    const match = activeResolution?.match || null;
+    const tower = towerHooksFor(match);
+    if (!tower?.onHeal || !unit) return applyHealToUnitCore(unit, rawAmount, options);
+    const hpBefore = Math.max(0, Number(unit.hp) || 0);
+    const result = applyHealToUnitCore(unit, rawAmount, options);
+    tower.onHeal({ match, unit, rawAmount, hpBefore, hpAfter: Math.max(0, Number(unit.hp) || 0) });
+    return result;
+};
+
+const applyHealToUnitCore = (unit, rawAmount, { excludeStatusId = '' } = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const targetState = ensureUnitStateShape(unit);
     const totals = getStatusMetadataTotals(targetState);
@@ -4477,6 +4608,19 @@ const applyHealthStealToUnit = ({ targetUnit, sourceUnit, rawAmount, context = {
 };
 
 const applyHealthLossToUnit = (unit, rawAmount, context = {}) => {
+    const match = context?.match || activeResolution?.match || null;
+    const tower = towerHooksFor(match);
+    if (!tower?.onDamage || !unit) return applyHealthLossToUnitCore(unit, rawAmount, context);
+    const hpBefore = Math.max(0, Number(unit.hp) || 0);
+    const wasAlive = unit.alive !== false;
+    const ddBefore = sumDestructibleDefense(unit);
+    const result = applyHealthLossToUnitCore(unit, rawAmount, context);
+    tower.onDamage({ match, unit, rawAmount, context: { ...context, healthLoss: true }, dealt: Math.max(0, hpBefore - (Number(unit.hp) || 0)),
+        hpBefore, wasAlive, ddBefore, ddAfter: sumDestructibleDefense(unit) });
+    return result;
+};
+
+const applyHealthLossToUnitCore = (unit, rawAmount, context = {}) => {
     if (!unit || unit.alive === false || isUnitBanished(unit)) return 0;
     const wasAlive = unit.alive !== false;
     const loss = roundHpAmount(rawAmount);
@@ -5430,7 +5574,15 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
     const turnStandardMitigationBudgetByRecipient = turnMitigation.standard;
     const turnPercentMitigationStateByRecipient = new Map();
 
+    // Tower matches: each skill that is actually used is reported once it has resolved.
+    const towerTurn = towerHooksFor(match);
+    let towerAction = null;
+    const flushTowerAction = () => {
+        if (towerAction && towerTurn?.afterSkill) towerTurn.afterSkill(towerAction);
+        towerAction = null;
+    };
     for (let queueIndex = 0; queueIndex < queuedActions.length; queueIndex += 1) {
+        flushTowerAction();
         syncLinkedStatuses(match);
         const queued = queuedActions[queueIndex];
         const actorSlot = Number.parseInt(queued?.actorSlot, 10);
@@ -5497,6 +5649,12 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
         );
         if (!queued?.isAutoCast && isEnergyCostIncreased({ skill, actorState, cost: queuedCost })) {
             applyOnEnemyIncreasedCostSkillBonuses({ match, actingUsername });
+        }
+        if (towerTurn?.beforeSkill) {
+            towerAction = towerTurn.beforeSkill({
+                match, actingUsername, actorSlot, skill, paidChakraCount, cost: queuedCost,
+                isAutoCast: Boolean(queued?.isAutoCast), characters, targetSelection: queued?.targetSelection || [],
+            }) || null;
         }
         const ownerUseSkillTriggeredStatusIds = new Set();
         const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
@@ -5816,7 +5974,7 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     return false;
                 }
                 if (!doesUnitSatisfySkillTargetCondition(
-                    entry.unit, skill, actingUsername, actorSlot
+                    entry.unit, skill, actingUsername, actorSlot, actorState
                 )) return false;
                 return (
                     bypassEnemyInvulnerability ||
@@ -5882,7 +6040,7 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     return false;
                 }
                 if (!doesUnitSatisfySkillTargetCondition(
-                    entry.unit, skill, actingUsername, actorSlot
+                    entry.unit, skill, actingUsername, actorSlot, actorState
                 )) return false;
                 return (
                     bypassEnemyInvulnerability ||
@@ -6910,8 +7068,28 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                         crystalBallReduction = Math.min(rawAmount, remaining);
                         crystalBallReductionRemainingByRecipient.set(recipientKey, remaining - crystalBallReduction);
                     }
-                    const totalAmount = rawAmount - crystalBallReduction;
-                    queueDamage(recipient, totalAmount, effect, controlledSource);
+                    let towerAdjustment = controlledSource || recipient.username === actingUsername ? 0
+                        : getTowerAugmentDamageAdjustment({
+                            actorUnit, actorState, targetUnit: recipient.unit, targetState,
+                            amount: rawAmount - crystalBallReduction, afflictionDamage, skillClasses: damageSkillClasses,
+                        });
+                    let towerEffect = effect;
+                    if (towerTurn?.adjustDamage && !controlledSource && recipient.username !== actingUsername) {
+                        const adjusted = towerTurn.adjustDamage({
+                            match, actingUsername, actorSlot, actorUnit, actorState, recipient, targetState, skill, effect,
+                            amount: rawAmount - crystalBallReduction + towerAdjustment, afflictionDamage,
+                            skillClasses: damageSkillClasses,
+                            targetDamageReductionFlat: Math.max(0, Number(getStatusMetadataTotals(targetState, recipient.unit).damageReductionFlat) || 0),
+                        }) || {};
+                        towerAdjustment += Number(adjusted.extra) || 0;
+                        if (adjusted.ignoreDamageReduction || adjusted.ignoreDestructibleDefense) {
+                            towerEffect = { ...effect, metadata: { ...(effect?.metadata || {}),
+                                ...(adjusted.ignoreDamageReduction ? { ignoreDamageReduction: true } : {}),
+                                ...(adjusted.ignoreDestructibleDefense ? { ignoreDestructibleDefense: true } : {}) } };
+                        }
+                    }
+                    const totalAmount = Math.max(0, rawAmount - crystalBallReduction + towerAdjustment);
+                    queueDamage(recipient, totalAmount, towerEffect, controlledSource);
                 });
                 return;
             }
@@ -8723,6 +8901,7 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
             });
         });
     }
+    flushTowerAction();
 
     (match.players || []).forEach((player) => {
         const units = match.board?.[player.username] || [];
@@ -10675,6 +10854,7 @@ const METADATA_REGISTRY = {
 };
 
 module.exports = {
+    setTowerHooks,
     DEFAULT_HP,
     buildInitialBoard,
     getSkillTargetType,

@@ -6,82 +6,78 @@
     <title>The Tower · Naruto-Arena</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700;800;900&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png?v=3">
     <link rel="shortcut icon" href="favicon.ico?v=3">
     <link rel="stylesheet" href="account.css?v=2">
-    <link rel="stylesheet" href="tower.css?v=3">
+    <link rel="stylesheet" href="tower.css?v=7">
 </head>
 <body class="tower-page" data-scene="waves">
-<div class="tower-backdrop" aria-hidden="true">
-    <div class="tower-backdrop-art"></div>
-    <div class="tower-mist is-far"></div>
-    <div class="tower-mist is-near"></div>
+<div class="tw-viewport">
+    <div class="tw-stage" data-stage-root>
+        <div class="tw-backdrop" aria-hidden="true"></div>
+        <nav class="tw-nav" aria-label="Game navigation">
+            <a class="tw-wordmark" href="selection.html">NARUTO<span>ARENA</span></a>
+            <div class="tw-tabs">
+                <a class="tw-tab" href="selection.html">Home</a>
+                <a class="tw-tab" href="selection.html?view=missions">Missions</a>
+                <a class="tw-tab" href="selection.html?view=shop">Shop</a>
+                <a class="tw-tab" href="selection.html?view=profile">Profile</a>
+                <a class="tw-tab is-active" href="tower.html" aria-current="page">Tower</a>
+            </div>
+            <div class="tw-nav-tools">
+                <button type="button" class="tw-tool" data-compendium title="Every augment, fusion and character augment">Compendium</button>
+                <button type="button" class="tw-tool is-danger" data-abandon hidden>Abandon run</button>
+            </div>
+        </nav>
+        <div class="tw-body" data-body>
+            <div class="tw-loading" aria-label="Opening the Tower"><span></span></div>
+        </div>
+        <div class="tw-fusion" data-fusion hidden role="dialog" aria-modal="true" aria-labelledby="tw-fusion-title"></div>
+    </div>
 </div>
-<header class="tower-topbar">
-    <a class="tower-back" href="selection.html" aria-label="Back to the selection hub">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
-        <span>Hub</span>
-    </a>
-    <div class="tower-title">
-        <span class="tower-title-mark" aria-hidden="true">塔</span>
-        <div>
-            <strong>The Tower</strong>
-            <small data-act-label>Act I · Land of Waves</small>
-        </div>
-    </div>
-    <div class="tower-run-meta" data-run-meta hidden>
-        <span class="tower-meta-chip" data-floor-chip></span>
-        <span class="tower-meta-chip is-exam" data-exam-chip hidden tabindex="0"
-              data-tip="Exam scrolls&#10;Reach the forest's central tower holding both a Heaven and an Earth scroll."></span>
-        <span class="tower-meta-chip is-ryo" data-ryo-chip title="Run ryō: spent at merchants, lost when the run ends"></span>
-        <button type="button" class="tower-text-button" data-abandon>Abandon run</button>
-    </div>
-</header>
 
-<main class="tower-layout">
-    <section class="tower-stage" data-stage aria-live="polite">
-        <div class="tower-card tower-skeleton" aria-label="Opening the Tower">
-            <span></span><span></span><span></span>
-        </div>
-    </section>
-
-    <aside class="tower-team" data-team-panel hidden aria-label="Your team">
-        <h2 class="tower-panel-title">Your team</h2>
-        <div class="tower-pick-banner" data-pick-banner hidden>
-            <span data-pick-label></span>
-            <button type="button" class="tower-text-button" data-pick-cancel>Cancel</button>
-        </div>
-        <ol class="tower-team-list" data-team-list></ol>
-        <div class="tower-team-scrolls" data-team-scrolls></div>
-        <h2 class="tower-panel-title">Journal</h2>
-        <ol class="tower-log" data-log></ol>
-    </aside>
-</main>
-
-<!-- On phones, choosing a ninja happens here, within thumb reach, instead of on the team panel far below. -->
-<section class="tower-pick-sheet" data-pick-sheet hidden aria-labelledby="tower-pick-sheet-title">
-    <div class="tower-pick-sheet-head">
-        <h2 id="tower-pick-sheet-title" data-pick-sheet-title></h2>
-        <p data-pick-sheet-detail></p>
-    </div>
-    <ol class="tower-pick-sheet-list" data-pick-sheet-list></ol>
-    <button type="button" class="tower-button" data-pick-sheet-cancel>Cancel</button>
+<!-- On phones, choosing a ninja happens here, within thumb reach. -->
+<section class="tw-sheet" data-pick-sheet hidden aria-labelledby="tw-sheet-title">
+    <h2 id="tw-sheet-title" data-pick-sheet-title></h2>
+    <p data-pick-sheet-detail></p>
+    <ol class="tw-sheet-list" data-pick-sheet-list></ol>
+    <button type="button" class="tw-button" data-pick-sheet-cancel>Cancel</button>
 </section>
 
-<dialog class="tower-confirm" data-confirm aria-labelledby="tower-confirm-title">
-    <span class="tower-confirm-seal" aria-hidden="true">退</span>
-    <h2 id="tower-confirm-title" data-confirm-title></h2>
+<dialog class="tw-dialog is-narrow" data-confirm aria-labelledby="tw-confirm-title">
+    <h2 id="tw-confirm-title" data-confirm-title></h2>
     <p data-confirm-body></p>
-    <div class="tower-actions">
-        <button type="button" class="tower-button" data-confirm-cancel>Keep climbing</button>
-        <button type="button" class="tower-button is-danger" data-confirm-ok></button>
+    <div class="tw-dialog-actions">
+        <button type="button" class="tw-button" data-confirm-cancel>Keep climbing</button>
+        <button type="button" class="tw-button is-danger" data-confirm-ok></button>
     </div>
 </dialog>
 
-<div class="tower-toast" data-toast role="status" hidden></div>
+<dialog class="tw-dialog" data-replace aria-labelledby="tw-replace-title">
+    <h2 id="tw-replace-title" data-replace-title>Augment slots are full</h2>
+    <p data-replace-body></p>
+    <ul class="tw-dialog-list" data-replace-list></ul>
+    <div class="tw-dialog-actions"><button type="button" class="tw-button" data-replace-cancel>Cancel</button></div>
+</dialog>
+
+<dialog class="tw-dialog is-tall" data-compendium-dialog aria-labelledby="tw-compendium-title">
+    <h2 id="tw-compendium-title">Compendium</h2>
+    <div class="tw-compendium-tools">
+        <input type="search" data-compendium-search placeholder="Search by name or effect" aria-label="Search the compendium">
+        <select data-compendium-filter aria-label="Show">
+            <option value="augments">Augments</option>
+            <option value="fusions">Fusions</option>
+            <option value="characterAugments">Character augments</option>
+        </select>
+    </div>
+    <ul class="tw-dialog-list" data-compendium-list></ul>
+    <div class="tw-dialog-actions"><button type="button" class="tw-button" data-compendium-close>Close</button></div>
+</dialog>
+
+<div class="tw-toast" data-toast role="status" hidden></div>
 
 <script src="account-client.js?v=4"></script>
-<script src="tower.js?v=4"></script>
+<script src="tower.js?v=8"></script>
 </body>
 </html>

@@ -1,77 +1,70 @@
-// The Tower page. It only sends the player's choices to /api/tower and renders the run
-// the server returns; every outcome (offers, healing, battle results) is decided there.
+// The Tower page: a screen of the game. It sends the player's choices to /api/tower and
+// renders the run the server returns; every outcome (offers, healing, fusion, battles) is
+// decided there. Every screen is the same board: a floor header over a row of postings,
+// with the team column beside it once there is a team.
 (function () {
     'use strict';
 
-    const stage = document.querySelector('[data-stage]');
-    const teamPanel = document.querySelector('[data-team-panel]');
-    const teamList = document.querySelector('[data-team-list]');
-    const teamScrollsEl = document.querySelector('[data-team-scrolls]');
-    const logEl = document.querySelector('[data-log]');
-    const runMeta = document.querySelector('[data-run-meta]');
-    const floorChip = document.querySelector('[data-floor-chip]');
-    const ryoChip = document.querySelector('[data-ryo-chip]');
+    const stageRoot = document.querySelector('[data-stage-root]');
+    const bodyEl = document.querySelector('[data-body]');
+    const fusionEl = document.querySelector('[data-fusion]');
     const abandonButton = document.querySelector('[data-abandon]');
-    const pickBanner = document.querySelector('[data-pick-banner]');
-    const pickLabel = document.querySelector('[data-pick-label]');
-    const pickCancel = document.querySelector('[data-pick-cancel]');
-    const pickSheet = document.querySelector('[data-pick-sheet]');
-    const pickSheetTitle = pickSheet.querySelector('[data-pick-sheet-title]');
-    const pickSheetDetail = pickSheet.querySelector('[data-pick-sheet-detail]');
-    const pickSheetList = pickSheet.querySelector('[data-pick-sheet-list]');
-    const pickSheetCancel = pickSheet.querySelector('[data-pick-sheet-cancel]');
-    const phoneLayout = window.matchMedia('(max-width: 860px)');
+    const compendiumButton = document.querySelector('[data-compendium]');
     const toastEl = document.querySelector('[data-toast]');
     const confirmEl = document.querySelector('[data-confirm]');
-
-    const NODE_META = {
-        battle: { kanji: '戦', label: 'Battle', hint: 'Fight a squad. Win a Forbidden Scroll and ryō.' },
-        elite: { kanji: '精', label: 'Elite', hint: 'A tougher squad with two affixes. Jōnin or Kage scrolls.' },
-        boss: { kanji: '鬼', label: 'Boss', hint: 'A scripted fight that telegraphs its moves.' },
-        ramen: { kanji: '麺', label: 'Ramen Stand', hint: 'Recover health before the next fight.' },
-        merchant: { kanji: '商', label: 'Merchant', hint: 'Spend ryō on scrolls and medicine.' },
-        recruit: { kanji: '募', label: 'Recruit', hint: 'Swap one ninja for a fresh recruit.' },
-        event: { kanji: '謎', label: 'Event', hint: 'Something happens on the road. Choose how to answer it.' },
-        exam: { kanji: '試', label: 'Written Exam', hint: 'Ibiki Morino\'s first exam, and its tenth question.' },
-        duel: { kanji: '闘', label: 'Duel', hint: 'One of your ninjas fights alone. Losing costs that ninja a life, not the run.' },
-        training: { kanji: '修', label: 'Training', hint: 'A month to train with a Leaf jōnin.' },
-    };
-    // Each act's merchant is someone different.
-    const MERCHANT_LABEL = { 1: 'A travelling merchant', 2: 'A Leaf weapons dealer' };
-    // Chakra colours match the battle screen's chakra pool.
-    const CHAKRA = [
-        { key: 'Taijutsu', label: 'Taijutsu', color: '#4caf50' },
-        { key: 'Bloodline', label: 'Bloodline', color: '#e04545' },
-        { key: 'Ninjutsu', label: 'Ninjutsu', color: '#4a7bdc' },
-        { key: 'Genjutsu', label: 'Genjutsu', color: '#e8e8e8' },
-    ];
-    const ACTIVE_STATUSES = ['draft', 'map', 'battle', 'ramen', 'merchant', 'recruit', 'reward', 'event', 'interlude'];
-    const actLabelEl = document.querySelector('[data-act-label]');
-    const examChip = document.querySelector('[data-exam-chip]');
+    const replaceEl = document.querySelector('[data-replace]');
+    const compendiumEl = document.querySelector('[data-compendium-dialog]');
+    const sheet = document.querySelector('[data-pick-sheet]');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const ACTIVE = ['draft', 'map', 'battle', 'ramen', 'merchant', 'recruit', 'reward', 'event', 'interlude', 'fusion'];
+    const NODES = {
+        battle: { kanji: '戦', label: 'Battle', hint: 'A squad blocks the stairs. Win an augment and ryō.', verb: 'Fight' },
+        elite: { kanji: '精', label: 'Elite', hint: 'A tougher squad. Better augments, more ryō.', verb: 'Fight' },
+        miniboss: { kanji: '将', label: 'Champion', hint: 'The champion guarding this stretch of the Tower.', verb: 'Fight' },
+        boss: { kanji: '鬼', label: 'Boss', hint: 'Telegraphs each technique a turn ahead.', verb: 'Face the boss', tone: 'is-boss' },
+        duel: { kanji: '闘', label: 'Duel', hint: 'One of your ninjas fights alone.', verb: 'Choose a champion' },
+        ramen: { kanji: '麺', label: 'Ramen Stand', hint: 'Recover health before the next fight.', verb: 'Rest', tone: 'is-rest' },
+        fusion: { kanji: '麺', label: 'Ramen Stand', hint: 'Recover health before the next fight.', verb: 'Rest', tone: 'is-rest' },
+        merchant: { kanji: '商', label: 'Merchant', hint: 'Spend ryō on augments and medicine.', verb: 'Browse', tone: 'is-shop' },
+        recruit: { kanji: '募', label: 'Recruit', hint: 'Swap one ninja for a fresh one.', verb: 'Visit', tone: 'is-shop' },
+        event: { kanji: '謎', label: 'Event', hint: 'Something happens on the road.', verb: 'Go', tone: 'is-event' },
+        exam: { kanji: '試', label: 'Written Exam', hint: 'Ibiki Morino\'s first exam.', verb: 'Go', tone: 'is-event' },
+        training: { kanji: '修', label: 'Training', hint: 'A month to train with a Leaf jōnin.', verb: 'Train', tone: 'is-event' },
+    };
+    const QUICK_FIGHT = new Set(['battle', 'elite', 'miniboss']);
+    const CHAKRA = { Taijutsu: '#4caf50', Bloodline: '#e04545', Ninjutsu: '#4a7bdc', Genjutsu: '#e8e8e8' };
+    const TIER_LABEL = { common: 'Common', rare: 'Rare', forbidden: 'Forbidden', prismatic: 'Prismatic' };
+    const REROLL_ICON = '<svg class="tw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>';
 
     let state = { run: null, bestFloor: null };
     let busy = false;
-    let pick = null; // { label, onPick(slot), disabledFor(member) }
-    let selectedNodeId = null;
+    let pick = null; // { label, detail, onPick(slot), disabledFor(member, slot), allowDead }
+    let draftIds = { key: '', ids: [] };
+    let championSlot = null;
+    let chosenMode = 'standard';
+    let catalog = null;
+    let lastKey = '';
     let toastTimer = null;
-    let lastStatusKey = '';
-    let lastTeamHp = null; // previous health per slot, to float +/- changes
-    let lastRyo = null;
-    let draftPicks = { key: '', ids: [] }; // the candidate kept in each draft slot
 
     // ------------------------------------------------------------ helpers
-    const escapeHtml = (value) => String(value ?? '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const e = (value) => String(value ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const isStd = (run) => run?.mode === 'standard';
+    const noun = (run, plural) => (isStd(run) ? (plural ? 'augments' : 'augment') : (plural ? 'scrolls' : 'scroll'));
+    const portrait = (character, cls = 'tw-portrait') =>
+        `<img class="${cls}" src="${e(character.facePicture || 'found-remaster.png')}" alt="${e(character.name)}">`;
+    const tip = (title, text) => `data-tip="${e(`${title}\n${text || ''}`.trim())}"`;
+    // Inside a pickable member row (itself a button) the icons must not be buttons.
+    const augIcon = (scroll, plain = false) => `<${plain ? 'span' : 'button type="button"'} class="tw-aug tier-${e(scroll.tier)}" ${tip(`${scroll.name} · ${scroll.tierLabel}`, scroll.description)}>` +
+        `<img src="${e(scroll.icon)}" alt="${e(scroll.name)}"></${plain ? 'span' : 'button'}>`;
+    const skillStrip = (character, limit = 4) => `<span class="tw-skills">${(character.skills || []).slice(0, limit).map((skill) =>
+        `<img src="${e(skill.skillimage)}" alt="${e(skill.name)}" tabindex="0" ${tip(skill.name, skill.skilldescription)}>`).join('')}</span>`;
 
     const showToast = (message, tone = 'info') => {
         toastEl.textContent = message;
         toastEl.dataset.tone = tone;
         toastEl.hidden = false;
-        toastEl.classList.remove('is-in');
-        void toastEl.offsetWidth; // restart the entrance animation
-        toastEl.classList.add('is-in');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => { toastEl.hidden = true; }, 4200);
     };
@@ -93,29 +86,24 @@
         return data;
     };
 
-    const act = async (path, body = {}, { onSuccess, button } = {}) => {
+    const act = async (path, body = {}, { button, onSuccess } = {}) => {
         if (busy) return;
         busy = true;
         document.body.classList.add('is-busy');
-        if (button) button.classList.add('is-loading');
+        button?.classList.add('is-loading');
         try {
             const data = await api(path, body);
-            const wasPicking = Boolean(pick);
             pick = null;
-            selectedNodeId = null;
             state = { run: data.run, bestFloor: data.bestFloor };
             render();
-            if (wasPicking && phoneLayout.matches && stage.getBoundingClientRect().top < 0) {
-                stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-            }
-            if (onSuccess) onSuccess(data);
+            if (onSuccess) await onSuccess(data);
         } catch (error) {
             showToast(error.message, 'error');
             if (/changed/.test(error.message)) load();
         } finally {
             busy = false;
             document.body.classList.remove('is-busy');
-            if (button) button.classList.remove('is-loading');
+            button?.classList.remove('is-loading');
         }
     };
 
@@ -125,25 +113,21 @@
             state = { run: data.run, bestFloor: data.bestFloor };
             render();
         } catch (error) {
-            stage.innerHTML = `<div class="tower-card tower-error"><p>${escapeHtml(error.message)}</p>` +
-                '<button type="button" class="tower-button" data-retry>Retry</button></div>';
-            stage.querySelector('[data-retry]').onclick = load;
+            bodyEl.className = 'tw-body';
+            bodyEl.innerHTML = `<div class="tw-board tw-error"><p>${e(error.message)}</p>` +
+                '<button type="button" class="tw-button is-primary" data-retry>Try again</button></div>';
+            bodyEl.querySelector('[data-retry]').onclick = load;
         }
     };
 
-    // A styled confirmation instead of the browser's own dialog.
-    const confirmAction = ({ title, body, confirmLabel }) => new Promise((resolve) => {
+    const confirmAction = ({ title, body, confirmLabel, cancelLabel = 'Keep climbing' }) => new Promise((resolve) => {
         confirmEl.querySelector('[data-confirm-title]').textContent = title;
         confirmEl.querySelector('[data-confirm-body]').textContent = body;
         const ok = confirmEl.querySelector('[data-confirm-ok]');
         const cancel = confirmEl.querySelector('[data-confirm-cancel]');
         ok.textContent = confirmLabel;
-        const close = (result) => {
-            confirmEl.close();
-            ok.onclick = null;
-            cancel.onclick = null;
-            resolve(result);
-        };
+        cancel.textContent = cancelLabel;
+        const close = (result) => { confirmEl.close(); ok.onclick = null; cancel.onclick = null; resolve(result); };
         ok.onclick = () => close(true);
         cancel.onclick = () => close(false);
         confirmEl.oncancel = (event) => { event.preventDefault(); close(false); };
@@ -151,782 +135,651 @@
         cancel.focus();
     });
 
-    const hpPercent = (member) => Math.max(0, Math.min(100, Math.round((member.hp / member.maxHp) * 100)));
-
-    const pairsLine = (scroll) => (scroll.pairsWith?.length ? `Pairs with ${scroll.pairsWith.join(' and ')}.` : '');
-
-    const scrollIcon = (scroll, size = 'sm') =>
-        `<span class="tower-scroll-icon is-${size} tier-${escapeHtml(scroll.tier)}" tabindex="0" ` +
-        `data-tip="${escapeHtml(`${scroll.name} · ${scroll.tierLabel}\n${scroll.description} ${pairsLine(scroll)}`.trim())}">` +
-        `<img src="${escapeHtml(scroll.icon)}" alt="${escapeHtml(scroll.name)}"></span>`;
-
-    const skillStrip = (character) => (character.skills || []).map((skill) =>
-        `<img class="tower-skill" src="${escapeHtml(skill.skillimage)}" alt="${escapeHtml(skill.name)}" tabindex="0" ` +
-        `data-tip="${escapeHtml(`${skill.name}\n${skill.skilldescription}`)}">`).join('');
-
-    const portrait = (character, extraClass = '') =>
-        `<img class="tower-portrait ${extraClass}" src="${escapeHtml(character.facePicture || 'found-remaster.png')}" ` +
-        `alt="${escapeHtml(character.name)}">`;
-
-    // How much of each chakra type a set of characters asks for (random costs left out).
-    const chakraMix = (characters) => {
-        const counts = Object.fromEntries(CHAKRA.map((entry) => [entry.key, 0]));
-        characters.forEach((character) => (character.skills || []).forEach((skill) =>
-            (skill.energy || []).forEach((type) => { if (type in counts) counts[type] += 1; })));
-        const total = Object.values(counts).reduce((sum, value) => sum + value, 0) || 1;
-        const segments = CHAKRA.filter((entry) => counts[entry.key] > 0).map((entry) =>
-            `<span style="flex:${counts[entry.key]};background:${entry.color}" title="${entry.label}: ${counts[entry.key]}"></span>`).join('');
-        const legend = CHAKRA.filter((entry) => counts[entry.key] > 0).map((entry) =>
-            `<span><i style="background:${entry.color}"></i>${entry.label} ${Math.round((counts[entry.key] / total) * 100)}%</span>`).join('');
-        return `<div class="tower-chakra-mix" aria-label="Chakra the team's skills ask for"><div class="tower-chakra-bar">${segments}</div>` +
-            `<div class="tower-chakra-legend">${legend}</div></div>`;
+    // ------------------------------------------------------------ fitting the stage
+    // Desktop: the 1100x800 stage scales to the window and the page never scrolls.
+    // Phones and narrow windows: the stage reflows into a stacked page.
+    const fit = () => {
+        const width = document.documentElement.clientWidth;
+        const height = document.documentElement.clientHeight;
+        const compact = width < 760 || (width < 1000 && height > width);
+        document.body.classList.toggle('tw-compact', compact);
+        const scale = compact ? 1 : Math.min(1, width / 1100, height / 800);
+        document.documentElement.style.setProperty('--tw-scale', String(scale));
     };
 
-    const scrollCard = (scroll, { footer = '', attrs = '', index = 0 } = {}) =>
-        `<button type="button" class="tower-scroll-card tier-${escapeHtml(scroll.tier)}" style="--i:${index}" ${attrs}>` +
-        `<span class="tower-scroll-tier">${escapeHtml(scroll.tierLabel)} scroll</span>` +
-        `<span class="tower-scroll-art-wrap"><img class="tower-scroll-art" src="${escapeHtml(scroll.icon)}" alt=""></span>` +
-        `<strong>${escapeHtml(scroll.name)}</strong>` +
-        `<span class="tower-scroll-desc">${escapeHtml(scroll.description)}</span>` +
-        (pairsLine(scroll) ? `<span class="tower-scroll-pairs">${escapeHtml(pairsLine(scroll))}</span>` : '') +
-        `<span class="tower-scroll-scope">${scroll.scope === 'team' ? 'Whole team' : 'Choose a ninja'}</span>` +
-        footer + '</button>';
+    // ------------------------------------------------------------ shared pieces
+    // The floor header: big floor number (or a seal), a title and a line, and a side.
+    const head = ({ floor = null, total = null, seal = null, sealTone = '', title, sub = '', side = '', pips = '' }) =>
+        '<header class="tw-board tw-head">' +
+        (floor !== null
+            ? `<div class="tw-floor">${floor}<small>/ ${total}</small></div>`
+            : `<span class="tw-seal-big ${sealTone}" aria-hidden="true">${e(seal || '塔')}</span>`) +
+        `<div class="tw-title"><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}${pips}</div>` +
+        `<div class="tw-head-side">${side}</div></header>`;
 
-    // Ask the player to pick a ninja, then run the action. On wide screens the team panel
-    // beside the stage becomes the picker; on phones a sheet opens at the bottom of the
-    // screen, repeating what is being chosen and the fact that matters for each ninja.
-    // detail: what the choice does. factFor(member): a short line shown per ninja.
-    const startPick = ({ label, detail = '', onPick, disabledFor = () => '', factFor = null, allowDead = false }) => {
-        pick = { label, detail, onPick, disabledFor, factFor, allowDead };
-        renderTeam();
-        if (phoneLayout.matches) {
-            pickSheetList.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
-            return;
-        }
-        teamPanel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
-        teamList.querySelector('.tower-member:not(.is-disabled)')?.focus({ preventScroll: true });
+    const posting = ({ art = '', seal = '', sealTone = '', boss = false, tone = '', title, kind = '', kindClass = '', body = '', foot = '', attrs = '' }) =>
+        `<article class="tw-board tw-posting${boss ? ' is-boss' : ''}${tone ? ` ${tone}` : ''}" ${attrs}>` +
+        `<div class="tw-posting-art">${art}${seal ? `<span class="tw-seal ${sealTone}" aria-hidden="true">${e(seal)}</span>` : ''}</div>` +
+        `<div class="tw-posting-body"><h2>${title}</h2>${kind ? `<span class="tw-posting-kind ${kindClass}">${kind}</span>` : ''}` +
+        `${body}<div class="tw-posting-foot">${foot}</div></div></article>`;
+
+    const fusionNote = (scroll) => (scroll.fusion
+        ? `<p class="tw-fuse-note">Fuses with <b>${e(scroll.fusion.partner)}</b> into <b>${e(scroll.fusion.name)}</b></p>` : '');
+
+    const scrollPosting = (scroll, { foot, attrs = '' }) => posting({
+        art: `<img class="tw-art-icon tier-${e(scroll.tier)}" src="${e(scroll.icon)}" alt="">`,
+        title: e(scroll.name),
+        kind: `${e(scroll.tierLabel)} · ${scroll.scope === 'team' ? 'whole team' : scroll.eligibleCharacterIds ? 'character augment' : 'one ninja'}`,
+        kindClass: `tier-${e(scroll.tier)}`,
+        body: `<p class="tw-posting-text" tabindex="0" ${tip(scroll.name, scroll.description)}>${e(scroll.description)}</p>${fusionNote(scroll)}`,
+        foot,
+        attrs,
+    });
+
+    // ------------------------------------------------------------ team column
+    const memberRow = (member, slot, { pickable = false, reason = '' } = {}) => {
+        const percent = member.dead ? 0 : Math.max(0, Math.min(100, Math.round((member.hp / member.maxHp) * 100)));
+        const status = member.dead ? '<span class="tw-state is-dead">Dead</span>'
+            : member.fallen ? `<span class="tw-state is-fallen" ${tip('Last life', 'Fell once this run. The next fall is permanent.')} tabindex="0">Last life</span>` : '';
+        const tag = pickable ? 'button type="button"' : 'div';
+        return `<li><${tag} class="tw-member${member.dead ? ' is-dead' : ''}${pickable ? ' is-pickable' : ''}${reason ? ' is-blocked' : ''}" ` +
+            `data-slot="${slot}" ${reason ? 'aria-disabled="true"' : ''}>` +
+            `<span class="tw-face">${portrait(member)}</span>` +
+            `<span><span class="tw-member-name"><b>${e(member.name)}</b>${status}</span>` +
+            `<span class="tw-hp${member.dead ? ' is-dead' : member.wounded ? ' is-low' : ''}" role="img" aria-label="${member.dead ? 'Dead' : `${member.hp} of ${member.maxHp} health`}">` +
+            `<i style="width:${percent}%"></i><span>${member.dead ? 'Dead' : `${member.hp} / ${member.maxHp}`}</span></span>` +
+            `<span class="tw-icons">${reason ? `<span class="tw-none">${e(reason)}</span>` : member.scrolls.map((scroll) => augIcon(scroll, pickable)).join('')}</span></span>` +
+            `</${pickable ? 'button' : 'div'}></li>`;
     };
 
-    const memberHp = (member) => (member.dead ? 'Dead' : `${member.hp} / ${member.maxHp} HP`);
+    const teamColumn = (run) => {
+        const capacity = isStd(run) ? run.standard?.capacity?.team : null;
+        const team = run.team || [];
+        const picking = Boolean(pick);
+        const rows = team.map((member, slot) => {
+            const reason = picking ? (member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot)) : '';
+            return memberRow(member, slot, { pickable: picking && !reason, reason });
+        }).join('');
+        const chakra = run.chakra ? Object.values(run.chakra).reduce((sum, amount) => sum + amount, 0) : 0;
+        return '<aside class="tw-board tw-team" aria-label="Your team">' +
+            (picking ? `<div class="tw-pickbar"><span>${e(pick.label)}</span><button type="button" data-pick-cancel>Cancel</button></div>`
+                : '<h2 class="tw-label">Your team</h2>') +
+            `<ul class="tw-members">${rows}</ul>` +
+            `<h2 class="tw-label">Team ${noun(run, true)}${capacity ? ` <b class="${capacity.full ? 'is-full' : ''}">${capacity.used} / ${capacity.max}</b>` : ''}</h2>` +
+            `<ul class="tw-auglist">${(run.teamScrolls || []).map((scroll) => `<li><button type="button" class="tw-augrow tier-${e(scroll.tier)}" data-key="${e(scroll.key)}" ` +
+                `${tip(`${scroll.name} · ${scroll.tierLabel}`, scroll.description)}><img src="${e(scroll.icon)}" alt=""><span>${e(scroll.name)}</span></button></li>`).join('') ||
+                '<li class="tw-none">None yet</li>'}</ul>` +
+            `<div class="tw-purse"><strong>${run.ryo} ryō</strong>` +
+            `<span>Chakra carried: ${chakra}${isStd(run) ? ` / ${run.standard.chakraCarryCap}` : ''}</span></div>` +
+            '</aside>';
+    };
 
-    // Chakra Weave names one chakra type; count how many of each ninja's skills use it.
-    const scrollFactFor = (scroll) => {
-        const weave = /^chakra-weave:(\w+)$/.exec(scroll.key || '');
-        if (!weave) return memberHp;
-        const type = weave[1].toLowerCase();
-        const label = CHAKRA.find((entry) => entry.key.toLowerCase() === type)?.label || weave[1];
-        return (member) => {
-            const count = (member.skills || []).filter((skill) =>
-                (skill.energy || []).some((cost) => String(cost).toLowerCase() === type)).length;
-            return `${count} ${label} skill${count === 1 ? '' : 's'} · ${memberHp(member)}`;
+    const startPick = ({ label, detail = '', onPick, disabledFor = () => '', allowDead = false }) => {
+        pick = { label, detail, onPick, disabledFor, allowDead };
+        render();
+        const first = document.body.classList.contains('tw-compact')
+            ? sheet.querySelector('button.tw-member') : bodyEl.querySelector('.tw-member.is-pickable');
+        first?.focus({ preventScroll: true });
+    };
+    const cancelPick = () => { pick = null; render(); };
+
+    const renderSheet = (run) => {
+        const open = Boolean(pick) && document.body.classList.contains('tw-compact');
+        sheet.hidden = !open;
+        document.body.classList.toggle('has-sheet', open);
+        if (!open) return;
+        sheet.querySelector('[data-pick-sheet-title]').textContent = pick.label;
+        sheet.querySelector('[data-pick-sheet-detail]').textContent = pick.detail;
+        sheet.querySelector('[data-pick-sheet-list]').innerHTML = run.team.map((member, slot) => {
+            const reason = member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot);
+            return memberRow(member, slot, { pickable: !reason, reason });
+        }).join('');
+        sheet.querySelectorAll('button.tw-member').forEach((button) => {
+            button.onclick = () => pick?.onPick(Number(button.dataset.slot));
+        });
+    };
+
+    // A scroll that binds to one ninja asks which; full Standard slots ask what to salvage.
+    const askReplacement = (scroll, slot, action) => {
+        const run = state.run;
+        const capacity = isStd(run) && !scroll.fusion
+            ? (scroll.scope === 'team' ? run.standard.capacity.team : run.standard.capacity.ninja[slot]) : null;
+        if (!capacity?.full) return action(slot, null);
+        const held = (scroll.scope === 'team' ? run.teamScrolls : run.team[slot].scrolls).filter((owned) => !(owned.tags || []).includes('cursed'));
+        replaceEl.querySelector('[data-replace-title]').textContent = 'Slots are full';
+        replaceEl.querySelector('[data-replace-body]').textContent =
+            `Salvage one for ${run.constants.salvageRyo} ryō to make room for ${scroll.name}.`;
+        const list = replaceEl.querySelector('[data-replace-list]');
+        list.innerHTML = held.map((owned) => `<li><button type="button" data-key="${e(owned.key)}">` +
+            `<img src="${e(owned.icon)}" alt=""><span><b>${e(owned.name)}</b><small>${e(owned.description)}</small></span></button></li>`).join('');
+        list.querySelectorAll('[data-key]').forEach((button) => {
+            button.onclick = () => { replaceEl.close(); action(slot, button.dataset.key); };
+        });
+        replaceEl.querySelector('[data-replace-cancel]').onclick = () => replaceEl.close();
+        replaceEl.showModal();
+        return null;
+    };
+    const withTarget = (scroll, action) => {
+        if (scroll.scope === 'team') return askReplacement(scroll, null, action);
+        return startPick({
+            label: `Who learns ${scroll.name}?`,
+            detail: scroll.description,
+            onPick: (slot) => askReplacement(scroll, slot, action),
+            disabledFor: (member) => (scroll.eligibleCharacterIds && !scroll.eligibleCharacterIds.includes(member.characterId) ? 'Another character\'s'
+                : member.scrolls.some((owned) => owned.key === scroll.key) ? 'Already learned' : ''),
+        });
+    };
+
+    // ------------------------------------------------------------ screens
+    // Each screen returns { team, html, bind }.
+    const introScreen = () => {
+        const best = state.bestFloor;
+        const option = (mode, seal, title, line, kind) => posting({
+            seal, title, kind, body: `<p class="tw-posting-text">${line}</p>`,
+            art: `<img class="tw-art-portrait" src="${mode === 'standard' ? 'selectionbg_1.jpg' : 'ingamebg_4.jpg'}" alt="">`,
+            foot: `<button type="button" class="tw-button is-primary is-wide is-large" data-start="${mode}">Begin</button>`,
+        });
+        return {
+            team: false,
+            html: head({ seal: '塔', title: 'The Tower', sub: best ? `Best climb: floor <b>${best.floor}</b>${best.cleared ? ' · conquered' : ''}` : 'A solo climb. Tower battles never touch your ladder record.' }) +
+                '<div class="tw-postings is-scenic">' +
+                option('standard', '塔', 'Standard', '200 floors. A boss every 20. Augments in four tiers, and pairs that fuse into something stronger.', '200 floors') +
+                option('legacy', '橋', 'Legacy', 'The Land of Waves and the Chūnin Exams, as the story goes.', 'Story · 10 to 20 floors') +
+                '</div>',
+            bind: () => bodyEl.querySelectorAll('[data-start]').forEach((button) => {
+                button.onclick = () => act('/start', { mode: button.dataset.start }, { button });
+            }),
         };
     };
 
-    const withScrollTarget = (scroll, action) => {
-        if (scroll.scope === 'team') return action(null);
-        return startPick({
-            label: `Choose a ninja for ${scroll.name}`,
-            detail: scroll.description,
-            onPick: action,
-            disabledFor: (member) => (member.scrolls.some((owned) => owned.key === scroll.key) ? 'Already learned' : ''),
-            factFor: scrollFactFor(scroll),
-        });
-    };
-
-    const cancelPick = () => {
-        pick = null;
-        renderTeam();
-    };
-
-    const renderPickSheet = () => {
-        const open = Boolean(pick) && phoneLayout.matches && Boolean(state.run?.team?.length);
-        pickSheet.hidden = !open;
-        document.body.classList.toggle('has-pick-sheet', open);
-        if (!open) return;
-        pickSheetTitle.textContent = pick.label;
-        pickSheetDetail.textContent = pick.detail || '';
-        pickSheetDetail.hidden = !pick.detail;
-        pickSheetList.innerHTML = state.run.team.map((member, slot) => {
-            const reason = member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot);
-            const fact = pick.factFor ? pick.factFor(member) : memberHp(member);
-            return '<li><button type="button" class="tower-pick-option' + (member.dead ? ' is-dead' : '') + '" ' +
-                `data-sheet-slot="${slot}" ${reason ? 'disabled' : ''}>` + portrait(member) +
-                `<span class="tower-pick-option-body"><strong>${escapeHtml(member.name)}</strong>` +
-                `<span>${escapeHtml(reason || fact)}</span></span></button></li>`;
-        }).join('');
-        pickSheetList.querySelectorAll('[data-sheet-slot]').forEach((button) => {
-            button.onclick = () => pick?.onPick(Number(button.dataset.sheetSlot));
-        });
-    };
-
-    // Floats a "+12" (or "-30") over an element.
-    const floatDelta = (element, delta, tone) => {
-        if (!element || !delta || reduceMotion) return;
-        const badge = document.createElement('span');
-        badge.className = `tower-float is-${tone}`;
-        badge.textContent = `${delta > 0 ? '+' : ''}${delta}`;
-        element.appendChild(badge);
-        setTimeout(() => badge.remove(), 1400);
-    };
-
-    // ------------------------------------------------------------ team panel
-    const renderTeam = () => {
-        const run = state.run;
-        const team = run?.team || [];
-        // A finished run shows its final team on the summary card instead.
-        teamPanel.hidden = !team.length || !ACTIVE_STATUSES.includes(run?.status);
-        pickBanner.hidden = !pick;
-        if (pick) pickLabel.textContent = pick.label;
-        teamPanel.classList.toggle('is-picking', Boolean(pick));
-        renderPickSheet();
-        teamList.innerHTML = team.map((member, slot) => {
-            const disabled = pick ? (member.dead && !pick.allowDead ? 'Dead' : pick.disabledFor(member, slot)) : '';
-            const percent = hpPercent(member);
-            const tone = member.wounded ? 'is-low' : percent < 60 ? 'is-mid' : '';
-            const mark = member.dead ? '死' : member.wounded ? '傷' : '';
-            const stateClass = member.dead ? ' is-dead' : member.wounded ? ' is-wounded' : '';
-            return `<li class="tower-member${stateClass}${disabled ? ' is-disabled' : ''}" ` +
-                `data-slot="${slot}" ${pick && !disabled ? 'tabindex="0" role="button"' : ''}>` +
-                `<div class="tower-member-face">${portrait(member)}${mark ? `<span class="tower-wound-mark" aria-hidden="true">${mark}</span>` : ''}</div>` +
-                '<div class="tower-member-body">' +
-                `<div class="tower-member-name"><strong>${escapeHtml(member.name)}</strong>` +
-                (member.dead ? '<span class="tower-tag is-dead">Dead</span>'
-                    : member.fallen ? '<span class="tower-tag is-fallen" tabindex="0" data-tip="Fell once this run. The next fall is permanent.">Last life</span>'
-                    : member.wounded ? '<span class="tower-tag is-wounded">Wounded</span>' : '') +
-                (member.stackCount && !member.dead ? `<span class="tower-tag is-stacks" tabindex="0" data-tip="Stacks this ninja carries into the next battle.">${member.stackCount} carried</span>` : '') +
-                (disabled ? `<span class="tower-tag">${escapeHtml(disabled)}</span>` : '') + '</div>' +
-                `<div class="tower-hp ${tone}" role="meter" aria-valuemin="0" aria-valuemax="${member.maxHp}" aria-valuenow="${member.hp}" aria-label="Health">` +
-                `<span class="tower-hp-fill" style="width:${percent}%"></span>` +
-                `<span class="tower-hp-text">${member.hp} / ${member.maxHp}</span></div>` +
-                `<div class="tower-member-scrolls">${member.scrolls.map((scroll) => scrollIcon(scroll)).join('') ||
-                    '<span class="tower-muted">No scrolls yet</span>'}</div>` +
-                `<div class="tower-skills">${skillStrip(member)}</div>` +
-                '</div></li>';
-        }).join('');
-        teamList.querySelectorAll('.tower-member').forEach((element) => {
-            const choose = () => {
-                if (!pick || element.classList.contains('is-disabled')) return;
-                pick.onPick(Number(element.dataset.slot));
-            };
-            element.addEventListener('click', choose);
-            element.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(); }
-            });
-        });
-        // Health changes since the last render (ramen, medkits, battles) float over the bars.
-        const nextHp = team.map((member) => `${member.characterId}:${member.hp}`);
-        if (lastTeamHp && lastTeamHp.length === team.length) {
-            team.forEach((member, slot) => {
-                const [previousId, previousHp] = lastTeamHp[slot].split(':');
-                if (previousId !== member.characterId) return;
-                const delta = member.hp - Number(previousHp);
-                floatDelta(teamList.children[slot]?.querySelector('.tower-hp'), delta, delta > 0 ? 'heal' : 'hurt');
-            });
-        }
-        lastTeamHp = nextHp;
-        const teamScrolls = run?.teamScrolls || [];
-        teamScrollsEl.innerHTML = teamScrolls.length
-            ? `<span class="tower-team-scrolls-label">Team scrolls</span>${teamScrolls.map((scroll) => scrollIcon(scroll, 'md')).join('')}`
-            : '';
-        logEl.innerHTML = (run?.log || []).slice().reverse()
-            .map((entry, index) => `<li class="${index === 0 ? 'is-latest' : ''}">${escapeHtml(entry.text)}</li>`).join('');
-    };
-
-    // ------------------------------------------------------------ stages
-    const renderIntro = () => {
-        const best = state.bestFloor;
-        stage.innerHTML =
-            '<div class="tower-card tower-intro">' +
-            '<div class="tower-intro-copy">' +
-            '<span class="tower-kicker">PvE roguelike · Act I · Land of Waves · Act II · The Chūnin Exams</span>' +
-            '<h1>Climb the Tower</h1>' +
-            '<p class="tower-lead">Draft a random squad, fight up ten floors of the Land of Waves, and shape your team ' +
-            'with Forbidden Scrolls along the way. Beat Zabuza and you can enter the Chūnin Exams for ten floors more. ' +
-            'Health, leftover chakra and stacks carry between battles. One loss ends the run.</p>' +
-            '<ol class="tower-steps">' +
-            '<li><span class="tower-step-mark" aria-hidden="true">選</span><div><b>Draft</b><span>Keep one of three random ninjas for each slot, then take a Jōnin or Kage starting scroll. Mission locks do not apply.</span></div></li>' +
-            '<li><span class="tower-step-mark" aria-hidden="true">道</span><div><b>Choose a path</b><span>Battles, ramen stands, merchants and recruits. Floor 5 is guarded by elites.</span></div></li>' +
-            '<li><span class="tower-step-mark" aria-hidden="true">巻</span><div><b>Collect scrolls</b><span>Every win offers a Forbidden Scroll. Genin, Jōnin and Kage rarities.</span></div></li>' +
-            '<li><span class="tower-step-mark is-boss" aria-hidden="true">鬼</span><div><b>Face the Demon</b><span>Floor 10: Zabuza telegraphs his next move. Stun him to interrupt it.</span></div></li>' +
-            '<li><span class="tower-step-mark" aria-hidden="true">試</span><div><b>The Chūnin Exams</b><span>Floors 11 to 20: the written exam, the Forest of Death, duels, and Gaara in the finals.</span></div></li>' +
-            '</ol>' +
-            '<p class="tower-fineprint">Survivors recover 25 health after every win. A ninja who falls is carried out at 1 health; ' +
-            'a second fall is permanent. Tower battles never touch your ladder record. ' +
-            'A finished run pays 15 account ryō per floor cleared, plus 150 for clearing Act I and 250 for Act II.</p>' +
-            '<div class="tower-actions">' +
-            '<button type="button" class="tower-button is-primary is-large" data-start>Begin the climb</button>' +
-            (best ? `<span class="tower-best"><span aria-hidden="true">塔</span>Best climb: floor ${best.floor}${best.cleared ? ' · conquered' : ''}</span>` : '') +
-            '</div></div>' +
-            '<img class="tower-intro-render" src="kakashi-render.png" alt="">' +
-            '</div>';
-        stage.querySelector('[data-start]').onclick = (event) => act('/start', {}, { button: event.currentTarget });
-    };
-
-    // The draft offers three candidates per slot; the player keeps one from each.
-    const renderDraft = (run) => {
+    const draftScreen = (run) => {
         const { offers, rerolls } = run.draft;
-        const offersKey = offers.map((candidates) => candidates.map((c) => c.characterId).join(',')).join('|');
-        if (draftPicks.key !== offersKey) {
-            // A reroll replaces one slot's candidates; keep the picks made in the other slots.
-            const previous = draftPicks.ids || [];
-            draftPicks = {
-                key: offersKey,
-                ids: offers.map((candidates, slot) =>
-                    candidates.some((c) => c.characterId === previous[slot]) ? previous[slot] : null),
-            };
+        const key = offers.map((candidates) => candidates.map((c) => c.characterId).join(',')).join('|');
+        if (draftIds.key !== key) {
+            const previous = draftIds.ids;
+            draftIds = { key, ids: offers.map((candidates, slot) => (candidates.some((c) => c.characterId === previous[slot]) ? previous[slot] : null)) };
         }
-        const chosen = offers.map((candidates, slot) => candidates.find((c) => c.characterId === draftPicks.ids[slot]) || null);
-        const ready = chosen.every(Boolean);
-        stage.innerHTML =
-            '<div class="tower-card">' +
-            '<span class="tower-kicker">Draft</span><h1>Choose your squad</h1>' +
-            '<p class="tower-lead">Keep one ninja from each slot. Hover or tap a skill to read it. Each slot can be rerolled once.</p>' +
-            '<div class="tower-draft">' +
-            offers.map((candidates, slot) =>
-                `<fieldset class="tower-slot" style="--i:${slot}">` +
-                `<legend class="tower-slot-head"><span class="tower-slot-mark" aria-hidden="true">${['一', '二', '三'][slot]}</span>Slot ${slot + 1}</legend>` +
-                candidates.map((character) => {
-                    const selected = draftPicks.ids[slot] === character.characterId;
-                    return `<div class="tower-candidate${selected ? ' is-selected' : ''}" ` +
-                        `data-slot="${slot}" data-id="${escapeHtml(character.characterId)}">` +
-                        `<button type="button" class="tower-candidate-pick" aria-pressed="${selected}">` +
-                        portrait(character) + `<strong>${escapeHtml(character.name)}</strong></button>` +
-                        `<span class="tower-skills">${skillStrip(character)}</span></div>`;
-                }).join('') +
-                `<button type="button" class="tower-button is-quiet" data-reroll="${slot}" ${rerolls[slot] > 0 ? '' : 'disabled'}>` +
-                `<span aria-hidden="true">↻</span> ${rerolls[slot] > 0 ? 'Reroll slot' : 'No rerolls left'}</button>` +
-                '</fieldset>').join('') +
-            '</div>' +
-            '<div class="tower-draft-footer">' +
-            (ready ? chakraMix(chosen) : '<p class="tower-muted">Pick a ninja in every slot to see the chakra your squad asks for.</p>') +
-            `<button type="button" class="tower-button is-primary is-large" data-confirm ${ready ? '' : 'disabled'}>Take this squad</button>` +
-            '</div></div>';
-        stage.querySelectorAll('.tower-candidate').forEach((element) => {
-            // A tap anywhere on the card picks the ninja; tapping a skill also shows its tip.
-            element.addEventListener('click', () => {
-                draftPicks.ids[Number(element.dataset.slot)] = element.dataset.id;
-                renderDraft(run);
-                stage.querySelector(`.tower-candidate[data-id="${CSS.escape(element.dataset.id)}"] .tower-candidate-pick`)?.focus();
+        const ready = draftIds.ids.every(Boolean);
+        const slots = offers.map((candidates, slot) =>
+            `<section class="tw-board tw-posting is-slot" aria-label="Slot ${slot + 1}"><div class="tw-title" style="padding:16px 16px 0"><h2 class="tw-label">Slot ${slot + 1}</h2></div>` +
+            `<ul class="tw-slot-list">${candidates.map((character) => `<li><button type="button" class="tw-candidate" data-slot="${slot}" data-id="${e(character.characterId)}" aria-pressed="${draftIds.ids[slot] === character.characterId}">` +
+                `${portrait(character)}<span><b>${e(character.name)}</b>${skillStrip(character)}</span></button></li>`).join('')}</ul>` +
+            `<div class="tw-slot-foot"><button type="button" class="tw-button is-wide" data-reroll="${slot}" ${rerolls[slot] > 0 ? '' : 'disabled'}>${REROLL_ICON}${rerolls[slot] > 0 ? 'Reroll' : 'No rerolls left'}</button></div></section>`).join('');
+        return {
+            team: false,
+            html: head({ seal: '選', title: 'Choose your squad', sub: 'One ninja from each slot. Each slot can be rerolled once.',
+                side: `<button type="button" class="tw-button is-primary is-large" data-take ${ready ? '' : 'disabled'}>Take this squad</button>` }) +
+                `<div class="tw-postings">${slots}</div>`,
+            bind: () => {
+                bodyEl.querySelectorAll('.tw-candidate').forEach((button) => {
+                    button.onclick = () => { draftIds.ids[Number(button.dataset.slot)] = button.dataset.id; render(); };
+                });
+                bodyEl.querySelectorAll('[data-reroll]').forEach((button) => {
+                    button.onclick = () => act('/draft/reroll', { slot: Number(button.dataset.reroll) }, { button });
+                });
+                const take = bodyEl.querySelector('[data-take]');
+                take.onclick = () => act('/draft', { picks: offers.map((candidates, slot) => candidates.findIndex((c) => c.characterId === draftIds.ids[slot])) }, { button: take });
+            },
+        };
+    };
+
+    // Where the climb stands: how far to the next boss and the next rest stop.
+    const climbFacts = (run) => {
+        const floors = run.map?.floors || [];
+        const ahead = (types) => floors.find((floor) => floor[0]?.floor > run.floor && floor.some((node) => types.includes(node.type)))?.[0]?.floor || null;
+        const next = run.floor + 1;
+        const bossFloor = ahead(['boss']) || (isStd(run) ? Math.ceil(next / 20) * 20 : null);
+        const restFloor = ahead(['ramen']);
+        const range = run.act || { firstFloor: 1, lastFloor: run.totalFloors };
+        const pips = [];
+        for (let floor = range.firstFloor; floor <= range.lastFloor; floor += 1) {
+            const row = floors.find((entry) => entry[0]?.floor === floor) || [];
+            const guarded = row.some((node) => ['boss', 'miniboss'].includes(node.type));
+            pips.push(`<i class="${[floor <= run.floor ? 'is-done' : '', floor === next ? 'is-next' : '', guarded ? 'is-boss' : ''].filter(Boolean).join(' ')}"></i>`);
+        }
+        return { next, bossFloor, restFloor, pips: `<div class="tw-pips" aria-hidden="true">${pips.join('')}</div>` };
+    };
+
+    const enemyFaces = (enemies) => `<div class="tw-faces">${enemies.slice(0, 3).map((enemy) =>
+        `<figure ${tip(enemy.name, `${enemy.hp} health`)} tabindex="0">${portrait(enemy)}<figcaption>${enemy.hp}</figcaption></figure>`).join('')}</div>`;
+    const affixList = (affixes) => (affixes.length ? `<div class="tw-affixes">${affixes.map((affix) =>
+        `<button type="button" class="tw-affix" ${tip(affix.name, affix.description)}>${e(affix.name)}</button>`).join('')}</div>` : '');
+
+    const mapScreen = (run) => {
+        const facts = climbFacts(run);
+        const region = isStd(run) ? `${run.act.name} · ${run.act.title}` : `${run.act?.name || 'Act I'} · ${run.act?.title || ''}${run.stage && run.stage !== run.act?.title ? ` · ${run.stage}` : ''}`;
+        const side = (facts.bossFloor ? `<div class="tw-dist is-boss"><strong>${facts.bossFloor - run.floor}</strong>to the boss</div>` : '') +
+            (facts.restFloor ? `<div class="tw-dist"><strong>${facts.restFloor - run.floor}</strong>to a rest</div>` : '');
+        const nodes = run.availableNodeIds.map((id) => run.map.floors.flat().find((node) => node.id === id)).filter(Boolean);
+        const cards = nodes.map((node) => {
+            const meta = NODES[node.type] || NODES.event;
+            const preview = run.previews?.[node.id] || {};
+            const encounter = preview.encounter;
+            const bossInfo = node.type === 'boss' ? run.bosses?.[node.bossId] : null;
+            const isBoss = node.type === 'boss';
+            let title = meta.label;
+            let kind = '';
+            let art = '';
+            let body = `<p class="tw-posting-text is-short">${e(meta.hint)}</p>`;
+            if (encounter) {
+                title = e(encounter.boss?.name || encounter.name);
+                kind = isBoss ? 'Boss' : `${meta.label} · ${encounter.enemies.length} ${encounter.enemies.length === 1 ? 'enemy' : 'enemies'}`;
+                art = enemyFaces(encounter.enemies);
+                body = `${affixList(encounter.affixes)}<p class="tw-posting-text is-short">${e(isBoss ? encounter.boss?.intro || meta.hint : encounter.blurb || meta.hint)}</p>`;
+            } else if (bossInfo) {
+                title = e(bossInfo.name);
+                kind = 'Boss';
+                art = enemyFaces([{ ...bossInfo.leader, hp: '' }]);
+            } else if (preview.trainer) {
+                title = e(preview.trainer.title);
+                kind = 'Training';
+            }
+            return posting({
+                art, seal: meta.kanji, sealTone: meta.tone || '', boss: isBoss, tone: node.type === 'elite' ? 'is-elite' : '', title, kind: e(kind),
+                body, foot: `<button type="button" class="tw-button is-primary is-wide" data-node="${e(node.id)}" data-type="${e(node.type)}">${e(meta.verb)}</button>`,
             });
-        });
-        stage.querySelectorAll('[data-reroll]').forEach((button) => {
-            button.onclick = () => act('/draft/reroll', { slot: Number(button.dataset.reroll) }, { button });
-        });
-        stage.querySelector('[data-confirm]').onclick = (event) => act('/draft', {
-            picks: offers.map((candidates, slot) => candidates.findIndex((c) => c.characterId === draftPicks.ids[slot])),
-        }, { button: event.currentTarget });
-    };
-
-    // What waits behind an open node: the squad and its affixes, or the trainer.
-    const previewHtml = (run, node) => {
-        const preview = run.previews?.[node.id];
-        if (!preview) return '';
-        if (preview.trainer) {
-            return `<span class="tower-preview-line">${escapeHtml(preview.trainer.title)}</span>`;
-        }
-        const encounter = preview.encounter;
-        if (!encounter) return '';
-        const facts = [
-            ...encounter.affixes.map((affix) => `<span class="tower-preview-chip is-affix" tabindex="0" data-tip="${escapeHtml(`${affix.name}\n${affix.description}`)}">${escapeHtml(affix.name)}</span>`),
-            encounter.carries ? `<span class="tower-preview-chip is-${escapeHtml(encounter.carries)}">${encounter.carries === 'heaven' ? '天 Heaven scroll' : '地 Earth scroll'}</span>` : '',
-        ].join('');
-        return '<span class="tower-preview">' +
-            `<span class="tower-preview-name">${escapeHtml(encounter.name)}</span>` +
-            '<span class="tower-preview-enemies">' + encounter.enemies.map((enemy) =>
-                `<span class="tower-preview-enemy" tabindex="0" data-tip="${escapeHtml(`${enemy.name}\n${enemy.hp} health`)}">${portrait(enemy)}<b>${enemy.hp}</b></span>`).join('') +
-            '</span>' + (facts ? `<span class="tower-preview-facts">${facts}</span>` : '') + '</span>';
-    };
-
-    const renderMap = (run, { entering = false } = {}) => {
-        // Only the current act's floors are drawn; earlier acts are finished.
-        const actRange = run.act || { firstFloor: 1, lastFloor: run.totalFloors };
-        const floors = run.map.floors.filter((floor) => floor[0] &&
-            floor[0].floor >= actRange.firstFloor && floor[0].floor <= actRange.lastFloor);
-        const firstFloor = floors[0]?.[0]?.floor || 1;
-        const rowOf = (floor) => floor - firstFloor + 1;
-        const floorNodes = (floor) => floors[rowOf(floor) - 1] || [];
-        const available = new Set(run.availableNodeIds);
-        const path = run.path || [];
-        const taken = new Set(path);
-        const takenEdges = new Set(path.slice(1).map((id, index) => `${path[index]}>${id}`));
-        const rowHeight = 54;
-        const height = floors.length * rowHeight;
-        const position = (node) => ({
-            x: floorNodes(node.floor).length === 1 ? 50 : ((node.lane + 0.5) / 3) * 100,
-            y: height - ((rowOf(node.floor) - 0.5) * rowHeight),
-        });
-        const lines = floors.flatMap((floor) => floor.flatMap((node) => node.next.map((nextId) => {
-            const nextNode = floorNodes(node.floor + 1).find((entry) => entry.id === nextId);
-            if (!nextNode) return '';
-            const from = position(node);
-            const to = position(nextNode);
-            const isTaken = takenEdges.has(`${node.id}>${nextId}`);
-            const isLive = node.id === run.currentNodeId && available.has(nextId);
-            return `<line x1="${from.x}%" y1="${from.y}" x2="${to.x}%" y2="${to.y}" class="${isTaken ? 'is-taken' : isLive ? 'is-live' : ''}"/>`;
-        }))).join('');
-        const nextFloor = run.floor + 1;
-        const band = nextFloor >= firstFloor && rowOf(nextFloor) <= floors.length
-            ? `<span class="tower-floor-band" style="top:${height - rowOf(nextFloor) * rowHeight}px;height:${rowHeight}px"></span>` : '';
-        const nodes = floors.flat().map((node) => {
-            const meta = NODE_META[node.type] || NODE_META.event;
-            const { x, y } = position(node);
-            const isAvailable = available.has(node.id);
-            const classes = ['tower-node', `type-${node.type}`,
-                isAvailable ? 'is-available' : '', taken.has(node.id) ? 'is-visited' : '',
-                !taken.has(node.id) && node.floor <= run.floor ? 'is-skipped' : '',
-                node.id === run.currentNodeId ? 'is-current' : '', node.id === selectedNodeId ? 'is-selected' : '']
-                .filter(Boolean).join(' ');
-            const boss = node.type === 'boss' ? run.bosses?.[node.bossId] || run.boss : null;
-            const face = boss?.leader?.facePicture
-                ? `<img src="${escapeHtml(boss.leader.facePicture)}" alt="">` : `<span aria-hidden="true">${meta.kanji}</span>`;
-            const label = boss ? boss.name : meta.label;
-            return `<button type="button" class="${classes}" style="left:${x}%;top:${y}px" data-node="${node.id}" ` +
-                `data-tip="${escapeHtml(`Floor ${node.floor} · ${label}\n${boss?.title || meta.hint}`)}" ` +
-                `${isAvailable ? '' : 'disabled'} aria-label="Floor ${node.floor}: ${escapeHtml(label)}${isAvailable ? ', available' : ''}">${face}</button>`;
         }).join('');
-        const selected = selectedNodeId ? floors.flat().find((node) => node.id === selectedNodeId) : null;
-        const selectedMeta = selected ? NODE_META[selected.type] || NODE_META.event : null;
-        const selectedBoss = selected?.type === 'boss' ? run.bosses?.[selected.bossId] : null;
-        const legendTypes = [...new Set(floors.flat().map((node) => node.type))];
-        const remaining = run.totalFloors - run.floor;
-        stage.innerHTML =
-            '<div class="tower-card tower-map-card">' +
-            `<div class="tower-map-head"><div><span class="tower-kicker">${run.floor >= firstFloor
-                ? `Floor ${run.floor} cleared · ${remaining} to go` : `${escapeHtml(run.act?.name || 'Act I')} begins`}` +
-            `${run.stage ? ` · ${escapeHtml(run.stage)}` : ''}</span>` +
-            '<h1>Choose your path</h1></div>' +
-            '<ul class="tower-legend">' + legendTypes.map((type) => NODE_META[type] ?
-                `<li class="type-${type}"><span aria-hidden="true">${NODE_META[type].kanji}</span>${NODE_META[type].label}</li>` : '').join('') + '</ul></div>' +
-            `<div class="tower-map" style="height:${height}px">${band}` +
-            `<svg class="tower-map-lines" width="100%" height="${height}" aria-hidden="true">${lines}</svg>` +
-            floors.map((floor) => {
-                const number = floor[0].floor;
-                return `<span class="tower-floor-label${number === nextFloor ? ' is-next' : ''}" style="top:${height - (rowOf(number) - 0.5) * rowHeight}px">${number}</span>`;
-            }).join('') +
-            nodes + '</div>' +
-            `<div class="tower-node-detail${selected ? ' has-selection' : ''}">${selected
-                ? `<span class="tower-detail-mark type-${selected.type}" aria-hidden="true">${selectedMeta.kanji}</span>` +
-                  `<div><strong>Floor ${selected.floor} · ${escapeHtml(selectedBoss?.name || selectedMeta.label)}</strong>` +
-                  `<span>${escapeHtml(selectedBoss?.title || selectedMeta.hint)}</span>${previewHtml(run, selected)}</div>` +
-                  '<button type="button" class="tower-button is-primary" data-go>Go</button>'
-                : '<span class="tower-muted">Pick a glowing node to continue the climb. Open battles show who waits there.</span>'}</div>` +
-            '</div>';
-        stage.querySelectorAll('[data-node]').forEach((button) => {
-            button.onclick = () => {
-                selectedNodeId = button.dataset.node;
-                renderMap(state.run);
-                const go = stage.querySelector('[data-go]');
-                stage.querySelector('.tower-node-detail')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
-                go?.focus({ preventScroll: true });
-            };
-        });
-        const go = stage.querySelector('[data-go]');
-        if (go) go.onclick = () => act('/node', { nodeId: selectedNodeId }, { button: go });
-        if (entering) {
-            // Bring the open floor into view: it is near the bottom early on and near the top later.
-            const open = stage.querySelector('.tower-node.is-available');
-            const rect = open?.getBoundingClientRect();
-            if (rect && (rect.top < 80 || rect.bottom > window.innerHeight - 90)) open.scrollIntoView({ block: 'center' });
-        }
+        return {
+            team: true,
+            html: head({ floor: facts.next, total: run.totalFloors, title: e(region), sub: isStd(run) ? `${e(run.standard.band)} · segment ${run.standard.segment} of ${run.standard.segments}` : 'Choose where to go next', side, pips: facts.pips }) +
+                `<div class="tw-postings">${cards}</div>`,
+            bind: () => bodyEl.querySelectorAll('[data-node]').forEach((button) => {
+                button.onclick = () => act('/node', { nodeId: button.dataset.node }, {
+                    button,
+                    onSuccess: (data) => (QUICK_FIGHT.has(button.dataset.type) && data.run.status === 'battle' ? enterBattle(null) : null),
+                });
+            }),
+        };
     };
-
-    let championSlot = null; // the ninja picked for a duel before entering it
 
     const enterBattle = (button, body = {}) => act('/battle', body, {
         button,
         onSuccess: (data) => {
-            if (data.matchId) {
-                document.body.classList.add('is-leaving');
-                setTimeout(() => { window.location.href = `ingame.html?matchId=${encodeURIComponent(data.matchId)}`; }, reduceMotion ? 0 : 260);
-            }
+            if (!data.matchId) return;
+            document.body.classList.add('is-leaving');
+            setTimeout(() => { window.location.href = `ingame.html?matchId=${encodeURIComponent(data.matchId)}`; }, reduceMotion ? 0 : 240);
         },
     });
 
-    const renderBattle = (run) => {
+    const battleScreen = (run) => {
         const { encounter, matchId } = run.battle;
-        const kindLabel = encounter.kind === 'boss' ? 'Boss' : encounter.kind === 'elite' ? 'Elite'
-            : encounter.kind === 'duel' ? 'Duel' : 'Battle';
-        const kindMark = encounter.kind === 'boss' ? '鬼' : encounter.kind === 'elite' ? '精'
-            : encounter.kind === 'duel' ? '闘' : '戦';
         const boss = encounter.boss;
         const duel = Boolean(encounter.duel);
         const team = run.team || [];
         if (!duel || matchId) championSlot = null;
-        else if (championSlot !== null && team[championSlot]?.dead) championSlot = null;
-        if (duel && !matchId && championSlot === null) {
-            // Default to the healthiest living ninja; the player can change it.
-            let best = -1;
-            team.forEach((member, slot) => {
-                if (!member.dead && (best < 0 || member.hp > team[best].hp)) best = slot;
-            });
-            championSlot = best >= 0 ? best : null;
+        else if (championSlot === null || team[championSlot]?.dead) {
+            championSlot = team.reduce((best, member, slot) => (!member.dead && (best < 0 || member.hp > team[best].hp) ? slot : best), -1);
+            if (championSlot < 0) championSlot = null;
         }
-        const championPicker = duel && !matchId
-            ? '<fieldset class="tower-champions"><legend>Choose your champion</legend>' +
-              team.map((member, slot) => `<button type="button" class="tower-champion${slot === championSlot ? ' is-selected' : ''}" ` +
-                  `data-champion="${slot}" aria-pressed="${slot === championSlot}" ${member.dead ? 'disabled' : ''}>` +
-                  portrait(member) + `<strong>${escapeHtml(member.name)}</strong>` +
-                  `<span>${member.dead ? 'Dead' : `${member.hp} / ${member.maxHp} HP${member.fallen ? ' · last life' : ''}`}</span></button>`).join('') +
-              '</fieldset>'
-            : '';
-        stage.innerHTML =
-            `<div class="tower-card tower-battle is-${escapeHtml(encounter.kind)}">` +
-            '<div class="tower-battle-head">' +
-            `<span class="tower-battle-seal" aria-hidden="true">${kindMark}</span>` +
-            `<div><span class="tower-kicker">Floor ${encounter.floor} · ${kindLabel}${boss ? ` · ${escapeHtml(boss.title.split('—').pop().trim())}` : ''}</span>` +
-            `<h1>${escapeHtml(encounter.name)}</h1>` +
-            (boss ? `<p class="tower-lead">${escapeHtml(boss.intro)}</p>`
-                : encounter.blurb ? `<p class="tower-lead">${escapeHtml(encounter.blurb)}</p>` : '') + '</div></div>' +
-            '<div class="tower-enemies">' + encounter.enemies.map((enemy, index) =>
-                `<div class="tower-enemy${boss && index === 0 ? ' is-leader' : ''}" style="--i:${index}">` + portrait(enemy) +
-                `<strong>${escapeHtml(enemy.name)}</strong>` +
-                `<span class="tower-enemy-hp${enemy.hp > 100 ? ' is-boosted' : ''}">${enemy.hp} HP</span>` +
-                `<div class="tower-skills">${skillStrip(enemy)}</div></div>`).join('') +
-            '</div>' +
-            '<ul class="tower-encounter-facts">' +
-            encounter.affixes.map((affix) => `<li><span class="tower-fact-mark is-affix" aria-hidden="true">${escapeHtml(affix.kanji || '!')}</span><span><b>${escapeHtml(affix.name)}</b> ${escapeHtml(affix.description)}</span></li>`).join('') +
-            (boss ? boss.mechanics.map((line) => `<li><span class="tower-fact-mark is-boss" aria-hidden="true">鬼</span>${escapeHtml(line)}</li>`).join('') : '') +
-            (encounter.carries
-                ? `<li><span class="tower-fact-mark is-${escapeHtml(encounter.carries)}" aria-hidden="true">${encounter.carries === 'heaven' ? '天' : '地'}</span>` +
-                  `<span><b>${encounter.carries === 'heaven' ? 'Heaven' : 'Earth'} scroll</b> This squad carries it. Win to take it.</span></li>` : '') +
-            (duel && !boss
-                ? '<li><span class="tower-fact-mark" aria-hidden="true">闘</span><span><b>Duel</b> One ninja fights; the others watch and rest. Both fighters gain 1 extra chakra a turn. Losing costs your champion a life, not the run.</span></li>' : '') +
-            (!boss && !duel && encounter.hpMultiplier <= 1 && !encounter.affixes.length
-                ? '<li><span class="tower-fact-mark" aria-hidden="true">戦</span>A plain squad. Win to claim a scroll.</li>' : '') +
-            '</ul>' +
-            championPicker +
-            '<div class="tower-battle-foot">' +
-            '<span class="tower-muted">The battle starts when you enter, and your first turn timer starts with it.</span>' +
-            `<button type="button" class="tower-button is-primary is-large" data-fight ${duel && !matchId && championSlot === null ? 'disabled' : ''}>` +
-            `${matchId ? 'Return to battle' : duel ? 'Enter the arena' : 'Enter battle'}</button>` +
-            '</div></div>';
-        stage.querySelectorAll('[data-champion]').forEach((button) => {
-            button.onclick = () => {
-                championSlot = Number(button.dataset.champion);
-                renderBattle(run);
-                stage.querySelector(`[data-champion="${championSlot}"]`)?.focus();
-            };
-        });
-        stage.querySelector('[data-fight]').onclick = (event) => enterBattle(event.currentTarget,
-            duel && !matchId ? { slot: championSlot } : {});
+        const kindLabel = encounter.final ? 'Final boss' : boss ? 'Boss' : encounter.checkpoint === 'mini' ? 'Champion'
+            : encounter.kind === 'elite' ? 'Elite' : duel ? 'Duel' : 'Battle';
+        const rules = [
+            ...(boss?.mechanics || []),
+            ...encounter.affixes.map((affix) => `${affix.name}: ${affix.description}`),
+            ...(encounter.carries ? [`This squad carries the ${encounter.carries === 'heaven' ? 'Heaven' : 'Earth'} scroll.`] : []),
+            ...(duel && !boss ? ['One ninja fights; the others rest. Losing costs your champion a life, not the run.'] : []),
+        ];
+        const champions = duel && !matchId ? `<h2 class="tw-label">Your champion</h2><div class="tw-champions">${team.map((member, slot) =>
+            `<button type="button" class="tw-champion" data-champion="${slot}" aria-pressed="${slot === championSlot}" ${member.dead ? 'disabled' : ''}>` +
+            `${portrait(member)}${e(member.name.split(' ')[0])}</button>`).join('')}</div>` : '';
+        return {
+            team: true,
+            html: head({ seal: boss ? '鬼' : NODES[encounter.kind]?.kanji || '戦', sealTone: boss ? 'is-boss' : '', title: e(boss?.name || encounter.name),
+                sub: `Floor <b>${encounter.floor}</b> · <span class="${boss ? 'is-boss' : ''}">${kindLabel}</span>` }) +
+                '<section class="tw-board tw-detail">' +
+                `<div class="tw-detail-col"><div class="tw-enemies${boss ? ' has-leader' : ''}">${encounter.enemies.map((enemy, index) =>
+                    `<div class="tw-enemy${boss && index === 0 ? ' is-leader' : ''}">${portrait(enemy)}<b>${e(enemy.name)}</b><span>${enemy.hp} health</span></div>`).join('')}</div>` +
+                `${boss?.intro || encounter.blurb ? `<p class="tw-story">${e(boss?.intro || encounter.blurb)}</p>` : ''}</div>` +
+                `<div class="tw-detail-col">${rules.length ? `<ul class="tw-rules${boss ? ' is-boss' : ''}">${rules.map((line) => `<li tabindex="0" ${tip(line.split(':')[0].length < 40 && line.includes(':') ? line.split(':')[0] : 'Rule', line)}><span>${e(line)}</span></li>`).join('')}</ul>` : ''}${champions}` +
+                `<div class="tw-detail-foot"><button type="button" class="tw-button is-primary is-large" data-fight ${duel && !matchId && championSlot === null ? 'disabled' : ''}>` +
+                `${matchId ? 'Return to battle' : duel ? 'Enter the arena' : 'Enter battle'}</button></div></div></section>`,
+            bind: () => {
+                bodyEl.querySelectorAll('[data-champion]').forEach((button) => {
+                    button.onclick = () => { championSlot = Number(button.dataset.champion); render(); };
+                });
+                const fight = bodyEl.querySelector('[data-fight]');
+                fight.onclick = () => enterBattle(fight, duel && !matchId ? { slot: championSlot } : {});
+            },
+        };
     };
 
-    // An event: a short scene and a choice. Options that need a ninja open the picker.
-    const renderEvent = (run) => {
+    const eventScreen = (run) => {
         const event = run.event;
-        if (!event) return renderEnded(run);
-        stage.innerHTML =
-            `<div class="tower-card tower-event is-${escapeHtml(event.pool)}">` +
-            '<div class="tower-event-head">' +
-            `<span class="tower-event-seal" aria-hidden="true">${escapeHtml(event.kanji)}</span>` +
-            `<div><span class="tower-kicker">Floor ${run.floor + 1}${run.stage ? ` · ${escapeHtml(run.stage)}` : ''}${event.speaker ? ` · ${escapeHtml(event.speaker)}` : ''}</span>` +
-            `<h1>${escapeHtml(event.title)}</h1></div></div>` +
-            `<p class="tower-lead tower-event-text">${escapeHtml(event.text)}</p>` +
-            '<div class="tower-choices">' + event.options.map((option, index) =>
-                `<button type="button" class="tower-choice" data-option="${escapeHtml(option.id)}" style="--i:${index}" ${option.blocked ? 'disabled' : ''}>` +
-                `<strong>${escapeHtml(option.label)}</strong>` +
-                `<span>${escapeHtml(option.description)}</span>` +
-                (option.cost ? `<span class="tower-price${option.cost > run.ryo ? ' is-short' : ''}">${option.cost} ryō</span>` : '') +
-                (option.blocked ? `<span class="tower-choice-blocked">${escapeHtml(option.blocked)}</span>` : '') +
-                '</button>').join('') + '</div></div>';
-        stage.querySelectorAll('[data-option]').forEach((button) => {
-            button.onclick = () => {
-                const option = event.options.find((entry) => entry.id === button.dataset.option);
-                if (!option.needsSlot) return act('/event', { optionId: option.id }, { button });
-                return startPick({
-                    label: option.label,
-                    detail: option.description,
-                    disabledFor: (member, slot) => option.slotReasons?.[slot] || '',
-                    onPick: (slot) => act('/event', { optionId: option.id, slot }),
-                });
-            };
-        });
+        if (!event) return endedScreen(run);
+        return {
+            team: true,
+            html: head({ floor: run.floor + 1, total: run.totalFloors, title: e(event.title), sub: `<span class="tw-story-line">${e(event.text)}</span>` }) +
+                `<div class="tw-postings">${event.options.map((option) => posting({
+                    seal: event.kanji, sealTone: 'is-event', title: e(option.label),
+                    kind: option.cost ? `<span class="tw-price${option.cost > run.ryo ? ' is-short' : ''}">${option.cost} ryō</span>` : (option.needsSlot ? 'One ninja' : ''),
+                    body: `<p class="tw-posting-text">${e(option.blocked || option.description)}</p>`,
+                    foot: `<button type="button" class="tw-button is-primary is-wide" data-option="${e(option.id)}" ${option.blocked ? 'disabled' : ''}>${option.needsSlot ? 'Choose who' : 'Choose'}</button>`,
+                })).join('')}</div>`,
+            bind: () => bodyEl.querySelectorAll('[data-option]').forEach((button) => {
+                button.onclick = () => {
+                    const option = event.options.find((entry) => entry.id === button.dataset.option);
+                    if (!option.needsSlot) return act('/event', { optionId: option.id }, { button });
+                    return startPick({
+                        label: option.label,
+                        detail: option.description,
+                        disabledFor: (member, slot) => option.slotReasons?.[slot] || '',
+                        onPick: (slot) => act('/event', { optionId: option.id, slot }),
+                    });
+                };
+            }),
+        };
     };
 
-    // Between acts: continue the climb, or retire with what has been earned.
-    const renderInterlude = (run) => {
-        const next = run.interlude;
-        stage.innerHTML =
-            '<div class="tower-card tower-interlude">' +
-            `<span class="tower-kicker">${escapeHtml(run.act?.name || 'Act I')} cleared · ${escapeHtml(run.act?.title || '')}</span>` +
-            '<h1>The bridge is finished</h1>' +
-            '<p class="tower-lead">Gatō is gone and the Land of Waves is free. Back in Konoha, Kakashi hands you three application forms. ' +
-            '"I nominated you for the Chūnin Exams. You don\'t have to take them."</p>' +
-            (next ? '<ol class="tower-steps">' +
-                '<li><span class="tower-step-mark" aria-hidden="true">試</span><div><b>The written exam</b><span>Ibiki\'s ten questions. The tenth is the real test.</span></div></li>' +
-                '<li><span class="tower-step-mark" aria-hidden="true">森</span><div><b>The Forest of Death</b><span>Take a Heaven and an Earth scroll from rival teams. Something else hunts in the trees.</span></div></li>' +
-                '<li><span class="tower-step-mark" aria-hidden="true">闘</span><div><b>Preliminaries and finals</b><span>One-on-one duels. Pick your champion for each bout.</span></div></li>' +
-                '<li><span class="tower-step-mark is-boss" aria-hidden="true">砂</span><div><b>The final bout</b><span>Gaara of the Desert, floor 20.</span></div></li>' +
-                '</ol>' : '') +
-            '<p class="tower-fineprint">Continuing returns every living ninja to full health and gives back their last life. ' +
-            'Retiring ends the run now and pays its account ryō.</p>' +
-            '<div class="tower-actions">' +
-            `<button type="button" class="tower-button is-primary is-large" data-continue>${next ? `Enter ${escapeHtml(next.title)}` : 'Continue'}</button>` +
-            '<button type="button" class="tower-button" data-retire>Retire</button></div></div>';
-        stage.querySelector('[data-continue]').onclick = (event) => act('/continue', { choice: 'continue' }, { button: event.currentTarget });
-        stage.querySelector('[data-retire]').onclick = async (event) => {
-            const button = event.currentTarget;
-            const confirmed = await confirmAction({
-                title: 'Retire after Act I?',
-                body: 'The run ends here and pays its account ryō. You cannot continue into the Chūnin Exams later.',
-                confirmLabel: 'Retire',
+    const ramenScreen = (run) => ({
+        team: true,
+        html: head({ seal: '麺', sealTone: 'is-rest', title: 'Ichiraku Ramen', sub: 'One bowl before the next floor.' }) +
+            '<div class="tw-postings">' +
+            posting({ seal: '宴', sealTone: 'is-rest', title: 'Team feast', kind: `+${run.constants.ramenFeastPercent}% health`, body: '<p class="tw-posting-text">Every ninja recovers part of their health.</p>',
+                foot: '<button type="button" class="tw-button is-primary is-wide" data-feast>Eat together</button>' }) +
+            posting({ seal: '休', sealTone: 'is-rest', title: 'Full rest', kind: 'One ninja to full', body: '<p class="tw-posting-text">One ninja recovers all of their health.</p>',
+                foot: '<button type="button" class="tw-button is-primary is-wide" data-rest>Choose who rests</button>' }) +
+            '</div>',
+        bind: () => {
+            const feast = bodyEl.querySelector('[data-feast]');
+            feast.onclick = () => act('/ramen', { option: 'feast' }, { button: feast });
+            bodyEl.querySelector('[data-rest]').onclick = () => startPick({
+                label: 'Who rests?',
+                detail: 'They recover to full health.',
+                onPick: (slot) => act('/ramen', { option: 'rest', slot }),
+                disabledFor: (member) => (member.hp >= member.maxHp ? 'Full health' : ''),
             });
-            if (confirmed) act('/continue', { choice: 'retire' }, { button });
-        };
-    };
+        },
+    });
 
-    const renderRamen = (run) => {
-        stage.innerHTML =
-            '<div class="tower-card tower-ramen"><span class="tower-kicker">Rest</span><h1>Ichiraku Ramen</h1>' +
-            '<p class="tower-lead">Steam rises from the counter. A warm bowl before the next floor. Choose one.</p>' +
-            '<div class="tower-choices">' +
-            `<button type="button" class="tower-choice" data-feast style="--i:0"><span class="tower-choice-mark" aria-hidden="true">宴</span><strong>Team feast</strong><span>Every ninja recovers ${run.constants.ramenFeastPercent}% of their health.</span></button>` +
-            '<button type="button" class="tower-choice" data-rest style="--i:1"><span class="tower-choice-mark" aria-hidden="true">休</span><strong>Full rest</strong><span>One ninja recovers to full health.</span></button>' +
-            '</div></div>';
-        stage.querySelector('[data-feast]').onclick = (event) => act('/ramen', { option: 'feast' }, { button: event.currentTarget });
-        stage.querySelector('[data-rest]').onclick = () => startPick({
-            label: 'Choose a ninja to rest',
-            detail: 'They recover to full health.',
-            onPick: (slot) => act('/ramen', { option: 'rest', slot }),
-            disabledFor: (member) => (member.hp >= member.maxHp ? 'Full health' : ''),
-        });
-    };
-
-    const renderMerchant = (run) => {
+    const merchantScreen = (run) => {
         const stock = run.merchant.stock;
-        stage.innerHTML =
-            `<div class="tower-card"><span class="tower-kicker">Merchant</span><h1>${escapeHtml(MERCHANT_LABEL[run.act?.act] || MERCHANT_LABEL[1])}</h1>` +
-            `<p class="tower-lead">You carry <b class="tower-ryo-inline">${run.ryo} ryō</b>. Run ryō is lost when the run ends, so spend it.</p>` +
-            '<div class="tower-shop">' + stock.map((item, index) => {
-                const short = !item.sold && item.price > run.ryo;
-                const price = `<span class="tower-price${short ? ' is-short' : ''}">${item.sold ? 'Sold' : `${item.price} ryō`}</span>`;
-                const disabled = item.sold || short ? 'disabled' : '';
-                const soldClass = item.sold ? ' is-sold' : '';
-                if (item.kind === 'scroll') {
-                    return scrollCard(item.scroll, { footer: price, attrs: `data-buy="${index}" ${disabled}`, index }).replace('tower-scroll-card ', `tower-scroll-card${soldClass} `);
-                }
-                return `<button type="button" class="tower-scroll-card tier-medkit${soldClass}" style="--i:${index}" data-buy="${index}" ${disabled}>` +
-                    '<span class="tower-scroll-tier">Supplies</span><span class="tower-scroll-art-wrap"><span class="tower-medkit-art" aria-hidden="true">薬</span></span>' +
-                    `<strong>Medical kit</strong><span class="tower-scroll-desc">Every ninja recovers ${run.constants.medkitHealPercent}% of their health.</span>` +
-                    price + '</button>';
-            }).join('') + '</div>' +
-            '<button type="button" class="tower-button" data-leave>Leave the merchant</button></div>';
-        stage.querySelectorAll('[data-buy]').forEach((button) => {
-            button.onclick = () => {
-                const index = Number(button.dataset.buy);
-                const item = stock[index];
-                if (item.kind !== 'scroll') return act('/merchant/buy', { itemIndex: index }, { button });
-                return withScrollTarget(item.scroll, (slot) => act('/merchant/buy', { itemIndex: index, slot }));
-            };
-        });
-        stage.querySelector('[data-leave]').onclick = (event) => act('/leave', {}, { button: event.currentTarget });
-    };
-
-    const renderRecruit = (run) => {
-        stage.innerHTML =
-            '<div class="tower-card"><span class="tower-kicker">Recruit</span><h1>Shinobi for hire</h1>' +
-            '<p class="tower-lead">Swap one of your ninjas for a recruit. The recruit arrives at full health and inherits the departing ninja\'s scrolls.</p>' +
-            '<div class="tower-recruits">' + run.recruit.offers.map((character, index) =>
-                `<div class="tower-recruit" style="--i:${index}">${portrait(character)}` +
-                `<strong>${escapeHtml(character.name)}</strong><div class="tower-skills">${skillStrip(character)}</div>` +
-                (character.passive
-                    ? `<span class="tower-passive" tabindex="0" data-tip="${escapeHtml(`${character.passive.name}\n${character.passive.description}`)}">Passive: ${escapeHtml(character.passive.name)}</span>`
-                    : '') +
-                chakraMix([character]) +
-                `<button type="button" class="tower-button" data-recruit="${index}">Recruit</button></div>`).join('') + '</div>' +
-            '<button type="button" class="tower-button" data-leave>Keep my team</button></div>';
-        stage.querySelectorAll('[data-recruit]').forEach((button) => {
-            button.onclick = () => {
-                const offer = run.recruit.offers[Number(button.dataset.recruit)];
-                startPick({
-                    label: `Choose who ${offer.name} replaces`,
-                    detail: `${offer.name} arrives at full health and inherits the departing ninja's scrolls.`,
-                    factFor: (member) => `${memberHp(member)} · ${member.scrolls.length} scroll${member.scrolls.length === 1 ? '' : 's'}`,
-                    onPick: (slot) => act('/recruit', { offerIndex: Number(button.dataset.recruit), slot }),
-                    allowDead: true,
+        return {
+            team: true,
+            html: head({ seal: '商', sealTone: 'is-shop', title: isStd(run) ? 'A wandering merchant' : (run.act?.act === 2 ? 'A Leaf weapons dealer' : 'A travelling merchant'),
+                sub: `You carry <b>${run.ryo} ryō</b>. It is lost when the run ends.`, side: '<button type="button" class="tw-button" data-leave>Leave</button>' }) +
+                `<div class="tw-postings">${stock.map((item, index) => {
+                    const short = !item.sold && item.price > run.ryo;
+                    const foot = `<span class="tw-price${short ? ' is-short' : ''}">${item.sold ? 'Sold' : `${item.price} ryō`}</span>` +
+                        `<button type="button" class="tw-button is-primary" style="margin-left:auto" data-buy="${index}" ${item.sold || short ? 'disabled' : ''}>Buy</button>`;
+                    return item.kind === 'scroll' ? scrollPosting(item.scroll, { foot })
+                        : posting({ seal: '薬', sealTone: 'is-rest', title: 'Medical kit', kind: `+${run.constants.medkitHealPercent}% health`, body: '<p class="tw-posting-text">Every ninja recovers part of their health.</p>', foot });
+                }).join('')}</div>`,
+            bind: () => {
+                bodyEl.querySelectorAll('[data-buy]').forEach((button) => {
+                    button.onclick = () => {
+                        const index = Number(button.dataset.buy);
+                        const item = stock[index];
+                        if (item.kind !== 'scroll') return act('/merchant/buy', { itemIndex: index }, { button });
+                        return withTarget(item.scroll, (slot, replaceKey) => act('/merchant/buy', { itemIndex: index, slot, replaceKey }));
+                    };
                 });
-            };
-        });
-        stage.querySelector('[data-leave]').onclick = (event) => act('/leave', {}, { button: event.currentTarget });
-    };
-
-    const renderReward = (run) => {
-        stage.innerHTML =
-            (run.reward.starting
-                // Before the first fight: a starting scroll from the Hokage's vault.
-                ? '<div class="tower-card tower-reward is-starting"><span class="tower-kicker">Before the climb</span>' +
-                  '<h1>Choose a starting scroll</h1>' +
-                  '<p class="tower-lead">Someone "borrowed" the Scroll of Seals again. Before anyone notices, copy one technique for the road. ' +
-                  `Choose one, or skip it for ${run.constants.skipScrollRyo} ryō.</p>`
-                // Rewards from events (the tenth question, Jiraiya) pay no ryō and are not victories.
-                : `<div class="tower-card tower-reward"><span class="tower-kicker">${run.reward.ryoGained ? 'Victory' : 'Reward'} · Floor ${run.floor + (run.reward.ryoGained ? 0 : 1)}</span><h1>Claim a Forbidden Scroll</h1>` +
-                  `<p class="tower-lead">${run.reward.ryoGained ? `<b class="tower-ryo-inline">+${run.reward.ryoGained} ryō</b> earned. ` : ''}Choose one scroll, or skip it for ${run.constants.skipScrollRyo} more ryō.</p>`) +
-            '<div class="tower-shop is-reveal">' + run.reward.offers.map((scroll, index) =>
-                scrollCard(scroll, { attrs: `data-reward="${index}"`, index })).join('') + '</div>' +
-            `<button type="button" class="tower-button" data-skip>Skip (+${run.constants.skipScrollRyo} ryō)</button></div>`;
-        stage.querySelectorAll('[data-reward]').forEach((button) => {
-            button.onclick = () => {
-                const index = Number(button.dataset.reward);
-                withScrollTarget(run.reward.offers[index], (slot) => act('/reward', { offerIndex: index, slot }, { button }));
-            };
-        });
-        stage.querySelector('[data-skip]').onclick = (event) => act('/reward/skip', {}, { button: event.currentTarget });
-    };
-
-    const renderEnded = (run) => {
-        const actsCleared = Math.max(Number(run.stats?.actsCleared) || 0, run.status === 'victory' ? 1 : 0);
-        const finalsInterrupted = run.status === 'victory' && actsCleared >= 2;
-        const titles = {
-            victory: finalsInterrupted ? 'The finals are interrupted' : 'Tower conquered',
-            defeated: 'The climb ends',
-            abandoned: 'Run abandoned',
+                const leave = bodyEl.querySelector('[data-leave]');
+                leave.onclick = () => act('/leave', {}, { button: leave });
+            },
         };
-        const art = run.status === 'victory' ? 'battle-victory.png' : 'battle-defeat.png';
-        const reward = run.accountReward;
-        const kicker = run.status === 'victory'
-            ? (finalsInterrupted ? 'Act II cleared · The Chūnin Exams' : 'Act I cleared · Retired')
-            : `Reached floor ${run.floor} of ${run.totalFloors}`;
-        stage.innerHTML =
-            `<div class="tower-card tower-ended is-${escapeHtml(run.status)}">` +
-            '<div class="tower-ended-head">' +
-            `<img class="tower-ended-art" src="${art}" alt="">` +
-            '<div>' +
-            `<span class="tower-kicker">${escapeHtml(kicker)}</span>` +
-            `<h1>${titles[run.status] || 'Run over'}</h1>` +
-            (finalsInterrupted
-                ? '<p class="tower-lead">Feathers drift over the stadium and the crowd falls asleep. Sand and Sound shinobi pour over the walls. ' +
-                  `<b>${escapeHtml(run.nextActTeaser || 'Act III is coming.')}</b></p>` : '') +
-            `<div class="tower-progress" aria-label="Floors cleared">${Array.from({ length: run.totalFloors }, (_, index) =>
-                `<span class="${index < run.floor ? 'is-done' : ''}${index === run.totalFloors - 1 ? ' is-boss' : ''}"></span>`).join('')}</div>` +
-            '</div></div>' +
-            '<dl class="tower-summary">' +
-            `<div><dt>Floors cleared</dt><dd>${run.floor} / ${run.totalFloors}</dd></div>` +
-            `<div><dt>Battles won</dt><dd>${run.stats.battlesWon}</dd></div>` +
-            `<div><dt>Scrolls learned</dt><dd>${run.stats.scrollsTaken}</dd></div>` +
-            `<div class="is-reward"><dt>Account ryō earned</dt><dd>${reward ? `+${reward.ryo}` : '0'}</dd></div>` +
-            '</dl>' +
-            '<h2 class="tower-panel-title">Final team</h2>' +
-            '<div class="tower-final-team">' + run.team.map((member) =>
-                `<div class="tower-final-member">${portrait(member)}<strong>${escapeHtml(member.name)}</strong>` +
-                `<div class="tower-member-scrolls">${member.scrolls.map((scroll) => scrollIcon(scroll)).join('') || '<span class="tower-muted">No scrolls</span>'}</div></div>`).join('') +
-            (run.teamScrolls.length ? `<div class="tower-final-member is-team"><span class="tower-muted">Team scrolls</span><div class="tower-member-scrolls">${run.teamScrolls.map((scroll) => scrollIcon(scroll)).join('')}</div></div>` : '') +
-            '</div>' +
-            '<div class="tower-actions"><button type="button" class="tower-button is-primary is-large" data-new>Start a new run</button>' +
-            '<a class="tower-button" href="selection.html">Back to the hub</a></div></div>';
-        stage.querySelector('[data-new]').onclick = (event) => act('/start', {}, { button: event.currentTarget });
     };
 
-    // The backdrop follows the run: the misty climb, the boss's waterfall, or the clear sky after a win.
-    // Act II: the exam hall, the forest's green gloom, then the stadium.
+    const recruitScreen = (run) => ({
+        team: true,
+        html: head({ seal: '募', sealTone: 'is-shop', title: 'Shinobi for hire', sub: 'The recruit arrives at full health and keeps the scrolls of the ninja they replace.',
+            side: '<button type="button" class="tw-button" data-leave>Keep my team</button>' }) +
+            `<div class="tw-postings">${run.recruit.offers.map((character, index) => posting({
+                art: `<img class="tw-art-face" src="${e(character.facePicture)}" alt="">`,
+                title: e(character.name),
+                kind: character.passive ? `Passive: ${e(character.passive.name)}` : '',
+                body: skillStrip(character),
+                foot: `<button type="button" class="tw-button is-primary is-wide" data-recruit="${index}">Recruit</button>`,
+            })).join('')}</div>`,
+        bind: () => {
+            bodyEl.querySelectorAll('[data-recruit]').forEach((button) => {
+                button.onclick = () => {
+                    const offer = run.recruit.offers[Number(button.dataset.recruit)];
+                    startPick({
+                        label: `Who does ${offer.name.split(' ')[0]} replace?`,
+                        detail: `${offer.name} arrives at full health.`,
+                        onPick: (slot) => act('/recruit', { offerIndex: Number(button.dataset.recruit), slot }),
+                        allowDead: true,
+                    });
+                };
+            });
+            const leave = bodyEl.querySelector('[data-leave]');
+            leave.onclick = () => act('/leave', {}, { button: leave });
+        },
+    });
+
+    const rewardScreen = (run) => {
+        const { reward } = run;
+        const title = reward.starting ? `Choose a starting ${noun(run)}` : isStd(run) ? 'Claim an augment' : 'Claim a Forbidden Scroll';
+        const sub = reward.starting ? 'Take one for the road, or skip it for ryō.'
+            : reward.ryoGained ? `Floor <b>${run.floor}</b> cleared · <b>+${reward.ryoGained} ryō</b>` : `Floor <b>${run.floor + 1}</b>`;
+        return {
+            team: true,
+            html: head({ seal: '巻', title, sub, side: `<button type="button" class="tw-button" data-skip>Skip · +${run.constants.skipScrollRyo} ryō</button>` }) +
+                `<div class="tw-postings">${reward.offers.map((scroll, index) => scrollPosting(scroll, {
+                    foot: `<button type="button" class="tw-button is-primary is-wide" data-reward="${index}">${scroll.fusion ? 'Take and fuse' : 'Take'}</button>`,
+                })).join('')}</div>`,
+            bind: () => {
+                bodyEl.querySelectorAll('[data-reward]').forEach((button) => {
+                    button.onclick = () => {
+                        const index = Number(button.dataset.reward);
+                        withTarget(reward.offers[index], (slot, replaceKey) => act('/reward', { offerIndex: index, slot, replaceKey }, { button }));
+                    };
+                });
+                const skip = bodyEl.querySelector('[data-skip]');
+                skip.onclick = () => act('/reward/skip', {}, { button: skip });
+            },
+        };
+    };
+
+    const interludeScreen = (run) => {
+        const next = run.interlude;
+        return {
+            team: true,
+            html: head({ seal: '橋', title: 'The bridge is finished', sub: `${e(run.act?.name || 'Act I')} cleared · ${e(run.act?.title || '')}` }) +
+                '<div class="tw-postings">' +
+                posting({ seal: '試', title: next ? `Enter ${e(next.title)}` : 'Continue', kind: 'Floors 11 to 20',
+                    body: '<p class="tw-posting-text">The written exam, the Forest of Death, duels, and Gaara in the finals. Every living ninja returns to full health and regains their last life.</p>',
+                    foot: '<button type="button" class="tw-button is-primary is-wide" data-continue>Continue</button>' }) +
+                posting({ seal: '退', title: 'Retire', kind: 'End the run now', body: '<p class="tw-posting-text">Collect the run\'s account ryō and stop here.</p>',
+                    foot: '<button type="button" class="tw-button is-wide" data-retire>Retire</button>' }) +
+                '</div>',
+            bind: () => {
+                const go = bodyEl.querySelector('[data-continue]');
+                go.onclick = () => act('/continue', { choice: 'continue' }, { button: go });
+                const retire = bodyEl.querySelector('[data-retire]');
+                retire.onclick = async () => {
+                    if (await confirmAction({ title: 'Retire now?', body: 'The run ends here and pays its account ryō.', confirmLabel: 'Retire' })) {
+                        act('/continue', { choice: 'retire' }, { button: retire });
+                    }
+                };
+            },
+        };
+    };
+
+    const leftChamberScreen = () => ({
+        team: true,
+        html: head({ seal: '麺', sealTone: 'is-rest', title: 'A quiet floor', sub: 'Nothing waits here any more.' }) +
+            '<div class="tw-postings">' + posting({ seal: '麺', sealTone: 'is-rest', title: 'Move on', kind: 'Fusion is automatic now',
+                body: '<p class="tw-posting-text">Taking the second half of a pair fuses it on the spot.</p>',
+                foot: '<button type="button" class="tw-button is-primary is-wide" data-leave>Continue</button>' }) + '</div>',
+        bind: () => { const leave = bodyEl.querySelector('[data-leave]'); leave.onclick = () => act('/leave', {}, { button: leave }); },
+    });
+
+    const endedScreen = (run) => {
+        const victory = run.status === 'victory';
+        const reward = run.accountReward;
+        const legacyActs = Math.max(Number(run.stats?.actsCleared) || 0, victory ? 1 : 0);
+        const title = run.status === 'abandoned' ? 'Run abandoned' : victory
+            ? (isStd(run) ? 'The Tower is conquered' : legacyActs >= 2 ? 'The finals are interrupted' : 'Act I cleared') : 'The climb ends';
+        const ledger = [
+            ['Floor', `${run.floor} / ${run.totalFloors}`],
+            ['Battles won', run.stats.battlesWon],
+            ...(isStd(run) ? [['Bosses', run.stats.bossesDefeated || 0], ['Fusions', (run.fusions || []).length]] : []),
+            ['Account ryō', reward ? `+${reward.ryo}` : '0', 'is-ryo'],
+        ];
+        return {
+            team: false,
+            html: `<section class="tw-board tw-ended${victory ? ' is-victory' : ''}">` +
+                `<h1>${title}</h1>` +
+                `<dl class="tw-ledger">${ledger.map(([label, value, cls]) => `<div class="${cls || ''}"><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>` +
+                '<div class="tw-final">' + run.team.map((member) =>
+                    `<div class="tw-final-member${member.dead ? ' is-dead' : ''}">${portrait(member)}${e(member.name)}` +
+                    `<span class="tw-icons">${member.scrolls.map(augIcon).join('')}</span></div>`).join('') +
+                `<div class="tw-final-member is-team"><span class="tw-label">Team ${noun(run, true)}</span><span class="tw-icons is-grid">${run.teamScrolls.map(augIcon).join('') || '<span class="tw-none">None</span>'}</span>` +
+                ((run.fusions || []).length ? `<ul class="tw-fusions-made">${run.fusions.map((entry) => `<li>Floor ${entry.floor}: <b>${e(entry.name)}</b></li>`).join('')}</ul>` : '') +
+                '</div></div>' +
+                '<div class="tw-actions"><button type="button" class="tw-button is-primary is-large" data-new>New run</button>' +
+                '<a class="tw-button is-large" href="selection.html">Back to the hub</a></div></section>',
+            bind: () => {
+                const again = bodyEl.querySelector('[data-new]');
+                again.onclick = () => act('/dismiss', {}, { button: again });
+            },
+        };
+    };
+
+    // ------------------------------------------------------------ the fusion moment
+    const seenFusion = (run) => { try { return localStorage.getItem(`tower:fusion:${run.runId}`); } catch (_) { return null; } };
+    const markFusion = (run, id) => { try { localStorage.setItem(`tower:fusion:${run.runId}`, id); } catch (_) { /* per-session only */ } };
+    let shownFusion = null;
+    const playFusion = (run) => {
+        const fusion = run?.lastFusion;
+        // Only a fusion made on this floor plays; an old one is in the team column already.
+        if (!fusion || fusion.floor !== run.floor || !ACTIVE.includes(run.status) || fusion.id === shownFusion || fusion.id === seenFusion(run)) return;
+        shownFusion = fusion.id;
+        markFusion(run, fusion.id);
+        const [left, right] = fusion.consumed;
+        fusionEl.innerHTML = '<div class="tw-board tw-fusion-card">' +
+            '<div class="tw-fusion-stage" aria-hidden="true">' +
+            (left ? `<img class="is-left tier-${e(left.tier)}" src="${e(left.icon)}" alt="">` : '') +
+            (right ? `<img class="is-right tier-${e(right.tier)}" src="${e(right.icon)}" alt="">` : '') +
+            `<img class="is-result tier-${e(fusion.result.tier)}" src="${e(fusion.result.icon)}" alt=""></div>` +
+            `<h2 id="tw-fusion-title">${e(fusion.name)}</h2>` +
+            `<span class="tw-posting-kind tier-${e(fusion.result.tier)}">${e(fusion.result.tierLabel)} fusion</span>` +
+            `<p class="tw-fusion-from">${fusion.consumed.map((entry) => `<b class="tier-${e(entry.tier)}">${e(entry.name)}</b>`).join(' + ')}</p>` +
+            `<p class="tw-posting-text">${e(fusion.result.description)}</p>` +
+            '<button type="button" class="tw-button is-primary is-large" data-fusion-ok>Continue</button></div>';
+        fusionEl.hidden = false;
+        const ok = fusionEl.querySelector('[data-fusion-ok]');
+        const close = () => {
+            fusionEl.hidden = true;
+            document.removeEventListener('keydown', onKey);
+            const row = bodyEl.querySelector(`.tw-augrow[data-key="${CSS.escape(fusion.result.key || '')}"]`);
+            if (row) { row.classList.add('is-new'); row.scrollIntoView({ block: 'nearest' }); }
+        };
+        const onKey = (event) => { if (event.key === 'Escape') close(); };
+        document.addEventListener('keydown', onKey);
+        fusionEl.onclick = (event) => { if (event.target === fusionEl) close(); };
+        ok.onclick = close;
+        ok.focus();
+    };
+
+    // ------------------------------------------------------------ render
     const sceneFor = (run) => {
-        if (!run) return 'waves';
+        if (!run) return 'konoha';
         if (run.status === 'victory') return 'victory';
         if (run.status === 'battle' && run.battle?.encounter?.kind === 'boss') return 'boss';
         if (run.status === 'defeated') return 'dusk';
-        if ((run.act?.act || 1) >= 2) {
-            const next = run.floor + 1;
-            if (next >= 12 && next <= 15) return 'forest';
-            return 'konoha';
-        }
-        if (run.floor >= 9) return 'dusk';
-        return 'waves';
+        if (isStd(run)) return run.scene || 'waves';
+        if ((run.act?.act || 1) >= 2) return run.floor + 1 >= 12 && run.floor + 1 <= 15 ? 'forest' : 'konoha';
+        return run.floor >= 9 ? 'dusk' : 'waves';
     };
 
     const render = () => {
         const run = state.run;
-        const statusKey = run ? `${run.runId}:${run.status}:${run.currentNodeId || ''}` : 'none';
-        const entering = statusKey !== lastStatusKey;
-        lastStatusKey = statusKey;
         document.body.dataset.scene = sceneFor(run);
-        runMeta.hidden = !run || !ACTIVE_STATUSES.includes(run.status);
-        if (actLabelEl) {
-            actLabelEl.textContent = run?.act ? `${run.act.name} · ${run.act.title}` : 'Act I · Land of Waves';
-        }
-        const exam = run && ACTIVE_STATUSES.includes(run.status) ? run.examScrolls : null;
-        examChip.hidden = !exam;
-        if (exam) {
-            examChip.innerHTML = `<span class="${exam.heaven ? 'is-held' : ''}">天 ${exam.heaven}</span>` +
-                `<span class="${exam.earth ? 'is-held' : ''}">地 ${exam.earth}</span>`;
-        }
-        if (run) {
-            floorChip.innerHTML = `<span aria-hidden="true">塔</span> Floor ${run.floor} / ${run.totalFloors}`;
-            ryoChip.innerHTML = `<span class="tower-coin" aria-hidden="true">両</span> ${run.ryo} ryō`;
-            if (lastRyo !== null && run.ryo !== lastRyo && ACTIVE_STATUSES.includes(run.status)) {
-                floatDelta(ryoChip, run.ryo - lastRyo, run.ryo > lastRyo ? 'gain' : 'spend');
-            }
-            lastRyo = run.ryo;
-        }
-        renderTeam();
-        if (!run) renderIntro();
-        else if (run.status === 'map') renderMap(run, { entering });
-        else ({
-            draft: renderDraft, battle: renderBattle, ramen: renderRamen, merchant: renderMerchant,
-            recruit: renderRecruit, reward: renderReward, event: renderEvent, interlude: renderInterlude,
-        }[run.status] || renderEnded)(run);
-        if (entering && !reduceMotion) {
-            stage.querySelector('.tower-card')?.classList.add('is-entering');
+        abandonButton.hidden = !run || !ACTIVE.includes(run.status);
+        const screens = {
+            draft: draftScreen, map: mapScreen, battle: battleScreen, event: eventScreen, ramen: ramenScreen,
+            merchant: merchantScreen, recruit: recruitScreen, reward: rewardScreen, interlude: interludeScreen, fusion: leftChamberScreen,
+        };
+        const screen = !run ? introScreen() : (screens[run.status] || endedScreen)(run);
+        const key = run ? `${run.runId}:${run.status}:${run.currentNodeId || ''}:${run.floor}` : 'intro';
+        const entering = key !== lastKey;
+        lastKey = key;
+        const withTeam = screen.team && run?.team?.length;
+        bodyEl.className = `tw-body${withTeam ? ' has-team' : ''}${entering && !reduceMotion ? ' tw-enter' : ''}`;
+        bodyEl.innerHTML = (withTeam ? teamColumn(run) : '') + `<main class="tw-main" aria-live="polite">${screen.html}</main>`;
+        screen.bind?.();
+        bodyEl.querySelector('[data-pick-cancel]')?.addEventListener('click', cancelPick);
+        bodyEl.querySelectorAll('button.tw-member.is-pickable').forEach((button) => {
+            button.onclick = () => pick?.onPick(Number(button.dataset.slot));
+        });
+        if (run) renderSheet(run);
+        else { sheet.hidden = true; document.body.classList.remove('has-sheet'); }
+        playFusion(run);
+    };
+
+    // ------------------------------------------------------------ compendium
+    const renderCompendium = () => {
+        const list = compendiumEl.querySelector('[data-compendium-list]');
+        if (!catalog) { list.innerHTML = '<li class="tw-none">Loading…</li>'; return; }
+        const kind = compendiumEl.querySelector('[data-compendium-filter]').value;
+        const query = compendiumEl.querySelector('[data-compendium-search]').value.trim().toLowerCase();
+        const nameOf = (code) => catalog.augments.find((augment) => augment.code === code)?.name || code;
+        const entries = (catalog[kind] || []).filter((entry) => !query || [entry.name, entry.characterName, entry.descriptionNormalized, entry.descriptionOriginal, entry.effectOriginal]
+            .some((field) => String(field || '').toLowerCase().includes(query)));
+        list.innerHTML = entries.map((entry) => `<li class="tw-entry tier-${e(entry.tier)}${entry.status === 'implemented' ? '' : ' is-off'}">` +
+            `<header><b>${e(entry.name)}</b><span>${e(TIER_LABEL[entry.tier] || entry.tier)}</span>` +
+            `${entry.characterName ? `<span style="color:var(--tw-muted)">${e(entry.characterName)}</span>` : ''}` +
+            `${entry.ingredients ? `<span style="color:var(--tw-muted)">${e(entry.ingredients.map(nameOf).join(' + '))}</span>` : ''}` +
+            `${entry.status === 'implemented' ? '' : '<span style="color:var(--tw-faint)">Not in the Tower yet</span>'}</header>` +
+            `<p>${e(entry.descriptionNormalized || entry.descriptionOriginal || entry.effectOriginal || '')}</p></li>`).join('') ||
+            '<li class="tw-none">Nothing matches.</li>';
+    };
+    const openCompendium = async () => {
+        compendiumEl.showModal();
+        renderCompendium();
+        if (catalog) return;
+        try { catalog = await api('/catalog'); renderCompendium(); } catch (error) {
+            compendiumEl.querySelector('[data-compendium-list]').innerHTML = `<li class="tw-none">${e(error.message)}</li>`;
         }
     };
+    compendiumEl.querySelector('[data-compendium-search]').addEventListener('input', renderCompendium);
+    compendiumEl.querySelector('[data-compendium-filter]').addEventListener('change', renderCompendium);
+    compendiumEl.querySelector('[data-compendium-close]').onclick = () => compendiumEl.close();
+    compendiumButton.onclick = openCompendium;
 
     // ------------------------------------------------------------ tooltips
-    const tip = document.createElement('div');
-    tip.className = 'tower-tip';
-    tip.setAttribute('role', 'tooltip');
-    tip.hidden = true;
-    document.body.appendChild(tip);
+    const tipEl = document.createElement('div');
+    tipEl.className = 'tw-tip';
+    tipEl.setAttribute('role', 'tooltip');
+    tipEl.hidden = true;
+    document.body.appendChild(tipEl);
     const showTip = (target) => {
-        const text = target.getAttribute('data-tip');
-        if (!text) return;
-        const [title, ...rest] = text.split('\n');
-        tip.innerHTML = `<strong>${escapeHtml(title)}</strong>${rest.length ? `<span>${escapeHtml(rest.join(' '))}</span>` : ''}`;
-        tip.hidden = false;
+        const [title, ...rest] = target.getAttribute('data-tip').split('\n');
+        tipEl.innerHTML = `<strong>${e(title)}</strong>${rest.join(' ').trim() ? `<span>${e(rest.join(' '))}</span>` : ''}`;
+        tipEl.hidden = false;
         const rect = target.getBoundingClientRect();
-        const tipRect = tip.getBoundingClientRect();
-        const left = Math.min(window.innerWidth - tipRect.width - 8, Math.max(8, rect.left + rect.width / 2 - tipRect.width / 2));
-        const above = rect.top - tipRect.height - 8;
-        tip.style.left = `${left}px`;
-        tip.style.top = `${above > 8 ? above : rect.bottom + 8}px`;
+        const box = tipEl.getBoundingClientRect();
+        tipEl.style.left = `${Math.min(window.innerWidth - box.width - 8, Math.max(8, rect.left + rect.width / 2 - box.width / 2))}px`;
+        tipEl.style.top = `${rect.top - box.height - 8 > 8 ? rect.top - box.height - 8 : rect.bottom + 8}px`;
     };
-    const hideTip = () => { tip.hidden = true; };
-    document.addEventListener('mouseover', (event) => {
-        const target = event.target.closest('[data-tip]');
-        if (target) showTip(target); else hideTip();
-    });
-    document.addEventListener('focusin', (event) => {
-        const target = event.target.closest('[data-tip]');
-        if (target) showTip(target); else hideTip();
-    });
-    document.addEventListener('focusout', hideTip);
-    window.addEventListener('scroll', hideTip, { passive: true });
+    const onTip = (event) => {
+        const target = event.target.closest?.('[data-tip]');
+        if (target) showTip(target); else tipEl.hidden = true;
+    };
+    document.addEventListener('mouseover', onTip);
+    document.addEventListener('focusin', onTip);
+    document.addEventListener('focusout', () => { tipEl.hidden = true; });
 
     // ------------------------------------------------------------ chrome
-    // Broken portraits fall back to the default avatar (inline handlers are blocked by the CSP).
     document.addEventListener('error', (event) => {
         const image = event.target;
-        if (image instanceof HTMLImageElement && image.classList.contains('tower-portrait') &&
-            !image.src.endsWith('found-remaster.png')) {
+        if (image instanceof HTMLImageElement && !image.src.endsWith('found-remaster.png') && image.closest('.tw-stage, .tw-sheet')) {
             image.src = 'found-remaster.png';
         }
     }, true);
-    pickCancel.onclick = cancelPick;
-    pickSheetCancel.onclick = cancelPick;
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && pick) cancelPick();
-    });
-    // Rotating or resizing across the phone breakpoint moves an open pick between sheet and panel.
-    phoneLayout.addEventListener('change', () => { if (pick) renderTeam(); });
+    sheet.querySelector('[data-pick-sheet-cancel]').onclick = cancelPick;
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && pick) cancelPick(); });
     abandonButton.onclick = async () => {
         if (!state.run) return;
-        const confirmed = await confirmAction({
-            title: 'Abandon this run?',
-            body: 'Your team, scrolls and run ryō are lost, and no account ryō is paid.',
-            confirmLabel: 'Abandon run',
-        });
-        if (confirmed) act('/abandon');
+        if (await confirmAction({ title: 'Abandon this run?', body: 'Your team, augments and run ryō are lost, and no account ryō is paid.', confirmLabel: 'Abandon run' })) {
+            act('/abandon');
+        }
     };
+    fit();
+    window.addEventListener('resize', () => { const was = document.body.classList.contains('tw-compact'); fit(); if (was !== document.body.classList.contains('tw-compact') && state.run) render(); });
+    stageRoot.hidden = false;
 
-    window.ArenaSession.ready.then((user) => {
-        if (!user) return;
-        load();
-    });
+    window.ArenaSession.ready.then((user) => { if (user) load(); });
 }());

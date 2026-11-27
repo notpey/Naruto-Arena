@@ -6,14 +6,32 @@
 // uncleansable statuses, so battleLogic.js resolves them exactly like any character
 // passive. Nothing here changes how combat itself works.
 
+//
+// Tower 2.0 (Standard mode) adds four rarity tiers: Common, Rare, Forbidden and Prismatic.
+// Operational source augments (towerAugments.js) and fusion results (towerFusions.js) are
+// merged in below as ordinary scroll definitions. Legacy scroll ids never change: in
+// Standard mode their tier is read through LEGACY_TIER_MAP (ruleset 1), and Legacy runs
+// keep seeing Genin/Jōnin/Kage exactly as before.
+
+const { AUGMENTS } = require('./towerAugments');
+const { RECIPES } = require('./towerFusions');
+const { CHARACTER_AUGMENTS, validateCharacterAugments } = require('./towerCharacterAugments');
+
 // Cursed scrolls are never offered as rewards: events and bosses force them on a ninja.
 const SCROLL_TIERS = Object.freeze({
     genin: { key: 'genin', label: 'Genin', rank: 1 },
     jonin: { key: 'jonin', label: 'Jōnin', rank: 2 },
     kage: { key: 'kage', label: 'Kage', rank: 3 },
     cursed: { key: 'cursed', label: 'Cursed', rank: 4 },
+    common: { key: 'common', label: 'Common', rank: 1 },
+    rare: { key: 'rare', label: 'Rare', rank: 2 },
+    forbidden: { key: 'forbidden', label: 'Forbidden', rank: 3 },
+    prismatic: { key: 'prismatic', label: 'Prismatic', rank: 4 },
 });
+const STANDARD_TIERS = ['common', 'rare', 'forbidden', 'prismatic'];
 const OFFERED_TIERS = new Set(['genin', 'jonin', 'kage']);
+// Ruleset 1 adapter: how a legacy scroll reads in Standard mode. Cursed is a tag there.
+const LEGACY_TIER_MAP = Object.freeze({ genin: 'common', jonin: 'rare', kage: 'forbidden', cursed: 'forbidden' });
 
 const CHAKRA_TYPES = ['taijutsu', 'ninjutsu', 'genjutsu', 'bloodline'];
 const CHAKRA_LABELS = { taijutsu: 'Taijutsu', ninjutsu: 'Ninjutsu', genjutsu: 'Genjutsu', bloodline: 'Bloodline' };
@@ -254,6 +272,45 @@ const SCROLL_DEFINITIONS = [
     },
 ];
 
+const LEGACY_SCROLL_IDS = new Set(SCROLL_DEFINITIONS.map((scroll) => scroll.id));
+// Existing art reused for augments that share a legacy scroll's name; tier art otherwise.
+const LEGACY_ART_BY_NAME = new Map(SCROLL_DEFINITIONS.map((scroll) => [scroll.name.toLowerCase(), scroll.id]));
+
+const catalogDefinition = (entry, catalog) => ({
+    id: entry.id,
+    code: entry.code,
+    name: entry.name,
+    tier: entry.tier,
+    scope: entry.scope,
+    kanji: entry.kanji || { common: '凡', rare: '稀', forbidden: '禁', prismatic: '虹' }[entry.tier],
+    catalog,
+    standardOnly: true,
+    art: LEGACY_ART_BY_NAME.get(entry.name.toLowerCase()) || `tier-${entry.tier}`,
+    description: entry.descriptionNormalized,
+    descriptionOriginal: entry.descriptionOriginal || entry.effectOriginal,
+    metadata: entry.impl.metadata || {},
+    metadataForUnit: entry.impl.metadataForUnit || null,
+    battleStart: entry.impl.battleStart || [],
+    setup: entry.impl.setup || null,
+    runOnly: false,
+    tags: entry.tags || [],
+    eligibleCharacterIds: entry.eligibleCharacterIds || null,
+});
+
+// Only operational entries become scrolls; the rest stay in the registry, never offered.
+AUGMENTS.filter((entry) => entry.impl).forEach((entry) => SCROLL_DEFINITIONS.push(catalogDefinition(entry, 'augment')));
+RECIPES.filter((recipe) => recipe.impl).forEach((recipe) => SCROLL_DEFINITIONS.push(catalogDefinition({
+    ...recipe, id: recipe.resultId, kanji: '融', tags: ['fusion'],
+}, 'fusion')));
+// Character augments whose character or skill ids no longer exist are left out (and
+// reported) until the registry is repaired, so a roster change can never offer a broken one.
+const INVALID_CHARACTER_CODES = new Set(validateCharacterAugments(require('../../data/characters')).map((problem) => {
+    console.warn(`Tower character augment ${problem.code} disabled: ${problem.error}`);
+    return problem.code;
+}));
+CHARACTER_AUGMENTS.filter((entry) => entry.impl && !INVALID_CHARACTER_CODES.has(entry.code))
+    .forEach((entry) => SCROLL_DEFINITIONS.push(catalogDefinition({ ...entry, kanji: '個' }, 'character')));
+
 const SCROLLS_BY_ID = new Map(SCROLL_DEFINITIONS.map((scroll) => [scroll.id, scroll]));
 
 // A scroll key is "<id>" or "<id>:<variant>" (Chakra Weave carries its chakra type).
@@ -270,33 +327,73 @@ const resolveValue = (value, variant) => (typeof value === 'function' ? value(va
 
 const scrollName = (id) => SCROLLS_BY_ID.get(id)?.name || id;
 
-// The client-facing description of a scroll key.
-const describeScroll = (key) => {
+// A scroll's tier as Standard mode reads it (legacy tiers through the adapter).
+const standardTierOf = (key) => {
+    const scroll = parseScrollKey(key)?.scroll;
+    if (!scroll) return null;
+    return STANDARD_TIERS.includes(scroll.tier) ? scroll.tier : LEGACY_TIER_MAP[scroll.tier] || null;
+};
+
+// The client-facing description of a scroll key. mode 'standard' shows the four-tier label.
+const describeScroll = (key, { mode = 'legacy' } = {}) => {
     const parsed = parseScrollKey(key);
     if (!parsed) return null;
     const { scroll, variant } = parsed;
     const pairs = (scroll.pairsWith || []).map(scrollName);
+    const tier = mode === 'standard' ? standardTierOf(key) : scroll.tier;
     return {
         key,
         id: scroll.id,
+        code: scroll.code || null,
         name: scroll.nameFor ? scroll.nameFor(variant) : scroll.name,
-        tier: scroll.tier,
-        tierLabel: SCROLL_TIERS[scroll.tier].label,
+        tier,
+        tierLabel: SCROLL_TIERS[tier].label,
         scope: scroll.scope,
         kanji: scroll.kanji,
-        icon: iconFor(scroll.id),
+        icon: iconFor(scroll.art || scroll.id),
         description: resolveValue(scroll.description, variant),
+        descriptionOriginal: scroll.descriptionOriginal || null,
+        catalog: scroll.catalog || 'legacy',
+        eligibleCharacterIds: scroll.eligibleCharacterIds || null,
+        tags: [...(scroll.tags || []), ...(scroll.tier === 'cursed' ? ['cursed'] : [])],
         pairsWith: pairs,
         upgradesTo: scroll.upgradesTo ? scrollName(scroll.upgradesTo) : null,
     };
 };
 
+// Extra statuses an augment applies when a Tower battle starts (destructible defense,
+// first-hit bonuses). Each carries towerScroll so it is never carried between battles.
+const buildScrollBattleStartStatuses = (key) => {
+    const parsed = parseScrollKey(key);
+    if (!parsed) return [];
+    const { scroll } = parsed;
+    const name = describeScroll(key, { mode: 'standard' })?.name || scroll.id;
+    return (scroll.battleStart || []).map((entry, index) => ({
+        scope: entry.scope === 'leader' ? 'leader' : 'each',
+        statusId: `tower_aug_${scroll.id.replace(/-/g, '_')}_start_${index}`,
+        duration: entry.duration,
+        metadata: {
+            helpful: true,
+            fromPassive: true,
+            towerScroll: key,
+            sourceSkillName: name,
+            statusIcon: iconFor(scroll.art || scroll.id),
+            ...JSON.parse(JSON.stringify(entry.metadata || {})),
+        },
+    }));
+};
+
+// Run-side battle setup an augment asks for ({ randomChakra, teamHpLoss, blessingCommons }).
+const getScrollSetup = (key) => parseScrollKey(key)?.scroll?.setup || null;
+
 // The permanent status a scroll grants inside a battle (null for run-only scrolls).
-const buildScrollStatus = (key) => {
+// unit: { skillIds } for augments whose bonus is keyed by the ninja's own skills.
+const buildScrollStatus = (key, unit = null) => {
     const parsed = parseScrollKey(key);
     if (!parsed || parsed.scroll.runOnly) return null;
     const { scroll, variant } = parsed;
-    const info = describeScroll(key);
+    const info = describeScroll(key, { mode: scroll.standardOnly ? 'standard' : 'legacy' });
+    const perUnit = typeof scroll.metadataForUnit === 'function' ? scroll.metadataForUnit(unit || {}) : {};
     return {
         statusId: `tower_scroll_${scroll.id.replace(/-/g, '_')}${variant ? `_${variant}` : ''}`,
         duration: 99,
@@ -311,6 +408,7 @@ const buildScrollStatus = (key) => {
             tooltipText: info.description,
             // Cloned so turn-end growth on one battle's status never leaks into the definition.
             ...JSON.parse(JSON.stringify(resolveValue(scroll.metadata, variant) || {})),
+            ...JSON.parse(JSON.stringify(perUnit || {})),
         },
     };
 };
@@ -332,7 +430,29 @@ const ALL_SCROLL_KEYS = SCROLL_DEFINITIONS.flatMap((scroll) =>
 // The keys rewards, merchants and trainers may offer (cursed scrolls excluded).
 const OFFERED_SCROLL_KEYS = ALL_SCROLL_KEYS.filter(isOfferedScroll);
 
+// Standard mode's draft pool: every operational source augment, plus the legacy offered
+// scrolls (read through LEGACY_TIER_MAP) except those superseded by an operational augment
+// of the same name. Fusion results are only ever made in the Fusion Chamber.
+const SUPERSEDED_LEGACY_IDS = new Set(SCROLL_DEFINITIONS
+    .filter((scroll) => scroll.catalog === 'augment')
+    .map((scroll) => LEGACY_ART_BY_NAME.get(scroll.name.toLowerCase()))
+    .filter((id) => id && LEGACY_SCROLL_IDS.has(id)));
+const STANDARD_OFFERED_SCROLL_KEYS = [
+    ...OFFERED_SCROLL_KEYS.filter((key) => !SUPERSEDED_LEGACY_IDS.has(String(key).split(':')[0])),
+    ...SCROLL_DEFINITIONS.filter((scroll) => scroll.catalog === 'augment' || scroll.catalog === 'character').map((scroll) => scroll.id),
+];
+const COMMON_AUGMENT_KEYS = SCROLL_DEFINITIONS
+    .filter((scroll) => scroll.catalog === 'augment' && scroll.tier === 'common').map((scroll) => scroll.id);
+
 module.exports = {
+    STANDARD_TIERS,
+    LEGACY_TIER_MAP,
+    STANDARD_OFFERED_SCROLL_KEYS,
+    SUPERSEDED_LEGACY_IDS,
+    COMMON_AUGMENT_KEYS,
+    standardTierOf,
+    buildScrollBattleStartStatuses,
+    getScrollSetup,
     SCROLL_TIERS,
     SCROLL_DEFINITIONS,
     ALL_SCROLL_KEYS,

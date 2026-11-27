@@ -4,6 +4,10 @@ const express = require('express');
 const { randomUUID, randomInt } = require('node:crypto');
 const { localizeArtwork } = require('../services/characterImages');
 const towerRun = require('../services/tower/towerRun');
+const { AUGMENTS } = require('../services/tower/towerAugments');
+const { RECIPES } = require('../services/tower/towerFusions');
+const { CHARACTER_AUGMENTS, validateCharacterAugments } = require('../services/tower/towerCharacterAugments');
+const { describeScroll, parseScrollKey } = require('../services/tower/towerScrolls');
 
 module.exports = function createTowerRouter(context) {
     const router = express.Router();
@@ -27,6 +31,10 @@ module.exports = function createTowerRouter(context) {
         .map((character) => character.characterId);
 
     const nameOf = (characterId) => describeCharacter(characterId)?.name || '';
+
+    // A character's full skill definitions (Standard mode builds telegraphed bosses from them).
+    const skillsOf = (characterId) =>
+        (getCharacters() || []).find((entry) => entry?.characterId === characterId)?.skills || [];
 
     const describeCharacter = (characterId) => {
         const character = (getCharacters() || []).find((entry) => entry?.characterId === characterId);
@@ -94,7 +102,7 @@ module.exports = function createTowerRouter(context) {
 
     const respond = async (res, username, run, extra = {}) => res.json({
         ok: true,
-        run: towerRun.serializeRun(run, describeCharacter, { rosterIds: rosterIds() }),
+        run: towerRun.serializeRun(run, describeCharacter, { rosterIds: rosterIds(), skillsOf }),
         bestFloor: await bestFloorFor(username),
         ...extra,
     });
@@ -175,6 +183,7 @@ module.exports = function createTowerRouter(context) {
     };
 
     const slotOf = (body) => (body.slot === undefined || body.slot === null ? null : Number(body.slot));
+    const replaceKeyOf = (body) => (typeof body.replaceKey === 'string' && body.replaceKey ? body.replaceKey : null);
 
     // ------------------------------------------------------------ routes
     router.get('/run', requireSession, async (req, res) => {
@@ -199,8 +208,10 @@ module.exports = function createTowerRouter(context) {
             const active = await findActiveRun(username);
             if (active) return respond(res, username, active);
             await towerRunsCollection.updateMany({ username, dismissed: { $ne: true } }, { $set: { dismissed: true } });
+            // Standard (200 floors) is the default; Legacy (the story, 10-20 floors) on request.
+            const mode = req.body?.mode === 'legacy' ? 'legacy' : 'standard';
             const run = towerRun.createRun({
-                username, rosterIds: rosterIds(), seed: randomInt(1, 2 ** 31 - 1), runId: randomUUID(),
+                username, rosterIds: rosterIds(), seed: randomInt(1, 2 ** 31 - 1), runId: randomUUID(), mode,
             });
             await towerRunsCollection.insertOne(run);
             return respond(res, username, run);
@@ -232,7 +243,7 @@ module.exports = function createTowerRouter(context) {
 
     // Choosing a combat node only scouts it; the match (and its turn timer) starts on /battle.
     router.post('/node', requireSession, withRun(async (run, body) => {
-        towerRun.chooseNode(run, String(body.nodeId || ''), rosterIds(), { nameOf });
+        towerRun.chooseNode(run, String(body.nodeId || ''), rosterIds(), { nameOf, skillsOf });
         await saveRun(run);
     }));
 
@@ -266,7 +277,7 @@ module.exports = function createTowerRouter(context) {
     }));
 
     router.post('/merchant/buy', requireSession, withRun(async (run, body) => {
-        towerRun.merchantBuy(run, Number(body.itemIndex), slotOf(body));
+        towerRun.merchantBuy(run, Number(body.itemIndex), slotOf(body), { replaceKey: replaceKeyOf(body) });
         await saveRun(run);
     }));
 
@@ -281,7 +292,7 @@ module.exports = function createTowerRouter(context) {
     }));
 
     router.post('/reward', requireSession, withRun(async (run, body) => {
-        towerRun.chooseReward(run, Number(body.offerIndex), slotOf(body));
+        towerRun.chooseReward(run, Number(body.offerIndex), slotOf(body), { replaceKey: replaceKeyOf(body) });
         await saveRun(run);
     }));
 
@@ -289,6 +300,36 @@ module.exports = function createTowerRouter(context) {
         towerRun.skipReward(run);
         await saveRun(run);
     }));
+
+    // The augment compendium: every catalog entry with its tier, status and wording.
+    router.get('/catalog', requireSession, async (req, res) => {
+        try {
+            const scroll = (id) => (parseScrollKey(id) ? describeScroll(id, { mode: 'standard' }) : null);
+            const problems = validateCharacterAugments(getCharacters() || []);
+            return res.json({
+                ok: true,
+                augments: AUGMENTS.map((entry) => ({
+                    id: entry.id, code: entry.code, name: entry.name, tier: entry.tier, scope: entry.scope,
+                    tags: entry.tags, descriptionOriginal: entry.descriptionOriginal,
+                    descriptionNormalized: entry.descriptionNormalized, status: entry.implementationStatus,
+                    needs: entry.needs, icon: scroll(entry.id)?.icon || `assets/tower/scrolls/tier-${entry.tier}.svg`,
+                })),
+                fusions: RECIPES.map((recipe) => ({
+                    id: recipe.id, name: recipe.name, tier: recipe.tier, ingredients: recipe.ingredients,
+                    effectOriginal: recipe.effectOriginal, descriptionNormalized: recipe.descriptionNormalized,
+                    status: recipe.implementationStatus, needs: recipe.needs,
+                })),
+                characterAugments: CHARACTER_AUGMENTS.map((entry) => ({
+                    id: entry.id, code: entry.code, name: entry.name, tier: entry.tier, characterId: entry.characterId,
+                    characterName: nameOf(entry.characterId), targetSkillIds: entry.targetSkillIds,
+                    effectOriginal: entry.effectOriginal, status: entry.implementationStatus, needs: entry.needs,
+                    invalid: problems.filter((problem) => problem.code === entry.code).map((problem) => problem.error),
+                })),
+            });
+        } catch (error) {
+            return sendError(res, error);
+        }
+    });
 
     router.post('/abandon', requireSession, withRun(async (run) => {
         if (run.status === 'battle' && run.battle?.matchId) {

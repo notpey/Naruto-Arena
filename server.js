@@ -31,7 +31,9 @@ const canonicalCharacters = require('./data/characters/index.js');
 const battleBot = require('./services/battleBot');
 const towerRun = require('./services/tower/towerRun');
 const towerBoss = require('./services/tower/towerBoss');
-const { buildScrollStatus } = require('./services/tower/towerScrolls');
+const { buildScrollStatus, buildScrollBattleStartStatuses } = require('./services/tower/towerScrolls');
+// Registers the Tower-only augment hooks with battleLogic (consulted for mode 'tower' only).
+const towerAugmentEffects = require('./services/tower/towerAugmentEffects');
 const missionCharacterTagsById = new Map(canonicalCharacters.map((character) =>
     [character.characterId, getMissionCharacterTags(character)]));
 let charactersData = selectActiveRoster(canonicalCharacters);
@@ -4794,6 +4796,9 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'skillCostOverridesBySkillId',
     'skillDamageBonuses',
     'skillReplacements',
+    // Tower augment cost discounts, mirrored by the battle client's cost display.
+    'towerCostDiscount',
+    'towerScroll',
     'skillReplacementsByRemainingTurns',
     'skillTargetOverrides',
     'sourceSkillName',
@@ -5097,7 +5102,25 @@ const buildMatchPayloadForUser = (match, username) => {
 // How a Tower battle's end screen reads, decided here so the battle client only renders it.
 const describeTowerOutcome = (encounter) => {
     const floor = Number(encounter.floor) || 0;
-    const boss = encounter.boss ? towerBoss.getBossDefinition(encounter.boss.bossId) : null;
+    const boss = encounter.boss ? towerBoss.defOf(encounter.boss) : null;
+    if (encounter.standard) {
+        const totalFloors = Number(encounter.totalFloors) || 200;
+        if (boss && encounter.final) {
+            return {
+                winTitle: 'The Tower is conquered',
+                winText: boss.victoryText,
+                loseTitle: 'Run over',
+                loseText: `${boss.name} ended your climb on floor ${floor} of ${totalFloors}.`,
+            };
+        }
+        return {
+            winTitle: boss ? 'Region cleared' : encounter.checkpoint === 'mini' ? 'Champion defeated' : `Floor ${floor} cleared`,
+            winText: boss ? `${boss.victoryText} Return to the Tower to claim your reward.`
+                : `You cleared floor ${floor} of ${totalFloors}. Return to the Tower to claim your reward.`,
+            loseTitle: 'Run over',
+            loseText: `${encounter.name || 'The enemy'} stopped your climb on floor ${floor} of ${totalFloors}. The run is over.`,
+        };
+    }
     // Matches from before acts existed only had the one, final boss.
     const final = Boolean(encounter.final) || (boss && boss.bossId === towerBoss.BOSS_ID);
     if (boss && final) {
@@ -5137,7 +5160,7 @@ const serializeTowerEncounter = (encounter) => (encounter ? {
     outcome: describeTowerOutcome(encounter),
     boss: encounter.boss ? {
         ...towerBoss.describeBossStateForClient(encounter.boss),
-        ...towerBoss.describeBossForClient(encounter.boss.bossId),
+        ...towerBoss.describeBossForClient(encounter.boss.bossId, encounter.boss.def || null),
     } : null,
 } : null);
 
@@ -6125,7 +6148,18 @@ const applyTowerSetupToBoard = ({ board, username, botUsername, setup }) => {
         }
         unit.hp = Math.max(1, Math.min(unit.hpCap, Number(member.hp) || unit.hpCap));
         restoreTowerCarriedStatuses(unit, member.carriedStatuses, username, slot);
-        member.scrolls.forEach((key) => applyTowerStatus(unit, buildScrollStatus(key), username, slot));
+        // Some augments key their bonus to the ninja's own skills (heal bonuses).
+        const definition = (Array.isArray(charactersData) ? charactersData : []).find((entry) => entry?.characterId === member.characterId) ||
+            (Array.isArray(canonicalCharacters) ? canonicalCharacters : []).find((entry) => entry?.characterId === member.characterId);
+        const skillIds = (definition?.skills || []).map((skill) => skill?.id).filter(Boolean);
+        const leaderSlot = setup.team.findIndex((entry) => entry && !entry.dead && !entry.benched);
+        [...new Set(member.scrolls)].forEach((key) => {
+            applyTowerStatus(unit, buildScrollStatus(key, { skillIds }), username, slot);
+            buildScrollBattleStartStatuses(key).forEach((status) => {
+                if (status.scope === 'leader' && slot !== leaderSlot) return;
+                applyTowerStatus(unit, status, username, slot);
+            });
+        });
     });
     const { encounter } = setup;
     const enemyIds = Array.isArray(encounter.enemyIds) ? encounter.enemyIds : [];
@@ -6213,14 +6247,16 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
             ? new Date(new Date(initialized.turnExpiresAt).getTime() + MATCH_FOUND_HOLD_MS)
             : built.matchStartsAt;
     }
-    // Chakra left over from the last Tower battle opens this one, on top of the opening gain.
-    if (setup.chakra && built.chakraPools?.[username]) {
+    // Chakra left over from the last Tower battle opens this one, on top of the opening gain,
+    // plus any chakra Standard-mode augments add at the start of a battle.
+    [setup.chakra, setup.bonusChakra].forEach((extra) => {
+        if (!extra || !built.chakraPools?.[username]) return;
         const pool = { ...built.chakraPools[username] };
-        Object.entries(setup.chakra).forEach(([type, amount]) => {
+        Object.entries(extra).forEach(([type, amount]) => {
             if (pool[type] !== undefined) pool[type] += Math.max(0, Math.floor(Number(amount) || 0));
         });
         built.chakraPools[username] = pool;
-    }
+    });
 
     const matchDocument = {
         matchId: built.matchId,
@@ -6250,11 +6286,17 @@ const buildTowerMatch = async ({ username, runId, setup }) => {
             name: encounter.name,
             duel: Boolean(encounter.duel),
             final: Boolean(encounter.final) || (encounter.kind === 'boss' && !encounter.bossId),
+            standard: Boolean(encounter.standard),
+            checkpoint: encounter.checkpoint || null,
             carries: encounter.carries || null,
             affixes: (encounter.affixes || []).slice(),
-            boss: encounter.kind === 'boss' ? towerBoss.createBossState(encounter.bossId) : null,
+            boss: encounter.kind === 'boss' ? towerBoss.createBossState(encounter.bossId, encounter.bossDef || null) : null,
         },
     };
+    // Per-battle augment memory, battle-start augment statuses, and the player's turn 1.
+    towerAugmentEffects.initBattle(matchDocument, {
+        username, botUsername: botPlayer.username, setup, characters: charactersData,
+    });
     if (matchDocument.towerEncounter.boss) {
         matchDocument.towerEncounter.boss.intent = towerBoss.computeNextIntent({
             state: matchDocument.towerEncounter.boss,
@@ -7268,6 +7310,7 @@ const finalizeTurn = async (match, username) => {
         match,
         endingUsername: username,
     });
+    if (isTowerMatch(match)) towerAugmentEffects.onTurnEnd(match, username);
     (match.players || []).forEach((player) => {
         const units = Array.isArray(match.board?.[player.username]) ? match.board[player.username] : [];
         player.aliveCount = units.reduce((sum, unit) => {
@@ -7373,6 +7416,7 @@ const finalizeTurn = async (match, username) => {
         match,
         startingUsername: nextTurn,
     });
+    if (isTowerMatch(match)) towerAugmentEffects.onTurnStart(match, nextTurn);
 
     match.turnStartedAt = new Date();
     match.turnExpiresAt = new Date(Date.now() + getTurnDurationMsForUser(match, nextTurn));
@@ -7390,6 +7434,7 @@ const finalizeTurn = async (match, username) => {
                 combatEvents: Array.isArray(match.combatEvents) ? match.combatEvents.slice(-50) : [],
                 turnStartedAt: match.turnStartedAt,
                 turnExpiresAt: match.turnExpiresAt,
+                ...(isTowerMatch(match) ? { towerEncounter: match.towerEncounter } : {}),
             },
         }
     );

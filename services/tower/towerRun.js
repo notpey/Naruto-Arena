@@ -7,16 +7,33 @@
 // Every random choice is seeded by the run's seed and a fixed label, so refreshing a
 // page or retrying a request can never reroll an offer.
 //
-// A run climbs acts of ten floors (towerActs.js). Act I ends at Zabuza on floor 10, where
-// the player may retire or continue into Act II, the Chūnin Exams.
+// Two modes share this module (run.mode; a run saved before modes existed is 'legacy'):
+//  - legacy: acts of ten floors (towerActs.js). Act I ends at Zabuza on floor 10, where the
+//    player may retire or continue into Act II, the Chūnin Exams (20 floors at most).
+//  - standard: Tower 2.0, a finite 200-floor procedural climb (towerStandard.js) with the
+//    four-tier augment catalog, capacity limits and automatic fusion (taking the second
+//    augment of a recipe fuses the pair on the spot).
+// The mode is fixed when a run is created and never changes.
 
 const {
     OFFERED_SCROLL_KEYS, SCROLL_TIERS, parseScrollKey, describeScroll, getScrollMaxHpBonus,
     getScrollPairs, getScrollUpgrade, isCursedScroll,
+    STANDARD_OFFERED_SCROLL_KEYS, standardTierOf, getScrollSetup, COMMON_AUGMENT_KEYS,
 } = require('./towerScrolls');
 const towerBoss = require('./towerBoss');
 const towerActs = require('./towerActs');
+const towerStandard = require('./towerStandard');
+const { RECIPES, RECIPES_BY_ID } = require('./towerFusions');
+const { AUGMENTS_BY_CODE } = require('./towerAugments');
 const { EVENT_IDS_BY_POOL, getEvent } = require('./towerEvents');
+
+const { STANDARD } = towerStandard;
+const MODES = Object.freeze({
+    standard: { id: 'standard', label: 'Standard', totalFloors: STANDARD.totalFloors },
+    legacy: { id: 'legacy', label: 'Legacy', totalFloors: 20 },
+});
+const modeOf = (run) => (run?.mode === 'standard' ? 'standard' : 'legacy');
+const isStandard = (run) => modeOf(run) === 'standard';
 
 const { ACTS } = towerActs;
 const TOTAL_FLOORS = ACTS[1].lastFloor;
@@ -42,7 +59,7 @@ const ACCOUNT_RYO_BOSS_BONUS = ACTS[1].accountBossBonus;
 // Reaching the forest's central tower with both scrolls, or without them.
 const EXAM_TOWER = { healPercent: 40, ryo: 30, penalty: 25 };
 
-const ACTIVE_STATUSES = new Set(['draft', 'map', 'battle', 'ramen', 'merchant', 'recruit', 'reward', 'event', 'interlude']);
+const ACTIVE_STATUSES = new Set(['draft', 'map', 'battle', 'ramen', 'merchant', 'recruit', 'reward', 'event', 'interlude', 'fusion']);
 const ENDED_STATUSES = new Set(['victory', 'defeated', 'abandoned']);
 
 const NODE_TYPES = {
@@ -56,8 +73,11 @@ const NODE_TYPES = {
     exam: { label: 'Written Exam' },
     duel: { label: 'Duel' },
     training: { label: 'Training' },
+    miniboss: { label: 'Champion' },
+    // Retired: segments generated before automatic fusion may still hold one; it now rests.
+    fusion: { label: 'Ramen Stand' },
 };
-const COMBAT_NODE_TYPES = new Set(['battle', 'elite', 'boss', 'duel']);
+const COMBAT_NODE_TYPES = new Set(['battle', 'elite', 'boss', 'duel', 'miniboss']);
 const EVENT_NODE_TYPES = new Set(['event', 'exam', 'training']);
 
 const SQUAD_NAMES = [
@@ -156,6 +176,11 @@ const fail = (message, status) => { throw new TowerError(message, status); };
 const memberMaxHp = (member) => BASE_MAX_HP +
     (member.scrolls || []).reduce((sum, key) => sum + getScrollMaxHpBonus(key), 0);
 
+const allOwnedKeys = (run) => [
+    ...(run.teamScrolls || []),
+    ...(run.team || []).filter((member) => !isDead(member)).flatMap((member) => member.scrolls || []),
+];
+
 // fallen: died once and was carried out at 1 health. dead: died a second time; the
 // ninja stays dead for the rest of the run (a recruit can still take the slot).
 // carriedStatuses: the ninja's own stacks, carried from one Tower battle to the next.
@@ -215,9 +240,20 @@ const normalizeDraft = (draft) => {
     return draft;
 };
 
-const createRun = ({ username, rosterIds, seed, now = new Date(), runId }) => ({
+const createRun = ({ username, rosterIds, seed, now = new Date(), runId, mode = 'legacy' }) => ({
     runId,
     username,
+    ...(mode === 'standard' ? {
+        mode: 'standard',
+        rulesetVersion: STANDARD.rulesetVersion,
+        schemaVersion: STANDARD.schemaVersion,
+        contentVersion: STANDARD.contentVersion,
+        generationVersion: STANDARD.generationVersion,
+        totalFloors: STANDARD.totalFloors,
+        // pity: reward drafts since one last showed a Prismatic offer.
+        standard: { segment: 0, pity: 0 },
+        fusions: [],
+    } : { mode: 'legacy', totalFloors: MODES.legacy.totalFloors }),
     seed: String(seed),
     status: 'draft',
     version: 0,
@@ -268,19 +304,37 @@ const chooseDraft = (run, picks) => {
     const chosen = offers.map((candidates, slot) => candidates[Number(picks[slot])]);
     if (chosen.some((id) => !id)) fail('Choose one of the offered ninjas for every slot.');
     run.team = chosen.map(createMember);
-    run.map = generateMap(run.seed);
+    run.map = isStandard(run) ? generateStandardSegment(run.seed, 0) : generateMap(run.seed);
     run.draft = null;
-    addLog(run, `The climb begins with ${chosen.length} ninjas.`);
+    addLog(run, isStandard(run)
+        ? `The 200-floor climb begins with ${chosen.length} ninjas.`
+        : `The climb begins with ${chosen.length} ninjas.`);
     // Before the first fight the squad picks one of three starting scrolls (or skips it for
     // ryō). It is an ordinary reward with no node behind it, so claiming it opens floor 1.
     run.status = 'reward';
     run.pending = {
         nodeId: null,
         starting: true,
-        offers: rollScrollKeys(run, createRng(run.seed, 'reward:start'), TIER_WEIGHTS.starting, 3),
+        offers: rollScrollKeys(run, createRng(run.seed, 'reward:start'),
+            isStandard(run) ? towerStandard.tierWeightsFor('starting', 1) : TIER_WEIGHTS.starting, 3),
         ryoGained: 0,
     };
     return run;
+};
+
+const generateStandardSegment = (seed, segmentIndex) =>
+    towerStandard.generateSegment(seed, segmentIndex, { createRng, pickWeighted, shuffled, linkFloors });
+
+// Clearing a segment's checkpoint opens the next segment: only its ten floors are stored.
+const advanceSegment = (run) => {
+    const next = towerStandard.segmentIndexOf(run.floor + 1);
+    if (next >= STANDARD.segments || run.map?.segment === next) return;
+    run.map = generateStandardSegment(run.seed, next);
+    run.currentNodeId = null;
+    run.standard = { ...(run.standard || {}), segment: next };
+    const region = towerStandard.regionFor(run.floor + 1);
+    addLog(run, run.floor % STANDARD.regionLength === 0
+        ? `Entered ${region.name}: ${region.title}.` : `Floor ${run.floor + 1}: the next ten floors open.`);
 };
 
 // ---------------------------------------------------------------- map
@@ -444,7 +498,87 @@ const duelEncounter = ({ run, node, rosterIds, nameOf }) => {
     };
 };
 
-const buildEncounter = (run, node, rosterIds, nameOf = () => '') => {
+// ---------------------------------------------------------------- Standard encounters
+// The major boss on a floor. Walks every major floor up to this one so the previous boss is
+// known (never the same featured boss twice in a row when another is eligible) without
+// storing anything. skillsOf(characterId) lists a character's skills; without it only the
+// scripted bosses can be chosen.
+const pickStandardBoss = (run, floor, rosterIds, { skillsOf, nameOf = () => '' } = {}) => {
+    const telegraphers = typeof skillsOf === 'function'
+        ? rosterIds.filter((id) => (skillsOf(id) || []).some(towerStandard.isTelegraphSkill)) : [];
+    const scripted = towerStandard.SCRIPTED_POOL.filter((bossId) =>
+        inRoster(rosterIds, towerBoss.getBossDefinition(bossId).enemyIds));
+    let previous = null;
+    let choice = null;
+    for (let majorFloor = STANDARD.regionLength; majorFloor <= floor; majorFloor += STANDARD.regionLength) {
+        const rng = createRng(run.seed, `standard:boss:${majorFloor}`);
+        const final = towerStandard.isFinalFloor(majorFloor);
+        const options = [
+            ...(telegraphers.length ? [['generic', final ? 100 : 70]] : []),
+            ...(final ? [] : scripted.filter((id) => id !== previous).map((id) => [id, 15])),
+        ];
+        const kind = options.length ? pickWeighted(options, rng) : (scripted[0] || null);
+        if (kind === 'generic') {
+            const leaders = telegraphers.filter((id) => id !== previous);
+            const leaderId = shuffled(leaders.length ? leaders : telegraphers, rng)[0];
+            const companions = pickEnemyIds(rng, rosterIds, [leaderId]).slice(0, 2);
+            choice = { identity: leaderId, def: towerStandard.synthesizeBoss({ floor: majorFloor, leaderId, companions, skillsOf, nameOf }) };
+            if (!choice.def) choice = { identity: scripted[0], bossId: scripted[0] };
+        } else {
+            choice = { identity: kind, bossId: kind };
+        }
+        previous = choice.identity;
+    }
+    return choice;
+};
+
+const buildStandardEncounter = (run, node, rosterIds, { nameOf = () => '', skillsOf } = {}) => {
+    const rng = createRng(run.seed, `encounter:${node.id}`);
+    const floor = node.floor;
+    const hpMultiplier = towerStandard.hpMultiplierFor(floor);
+    const affixCount = towerStandard.affixCountFor(floor);
+    const region = towerStandard.regionFor(floor);
+    const base = { floor, act: region.number, region: region.number, standard: true, totalFloors: STANDARD.totalFloors };
+    if (node.type === 'boss') {
+        const choice = pickStandardBoss(run, floor, rosterIds, { skillsOf, nameOf });
+        if (!choice || (!choice.def && !choice.bossId)) fail('No boss is eligible for this floor.', 500);
+        const encounter = towerBoss.buildBossEncounter({ floor, bossId: choice.bossId, def: choice.def || null });
+        if (!choice.def) {
+            const scale = Math.max(1, Math.round(hpMultiplier * 0.95 * 100) / 100);
+            encounter.hpCaps = encounter.hpCaps.map((hp) => Math.round(hp * scale));
+        }
+        return { ...encounter, ...base, checkpoint: 'major', final: towerStandard.isFinalFloor(floor) };
+    }
+    if (node.type === 'miniboss') {
+        const enemyIds = pickEnemyIds(rng, rosterIds);
+        return {
+            ...base,
+            kind: 'elite',
+            checkpoint: 'mini',
+            name: `Champion: ${nameOf(enemyIds[0]) || 'the Gatekeeper'}`,
+            blurb: `The champion of ${region.title} guards floor ${floor}.`,
+            enemyIds,
+            hpMultiplier: Math.round((hpMultiplier + towerStandard.CHAMPION_HP_BONUS) * 100) / 100,
+            affixes: towerStandard.rollAffixes(rng, shuffled, Math.min(3, affixCount + 1)),
+            rewardTable: 'champion',
+        };
+    }
+    const elite = node.type === 'elite';
+    return {
+        ...base,
+        kind: elite ? 'elite' : 'battle',
+        name: elite
+            ? towerStandard.ELITE_NAMES[Math.floor(rng() * towerStandard.ELITE_NAMES.length)]
+            : towerStandard.SQUAD_NAMES[Math.floor(rng() * towerStandard.SQUAD_NAMES.length)],
+        enemyIds: pickEnemyIds(rng, rosterIds),
+        hpMultiplier: Math.round((hpMultiplier + (elite ? towerStandard.ELITE_HP_BONUS : 0)) * 100) / 100,
+        affixes: towerStandard.rollAffixes(rng, shuffled, Math.min(3, affixCount + (elite ? 1 : 0))),
+        rewardTable: elite ? 'elite' : 'battle',
+    };
+};
+
+const buildEncounter = (run, node, rosterIds, nameOf = () => '', options = {}) => {
+    if (isStandard(run)) return buildStandardEncounter(run, node, rosterIds, { nameOf, ...options });
     const rng = createRng(run.seed, `encounter:${node.id}`);
     const act = node.floor > ACTS[1].lastFloor ? 2 : 1;
     if (node.type === 'boss') {
@@ -512,15 +646,20 @@ const TIER_WEIGHTS = {
     kage: [['kage', 100]],
     merchant: [['genin', 55], ['jonin', 35], ['kage', 10]],
 };
-// A scroll that pairs with one the team already owns is this many times more likely.
+// A scroll that pairs with one the team already owns is this many times more likely, and
+// one that would complete a fusion recipe more likely still.
 const PAIR_WEIGHT = 3;
+const FUSION_WEIGHT = 4;
 
 // A scroll can be offered while at least one ninja could still take it.
+// Character augments may only go to a living ninja of their character.
+const eligibleFor = (scroll, member) => !scroll.eligibleCharacterIds || scroll.eligibleCharacterIds.includes(member?.characterId);
+
 const canTakeScroll = (run, key) => {
     const parsed = parseScrollKey(key);
     if (!parsed) return false;
     if (parsed.scroll.scope === 'team') return !run.teamScrolls.includes(key);
-    return run.team.some((member) => !isDead(member) && !member.scrolls.includes(key));
+    return run.team.some((member) => !isDead(member) && !member.scrolls.includes(key) && eligibleFor(parsed.scroll, member));
 };
 
 const ownedScrollIds = (run) => new Set([
@@ -528,44 +667,82 @@ const ownedScrollIds = (run) => new Set([
     ...run.team.filter((member) => !isDead(member)).flatMap((member) => member.scrolls || []),
 ].map((key) => String(key).split(':')[0]));
 
-const rollScrollKeys = (run, rng, weights, count, exclude = []) => {
+// forceTiers: tiers the first offers must have (milestones and Prismatic pity, Standard only).
+const rollScrollKeys = (run, rng, weights, count, exclude = [], { forceTiers = [] } = {}) => {
     const picked = [];
     const owned = ownedScrollIds(run);
+    const standard = isStandard(run);
+    const keys = standard ? STANDARD_OFFERED_SCROLL_KEYS : OFFERED_SCROLL_KEYS;
+    const tierOf = (key) => (standard ? standardTierOf(key) : parseScrollKey(key).scroll.tier);
+    const poolFor = (tier) => keys.filter((key) => {
+        const parsed = parseScrollKey(key);
+        return tierOf(key) === tier && canTakeScroll(run, key) &&
+            !picked.some((entry) => entry.split(':')[0] === parsed.scroll.id) &&
+            !exclude.includes(key);
+    });
+    const weightOf = (key) => (recipeCompletedBy(run, key) ? FUSION_WEIGHT
+        : getScrollPairs(key).some((id) => owned.has(id)) ? PAIR_WEIGHT : 1);
+    const take = (pool) => picked.push(pickWeighted(pool.map((key) => [key, weightOf(key)]), rng));
+    forceTiers.forEach((tier) => {
+        const pool = picked.length < count ? poolFor(tier) : [];
+        if (pool.length) take(pool);
+    });
     for (let attempt = 0; picked.length < count && attempt < 60; attempt += 1) {
-        const tier = pickWeighted(weights, rng);
-        const pool = OFFERED_SCROLL_KEYS.filter((key) => {
-            const parsed = parseScrollKey(key);
-            return parsed.scroll.tier === tier && canTakeScroll(run, key) &&
-                !picked.some((entry) => entry.split(':')[0] === parsed.scroll.id) &&
-                !exclude.includes(key);
-        });
-        if (pool.length) {
-            picked.push(pickWeighted(pool.map((key) => [key,
-                getScrollPairs(key).some((id) => owned.has(id)) ? PAIR_WEIGHT : 1]), rng));
-        }
+        const pool = poolFor(pickWeighted(weights, rng));
+        if (pool.length) take(pool);
     }
     return picked;
 };
 
-const grantScroll = (run, key, slot) => {
+// Standard mode's active capacity: team scrolls and each ninja's own scrolls are limited.
+// Cursed scrolls forced by bosses and events ignore the limit (they cannot be refused).
+const capacityFor = (run, scope, member = null) => {
+    if (!isStandard(run)) return null;
+    const list = scope === 'team' ? run.teamScrolls : member?.scrolls || [];
+    const used = list.filter((key) => !isCursedScroll(key)).length;
+    const max = scope === 'team' ? STANDARD.teamScrollCap : STANDARD.ninjaScrollCap;
+    return { used, max, full: used >= max };
+};
+
+// replaceKey: when the slots are full, the owned scroll to salvage (for ryō) in its place.
+const grantScroll = (run, key, slot, { replaceKey = null } = {}) => {
     const parsed = parseScrollKey(key);
     if (!parsed) fail('Unknown scroll.');
-    if (parsed.scroll.scope === 'team') {
-        if (run.teamScrolls.includes(key)) fail('Your team already has that scroll.');
-        run.teamScrolls.push(key);
-    } else {
-        const member = requireLivingSlot(run, slot);
-        if (member.scrolls.includes(key)) fail('That ninja already has this scroll.');
-        member.scrolls.push(key);
+    const team = parsed.scroll.scope === 'team';
+    const member = team ? null : requireLivingSlot(run, slot);
+    if (member && !eligibleFor(parsed.scroll, member)) fail('Only that character can learn this augment.');
+    const list = team ? run.teamScrolls : member.scrolls;
+    if (list.includes(key)) fail(team ? 'Your team already has that scroll.' : 'That ninja already has this scroll.');
+    // Completing a recipe fuses two slots into one, so it never needs a free slot.
+    const completes = team ? recipeCompletedBy(run, key) : null;
+    const capacity = isCursedScroll(key) || completes ? null : capacityFor(run, team ? 'team' : 'ninja', member);
+    if (capacity?.full) {
+        if (!replaceKey) fail(`${team ? 'Team' : 'This ninja\'s'} scroll slots are full (${capacity.max}). Choose a scroll to replace.`, 409);
+        if (!list.includes(replaceKey) || isCursedScroll(replaceKey)) fail('Choose one of the scrolls already held there to replace.');
+        salvageScroll(run, list, replaceKey, member);
+    }
+    list.push(key);
+    if (member) {
         const bonus = getScrollMaxHpBonus(key);
         if (bonus > 0) healMember(member, bonus);
     }
     run.stats.scrollsTaken += 1;
-    addLog(run, `Learned ${describeScroll(key).name}.`);
+    addLog(run, `Learned ${describeScroll(key, { mode: modeOf(run) }).name}.`);
+    if (completes) fuseRecipe(run, completes);
+};
+
+// Removes a held scroll for ryō. Max-health bonuses it gave are removed with it.
+const salvageScroll = (run, list, key, member) => {
+    const index = list.indexOf(key);
+    if (index < 0) return;
+    list.splice(index, 1);
+    if (member) member.hp = Math.min(member.hp, memberMaxHp(member));
+    run.ryo += STANDARD.salvageRyo;
+    addLog(run, `Salvaged ${describeScroll(key, { mode: modeOf(run) })?.name || key} for ${STANDARD.salvageRyo} ryō.`);
 };
 
 // ---------------------------------------------------------------- node choice
-const chooseNode = (run, nodeId, rosterIds, { nameOf } = {}) => {
+const chooseNode = (run, nodeId, rosterIds, { nameOf, skillsOf } = {}) => {
     if (!getAvailableNodeIds(run).includes(nodeId)) fail('That path is not open.');
     const node = findNode(run, nodeId);
     run.currentNodeId = node.id;
@@ -573,7 +750,13 @@ const chooseNode = (run, nodeId, rosterIds, { nameOf } = {}) => {
     const rng = createRng(run.seed, `node:${node.id}`);
     if (COMBAT_NODE_TYPES.has(node.type)) {
         run.status = 'battle';
-        run.battle = { nodeId: node.id, matchId: null, encounter: buildEncounter(run, node, rosterIds, nameOf) };
+        run.battle = { nodeId: node.id, matchId: null, encounter: buildEncounter(run, node, rosterIds, nameOf, { skillsOf }) };
+        return run;
+    }
+    // Fusion Chambers are retired (fusion is automatic); one left in an older segment rests.
+    if (node.type === 'fusion') {
+        run.status = 'ramen';
+        run.pending = { nodeId: node.id };
         return run;
     }
     if (EVENT_NODE_TYPES.has(node.type)) {
@@ -590,7 +773,12 @@ const chooseNode = (run, nodeId, rosterIds, { nameOf } = {}) => {
         run.status = 'merchant';
         run.pending = {
             nodeId: node.id,
-            stock: [
+            stock: isStandard(run) ? [
+                ...rollScrollKeys(run, rng, towerStandard.tierWeightsFor('merchant', node.floor), 3).map((key) => ({
+                    kind: 'scroll', key, price: towerStandard.MERCHANT_PRICES[standardTierOf(key)], sold: false,
+                })),
+                { kind: 'medkit', price: towerStandard.MERCHANT_PRICES.medkit, sold: false },
+            ] : [
                 ...rollScrollKeys(run, rng, TIER_WEIGHTS.merchant, 3).map((key) => ({
                     kind: 'scroll', key, price: MERCHANT_PRICES[parseScrollKey(key).scroll.tier], sold: false,
                 })),
@@ -605,12 +793,16 @@ const chooseNode = (run, nodeId, rosterIds, { nameOf } = {}) => {
     return run;
 };
 
-// Leaving a non-combat node clears its floor.
+// Leaving a non-combat node clears its floor. In Standard mode, clearing a checkpoint
+// (floor 10, 20, ...) opens the next segment.
 const completeNode = (run) => {
     const node = findNode(run, run.currentNodeId);
     run.floor = node ? node.floor : run.floor;
     run.pending = null;
     run.status = 'map';
+    if (isStandard(run) && node && towerStandard.isCheckpointFloor(node.floor) && node.floor < STANDARD.totalFloors) {
+        advanceSegment(run);
+    }
     return run;
 };
 
@@ -629,13 +821,13 @@ const applyRamen = (run, option, slot) => {
     return completeNode(run);
 };
 
-const merchantBuy = (run, itemIndex, slot) => {
+const merchantBuy = (run, itemIndex, slot, { replaceKey = null } = {}) => {
     if (run.status !== 'merchant') fail('There is no merchant here.');
     const item = run.pending.stock[itemIndex];
     if (!item || item.sold) fail('That item is not for sale.');
     if (run.ryo < item.price) fail('Not enough ryō.');
     if (item.kind === 'scroll') {
-        grantScroll(run, item.key, slot);
+        grantScroll(run, item.key, slot, { replaceKey });
     } else if (item.kind === 'medkit') {
         run.team.forEach((member) => healMember(member, Math.round(memberMaxHp(member) * MEDKIT_HEAL_PERCENT / 100)));
         addLog(run, `Bought a medical kit: every ninja recovered ${MEDKIT_HEAL_PERCENT}% health.`);
@@ -645,9 +837,48 @@ const merchantBuy = (run, itemIndex, slot) => {
     return run;
 };
 
+// 'fusion' remains leavable for runs saved while standing in a retired Fusion Chamber.
 const leaveNode = (run) => {
-    if (!['merchant', 'recruit'].includes(run.status)) fail('There is nothing to leave.');
+    if (!['merchant', 'recruit', 'fusion'].includes(run.status)) fail('There is nothing to leave.');
     return completeNode(run);
+};
+
+// ---------------------------------------------------------------- fusion
+// Fusion is automatic: the moment the team takes the second augment of a recipe, the pair
+// fuses into the recipe's result inside the same grant (one save, so it cannot half-happen).
+// Every source augment is team-scoped, so a fusion only ever consumes team augments.
+
+// A recipe's two ingredients and result as scroll keys (stable source ids, never names).
+const recipeKeys = (recipe) => ({
+    ingredients: recipe.ingredients.map((code) => AUGMENTS_BY_CODE.get(code)?.id || null),
+    result: recipe.resultId,
+});
+
+const recipeOperational = (recipe) => recipe.implementationStatus === 'implemented' &&
+    Boolean(parseScrollKey(recipe.resultId)) && recipeKeys(recipe).ingredients.every((key) => key && parseScrollKey(key));
+
+// The recipe that taking `key` would complete for this team, or null.
+const recipeCompletedBy = (run, key) => {
+    if (!isStandard(run)) return null;
+    const owned = run.teamScrolls || [];
+    return RECIPES.find((recipe) => {
+        if (!recipeOperational(recipe)) return false;
+        const { ingredients, result } = recipeKeys(recipe);
+        return ingredients.includes(key) && !owned.includes(key) && !owned.includes(result) &&
+            ingredients.every((ingredient) => ingredient === key || owned.includes(ingredient));
+    }) || null;
+};
+
+// Consumes both ingredients and grants the result. lastFusion lets the page play the
+// fusion moment once (its id changes with every fusion).
+const fuseRecipe = (run, recipe) => {
+    const { ingredients, result } = recipeKeys(recipe);
+    run.teamScrolls = run.teamScrolls.filter((key) => !ingredients.includes(key));
+    run.teamScrolls.push(result);
+    const entry = { recipeId: recipe.id, consumed: ingredients.slice(), result, floor: run.floor };
+    run.fusions = [...(run.fusions || []), entry];
+    run.lastFusion = { ...entry, id: `${recipe.id}:${run.fusions.length}` };
+    addLog(run, `${ingredients.map((key) => describeScroll(key, { mode: 'standard' }).name).join(' and ')} fused into ${recipe.name}.`);
 };
 
 const recruit = (run, offerIndex, slot) => {
@@ -657,6 +888,18 @@ const recruit = (run, offerIndex, slot) => {
     const member = requireSlot(run, slot);
     // The newcomer inherits the departing ninja's scrolls (not their stacks) and arrives
     // fully rested. Recruiting is the one way to fill a slot whose ninja has died for good.
+    // Character augments cannot pass to a different character: they are salvaged for ryō.
+    const kept = [];
+    member.scrolls.forEach((key) => {
+        const scroll = parseScrollKey(key)?.scroll;
+        if (scroll?.eligibleCharacterIds && !scroll.eligibleCharacterIds.includes(characterId)) {
+            run.ryo += STANDARD.salvageRyo;
+            addLog(run, `${describeScroll(key, { mode: modeOf(run) }).name} cannot pass to the recruit: salvaged for ${STANDARD.salvageRyo} ryō.`);
+        } else {
+            kept.push(key);
+        }
+    });
+    member.scrolls = kept;
     member.characterId = characterId;
     member.fallen = false;
     member.dead = false;
@@ -667,12 +910,19 @@ const recruit = (run, offerIndex, slot) => {
 };
 
 // ---------------------------------------------------------------- events
+// Standard mode reuses the road and training events as themed pools. The written exam and
+// the Forest of Death events (Heaven/Earth scrolls) are Legacy story gates and never appear.
+const STANDARD_EVENT_POOLS = ['act1', 'training'];
+
 const pickEventId = (run, node) => {
     if (node.type === 'exam') return 'written-exam';
     if (node.type === 'training' && node.eventId) return node.eventId;
     const pool = node.type === 'training' ? 'training' : node.floor > ACTS[1].lastFloor ? 'forest' : 'act1';
-    const ids = EVENT_IDS_BY_POOL[pool] || [];
-    const unseen = ids.filter((id) => !(run.seenEvents || []).includes(id));
+    const ids = isStandard(run)
+        ? STANDARD_EVENT_POOLS.flatMap((name) => EVENT_IDS_BY_POOL[name] || [])
+        : EVENT_IDS_BY_POOL[pool] || [];
+    // Standard runs are long: events repeat once each has been seen.
+    const unseen = ids.filter((id) => !(run.seenEvents || []).slice(isStandard(run) ? -ids.length + 1 : 0).includes(id));
     const choices = unseen.length ? unseen : ids;
     return choices[Math.floor(createRng(run.seed, `event:${node.id}`)() * choices.length)];
 };
@@ -732,7 +982,17 @@ const resolveEvent = (run, optionId, slot, rosterIds, { nameOf } = {}) => {
         healTeamFlat: (amount) => run.team.forEach((entry) => healMember(entry, amount)),
         healMemberFull: () => healMember(member, memberMaxHp(member)),
         hurtTeam: (amount) => run.team.forEach((entry) => hurtMember(entry, amount)),
-        grantScroll: (key) => grantScroll(run, key, slot),
+        // A scroll an event grants into full Standard slots is salvaged for ryō instead (logged).
+        grantScroll: (key) => {
+            const scope = parseScrollKey(key)?.scroll?.scope;
+            const capacity = isCursedScroll(key) ? null : capacityFor(run, scope === 'team' ? 'team' : 'ninja', member);
+            if (capacity?.full) {
+                run.ryo += STANDARD.salvageRyo;
+                addLog(run, `No free scroll slot for ${describeScroll(key, { mode: 'standard' }).name}: salvaged for ${STANDARD.salvageRyo} ryō.`);
+                return;
+            }
+            grantScroll(run, key, slot);
+        },
         upgradeScroll: () => {
             const from = upgradableKeys(member)[0];
             const to = getScrollUpgrade(from);
@@ -760,12 +1020,15 @@ const resolveEvent = (run, optionId, slot, rosterIds, { nameOf } = {}) => {
             run.status = 'reward';
             run.pending = {
                 nodeId: run.pending.nodeId,
-                offers: rollScrollKeys(run, createRng(run.seed, `reward:${run.pending.nodeId}`), TIER_WEIGHTS[table] || TIER_WEIGHTS.elite, 3),
+                offers: rollScrollKeys(run, createRng(run.seed, `reward:${run.pending.nodeId}`), isStandard(run)
+                    ? towerStandard.tierWeightsFor(table, node.floor)
+                    : TIER_WEIGHTS[table] || TIER_WEIGHTS.elite, 3),
                 ryoGained: 0,
             };
         },
         startBattle: ({ name, hpBonus = 0, affixCount = 0, rewardTable = null }) => {
             const encounterRng = createRng(run.seed, `encounter:${node.id}:event`);
+            const standard = isStandard(run);
             run.status = 'battle';
             run.pending = null;
             run.battle = {
@@ -774,12 +1037,16 @@ const resolveEvent = (run, optionId, slot, rosterIds, { nameOf } = {}) => {
                 encounter: {
                     kind: 'battle',
                     floor: node.floor,
-                    act: node.floor > ACTS[1].lastFloor ? 2 : 1,
+                    act: standard ? towerStandard.regionFor(node.floor).number : node.floor > ACTS[1].lastFloor ? 2 : 1,
+                    ...(standard ? { standard: true, totalFloors: STANDARD.totalFloors } : {}),
                     name,
                     enemyIds: pickEnemyIds(encounterRng, rosterIds),
-                    hpMultiplier: Math.round((towerActs.battleHpMultiplier(node.floor) + hpBonus) * 100) / 100,
-                    affixes: shuffled(affixPool(node.floor > ACTS[1].lastFloor ? 2 : 1), encounterRng).slice(0, affixCount),
-                    rewardTable,
+                    hpMultiplier: Math.round(((standard ? towerStandard.hpMultiplierFor(node.floor)
+                        : towerActs.battleHpMultiplier(node.floor)) + hpBonus) * 100) / 100,
+                    affixes: standard
+                        ? towerStandard.rollAffixes(encounterRng, shuffled, Math.min(3, towerStandard.affixCountFor(node.floor) + affixCount))
+                        : shuffled(affixPool(node.floor > ACTS[1].lastFloor ? 2 : 1), encounterRng).slice(0, affixCount),
+                    rewardTable: standard && rewardTable === 'elite' ? 'elite' : rewardTable,
                 },
             };
         },
@@ -852,25 +1119,74 @@ const chooseChampion = (run, slot) => {
     return run;
 };
 
+const CHAKRA_POOL_TYPES = ['taijutsu', 'ninjutsu', 'genjutsu', 'bloodline'];
+
+// Augment effects that act on the battle setup rather than inside the engine: extra random
+// chakra, Forbidden Exchange's health cost, and The Tower's Blessing's borrowed Commons.
+// Every roll is seeded by the node, so re-entering a battle rebuilds the same setup.
+const applyAugmentSetup = (run, team) => {
+    const owned = [...new Set(allOwnedKeys(run))];
+    const rng = createRng(run.seed, `battle-setup:${run.battle.nodeId}`);
+    const blessing = [];
+    owned.forEach((key) => {
+        const count = Math.max(0, Number(getScrollSetup(key)?.blessingCommons) || 0);
+        if (!count) return;
+        const candidates = COMMON_AUGMENT_KEYS.filter((entry) => !owned.includes(entry) && !blessing.includes(entry));
+        blessing.push(...shuffled(candidates, rng).slice(0, count));
+    });
+    if (blessing.length) team.forEach((member) => { if (!member.dead) member.scrolls.push(...blessing); });
+    const bonusChakra = {};
+    let hpLoss = 0;
+    [...owned, ...blessing].forEach((key) => {
+        const setup = getScrollSetup(key);
+        for (let index = 0; index < Math.max(0, Number(setup?.randomChakra) || 0); index += 1) {
+            const type = CHAKRA_POOL_TYPES[Math.floor(rng() * CHAKRA_POOL_TYPES.length)];
+            bonusChakra[type] = (bonusChakra[type] || 0) + 1;
+        }
+        hpLoss += Math.max(0, Number(setup?.teamHpLoss) || 0);
+    });
+    const fighting = team.filter((member) => !member.dead && !member.benched);
+    if (hpLoss > 0 && fighting.length) {
+        const share = Math.floor(hpLoss / fighting.length);
+        fighting.forEach((member) => { member.hp = Math.max(1, member.hp - share); });
+    }
+    return { bonusChakra: Object.keys(bonusChakra).length ? bonusChakra : null, blessing };
+};
+
 // What the server needs to build a Tower match for this run's current battle.
 const buildBattleSetup = (run) => {
     if (run.status !== 'battle' || !run.battle) fail('No Tower battle is ready.');
     const { encounter } = run.battle;
     const duel = Boolean(encounter.duel);
     if (duel && !Number.isInteger(run.battle.championSlot)) fail('Choose a champion for the duel.');
-    return {
-        encounter: { ...encounter, totalFloors: actOf(run).lastFloor },
-        team: run.team.map((member, slot) => ({
-            characterId: member.characterId,
-            dead: isDead(member),
-            benched: duel && slot !== run.battle.championSlot,
-            hp: isDead(member) ? 0 : Math.max(1, Math.round(member.hp)),
-            maxHp: memberMaxHp(member),
-            scrolls: [...run.teamScrolls, ...member.scrolls],
-            carriedStatuses: isDead(member) ? [] : (member.carriedStatuses || []),
-        })),
+    const team = run.team.map((member, slot) => ({
+        characterId: member.characterId,
+        dead: isDead(member),
+        benched: duel && slot !== run.battle.championSlot,
+        hp: isDead(member) ? 0 : Math.max(1, Math.round(member.hp)),
+        maxHp: memberMaxHp(member),
+        scrolls: [...run.teamScrolls, ...member.scrolls],
+        carriedStatuses: isDead(member) ? [] : (member.carriedStatuses || []),
+    }));
+    const setup = {
+        encounter: { ...encounter, totalFloors: isStandard(run) ? STANDARD.totalFloors : actOf(run).lastFloor },
+        team,
         chakra: run.chakra || null,
     };
+    if (isStandard(run)) Object.assign(setup, applyAugmentSetup(run, team));
+    return setup;
+};
+
+// Standard mode caps carried chakra: the largest stacks shrink first until the total fits.
+const capCarriedChakra = (chakra) => {
+    const next = { ...chakra };
+    let total = Object.values(next).reduce((sum, amount) => sum + amount, 0);
+    while (total > STANDARD.chakraCarryCap) {
+        const [largest] = Object.entries(next).sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))[0];
+        next[largest] -= 1;
+        total -= 1;
+    }
+    return next;
 };
 
 // ---------------------------------------------------------------- carried stacks
@@ -943,7 +1259,8 @@ const settleMember = (run, member, unit, username, slot) => {
     const maxHp = memberMaxHp(member);
     const alive = unit && unit.alive !== false && Number(unit.hp) > 0;
     if (alive) {
-        member.hp = Math.min(maxHp, Math.max(1, Math.round(Number(unit.hp))) + POST_BATTLE_REGEN);
+        const regen = isStandard(run) ? STANDARD.postBattleRegen : POST_BATTLE_REGEN;
+        member.hp = Math.min(maxHp, Math.max(1, Math.round(Number(unit.hp))) + regen);
         member.carriedStatuses = extractCarriedStatuses(unit, username, slot);
     } else if (!member.fallen) {
         member.fallen = true;
@@ -984,8 +1301,79 @@ const reachExamTower = (run) => {
 // units: the player's board units at the end of the match, in team order.
 // chakra: the player's chakra pool at the end of the match.
 // bossState: the scripted boss's state, when the battle had one.
+// Standard reward table for an encounter.
+const standardRewardTable = (encounter) => (encounter.kind === 'boss' ? 'boss'
+    : encounter.checkpoint === 'mini' ? 'champion' : encounter.rewardTable || (encounter.kind === 'elite' ? 'elite' : 'battle'));
+
+// Standard reward offers. Milestone bosses always show a Prismatic; every major boss shows at
+// least one Forbidden; and after STANDARD.prismaticPity drafts without one, a Prismatic is
+// forced. Offers are stored once rolled, so reloading can never reroll them.
+const offerStandardRewards = (run, encounter) => {
+    const nodeId = run.battle.nodeId;
+    const forceTiers = [];
+    const pity = Number(run.standard?.pity) || 0;
+    if (encounter.kind === 'boss' && STANDARD.prismaticMilestones.includes(encounter.floor)) forceTiers.push('prismatic');
+    else if (pity + 1 >= STANDARD.prismaticPity) forceTiers.push('prismatic');
+    if (encounter.kind === 'boss') forceTiers.push('forbidden');
+    const offers = rollScrollKeys(run, createRng(run.seed, `reward:${nodeId}`),
+        towerStandard.tierWeightsFor(standardRewardTable(encounter), encounter.floor), 3, [], { forceTiers });
+    const sawPrismatic = offers.some((key) => standardTierOf(key) === 'prismatic');
+    run.standard = { ...(run.standard || {}), pity: sawPrismatic ? 0 : pity + 1 };
+    return { nodeId, offers };
+};
+
+const recordStandardBattleResult = (run, { won, units, chakra, username, bossState }) => {
+    const { encounter } = run.battle;
+    if (!won) return endRun(run, 'defeated', `Fell on floor ${encounter.floor} of ${STANDARD.totalFloors} to ${encounter.name}.`);
+    run.team.forEach((member, slot) => {
+        if (!isDead(member)) settleMember(run, member, units[slot], username, slot);
+    });
+    run.floor = encounter.floor;
+    if (chakra && typeof chakra === 'object') {
+        run.chakra = capCarriedChakra(Object.fromEntries(Object.entries(chakra)
+            .map(([type, amount]) => [type, Math.max(0, Math.floor(Number(amount) || 0))])));
+    }
+    run.stats.battlesWon += 1;
+    if (encounter.kind === 'elite') run.stats.elitesWon += 1;
+    if (encounter.kind === 'boss') {
+        const boss = encounter.bossDef || towerBoss.getBossDefinition(encounter.bossId);
+        run.stats.bossesDefeated = (run.stats.bossesDefeated || 0) + 1;
+        if (encounter.final || towerStandard.isFinalFloor(encounter.floor)) {
+            run.stats.actsCleared = towerStandard.REGIONS.length;
+            return endRun(run, 'victory', boss.victoryText);
+        }
+        if (boss.trigger?.marksCursedSeal && Number.isInteger(bossState?.cursedSlot)) {
+            const marked = run.team[bossState.cursedSlot];
+            if (marked && !isDead(marked) && !marked.scrolls.includes('cursed-seal-of-heaven')) {
+                marked.scrolls.push('cursed-seal-of-heaven');
+                addLog(run, 'The Cursed Seal of Heaven burns on a ninja\'s neck.');
+            }
+        }
+        // Clearing a region: the living recover and regain their last life.
+        run.team.forEach((member) => {
+            if (isDead(member)) return;
+            member.fallen = false;
+            healMember(member, Math.round(memberMaxHp(member) * STANDARD.majorBossHealPercent / 100));
+        });
+        run.stats.actsCleared = Math.max(run.stats.actsCleared || 0, towerStandard.regionFor(encounter.floor).number);
+        addLog(run, `${boss.victoryText} The living recover ${STANDARD.majorBossHealPercent}% health and regain their last life.`);
+    } else if (encounter.checkpoint === 'mini') {
+        run.stats.championsDefeated = (run.stats.championsDefeated || 0) + 1;
+    }
+    const kind = encounter.kind === 'boss' ? 'boss' : encounter.checkpoint === 'mini' ? 'champion' : encounter.kind;
+    const pouch = (run.teamScrolls || []).includes('ryo-pouch') ? RYO_REWARDS.pouch : 0;
+    const ryoGained = (towerStandard.RYO_REWARDS[kind] || towerStandard.RYO_REWARDS.battle) + pouch;
+    run.ryo += ryoGained;
+    run.status = 'reward';
+    run.pending = { ...offerStandardRewards(run, encounter), ryoGained };
+    run.battle = null;
+    addLog(run, `Defeated ${encounter.name} on floor ${encounter.floor} (+${ryoGained} ryō).`);
+    return run;
+};
+
 const recordBattleResult = (run, { won, units = [], chakra = null, username = run.username, bossState = null }) => {
     if (run.status !== 'battle' || !run.battle) return run;
+    if (isStandard(run)) return recordStandardBattleResult(run, { won, units, chakra, username, bossState });
     const { encounter } = run.battle;
     const duel = Boolean(encounter.duel);
     const championSlot = run.battle.championSlot;
@@ -1061,18 +1449,18 @@ const recordBattleResult = (run, { won, units = [], chakra = null, username = ru
     return run;
 };
 
-const chooseReward = (run, offerIndex, slot) => {
+const chooseReward = (run, offerIndex, slot, { replaceKey = null } = {}) => {
     if (run.status !== 'reward') fail('There is no reward to claim.');
     const key = run.pending.offers[offerIndex];
     if (!key) fail('Choose one of the offered scrolls.');
-    grantScroll(run, key, slot);
+    grantScroll(run, key, slot, { replaceKey });
     return completeNode(run);
 };
 
 const skipReward = (run) => {
     if (run.status !== 'reward') fail('There is no reward to skip.');
     run.ryo += RYO_REWARDS.skipScroll;
-    addLog(run, `Skipped the scroll for ${RYO_REWARDS.skipScroll} ryō.`);
+    addLog(run, `Skipped the ${isStandard(run) ? 'augment' : 'scroll'} for ${RYO_REWARDS.skipScroll} ryō.`);
     return completeNode(run);
 };
 
@@ -1089,6 +1477,7 @@ const abandonRun = (run) => {
 // boss bonus (runs from before acts existed count a victory as Act I).
 const computeAccountReward = (run) => {
     if (run.status === 'abandoned' || !ENDED_STATUSES.has(run.status)) return null;
+    if (isStandard(run)) return towerStandard.computeAccountReward(run);
     const floorsCleared = Math.max(0, Number(run.floor) || 0);
     const actsCleared = Math.max(Number(run.stats?.actsCleared) || 0, run.status === 'victory' ? 1 : 0);
     let bossBonus = 0;
@@ -1120,7 +1509,10 @@ const describeEncounter = (encounter, character) => ({
         ...character(id),
         hp: encounter.hpCaps?.[slot] || Math.round(BASE_MAX_HP * Math.max(1, Number(encounter.hpMultiplier) || 1)),
     } : null)).filter(Boolean),
-    boss: encounter.kind === 'boss' ? towerBoss.describeBossForClient(encounter.bossId || towerBoss.BOSS_ID) : null,
+    boss: encounter.kind === 'boss'
+        ? towerBoss.describeBossForClient(encounter.bossId || towerBoss.BOSS_ID, encounter.bossDef || null) : null,
+    checkpoint: encounter.checkpoint || null,
+    final: Boolean(encounter.final),
 });
 
 const describeEventForClient = (run) => {
@@ -1147,14 +1539,14 @@ const describeEventForClient = (run) => {
 
 // Scouting: what waits behind each open node. Encounters are seeded, so the preview is
 // exactly the fight the node will start.
-const describePreviews = (run, rosterIds, character, nameOf) => {
+const describePreviews = (run, rosterIds, character, nameOf, skillsOf) => {
     if (run.status !== 'map' || !rosterIds) return {};
     const previews = {};
     getAvailableNodeIds(run).forEach((nodeId) => {
         const node = findNode(run, nodeId);
         if (!node) return;
         if (COMBAT_NODE_TYPES.has(node.type)) {
-            previews[nodeId] = { encounter: describeEncounter(buildEncounter(run, node, rosterIds, nameOf), character) };
+            previews[nodeId] = { encounter: describeEncounter(buildEncounter(run, node, rosterIds, nameOf, { skillsOf }), character) };
         } else if (node.type === 'training' && node.eventId) {
             const event = getEvent(node.eventId);
             previews[nodeId] = { trainer: { title: event.title, speaker: event.speaker || '' } };
@@ -1163,11 +1555,93 @@ const describePreviews = (run, rosterIds, character, nameOf) => {
     return previews;
 };
 
-const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
+// The Standard-mode view: segment map, region, progress rail checkpoints, capacity, fusion.
+const serializeStandardRun = (run, { character, nameOf, rosterIds, skillsOf }) => {
+    const mode = { mode: 'standard' };
+    const describe = (key) => describeScroll(key, mode);
+    const nextFloor = Math.min(STANDARD.totalFloors, (run.floor || 0) + 1);
+    const segmentIndex = Number.isInteger(run.map?.segment) ? run.map.segment : towerStandard.segmentIndexOf(nextFloor);
+    const range = towerStandard.segmentRange(segmentIndex);
+    const region = towerStandard.regionFor(Math.max(range.firstFloor, Math.min(nextFloor, range.lastFloor)));
+    const pending = run.pending || null;
+    const bosses = {};
+    (run.map?.floors || []).flat().filter((node) => node.type === 'boss').forEach((node) => {
+        if (!rosterIds) return;
+        const encounter = buildStandardEncounter(run, node, rosterIds, { nameOf, skillsOf });
+        const def = encounter.bossDef || towerBoss.getBossDefinition(encounter.bossId);
+        bosses[node.bossId] = { name: def.name, title: def.title, leader: character(def.enemyIds[0]) };
+    });
+    const checkpoints = Array.from({ length: STANDARD.segments }, (_, index) => {
+        const floor = (index + 1) * STANDARD.segmentLength;
+        return { floor, kind: towerStandard.isMajorFloor(floor) ? (floor === STANDARD.totalFloors ? 'final' : 'major') : 'mini',
+            cleared: (run.floor || 0) >= floor };
+    });
+    const capacity = {
+        team: capacityFor(run, 'team'),
+        ninja: (run.team || []).map((member) => capacityFor(run, 'ninja', member)),
+    };
+    const view = {
+        mode: 'standard',
+        modeLabel: 'Standard',
+        rulesetVersion: run.rulesetVersion || STANDARD.rulesetVersion,
+        act: { act: region.number, name: region.name, title: region.title, firstFloor: range.firstFloor, lastFloor: range.lastFloor },
+        totalFloors: STANDARD.totalFloors,
+        maxFloors: STANDARD.totalFloors,
+        stage: region.title,
+        scene: region.scene,
+        standard: {
+            segment: segmentIndex + 1,
+            segments: STANDARD.segments,
+            region: { number: region.number, name: region.name, title: region.title, firstFloor: region.firstFloor, lastFloor: region.lastFloor },
+            band: towerStandard.bandFor(nextFloor).label,
+            checkpoints,
+            nextCheckpoint: checkpoints.find((entry) => !entry.cleared) || null,
+            capacity,
+            chakraCarryCap: STANDARD.chakraCarryCap,
+        },
+        boss: null,
+        bosses,
+        // The latest automatic fusion, so the page can play its moment once (keyed by id).
+        lastFusion: run.lastFusion ? {
+            id: run.lastFusion.id,
+            floor: run.lastFusion.floor,
+            name: RECIPES_BY_ID.get(run.lastFusion.recipeId)?.name || run.lastFusion.recipeId,
+            result: describe(run.lastFusion.result),
+            consumed: run.lastFusion.consumed.map((key) => describe(key)).filter(Boolean),
+        } : null,
+        fusions: (run.fusions || []).map((entry) => ({
+            ...entry, name: RECIPES_BY_ID.get(entry.recipeId)?.name || entry.recipeId,
+            consumedNames: entry.consumed.map((key) => describe(key)?.name || key),
+        })),
+        previews: describePreviews(run, rosterIds, character, nameOf, skillsOf),
+    };
+    return view;
+};
+
+// An offered scroll as the page sees it; in Standard runs it also says when taking it would
+// complete a fusion (and into what).
+const describeOffer = (run, key) => {
+    const info = describeScroll(key, { mode: modeOf(run) });
+    const recipe = info ? recipeCompletedBy(run, key) : null;
+    if (!recipe) return info;
+    const { ingredients, result } = recipeKeys(recipe);
+    const partner = ingredients.find((ingredient) => ingredient !== key);
+    return {
+        ...info,
+        fusion: {
+            name: recipe.name,
+            partner: describeScroll(partner, { mode: 'standard' })?.name || partner,
+            result: describeScroll(result, { mode: 'standard' }),
+        },
+    };
+};
+
+const serializeRun = (run, describeCharacter, { rosterIds = null, skillsOf = null } = {}) => {
     if (!run) return null;
     const character = (id) => describeCharacter(id) || { characterId: id, name: id };
     const nameOf = (id) => character(id).name;
     const pending = run.pending || null;
+    const scrollMode = { mode: modeOf(run) };
     const act = actOf(run);
     const bossIds = new Set((run.map?.floors || []).flat().filter((node) => node.type === 'boss')
         .map((node) => node.bossId || towerBoss.BOSS_ID));
@@ -1191,8 +1665,10 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
             return [id, { name: def.name, title: def.title, leader: character(def.enemyIds[0]) }];
         })),
         availableNodeIds: getAvailableNodeIds(run),
-        previews: describePreviews(run, rosterIds, character, nameOf),
+        previews: isStandard(run) ? {} : describePreviews(run, rosterIds, character, nameOf),
         map: run.map,
+        mode: modeOf(run),
+        modeLabel: MODES[modeOf(run)].label,
         team: (run.team || []).map((member) => ({
             ...character(member.characterId),
             hp: Math.round(member.hp),
@@ -1201,9 +1677,9 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
             fallen: Boolean(member.fallen),
             dead: isDead(member),
             stackCount: (member.carriedStatuses || []).length,
-            scrolls: member.scrolls.map(describeScroll).filter(Boolean),
+            scrolls: member.scrolls.map((key) => describeScroll(key, scrollMode)).filter(Boolean),
         })),
-        teamScrolls: (run.teamScrolls || []).map(describeScroll).filter(Boolean),
+        teamScrolls: (run.teamScrolls || []).map((key) => describeScroll(key, scrollMode)).filter(Boolean),
         stats: run.stats,
         log: (run.log || []).slice(-8),
         accountReward: run.accountReward || null,
@@ -1212,7 +1688,8 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
         constants: {
             ramenFeastPercent: RAMEN.feastPercent, medkitHealPercent: MEDKIT_HEAL_PERCENT,
             skipScrollRyo: RYO_REWARDS.skipScroll, woundedPercent: WOUNDED_HP_FRACTION * 100,
-            postBattleRegen: POST_BATTLE_REGEN, examTower: EXAM_TOWER,
+            postBattleRegen: isStandard(run) ? STANDARD.postBattleRegen : POST_BATTLE_REGEN, examTower: EXAM_TOWER,
+            salvageRyo: STANDARD.salvageRyo,
         },
         nextActTeaser: towerActs.NEXT_ACT_TEASER,
     };
@@ -1236,7 +1713,7 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
                 kind: item.kind,
                 price: item.price,
                 sold: item.sold,
-                scroll: item.kind === 'scroll' ? describeScroll(item.key) : null,
+                scroll: item.kind === 'scroll' ? describeOffer(run, item.key) : null,
             })),
         };
     }
@@ -1245,7 +1722,7 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
         view.reward = {
             ryoGained: pending.ryoGained,
             starting: Boolean(pending.starting),
-            offers: pending.offers.map(describeScroll).filter(Boolean),
+            offers: pending.offers.map((key) => describeOffer(run, key)).filter(Boolean),
         };
     }
     if (pending && run.status === 'event') view.event = describeEventForClient(run);
@@ -1253,10 +1730,18 @@ const serializeRun = (run, describeCharacter, { rosterIds = null } = {}) => {
         const next = ACTS[pending?.nextAct || (run.act || 1) + 1];
         view.interlude = next ? { act: next.act, name: next.name, title: next.title, firstFloor: next.firstFloor } : null;
     }
+    if (isStandard(run)) Object.assign(view, serializeStandardRun(run, { character, nameOf, rosterIds, skillsOf }));
     return view;
 };
 
 module.exports = {
+    MODES,
+    modeOf,
+    STANDARD,
+    recipeCompletedBy,
+    capacityFor,
+    pickStandardBoss,
+    generateStandardSegment,
     TOTAL_FLOORS, MAX_FLOORS, ELITE_FLOOR, REST_FLOOR, BOSS_FLOOR, BASE_MAX_HP, STARTING_RYO, WOUNDED_HP_FRACTION,
     POST_BATTLE_REGEN, DRAFT_REROLLS_PER_SLOT, EXAM_TOWER, DUEL_RULE_STATUS,
     extractCarriedStatuses,
