@@ -42,6 +42,7 @@ const ACTIVE_ROSTER_IDS = [
     'uchiha-obito',
     'nohara-rin',
     'namikaze-minato',
+    'pakkun',
 ];
 
 const ACTIVE_ROSTER_SET = new Set(ACTIVE_ROSTER_IDS);

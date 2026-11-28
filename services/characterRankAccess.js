@@ -6,6 +6,8 @@ const VISIBILITY_MODES = ['visible', 'hidden'];
 const UNLOCK_MODES = ['inherit', 'allow'];
 const INITIAL_POLICIES = {
     'yamanaka-ino': { player: { visibility: 'hidden', unlock: 'inherit' } },
+    // Staff-only test character, hidden on live; a new database starts the same way.
+    'pakkun': { player: { visibility: 'hidden', unlock: 'inherit' } },
 };
 
 const normalizeRole = (role) => {

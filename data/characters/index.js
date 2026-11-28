@@ -103,6 +103,7 @@ const rawCharacters = [
     require('./sasori-of-the-red-sand'),
     require('./puppet-sasori'),
     require('./namikaze-minato'),
+    require('./pakkun'),
 ];
 
 // Internal roster classification for team passives. This is not a display label.

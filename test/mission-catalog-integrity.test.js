@@ -80,7 +80,9 @@ test('mission rewards are reachable except the Forest of Death team requiring hi
         'aburame-shino', 'hyuuga-hinata', 'inuzuka-kiba', 'rock-lee', 'tenten', 'neji-hyuuga',
         'gaara-of-the-desert', 'kankuro', 'temari', 'akimichi-chouji', 'nara-shikamaru',
         'young-kakashi', 'uchiha-obito', 'nohara-rin']);
-    assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && id !== 'yamanaka-ino'),
+    // Characters hidden from Members (Ino, and Pakkun while staff test him) aren't free starters.
+    const hiddenFromMembers = new Set(Object.keys(INITIAL_POLICIES));
+    assert.deepEqual(ACTIVE_ROSTER_IDS.filter((id) => !rewardIds.has(id) && !hiddenFromMembers.has(id)),
         [...available]);
     const remaining = new Map(missions.map((mission) => [mission.missionId, mission]));
 

@@ -136,7 +136,6 @@ module.exports = {
             "id": "haku-flying-needles-of-death-mirrors",
             "baseSkillId": "haku-flying-needles-of-death",
             "useBaseSkillCooldown": true,
-            "hiddenFromSelectionViewer": true,
             "name": "Flying Needles of Death",
             "skillimage": "https://i.imgur.com/1wG05K5.png",
             "skilldescription": "Haku deals 30 physical damage to all enemies.",
@@ -157,13 +156,13 @@ module.exports = {
                     "amount": 30,
                     "scope": "all-enemy"
                 }
-            ]
+            ],
+            "hiddenFromSelectionViewer": true
         },
         {
             "id": "haku-acupuncture-mirrors",
             "baseSkillId": "haku-acupuncture",
             "useBaseSkillCooldown": true,
-            "hiddenFromSelectionViewer": true,
             "name": "Acupuncture",
             "skillimage": "https://i.imgur.com/dDxetJr.png",
             "skilldescription": "Haku stuns all enemies' Physical and Chakra skills for 1 turn.",
@@ -193,7 +192,8 @@ module.exports = {
                         "tooltipText": "Physical and Chakra skills are stunned."
                     }
                 }
-            ]
+            ],
+            "hiddenFromSelectionViewer": true
         }
     ]
 };

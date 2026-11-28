@@ -46,6 +46,7 @@ test('arc sorting changes display order without changing canonical roster indice
         ['uchiha-obito', 'Uchiha Obito'],
         ['nohara-rin', 'Nohara Rin'],
         ['namikaze-minato', 'Namikaze Minato'],
+        ['pakkun', 'Pakkun'],
     ]);
     const roster = ACTIVE_ROSTER_IDS.toReversed().map((characterId) => ({
         characterId,
@@ -66,6 +67,7 @@ test('arc sorting changes display order without changing canonical roster indice
         'kankuro', 'temari', 'akadou-yoroi', 'oboro', 'shigure',
         'dosu-kinuta', 'tsuchi-kin', 'zaku-abumi', 'akimichi-chouji', 'nara-shikamaru', 'tsurugi-misumi', 'shiore-orochimaru', 'baki', 'gekko-hayate', 'mitarashi-anko',
         'young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato',
+        'pakkun',
     ]);
     assert.deepEqual(catalog.filterRosterIndices(roster, { arc: 'kakashi-gaiden' })
         .map((index) => roster[index].characterId), ['young-kakashi', 'uchiha-obito', 'nohara-rin', 'namikaze-minato']);
@@ -105,6 +107,7 @@ test('roster order preserves team groups as new mission rewards are added', () =
         'hatake-kakashi',
         'demon-brothers', 'haku', 'momochi-zabuza', 'gato', 'zori-and-waraji',
         'sarutobi-hiruzen',
+        'pakkun',
     ]);
     assert.equal(new Set(order).size, ACTIVE_ROSTER_IDS.length, 'every active character has a roster position');
 

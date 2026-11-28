@@ -426,7 +426,12 @@ test('Sakura C08 Inner Sakura Unleashed and Haku C23 Fractured Mirrors', () => {
     assert.equal(targets(null), 0, 'normally only enemies who used a stun skill');
     assert.equal(targets('C08'), 3, 'C08: any enemy');
     const match = battle({ code: 'C08', allies: SAKURA });
-    cast(match, 'p', 0, 'haruno-sakura-inner-mental-overwhelm', ['bot', 0]);
+    // The inner version is hidden from the roster: it is reached the way a match reaches it,
+    // by awakening Inner Sakura and casting Mental Overwhelm, which it replaces.
+    give(match.board.p[0], 'haruno_sakura_inner_sakura_awakened', { permanent: true,
+        skillReplacements: { 'haruno-sakura-mental-overwhelm': 'haruno-sakura-inner-mental-overwhelm' } });
+    cast(match, 'p', 0, 'haruno-sakura-mental-overwhelm', ['bot', 0]);
+    assert.equal(match.board.bot[0].hp, 80, 'the Inner version ran: it deals 20 affliction damage');
     const stun = status(match.board.bot[0], 'haruno_sakura_mental_overwhelm_stun');
     assert.ok(stun, 'the stun lands');
     assert.equal(stun.metadata.cannotUseSkills, undefined, 'C08: not a full stun on a non-stunner');

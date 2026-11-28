@@ -261,7 +261,8 @@
                             "tooltipText": "Mental Overwhelm: Rudimentary Healing heals 5 more."
                         }
                     }
-                ]
+                ],
+                "hiddenFromSelectionViewer": true
             }
         ]
     };
