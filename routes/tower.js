@@ -16,6 +16,7 @@ module.exports = function createTowerRouter(context) {
         towerRunsCollection,
         usersCollection,
         getCharacters,
+        getPlayerHiddenCharacterIds,
         getMatchActive,
         buildTowerMatch,
         userToMatch,
@@ -25,11 +26,17 @@ module.exports = function createTowerRouter(context) {
     const ACTIVE = [...towerRun.ACTIVE_STATUSES];
 
     // ------------------------------------------------------------ characters
-    // Retired characters stay in the roster for old matches but can't be recruited.
-    const rosterIds = () => (getCharacters() || [])
-        .filter((character) => typeof character?.characterId === 'string' && character.retired !== true &&
-            Array.isArray(character.skills) && character.skills.length > 0)
-        .map((character) => character.characterId);
+    // Retired characters stay in the roster for old matches but can't be recruited. Characters
+    // hidden from players (staff-only tests) are left out too: never drafted, recruited or fought.
+    const rosterIds = async () => {
+        const hidden = typeof getPlayerHiddenCharacterIds === 'function'
+            ? await getPlayerHiddenCharacterIds() : new Set();
+        return (getCharacters() || [])
+            .filter((character) => typeof character?.characterId === 'string' && character.retired !== true &&
+                !hidden.has(character.characterId) &&
+                Array.isArray(character.skills) && character.skills.length > 0)
+            .map((character) => character.characterId);
+    };
 
     const nameOf = (characterId) => describeCharacter(characterId)?.name || '';
 
@@ -103,7 +110,7 @@ module.exports = function createTowerRouter(context) {
 
     const respond = async (res, username, run, extra = {}) => res.json({
         ok: true,
-        run: towerRun.serializeRun(run, describeCharacter, { rosterIds: rosterIds(), skillsOf }),
+        run: towerRun.serializeRun(run, describeCharacter, { rosterIds: await rosterIds(), skillsOf }),
         bestFloor: await bestFloorFor(username),
         ...extra,
     });
@@ -212,7 +219,7 @@ module.exports = function createTowerRouter(context) {
             // Standard (200 floors) is the default; Legacy (the story, 10-20 floors) on request.
             const mode = req.body?.mode === 'legacy' ? 'legacy' : 'standard';
             const run = towerRun.createRun({
-                username, rosterIds: rosterIds(), seed: randomInt(1, 2 ** 31 - 1), runId: randomUUID(), mode,
+                username, rosterIds: await rosterIds(), seed: randomInt(1, 2 ** 31 - 1), runId: randomUUID(), mode,
             });
             await towerRunsCollection.insertOne(run);
             return respond(res, username, run);
@@ -233,7 +240,7 @@ module.exports = function createTowerRouter(context) {
     });
 
     router.post('/draft/reroll', requireSession, withRun(async (run, body) => {
-        towerRun.rerollDraft(run, rosterIds(), Number(body.slot));
+        towerRun.rerollDraft(run, await rosterIds(), Number(body.slot));
         await saveRun(run);
     }));
 
@@ -244,7 +251,7 @@ module.exports = function createTowerRouter(context) {
 
     // Choosing a combat node only scouts it; the match (and its turn timer) starts on /battle.
     router.post('/node', requireSession, withRun(async (run, body) => {
-        towerRun.chooseNode(run, String(body.nodeId || ''), rosterIds(), { nameOf, skillsOf });
+        towerRun.chooseNode(run, String(body.nodeId || ''), await rosterIds(), { nameOf, skillsOf });
         await saveRun(run);
     }));
 
@@ -262,7 +269,7 @@ module.exports = function createTowerRouter(context) {
     }));
 
     router.post('/event', requireSession, withRun(async (run, body) => {
-        towerRun.resolveEvent(run, String(body.optionId || ''), slotOf(body), rosterIds(), { nameOf });
+        towerRun.resolveEvent(run, String(body.optionId || ''), slotOf(body), await rosterIds(), { nameOf });
         await saveRun(run);
     }));
 

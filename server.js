@@ -1615,6 +1615,23 @@ const getCharacterAvailability = ({ policies, user, profile, characterId, locked
     });
 };
 
+// Characters hidden from players in Character Access (staff-only tests). Players never meet them:
+// bots don't field them, the Tower doesn't offer or fight them, and public queues refuse them.
+const getPlayerHiddenCharacterIds = async () => {
+    const policies = await characterRankAccess.getPolicies();
+    return new Set(Object.keys(policies || {}).filter((characterId) =>
+        evaluateAccess({ policies, characterId, role: 'player' }).hidden));
+};
+
+const findPlayerHiddenCharacterInTeam = (team, hiddenIds) => {
+    if (!hiddenIds || hiddenIds.size === 0 || !Array.isArray(team)) return null;
+    for (const slot of team) {
+        const characterId = getRosterCharacterId(slot);
+        if (characterId && hiddenIds.has(characterId)) return findRosterCharacter(characterId) || { characterId };
+    }
+    return null;
+};
+
 const assertTeamCanBeUsed = async (profile, team = [], userRole = 'player') => {
     if (teamHasDuplicateCharacters(team)) {
         throw new Error('Team characters must be unique.');
@@ -5469,7 +5486,7 @@ const shuffleList = (items = []) => {
     return next;
 };
 
-const buildBattleBotTeam = () => {
+const buildBattleBotTeam = (hiddenIds = new Set()) => {
     const candidates = shuffleList(
         (Array.isArray(charactersData) ? charactersData : [])
             .map((character, rosterIndex) => ({
@@ -5482,6 +5499,7 @@ const buildBattleBotTeam = () => {
                     entry.character &&
                     !isRetiredCharacter(entry.character) &&
                     typeof entry.character.characterId === 'string' &&
+                    !hiddenIds.has(entry.character.characterId) &&
                     Array.isArray(entry.character.skills) &&
                     entry.character.skills.length > 0
             )
@@ -5988,8 +6006,8 @@ const resolveRosterIndicesForCharacterIds = (characterIds = []) =>
 
 // The boss fights at the player's own level, so its doubled EXP is exactly twice
 // an even ladder win. Its avatar is its lead character.
-const createEliteBossPlayer = ({ matchId, playerProfile }) => {
-    const botTeam = buildBattleBotTeam();
+const createEliteBossPlayer = ({ matchId, playerProfile, hiddenIds }) => {
+    const botTeam = buildBattleBotTeam(hiddenIds);
     const level = Math.max(1, Math.min(LADDER_MAX_LEVEL, Number(playerProfile?.ladder?.level) || 1));
     const bossName = ELITE_BOSS_NAMES[Math.floor(Math.random() * ELITE_BOSS_NAMES.length)];
     const leadFace = charactersData?.[botTeam[0]]?.facePicture || '';
@@ -6016,14 +6034,15 @@ const applyEliteBossVitality = (board, botUsername) => {
 
 const buildBattleBotMatch = async ({ username, team, mode, playerProfile, elite = rollEliteEncounter(mode) }) => {
     const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const hiddenIds = await getPlayerHiddenCharacterIds();
     let botPlayer;
     if (elite) {
-        botPlayer = createEliteBossPlayer({ matchId, playerProfile });
+        botPlayer = createEliteBossPlayer({ matchId, playerProfile, hiddenIds });
     } else {
         const persona = await createBattleBotPersona(playerProfile);
         botPlayer = createBattleBotPlayer({
             matchId,
-            team: buildBattleBotTeam(),
+            team: buildBattleBotTeam(hiddenIds),
             ladderLevel: persona?.level || getRandomBattleBotLevel(),
             persona,
         });
@@ -6086,7 +6105,7 @@ const buildTrainingDummyMatch = async ({ username, team }) => {
         throw new Error('A valid three-character team is required for training.');
     }
     const matchId = `match-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const dummyTeam = buildBattleBotTeam();
+    const dummyTeam = buildBattleBotTeam(await getPlayerHiddenCharacterIds());
     if (dummyTeam.length !== 3) {
         throw new Error('Training dummy team could not be created.');
     }
@@ -8207,6 +8226,7 @@ async function initDb() {
         towerRunsCollection,
         usersCollection,
         getCharacters: () => charactersData,
+        getPlayerHiddenCharacterIds,
         getMatchActive,
         buildTowerMatch,
         userToMatch,
@@ -8506,6 +8526,26 @@ app.post('/api/team/save', requireSession, async (req, res) => {
             await assertTeamCanBeUsed(profile, team, user.role);
         } catch (error) {
             return res.status(403).json({ error: error.message || 'Character is locked.' });
+        }
+
+        // Staff can play characters hidden from players, but never where a player would meet them:
+        // public queues refuse them, and a private game allows them only against other staff.
+        const hiddenInTeam = findPlayerHiddenCharacterInTeam(team, await getPlayerHiddenCharacterIds());
+        if (hiddenInTeam) {
+            const hiddenName = hiddenInTeam.name || hiddenInTeam.characterId;
+            let allowed = false;
+            if (mode === 'private' && targetUsername) {
+                const opponent = await usersCollection.findOne(
+                    { $or: [{ username: targetUsername }, { usernameLower: targetUsername.toLowerCase() }] },
+                    { projection: { role: 1 } });
+                allowed = ['admin', 'global_moderator', 'moderator']
+                    .includes(String(opponent?.role || '').trim().toLowerCase());
+            }
+            if (!allowed) {
+                return res.status(403).json({
+                    error: `${hiddenName} is hidden from players, so staff can only use them in private games against other staff.`,
+                });
+            }
         }
 
         // War battles pair like private games, but only with the other player
@@ -11107,6 +11147,9 @@ module.exports = {
     resolveLadderRewardsForResult,
     rollEliteEncounter,
     createEliteBossPlayer,
+    buildBattleBotTeam,
+    getPlayerHiddenCharacterIds,
+    findPlayerHiddenCharacterInTeam,
     applyEliteBossVitality,
     ELITE_ENCOUNTER_CHANCE,
     applyMissionProgressForUsers,
