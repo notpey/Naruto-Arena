@@ -60,7 +60,8 @@ module.exports = {
                         "triggerOnOwnerHelpfulSkill": true,
                         "counterCancelsSkill": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "The next helpful skill this character uses is countered."
+                        "tooltipText": "The next helpful skill this character uses is countered.",
+                        "visibleCounter": true
                     }
                 }
             ]

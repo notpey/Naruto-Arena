@@ -397,7 +397,9 @@
                     var main = node("div", "rw-row-main");
                     main.appendChild(node("strong", "rw-row-title", q.title));
                     var meta = node("p", "rw-row-meta");
-                    meta.appendChild(node("span", "rw-cadence", q.type === "weekly" ? "Weekly" : q.type === "daily" ? "Daily" : q.type));
+                    var cadence = node("span", "rw-cadence", q.type === "weekly" ? "Weekly" : q.type === "daily" ? "Daily" : q.type);
+                    if (q.resetsAt && untilText(q.resetsAt)) cadence.title = "Resets in " + untilText(q.resetsAt);
+                    meta.appendChild(cadence);
                     meta.appendChild(document.createTextNode(q.description));
                     main.appendChild(meta);
                     if (!q.isClaimed) main.appendChild(progressTrack(Number(q.currentProgress) || 0, Number(q.target) || 0, q.title + " progress"));
@@ -415,7 +417,10 @@
                     li.appendChild(end);
                     list.appendChild(li);
                 });
-                if (note) note.textContent = claimed + " of " + ordered.length + " claimed";
+                // Dailies reset at the server's daily reset; show how long is left.
+                var dailyReset = ordered.filter(function(q) { return q.type === "daily" && q.resetsAt; })[0];
+                var resetText = dailyReset ? untilText(dailyReset.resetsAt) : "";
+                if (note) note.textContent = claimed + " of " + ordered.length + " claimed" + (resetText ? " · dailies reset in " + resetText : "");
             }
 
             // Achievements: three tiers on one track. Each segment fills with progress toward its tier.
@@ -489,6 +494,14 @@
                     list.appendChild(li);
                 });
                 if (note) note.textContent = tiersClaimed + " of " + tiersTotal + " tiers";
+            }
+
+            function untilText(iso) {
+                var ms = new Date(iso).getTime() - Date.now();
+                if (!(ms > 0)) return "";
+                var hours = Math.floor(ms / 3600000);
+                if (hours >= 24) return Math.floor(hours / 24) + "d " + (hours % 24) + "h";
+                return (hours ? hours + "h " : "") + Math.max(1, Math.floor((ms % 3600000) / 60000)) + "m";
             }
 
             function renderSpin() {

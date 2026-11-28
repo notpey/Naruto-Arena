@@ -908,7 +908,7 @@
                                 "energy": [
                                         "Bloodline"
                                 ],
-                                "target": "self",
+                                "target": "self-and-all-enemies",
                                 "damage": 0,
                                 "cooldown": 1,
                                 "classes": [

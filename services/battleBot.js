@@ -36,7 +36,9 @@ const describeSkill = (skill) => {
         enemyDebuff: false, selfBuff: false, chakraDenial: false, instantKill: false, hitsAllEnemies: false,
     };
     const targetType = String(skill?.target || '');
-    if (targetType === 'all-enemy') summary.hitsAllEnemies = true;
+    if (targetType === 'all-enemy' || targetType === 'self-and-all-enemies' || targetType === 'all-characters') {
+        summary.hitsAllEnemies = true;
+    }
     (Array.isArray(skill?.effects) ? skill.effects : []).forEach((effect) => {
         const type = String(effect?.type || '');
         const metadata = effect?.metadata || {};

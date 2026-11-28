@@ -1602,6 +1602,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return Boolean(
                     metadata.harmful || metadata.cannotUseSkills || metadata.cannotUseHelpfulSkills ||
                     metadata.cannotUseHarmfulSkills || metadata.cannotUseNonMentalSkills ||
+                    metadata.cannotUseNonStrategicSkills ||
                     metadata.useChosenSkillClassForCannotUseSkillClasses ||
                     (Array.isArray(metadata.cannotUseSkillClasses) && metadata.cannotUseSkillClasses.length > 0) ||
                     metadata.cannotReduceDamage || metadata.cannotBecomeInvulnerable || metadata.taunt
@@ -1999,8 +2000,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .filter(Boolean)
                 : [];
             const statuses = Array.isArray(actorUnit?.state?.statuses) ? actorUnit.state.statuses : [];
-            const isMental = skillClasses.includes('mental');
-            if (statuses.some((status) => (Number(status?.remainingTurns) || 0) > 0 && status?.metadata?.cannotUseNonMentalSkills) && !isMental) {
+            // There is no Mental class: a non-Mental or non-Strategic stun leaves only Strategic skills.
+            const isStrategic = skillClasses.includes('strategic') || skillClasses.includes('mental');
+            if (statuses.some((status) => (Number(status?.remainingTurns) || 0) > 0 &&
+                (status?.metadata?.cannotUseNonMentalSkills || status?.metadata?.cannotUseNonStrategicSkills)) && !isStrategic) {
                 return true;
             }
             if (!skillClasses.length) return false;
@@ -2123,6 +2126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     isValidUnitTarget(unit, opponentUsername, slot, true)
                 );
                 return allyValid || enemyValid;
+            }
+
+            if (targetType === 'self-and-all-enemies') {
+                return isValidUnitTarget(playerUnits[actorSlot], currentPlayerUsername, actorSlot, false) ||
+                    opponentUnits.some((unit, slot) => isValidUnitTarget(unit, opponentUsername, slot, true));
             }
 
             if (targetType === 'self-or-single-enemy') {
@@ -6388,13 +6396,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         setActiveSkillImage(-1);
     };
 
+    // The skills the preview shows: same-named alternate forms are left out (skill-visibility.js).
+    const previewSkillsFor = (character) => (window.ArenaSkillVisibility
+        ? window.ArenaSkillVisibility.previewSkills(character.skills)
+        : character.skills.filter((skill) => skill && !skill.omitFromSelectionViewer));
+
     const handleSkillSelect = (skillIndex) => {
         if (currentCharacterIndex === null) return;
         const character = roster[currentCharacterIndex];
         if (!character || !Array.isArray(character.skills)) return;
-        const viewerSkills = character.skills.filter(
-            (skill) => skill && !skill.omitFromSelectionViewer
-        );
+        const viewerSkills = previewSkillsFor(character);
         const skill = viewerSkills[skillIndex];
         if (!skill) return;
         renderSkill(skill, skillIndex);
@@ -6452,9 +6463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             portraitEl.alt = character.name ? `${character.name} portrait` : 'Character portrait';
         }
         if (Array.isArray(character.skills)) {
-            const viewerSkills = character.skills.filter(
-                (skill) => skill && !skill.omitFromSelectionViewer
-            );
+            const viewerSkills = previewSkillsFor(character);
             ensureSkillImageSlots(viewerSkills.length);
             if (skillImagesContainer) {
                 skillImagesContainer.scrollLeft = 0;

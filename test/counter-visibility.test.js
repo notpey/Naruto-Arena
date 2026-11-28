@@ -28,7 +28,7 @@ test('counter effects on allies and enemy targets are hidden from the opposing t
     assert.equal(hasStatus(match, 'a', 'b', 'enemy_trap'), true);
 });
 
-test('all character counter statuses are hidden, while ordinary statuses remain visible', () => {
+test('character counter statuses are hidden unless marked visible, while ordinary statuses remain visible', () => {
     const counterEffects = [];
     const collect = (value) => {
         if (Array.isArray(value)) return value.forEach(collect);
@@ -46,12 +46,16 @@ test('all character counter statuses are hidden, while ordinary statuses remain 
             const match = matchFor();
             const id = `counter_${index}`;
             addStatus(match, unitUsername, effect.metadata, id);
-            assert.equal(hasStatus(match, 'b', unitUsername, id), false,
-                `${effect.statusId} must be hidden from the opposing team`);
+            // A counter marked visibleCounter (Kin, Mizuki, Ebisu) is shown to both teams.
+            assert.equal(hasStatus(match, 'b', unitUsername, id), Boolean(effect.metadata.visibleCounter),
+                `${effect.statusId} must be ${effect.metadata.visibleCounter ? 'visible to' : 'hidden from'} the opposing team`);
             assert.equal(hasStatus(match, 'a', unitUsername, id), true,
                 `${effect.statusId} must remain visible to its caster`);
         }
     });
+    assert.deepEqual(counterEffects.filter((effect) => effect.metadata.visibleCounter)
+        .map((effect) => effect.statusId).sort(),
+    ['ebisu_textbook_counter', 'mizuki_kunai_ambush_trap', 'tsuchi_kin_illusion_bell_needles']);
     const match = matchFor();
     addStatus(match, 'a', { helpful: true, damageReductionFlat: 5 }, 'ordinary_defense');
     assert.equal(hasStatus(match, 'b', 'a', 'ordinary_defense'), true);

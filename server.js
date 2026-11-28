@@ -166,6 +166,11 @@ const {
     SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS,
     applySasukeShadowShurikenFix,
 } = require('./services/sasukeShadowShurikenFix');
+const {
+    BUG_REPORT_FIXES_1128_MIGRATION_ID,
+    BUG_REPORT_FIXES_1128_CHARACTER_IDS,
+    applyBugReportFixes1128,
+} = require('./services/bugReportFixes1128');
 const TEAM_7_QUEST_PROGRESS_CHARACTER_IDS = ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'];
 const {
     BALANCE_UPDATE_0_5_MIGRATION_ID,
@@ -1951,19 +1956,50 @@ const DAILY_LOGIN_CALENDAR_REWARDS = [
     { day: 6, rewards: { ryo: 750 } },
     { day: 7, rewards: { ryo: 1500 } },
 ];
-function normalizeQuestsState(questsObj = {}) {
-    const progress = questsObj.progress && typeof questsObj.progress === 'object' ? questsObj.progress : {};
-    const claimedIds = Array.isArray(questsObj.claimedIds) ? questsObj.claimedIds.map(String) : [];
+// ── QUEST PERIODS ──
+// Each cadence keeps its own progress and claims, tagged with the period they belong to. Dailies
+// reset at 00:00 UTC (as the daily spin and check-in do); weeklies at 00:00 UTC on Monday.
+// Progress from an earlier period is simply not read, so a quest resets the moment its period ends.
+const QUEST_METRICS = ['battlesWon', 'chakraSpent', 'rankedWins', 'skillsUsed', 'charactersKilled', 'hpHealed'];
+const QUEST_PERIOD_TYPES = ['daily', 'weekly'];
+// Quests count real battles, like missions; the Tower and training are separate.
+const QUEST_COUNTED_MODES = new Set(['quick', 'ladder', 'private', 'war']);
+const questPeriodType = (type) => (type === 'weekly' ? 'weekly' : 'daily');
+const questWeekStart = (now = new Date()) => {
+    const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+    return day;
+};
+const questPeriodKey = (type, now = new Date()) => (questPeriodType(type) === 'weekly'
+    ? questWeekStart(now).toISOString().slice(0, 10)
+    : now.toISOString().slice(0, 10));
+const questPeriodResetsAt = (type, now = new Date()) => {
+    if (questPeriodType(type) === 'weekly') {
+        const next = questWeekStart(now);
+        next.setUTCDate(next.getUTCDate() + 7);
+        return next.toISOString();
+    }
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
+};
+const emptyQuestProgress = () => Object.fromEntries(QUEST_METRICS.map((metric) => [metric, 0]));
+const normalizeQuestPeriod = (period, type, now = new Date()) => {
+    const key = questPeriodKey(type, now);
+    if (!period || typeof period !== 'object' || period.key !== key) {
+        return { key, progress: emptyQuestProgress(), claimedIds: [] };
+    }
+    const progress = period.progress && typeof period.progress === 'object' ? period.progress : {};
     return {
-        progress: {
-            battlesWon: Math.max(0, Number(progress.battlesWon) || 0),
-            chakraSpent: Math.max(0, Number(progress.chakraSpent) || 0),
-            rankedWins: Math.max(0, Number(progress.rankedWins) || 0),
-            skillsUsed: Math.max(0, Number(progress.skillsUsed) || 0),
-            charactersKilled: Math.max(0, Number(progress.charactersKilled) || 0),
-            hpHealed: Math.max(0, Number(progress.hpHealed) || 0),
-        },
-        claimedIds
+        key,
+        progress: Object.fromEntries(QUEST_METRICS.map((metric) =>
+            [metric, Math.max(0, Number(progress[metric]) || 0)])),
+        claimedIds: Array.isArray(period.claimedIds) ? period.claimedIds.map(String) : [],
+    };
+};
+function normalizeQuestsState(questsObj = {}, now = new Date()) {
+    const source = questsObj && typeof questsObj === 'object' ? questsObj : {};
+    return {
+        daily: normalizeQuestPeriod(source.daily, 'daily', now),
+        weekly: normalizeQuestPeriod(source.weekly, 'weekly', now),
     };
 }
 
@@ -2781,6 +2817,70 @@ const recalculatePlayerLadderStandings = async () => {
     return profileByUsername;
 };
 
+// ── QUEST PROGRESS ──
+// Adds counts to the player's current daily and weekly periods. A period the player hasn't
+// counted in yet (a new day or week) starts fresh with these counts.
+const recordQuestProgress = async (username, increments = {}, now = new Date()) => {
+    if (!usersCollection || typeof username !== 'string' || !username) return;
+    const counts = {};
+    QUEST_METRICS.forEach((metric) => {
+        const amount = Math.max(0, Math.floor(Number(increments[metric]) || 0));
+        if (amount > 0) counts[metric] = amount;
+    });
+    if (!Object.keys(counts).length) return;
+    for (const type of QUEST_PERIOD_TYPES) {
+        const key = questPeriodKey(type, now);
+        const keyPath = `profile.quests.${type}.key`;
+        const $inc = {};
+        Object.entries(counts).forEach(([metric, amount]) => { $inc[`profile.quests.${type}.progress.${metric}`] = amount; });
+        const added = await usersCollection.updateOne({ username, [keyPath]: key }, { $inc });
+        if (added.matchedCount) continue;
+        const started = await usersCollection.updateOne(
+            { username, [keyPath]: { $ne: key } },
+            { $set: { [`profile.quests.${type}`]: { key, progress: { ...emptyQuestProgress(), ...counts }, claimedIds: [] } } }
+        );
+        // Another write started this period first: add to it instead.
+        if (!started.matchedCount) await usersCollection.updateOne({ username, [keyPath]: key }, { $inc });
+    }
+};
+
+const isQuestCountedPlayer = (match, username) => {
+    if (!match || !QUEST_COUNTED_MODES.has(match.mode)) return false;
+    const player = (match.players || []).find((entry) => entry?.username === username);
+    return Boolean(player) && !player.isBot;
+};
+
+// The skills a player sends at the end of their turn, and the chakra they pay for them.
+const tallyQueuedQuestProgress = (pending) => {
+    const queued = pending && pending.queuedByActorSlot && typeof pending.queuedByActorSlot === 'object'
+        ? Object.values(pending.queuedByActorSlot).filter(Boolean) : [];
+    return {
+        skillsUsed: queued.length,
+        chakraSpent: queued.reduce((sum, entry) => sum
+            + Object.values(entry.reservedSpecific || {}).reduce((total, amount) => total + (Number(amount) || 0), 0)
+            + (Number(entry.requiredRandom) || 0), 0),
+    };
+};
+
+// At the end of a match: wins, ranked wins, and the enemy characters that fell.
+const recordQuestMatchResults = async (match, winnerUsername) => {
+    const players = Array.isArray(match?.players) ? match.players : [];
+    await Promise.all(players.map(async (player) => {
+        const username = player?.username;
+        if (!isQuestCountedPlayer(match, username)) return;
+        const won = Boolean(winnerUsername) && winnerUsername === username;
+        const defeated = players
+            .filter((other) => other?.username && other.username !== username)
+            .reduce((sum, other) => sum + (Array.isArray(match.board?.[other.username]) ? match.board[other.username] : [])
+                .filter((unit) => unit && (unit.alive === false || (Number(unit.hp) || 0) <= 0)).length, 0);
+        await recordQuestProgress(username, {
+            battlesWon: won ? 1 : 0,
+            rankedWins: won && match.mode === 'ladder' ? 1 : 0,
+            charactersKilled: defeated,
+        });
+    }));
+};
+
 const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
     if (!match || !Array.isArray(match.players) || match.players.length < 2) {
         return null;
@@ -2799,6 +2899,13 @@ const applyMatchCompletionRewards = async (match, winnerUsername, endedAt) => {
             console.error('Tower battle result error:', error);
         }
         return null;
+    }
+
+    // Quest progress must never stop a match from ending.
+    try {
+        await recordQuestMatchResults(match, winnerUsername);
+    } catch (error) {
+        console.error('Quest match progress error:', error);
     }
 
     const missionResults = await applyMissionProgressForUsers(match, winnerUsername, endedAt);
@@ -3154,6 +3261,7 @@ const saveCharacters = async (nextCharacters, { savedBy = '', action = 'edit' } 
                 [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
                 [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
+                [`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
@@ -3254,6 +3362,7 @@ const getStoredCharacters = async () => {
                     [`completed.${BALANCE_UPDATE_0_5_MIGRATION_ID}`]: now,
                     [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
+                    [`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
@@ -3315,6 +3424,7 @@ const getStoredCharacters = async () => {
     const shouldApplyBalanceUpdate05 = !completedMigrations[BALANCE_UPDATE_0_5_MIGRATION_ID];
     const shouldApplyZoriWarajiRework = !completedMigrations[ZORI_WARAJI_REWORK_MIGRATION_ID];
     const shouldApplySasukeShadowShurikenFix = !completedMigrations[SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID];
+    const shouldApplyBugReportFixes1128 = !completedMigrations[BUG_REPORT_FIXES_1128_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const rosterManagedInDb = Boolean(completedMigrations[ROSTER_IN_DB_MIGRATION_ID]);
@@ -3361,6 +3471,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyBalanceUpdate05 ? BALANCE_UPDATE_0_5_CHARACTER_IDS : []),
         ...(shouldApplyZoriWarajiRework ? ZORI_WARAJI_REWORK_CHARACTER_IDS : []),
         ...(shouldApplySasukeShadowShurikenFix ? SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS : []),
+        ...(shouldApplyBugReportFixes1128 ? BUG_REPORT_FIXES_1128_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3476,6 +3587,10 @@ const getStoredCharacters = async () => {
             if (shouldApplySasukeShadowShurikenFix && SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS.includes(characterId)) {
                 entry = applySasukeShadowShurikenFix(entry, seedEntry);
             }
+            // Field-level bug fixes (Nov 28): only the named fields change; everything else is kept.
+            if (shouldApplyBugReportFixes1128 && BUG_REPORT_FIXES_1128_CHARACTER_IDS.includes(characterId)) {
+                entry = applyBugReportFixes1128(entry);
+            }
             // Only the rebalanced skills change; stored art and other edits are kept.
             if (shouldApplyBalanceUpdate05 && BALANCE_UPDATE_0_5_CHARACTER_IDS.includes(characterId)) {
                 return applyBalanceUpdate05(entry, seedEntry);
@@ -3534,7 +3649,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks || !rosterManagedInDb) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyBugReportFixes1128 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks || !rosterManagedInDb) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3662,6 +3777,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplySasukeShadowShurikenFix) {
             completedMigrationUpdates[`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyBugReportFixes1128) {
+            completedMigrationUpdates[`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
@@ -4423,6 +4541,7 @@ const PUBLIC_ROOT_SCRIPTS = new Set([
     'selectionStore.js',
     'selectionWar.js',
     'skill-description-format.js',
+    'skill-visibility.js',
     'status-display.js',
     'tower.js',
 ]);
@@ -4948,7 +5067,8 @@ const shouldHideStatusFromViewer = ({ status, unitUsername, viewerUsername, reve
     if (Boolean(metadata.hideTooltip)) {
         return true;
     }
-    const isCounterEffect = Object.keys(metadata).some((key) => /^counter[A-Z]/.test(key));
+    // Counters are hidden from the other side unless the skill says it is visible (visibleCounter).
+    const isCounterEffect = !metadata.visibleCounter && Object.keys(metadata).some((key) => /^counter[A-Z]/.test(key));
     const counterOwnerUsername = status?.sourceUsername || unitUsername;
     if (isCounterEffect && viewerUsername !== counterOwnerUsername && !revealInvisibleSkills) {
         return true;
@@ -7412,6 +7532,11 @@ const finalizeTurn = async (match, username) => {
     const pools = match.chakraPools;
     match.pendingTurns = match.pendingTurns || {};
     const blockedActorGainCount = getTeamStatusFlagCount(match, username, 'preventNextTurnChakraGain');
+    if (isQuestCountedPlayer(match, username)) {
+        // Counted from what the player sends this turn; a failed write never holds up the turn.
+        recordQuestProgress(username, tallyQueuedQuestProgress(match.pendingTurns[username]))
+            .catch((error) => console.error('Quest turn progress error:', error));
+    }
     battleLogic.resolvePendingTurnSkills({
         match,
         actingUsername: username,
@@ -7768,19 +7893,19 @@ async function initDb() {
             if (!user) return res.status(401).json({ error: 'Unauthorized.' });
             const profile = normalizeUserProfile(user);
 
-            const progress = profile.quests.progress;
-            const claimedSet = new Set(profile.quests.claimedIds);
-
+            const now = new Date();
             const quests = DEFAULT_QUEST_DEFINITIONS.map((q) => {
-                const currentVal = Number(progress[q.metric]) || 0;
+                const period = profile.quests[questPeriodType(q.type)];
+                const currentVal = Number(period.progress[q.metric]) || 0;
                 const isCompleted = currentVal >= q.target;
-                const isClaimed = claimedSet.has(q.questId);
+                const isClaimed = period.claimedIds.includes(q.questId);
                 return {
                     ...q,
                     currentProgress: Math.min(currentVal, q.target),
                     isCompleted,
                     isClaimed,
-                    canClaim: isCompleted && !isClaimed
+                    canClaim: isCompleted && !isClaimed,
+                    resetsAt: questPeriodResetsAt(q.type, now),
                 };
             });
 
@@ -7801,34 +7926,36 @@ async function initDb() {
             const questDef = DEFAULT_QUEST_DEFINITIONS.find((q) => q.questId === questId);
             if (!questDef) return res.status(404).json({ error: 'Quest not found.' });
 
-            const progress = profile.quests.progress;
-            const claimedSet = new Set(profile.quests.claimedIds);
-
-            if (claimedSet.has(questId)) {
+            const periodType = questPeriodType(questDef.type);
+            const period = profile.quests[periodType];
+            if (period.claimedIds.includes(questId)) {
                 return res.status(400).json({ error: 'Quest reward already claimed.' });
             }
-
-            const currentVal = Number(progress[questDef.metric]) || 0;
+            const currentVal = Number(period.progress[questDef.metric]) || 0;
             if (currentVal < questDef.target) {
                 return res.status(400).json({ error: 'Quest objective not completed yet.' });
             }
 
-            claimedSet.add(questId);
-            profile.quests.claimedIds = Array.from(claimedSet);
-
+            // One atomic write: only for the period that earned it, and only if not yet claimed in it,
+            // so two claims at once pay once and a claim never wipes progress counted meanwhile.
             const rewards = questDef.rewards || {};
-            profile.ryo = (Number(profile.ryo) || 0) + (Number(rewards.ryo) || 0);
-
-            await usersCollection.updateOne(
-                { _id: user._id },
+            const claimResult = await usersCollection.updateOne(
                 {
-                    $set: {
-                        'profile.quests.claimedIds': profile.quests.claimedIds,
-                        'profile.ryo': profile.ryo,
-                        updatedAt: new Date()
-                    }
+                    _id: user._id,
+                    [`profile.quests.${periodType}.key`]: period.key,
+                    [`profile.quests.${periodType}.claimedIds`]: { $ne: questId },
+                },
+                {
+                    $addToSet: { [`profile.quests.${periodType}.claimedIds`]: questId },
+                    $inc: { 'profile.ryo': Number(rewards.ryo) || 0 },
+                    $set: { updatedAt: new Date() },
                 }
             );
+            if (!claimResult.matchedCount) {
+                return res.status(409).json({ error: 'This quest was already claimed or has reset. Refresh and try again.' });
+            }
+            const refreshed = await usersCollection.findOne({ _id: user._id }, { projection: { 'profile.ryo': 1 } });
+            profile.ryo = Number(refreshed?.profile?.ryo) || 0;
 
             return res.json({
                 ok: true,
@@ -11148,6 +11275,12 @@ module.exports = {
     rollEliteEncounter,
     createEliteBossPlayer,
     buildBattleBotTeam,
+    normalizeQuestsState,
+    questPeriodKey,
+    questPeriodResetsAt,
+    recordQuestProgress,
+    tallyQueuedQuestProgress,
+    recordQuestMatchResults,
     getPlayerHiddenCharacterIds,
     findPlayerHiddenCharacterInTeam,
     applyEliteBossVitality,

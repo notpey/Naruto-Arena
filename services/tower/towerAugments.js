@@ -152,7 +152,7 @@ const SOURCE = [
         metadata: { damageBonusBySkillClass: { Chakra: 5 } },
         normalized: 'Your ninjas\' Chakra skills deal 5 additional damage.',
     }],
-    [17, 'Mental Clarity', 'common', 'Your mental skills cost 1 less random chakra the first time they are used each battle, if they have a random chakra cost.', null, HOOK.mentalFirstUse],
+    [17, 'Strategic Clarity', 'common', 'Your strategic skills cost 1 less random chakra the first time they are used each battle, if they have a random chakra cost.', null, HOOK.mentalFirstUse],
     [18, 'Lingering Pain', 'common', 'Your affliction damage is increased by 5 per damage instance, once per target per turn.', null, HOOK.afflictionInstance],
     [19, 'Protective Instinct', 'common', 'Whenever an ally dies, surviving allies gain 10 destructible defense.', null, HOOK.allyDeathTrigger],
     [20, 'Opportunist', 'common', 'Your characters deal 5 additional damage to enemies below 50 health.', {
@@ -237,12 +237,12 @@ const SOURCE = [
     [70, 'The Last Stand', 'forbidden', 'When only one ally remains alive, that character gains 50% additional direct damage, 20 damage reduction, and heals 10 health at the start of each turn.', null, HOOK.lastAlive],
     [71, 'Impure Resurrection', 'forbidden', 'The first ally to die each battle returns with 50 health after 1 turn, but permanently loses 10 maximum health.', null, HOOK.weakenedRevive],
     [72, 'Forbidden Experimentation', 'forbidden', 'At the beginning of each battle, randomly gain one of three effects: +25% direct damage, +15 damage reduction, or +10 healing per turn.', null, HOOK.randomBoonAtStart],
-    [73, 'Heavenly Restriction', 'forbidden', 'Your physical skills deal 50% additional direct damage, but your chakra and mental skills cost 1 additional random chakra.', {
+    [73, 'Heavenly Restriction', 'forbidden', 'Your physical skills deal 50% additional direct damage, but your chakra and strategic skills cost 1 additional random chakra.', {
         metadata: {
             towerDirectDamagePercent: 50, towerDirectDamagePercentSkillClassesAny: ['Physical'],
-            randomCostIncreaseForSkillClasses: { Chakra: 1, Mental: 1 },
+            randomCostIncreaseForSkillClasses: { Chakra: 1, Strategic: 1 },
         },
-        normalized: 'Your ninjas\' Physical skills deal 50% more direct (non-affliction) damage, rounded down. Their Chakra and Mental skills cost 1 additional random chakra (+1 total for a skill that is both).',
+        normalized: 'Your ninjas\' Physical skills deal 50% more direct (non-affliction) damage, rounded down. Their Chakra and Strategic skills cost 1 additional random chakra (+1 total for a skill that is both).',
     }],
     [74, 'Chakra Devourer', 'forbidden', "Whenever an enemy dies, gain 2 random chakra and permanently increase your team's direct damage by 5 for the remainder of the battle.", null, HOOK.enemyDeathTeamGrowth],
     [75, 'The Immortal Body', 'forbidden', 'Your characters cannot be reduced below 1 health during the first 2 turns of each battle.', {
@@ -269,7 +269,7 @@ const SOURCE = [
     [87, 'Reverse Summoning', 'prismatic', 'Once per battle, when a character would die, remove them from combat for 1 turn. They return with 25 health.', null, HOOK.banishOnDeath],
     [88, 'Mirror Technique', 'prismatic', 'Whenever a character successfully counters a damaging skill, reflect 50% of its original direct damage to the attacker.', null, HOOK.counterReflect],
     [89, 'Unstable Evolution', 'prismatic', 'Every 3 turns, your characters randomly gain +10 direct damage, +10 damage reduction, or 15 destructible defense for 2 turns.', null, HOOK.evolution],
-    [90, 'Perfect Balance', 'prismatic', 'Whenever your team uses a physical, chakra, and mental skill in the same turn, refund 2 random chakra.', null, HOOK.classTrio],
+    [90, 'Perfect Balance', 'prismatic', 'Whenever your team uses a physical, chakra, and strategic skill in the same turn, refund 2 random chakra.', null, HOOK.classTrio],
     [91, 'Death Mark', 'prismatic', 'Whenever your team damages the same enemy on 3 consecutive turns, deal 30 piercing damage to that enemy. Reset the count afterward.', null, HOOK.deathMark],
     [92, "The Puppet Master's Art", 'prismatic', 'Whenever a character applies a harmful effect lasting 2 or more turns, extend that effect by 1 turn, maximum once per application.', null, HOOK.harmfulExtension],
     [93, 'Forbidden Transfusion', 'prismatic', 'Whenever a character receives healing at full health, convert up to 20 excess healing into destructible defense.', null, HOOK.overhealToDd],
@@ -296,7 +296,7 @@ const pad = (number) => String(number).padStart(3, '0');
 const TAG_RULES = [
     ['chakra', /chakra/i], ['heal', /heal/i], ['defense', /destructible defense|damage reduction/i],
     ['affliction', /affliction/i], ['stun', /stun/i], ['death', /dies|die|death|revive/i],
-    ['counter', /counter/i], ['random', /random/i], ['physical', /physical/i], ['mental', /mental/i],
+    ['counter', /counter/i], ['random', /random/i], ['physical', /physical/i], ['strategic', /strategic/i],
     ['piercing', /piercing/i], ['cooldown', /cooldown/i],
 ];
 

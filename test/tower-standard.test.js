@@ -461,7 +461,7 @@ test('damage augments change real hits (A015, A016, A077, A073, A036, A020, A012
     assert.equal(after - precision.board.bot[0].hp, 30, 'only the first');
 });
 
-test('Heavenly Restriction raises Chakra and Mental skill costs by 1 random chakra', () => {
+test('Heavenly Restriction raises Chakra and Strategic skill costs by 1 random chakra', () => {
     const match = towerMatch({ allies: ALLIES, enemies: FOES, scrolls: [[id('A073')], [], []] });
     const prison = characters[index('momochi-zabuza')].skills.find((skill) => skill.id === 'momochi-zabuza-water-prison-technique');
     const plain = battleLogic.computeEffectiveEnergyCost({ skill: prison, actorState: towerMatch({ allies: ALLIES, enemies: FOES }).board.p[0].state });

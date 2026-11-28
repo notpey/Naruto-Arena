@@ -73,7 +73,7 @@ test('Fair Fight adds 5 damage and ignores invulnerability only against the oppo
     assert.equal(match.board.p2[1].hp, 50);
 });
 
-test('Crescent Moon Slash builds charges and Dance spends them for 10 damage each', () => {
+test('Crescent Moon Slash builds charges and Dance deals 10 damage per charge without spending them', () => {
     const match = matchFor(['haruno-sakura', 'gekko-hayate'], ['tenten', 'mizuki']);
     cast(match, 'p1', 1, 0, 'p2', 0);
     cast(match, 'p1', 1, 0, 'p2', 0);
@@ -81,7 +81,7 @@ test('Crescent Moon Slash builds charges and Dance spends them for 10 damage eac
     assert.equal(match.board.p2[0].hp, 60);
     cast(match, 'p1', 1, 1, 'p2', 0);
     assert.equal(match.board.p2[0].hp, 10, '30 + 2 charges x 10');
-    assert.equal(charges(match), 0, 'Dance spends every charge');
+    assert.equal(charges(match), 2, 'Dance keeps the charges');
     assert.ok(status(match.board.p1[1], 'gekko_hayate_dance_invulnerable'));
 });
 

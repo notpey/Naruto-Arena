@@ -80,7 +80,9 @@ const once = (state, key) => {
 };
 const skillDealsDamage = (skill) => (skill?.effects || []).some((effect) =>
     (effect?.type === 'damage' || effect?.type === 'health_steal_damage') && Number(effect.amount) > 0);
-const hasClass = (skill, name) => (skill?.classes || []).some((entry) => String(entry).toLowerCase() === name);
+// There is no Mental class: a skill written as Mental counts as Strategic.
+const classKey = (entry) => { const key = String(entry).toLowerCase(); return key === 'mental' ? 'strategic' : key; };
+const hasClass = (skill, name) => (skill?.classes || []).some((entry) => classKey(entry) === classKey(name));
 const rawCost = (skill) => (skill?.energy || []).filter((entry) => entry && String(entry).toLowerCase() !== 'none').length;
 // A skill "grants invulnerability" when it puts a helpful invulnerability status on its user
 // or allies (a control effect that makes an enemy invulnerable, like Water Prison, does not).
@@ -255,8 +257,8 @@ const initBattle = (match, { username, botUsername, setup, characters = null }) 
         if (has(state, 'A001')) applyAugmentStatus(match, state, entry, 'A001', 'tower_aug_a001_discount', 99,
             { towerCostDiscount: { amount: 1, minTotal: 2 }, tooltipText: 'Chakra Efficiency: your first skill costing 2 or more costs 1 less random chakra.' });
         if (has(state, 'A017')) applyAugmentStatus(match, state, entry, 'A017', 'tower_aug_a017_discount', 99,
-            { towerCostDiscount: { amount: 1, minTotal: 2, skillClassesAny: ['Mental'], requireRandom: true, excludeSkillIds: [] },
-                tooltipText: 'Mental Clarity: each Mental skill costs 1 less random chakra the first time it is used.' });
+            { towerCostDiscount: { amount: 1, minTotal: 2, skillClassesAny: ['Strategic'], requireRandom: true, excludeSkillIds: [] },
+                tooltipText: 'Strategic Clarity: each Strategic skill costs 1 less random chakra the first time it is used.' });
         if (has(state, 'A053')) applyAugmentStatus(match, state, entry, 'A053', 'tower_aug_a053_discount', 99,
             { towerCostDiscount: { amount: 1, minTotal: 2, fallbackSpecific: true },
                 tooltipText: 'Infinite Chakra: this ninja\'s skill each turn costs 1 less chakra (minimum 1).' });
@@ -505,14 +507,14 @@ const afterSkill = (action) => {
     if (!actorUnit) return;
     const physical = hasClass(skill, 'physical');
     const chakra = hasClass(skill, 'chakra');
-    const mental = hasClass(skill, 'mental');
+    const strategic = hasClass(skill, 'strategic');
     const ownTurn = turnOf(state, state.player);
 
     // Costs and spending.
     if (has(state, 'A001') && rawCost(skill) >= 2 && once(state, 'A001')) {
         team(match, state.player).forEach((unit) => removeStatus(unit, 'tower_aug_a001_discount'));
     }
-    if (has(state, 'A017') && mental && (skill.energy || []).some((type) => String(type).toLowerCase() === 'random')) {
+    if (has(state, 'A017') && strategic && (skill.energy || []).some((type) => String(type).toLowerCase() === 'random')) {
         const status = statusOn(actorUnit, 'tower_aug_a017_discount');
         const discount = status?.metadata?.towerCostDiscount;
         if (discount && !discount.excludeSkillIds.includes(skill.id)) discount.excludeSkillIds.push(skill.id);
@@ -544,8 +546,8 @@ const afterSkill = (action) => {
         turnState.classes = turnState.classes || {};
         if (physical) turnState.classes.physical = true;
         if (chakra) turnState.classes.chakra = true;
-        if (mental) turnState.classes.mental = true;
-        if (turnState.classes.physical && turnState.classes.chakra && turnState.classes.mental) {
+        if (strategic) turnState.classes.strategic = true;
+        if (turnState.classes.physical && turnState.classes.chakra && turnState.classes.strategic) {
             turnState.a090 = true;
             gainChakra(match, state, 2, `a090:${ownTurn}`);
         }

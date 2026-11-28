@@ -61,7 +61,7 @@ test('effects with mechanics a sentence does not cover stay special', () => {
     assert.equal(S.readEffect({ type: 'apply_status', statusId: 'x', duration: 1, scope: 'target',
         metadata: { harmful: true, cannotUseSkills: true, invulnerableToHelpfulSkills: true } }), null);
     assert.equal(S.readEffect({ type: 'apply_status', statusId: 'x', duration: 1, scope: 'target',
-        metadata: { harmful: true, cannotUseSkillClasses: ['strategic'] } }), null, 'a class stun the sentence can\'t offer');
+        metadata: { harmful: true, cannotUseSkillClasses: ['affliction'] } }), null, 'a class stun the sentence can\'t offer');
 });
 
 test('descriptions read as plain English', () => {

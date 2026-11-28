@@ -17,7 +17,7 @@
         taijutsu: 'Taijutsu', ninjutsu: 'Ninjutsu', bloodline: 'Bloodline', genjutsu: 'Genjutsu', random: 'Random',
     };
     const CLASS_LABELS = {
-        physical: 'Physical', chakra: 'Chakra', energy: 'Chakra', mental: 'Mental', strategic: 'Strategic',
+        physical: 'Physical', chakra: 'Chakra', energy: 'Chakra', mental: 'Strategic', strategic: 'Strategic',
         affliction: 'Affliction', instant: 'Instant', action: 'Action', control: 'Control', unique: 'Unique',
     };
 
@@ -59,6 +59,8 @@
             (m.invulnerableToHelpfulSkills ? [{ stat: 'invulnerable-helpful', text: "Allies' skills can't target" }] : []) },
         { keys: ['damageReductionFlat'], chips: (m) => (positive(m.damageReductionFlat)
             ? [{ stat: 'damage-reduction', value: positive(m.damageReductionFlat), text: '{value} damage reduction', good: true }] : []) },
+        { keys: ['unpierceableDamageReductionFlat'], chips: (m) => (positive(m.unpierceableDamageReductionFlat)
+            ? [{ stat: 'damage-reduction', value: positive(m.unpierceableDamageReductionFlat), text: '{value} unpierceable damage reduction', good: true }] : []) },
         { keys: ['destructibleDefensePoints'], chips: (m) => (positive(m.destructibleDefensePoints)
             ? [{ stat: 'destructible-defense', value: positive(m.destructibleDefensePoints), text: '{value} destructible defense', good: true }] : []) },
         { keys: ['damageBonusFlat'], chips: (m) => (positive(m.damageBonusFlat)
@@ -88,8 +90,9 @@
         } },
         { keys: ['cannotUseHarmfulSkills'], chips: (m) =>
             (m.cannotUseHarmfulSkills && !m.cannotUseSkills ? [{ stat: 'stun-harmful', text: 'Harmful skills stunned' }] : []) },
-        { keys: ['cannotUseNonMentalSkills'], chips: (m) =>
-            (m.cannotUseNonMentalSkills && !m.cannotUseSkills ? [{ stat: 'stun-non-mental', text: 'Non-Mental skills stunned' }] : []) },
+        { keys: ['cannotUseNonStrategicSkills', 'cannotUseNonMentalSkills'], chips: (m) =>
+            ((m.cannotUseNonStrategicSkills || m.cannotUseNonMentalSkills) && !m.cannotUseSkills
+                ? [{ stat: 'stun-non-strategic', text: 'Non-Strategic skills stunned' }] : []) },
         { keys: ['cannotUseSkillIndices'], chips: (m, ctx) => {
             const indices = Array.isArray(m.cannotUseSkillIndices) ? m.cannotUseSkillIndices : [];
             if (!indices.length || m.cannotUseSkills) return [];
@@ -236,7 +239,6 @@
         instant: 'Instant: takes effect immediately.',
         physical: 'Physical: a skill class. Some effects only affect certain classes.',
         chakra: 'Chakra: a skill class. Some effects only affect certain classes.',
-        mental: 'Mental: a skill class. Some effects only affect certain classes.',
         strategic: 'Strategic: a skill class. Some effects only affect certain classes.',
     };
     const glossaryFor = (term) => GLOSSARY[String(term || '').trim().toLowerCase()] || '';
@@ -265,6 +267,7 @@
         'single-enemy': 'One enemy', 'all-enemy': 'All enemies', 'random-enemy': 'Random enemy',
         self: 'Self', 'single-ally': 'One ally', 'all-allies': 'All allies', 'self-or-single-ally': 'Self or one ally',
         'single-character': 'Any one character', 'single-target': 'Any one character', 'all-characters': 'Everyone',
+        'self-and-all-enemies': 'Self and all enemies',
     };
     const targetLabel = (target) => TARGET_LABELS[String(target || '').trim().toLowerCase()] || '';
 

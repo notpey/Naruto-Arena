@@ -1,6 +1,12 @@
 const defaultCharacters = require("./data/characters/index.js");
 
 const DEFAULT_HP = 100;
+// A status lasting this many turns or more is permanent: it never counts down.
+const PERMANENT_STATUS_TURNS = 99;
+const countDownRemainingTurns = (remaining) => {
+    const turns = Number(remaining) || 0;
+    return turns >= PERMANENT_STATUS_TURNS ? turns : turns - 1;
+};
 const getUnitMaxHp = (unit) => Math.max(1, Number(unit?.hpCap) || DEFAULT_HP);
 const chakraTypes = ['taijutsu', 'ninjutsu', 'bloodline', 'genjutsu'];
 
@@ -1061,6 +1067,21 @@ const computeTargetOptions = ({ match, actingUsername, actorSlot, skillIndex, ch
             }).filter((target) => !guardSlots || guardSlots.has(target.slot));
             break;
         }
+        case 'self-and-all-enemies': {
+            // Skills that act on the user and every enemy at once (Neji's Heavenly Spin, Zabuza's
+            // Hidden Mist): both sides are shown as targets, like an area skill.
+            result.mode = 'all';
+            const guardSlots = getAreaSkillGuardSlots(opponentBoard);
+            result.targets = [
+                ...mapTargets(actingUsername, actorBoard, { helpfulTargeting: true })
+                    .filter((target) => target.slot === actorSlot),
+                ...mapTargets(opponentUsername, opponentBoard, {
+                    enemyTargeting: true,
+                    skillClasses: effectiveSkill?.classes || [],
+                }).filter((target) => !guardSlots || guardSlots.has(target.slot)),
+            ];
+            break;
+        }
         case 'self': {
             result.mode = 'self';
             result.targets = mapTargets(actingUsername, actorBoard, { helpfulTargeting: true }).filter(
@@ -1293,11 +1314,7 @@ const computeEffectiveEnergyCost = ({ skill, actorState }) => {
     });
     const randomReduction = Math.max(0, totals.randomCostReduction);
     let randomIncrease = Math.max(0, totals.randomCostIncrease);
-    const skillIsMental =
-        Array.isArray(skill?.classes) &&
-        skill.classes.some(
-            (entry) => typeof entry === 'string' && entry.trim().toLowerCase() === 'mental'
-        );
+    const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
     if (!skillIsMental) {
         const statuses = Array.isArray(actorState?.statuses) ? actorState.statuses : [];
         const nonMentalIncrease = statuses.reduce((sum, status) => {
@@ -1497,7 +1514,7 @@ const describeStunLocks = (locks = {}) => {
     });
     if (locks.cannotUseHarmfulSkills) parts.push('harmful skills');
     if (locks.cannotUseHelpfulSkills) parts.push('helpful skills');
-    if (locks.cannotUseNonMentalSkills) parts.push('non-Mental skills');
+    if (locks.cannotUseNonMentalSkills) parts.push('non-Strategic skills');
     if (locks.cannotUseNonStrategicSkills) parts.push('non-Strategic skills');
     if (Array.isArray(locks.cannotUseSkillIndices) && locks.cannotUseSkillIndices.length) {
         parts.push(locks.cannotUseSkillIndices.length === 1 ? 'one skill' : 'some skills');
@@ -1649,6 +1666,7 @@ const DAMAGE_ONLY_STATUS_KEYS = [
     'invisible', 'hideTooltipFromEnemy', 'hideTooltipFromUnitOwner',
     'onOwnerUseSkillTrigger', 'ownerUseTriggerRequiresLivingSource',
     'sharedFirstTriggerUnlessSourceStatusId', 'statusIcon', 'sourceSkillName',
+    'controlSkillClasses', 'controlSkillHarmful',
 ];
 
 // Passives cannot be removed or ignored, and that covers the statuses they create on any unit.
@@ -2653,9 +2671,12 @@ const getTargetBonusDamageFromSource = ({ targetState, sourceCharacterId, source
     }, 0);
 };
 
+// There is no Mental class in Naruto-Arena: anything written as "Mental" means Strategic, so the
+// older Mental mechanics (non-Mental stuns, Mental guards) apply to Strategic skills.
 const normalizeSkillClassName = (value) => {
     const norm = typeof value === 'string' ? value.trim().toLowerCase() : '';
     if (norm === 'energy') return 'chakra';
+    if (norm === 'mental') return 'strategic';
     return norm;
 };
 
@@ -2804,9 +2825,28 @@ const materializeEffectWithSkillClassChoice = (effect, chosenSkillClass) => {
 const getSkillClassSet = (skillClasses = []) =>
     new Set(
         (Array.isArray(skillClasses) ? skillClasses : [])
-            .map((entry) => (typeof entry === 'string' ? entry.trim().toLowerCase() : ''))
+            .map((entry) => normalizeSkillClassName(entry))
             .filter(Boolean)
     );
+
+// Whether this unit's stuns would stop it using a skill with these classes. A full stun always does;
+// a unit that ignores partial stuns (Inner Sakura) is stopped only by a full stun.
+const isUnitStunnedForSkill = (state, { classes = [], harmful = true } = {}) => {
+    if (!state) return false;
+    if (getStatusMetadataTotals(state).cannotUseSkills) return true;
+    if (hasStatusMetadataFlag(state, 'ignoresPartialStuns')) return false;
+    if (harmful && hasStatusMetadataFlag(state, 'cannotUseHarmfulSkills')) return true;
+    if (!harmful && hasStatusMetadataFlag(state, 'cannotUseHelpfulSkills')) return true;
+    const classSet = getSkillClassSet(classes);
+    if ((hasStatusMetadataFlag(state, 'cannotUseNonMentalSkills') ||
+        hasStatusMetadataFlag(state, 'cannotUseNonStrategicSkills')) && !classSet.has('strategic')) return true;
+    return (Array.isArray(state.statuses) ? state.statuses : []).some((status) => {
+        if ((Number(status?.remainingTurns) || 0) <= 0) return false;
+        const blocked = status?.metadata?.cannotUseSkillClasses;
+        return Array.isArray(blocked) && blocked.some((entry) =>
+            classSet.has(typeof entry === 'string' ? entry.trim().toLowerCase() : ''));
+    });
+};
 
 const getBlockedSkillIndices = (actorState) => {
     const blocked = new Set();
@@ -3166,6 +3206,7 @@ const isHarmfulEffect = (effect) => {
                 metadata.cannotUseHelpfulSkills ||
                 metadata.cannotUseHarmfulSkills ||
                 metadata.cannotUseNonMentalSkills ||
+                metadata.cannotUseNonStrategicSkills ||
                 metadata.useChosenSkillClassForCannotUseSkillClasses ||
                 (Array.isArray(metadata.cannotUseSkillClasses) && metadata.cannotUseSkillClasses.length > 0) ||
                 metadata.cannotReduceDamage ||
@@ -5074,6 +5115,19 @@ const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
                 applyChakraGainToMatch({ match, username: status.sourceUsername, chakraType: pick, amount: 1 });
             }
         });
+        // A mark that ends its source's linked statuses when it expires (Devour's guard) ends them
+        // when the marked unit dies too.
+        (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
+            const linkedIds = Array.isArray(status?.metadata?.endSourceStatusIdsOnExpire)
+                ? status.metadata.endSourceStatusIdsOnExpire : [];
+            if (!linkedIds.length || !status.sourceUsername || !Number.isInteger(status.sourceSlot)) return;
+            const sourceUnit = match.board?.[status.sourceUsername]?.[status.sourceSlot] || null;
+            if (!sourceUnit) return;
+            const sourceState = ensureUnitStateShape(sourceUnit);
+            const before = sourceState.statuses.length;
+            sourceState.statuses = sourceState.statuses.filter((entry) => !linkedIds.includes(entry?.id));
+            if (sourceState.statuses.length !== before) refreshDerivedStatusTooltips(sourceState);
+        });
         purgeTetheredStatusesOnSourceDeath({ match, sourceUsername: username, sourceSlot: slot });
     }
     if (changed) {
@@ -5634,8 +5688,9 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
             continue;
         }
         if (
-            hasStatusMetadataFlag(actorState, 'cannotUseNonMentalSkills') &&
-            !hasSkillClass(skill?.classes || [], 'mental')
+            (hasStatusMetadataFlag(actorState, 'cannotUseNonMentalSkills') ||
+                hasStatusMetadataFlag(actorState, 'cannotUseNonStrategicSkills')) &&
+            !hasSkillClass(skill?.classes || [], 'strategic')
         ) {
             continue;
         }
@@ -7202,6 +7257,16 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                     let runtimeStatusId = effect.statusId;
                     let runtimeDuration = effect.duration;
                     let runtimeMetadata = effect.metadata || {};
+                    // A control skill ends when its user is stunned in a way that would stop them using
+                    // it, so its statuses carry the skill's classes and whether it is harmful.
+                    if (String(runtimeMetadata?.ongoingClass || '').trim().toLowerCase() === 'control') {
+                        runtimeMetadata = {
+                            ...runtimeMetadata,
+                            controlSkillClasses: (Array.isArray(skill?.classes) ? skill.classes : [])
+                                .map((entry) => String(entry || '').trim().toLowerCase()).filter(Boolean),
+                            controlSkillHarmful: skillHasHarmfulEffects(skill),
+                        };
+                    }
                     if (runtimeMetadata?.repeatTargetControl && typeof runtimeMetadata.repeatTargetControl === 'object') {
                         const control = runtimeMetadata.repeatTargetControl;
                         const trackerStatusId =
@@ -7343,6 +7408,7 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                         Boolean(runtimeMetadata?.cannotUseSkills) ||
                         Boolean(runtimeMetadata?.cannotUseHarmfulSkills) ||
                         Boolean(runtimeMetadata?.cannotUseNonMentalSkills) ||
+                        Boolean(runtimeMetadata?.cannotUseNonStrategicSkills) ||
                         Boolean(runtimeMetadata?.useChosenSkillClassForCannotUseSkillClasses) ||
                         (Array.isArray(runtimeMetadata?.cannotUseSkillIndices) &&
                             runtimeMetadata.cannotUseSkillIndices.length > 0) ||
@@ -9010,9 +9076,16 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                     Boolean(status?.sourceUsername) &&
                     Number.isInteger(status?.sourceSlot) &&
                     (!sourceUnit || sourceUnit.alive === false);
+                const controlSkillClasses = Array.isArray(status?.metadata?.controlSkillClasses)
+                    ? status.metadata.controlSkillClasses : null;
                 const sourceStunned = sourceState
                     ? Boolean(getStatusMetadataTotals(sourceState).cannotUseSkills) ||
-                        (Boolean(status?.metadata?.endsOnAnySourceStun) && isUnitStunned(sourceState, sourceUnit))
+                        (Boolean(status?.metadata?.endsOnAnySourceStun) && isUnitStunned(sourceState, sourceUnit)) ||
+                        // A control skill also ends on a partial stun that would stop its user using it.
+                        (ongoingClass === 'control' && controlSkillClasses !== null && isUnitStunnedForSkill(sourceState, {
+                            classes: controlSkillClasses,
+                            harmful: status?.metadata?.controlSkillHarmful !== false,
+                        }))
                     : false;
                 const sourceDamageBonusFlat = sourceState
                     ? Number(getStatusMetadataTotals(sourceState).damageBonusFlat) || 0
@@ -9048,17 +9121,10 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                     }
                     return;
                 }
+                // Effects of instant skills keep going after their user dies; only control and action
+                // skills, and effects that say so (removeOnSourceDeath), end with the user (above).
                 const triggerAnchor =
                     status?.metadata?.turnEndTrigger === 'source_turn' ? 'source_turn' : 'owner_turn';
-                if (
-                    sourceDead &&
-                    triggerAnchor === 'source_turn'
-                ) {
-                    if (status?.id) {
-                        endedOngoingStatuses.add(status.id);
-                    }
-                    return;
-                }
                 const shouldTrigger =
                     triggerAnchor === 'source_turn'
                         ? status?.sourceUsername === endingUsername
@@ -9804,7 +9870,7 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                         return { ...status, fresh: false };
                     }
                 if (status.fresh && Boolean(status?.metadata?.triggerOnApply)) {
-                    const nextRemaining = (status.remainingTurns || 0) - 1;
+                    const nextRemaining = countDownRemainingTurns(status.remainingTurns);
                     if (nextRemaining <= 0) {
                         triggerSuperMultiSizeBurst({
                             status,
@@ -9838,7 +9904,7 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                             remainingTurns: nextRemaining,
                         };
                     }
-                    const nextRemaining = (status.remainingTurns || 0) - 1;
+                    const nextRemaining = countDownRemainingTurns(status.remainingTurns);
                     const turnEndRandomizeConfig =
                         status?.metadata?.turnEndRandomizeMetadataKeyFromOptions &&
                         typeof status.metadata.turnEndRandomizeMetadataKeyFromOptions === 'object'
@@ -10409,6 +10475,7 @@ const applyTriggeredEffectsFromStatus = ({
             const appliesStun = Boolean(effectMetadata.cannotUseSkills) ||
                 Boolean(effectMetadata.cannotUseHarmfulSkills) ||
                 Boolean(effectMetadata.cannotUseNonMentalSkills) ||
+                Boolean(effectMetadata.cannotUseNonStrategicSkills) ||
                 (Array.isArray(effectMetadata.cannotUseSkillClasses) &&
                     effectMetadata.cannotUseSkillClasses.length > 0) ||
                 (Array.isArray(effectMetadata.cannotUseSkillIndices) &&
@@ -10893,6 +10960,7 @@ module.exports = {
     reviveUnitToHp,
     applyDamageToUnit,
     applyStatus,
+    hasSkillClass,
     purgeTetheredStatusesOnSourceDeath,
     selectTurnStartChoiceTarget,
     queueTurnStartChoicePrompts,

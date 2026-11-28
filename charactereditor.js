@@ -298,7 +298,7 @@
       const name = effect.statusId ? statusName(effect.statusId) : '';
       const inputs = [];
       if (typeof effect.amount === 'number') inputs.push(`<label>Amount ${stepper(base.concat('amount'), `${name || humanize(effect.type)} amount`, 999)}</label>`);
-      if (typeof effect.duration === 'number') inputs.push(`<label>Turns ${stepper(base.concat('duration'), `${name || humanize(effect.type)} duration`, 99)}</label>`);
+      if (typeof effect.duration === 'number') inputs.push(`<label>Turns ${stepper(base.concat('duration'), `${name || humanize(effect.type)} duration`, 99)}<small class="ce-hint">99 = permanent</small></label>`);
       const tips = ['tooltipText', 'tooltipTextTemplate', 'statusIcon'].filter(key => typeof meta[key] === 'string').map(key => tooltipInput(base.concat('metadata', key), FIELD_LABELS[key]));
       if (!inputs.length && !tips.length) return '';
       return `<div class="ce-effect"><div class="ce-effect-head"><strong>${escapeHtml(humanize(effect.type))}</strong><span>${escapeHtml(scopeLabel(effect.scope))}${name ? ` · ${escapeHtml(name)}` : ''}${effect.condition ? ' · conditional' : ''}</span></div>${inputs.length ? `<div class="ce-effect-numbers">${inputs.join('')}</div>` : ''}${tips.join('')}</div>`;
@@ -342,7 +342,7 @@
     const data = `data-sl="${pathAttr(at)}" data-sl-field="${escapeHtml(field.key)}"`;
     if (field.kind === 'number') return `<input type="number" class="sl-num" ${data} value="${escapeHtml(value ?? '')}" min="${field.min ?? 0}" max="${field.max ?? 999}" aria-label="${escapeHtml(field.label)}">`;
     if (field.kind === 'turns') {
-      return `<span class="sl-turns">for <input type="number" class="sl-num" ${data} value="${escapeHtml(value ?? 1)}" min="1" max="99" aria-label="Turns"> ${Number(value) === 1 ? 'turn' : 'turns'}${Number(value) >= 99 ? ' (rest of the match)' : ''}</span>`;
+      return `<span class="sl-turns">for <input type="number" class="sl-num" ${data} value="${escapeHtml(value ?? 1)}" min="1" max="99" aria-label="Turns"> ${Number(value) === 1 ? 'turn' : 'turns'}${Number(value) >= 99 ? ' (permanent)' : ''}</span>`;
     }
     if (field.kind === 'label') return `<strong class="sl-fixed">${escapeHtml(value || '')}</strong>`;
     let options;

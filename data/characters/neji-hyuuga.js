@@ -74,7 +74,7 @@ module.exports = {
             "energy": [
                 "Bloodline"
             ],
-            "target": "all-enemy",
+            "target": "self-and-all-enemies",
             "damage": 0,
             "cooldown": 2,
             "cannotBeCountered": true,

@@ -28,12 +28,18 @@
     { id: 'piercing', label: 'piercing' },
     { id: 'affliction', label: 'affliction' },
   ];
+  // Damage reduction is ignored by piercing damage unless it is unpierceable.
+  const REDUCTION_KINDS = [
+    { id: 'normal', label: '(piercing ignores it)' },
+    { id: 'unpierceable', label: 'that piercing cannot ignore' },
+  ];
   const STUN_KINDS = [
     { id: 'all', label: 'all' },
     { id: 'physical', label: 'Physical' },
     { id: 'chakra', label: 'Chakra' },
-    { id: 'mental', label: 'Mental' },
+    { id: 'strategic', label: 'Strategic' },
     { id: 'physical,chakra', label: 'Physical and Chakra' },
+    { id: 'non-strategic', label: 'non-Strategic' },
   ];
   const CHAKRA = [
     { id: 'random', label: 'random' },
@@ -204,11 +210,14 @@
         { key: 'turns', label: 'Turns', kind: 'turns', default: 1 },
       ],
       parts: ['Stun', 'skills', 'skills of', 'who', 'turns'],
-      keys: ['cannotUseSkills', 'cannotUseSkillClasses'],
+      keys: ['cannotUseSkills', 'cannotUseSkillClasses', 'cannotUseNonStrategicSkills'],
       harmful: () => true,
-      toSettings: v => (v.skills === 'all' ? { cannotUseSkills: true } : { cannotUseSkillClasses: String(v.skills).split(',') }),
+      toSettings: v => (v.skills === 'all' ? { cannotUseSkills: true }
+        : v.skills === 'non-strategic' ? { cannotUseNonStrategicSkills: true }
+          : { cannotUseSkillClasses: String(v.skills).split(',') }),
       fromSettings(m) {
         if (m.cannotUseSkills === true && !m.cannotUseSkillClasses) return { skills: 'all' };
+        if (m.cannotUseNonStrategicSkills === true && !m.cannotUseSkills && !m.cannotUseSkillClasses) return { skills: 'non-strategic' };
         if (Array.isArray(m.cannotUseSkillClasses) && !m.cannotUseSkills) {
           const id = m.cannotUseSkillClasses.map(entry => String(entry).toLowerCase()).sort().join(',');
           return STUN_KINDS.some(kind => kind.id === id) ? { skills: id } : null;
@@ -285,15 +294,24 @@
       fields: [
         { key: 'who', label: 'Who', kind: 'who', default: 'self', exclude: ['all-enemy'] },
         { key: 'amount', label: 'Less damage taken', kind: 'number', min: 1, max: 99, default: 10 },
+        { key: 'pierce', label: 'Piercing', kind: 'choice', options: REDUCTION_KINDS, default: 'normal' },
         { key: 'turns', label: 'Turns', kind: 'turns', default: 1 },
       ],
-      parts: ['Give', 'who', 'amount', 'damage reduction', 'turns'],
-      keys: ['damageReductionFlat'],
+      parts: ['Give', 'who', 'amount', 'damage reduction', 'pierce', 'turns'],
+      keys: ['damageReductionFlat', 'unpierceableDamageReductionFlat'],
       harmful: () => false,
-      toSettings: v => ({ damageReductionFlat: Number(v.amount) || 0 }),
-      fromSettings: m => (m.damageReductionFlat > 0 ? { amount: m.damageReductionFlat } : null),
-      tooltip: v => `This character has ${v.amount} damage reduction.`,
-      describe: (v, ctx) => `${cap(whoText(v.who, ctx))} gain${v.who === 'all-allies' ? '' : 's'} ${v.amount} damage reduction ${turnsText(v.turns)}.`,
+      toSettings: v => (v.pierce === 'unpierceable'
+        ? { unpierceableDamageReductionFlat: Number(v.amount) || 0 }
+        : { damageReductionFlat: Number(v.amount) || 0 }),
+      fromSettings(m) {
+        if (m.damageReductionFlat > 0 && !m.unpierceableDamageReductionFlat) return { amount: m.damageReductionFlat, pierce: 'normal' };
+        if (m.unpierceableDamageReductionFlat > 0 && !m.damageReductionFlat) return { amount: m.unpierceableDamageReductionFlat, pierce: 'unpierceable' };
+        return null;
+      },
+      tooltip: v => (v.pierce === 'unpierceable'
+        ? `This character has ${v.amount} damage reduction that piercing damage cannot ignore.`
+        : `This character has ${v.amount} damage reduction.`),
+      describe: (v, ctx) => `${cap(whoText(v.who, ctx))} gain${v.who === 'all-allies' ? '' : 's'} ${v.amount} ${v.pierce === 'unpierceable' ? 'unpierceable ' : ''}damage reduction ${turnsText(v.turns)}.`,
     }),
     statusSentence({
       id: 'defense', group: 'Protection', label: 'Destructible defense',

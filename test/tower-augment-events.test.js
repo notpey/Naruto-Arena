@@ -207,8 +207,8 @@ test('chakra augments (A001, A053, A017, A081, A011, A079, A031, A037, A090, F13
     assert.equal(blade.requiredRandom + Object.values(blade.reservedSpecific).reduce((s, v) => s + v, 0), 1, 'A053: one required chakra off, minimum 1');
 
     match = battle({ codes: ['A017'] });
-    const mental = { id: 'test-mental', classes: ['Mental'], energy: ['Genjutsu', 'Random'], effects: [] };
-    assert.equal(battleLogic.computeEffectiveEnergyCost({ skill: mental, actorState: match.board.p[0].state }).requiredRandom, 0, 'A017: a Mental skill random cost drops on first use');
+    const strategic = { id: 'test-strategic', classes: ['Strategic'], energy: ['Genjutsu', 'Random'], effects: [] };
+    assert.equal(battleLogic.computeEffectiveEnergyCost({ skill: strategic, actorState: match.board.p[0].state }).requiredRandom, 0, 'A017: a Strategic skill random cost drops on first use');
 
     match = battle({ codes: ['A081'] });
     assert.ok(match.board.p.every((unit) => has(unit, 'tower_aug_a081')), 'A081: a seeded type each turn');
@@ -235,7 +235,7 @@ test('chakra augments (A001, A053, A017, A081, A011, A079, A031, A037, A090, F13
     start = chakra(match);
     castAll(match, 'p', [[0, 'momochi-zabuza', 'kubikiribocho', ['bot', 0]], [1, 'baki', 'sudden-strike', ['bot', 0]],
         [2, 'yamanaka-ino-s', 'proxy-surveillance', ['bot', 0]]]);
-    assert.equal(chakra(match) - start, 2, 'A090: Physical, Chakra and Mental in one turn refund 2');
+    assert.equal(chakra(match) - start, 2, 'A090: Physical, Chakra and Strategic in one turn refund 2');
 
     match = battle({ codes: ['F13'] });
     castAll(match, 'p', [[0, 'momochi-zabuza', 'kubikiribocho', ['bot', 0]], [1, 'baki', 'sudden-strike', ['bot', 1]]]);

@@ -1356,7 +1356,7 @@
                                 "energy": [
                                         "Bloodline"
                                 ],
-                                "target": "all-enemy",
+                                "target": "self-and-all-enemies",
                                 "damage": 0,
                                 "cooldown": 2,
                                 "cannotBeCountered": true,
@@ -1955,7 +1955,7 @@
                         "Ninjutsu",
                         "Ninjutsu"
                     ],
-                    "target": "all-enemy",
+                    "target": "all-characters",
                     "damage": 0,
                     "cooldown": 4,
                     "classes": [

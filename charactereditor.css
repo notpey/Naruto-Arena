@@ -64,6 +64,7 @@
 .ce-effect-head span { color: #5c6f86 !important; font-size: 11px; }
 .ce-effect-numbers { display: flex; flex-wrap: wrap; gap: 14px; }
 .ce-effect-numbers label { display: grid; gap: 2px; }
+.ce-effect-numbers .ce-hint { color: #5c6f86 !important; font-size: 10.5px; font-weight: 600; }
 .ce-tip { display: grid; gap: 4px; }
 .ce-tip > span { color: #29364b !important; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .inline-editor .ce-tip textarea { width: 100%; min-height: 48px; border: 1px solid #d0d6de; border-radius: 3px; padding: 6px 8px; background: #fff; color: #2d405b; font-size: 12px; line-height: 1.45; resize: vertical; }

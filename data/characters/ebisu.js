@@ -99,7 +99,8 @@ module.exports = {
                         ],
                         "counterDamageAttributedToStatusSource": true,
                         "turnDurationAnchor": "source_turn",
-                        "tooltipText": "The next harmful Physical skill this character uses is countered and deals 10 physical damage to them."
+                        "tooltipText": "The next harmful Physical skill this character uses is countered and deals 10 physical damage to them.",
+                        "visibleCounter": true
                     }
                 }
             ]

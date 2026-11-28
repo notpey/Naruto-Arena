@@ -383,8 +383,9 @@
   </footer>
 
   <script src="./characters.js"></script>
-  <script src="status-display.js?v=2"></script>
-  <script src="./skill-description-format.js?v=3"></script>
+  <script src="status-display.js?v=3"></script>
+  <script src="./skill-description-format.js?v=4"></script>
+  <script src="./skill-visibility.js?v=1"></script>
   <script src="./index.js" defer></script>
   <script src="./nav.js" defer></script>
 
@@ -413,10 +414,10 @@
       }
       function visibleSkills(c) {
         var s = c && Array.isArray(c.skills) ? c.skills : [];
-        // hiddenFromSelectionViewer skills are alternate/unlockable forms,
-        // not truly hidden -- they still belong on this page, badged via
-        // isAlternateSkill below. omitFromSelectionViewer is the only flag
-        // that means "never show this anywhere."
+        // Alternate forms with their own name (Raikiri) belong on this page, badged via
+        // isAlternateSkill below. Same-named alternates (Haku's area Flying Needles) are the
+        // same skill working differently, so skill-visibility.js leaves them out.
+        if (window.ArenaSkillVisibility) return window.ArenaSkillVisibility.previewSkills(s);
         return s.filter(function (sk) { return sk && !sk.omitFromSelectionViewer; });
       }
       function isAlternateSkill(sk, index) {

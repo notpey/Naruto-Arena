@@ -116,7 +116,7 @@ const EFFECT_TYPES = {
         description: 'Puts a status on the recipients. Statuses carry every lasting effect: stuns, invulnerability, damage over time, counters, skill swaps, bonuses and more. Its settings are listed under Status settings.',
         fields: {
             statusId: { kind: 'statusId', label: 'Status name (id)', required: true, defines: true },
-            duration: { kind: 'int', label: 'Turns', required: true, min: 1, max: 99, description: '99 is used for statuses that last the whole match.' },
+            duration: { kind: 'int', label: 'Turns', required: true, min: 1, max: 99, description: '99 = permanent: the status never runs out.' },
             scope: SCOPE_FIELD,
             condition: CONDITION_FIELD,
             applyToSource: { kind: 'bool', label: 'Put it on the user instead', description: 'The status goes on the user, while still reacting to the chosen target.', advanced: true },

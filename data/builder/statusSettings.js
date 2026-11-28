@@ -194,6 +194,7 @@ const STATUS_SETTINGS = {
     triggerOnOwnerHelpfulSkill: S('counters', 'bool', 'Trap: triggers on the owner\'s helpful skills', 'Also goes off when the trapped character uses a helpful skill.'),
     triggerOnlyOnOwnerSkillUse: S('counters', 'bool', 'Trap: triggers when the owner acts', "A trap placed on an enemy: goes off when that enemy uses a skill, not when they are targeted."),
     triggerOnlyOnDamagingSkill: S('counters', 'bool', 'Only on damaging skills'),
+    visibleCounter: S('counters', 'bool', 'Visible to the enemy', 'Counters are hidden from the other team by default. Turn on for a counter the enemy should be able to see.'),
     counterCancelsSkill: S('counters', 'bool', 'Cancels the skill', 'On by default: the countered skill does nothing. Turn off for traps that punish but let the skill land.'),
     counterDamage: S('counters', 'int', 'Damage to whoever set it off'),
     counterDamageSkillClasses: S('counters', 'classes', 'That damage counts as'),

@@ -116,13 +116,8 @@ module.exports = {
                         "counterStatusApplyIfTargetHpAtMost": 50,
                         "counterStatusMetadata": {
                             "harmful": true,
-                            "cannotUseSkillClasses": [
-                                "physical",
-                                "energy",
-                                "mental",
-                                "ninjutsu"
-                            ],
-                            "tooltipText": "This character's non-strategic skills are stunned for 1 turn."
+                            "tooltipText": "This character's non-strategic skills are stunned for 1 turn.",
+                            "cannotUseNonStrategicSkills": true
                         },
                         "turnDurationAnchor": "source_turn",
                         "tooltipText": "If this character uses a damaging skill, Sealed Bomb Square Release deals 20 affliction damage and stuns non-strategic skills if their health falls to 50 or less."

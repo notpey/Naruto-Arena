@@ -24,7 +24,6 @@ const CHAKRA_EFFECT_TYPES = [
 const SKILL_CLASSES = [
     { id: 'Physical', group: 'damage', description: 'A physical attack. Physical stuns, invulnerability and reductions apply to it.' },
     { id: 'Chakra', group: 'damage', description: 'A chakra attack. Chakra stuns, invulnerability and reductions apply to it.' },
-    { id: 'Mental', group: 'damage', description: 'A mental (genjutsu-style) skill.' },
     { id: 'Affliction', group: 'damage', description: 'An affliction skill. Its damage passes ordinary invulnerability when it resolves, if the damage effect also has "Affliction damage" on. (The ignoring of reduction and defense comes from that effect setting.)' },
     { id: 'Piercing', group: 'damage', description: 'Shown to players only. To make damage pierce, turn on "Ignore damage reduction" on the damage effect.' },
     { id: 'Instant', group: 'timing', description: 'Resolves at once instead of lasting over turns.' },
@@ -47,6 +46,8 @@ const SKILL_TARGETS = [
     { id: 'single-character', label: 'One ally (not self) or one enemy' },
     { id: 'single-target', label: 'Any one character, including self' },
     { id: 'self-or-single-enemy', label: 'Self or one enemy' },
+    { id: 'self-and-all-enemies', label: 'The user and all enemies' },
+    { id: 'all-characters', label: 'Everyone (all allies and all enemies)' },
 ];
 
 // Who one effect lands on (effect "scope"). Only these are resolved by the engine; anything else

@@ -8,7 +8,7 @@
     defense: ['destructible defense', 'damage reduction', 'ignore invulnerability', 'ignores invulnerability', 'invulnerable', 'defense'],
     control: ['stunned', 'stuns', 'stun', 'countered', 'reflected'],
     resource: ['chakra', 'cooldown'],
-    class: ['non-strategic', 'non-affliction', 'non-physical', 'non-mental', 'physical', 'strategic', 'mental', 'affliction', 'piercing']
+    class: ['non-strategic', 'non-affliction', 'non-physical', 'physical', 'strategic', 'affliction', 'piercing']
   };
   const termKinds = new Map(Object.entries(termGroups).flatMap(([kind, words]) => words.map(word => [word, kind])));
 

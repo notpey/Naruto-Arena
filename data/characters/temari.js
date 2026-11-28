@@ -115,7 +115,7 @@ module.exports = {
                 "Ninjutsu",
                 "Ninjutsu"
             ],
-            "target": "all-enemy",
+            "target": "all-characters",
             "damage": 0,
             "cooldown": 4,
             "classes": [

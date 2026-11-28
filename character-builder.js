@@ -282,7 +282,7 @@
     function statusEditor(path, spec) {
       const value = spec || {};
       return `<div class="cb-status">
-        <div class="cb-fields cb-fields-row">${fieldRow('Status name', widget('statusId', path.concat('statusId'), value.statusId, { label: 'Status name', defines: true }), '', path.concat('statusId'), false)}${fieldRow('Turns', widget('int', path.concat('duration'), value.duration, { label: 'Turns', min: 1, max: 99 }), '99 lasts all match.', path.concat('duration'), false)}</div>
+        <div class="cb-fields cb-fields-row">${fieldRow('Status name', widget('statusId', path.concat('statusId'), value.statusId, { label: 'Status name', defines: true }), '', path.concat('statusId'), false)}${fieldRow('Turns', widget('int', path.concat('duration'), value.duration, { label: 'Turns', min: 1, max: 99 }), '99 = permanent: it never runs out.', path.concat('duration'), false)}</div>
         ${settingsEditor(path.concat('metadata'), value.metadata || {})}
       </div>`;
     }

@@ -299,9 +299,11 @@
                 rarity: "",
                 arcLabel: arc ? arc.series + " / " + arc.label : "",
                 requiredMissionId: character.requiredMissionId || "",
-                skills: (Array.isArray(character.skills) ? character.skills : []).filter(function (skill) {
-                    return skill && !skill.omitFromSelectionViewer;
-                }).slice(0, 4)
+                skills: (window.ArenaSkillVisibility
+                    ? window.ArenaSkillVisibility.previewSkills(character.skills)
+                    : (Array.isArray(character.skills) ? character.skills : []).filter(function (skill) {
+                        return skill && !skill.omitFromSelectionViewer;
+                    })).slice(0, 4)
             };
         });
     }
