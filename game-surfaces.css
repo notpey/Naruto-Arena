@@ -1655,6 +1655,12 @@
     border-color: #e94e4e;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .65), 0 3px 6px rgba(0, 0, 0, .55);
 }
+/* A one-time effect that has already fired: still there to read, clearly used up. */
+.skilltooltipimage.status-spent {
+    filter: grayscale(1) brightness(.6);
+    opacity: .75;
+}
+.skilltooltipimage.status-spent:hover { filter: grayscale(1) brightness(.85); opacity: 1; }
 .game-remaster .global-status-tooltip,
 .game-remaster .status-tooltip-content {
     box-sizing: border-box;

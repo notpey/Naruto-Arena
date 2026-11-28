@@ -1565,7 +1565,7 @@ const recordEnemyStunner = ({ match, targetState, sourceUsername, sourceSlot, st
             targetState: stunnerState, statusId: config.statusId, duration: 1,
             sourceUsername: targetUsername, sourceSlot: watcherSlot,
             metadata: {
-                cannotBeCleansed: true, turnDurationAnchor: 'source_turn',
+                cannotBeCleansed: true, endsOnSourceDeath: true, turnDurationAnchor: 'source_turn',
                 ...(config.statusIcon ? { statusIcon: config.statusIcon } : {}),
                 recordedStunLocks: mergeStunLocks(previous?.metadata?.recordedStunLocks, locks),
                 tooltipText: config.tooltipText || 'This character stunned an enemy this turn.',
@@ -4275,6 +4275,27 @@ const applyDamageToUnitCore = (unit, rawAmount, context = {}) => {
                 !status.metadata._sacrificeUsed
             );
             passive.metadata._sacrificeUsed = true;
+            // Show that it happened: the passive reads as spent, and the saved ally carries a
+            // marker until the end of their team's next turn.
+            passive.metadata.spent = true;
+            passive.metadata.tooltipText = `${passive.metadata.sourceSkillName || 'Sacrifice'} is spent: this character took a lethal attack in an ally's place. It won't trigger again.`;
+            refreshDerivedStatusTooltips(ensureUnitStateShape(haku));
+            applyStatus({
+                targetState: ensureUnitStateShape(unit),
+                statusId: 'sacrifice_saved',
+                duration: 1,
+                sourceSkillId: null,
+                sourceUsername: context.targetUsername,
+                sourceSlot: hakuSlot,
+                metadata: {
+                    helpful: true,
+                    cannotBeCleansed: true,
+                    statusIcon: passive.metadata.statusIcon || '',
+                    sourceSkillName: passive.metadata.sourceSkillName || 'Sacrifice',
+                    tooltipText: "An ally took a lethal attack in this character's place.",
+                },
+                fresh: false,
+            });
             applyDamageToUnit(haku, dealt, {
                 ...context,
                 targetSlot: hakuSlot,
@@ -5025,7 +5046,12 @@ const purgeTetheredStatusesOnSourceDeath = ({ match, sourceUsername, sourceSlot 
                     typeof metadata.ongoingClass === 'string'
                         ? metadata.ongoingClass.trim().toLowerCase()
                         : '';
+                // Every mark a passive leaves on another character ends with the passive's owner
+                // (Hayate's Fair Fight), unless it says it outlasts them.
+                const passiveMarkOnOther = Boolean(metadata.fromPassive) && !Boolean(metadata.keepAfterSourceDeath) &&
+                    !(username === sourceUsername && units.indexOf(unit) === sourceSlot);
                 const isTethered =
+                    passiveMarkOnOther ||
                     ongoingClass === 'action' ||
                     ongoingClass === 'control' ||
                     Boolean(metadata.removeOnSourceDeath) ||

@@ -4993,7 +4993,9 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'cannotIgnoreStuns',
     'cannotReduceDamage',
     'cannotUseHarmfulSkills',
+    'cannotUseHelpfulSkills',
     'cannotUseNonMentalSkills',
+    'cannotUseNonStrategicSkills',
     'cannotUseSkillClasses',
     'cannotUseSkillIndices',
     'cannotUseSkills',
@@ -5027,6 +5029,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'NonAfflictionDamageDebuff',
     'ninjutsuCostIncrease',
     'ninjutsuCostReduction',
+    'nonAfflictionDamageDebuffFlat',
     'nonAfflictionDamageTakenBonusFlat',
     'nonMentalRandomCostIncrease',
     'ongoingClass',
@@ -5047,6 +5050,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'skillReplacementsByRemainingTurns',
     'skillTargetOverrides',
     'sourceSkillName',
+    'spent',
     'stackDelta',
     'stackMax',
     'stackMetadataKey',
@@ -5057,6 +5061,7 @@ const CLIENT_SAFE_STATUS_METADATA_KEYS = new Set([
     'tooltipTextTemplate',
     'turnEndDamage',
     'turnEndTrigger',
+    'unpierceableDamageReductionFlat',
 ]);
 
 const extractTooltipPlaceholderKeys = (template) => {

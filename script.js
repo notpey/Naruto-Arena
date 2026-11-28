@@ -4132,6 +4132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 iconEl.classList.toggle('status-helpful', allegiance === 'ally');
                 iconEl.classList.toggle('status-harmful', allegiance === 'enemy');
+                // A one-time effect that has already fired (Haku's Sacrifice) stays visible, dimmed.
+                const spent = group.statuses.length > 0 && group.statuses.every((status) => Boolean(status?.metadata?.spent));
+                iconEl.classList.toggle('status-spent', spent);
                 iconEl.alt = `${statusSkill?.name || group.statuses[0]?.metadata?.sourceSkillName || 'Status'}${allegiance ? ` (${allegiance} skill)` : ''}`;
                 iconEl.style.display = 'block';
                 iconEl.removeAttribute('title');

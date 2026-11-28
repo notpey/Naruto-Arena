@@ -57,6 +57,7 @@ const STATUS_SETTINGS = {
     permanent: S('lifetime', 'bool', 'Lasts all match', 'Never runs out. Pair with 99 turns.'),
     ongoingClass: S('lifetime', 'ongoingClass', 'Ongoing class', 'Ties the status to its user: Action and Control statuses end when the user dies (Control also when the user is stunned or the target turns invulnerable).'),
     removeOnSourceDeath: S('lifetime', 'bool', 'Ends if the user dies'),
+    keepAfterSourceDeath: S('lifetime', 'bool', 'Lasts after the user dies', "A mark placed by a passive normally ends when the passive's owner dies. This keeps it."),
     cannotBeCleansed: S('lifetime', 'bool', 'Cannot be removed by cleanses'),
     cannotBeRemoved: S('lifetime', 'bool', 'Cannot be removed at all', 'Not even by effects that remove it by name.', { advanced: true }),
     controlIgnoresOwnerInvulnerability: S('lifetime', 'bool', 'Control ignores invulnerability', 'A Control status keeps going even if its target becomes invulnerable.'),

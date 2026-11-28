@@ -90,6 +90,8 @@
         } },
         { keys: ['cannotUseHarmfulSkills'], chips: (m) =>
             (m.cannotUseHarmfulSkills && !m.cannotUseSkills ? [{ stat: 'stun-harmful', text: 'Harmful skills stunned' }] : []) },
+        { keys: ['cannotUseHelpfulSkills'], chips: (m) =>
+            (m.cannotUseHelpfulSkills && !m.cannotUseSkills ? [{ stat: 'stun-helpful', text: 'Helpful skills stunned' }] : []) },
         { keys: ['cannotUseNonStrategicSkills', 'cannotUseNonMentalSkills'], chips: (m) =>
             ((m.cannotUseNonStrategicSkills || m.cannotUseNonMentalSkills) && !m.cannotUseSkills
                 ? [{ stat: 'stun-non-strategic', text: 'Non-Strategic skills stunned' }] : []) },
@@ -99,6 +101,7 @@
             const names = indices.map((index) => ctx?.skillNameAt?.(Number(index))).filter(Boolean);
             return [{ stat: 'stun-indices', text: names.length ? `${names.join(', ')} stunned` : 'Some skills stunned' }];
         } },
+        { keys: ['spent'], chips: (m) => (m.spent ? [{ stat: 'spent', text: 'Spent', good: false }] : []) },
         { keys: ['cannotBeStunned'], chips: (m) => (m.cannotBeStunned ? [{ stat: 'stun-immune', text: "Can't be stunned", good: true }] : []) },
         { keys: ['cannotBecomeInvulnerable'], chips: (m) =>
             (m.cannotBecomeInvulnerable ? [{ stat: 'no-invulnerable', text: "Can't become invulnerable", good: false }] : []) },
@@ -149,7 +152,7 @@
         'tooltipText', 'tooltipTextTemplate', 'statusIcon', 'sourceSkillName', 'helpful', 'harmful',
         'permanent', 'passive', 'fromPassive', 'cannotBeCleansed', 'turnDurationAnchor', 'triggerOnApply',
         'invisible', 'hideTooltip', 'hideTooltipFromEnemy', 'hideTooltipFromUnitOwner', 'hideTooltipFromOwner',
-        'removeOnSourceDeath', 'endsOnSourceDeath', 'removeWhenSourceDies', 'sourceDeathPurge',
+        'removeOnSourceDeath', 'endsOnSourceDeath', 'keepAfterSourceDeath', 'removeWhenSourceDies', 'sourceDeathPurge',
         'stackMetadataKey', 'stackDelta', 'stackMax', 'mergeNumericAddKeys', 'mergeObjectNumericAddKeys',
         'passiveAwakening', 'controlIgnoresOwnerInvulnerability', 'ignoreDamageReduction',
         'ignoreDestructibleDefense', 'ignoreTargetDamageReduction', 'ignoreTargetDestructibleDefense',
