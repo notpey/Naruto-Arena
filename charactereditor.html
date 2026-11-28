@@ -6,15 +6,18 @@
   <title>Character Editor — Naruto-Arena ACP</title>
   <link rel="stylesheet" href="brand.css">
   <link rel="stylesheet" href="charactercreator.css">
-  <link rel="stylesheet" href="charactereditor.css?v=9">
+  <link rel="stylesheet" href="charactereditor.css?v=12">
   <script src="character-images.js?v=1"></script>
   <script src="status-display.js?v=3" defer></script>
   <script src="skill-description-format.js?v=4" defer></script>
   <script src="roster-catalog.js?v=2" defer></script>
-  <script src="character-builder-checks.js?v=3" defer></script>
+  <script src="character-rules-vocab.js?v=2" defer></script>
+  <script src="character-builder-checks.js?v=4" defer></script>
   <script src="character-builder.js?v=3" defer></script>
   <script src="character-sentences.js?v=4" defer></script>
-  <script src="charactereditor.js?v=9" defer></script>
+  <script src="character-rules-editor.js?v=1" defer></script>
+  <script src="character-test-bench.js?v=2" defer></script>
+  <script src="charactereditor.js?v=10" defer></script>
 </head>
 <body>
   <div class="creator-shell">
@@ -62,6 +65,8 @@
           <button type="button" class="creator-tab" data-view="preview">Preview</button>
           <button type="button" class="creator-tab" data-view="changes">Changes <span id="changes-count" class="ce-tab-count" hidden></span></button>
           <button type="button" class="creator-tab" data-view="checks">Checks <span id="checks-count" class="ce-tab-count" hidden></span></button>
+          <button type="button" class="creator-tab" data-view="rules" id="rules-tab" hidden>Rules</button>
+          <button type="button" class="creator-tab" data-view="bench" id="bench-tab" hidden>Test bench</button>
           <button type="button" class="creator-tab" data-view="history">History</button>
           <button type="button" class="creator-tab" data-view="raw" id="raw-tab" hidden>Raw data</button>
         </nav>
@@ -89,6 +94,14 @@
             <div id="checks-content"></div>
           </section>
 
+          <section class="view-panel ce-rules" data-panel="rules" aria-label="Rules" hidden>
+            <div class="view-heading"><div><h2>Rules</h2><p>Make a status react to the match: when something happens, if the checks pass, then do something. The <strong>holder</strong> is the character a status is on; the <strong>caster</strong> placed it. Rules run top to bottom.</p></div></div>
+            <div id="rules-content" class="inline-editor ce-rules-body"></div>
+          </section>
+          <section class="view-panel ce-bench" data-panel="bench" aria-label="Test bench" hidden>
+            <div class="view-heading"><div><h2>Test bench</h2><p>Play this character, unsaved edits included, against three opponents with the real battle engine. Nothing is saved and no live match is touched.</p></div></div>
+            <div id="bench-content" class="inline-editor ce-bench-body"></div>
+          </section>
           <section class="view-panel ce-history" data-panel="history" aria-label="Version history" hidden>
             <div class="view-heading"><div><h2>History</h2><p>Every saved version of this character: who saved it and what changed. Load any version into the editor to review it, then save to make it live again.</p></div></div>
             <div id="history-content"></div>

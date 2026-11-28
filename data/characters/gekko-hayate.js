@@ -57,7 +57,7 @@ module.exports = {
                         "stackMetadataKey": "charges",
                         "stackDelta": 1,
                         "stackMax": 99,
-                        "tooltipTextTemplate": "Hayate has {charges} Crescent Moon charges. Dance of the Crescent Moon deals 10 additional damage for each and spends them."
+                        "tooltipTextTemplate": "Hayate has {charges} Crescent Moon charges. Dance of the Crescent Moon deals 10 additional damage for each."
                     }
                 }
             ]
@@ -144,7 +144,7 @@ module.exports = {
                                 "stackMetadataKey": "charges",
                                 "stackDelta": 1,
                                 "stackMax": 99,
-                                "tooltipTextTemplate": "Hayate has {charges} Crescent Moon charges. Dance of the Crescent Moon deals 10 additional damage for each and spends them."
+                                "tooltipTextTemplate": "Hayate has {charges} Crescent Moon charges. Dance of the Crescent Moon deals 10 additional damage for each."
                             }
                         },
                         "tooltipText": "The first physical or chakra skill used on Hayate will be countered, granting him 1 Crescent Moon charge."

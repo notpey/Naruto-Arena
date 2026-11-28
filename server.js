@@ -171,6 +171,11 @@ const {
     BUG_REPORT_FIXES_1128_CHARACTER_IDS,
     applyBugReportFixes1128,
 } = require('./services/bugReportFixes1128');
+const {
+    HAYATE_TOOLTIP_FIX_MIGRATION_ID,
+    HAYATE_TOOLTIP_FIX_CHARACTER_IDS,
+    applyHayateTooltipFix,
+} = require('./services/hayateTooltipFix');
 const TEAM_7_QUEST_PROGRESS_CHARACTER_IDS = ['uzumaki-naruto', 'haruno-sakura', 'uchiha-sasuke'];
 const {
     BALANCE_UPDATE_0_5_MIGRATION_ID,
@@ -3262,6 +3267,7 @@ const saveCharacters = async (nextCharacters, { savedBy = '', action = 'edit' } 
                 [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
                 [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                 [`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`]: now,
+                [`completed.${HAYATE_TOOLTIP_FIX_MIGRATION_ID}`]: now,
                 [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                 [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
@@ -3363,6 +3369,7 @@ const getStoredCharacters = async () => {
                     [`completed.${ZORI_WARAJI_REWORK_MIGRATION_ID}`]: now,
                     [`completed.${SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID}`]: now,
                     [`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`]: now,
+                    [`completed.${HAYATE_TOOLTIP_FIX_MIGRATION_ID}`]: now,
                     [`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${NEW_MISSION_UNLOCKS_MIGRATION_ID}`]: now,
                     [`completed.${ROSTER_IN_DB_MIGRATION_ID}`]: now,
@@ -3425,6 +3432,7 @@ const getStoredCharacters = async () => {
     const shouldApplyZoriWarajiRework = !completedMigrations[ZORI_WARAJI_REWORK_MIGRATION_ID];
     const shouldApplySasukeShadowShurikenFix = !completedMigrations[SASUKE_SHADOW_SHURIKEN_FIX_MIGRATION_ID];
     const shouldApplyBugReportFixes1128 = !completedMigrations[BUG_REPORT_FIXES_1128_MIGRATION_ID];
+    const shouldApplyHayateTooltipFix = !completedMigrations[HAYATE_TOOLTIP_FIX_MIGRATION_ID];
     const shouldApplyLaunchUnlocks = !completedMigrations[LAUNCH_UNLOCKS_MIGRATION_ID];
     const shouldApplyNewMissionUnlocks = !completedMigrations[NEW_MISSION_UNLOCKS_MIGRATION_ID];
     const rosterManagedInDb = Boolean(completedMigrations[ROSTER_IN_DB_MIGRATION_ID]);
@@ -3472,6 +3480,7 @@ const getStoredCharacters = async () => {
         ...(shouldApplyZoriWarajiRework ? ZORI_WARAJI_REWORK_CHARACTER_IDS : []),
         ...(shouldApplySasukeShadowShurikenFix ? SASUKE_SHADOW_SHURIKEN_FIX_CHARACTER_IDS : []),
         ...(shouldApplyBugReportFixes1128 ? BUG_REPORT_FIXES_1128_CHARACTER_IDS : []),
+        ...(shouldApplyHayateTooltipFix ? HAYATE_TOOLTIP_FIX_CHARACTER_IDS : []),
         ...(shouldApplyLaunchUnlocks ? Array.from(LAUNCH_UNLOCK_RULE_CHARACTER_IDS) : []),
         ...(shouldApplyNewMissionUnlocks ? Array.from(NEW_MISSION_UNLOCK_CHARACTER_IDS) : []),
     ]);
@@ -3591,6 +3600,10 @@ const getStoredCharacters = async () => {
             if (shouldApplyBugReportFixes1128 && BUG_REPORT_FIXES_1128_CHARACTER_IDS.includes(characterId)) {
                 entry = applyBugReportFixes1128(entry);
             }
+            // Text-level: Hayate's Crescent Moon tooltip no longer says Dance spends the charges.
+            if (shouldApplyHayateTooltipFix && HAYATE_TOOLTIP_FIX_CHARACTER_IDS.includes(characterId)) {
+                entry = applyHayateTooltipFix(entry);
+            }
             // Only the rebalanced skills change; stored art and other edits are kept.
             if (shouldApplyBalanceUpdate05 && BALANCE_UPDATE_0_5_CHARACTER_IDS.includes(characterId)) {
                 return applyBalanceUpdate05(entry, seedEntry);
@@ -3649,7 +3662,7 @@ const getStoredCharacters = async () => {
             { upsert: true }
         ),
     };
-    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyBugReportFixes1128 || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks || !rosterManagedInDb) {
+    if (shouldApplyStarterRebalance || shouldApplyExamsRebalance || shouldApplyAuditRebalance || shouldApplyNarutoRework || shouldApplySakuraSasukeRework || shouldApplyWavesAndMizukiRework || shouldApplyDemonBrothersRework || shouldApplyInoKonohamaruRework || shouldApplyHokageHiruzenRework || shouldApplyKibaRework || shouldApplyNejiRework || shouldApplyTentenRework || shouldApplyIrukaRework || shouldApplyRainGeninRework || shouldApplySoundGeninRework || shouldApplyChoujiRework || shouldApplyShikamaruRework || shouldApplyOboroAmbushRework || shouldApplyShikamaruMarkIconRework || shouldApplyHinataShikamaruTargetingFix || shouldApplyMisumiRework || shouldApplyShioreOrochimaruRework || shouldApplyBakiRework || shouldApplyGekkoHayateRework || shouldApplyMitarashiAnkoRework || shouldApplyBalanceUpdate03 || shouldApplyKankuroTrapPoisonFix || shouldApplyZabuzaHinataMizukiFix || shouldApplyUniqueSkills || shouldApplyBalanceUpdate04 || shouldApplyTeamMinatoDrafts || shouldApplyTeamMinatoReview || shouldApplyRockLeeImmortalityFix || shouldApplyMizukiWindmillFix || shouldApplySasukeTwoTomoeRework || shouldApplySakuraInnerSakuraRework || shouldApplyNarutoKyuubiRework || shouldApplyTeam7QuestProgress || shouldApplyBalanceUpdate05 || shouldApplyZoriWarajiRework || shouldApplySasukeShadowShurikenFix || shouldApplyBugReportFixes1128 || shouldApplyHayateTooltipFix || shouldApplyLaunchUnlocks || shouldApplyNewMissionUnlocks || !rosterManagedInDb) {
         const completedMigrationUpdates = {};
         const migrationCompletedAt = new Date();
         if (shouldApplyStarterRebalance) {
@@ -3780,6 +3793,9 @@ const getStoredCharacters = async () => {
         }
         if (shouldApplyBugReportFixes1128) {
             completedMigrationUpdates[`completed.${BUG_REPORT_FIXES_1128_MIGRATION_ID}`] = migrationCompletedAt;
+        }
+        if (shouldApplyHayateTooltipFix) {
+            completedMigrationUpdates[`completed.${HAYATE_TOOLTIP_FIX_MIGRATION_ID}`] = migrationCompletedAt;
         }
         if (shouldApplyLaunchUnlocks) {
             completedMigrationUpdates[`completed.${LAUNCH_UNLOCKS_MIGRATION_ID}`] = migrationCompletedAt;
@@ -4518,6 +4534,9 @@ const PUBLIC_ROOT_SCRIPTS = new Set([
     'admin-shop.js',
     'border-fit.js',
     'character-builder-checks.js',
+    'character-rules-editor.js',
+    'character-rules-vocab.js',
+    'character-test-bench.js',
     'character-builder.js',
     'character-sentences.js',
     'character-images.js',

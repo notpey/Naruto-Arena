@@ -55,6 +55,9 @@
   let advancedView = false;
   const SL = window.CharacterSentences || null;
   let view = 'edit';
+  // The Rules and Test bench tabs (character-rules-editor.js, character-test-bench.js).
+  let rulesEditor = null;
+  let testBench = null;
   let busy = false;
   let uploadPath = null;
   let historyFor = '';
@@ -746,6 +749,8 @@
     if (view === 'changes') renderChanges();
     if (view === 'history') renderHistory();
     if (view === 'checks') renderChecks();
+    if (view === 'rules' && rulesEditor) rulesEditor.render();
+    if (view === 'bench' && testBench) testBench.render();
     if (view === 'raw') { raw.value = JSON.stringify(working, null, 2); raw.dataset.dirty = 'false'; $('raw-state').textContent = ''; }
   }
 
@@ -753,7 +758,10 @@
     const technical = Boolean(builderCatalog && builderCatalog.advancedAllowed);
     $('export-character').hidden = !working || !technical;
     $('raw-tab').hidden = !technical;
-    if (!technical && view === 'raw') view = 'edit';
+    // Rules and the test bench are part of the Advanced view.
+    $('rules-tab').hidden = !technical;
+    $('bench-tab').hidden = !technical;
+    if (!technical && ['raw', 'rules', 'bench'].includes(view)) view = 'edit';
     $('delete-character').hidden = !working || isNew || Boolean(original?.retired);
     $('discard-draft').hidden = !working || !isNew;
     if (working) renderForm();
@@ -1394,6 +1402,14 @@ They disappear from character selection, the shop, missions and the Tower for ev
   (async () => {
     await Promise.all([loadRoster(), loadMissions(), loadAccess(), loadCatalog(), loadDrafts()]);
     setupBuilder();
+    if (window.CharacterRulesEditor) {
+      rulesEditor = window.CharacterRulesEditor.mount({ container: $('rules-content'), getWorking: () => working,
+        onChange: refreshStatus, statusName });
+    }
+    if (window.CharacterTestBench) {
+      testBench = window.CharacterTestBench.mount({ container: $('bench-content'), getWorking: () => working,
+        getRoster: () => roster, request });
+    }
     let savedAdvanced = false;
     try { savedAdvanced = localStorage.getItem('ce-advanced-view') === '1'; } catch (_) {}
     setAdvanced(savedAdvanced);

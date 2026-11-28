@@ -19,6 +19,19 @@
     const STATUS_SPEC_KEYS = ['statusId', 'duration', 'fresh', 'metadata', 'scope', 'type'];
     // Settings the engine sets on statuses itself; harmless if present in data.
     const RUNTIME_STATUS_KEYS = ['passive', 'stacks', 'stackable', 'maxStacks'];
+    // Character Rules: how rules are read and checked (character-rules-vocab.js).
+    const RulesVocab = (typeof module !== 'undefined' && module.exports && typeof require === 'function')
+        ? require('./character-rules-vocab') : (globalThis.CharacterRulesVocab || null);
+    // Every rules list in a character (on its statuses and its passive).
+    function rulesIn(value, out = []) {
+        if (!value || typeof value !== 'object') return out;
+        if (Array.isArray(value)) { value.forEach((entry) => rulesIn(entry, out)); return out; }
+        Object.entries(value).forEach(([key, entry]) => {
+            if (key === 'rules' && Array.isArray(entry)) out.push(...entry);
+            rulesIn(entry, out);
+        });
+        return out;
+    }
 
     function checkCharacter(character, options) {
         const catalog = (options && options.catalog) || {};
@@ -57,6 +70,22 @@
         const producedHere = new Set(catalog.builtInStatusIds || ['invulnerable', 'stunned']);
         const statusRefs = [];
         const skillRefs = [];
+        // Counters any rule in this character uses: their values are expected on statuses.
+        const ruleCounters = new Set(RulesVocab ? RulesVocab.counterNamesIn(rulesIn(character)) : []);
+        const statusNameOf = (id) => String(id || '').replace(/_/g, ' ');
+        const skillNameOf = (id) => ((character.skills || []).find((skill) => skill && skill.id === id) || {}).name || id;
+        const checkRulesAt = (rules, where, isPassive) => {
+            if (!RulesVocab) return;
+            RulesVocab.checkRules(rules, { statusName: statusNameOf, skillName: skillNameOf, isPassive })
+                .forEach((problem) => add(problem.level, where, problem.message));
+            rulesIn(rules).forEach((rule) => (Array.isArray(rule && rule.do) ? rule.do : []).forEach((action) => {
+                if (!action) return;
+                if (action.type === 'apply_status' && action.statusId) produce(action.statusId);
+                if (action.type === 'remove_status' && action.statusId) referStatus(action.statusId, where);
+                if (action.type === 'grant_skill_use' && action.skillId) referSkill(action.skillId, where);
+                (action.skillIds || []).forEach((id) => referSkill(id, where));
+            }));
+        };
         const produce = (statusId) => { if (typeof statusId === 'string' && statusId) producedHere.add(statusId); };
         const referStatus = (statusId, where) => { if (typeof statusId === 'string' && statusId) statusRefs.push({ statusId, where }); };
         const referSkill = (skillId, where) => { if (typeof skillId === 'string' && skillId) skillRefs.push({ skillId, where }); };
@@ -193,6 +222,8 @@
                 add('warning', where, 'Players will see this status, but it has no tooltip.');
             }
             Object.entries(metadata).forEach(([key, value]) => {
+                if (key === 'rules') { checkRulesAt(value, `${where} › Rules`, false); return; }
+                if (ruleCounters.has(key)) return; // a counter the rules keep
                 const setting = statusSettings[key];
                 if (setting) {
                     checkKind(setting.kind, value, `${where} › ${setting.label}`, setting);
@@ -310,6 +341,14 @@
             Object.entries(passive).forEach(([key, value]) => {
                 const where = `Passive (${passive.name || 'unnamed'})`;
                 if (key === 'awakening') return;
+                if (key === 'rules') { checkRulesAt(value, `${where} › Rules`, true); return; }
+                if (key === 'counters') {
+                    if (!value || typeof value !== 'object' || Array.isArray(value) ||
+                        Object.values(value).some((start) => !Number.isFinite(Number(start)))) {
+                        add('error', where, 'Counters must each start at a number.');
+                    }
+                    return;
+                }
                 const field = passiveFields[key];
                 if (field) {
                     checkKind(field.kind, value, `${where} › ${field.label}`, field);

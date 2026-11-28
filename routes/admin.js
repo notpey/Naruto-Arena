@@ -6,6 +6,7 @@ const { validateCharacterPayload } = require('../services/characterValidation.js
 const { getBuilderCatalog } = require('../data/builder');
 const { checkCharacter } = require('../character-builder-checks.js');
 const { conceptToCharacter } = require('../services/conceptToCharacter.js');
+const { runTestBench } = require('../services/testBench.js');
 
 module.exports = function(context) {
     const router = express.Router();
@@ -826,6 +827,11 @@ module.exports = function(context) {
             return res.status(500).json({ error: 'Unable to save character rank access.' });
         }
     });
+    // The Advanced view (block builder, Rules, test bench) is limited to the usernames in
+    // ACP_ADVANCED_EDITORS (comma-separated); everyone else edits with plain sentences.
+    const isAdvancedEditor = (req) => String(process.env.ACP_ADVANCED_EDITORS || '').split(',')
+        .map((name) => name.trim().toLowerCase()).filter(Boolean)
+        .includes(String(req.authUser?.username || '').toLowerCase());
     // Everything the battle engine can do, described for the Character Editor, with where each
     // piece is used on the live roster.
     router.get('/builder-catalog', requireSession, (req, res) => {
@@ -834,10 +840,20 @@ module.exports = function(context) {
         }
         // The full block builder is limited to the usernames in ACP_ADVANCED_EDITORS (comma-separated);
         // everyone else edits with plain sentences.
-        const advancedEditors = String(process.env.ACP_ADVANCED_EDITORS || '').split(',')
-            .map((name) => name.trim().toLowerCase()).filter(Boolean);
-        const advancedAllowed = advancedEditors.includes(String(req.authUser?.username || '').toLowerCase());
-        return res.json({ ok: true, catalog: { ...getBuilderCatalog(getCharactersList()), advancedAllowed } });
+        return res.json({ ok: true, catalog: { ...getBuilderCatalog(getCharactersList()), advancedAllowed: isAdvancedEditor(req) } });
+    });
+    // Character Editor test bench: runs the edited character (unsaved changes included) in a short
+    // scripted match on a throwaway board. Nothing is saved; no live match is touched.
+    router.post('/test-bench', requireSession, (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        if (!isAdvancedEditor(req)) return res.status(403).json({ error: 'The test bench is part of the Advanced view.' });
+        const { character, allies, enemies, steps } = req.body || {};
+        const problems = validateCharacterPayload(character);
+        if (problems.length) return res.status(400).json({ error: problems[0] });
+        const result = runTestBench({ roster: getCharactersList(), character, allies, enemies, steps });
+        return res.status(result.ok ? 200 : 400).json(result.ok ? result : { error: result.error, frames: result.frames || [] });
     });
     // Plain-language checks for a saved character: what the engine would ignore or misread.
     const checksFor = (character) => {

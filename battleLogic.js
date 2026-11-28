@@ -1,4 +1,17 @@
 const defaultCharacters = require("./data/characters/index.js");
+const { createRuleRunner, hasRules } = require('./characterRules');
+
+// Character Rules (characterRules.js) run only on statuses that carry `rules`; built on first use.
+let ruleRunnerInstance = null;
+const ruleRunner = () => {
+    if (!ruleRunnerInstance) {
+        ruleRunnerInstance = createRuleRunner({
+            applyTriggeredEffectsFromStatus, applyStatus, ensureUnitStateShape, refreshDerivedStatusTooltips,
+            isStatusActive: (status, unit) => isStatusActiveForMetadata(status, unit),
+        });
+    }
+    return ruleRunnerInstance;
+};
 
 const DEFAULT_HP = 100;
 // A status lasting this many turns or more is permanent: it never counts down.
@@ -172,6 +185,9 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
                           awakening: passive.awakening || null,
                           ...(Number(passive.awakening?.afterOwnerSkillUses) > 0
                               ? { awakeningSkillUses: 0 } : {}),
+                          // Character Rules: the passive's rules, and its counters at their start values.
+                          ...(Array.isArray(passive.rules) && passive.rules.length ? { rules: passive.rules } : {}),
+                          ...(passive.counters && typeof passive.counters === 'object' ? passive.counters : {}),
                       },
                   }
                 : null;
@@ -347,6 +363,8 @@ const buildInitialBoard = (players = [], characters = defaultCharacters) => {
             }
         });
     });
+    // Character Rules: "when the match starts".
+    ruleRunner().fireBoard({ match: { board }, event: 'matchStart' });
     return board;
 };
 
@@ -2356,6 +2374,9 @@ const updateTeamPassiveAwakenings = ({ match, username, ownerTurnEnded = false }
         if (!turnsReady && !allyReady && !skillUsesReady) return;
         grantPassiveAwakening({ state, passive, username, slot });
     });
+    // Character Rules: "when health drops below" is checked at the same moments as awakenings
+    // (after damage to this team, and at the end of its turns).
+    if (match?.board) ruleRunner().fireBoard({ match, event: 'healthBelow', usernames: [username] });
 };
 
 const grantPassiveAwakening = ({ state, passive, username, slot }) => {
@@ -3691,6 +3712,13 @@ const maybeTriggerReactiveDefenses = ({
         });
     }
 
+    // Character Rules: "when this status counters a skill".
+    if (hasRules(trapStatus) && recipient?.username && Number.isInteger(recipient?.slot)) {
+        ruleRunner().fireStatus({
+            match, event: 'countered', username: recipient.username, slot: recipient.slot, status: trapStatus,
+        });
+    }
+
     const alternativeEffectsAppliedCount = applyCounteredAlternativeEffects({
         match,
         actingUsername,
@@ -4296,6 +4324,14 @@ const applyDamageToUnitCore = (unit, rawAmount, context = {}) => {
         }
     }
     const healthDamage = Math.max(0, hpBeforeDamage - unit.hp);
+    if (dealt > 0 && context?.match && context?.targetUsername) {
+        // Character Rules: "when the owner takes damage".
+        const damagedSlot = (context.match.board?.[context.targetUsername] || []).indexOf(unit);
+        if (damagedSlot >= 0) {
+            ruleRunner().fireUnit({ match: context.match, event: 'damaged', username: context.targetUsername,
+                slot: damagedSlot, info: { amount: dealt } });
+        }
+    }
     if (dealt > 0) {
         targetState.snapshots.tookDamageThisTurn = true;
         (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
@@ -4547,6 +4583,14 @@ const applyPassiveStunDamage = ({
     const sourceUnit = match.board?.[sourceUsername]?.[sourceSlot];
     if (!sourceUnit || sourceUnit.alive === false) return;
     const sourceState = ensureUnitStateShape(sourceUnit);
+    // Character Rules: "when the owner stuns an enemy" (the stun this skill placed has landed).
+    const stunLanded = ensureUnitStateShape(targetUnit).statuses.some((status) =>
+        status.id === statusId && status.sourceUsername === sourceUsername &&
+        status.sourceSlot === sourceSlot && (Number(status.remainingTurns) || 0) > 0);
+    if (stunLanded) {
+        ruleRunner().fireUnit({ match, event: 'ownerStuns', username: sourceUsername, slot: sourceSlot,
+            info: { skillId: sourceSkillId || null, stunnedUsername: targetUsername, stunnedSlot: targetSlot } });
+    }
     const passive = sourceState.statuses.find((status) =>
         isStatusActiveForMetadata(status, sourceUnit) &&
         status.metadata?.passive === true &&
@@ -4959,6 +5003,7 @@ const triggerTeamMemberDeathHooks = ({ match, deadUsername, deadSlot = null }) =
 
 const purgeTetheredStatusesOnSourceDeath = ({ match, sourceUsername, sourceSlot }) => {
     if (!match || !sourceUsername || !Number.isInteger(sourceSlot)) return;
+    const endedByCasterDeath = [];
     const players = Array.isArray(match.players) ? match.players : [];
     players.forEach((player) => {
         const username = player?.username;
@@ -4988,9 +5033,15 @@ const purgeTetheredStatusesOnSourceDeath = ({ match, sourceUsername, sourceSlot 
                     Boolean(metadata.sourceDeathPurge) ||
                     Boolean(metadata.removeWhenSourceDies);
                 if (isTethered) {
+                    if (hasRules(status)) endedByCasterDeath.push(status);
                     return false;
                 }
                 return true;
+            });
+            // Character Rules: "when this status ends" (its caster died).
+            endedByCasterDeath.splice(0).forEach((status) => {
+                ruleRunner().fireStatus({ match, event: 'statusEnds', username, slot: units.indexOf(unit), status,
+                    info: { reason: 'casterDied' } });
             });
             if (unitState.statuses.length !== initialCount) {
                 refreshDerivedStatusTooltips(unitState);
@@ -5115,6 +5166,18 @@ const triggerOwnerDeathHooks = ({ unit, match, username, slot }) => {
                 applyChakraGainToMatch({ match, username: status.sourceUsername, chakraType: pick, amount: 1 });
             }
         });
+        // Character Rules, once per death: "when a unit dies" for the fallen unit and everyone
+        // else, and "when this status ends" for the statuses the fallen unit held.
+        if (!targetState.snapshots?.deathRulesFired) {
+            targetState.snapshots = { ...(targetState.snapshots || {}), deathRulesFired: true };
+            const deathInfo = { dyingUsername: username, dyingSlot: slot };
+            ruleRunner().fireUnit({ match, event: 'unitDies', username, slot, info: deathInfo });
+            ruleRunner().fireBoard({ match, event: 'unitDies', info: deathInfo });
+            [...(Array.isArray(targetState.statuses) ? targetState.statuses : [])].forEach((status) => {
+                if (!isStatusActiveForMetadata(status, unit) || !hasRules(status)) return;
+                ruleRunner().fireStatus({ match, event: 'statusEnds', username, slot, status, info: { reason: 'ownerDied' } });
+            });
+        }
         // A mark that ends its source's linked statuses when it expires (Devour's guard) ends them
         // when the marked unit dies too.
         (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
@@ -5147,6 +5210,10 @@ const triggerSourceKillHooks = ({
     const sourceUnit = match.board?.[sourceUsername]?.[Number(sourceSlot)] || null;
     if (!sourceUnit || sourceUnit.alive === false) return;
     const sourceState = ensureUnitStateShape(sourceUnit);
+    // Character Rules: "when the owner kills a unit".
+    ruleRunner().fireUnit({ match, event: 'ownerKills', username: sourceUsername, slot: sourceSlot,
+        info: { skillId: sourceSkillId || null, classes: sourceSkillClasses || [],
+            relation: sourceUsername === targetUsername ? 'ally' : 'enemy' } });
     (Array.isArray(sourceState.statuses) ? sourceState.statuses : []).forEach((status) => {
         if (!isStatusActiveForMetadata(status, sourceUnit)) return;
         const metadata = status?.metadata || {};
@@ -5244,6 +5311,16 @@ const triggerOnEnemySkillTargetedBonuses = ({
     if (!recipient.username || recipient.username === actingUsername) return;
     const targetUnit = recipient.unit;
     const targetState = ensureUnitStateShape(targetUnit);
+    // Character Rules: "when an enemy uses a skill on the owner" ('attacker' is that enemy).
+    const recipientSlot = Number.isInteger(recipient.slot) ? recipient.slot
+        : (match.board?.[recipient.username] || []).indexOf(targetUnit);
+    ruleRunner().fireUnit({ match, event: 'enemySkillOnOwner', username: recipient.username, slot: recipientSlot,
+        info: {
+            attackerUsername: actingUsername,
+            attackerSlot: Number.isInteger(actorSlot) ? actorSlot : (match.board?.[actingUsername] || []).indexOf(actorUnit),
+            skillId: skill?.id || null, classes: skill?.classes || [], harmful: skillHasHarmfulEffects(skill),
+            damagingPass: Boolean(damagingEffectOnly),
+        } });
     (Array.isArray(targetState.statuses) ? targetState.statuses : []).forEach((status) => {
         if (!isStatusActiveForMetadata(status, targetUnit)) return;
         const metadata = status?.metadata || {};
@@ -5713,6 +5790,9 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
         }
         const ownerUseSkillTriggeredStatusIds = new Set();
         const skillIsMental = hasSkillClass(skill?.classes || [], 'mental');
+        // Character Rules: "when the owner uses a skill".
+        ruleRunner().fireUnit({ match, event: 'ownerUsesSkill', username: actingUsername, slot: actorSlot,
+            info: { skillId: skill?.id || null, classes: skill?.classes || [], harmful: skillHasHarmfulEffects(skill) } });
         (Array.isArray(actorState?.statuses) ? actorState.statuses : []).forEach((status) => {
             const remaining = Number(status?.remainingTurns) || 0;
             if (remaining <= 0) return;
@@ -7626,6 +7706,17 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                             fresh: true,
                         });
                     }
+                    // Character Rules: "when this status is applied" (placed by this skill).
+                    {
+                        const placed = destinationState.statuses.find((status) => status?.id === runtimeStatusId &&
+                            status.sourceUsername === actingUsername && status.sourceSlot === actorSlot &&
+                            (Number(status.remainingTurns) || 0) > 0);
+                        if (placed && hasRules(placed)) {
+                            ruleRunner().fireStatus({ match, event: 'statusApplied',
+                                username: appliesToSelf ? actingUsername : recipient.username,
+                                slot: appliesToSelf ? actorSlot : recipient.slot, status: placed });
+                        }
+                    }
                     if (applyingStun) {
                         applyPassiveStunDamage({
                             match, sourceUsername: actingUsername, sourceSlot: actorSlot,
@@ -8265,6 +8356,13 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
                 return;
             }
 
+            if (effectType === 'add_counter') {
+                // Character Rules: a skill adds to a counter (e.g. one more charge).
+                ruleRunner().addCounterFromSkill({
+                    match, username: actingUsername, slot: actorSlot, effect, sourceSkillId: skill?.id || null,
+                });
+                return;
+            }
             if (effectType === 'gain_chakra') {
                 const amount = Math.max(0, Number(effect?.amount) || 0);
                 if (amount <= 0) return;
@@ -8994,6 +9092,8 @@ const tickStatusesForTurnEnd = (args = {}) =>
     runWithActiveResolution(args?.match, () => tickStatusesAtTurnEnd(args));
 
 const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
+    // Character Rules: "when a turn ends", before statuses count down (as ongoing effects tick).
+    if (match?.board) ruleRunner().fireBoard({ match, event: 'turnEnds', info: { endingUsername } });
     if (!match || !endingUsername) return;
     syncLinkedStatuses(match);
     const players = Array.isArray(match.players) ? match.players : [];
@@ -9060,6 +9160,7 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
         const endedOngoingStatuses = new Set();
         const pendingExpireStatuses = [];
         const earlyEndedStatusesWithEffects = [];
+        const interruptedRuleStatuses = [];
         actorState.statuses.forEach((status) => {
                 if (!status || (status.remainingTurns || 0) <= 0) return;
                 if (status.fresh && !Boolean(status?.metadata?.triggerOnApply)) return;
@@ -9118,6 +9219,7 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                         if (status?.metadata?.expireEffectsOnEarlyEnd) {
                             earlyEndedStatusesWithEffects.push(status);
                         }
+                        if (hasRules(status)) interruptedRuleStatuses.push(status);
                     }
                     return;
                 }
@@ -9887,6 +9989,11 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                             targetSlot: unitSlot,
                             pendingStatuses: pendingExpireStatuses,
                         });
+                        // Character Rules: "when this status ends" (ran out).
+                        if (hasRules(status)) {
+                            ruleRunner().fireStatus({ match, event: 'statusEnds', username, slot: unitSlot, status,
+                                info: { reason: 'expired' }, pendingStatuses: pendingExpireStatuses });
+                        }
                     }
                     if (
                         nextRemaining <= 0 &&
@@ -9968,6 +10075,11 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                             targetSlot: unitSlot,
                             pendingStatuses: pendingExpireStatuses,
                         });
+                        // Character Rules: "when this status ends" (ran out).
+                        if (hasRules(status)) {
+                            ruleRunner().fireStatus({ match, event: 'statusEnds', username, slot: unitSlot, status,
+                                info: { reason: 'expired' }, pendingStatuses: pendingExpireStatuses });
+                        }
                     }
                     if (nextRemaining <= 0 && status?.metadata?.onExpireApplyStatusToSelf?.statusId) {
                         applyExpireReplacementStatus({
@@ -9991,6 +10103,11 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
                     pendingStatuses: pendingExpireStatuses,
                 });
             });
+            // Character Rules: "when this status ends" (a control effect interrupted).
+            interruptedRuleStatuses.forEach((status) => {
+                ruleRunner().fireStatus({ match, event: 'statusEnds', username, slot: unitSlot, status,
+                    info: { reason: 'interrupted' }, pendingStatuses: pendingExpireStatuses });
+            });
             if (pendingExpireStatuses.length > 0) {
                 actorState.statuses.push(...pendingExpireStatuses);
             }
@@ -10011,6 +10128,8 @@ const tickStatusesAtTurnEnd = ({ match, endingUsername }) => {
         const snapshots = unitState.snapshots;
         if (username === endingUsername) {
             if (unit.alive !== false && !snapshots.tookDamageThisTurn) {
+                // Character Rules: "when the owner's team ends a turn without the owner taking damage".
+                ruleRunner().fireUnit({ match, event: 'undamagedTurn', username, slot: units.indexOf(unit) });
                 (Array.isArray(unitState.statuses) ? unitState.statuses : []).forEach((status) => {
                     if (!isStatusActiveForMetadata(status, unit)) return;
                     const key = status?.metadata?.onUndamagedTurnStackMetadataKey;
@@ -10189,6 +10308,8 @@ const applyOnEnemyIncreasedCostSkillBonuses = ({ match, actingUsername }) => {
         (match.board?.[player.username] || []).forEach((unit, slot) => {
             if (!unit || unit.alive === false) return;
             const state = ensureUnitStateShape(unit);
+            // Character Rules: "when an enemy pays an increased cost".
+            ruleRunner().fireUnit({ match, event: 'enemyPaysMore', username: player.username, slot });
             state.statuses.slice().forEach((status) => {
                 if (!isStatusActiveForMetadata(status, unit)) return;
                 const applyStatusToSelf = status?.metadata?.onEnemyIncreasedCostSkillApplyStatusToSelf;

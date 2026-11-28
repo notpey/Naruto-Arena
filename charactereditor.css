@@ -294,3 +294,99 @@
   .cb-recipient { flex: 1 1 100%; }
   .inline-editor .cb-recipient select { flex: 1; width: auto; }
 }
+
+/* Rules tab: each status is a light card; each rule a sentence in three parts (when, if, then). */
+.ce-rules-body, .ce-bench-body { display: grid; gap: 16px; color-scheme: light; }
+.ce-rules-body .ce-muted { color: #bfb6aa; }
+.rr-owner { display: grid; gap: 12px; padding: 14px 16px; border: 1px solid #d8dce2; border-radius: 4px; background: #fbfcfd; box-shadow: 0 10px 20px rgba(0, 0, 0, .2); }
+.rr-owner-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.inline-editor .rr-owner-head h3 { margin: 4px 0 0; color: #1e344e !important; font-size: 16px; font-weight: 800 !important; letter-spacing: 0 !important; text-transform: none !important; text-shadow: none !important; }
+.rr-count { flex: none; color: #55677d; font-size: 12px; font-weight: 700; }
+.rr-counters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 10px; border-radius: 3px; background: #eef2f7; }
+.rr-counters-label { color: #55677d; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.rr-counter { display: inline-flex; align-items: center; gap: 6px; color: #1e344e; font-size: 13px; font-weight: 600; }
+.rr-rules { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.rr-rule { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid #d6dce4; border-radius: 4px; background: #fff; }
+.rr-rule-head { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: start; gap: 8px; }
+.inline-editor .rr-readback { margin: 0; padding: 6px 10px; border-radius: 3px; background: #f1f5fa; color: #1e344e !important; font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+.rr-rule-tools { display: inline-flex; flex-wrap: wrap; gap: 2px 12px; padding-top: 6px; }
+.rr-part { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: start; gap: 10px; }
+.rr-label { justify-self: start; margin-top: 7px; padding: 2px 7px; border-radius: 3px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.rr-label.is-when { background: #e3eaf3; color: #2d5a94; }
+.rr-label.is-if { background: #f6ecd9; color: #7a4f0e; }
+.rr-label.is-then { background: #e1f0e6; color: #2a6540; }
+.rr-part-body { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; color: #1e344e; font-size: 14px; }
+.rr-fields { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; width: 100%; }
+.rr-field { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: #3d4f66; font-size: 13px; font-weight: 600; }
+.rr-multi { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; }
+.rr-items { display: grid; gap: 4px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.rr-item { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; color: #1e344e; font-size: 14px; line-height: 2; }
+.rr-item .text-button { margin-left: auto; }
+.inline-editor .rr-text { width: 140px; text-align: left; }
+.inline-editor .rr-none { margin: 0; }
+.rr-add-rule { justify-self: start; }
+.rr-problems ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* Test bench: the match as light cards, the steps as a log to step back through. */
+.tb-setup, .tb-turnbar, .tb-row, .tb-log { padding: 12px 14px; border: 1px solid #d8dce2; border-radius: 4px; background: #fbfcfd; box-shadow: 0 10px 20px rgba(0, 0, 0, .2); }
+.tb-setup { display: grid; gap: 8px; }
+.tb-side { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.tb-side .rr-counters-label { width: 92px; }
+.tb-fixed { display: inline-flex; align-items: center; gap: 6px; color: #1e344e; font-size: 14px; font-weight: 800; }
+.tb-turnbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; color: #1e344e; font-size: 14px; }
+.tb-turn-tools { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.tb-board { display: grid; gap: 12px; }
+.inline-editor .tb-row h3, .inline-editor .tb-log h3 { margin: 0 0 8px; color: #29364b !important; font-size: 12px; font-weight: 800 !important; letter-spacing: .04em !important; text-transform: uppercase; text-shadow: none !important; }
+.tb-units { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tb-unit { display: grid; align-content: start; gap: 6px; min-width: 0; padding: 10px; border: 1px solid #d6dce4; border-radius: 4px; background: #fff; }
+.tb-unit header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.inline-editor .tb-unit h4 { margin: 0; color: #1e344e !important; font-size: 14px; font-weight: 800; text-transform: none; }
+.tb-hp { color: #1e344e; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tb-bar { height: 6px; overflow: hidden; border-radius: 3px; background: #e3e8ee; }
+.tb-bar span { display: block; height: 100%; background: #3f8f5b; transition: width .2s ease-out; }
+.tb-unit.is-dead { opacity: .55; }
+.tb-unit.is-dead .tb-hp { color: #8e4d48; }
+.tb-unit.is-target { outline: 2px dashed #2f73cf; outline-offset: 1px; cursor: pointer; }
+.tb-unit.is-target:hover, .tb-unit.is-target:focus-visible { background: #eef4fc; }
+.tb-statuses { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+.tb-status { color: #3d4f66; font-size: 12.5px; line-height: 1.4; }
+.tb-status strong { color: #1e344e; }
+.tb-status.is-hidden { opacity: .75; }
+.tb-counters { color: #2d5a94; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tb-cooldowns { margin: 0; color: #55677d; font-size: 12px; }
+.tb-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.tb-skill { padding: 5px 9px; border: 1px solid #b9c7d8; border-radius: 3px; background: #eef3f9; color: #1e344e; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.tb-skill:hover { background: #e1eaf5; border-color: #8fa3bb; }
+.tb-skill:focus-visible, .tb-step:focus-visible { outline: 2px solid #2f73cf; outline-offset: 1px; }
+.tb-sethp { display: inline-flex; align-items: center; gap: 6px; color: #55677d; font-size: 11.5px; font-weight: 700; }
+.tb-log header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; }
+.tb-log ol { display: grid; gap: 2px; margin: 0; padding-left: 22px; color: #55677d; font-size: 13px; }
+.tb-log li.is-current .tb-step { color: #1e344e; font-weight: 800; }
+.tb-step { padding: 2px 0; border: 0; background: none; color: #2d5a94; font: inherit; text-align: left; cursor: pointer; }
+.tb-note { display: block; color: #8a5a12; font-size: 12px; }
+@media (max-width: 760px) {
+  .tb-units { grid-template-columns: minmax(0, 1fr); }
+  .rr-part { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+/* brand.css forces every p, label and span to a light beige for dark pages; on these light cards
+   the text needs its own colours, with !important as elsewhere in the editor. */
+.ce-rules-body .ce-muted { color: #bfb6aa !important; }
+.rr-owner .sl-tag, .ce-bench-body .sl-tag { color: #2d5a94 !important; }
+.rr-count, .rr-counters-label { color: #55677d !important; }
+.rr-counter, .rr-part-body span, .rr-item span { color: #1e344e !important; }
+.rr-field { color: #3d4f66 !important; }
+.rr-label.is-when { color: #2d5a94 !important; }
+.rr-label.is-if { color: #7a4f0e !important; }
+.rr-label.is-then { color: #2a6540 !important; }
+.rr-owner .ce-hint { color: #5c6f86 !important; font-size: 12px; }
+.tb-fixed, .tb-turnbar span, .tb-hp, .tb-unit header span { color: #1e344e !important; }
+.tb-unit.is-dead .tb-hp { color: #8e4d48 !important; }
+.tb-status span, .tb-sethp, .tb-log header span, .tb-cooldowns { color: #55677d !important; }
+.tb-status .tb-counters { color: #2d5a94 !important; }
+.tb-note { color: #8a5a12 !important; }
+.tb-log li { color: #55677d; }
+/* "Add a rule" is an add control, like the sentence editor's: a quiet dashed outline. */
+.inline-editor .rr-add-rule { min-height: 34px; padding: 6px 14px; border: 1px dashed #8fa3bb; border-radius: 3px; background: #fff; color: #2d5a94; font-size: 13px; font-weight: 800; letter-spacing: 0; text-transform: none; box-shadow: none; }
+.inline-editor .rr-add-rule:hover { background: #eef4fc; border-color: #2d5a94; }
+.inline-editor .rr-item input[placeholder="no limit"] { width: 84px; }
+.tb-status strong, .tb-turnbar strong { color: #1e344e !important; }

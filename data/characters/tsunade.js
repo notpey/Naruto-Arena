@@ -2,21 +2,19 @@ module.exports = {
     "id": "tsunade",
     "characterId": "tsunade",
     "name": "Tsunade",
-    "facePicture": "https://i.imgur.com/N6D7kcS.png",
+    "facePicture": "https://www.animehistory.org/uploads/screencaps/naruto-episode-089-an-impossible-choice-the-pain-within-tsunade_s-heart/cap_20-38_f81e.jpg",
     "characterdeescription": "One of the three sannins, Tsunade is a gambling, sake drinking loving woman with a tough exterior but soft interior. Tsunade is an expert at medical jutsu, using it to remove all her wounds, or delivering high impact kicks.",
-    "requiredMissionId": "disciples-of-the-slug",
     "skills": [
         {
             "id": "tsunade-heavenly-foot-of-pain",
             "name": "Heavenly Foot of Pain",
             "skillimage": "https://i.imgur.com/pZx6mNz.png",
-            "skilldescription": "Tsunade deals 30 damage to one enemy and stuns their physical, mental, and strategic skills for 1 turn.",
+            "skilldescription": "Tsunade deals 30 physical damage to an enemy and stuns their physical and strategic skills for 1 turn.",
             "energy": [
                 "Taijutsu",
                 "Random"
             ],
             "target": "single-enemy",
-            "damage": 0,
             "cooldown": 0,
             "classes": [
                 "Physical",
@@ -35,13 +33,25 @@ module.exports = {
                     "scope": "target",
                     "metadata": {
                         "harmful": true,
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "This character's Physical skills are stunned.",
                         "cannotUseSkillClasses": [
-                            "physical",
-                            "mental",
+                            "physical"
+                        ]
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "tsunade_heavenly_foot_of_pain_stun_3",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "This character's Strategic skills are stunned.",
+                        "cannotUseSkillClasses": [
                             "strategic"
-                        ],
-                        "tooltipText": "This character's physical, mental, and strategic skills are stunned.",
-                        "turnDurationAnchor": "source_turn"
+                        ]
                     }
                 }
             ]
@@ -50,14 +60,13 @@ module.exports = {
             "id": "tsunade-creation-rebirth",
             "name": "Creation Rebirth",
             "skillimage": "https://i.imgur.com/nSlS0Nu.png",
-            "skilldescription": "Tsunade removes all harmful effects on her and then sets her health to 100 (this is a healing effect).",
+            "skilldescription": "Tsunade cleanses and fully heals.",
             "energy": [
                 "Ninjutsu",
                 "Ninjutsu"
             ],
             "target": "self",
-            "damage": 0,
-            "cooldown": 3,
+            "cooldown": 4,
             "classes": [
                 "Strategic",
                 "Instant"
@@ -66,12 +75,11 @@ module.exports = {
                 {
                     "type": "cleanse_statuses",
                     "scope": "self",
-                    "harmfulOnly": true,
-                    "count": 0
+                    "harmfulOnly": true
                 },
                 {
                     "type": "heal",
-                    "amount": 999,
+                    "amount": 100,
                     "scope": "self"
                 }
             ]
@@ -80,14 +88,13 @@ module.exports = {
             "id": "tsunade-major-summoning-katsuyu",
             "name": "Major Summoning: Katsuyu",
             "skillimage": "https://i.imgur.com/bMT9EFI.png",
-            "skilldescription": "Tsunade heals herself and her allies for 45 health. For the rest of the game, Tsunade's team will be healed for 5 health each turn, and this skill will be replaced by 'Slug Division'. This skill will end if Tsunade dies.",
+            "skilldescription": "Tsunade heals all team members for 45 hp. Permanently, the targets will heal 5 hp each turn, and this skill will be replaced by Slug Division. This skill ends if Tsunade dies.",
             "energy": [
                 "Bloodline",
                 "Ninjutsu",
                 "Genjutsu"
             ],
-            "target": "self",
-            "damage": 0,
+            "target": "all-allies",
             "cooldown": 0,
             "classes": [
                 "Strategic",
@@ -101,28 +108,26 @@ module.exports = {
                 },
                 {
                     "type": "apply_status",
-                    "statusId": "tsunade_katsuyu_regen",
+                    "statusId": "tsunade_major_summoning_katsuyu_healovertime",
                     "duration": 99,
                     "scope": "all-allies",
                     "metadata": {
                         "helpful": true,
-                        "ongoingClass": "action",
                         "turnEndHealFlat": 5,
-                        "tooltipText": "This character heals 5 health each turn from Major Summoning: Katsuyu."
+                        "tooltipText": "This character heals 5 health each turn."
                     }
                 },
                 {
                     "type": "apply_status",
-                    "statusId": "tsunade_katsuyu_replacement",
+                    "statusId": "tsunade_major_summoning_katsuyu_transform",
                     "duration": 99,
                     "scope": "self",
                     "metadata": {
                         "helpful": true,
-                        "ongoingClass": "action",
                         "skillReplacements": {
                             "tsunade-major-summoning-katsuyu": "tsunade-slug-division"
                         },
-                        "tooltipText": "Major Summoning: Katsuyu is replaced by Slug Division."
+                        "tooltipText": "Major Summoning: Katsuyu becomes Slug Division."
                     }
                 }
             ]
@@ -136,7 +141,6 @@ module.exports = {
                 "Random"
             ],
             "target": "self",
-            "damage": 0,
             "cooldown": 4,
             "classes": [
                 "Strategic",
@@ -145,10 +149,11 @@ module.exports = {
             "effects": [
                 {
                     "type": "apply_status",
-                    "statusId": "invulnerable",
+                    "statusId": "tsunade_elbow_block_invulnerable",
                     "duration": 1,
                     "scope": "self",
                     "metadata": {
+                        "helpful": true,
                         "invulnerable": true,
                         "tooltipText": "This character is invulnerable."
                     }
@@ -158,14 +163,12 @@ module.exports = {
         {
             "id": "tsunade-slug-division",
             "name": "Slug Division",
-            "hiddenFromSelectionViewer": true,
             "skillimage": "https://i.imgur.com/oyxiuxw.png",
-            "skilldescription": "Tsunade heals her team for 10 health and grants them 10 points of permanent destructible defense.",
+            "skilldescription": "Tsunade heals all team members 10 hp and grants them 20 permanent affliction mitigation.\n",
             "energy": [
                 "Ninjutsu"
             ],
-            "target": "self",
-            "damage": 0,
+            "target": "all-allies",
             "cooldown": 2,
             "classes": [
                 "Strategic",
@@ -176,22 +179,14 @@ module.exports = {
                     "type": "heal",
                     "amount": 10,
                     "scope": "all-allies"
-                },
-                {
-                    "type": "apply_status",
-                    "statusId": "tsunade_slug_division_dd",
-                    "duration": 99,
-                    "scope": "all-allies",
-                    "metadata": {
-                        "helpful": true,
-                        "destructibleDefensePoints": 10,
-                        "mergeNumericAddKeys": [
-                            "destructibleDefensePoints"
-                        ],
-                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} permanent destructible defense."
-                    }
                 }
-            ]
+            ],
+            "hiddenFromSelectionViewer": true
         }
-    ]
+    ],
+    "passive": {
+        "name": "Legendary Sannin",
+        "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-095-the-fifth-hokage_-a-life-on-the-line_/cap_20-16_8aa7.jpg",
+        "description": "When an allied Major Summoning skill is used, this character becomes invulnerable for 1 turn."
+    }
 };
