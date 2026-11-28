@@ -9,6 +9,7 @@
   const saveButton = document.getElementById('save-draft');
   const deleteButton = document.getElementById('delete-draft');
   const copyButton = document.getElementById('copy-link');
+  const sendButton = document.getElementById('send-to-editor');
   const commentForm = document.getElementById('comment-form');
   const topicForm = document.getElementById('topic-form');
   const commentList = document.getElementById('discussion-list');
@@ -45,7 +46,7 @@
   async function request(url, options) {
     const response = await fetch(url, { credentials: 'same-origin', ...options });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
+    if (!response.ok) throw Object.assign(new Error(data.error || `Request failed (${response.status}).`), { status: response.status });
     return data;
   }
   function renderList() {
@@ -175,6 +176,7 @@
     renderList();
     deleteButton.hidden = !current.id;
     copyButton.hidden = !current.id;
+    sendButton.hidden = !current.id;
     setState(current.id ? `Saved draft · version ${current.version}` : 'New concept');
     comments = [];
     renderComments();
@@ -248,6 +250,21 @@
     if (current.skills.length >= 12) return;
     current.skills.push(blankSkill()); renderSkillEditors(); changed();
     skillEditor.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  // Promotes this concept to a Character Editor draft: a character skeleton with ids, costs, classes
+  // and targets filled in from the concept, ready for its mechanics to be built.
+  sendButton.addEventListener('click', async () => {
+    if (!current.id) return;
+    if (dirty) { setState('Save the draft first, so the Character Editor gets your latest changes.', true); return; }
+    sendButton.disabled = true;
+    setState('Starting a Character Editor draft…');
+    try {
+      const data = await request('/api/admin/editor-drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conceptId: current.id }) });
+      location.href = `charactereditor.html?draft=${encodeURIComponent(data.draft.id)}`;
+    } catch (error) {
+      sendButton.disabled = false;
+      setState(error.status === 403 ? 'Only admins can build characters in the Character Editor.' : error.message, true);
+    }
   });
   document.getElementById('toggle-passive').addEventListener('click', () => {
     if (current.passive && !confirm('Remove the passive skill from this draft?')) return;

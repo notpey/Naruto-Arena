@@ -3,6 +3,9 @@ const { ObjectId } = require('mongodb');
 const { randomUUID, createHash } = require('node:crypto');
 const cosmeticsRules = require('../services/cosmeticsRules.js');
 const { validateCharacterPayload } = require('../services/characterValidation.js');
+const { getBuilderCatalog } = require('../data/builder');
+const { checkCharacter } = require('../character-builder-checks.js');
+const { conceptToCharacter } = require('../services/conceptToCharacter.js');
 
 module.exports = function(context) {
     const router = express.Router();
@@ -823,6 +826,136 @@ module.exports = function(context) {
             return res.status(500).json({ error: 'Unable to save character rank access.' });
         }
     });
+    // Everything the battle engine can do, described for the Character Editor, with where each
+    // piece is used on the live roster.
+    router.get('/builder-catalog', requireSession, (req, res) => {
+        if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required.' });
+        }
+        // The full block builder is limited to the usernames in ACP_ADVANCED_EDITORS (comma-separated);
+        // everyone else edits with plain sentences.
+        const advancedEditors = String(process.env.ACP_ADVANCED_EDITORS || '').split(',')
+            .map((name) => name.trim().toLowerCase()).filter(Boolean);
+        const advancedAllowed = advancedEditors.includes(String(req.authUser?.username || '').toLowerCase());
+        return res.json({ ok: true, catalog: { ...getBuilderCatalog(getCharactersList()), advancedAllowed } });
+    });
+    // Plain-language checks for a saved character: what the engine would ignore or misread.
+    const checksFor = (character) => {
+        try {
+            const roster = getCharactersList();
+            return checkCharacter(character, { catalog: getBuilderCatalog(roster), roster });
+        } catch (error) {
+            console.error('Character check error:', error);
+            return [];
+        }
+    };
+    // ------------------------------------------------------------ Character Editor drafts
+    // A draft is a character that isn't live yet: made in the editor, or promoted from a Character
+    // Creator concept. Admins work on it across sessions, then publish it to the roster.
+    const editorDraftKey = (id) => `editor_draft:${id}`;
+    const isAdminRequest = (req) => String(req.authUser?.role || '').trim().toLowerCase() === 'admin';
+    const publicEditorDraft = (doc, { withCharacter = true } = {}) => ({
+        id: doc.id,
+        name: doc.character?.name || 'Untitled',
+        characterId: doc.character?.characterId || '',
+        facePicture: doc.character?.facePicture || '',
+        source: doc.source || null,
+        createdAt: doc.createdAt, updatedAt: doc.updatedAt,
+        createdBy: doc.createdBy, updatedBy: doc.updatedBy,
+        ...(withCharacter ? { character: doc.character, notes: doc.notes || null, problems: doc.problems || [] } : {}),
+    });
+    const draftCharacterErrors = (character) => {
+        if (!character || typeof character !== 'object' || Array.isArray(character)) return ['A character is required.'];
+        if (typeof character.name !== 'string' || !character.name.trim()) return ['Give the character a name.'];
+        if (JSON.stringify(character).length > 400000) return ['This draft is too large to save.'];
+        return [];
+    };
+    router.use('/editor-drafts', (req, res, next) => {
+        if (!isAdminRequest(req)) return res.status(403).json({ error: 'Admin access required.' });
+        if (!appStateCollection) return res.status(503).json({ error: 'Draft storage is unavailable.' });
+        next();
+    });
+    router.get('/editor-drafts', async (req, res) => {
+        try {
+            const docs = await appStateCollection.find({ key: /^editor_draft:/ }).sort({ updatedAt: -1 }).toArray();
+            return res.json({ ok: true, drafts: docs.map((doc) => publicEditorDraft(doc, { withCharacter: false })) });
+        } catch (error) {
+            console.error('Editor draft list error:', error);
+            return res.status(500).json({ error: 'Unable to load drafts.' });
+        }
+    });
+    router.get('/editor-drafts/:id', async (req, res) => {
+        try {
+            const doc = await appStateCollection.findOne({ key: editorDraftKey(String(req.params.id || '')) });
+            if (!doc) return res.status(404).json({ error: 'Draft not found.' });
+            return res.json({ ok: true, draft: publicEditorDraft(doc), checks: checksFor(doc.character) });
+        } catch (error) {
+            console.error('Editor draft load error:', error);
+            return res.status(500).json({ error: 'Unable to load the draft.' });
+        }
+    });
+    // Body: { character } for a new draft, or { conceptId } to promote a Character Creator concept.
+    router.post('/editor-drafts', async (req, res) => {
+        const now = new Date();
+        const id = randomUUID();
+        let character = req.body?.character;
+        let notes = null;
+        let problems = [];
+        let source = null;
+        try {
+            if (typeof req.body?.conceptId === 'string' && req.body.conceptId) {
+                const concept = await appStateCollection.findOne({ key: draftKey(req.body.conceptId) });
+                if (!concept) return res.status(404).json({ error: 'Concept not found.' });
+                const draftIds = (await appStateCollection.find({ key: /^editor_draft:/ }).toArray())
+                    .map((doc) => doc.character?.characterId).filter(Boolean);
+                const converted = conceptToCharacter(concept.draft, {
+                    takenIds: [...getCharactersList().map((entry) => entry.characterId), ...draftIds],
+                });
+                ({ character, notes, problems } = converted);
+                source = { type: 'concept', id: concept.id, name: concept.draft?.name || '' };
+            }
+            const errors = draftCharacterErrors(character);
+            if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+            const doc = {
+                key: editorDraftKey(id), id, character, notes, problems, source,
+                createdAt: now, updatedAt: now, createdBy: req.authUser.username, updatedBy: req.authUser.username,
+            };
+            await appStateCollection.insertOne(doc);
+            return res.status(201).json({ ok: true, draft: publicEditorDraft(doc), checks: checksFor(character) });
+        } catch (error) {
+            console.error('Editor draft create error:', error);
+            return res.status(500).json({ error: 'Unable to create the draft.' });
+        }
+    });
+    router.put('/editor-drafts/:id', async (req, res) => {
+        const character = req.body?.character;
+        const errors = draftCharacterErrors(character);
+        if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+        try {
+            const result = await appStateCollection.findOneAndUpdate(
+                { key: editorDraftKey(String(req.params.id || '')) },
+                { $set: { character, updatedAt: new Date(), updatedBy: req.authUser.username } },
+                { returnDocument: 'after' }
+            );
+            const doc = result && result.value !== undefined ? result.value : result;
+            if (!doc) return res.status(404).json({ error: 'Draft not found.' });
+            return res.json({ ok: true, draft: publicEditorDraft(doc), checks: checksFor(character) });
+        } catch (error) {
+            console.error('Editor draft save error:', error);
+            return res.status(500).json({ error: 'Unable to save the draft.' });
+        }
+    });
+    router.delete('/editor-drafts/:id', async (req, res) => {
+        try {
+            const result = await appStateCollection.deleteOne({ key: editorDraftKey(String(req.params.id || '')) });
+            if (!result.deletedCount) return res.status(404).json({ error: 'Draft not found.' });
+            return res.json({ ok: true });
+        } catch (error) {
+            console.error('Editor draft delete error:', error);
+            return res.status(500).json({ error: 'Unable to delete the draft.' });
+        }
+    });
+
     router.get('/characters/export', requireSession, (req, res) => {
         if (String(req.authUser?.role || '').trim().toLowerCase() !== 'admin') {
             return res.status(403).json({ error: 'Admin access required.' });
@@ -925,6 +1058,7 @@ module.exports = function(context) {
                 ok: true,
                 character: nextCharacter,
                 revision: characterRevision(nextCharacter),
+                checks: checksFor(nextCharacter),
             });
         } catch (error) {
             if (error.status) return res.status(error.status).json({ error: error.message });
@@ -973,6 +1107,7 @@ module.exports = function(context) {
         }
         return res.status(201).json({
             ok: true, character: newCharacter, revision: characterRevision(newCharacter), hiddenFromPlayers,
+            checks: checksFor(newCharacter),
         });
     });
     // "Deleting" retires a character: it stays in the roster, because matches, saved teams and

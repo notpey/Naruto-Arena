@@ -187,3 +187,15 @@ test('Kyuubi Awakening heals 5 each turn and enhances Shadow Clones and Rasengan
     // Costs are paid when queued on the server, not during resolution, so only the gain shows here.
     assert.equal(chakraTotal(match, 'p1'), chakraBefore + 1, 'Rasengan gives 1 random chakra');
 });
+
+test('Rasengan gives no chakra before the Kyuubi awakens', () => {
+    const match = matchFor([NARUTO], ['haku']);
+    const naruto = match.board.p1[0];
+    turn(match, 'p1', { skill: COMBO, target: enemy() }); turn(match, 'p2');
+    turn(match, 'p1', { skill: COMBO, target: enemy() }); turn(match, 'p2');
+    assert.equal(status(naruto, KYUUBI), undefined);
+    assert.equal(clonesOf(naruto), 2);
+    const chakraBefore = chakraTotal(match, 'p1');
+    turn(match, 'p1', { skill: RASENGAN, target: enemy() });
+    assert.equal(chakraTotal(match, 'p1'), chakraBefore, 'no chakra from Rasengan before awakening');
+});

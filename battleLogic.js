@@ -8202,6 +8202,21 @@ const resolveQueuedTurnSkills = ({ match, actingUsername, characters }) => {
             if (effectType === 'gain_chakra') {
                 const amount = Math.max(0, Number(effect?.amount) || 0);
                 if (amount <= 0) return;
+                // The gain goes to the user's team, so its condition is checked on the user
+                // (e.g. Rasengan's chakra only once the Kyuubi has awakened).
+                const condition = effect?.condition;
+                if (condition) {
+                    if (!doesEffectConditionMatch({
+                        condition,
+                        actorState,
+                        targetState: actorState,
+                        actorUnit,
+                        targetUnit: actorUnit,
+                        actorUsername: actingUsername,
+                        targetUsername: actingUsername,
+                    })) return;
+                    if (condition.consumeOnMatch && condition.statusId) consumeStatus(actorState, condition.statusId);
+                }
                 const rawType = typeof effect?.chakraType === 'string' ? effect.chakraType.trim().toLowerCase() : '';
                 if (rawType === 'random') {
                     for (let i = 0; i < amount; i += 1) {

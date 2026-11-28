@@ -6,12 +6,15 @@
   <title>Character Editor — Naruto-Arena ACP</title>
   <link rel="stylesheet" href="brand.css">
   <link rel="stylesheet" href="charactercreator.css">
-  <link rel="stylesheet" href="charactereditor.css?v=2">
+  <link rel="stylesheet" href="charactereditor.css?v=8">
   <script src="character-images.js?v=1"></script>
   <script src="status-display.js?v=2" defer></script>
   <script src="skill-description-format.js?v=3" defer></script>
   <script src="roster-catalog.js?v=2" defer></script>
-  <script src="charactereditor.js?v=2" defer></script>
+  <script src="character-builder-checks.js?v=3" defer></script>
+  <script src="character-builder.js?v=2" defer></script>
+  <script src="character-sentences.js?v=3" defer></script>
+  <script src="charactereditor.js?v=8" defer></script>
 </head>
 <body>
   <div class="creator-shell">
@@ -19,17 +22,22 @@
       <div>
         <a class="back-link" href="admin.html">← Control Panel</a>
         <h1>Character Editor</h1>
-        <p>Tune live characters. Saved changes go live for new matches; matches already in progress finish on the version they started with.</p>
+        <p>Build new characters and tune live ones. Saved changes reach new matches.</p>
       </div>
       <div class="header-actions">
         <button type="button" class="button secondary" id="new-character">New character</button>
         <button type="button" class="button" id="save-character" disabled>Save changes</button>
+        <button type="button" class="button" id="publish-draft" hidden>Publish</button>
       </div>
     </header>
 
     <div class="creator-layout">
-      <aside class="draft-sidebar" aria-label="Live roster">
+      <aside class="draft-sidebar" aria-label="Drafts and live roster">
         <div class="sidebar-heading">
+          <h2>Drafts</h2>
+        </div>
+        <div class="draft-list ce-drafts" id="drafts-list"><p class="empty">Loading drafts…</p></div>
+        <div class="sidebar-heading ce-roster-heading">
           <h2>Live roster</h2>
           <button type="button" class="text-button" id="refresh-roster">Refresh</button>
         </div>
@@ -43,22 +51,25 @@
           <span id="save-state" role="status" aria-live="polite">Pick a character to start.</span>
           <div class="toolbar-actions">
             <button type="button" class="text-button" id="revert-character" hidden>Discard changes</button>
+            <button type="button" class="text-button" id="advanced-view" hidden>Advanced view</button>
             <button type="button" class="text-button" id="export-character" hidden>Export JSON</button>
             <button type="button" class="text-button danger" id="delete-character" hidden>Retire character</button>
+            <button type="button" class="text-button danger" id="discard-draft" hidden>Discard draft</button>
           </div>
         </div>
         <nav class="creator-tabs" aria-label="Editor views">
           <button type="button" class="creator-tab active" data-view="edit" aria-current="page">Edit</button>
           <button type="button" class="creator-tab" data-view="preview">Preview</button>
           <button type="button" class="creator-tab" data-view="changes">Changes <span id="changes-count" class="ce-tab-count" hidden></span></button>
+          <button type="button" class="creator-tab" data-view="checks">Checks <span id="checks-count" class="ce-tab-count" hidden></span></button>
           <button type="button" class="creator-tab" data-view="history">History</button>
-          <button type="button" class="creator-tab" data-view="raw">Raw data</button>
+          <button type="button" class="creator-tab" data-view="raw" id="raw-tab" hidden>Raw data</button>
         </nav>
 
         <div class="workspace">
           <div class="ce-empty" id="empty-state">
             <h2>Choose a character</h2>
-            <p>Pick someone from the live roster to adjust cooldowns, chakra costs, classes, images, descriptions, and status tooltips.</p>
+            <p>Pick a draft or a live character from the list, or start a new character.</p>
           </div>
 
           <form id="character-form" class="view-panel inline-editor" data-panel="edit" autocomplete="off" hidden></form>
@@ -71,6 +82,11 @@
           <section class="view-panel ce-changes" data-panel="changes" aria-label="Unsaved changes" hidden>
             <div class="view-heading"><div><h2>Changes</h2><p>Everything that will go live when you save.</p></div></div>
             <div id="changes-content"></div>
+          </section>
+
+          <section class="view-panel ce-checks" data-panel="checks" aria-label="Checks" hidden>
+            <div class="view-heading"><div><h2>Checks</h2><p>Reads this character the way the battle engine will, including unsaved edits, and lists anything it would ignore or misread.</p></div></div>
+            <div id="checks-content"></div>
           </section>
 
           <section class="view-panel ce-history" data-panel="history" aria-label="Version history" hidden>

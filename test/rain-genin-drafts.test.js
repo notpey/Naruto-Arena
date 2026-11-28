@@ -125,3 +125,18 @@ test('Underground Ambush is visible to Oboro but hidden from the ambushed enemie
     assert.equal(visibleTo('p1'), true);
     assert.equal(visibleTo('p2'), false);
 });
+
+test('High Speed Taijutsu gives Taijutsu chakra only at 5 Gate Openings', () => {
+    const chakra = (match) => Object.values(match.chakraPools.p1).reduce((sum, value) => sum + (Number(value) || 0), 0);
+    const match = matchFor(['rock-lee'], ['haku']);
+    const lee = match.board.p1[0];
+    const before = chakra(match);
+    cast(match, 'p1', 0, 0, 'p2', 0);
+    assert.equal(chakra(match), before, 'no chakra below 5 Gate Openings');
+    const gates = status(lee, 'rock_lee_gate_openings');
+    assert.ok(gates, 'Lee tracks his Gate Openings');
+    gates.metadata.gateCount = 5;
+    const atFive = chakra(match);
+    cast(match, 'p1', 0, 0, 'p2', 0);
+    assert.equal(chakra(match), atFive + 1, '1 Taijutsu chakra at 5 Gate Openings');
+});

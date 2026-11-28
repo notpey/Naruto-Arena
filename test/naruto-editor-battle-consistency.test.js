@@ -763,6 +763,7 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
     assert.equal(poolTotal(), 1,
         'training weights cannot be removed twice');
 
+    const taijutsuBeforeGates = match.chakraPools.p1.taijutsu || 0;
     for (let count = 1; count <= 5; count += 1) {
         if (count > 1) {
             actor.state.cooldowns = {};
@@ -784,12 +785,14 @@ test('Rock Lee draft opens Gates on physical skills and changes costs and skills
     assert.equal(actor.hp, 50, 'opening the fifth Gate costs 50 nonlethal affliction damage');
     assert.ok(actor.state.statuses.some((status) =>
         status.id === 'rock_lee_fifth_gate_invulnerable'));
+    assert.equal(match.chakraPools.p1.taijutsu, taijutsuBeforeGates + 1,
+        'opening the fifth Gate grants 1 taijutsu chakra once; Gates 1 to 4 grant none');
     const chakraBeforeLotus = match.chakraPools.p1.taijutsu;
     queueSkill(match, 'p1', 2, [{ username: 'p2', slot: 0 }]);
     resolvePendingTurnSkills({ match, actingUsername: 'p1', characters });
     assert.equal(match.board.p2[0].alive, false);
-    assert.equal(match.chakraPools.p1.taijutsu, chakraBeforeLotus + 1,
-        'only the turn grant adds taijutsu; a successful Final Lotus no longer does');
+    assert.equal(match.chakraPools.p1.taijutsu, chakraBeforeLotus,
+        'a successful Final Lotus adds no taijutsu once the fifth Gate is used');
     assert.ok(actor.state.statuses.some((status) =>
         status.id === 'rock_lee_final_lotus_immortal'));
 });
