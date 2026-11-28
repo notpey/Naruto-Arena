@@ -324,24 +324,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 playModalCloseSound();
                 return;
             }
-            const promoModal = document.getElementById('promo-code-modal');
-            if (promoModal && !promoModal.classList.contains('hidden')) {
-                promoModal.classList.add('hidden');
-                playModalCloseSound();
-                return;
-            }
-            const questsModal = document.getElementById('quests-modal');
-            if (questsModal && !questsModal.classList.contains('hidden')) {
-                questsModal.classList.add('hidden');
-                playModalCloseSound();
-                return;
-            }
-            const achievementsModal = document.getElementById('achievements-modal');
-            if (achievementsModal && !achievementsModal.classList.contains('hidden')) {
-                achievementsModal.classList.add('hidden');
-                playModalCloseSound();
-                return;
-            }
             const privateBackdrop = document.querySelector('.private-match-backdrop');
             if (privateBackdrop && !privateBackdrop.classList.contains('hidden')) {
                 privateBackdrop.classList.add('hidden');

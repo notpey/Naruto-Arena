@@ -323,7 +323,7 @@
         goButton.textContent = state.spinning ? "…" : state.available ? "Spin" : "Done";
         goButton.setAttribute("aria-label", state.available ? "Spin the wheel" : "Already spun today");
         if (readyBadge) readyBadge.hidden = !state.available;
-        document.dispatchEvent(new CustomEvent("arena:daily-spin-state", { detail: { available: state.available } }));
+        document.dispatchEvent(new CustomEvent("arena:daily-spin-state", { detail: { available: state.available, nextSpinAt: state.nextSpinAt } }));
     }
 
     // ---------- spinning ----------

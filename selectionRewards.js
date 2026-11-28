@@ -1,15 +1,7 @@
-        // ── QUESTS, ACHIEVEMENTS, LOGIN REWARDS & PROMO CODES CONTROLLER ──
+        // ── SETTINGS MENU & PROFILE REWARDS CONTROLLER ──
         (function initQuestsAndRewardsController() {
-            var questsModal = document.getElementById("quests-modal");
-            var achievementsModal = document.getElementById("achievements-modal");
-            var loginRewardsModal = document.getElementById("login-rewards-modal");
-            var promoCodeModal = document.getElementById("promo-code-modal");
             var settingsModal = document.getElementById("settings-modal");
-            var hideHubMenus = function() {
-                if (settingsModal) settingsModal.classList.add("hidden");
-            };
 
-            // Open Triggers
             document.querySelectorAll("[data-settings-trigger]").forEach(function(btn) {
                 btn.addEventListener("click", function(e) {
                     e.preventDefault();
@@ -17,63 +9,8 @@
                 });
             });
 
-            document.querySelectorAll("[data-quests-trigger]").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    hideHubMenus();
-                    if (questsModal) questsModal.classList.remove("hidden");
-                    loadQuests();
-                });
-            });
-
-            document.querySelectorAll("[data-achievements-trigger]").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    hideHubMenus();
-                    if (achievementsModal) achievementsModal.classList.remove("hidden");
-                    loadAchievements();
-                });
-            });
-
-            document.querySelectorAll("[data-login-rewards-trigger]").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    hideHubMenus();
-                    if (loginRewardsModal) loginRewardsModal.classList.remove("hidden");
-                    loadLoginRewards();
-                });
-            });
-
-            document.querySelectorAll("[data-promo-code-trigger]").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    hideHubMenus();
-                    if (promoCodeModal) promoCodeModal.classList.remove("hidden");
-                });
-            });
-
-            // Back to Settings Buttons
-            document.querySelectorAll("[data-back-to-settings]").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    if (questsModal) questsModal.classList.add("hidden");
-                    if (achievementsModal) achievementsModal.classList.add("hidden");
-                    if (loginRewardsModal) loginRewardsModal.classList.add("hidden");
-                    if (promoCodeModal) promoCodeModal.classList.add("hidden");
-                    if (settingsModal) settingsModal.classList.remove("hidden");
-                });
-            });
-
-            // Close Triggers
             var sClose = document.getElementById("settings-modal-close");
             if (sClose) sClose.addEventListener("click", function() { if (settingsModal) settingsModal.classList.add("hidden"); });
-
-            var qClose = document.getElementById("quests-modal-close");
-            if (qClose) qClose.addEventListener("click", function() { if (questsModal) questsModal.classList.add("hidden"); });
-
-            var aClose = document.getElementById("achievements-modal-close");
-            if (aClose) aClose.addEventListener("click", function() { if (achievementsModal) achievementsModal.classList.add("hidden"); });
-
-            var lClose = document.getElementById("login-rewards-modal-close");
-            if (lClose) lClose.addEventListener("click", function() { if (loginRewardsModal) loginRewardsModal.classList.add("hidden"); });
-
-            var pClose = document.getElementById("promo-code-modal-close");
-            if (pClose) pClose.addEventListener("click", function() { if (promoCodeModal) promoCodeModal.classList.add("hidden"); });
 
             // Audio: Master, Music and Effects. The sound manager in script.js owns and saves the
             // levels; these controls only read and change them through window.ArenaSound.
@@ -254,256 +191,393 @@
                 }
             });
 
-            // 📜 Quests Functions
-            var activeQuestType = "daily";
-            var cachedQuests = [];
+            // ── PROFILE > REWARDS BOARD ──
+            // Check-in, contracts, achievements and promo codes, claimed in place. The server decides
+            // every outcome: the board renders what /api returns, claims post intent, then reload.
+            var board = document.querySelector("[data-rewards-board]");
+            var liveEl = document.querySelector("[data-rewards-live]");
+            var rewardsState = { quests: null, achievements: null, checkIn: null, spin: null };
+            var busy = {};
+            var justClaimed = {};
+            var TIER_NAMES = { 1: "Genin", 2: "Chūnin", 3: "Jōnin" };
+            var SVG_NS = "http://www.w3.org/2000/svg";
 
-            document.querySelectorAll(".quest-tab-btn").forEach(function(btn) {
-                btn.addEventListener("click", function() {
-                    document.querySelectorAll(".quest-tab-btn").forEach(function(b) { b.classList.remove("active"); });
-                    btn.classList.add("active");
-                    activeQuestType = btn.getAttribute("data-quest-type") || "daily";
-                    renderQuestsList();
+            function node(tag, className, text) {
+                var n = document.createElement(tag);
+                if (className) n.className = className;
+                if (text !== undefined && text !== null) n.textContent = text;
+                return n;
+            }
+            function fmt(value) {
+                return (Number(value) || 0).toLocaleString("en-US");
+            }
+            function checkIcon() {
+                var svg = document.createElementNS(SVG_NS, "svg");
+                svg.setAttribute("viewBox", "0 0 16 16");
+                svg.setAttribute("aria-hidden", "true");
+                svg.setAttribute("class", "rw-check");
+                var path = document.createElementNS(SVG_NS, "path");
+                path.setAttribute("d", "M3.5 8.5l3 3 6-7");
+                svg.appendChild(path);
+                return svg;
+            }
+            // A ryō amount with the nav's coin, so rewards read as the same currency as the balance.
+            function ryoAmount(amount, className) {
+                var wrap = node("span", "rw-ryo" + (className ? " " + className : ""));
+                wrap.appendChild(node("span", "rw-coin", "R")).setAttribute("aria-hidden", "true");
+                wrap.appendChild(node("span", "rw-ryo-value", fmt(amount)));
+                wrap.appendChild(node("span", "sr-only", " ryō"));
+                return wrap;
+            }
+            function announce(text) {
+                if (!liveEl) return;
+                liveEl.textContent = "";
+                setTimeout(function() { liveEl.textContent = text; }, 30);
+            }
+            function setCanonicalRyo(ryo) {
+                if (typeof ryo !== "number") return;
+                if (window.ArenaRoster && typeof window.ArenaRoster.setRyo === "function") window.ArenaRoster.setRyo(ryo);
+                else document.querySelectorAll("[data-ryo-balance]").forEach(function(n) { n.textContent = fmt(ryo); });
+                document.dispatchEvent(new CustomEvent("arena:ryo-changed"));
+            }
+            function getJson(url) {
+                return window.ArenaSession.fetch(url).then(function(r) {
+                    return r.json().catch(function() { return {}; });
                 });
-            });
-
-            function loadQuests() {
-                window.ArenaSession.fetch("/api/quests").then(function(r) { return r.json(); }).then(function(d) {
-                    if (d.ok) {
-                        cachedQuests = (d.quests || []);
-                        setRewardCount("quests", cachedQuests.filter(function(q) { return q.canClaim && !q.isClaimed; }).length);
-                        renderQuestsList();
-                    }
-                }).catch(console.error);
+            }
+            function postJson(url, body) {
+                return window.ArenaSession.fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body || {})
+                }).then(function(r) {
+                    return r.json().catch(function() { return {}; }).then(function(d) {
+                        if (!r.ok || !d.ok) throw new Error(d.error || "That didn't go through. Try again.");
+                        return d;
+                    });
+                });
+            }
+            function claimButton(label, amount, onClick, key) {
+                var btn = node("button", "rw-btn rw-btn-primary rw-btn-claim");
+                btn.type = "button";
+                btn.appendChild(node("span", "rw-btn-label", label));
+                if (amount) btn.appendChild(ryoAmount(amount, "rw-ryo-on-btn"));
+                if (busy[key]) {
+                    btn.disabled = true;
+                    btn.classList.add("is-loading");
+                    btn.setAttribute("aria-busy", "true");
+                }
+                btn.addEventListener("click", onClick);
+                return btn;
+            }
+            // Runs a claim: lock its button, post, take the server's balance, then reload canonical state.
+            function runClaim(key, url, body, reload, successText) {
+                if (busy[key]) return;
+                busy[key] = true;
+                reload(true);
+                postJson(url, body).then(function(d) {
+                    justClaimed[key] = true;
+                    setCanonicalRyo(d.ryo);
+                    announce(successText(d));
+                }).catch(function(err) {
+                    announce(err.message);
+                }).then(function() {
+                    busy[key] = false;
+                    reload();
+                });
             }
 
-            function renderQuestsList() {
-                var container = document.getElementById("quests-list-container");
-                if (!container) return;
-                var filtered = cachedQuests.filter(function(q) { return q.type === activeQuestType; });
-                if (!filtered.length) {
-                    container.innerHTML = '<div style="text-align:center; padding:32px 20px; background:#0f172a; border:1px dashed rgba(245,158,11,0.25); border-radius:8px;"><p style="margin:0; color:#94a3b8; font-size:13px; font-weight:700;">No active Shinobi Contracts in this category.</p></div>';
+            // Check-in: a seven-day track. currentDayIndex is the day the next claim pays.
+            function renderCheckIn() {
+                var week = board && board.querySelector("[data-checkin-week]");
+                if (!week) return;
+                var data = rewardsState.checkIn;
+                var note = board.querySelector("[data-checkin-note]");
+                var status = board.querySelector("[data-checkin-status]");
+                var claim = board.querySelector("[data-checkin-claim]");
+                week.innerHTML = "";
+                if (!data) return;
+                var calendar = data.calendar || [];
+                var nextDay = Number(data.currentDayIndex) || 1;
+                var canClaim = Boolean(data.canClaimToday);
+                // After the seventh day the next claim starts a new week; until then the full week stays stamped.
+                var weekDone = !canClaim && nextDay === 1 && Number(data.streakCount) > 0;
+                var claimedThrough = weekDone ? calendar.length : nextDay - 1;
+                var fresh = justClaimed.checkIn;
+                justClaimed.checkIn = false;
+                week.style.setProperty("--rw-reach", calendar.length > 1 ? Math.max(0, claimedThrough - 1) / (calendar.length - 1) : 0);
+
+                calendar.forEach(function(day, i) {
+                    var isClaimed = day.day <= claimedThrough;
+                    var isReady = canClaim && day.day === nextDay;
+                    var isGrand = i === calendar.length - 1;
+                    var li = node("li", "rw-day");
+                    if (isClaimed) li.classList.add("is-claimed");
+                    if (isReady) li.classList.add("is-ready");
+                    if (isGrand) li.classList.add("is-grand");
+                    if (fresh && day.day === claimedThrough) li.classList.add("is-fresh");
+                    var stamp = node("span", "rw-day-stamp");
+                    if (isClaimed) stamp.appendChild(checkIcon());
+                    else if (isGrand) stamp.appendChild(node("span", "rw-day-kanji", "礼"));
+                    else stamp.appendChild(node("span", "rw-day-num", String(day.day)));
+                    li.appendChild(stamp);
+                    li.appendChild(node("span", "rw-day-label", isReady ? "Today" : "Day " + day.day));
+                    li.appendChild(node("span", "rw-day-amount", fmt(day.rewards && day.rewards.ryo)));
+                    li.setAttribute("aria-label", "Day " + day.day + ", " + fmt(day.rewards && day.rewards.ryo) + " ryō, " + (isClaimed ? "claimed" : isReady ? "ready to claim" : "not yet"));
+                    week.appendChild(li);
+                });
+
+                var nextReward = calendar[nextDay - 1] || calendar[0] || { rewards: {} };
+                if (note) note.textContent = canClaim ? "Day " + nextDay + " of " + calendar.length : weekDone ? "Week complete" : "Day " + (nextDay - 1) + " of " + calendar.length;
+                if (status) {
+                    // The pulsing stamp and the Claim button say "ready"; the line only speaks once today is done.
+                    status.hidden = canClaim || Boolean(busy.checkIn);
+                    status.textContent = "Claimed today. Day " + nextDay + " pays " + fmt(nextReward.rewards && nextReward.rewards.ryo) + " ryō tomorrow.";
+                }
+                if (claim) {
+                    claim.hidden = !canClaim && !busy.checkIn;
+                    var fresh2 = claimButton("Claim", nextReward.rewards && nextReward.rewards.ryo, function() {
+                        runClaim("checkIn", "/api/login-rewards/claim", {}, loadCheckIn, function(d) {
+                            return "Day " + (d.claimedDay || nextDay) + " claimed: " + fmt(d.rewards && d.rewards.ryo) + " ryō.";
+                        });
+                    }, "checkIn");
+                    fresh2.setAttribute("data-checkin-claim", "");
+                    fresh2.hidden = claim.hidden;
+                    claim.replaceWith(fresh2);
+                }
+            }
+
+            // A progress track: a thin well with an amber fill and a tabular count.
+            function progressTrack(current, target, label) {
+                var wrap = node("div", "rw-progress");
+                var track = node("span", "rw-track");
+                var fill = node("span", "rw-track-fill");
+                var pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+                fill.style.width = pct + "%";
+                track.appendChild(fill);
+                track.setAttribute("role", "progressbar");
+                track.setAttribute("aria-valuemin", "0");
+                track.setAttribute("aria-valuemax", String(target));
+                track.setAttribute("aria-valuenow", String(current));
+                track.setAttribute("aria-label", label);
+                wrap.appendChild(track);
+                wrap.appendChild(node("span", "rw-count", fmt(current) + " / " + fmt(target)));
+                return wrap;
+            }
+            function claimedMark(amount) {
+                var mark = node("span", "rw-claimed");
+                mark.appendChild(checkIcon());
+                mark.appendChild(node("span", "rw-claimed-label", "Claimed"));
+                return mark;
+            }
+
+            function renderContracts() {
+                var list = board && board.querySelector("[data-contracts-list]");
+                var note = board && board.querySelector("[data-contracts-note]");
+                if (!list) return;
+                var quests = rewardsState.quests;
+                if (!quests) return;
+                list.innerHTML = "";
+                if (!quests.length) {
+                    list.appendChild(node("li", "rw-empty", "No contracts are posted right now."));
+                    if (note) note.textContent = "";
                     return;
                 }
-                var html = '';
-                filtered.forEach(function(q, idx) {
-                    var pct = Math.min(100, Math.round((q.currentProgress / q.target) * 100));
-                    var rankClass = (q.type === 'event' ? 's-rank' : q.type === 'weekly' ? 'b-rank' : (idx % 2 === 0 ? 'd-rank' : 'c-rank'));
-                    var rankLabel = (q.type === 'event' ? 'S-RANK' : q.type === 'weekly' ? 'B-RANK' : (idx % 2 === 0 ? 'D-RANK' : 'C-RANK'));
-                    var rankInline = (rankClass === 's-rank' ? 'background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#f87171;' : rankClass === 'b-rank' ? 'background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#fbbf24;' : rankClass === 'c-rank' ? 'background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399;' : 'background:rgba(59,130,246,0.15); border:1px solid #3b82f6; color:#60a5fa;');
-
-                    var btnHtml = '';
-                    if (q.isClaimed) {
-                        btnHtml = '<button class="quest-claim-btn claimed" disabled style="-webkit-appearance:none; appearance:none; outline:none; background: #020617; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: #64748b; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: default; white-space: nowrap;">Claimed ✓</button>';
-                    } else if (q.canClaim) {
-                        btnHtml = '<button class="shinobi-claim-btn" onclick="claimQuest(\'' + q.questId + '\')" style="-webkit-appearance:none; appearance:none; outline:none; background: #10b981; border: 1px solid #34d399; border-radius: 6px; color: #ffffff; padding: 8px 16px; font-size: 11px; font-weight: 900; cursor: pointer; white-space: nowrap; text-transform: uppercase;">Claim Reward!</button>';
-                    } else {
-                        btnHtml = '<button class="quest-claim-btn" disabled style="-webkit-appearance:none; appearance:none; outline:none; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #94a3b8; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: default; white-space: nowrap;">' + q.currentProgress + ' / ' + q.target + '</button>';
-                    }
-
-                    var rewardsHtml = [];
-                    if (q.rewards.ryo) rewardsHtml.push('<span class="reward-pill ryo" style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">' + q.rewards.ryo + ' Ryo</span>');
-
-                    html += '<div class="shinobi-quest-contract" style="position: relative; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; transition: border-color 0.15s ease;">' +
-                        '<div class="quest-info" style="flex-grow: 1;">' +
-                            '<div class="contract-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">' +
-                                '<span class="mission-rank-tag ' + rankClass + '" style="font-size: 9px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; font-family: \'Outfit\', sans-serif; display: inline-block; ' + rankInline + '">' + rankLabel + '</span>' +
-                                '<h3 class="contract-title" style="margin: 0; font-size: 14px; font-weight: 800; color: #f8fafc; letter-spacing: 0.02em; text-transform: uppercase; font-family: \'Outfit\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif !important;">' + q.title + '</h3>' +
-                            '</div>' +
-                            '<p class="contract-desc" style="margin: 0 0 8px; font-size: 12px; color: #94a3b8; line-height: 1.4;">' + q.description + '</p>' +
-                            '<div class="contract-rewards" style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">' + rewardsHtml.join(' ') + '</div>' +
-                            '<div class="chakra-track" style="height: 6px; background: #020617; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.06); position: relative;"><div class="chakra-fill" style="width: ' + pct + '%; height: 100%; background: #d97706; border-radius: 3px; transition: width 0.3s ease;"></div></div>' +
-                        '</div>' +
-                        '<div class="quest-action" style="flex-shrink: 0;">' + btnHtml + '</div>' +
-                    '</div>';
+                // Daily first, then weekly, each in server order, so rows never jump when one is claimed.
+                var ordered = quests.filter(function(q) { return q.type === "daily"; })
+                    .concat(quests.filter(function(q) { return q.type !== "daily"; }));
+                var claimed = 0;
+                ordered.forEach(function(q) {
+                    if (q.isClaimed) claimed += 1;
+                    var key = "quest:" + q.questId;
+                    var li = node("li", "rw-row");
+                    if (q.canClaim) li.classList.add("is-ready");
+                    if (q.isClaimed) li.classList.add("is-done");
+                    if (justClaimed[key]) { li.classList.add("is-fresh"); justClaimed[key] = false; }
+                    var main = node("div", "rw-row-main");
+                    main.appendChild(node("strong", "rw-row-title", q.title));
+                    var meta = node("p", "rw-row-meta");
+                    meta.appendChild(node("span", "rw-cadence", q.type === "weekly" ? "Weekly" : q.type === "daily" ? "Daily" : q.type));
+                    meta.appendChild(document.createTextNode(q.description));
+                    main.appendChild(meta);
+                    if (!q.isClaimed) main.appendChild(progressTrack(Number(q.currentProgress) || 0, Number(q.target) || 0, q.title + " progress"));
+                    li.appendChild(main);
+                    var end = node("div", "rw-row-end");
+                    var ryo = q.rewards && q.rewards.ryo;
+                    if (q.isClaimed) end.appendChild(claimedMark(ryo));
+                    else if (q.canClaim || busy[key]) {
+                        end.appendChild(claimButton("Claim", ryo, function() {
+                            runClaim(key, "/api/quests/claim", { questId: q.questId }, loadQuests, function() {
+                                return q.title + " claimed: " + fmt(ryo) + " ryō.";
+                            });
+                        }, key));
+                    } else if (ryo) end.appendChild(ryoAmount(ryo));
+                    li.appendChild(end);
+                    list.appendChild(li);
                 });
-                container.innerHTML = html;
+                if (note) note.textContent = claimed + " of " + ordered.length + " claimed";
             }
 
-            window.claimQuest = function(questId) {
-                window.ArenaSession.fetch("/api/quests/claim", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ questId: questId })
-                }).then(function(r) { return r.json(); }).then(function(d) {
-                    if (d.ok) {
-                        loadQuests();
-                    } else {
-                        alert(d.error || "Failed to claim quest.");
-                    }
-                }).catch(console.error);
-            };
-
-            // 🏆 Achievements Functions
-            function loadAchievements() {
-                window.ArenaSession.fetch("/api/achievements").then(function(r) { return r.json(); }).then(function(d) {
-                    if (d.ok) {
-                        setRewardCount("achievements", (d.achievements || []).reduce(function(sum, ach) {
-                            return sum + (ach.tiers || []).filter(function(t) { return t.canClaim && !t.isClaimed; }).length;
-                        }, 0));
-                        renderAchievementsList((d.achievements || []));
-                    }
-                }).catch(console.error);
-            }
-
-            function renderAchievementsList(achievements) {
-                var container = document.getElementById("achievements-list-container");
-                if (!container) return;
-                var html = '';
-                achievements.forEach(function(ach) {
-                    html += '<div class="shinobi-quest-contract" style="background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: stretch;">' +
-                        '<div class="achievement-header" style="margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px;">' +
-                            '<h3 class="contract-title" style="margin: 0; font-size: 15px; font-weight: 800; color: #fbbf24; text-transform: uppercase; font-family: \'Outfit\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif !important;">' + ach.title + '</h3>' +
-                            '<p class="contract-desc" style="margin: 4px 0 0; font-size: 12px; color: #94a3b8;">' + ach.description + '</p>' +
-                        '</div>' +
-                        '<div class="achievement-tiers-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">';
-                    (ach.tiers || []).forEach(function(t) {
-                        var pct = Math.min(100, Math.round((t.currentProgress / t.target) * 100));
-                        var tierRankName = (t.tier === 1 ? 'GENIN · TIER 1' : t.tier === 2 ? 'CHUNIN · TIER 2' : 'JONIN · TIER 3');
-                        var btnHtml = '';
-                        if (t.isClaimed) {
-                            btnHtml = '<button class="quest-claim-btn claimed" disabled style="-webkit-appearance:none; appearance:none; outline:none; background: #020617; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: #64748b; padding: 6px 10px; font-size: 11px; font-weight: 800;">Claimed ✓</button>';
-                        } else if (t.canClaim) {
-                            btnHtml = '<button class="shinobi-claim-btn" onclick="claimAchievement(\'' + ach.id + '\', ' + t.tier + ')" style="-webkit-appearance:none; appearance:none; outline:none; background: #10b981; border: 1px solid #34d399; border-radius: 6px; color: #ffffff; padding: 6px 10px; font-size: 11px; font-weight: 900; cursor: pointer; text-transform: uppercase;">Claim Reward!</button>';
-                        } else {
-                            btnHtml = '<button class="quest-claim-btn" disabled style="-webkit-appearance:none; appearance:none; outline:none; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #94a3b8; padding: 6px 10px; font-size: 11px; font-weight: 800;">' + t.currentProgress + ' / ' + t.target + '</button>';
-                        }
-
-                        var rewardsText = [];
-                        if (t.rewards.ryo) rewardsText.push(t.rewards.ryo + ' Ryo');
-
-                        html += '<div class="achievement-tier-box" style="background: #020617; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px; text-align: center;">' +
-                            '<div class="tier-badge" style="font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 4px; padding: 2px 4px;">' + tierRankName + '</div>' +
-                            '<div class="tier-target" style="font-size: 11px; color: #cbd5e1; font-weight: 700;">Target: ' + t.target + '</div>' +
-                            '<div class="chakra-track" style="height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.06);"><div class="chakra-fill" style="width: ' + pct + '%; height: 100%; background: #d97706; border-radius: 3px; transition: width 0.3s ease;"></div></div>' +
-                            '<div class="tier-rewards" style="font-size: 11px; font-weight: 800; color: #f59e0b;">' + rewardsText.join(' · ') + '</div>' +
-                            btnHtml +
-                        '</div>';
-                    });
-                    html += '</div></div>';
-                });
-                container.innerHTML = html;
-            }
-
-            window.claimAchievement = function(achievementId, tier) {
-                window.ArenaSession.fetch("/api/achievements/claim", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ achievementId: achievementId, tier: tier })
-                }).then(function(r) { return r.json(); }).then(function(d) {
-                    if (d.ok) {
-                        loadAchievements();
-                    } else {
-                        alert(d.error || "Failed to claim achievement.");
-                    }
-                }).catch(console.error);
-            };
-
-            // 📅 Login Rewards Functions
-            function loadLoginRewards() {
-                window.ArenaSession.fetch("/api/login-rewards").then(function(r) { return r.json(); }).then(function(d) {
-                    if (d.ok) {
-                        setRewardCount("checkIn", d.canClaimToday ? 1 : 0);
-                        renderLoginCalendar(d);
-                    }
-                }).catch(console.error);
-            }
-
-            function renderLoginCalendar(data) {
-                var grid = document.getElementById("login-calendar-grid");
-                var claimBtn = document.getElementById("claim-daily-login-btn");
-                var msgEl = document.getElementById("login-reward-msg");
-                if (!grid) return;
-
-                var calendar = data.calendar || [];
-                var currentDay = data.currentDayIndex || 1;
-                var canClaim = data.canClaimToday;
-
-                if (msgEl) msgEl.textContent = canClaim ? "Today's reward is ready to claim!" : "Already claimed today! Return tomorrow for Day " + ((currentDay % 7) + 1) + ".";
-                if (claimBtn) {
-                    claimBtn.disabled = !canClaim;
-                    claimBtn.textContent = canClaim ? "Claim Day " + currentDay + " Reward" : "Claimed Today ✓";
-                    if (canClaim) {
-                        claimBtn.style.opacity = "1";
-                        claimBtn.style.cursor = "pointer";
-                    } else {
-                        claimBtn.style.opacity = "0.5";
-                        claimBtn.style.cursor = "not-allowed";
-                    }
+            // Achievements: three tiers on one track. Each segment fills with progress toward its tier.
+            function renderAchievements() {
+                var list = board && board.querySelector("[data-achievements-list]");
+                var note = board && board.querySelector("[data-achievements-note]");
+                if (!list) return;
+                var achievements = rewardsState.achievements;
+                if (!achievements) return;
+                list.innerHTML = "";
+                if (!achievements.length) {
+                    list.appendChild(node("li", "rw-empty", "No achievements yet."));
+                    return;
                 }
-
-                var html = '';
-                calendar.forEach(function(day) {
-                    var isToday = day.day === currentDay;
-                    var isClaimed = day.day < currentDay || (isToday && !canClaim);
-                    var rewardsText = [];
-                    if (day.rewards.ryo) rewardsText.push(day.rewards.ryo + ' Ryo');
-
-                    var borderStyle = isToday ? 'border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.12);' : 'border: 1px solid rgba(255, 255, 255, 0.08); background: #020617;';
-                    if (day.day === 7) borderStyle = 'border: 1px solid #fbbf24; background: rgba(245, 158, 11, 0.18);';
-
-                    html += '<div class="login-day-card" style="border-radius: 6px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; ' + borderStyle + ' opacity: ' + (isClaimed ? '0.5' : '1') + ';">' +
-                        '<div style="font-size: 10px; font-weight: 900; color: #fbbf24; text-transform: uppercase;">Day ' + day.day + '</div>' +
-                        '<div style="font-size: 10px; font-weight: 700; color: #e2e8f0; line-height: 1.3;">' + rewardsText.join('<br>') + '</div>' +
-                        '<div style="font-size: 10px; font-weight: 800; color: ' + (isClaimed ? '#475569' : isToday ? '#34d399' : '#94a3b8') + '; margin-top: 2px;">' + (isClaimed ? 'Claimed ✓' : isToday ? 'READY' : 'Locked') + '</div>' +
-                    '</div>';
-                });
-                grid.innerHTML = html;
-            }
-
-            var claimLoginBtn = document.getElementById("claim-daily-login-btn");
-            if (claimLoginBtn) {
-                claimLoginBtn.addEventListener("click", function() {
-                    var msgEl = document.getElementById("login-reward-msg");
-                    if (msgEl) msgEl.textContent = "Claiming...";
-                    window.ArenaSession.fetch("/api/login-rewards/claim", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" }
-                    }).then(function(r) { return r.json(); }).then(function(d) {
-                        if (d.ok) {
-                            if (msgEl) msgEl.textContent = d.message || "Login reward claimed!";
-                            loadLoginRewards();
-                        } else {
-                            if (msgEl) msgEl.textContent = d.error || "Claim failed.";
-                        }
-                    }).catch(function(err) {
-                        if (msgEl) msgEl.textContent = err.message || "Claim failed.";
+                var tiersClaimed = 0;
+                var tiersTotal = 0;
+                achievements.forEach(function(ach) {
+                    var tiers = ach.tiers || [];
+                    var value = Number(ach.currentValue) || 0;
+                    var li = node("li", "rw-row rw-ach");
+                    var main = node("div", "rw-row-main");
+                    main.appendChild(node("strong", "rw-row-title", ach.title));
+                    main.appendChild(node("p", "rw-row-meta", ach.description));
+                    var ladder = node("ol", "rw-tiers");
+                    ladder.setAttribute("aria-label", ach.title + " tiers");
+                    var claimable = null;
+                    var nextLocked = null;
+                    tiers.forEach(function(t, i) {
+                        tiersTotal += 1;
+                        if (t.isClaimed) tiersClaimed += 1;
+                        if (t.canClaim && !claimable) claimable = t;
+                        if (!t.isCompleted && !nextLocked) nextLocked = t;
+                        var prevTarget = i > 0 ? Number(tiers[i - 1].target) || 0 : 0;
+                        var span = (Number(t.target) || 0) - prevTarget;
+                        var reach = span > 0 ? Math.max(0, Math.min(1, (value - prevTarget) / span)) : 1;
+                        var key = "ach:" + ach.id + ":" + t.tier;
+                        var tierEl = node("li", "rw-tier");
+                        tierEl.style.setProperty("--rw-reach", reach);
+                        if (t.isClaimed) tierEl.classList.add("is-claimed");
+                        else if (t.isCompleted) tierEl.classList.add("is-ready");
+                        if (justClaimed[key]) { tierEl.classList.add("is-fresh"); justClaimed[key] = false; }
+                        // Each tier's marker carries its target, so the track reads 5 · 25 · 100 at a glance.
+                        var stamp = node("span", "rw-tier-stamp");
+                        if (t.isClaimed) stamp.appendChild(checkIcon());
+                        stamp.appendChild(node("span", "rw-tier-target", fmt(t.target)));
+                        tierEl.appendChild(stamp);
+                        var name = TIER_NAMES[t.tier] || "Tier " + t.tier;
+                        tierEl.title = name + ": reach " + fmt(t.target) + " for " + fmt(t.rewards && t.rewards.ryo) + " ryō";
+                        tierEl.setAttribute("aria-label", name + ", " + fmt(t.target) + ", " + fmt(t.rewards && t.rewards.ryo) + " ryō, " + (t.isClaimed ? "claimed" : t.isCompleted ? "ready to claim" : "not reached"));
+                        ladder.appendChild(tierEl);
                     });
+                    main.appendChild(ladder);
+                    li.appendChild(main);
+                    var end = node("div", "rw-row-end");
+                    var claimKey = claimable ? "ach:" + ach.id + ":" + claimable.tier : "";
+                    if (claimable) {
+                        li.classList.add("is-ready");
+                        end.appendChild(claimButton("Claim", claimable.rewards && claimable.rewards.ryo, function() {
+                            runClaim(claimKey, "/api/achievements/claim", { achievementId: ach.id, tier: claimable.tier }, loadAchievements, function() {
+                                return ach.title + " " + (TIER_NAMES[claimable.tier] || "tier") + " claimed: " + fmt(claimable.rewards && claimable.rewards.ryo) + " ryō.";
+                            });
+                        }, claimKey));
+                    } else if (nextLocked) {
+                        end.appendChild(node("span", "rw-next-label", "Next"));
+                        end.appendChild(ryoAmount(nextLocked.rewards && nextLocked.rewards.ryo));
+                    } else {
+                        li.classList.add("is-done");
+                        end.appendChild(claimedMark());
+                    }
+                    li.appendChild(end);
+                    list.appendChild(li);
                 });
+                if (note) note.textContent = tiersClaimed + " of " + tiersTotal + " tiers";
             }
 
-            // 🎁 Promo Code Redemption Functions
-            var submitPromoBtn = document.getElementById("submit-promo-code-btn");
-            if (submitPromoBtn) {
-                submitPromoBtn.addEventListener("click", function() {
-                    var input = document.getElementById("promo-code-input");
-                    var msgEl = document.getElementById("promo-code-msg");
-                    var codeStr = input ? input.value.trim() : '';
-                    if (!codeStr) {
-                        if (msgEl) msgEl.textContent = "Please enter a valid code.";
+            function renderSpin() {
+                var cell = board && board.querySelector("[data-spin-cell]");
+                if (!cell) return;
+                var spin = rewardsState.spin;
+                var status = cell.querySelector("[data-spin-status]");
+                var open = cell.querySelector("[data-spin-open]");
+                cell.classList.toggle("is-ready", Boolean(spin && spin.available));
+                if (!spin) return;
+                if (spin.available) {
+                    status.textContent = "Free spin ready";
+                    open.textContent = "Spin the wheel";
+                    open.classList.add("rw-btn-primary");
+                } else {
+                    var ms = spin.nextSpinAt ? new Date(spin.nextSpinAt).getTime() - Date.now() : 0;
+                    var hours = Math.floor(ms / 3600000);
+                    var minutes = Math.max(0, Math.floor((ms % 3600000) / 60000));
+                    status.textContent = ms > 0 ? "Next in " + (hours ? hours + "h " : "") + minutes + "m" : "Spun today";
+                    open.textContent = "View the wheel";
+                    open.classList.remove("rw-btn-primary");
+                }
+            }
+
+            function loadQuests(keepRender) {
+                if (keepRender === true) return renderContracts();
+                getJson("/api/quests").then(function(d) {
+                    if (!d.ok) return;
+                    rewardsState.quests = d.quests || [];
+                    setRewardCount("quests", rewardsState.quests.filter(function(q) { return q.canClaim; }).length);
+                    renderContracts();
+                }).catch(console.error);
+            }
+            function loadAchievements(keepRender) {
+                if (keepRender === true) return renderAchievements();
+                getJson("/api/achievements").then(function(d) {
+                    if (!d.ok) return;
+                    rewardsState.achievements = d.achievements || [];
+                    setRewardCount("achievements", rewardsState.achievements.reduce(function(sum, ach) {
+                        return sum + (ach.tiers || []).filter(function(t) { return t.canClaim; }).length;
+                    }, 0));
+                    renderAchievements();
+                }).catch(console.error);
+            }
+            function loadCheckIn(keepRender) {
+                if (keepRender === true) return renderCheckIn();
+                getJson("/api/login-rewards").then(function(d) {
+                    if (!d.ok) return;
+                    rewardsState.checkIn = d;
+                    setRewardCount("checkIn", d.canClaimToday ? 1 : 0);
+                    renderCheckIn();
+                }).catch(console.error);
+            }
+
+            // Promo codes redeem inline; the server's message is shown as-is.
+            var promoForm = document.querySelector("[data-promo-form]");
+            if (promoForm) {
+                promoForm.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    var input = promoForm.querySelector("[data-promo-input]");
+                    var msg = promoForm.querySelector("[data-promo-msg]");
+                    var submit = promoForm.querySelector("[data-promo-submit]");
+                    var code = input ? input.value.trim() : "";
+                    msg.classList.remove("is-error", "is-success");
+                    if (!code) {
+                        msg.textContent = "Enter a code first.";
+                        msg.classList.add("is-error");
+                        input.focus();
                         return;
                     }
-                    if (msgEl) msgEl.textContent = "Validating code...";
-
-                    window.ArenaSession.fetch("/api/promo-codes/redeem", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ code: codeStr })
-                    }).then(function(r) { return r.json(); }).then(function(d) {
-                        if (d.ok) {
-                            if (msgEl) msgEl.style.color = "#4ade80";
-                            if (msgEl) msgEl.textContent = d.message || "Code redeemed!";
-                            if (input) input.value = "";
-                        } else {
-                            if (msgEl) msgEl.style.color = "#f87171";
-                            if (msgEl) msgEl.textContent = d.error || "Redemption failed.";
-                        }
+                    submit.disabled = true;
+                    submit.classList.add("is-loading");
+                    msg.textContent = "Checking the code…";
+                    postJson("/api/promo-codes/redeem", { code: code }).then(function(d) {
+                        msg.textContent = d.message || "Code redeemed.";
+                        msg.classList.add("is-success");
+                        input.value = "";
+                        setCanonicalRyo(d.ryo);
+                        document.dispatchEvent(new CustomEvent("arena:inventory-changed"));
                     }).catch(function(err) {
-                        if (msgEl) msgEl.style.color = "#f87171";
-                        if (msgEl) msgEl.textContent = err.message || "Redemption failed.";
+                        msg.textContent = err.message;
+                        msg.classList.add("is-error");
+                    }).then(function() {
+                        submit.disabled = false;
+                        submit.classList.remove("is-loading");
                     });
                 });
             }
+
             // Reward alerts: count everything waiting to be claimed and light an orb on the Profile tab,
             // so players notice dailies without opening a menu. The Profile > Rewards tab shows the count.
             var rewardCounts = { quests: 0, achievements: 0, checkIn: 0, spin: 0 };
@@ -512,11 +586,6 @@
             var rewardsCountEl = document.querySelector("[data-rewards-count]");
             function setRewardCount(key, count) {
                 rewardCounts[key] = Math.max(0, Number(count) || 0);
-                var badge = document.querySelector('[data-reward-ready="' + key + '"]');
-                if (badge) {
-                    badge.hidden = rewardCounts[key] === 0;
-                    badge.textContent = rewardCounts[key] > 1 ? rewardCounts[key] + " ready" : "Ready";
-                }
                 var total = rewardCounts.quests + rewardCounts.achievements + rewardCounts.checkIn + rewardCounts.spin;
                 if (rewardsCountEl) {
                     rewardsCountEl.hidden = total === 0;
@@ -536,11 +605,14 @@
             function refreshRewardAlerts() {
                 loadQuests();
                 loadAchievements();
-                loadLoginRewards();
+                loadCheckIn();
             }
             document.addEventListener("arena:rewards-refresh", refreshRewardAlerts);
             document.addEventListener("arena:daily-spin-state", function(event) {
-                setRewardCount("spin", event.detail && event.detail.available ? 1 : 0);
+                var detail = event.detail || {};
+                rewardsState.spin = { available: Boolean(detail.available), nextSpinAt: detail.nextSpinAt || "" };
+                setRewardCount("spin", detail.available ? 1 : 0);
+                renderSpin();
             });
             if (window.ArenaSession && window.ArenaSession.ready) {
                 window.ArenaSession.ready.then(function(user) { if (user) refreshRewardAlerts(); }).catch(function() {});
@@ -550,7 +622,9 @@
                 if (document.visibilityState === "visible") refreshRewardAlerts();
             });
             setInterval(function() {
-                if (document.visibilityState === "visible") refreshRewardAlerts();
+                if (document.visibilityState === "visible") {
+                    refreshRewardAlerts();
+                    renderSpin();
+                }
             }, 5 * 60 * 1000);
         })();
-

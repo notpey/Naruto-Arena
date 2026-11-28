@@ -81,10 +81,6 @@
 .daily-spin-title-art { padding: 6px; color: #f0b866; font: 800 12px/1.25 'Libre Franklin', sans-serif; letter-spacing: .05em; text-align: center; text-transform: uppercase; }
 .daily-spin-countdown { margin: 14px 0 0; color: #e5bc83; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* "Ready" cues on the reward cards. */
-.reward-ready { margin-left: 6px; padding: 1px 6px; border-radius: 3px; background: #e3ad68; color: #1d2a31; font-size: 9px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; vertical-align: 2px; white-space: nowrap; }
-.reward-ready[hidden] { display: none; }
-
 /* Profile tab orb: lights up whenever something is waiting to be claimed in Profile > Rewards. */
 .selection-hub-tab-orb {
     display: inline-block;
@@ -108,11 +104,9 @@
     .selection-hub-tab-orb { animation: none; }
 }
 
-/* Profile > Rewards: the reward cards, with a ready count on the section tab. */
+/* Profile > Rewards: the ready count on the section tab. */
 .store-tab-count[data-rewards-count] { background: #e3ad68; color: #1d2a31; font-weight: 900; }
 .store-tab-count[data-rewards-count][hidden] { display: none; }
-.profile-rewards { min-height: 0; overflow-y: auto; }
-.profile-rewards[hidden] { display: none; }
 .profile-body[hidden] { display: none; }
 
 @keyframes daily-spin-pop {

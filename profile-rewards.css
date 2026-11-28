@@ -1,0 +1,573 @@
+/* Profile > Rewards: one board where every daily reward is visible and claimed in place.
+   Slate boards on the hub's store tokens (hub-store.css), amber for the player's progress,
+   hub buttons with the 3px bottom bar, and a stamp landing as the one claim moment. */
+
+.profile-rewards {
+    min-height: 0;
+    padding-right: 4px;
+    overflow-y: auto;
+    scrollbar-color: #5c717a var(--store-panel, #12212a);
+}
+.profile-rewards[hidden] { display: none; }
+
+.rw {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: start;
+    gap: 10px;
+    color: #f3f4f0;
+    font-family: 'Libre Franklin', 'Franklin', Arial, sans-serif;
+}
+
+.rw-board {
+    min-width: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--store-line, #536872);
+    border-radius: 8px;
+    background: linear-gradient(155deg, #1f343e 0%, #172a34 48%, #13242d 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+    box-sizing: border-box;
+}
+
+.rw-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+.rw .rw-title {
+    margin: 0;
+    color: #b8dce5;
+    font: 800 12px/1.2 'Libre Franklin', 'Franklin', Arial, sans-serif !important;
+    letter-spacing: .02em;
+    text-transform: none !important;
+}
+.rw-note {
+    color: var(--store-text-muted, #9bb0b8);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.rw-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- Buttons: the hub button, cut down for rows ---------- */
+.rw .rw-btn {
+    --bar: #9aabb3;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 14px 2px;
+    border: 1px solid #65777d;
+    border-radius: 5px;
+    background: linear-gradient(165deg, #2d424c 0%, #1d303a 55%, #13232b 100%);
+    box-shadow: inset 0 1px rgba(255, 255, 255, .13), inset 0 -3px var(--bar), 0 4px 10px rgba(0, 0, 0, .26);
+    color: #f2f3f0;
+    font: 800 11.5px/1 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform .12s ease, border-color .15s ease, background .15s ease;
+}
+.rw .rw-btn:hover:not(:disabled) {
+    border-color: var(--bar);
+    background: linear-gradient(165deg, #344852 0%, #192a34 100%);
+    transform: translateY(-1px);
+}
+.rw .rw-btn:active:not(:disabled) { transform: translateY(1px); }
+.rw .rw-btn-primary { --bar: #e3ad68; border-color: #a07a4a; }
+.rw .rw-btn:disabled { opacity: .45; cursor: default; }
+.rw .rw-btn[hidden] { display: none; }
+.rw .rw-btn.is-loading { color: transparent; }
+.rw .rw-btn.is-loading > * { visibility: hidden; }
+.rw .rw-btn.is-loading::after {
+    content: "";
+    position: absolute;
+    top: calc(50% - 8px);
+    left: calc(50% - 8px);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(244, 201, 143, .25);
+    border-top-color: #f4c98f;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: rw-spin .7s linear infinite;
+}
+.rw .rw-btn.is-loading:disabled { opacity: 1; }
+.rw .rw-btn-claim { min-height: 30px; padding: 0 11px 2px; gap: 7px; }
+
+/* ---------- Ryō amounts carry the nav's coin ---------- */
+.rw-ryo {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #f3f4f0;
+    font-size: 12.5px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+.rw-coin {
+    display: inline-grid;
+    place-items: center;
+    width: 15px;
+    height: 15px;
+    border: 1px solid #f3cd8e;
+    border-radius: 50%;
+    background: #e3ad68;
+    color: #24313a;
+    font: 800 8px/1 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    box-sizing: border-box;
+}
+.rw-ryo-on-btn { color: #f4c98f; font-size: 12px; }
+
+.rw-check {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- Today: the check-in week and the daily spin ---------- */
+.rw-today {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    padding: 12px 0 13px;
+}
+.rw-checkin { min-width: 0; padding: 0 18px; }
+
+.rw-week {
+    --stamp-box: 42px;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+/* The track: a well running through every stamp, filled in amber through the last claimed day. */
+.rw-week::before,
+.rw-week::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--stamp-box) / 2 - 1px);
+    left: calc(100% / 14);
+    height: 2px;
+    border-radius: 1px;
+}
+.rw-week::before { right: calc(100% / 14); background: #0c151b; box-shadow: 0 0 0 1px rgba(255, 255, 255, .03); }
+.rw-week::after {
+    width: calc((100% - 100% / 7) * var(--rw-reach, 0));
+    background: #e3ad68;
+    transition: width .7s cubic-bezier(.16, 1, .3, 1);
+}
+
+.rw-day {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+.rw-day-stamp {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: 5px 0;
+    border: 1px solid #536872;
+    border-radius: 50%;
+    background: #13232b;
+    color: #9bb0b8;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-sizing: border-box;
+}
+.rw-day-label {
+    margin-top: 5px;
+    color: #9bb0b8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.rw-day-amount {
+    margin-top: 3px;
+    color: #f3f4f0;
+    font-size: 12.5px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.rw-day.is-claimed .rw-day-stamp { border-color: #f3cd8e; background: #e3ad68; color: #1d2a31; }
+.rw-day.is-claimed .rw-day-amount { color: #9bb0b8; }
+.rw-day.is-claimed .rw-check { width: 15px; height: 15px; stroke-width: 2.6; }
+
+.rw-day.is-ready .rw-day-stamp {
+    border: 2px solid #e3ad68;
+    background: #22363f;
+    color: #f4c98f;
+    animation: rw-ready 2.4s ease-in-out infinite;
+}
+.rw-day.is-ready .rw-day-label { color: #f4c98f; }
+
+/* Day seven: the week's big payout, sealed. */
+.rw-day.is-grand .rw-day-stamp {
+    width: var(--stamp-box);
+    height: var(--stamp-box);
+    margin: 0;
+    border: 2px solid rgba(227, 173, 104, .55);
+}
+.rw-day-kanji {
+    color: #f4c98f;
+    font: 700 19px/1 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'MS Mincho', serif;
+}
+.rw-day.is-grand .rw-day-amount { color: #f0b866; }
+.rw-day.is-grand.is-claimed .rw-day-stamp { border-color: #f3cd8e; }
+.rw-day.is-grand.is-claimed .rw-check { width: 18px; height: 18px; }
+
+.rw-checkin-head { align-items: center; justify-content: flex-start; min-height: 32px; }
+.rw-checkin-head .rw-note { margin-right: auto; }
+.rw-checkin-status {
+    margin: 0;
+    color: var(--store-text-soft, #bfccd0);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: right;
+}
+.rw-checkin-status[hidden] { display: none; }
+
+.rw-spin {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    gap: 2px 11px;
+    padding: 0 16px;
+    border-left: 1px solid #40545e;
+}
+.rw-seal {
+    grid-row: 1 / 3;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid #536872;
+    border-radius: 50%;
+    background: #16232c;
+    color: #b9c5c8;
+    font: 700 22px/1 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', 'MS Mincho', serif;
+    box-sizing: border-box;
+}
+.rw-spin.is-ready .rw-seal { border-color: #e3ad68; color: #f4c98f; }
+.rw .rw-spin .rw-title { align-self: end; color: #f3f4f0; font-size: 14px !important; }
+.rw-spin-status {
+    align-self: start;
+    margin: 0;
+    color: var(--store-text-muted, #9bb0b8);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.rw-spin.is-ready .rw-spin-status { color: #f4c98f; }
+.rw .rw-spin .rw-btn { grid-column: 1 / -1; width: 100%; margin-top: 10px; }
+
+/* ---------- Rows: contracts and achievements ---------- */
+.rw-panel { display: flex; flex-direction: column; }
+.rw-rows { margin: 4px 0 0; padding: 0; list-style: none; }
+.rw-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin: 0 -8px;
+    padding: 6px 8px;
+    border-top: 1px solid #2f414b;
+    border-radius: 3px;
+    transition: background .2s ease;
+}
+.rw-row:first-child { border-top-color: transparent; }
+.rw-row.is-ready { background: rgba(227, 173, 104, .08); }
+.rw-row.is-ready + .rw-row { border-top-color: transparent; }
+.rw-row-main { min-width: 0; }
+.rw-row-title {
+    display: block;
+    overflow: hidden;
+    color: #f3f4f0;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rw-row.is-done .rw-row-title { color: #9bb0b8; }
+.rw-row-meta {
+    margin: 2px 0 0;
+    overflow: hidden;
+    color: var(--store-text-muted, #9bb0b8);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rw-cadence {
+    margin-right: 6px;
+    color: #c0cbce;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+.rw-row-end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+}
+.rw-next-label {
+    color: #93a4aa;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.rw-claimed {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #9bb0b8;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+.rw-claimed .rw-check { color: #e3ad68; }
+
+.rw-progress { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.rw-track {
+    flex: 1 1 auto;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #0c151b;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03);
+}
+.rw-track-fill {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: #e3ad68;
+    transition: width .6s cubic-bezier(.16, 1, .3, 1);
+}
+.rw-count {
+    min-width: 42px;
+    color: var(--store-text-soft, #bfccd0);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+.rw-empty { padding: 14px 0 6px; color: var(--store-text-muted, #9bb0b8); font-size: 12px; font-weight: 600; }
+
+/* Achievement tiers: three stamps on one track; each segment fills toward its tier. */
+.rw-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 7px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.rw-tier {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    cursor: help;
+}
+.rw-tier::before,
+.rw-tier::after {
+    content: "";
+    grid-row: 1;
+    grid-column: 1;
+    height: 3px;
+    margin: 0 4px;
+    border-radius: 2px;
+}
+.rw-tier::before { background: #0c151b; }
+.rw-tier::after {
+    width: calc((100% - 8px) * var(--rw-reach, 0));
+    background: #e3ad68;
+    transition: width .6s cubic-bezier(.16, 1, .3, 1);
+}
+/* A tier marker is a small pill holding its target. */
+.rw-tier-stamp {
+    position: relative;
+    grid-row: 1;
+    grid-column: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 26px;
+    height: 18px;
+    padding: 0 6px;
+    border: 1px solid #536872;
+    border-radius: 9px;
+    background: #13232b;
+    color: #93a4aa;
+    box-sizing: border-box;
+}
+.rw-tier-target {
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.rw-tier-stamp .rw-check { width: 9px; height: 9px; stroke-width: 3; }
+.rw-tier.is-claimed .rw-tier-stamp { border-color: #f3cd8e; background: #e3ad68; color: #1d2a31; }
+.rw-tier.is-ready .rw-tier-stamp {
+    border: 2px solid #e3ad68;
+    background: #22363f;
+    color: #f4c98f;
+    animation: rw-ready 2.4s ease-in-out infinite;
+}
+
+/* ---------- Promo code ---------- */
+.rw-promo {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 7px 16px;
+}
+.rw .rw-promo .rw-title { flex: 0 0 auto; }
+.rw .rw-input {
+    flex: 0 1 220px;
+    min-width: 0;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #465964;
+    border-radius: 5px;
+    background: #0c151b;
+    color: #f3f4f0;
+    font: 800 12.5px/1 'Libre Franklin', 'Franklin', Arial, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    caret-color: #e3ad68;
+    box-sizing: border-box;
+}
+.rw .rw-input::placeholder { color: #93a4aa; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.rw .rw-input:hover { border-color: #65777d; }
+.rw-promo-msg {
+    flex: 1 1 160px;
+    margin: 0;
+    color: var(--store-text-soft, #bfccd0);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+.rw-promo-msg:empty { display: none; }
+.rw-promo-msg.is-error { color: #eab9ab; }
+.rw-promo-msg.is-success { color: #afdabb; }
+
+.rw .rw-promo .rw-btn { min-height: 32px; }
+
+/* ---------- The claim moment: a stamp lands, and a ring rolls out from it ---------- */
+.rw-day.is-fresh .rw-day-stamp,
+.rw-tier.is-fresh .rw-tier-stamp { animation: rw-stamp .55s cubic-bezier(.2, .9, .25, 1) both; }
+.rw-day.is-fresh .rw-day-stamp::after,
+.rw-tier.is-fresh .rw-tier-stamp::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid #e3ad68;
+    border-radius: inherit;
+    animation: rw-ring .7s .18s cubic-bezier(.16, 1, .3, 1) both;
+    pointer-events: none;
+}
+.rw-row.is-fresh .rw-claimed { animation: rw-settle .45s cubic-bezier(.16, 1, .3, 1) both; }
+
+@keyframes rw-stamp {
+    0% { opacity: 0; transform: scale(1.6) rotate(-12deg); }
+    55% { opacity: 1; transform: scale(.9) rotate(0); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes rw-ring {
+    from { opacity: .9; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.9); }
+}
+@keyframes rw-settle {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes rw-ready {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(227, 173, 104, .45); }
+    50% { box-shadow: 0 0 0 5px rgba(227, 173, 104, 0); }
+}
+@keyframes rw-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .rw *,
+    .rw *::before,
+    .rw *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Phones: one column, the week on its own, 44px targets ---------- */
+@media (max-width: 759px) {
+    .profile-rewards { padding-right: 0; overflow: visible; }
+    .rw { grid-template-columns: minmax(0, 1fr); }
+    .rw-today { grid-template-columns: minmax(0, 1fr); padding: 14px 0 0; }
+    .rw-checkin { padding: 0 14px; }
+    .rw-week { --stamp-box: 36px; }
+    .rw-day-stamp { width: 28px; height: 28px; margin: 4px 0; font-size: 12px; }
+    .rw-day-label { font-size: 9px; letter-spacing: .04em; }
+    .rw-day-amount { font-size: 11.5px; }
+    .rw-day-kanji { font-size: 16px; }
+    .rw-checkin-head { flex-wrap: wrap; }
+    .rw-checkin-status { flex-basis: 100%; text-align: left; }
+    .rw-spin {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        gap: 2px 12px;
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-top: 1px solid #40545e;
+        border-left: 0;
+        text-align: left;
+    }
+    .rw-seal { grid-row: 1 / 3; margin: 0; }
+    .rw .rw-spin .rw-title { grid-column: 2; align-self: end; }
+    .rw-spin-status { grid-column: 2; margin: 0; align-self: start; }
+    .rw .rw-spin .rw-btn { grid-column: 3; grid-row: 1 / 3; align-self: center; width: auto; margin-top: 0; }
+    .rw .rw-btn { min-height: 44px; }
+    .rw .rw-input { height: 44px; }
+    .rw .rw-promo .rw-btn, .rw .rw-btn-claim { min-height: 44px; }
+    .rw-row-meta { white-space: normal; }
+    .rw .rw-promo .rw-title { flex-basis: 100%; }
+    .rw .rw-input { flex: 1 1 0; }
+}

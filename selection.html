@@ -15,11 +15,12 @@
     <link rel="stylesheet" href="account.css?v=2">
     <script src="character-images.js?v=1"></script>
     <script src="border-fit.js?v=7" defer></script>
-    <link rel="stylesheet" href="mobile-layout.css?v=6">
+    <link rel="stylesheet" href="mobile-layout.css?v=7">
     <link rel="stylesheet" href="game-surfaces.css?v=34">
     <link rel="stylesheet" href="missions.css?v=2">
     <link rel="stylesheet" href="hub-store.css?v=5">
-    <link rel="stylesheet" href="daily-spin.css?v=4">
+    <link rel="stylesheet" href="daily-spin.css?v=5">
+    <link rel="stylesheet" href="profile-rewards.css?v=1">
 </head>
 <body class="selection-client-page game-remaster">
 <div id="mobile-orientation-overlay" class="mobile-orientation-overlay" style="display:none;">
@@ -182,67 +183,49 @@
                     <div class="store-empty">Loading profile...</div>
                 </aside>
                 <div class="profile-body" data-profile-body></div>
-                <!-- Rewards: quests, achievements and daily rewards; ready counts also light the Profile tab orb -->
+                <!-- Rewards: check-in, daily spin, contracts, achievements and promo codes, all claimable in place.
+                     selectionRewards.js fills it from the server; ready counts also light the Profile tab orb. -->
                 <div class="profile-rewards" data-profile-rewards hidden>
-                    <section class="profile-card">
-                        <h3 class="profile-card-title">Daily &amp; Progression</h3>
-                        <div class="settings-grid">
-                            <button type="button" class="settings-hub-card-btn op-quests" data-quests-trigger>
-                                <div class="card-crest-badge quests">
-                                    <span>忍</span>
-                                </div>
-                                <div class="card-text-wrap">
-                                    <strong>Ninja Quests <span class="reward-ready" data-reward-ready="quests" hidden></span></strong>
-                                    <span>Daily &amp; weekly contracts</span>
-                                </div>
-                                <span class="card-arrow">›</span>
-                            </button>
-                            
-                            <button type="button" class="settings-hub-card-btn op-achieve" data-achievements-trigger>
-                                <div class="card-crest-badge achieve">
-                                    <span>栄</span>
-                                </div>
-                                <div class="card-text-wrap">
-                                    <strong>Achievements <span class="reward-ready" data-reward-ready="achievements" hidden></span></strong>
-                                    <span>Milestones &amp; honors</span>
-                                </div>
-                                <span class="card-arrow">›</span>
-                            </button>
-
-                            <button type="button" class="settings-hub-card-btn op-spin" data-daily-spin-trigger>
-                                <div class="card-crest-badge spin">
-                                    <span>運</span>
-                                </div>
-                                <div class="card-text-wrap">
-                                    <strong>Daily Spin <span class="reward-ready daily-spin-ready" data-daily-spin-ready hidden>Ready</span></strong>
-                                    <span>One free spin every day</span>
-                                </div>
-                                <span class="card-arrow">›</span>
-                            </button>
-
-                            <button type="button" class="settings-hub-card-btn op-login" data-login-rewards-trigger>
-                                <div class="card-crest-badge check-in">
-                                    <span>礼</span>
-                                </div>
-                                <div class="card-text-wrap">
-                                    <strong>Daily Check-In <span class="reward-ready" data-reward-ready="checkIn" hidden></span></strong>
-                                    <span>Claim daily rewards</span>
-                                </div>
-                                <span class="card-arrow">›</span>
-                            </button>
-
-                            <button type="button" class="settings-hub-card-btn op-promo" data-promo-code-trigger>
-                                <div class="card-crest-badge promo">
-                                    <span>文</span>
-                                </div>
-                                <div class="card-text-wrap">
-                                    <strong>Promo Codes</strong>
-                                    <span>Redeem promo codes</span>
-                                </div>
-                                <span class="card-arrow">›</span>
-                            </button>
-                        </div>
-                    </section>
+                    <div class="rw" data-rewards-board>
+                        <section class="rw-today rw-board" aria-label="Today">
+                            <div class="rw-checkin">
+                                <header class="rw-head rw-checkin-head">
+                                    <h2 class="rw-title" id="rw-checkin-title">Daily check-in</h2>
+                                    <span class="rw-note" data-checkin-note></span>
+                                    <p class="rw-checkin-status" data-checkin-status>Loading your check-in&hellip;</p>
+                                    <button type="button" class="rw-btn rw-btn-primary" data-checkin-claim hidden>Claim</button>
+                                </header>
+                                <ol class="rw-week" data-checkin-week aria-labelledby="rw-checkin-title"></ol>
+                            </div>
+                            <div class="rw-spin" data-spin-cell>
+                                <span class="rw-seal" aria-hidden="true">運</span>
+                                <h2 class="rw-title">Daily Spin</h2>
+                                <p class="rw-spin-status" data-spin-status>Checking the wheel&hellip;</p>
+                                <button type="button" class="rw-btn" data-daily-spin-trigger data-spin-open>Open the wheel</button>
+                            </div>
+                        </section>
+                        <section class="rw-board rw-panel" aria-labelledby="rw-contracts-title">
+                            <header class="rw-head">
+                                <h2 class="rw-title" id="rw-contracts-title">Contracts</h2>
+                                <span class="rw-note" data-contracts-note></span>
+                            </header>
+                            <ul class="rw-rows" data-contracts-list><li class="rw-empty">Loading contracts&hellip;</li></ul>
+                        </section>
+                        <section class="rw-board rw-panel" aria-labelledby="rw-achievements-title">
+                            <header class="rw-head">
+                                <h2 class="rw-title" id="rw-achievements-title">Achievements</h2>
+                                <span class="rw-note" data-achievements-note></span>
+                            </header>
+                            <ul class="rw-rows" data-achievements-list><li class="rw-empty">Loading achievements&hellip;</li></ul>
+                        </section>
+                        <form class="rw-board rw-promo" data-promo-form novalidate>
+                            <label class="rw-title" for="rw-promo-input">Promo code</label>
+                            <input type="text" id="rw-promo-input" class="rw-input" data-promo-input autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" placeholder="Enter a code">
+                            <button type="submit" class="rw-btn" data-promo-submit>Redeem</button>
+                            <p class="rw-promo-msg" data-promo-msg role="status" aria-live="polite"></p>
+                        </form>
+                    </div>
+                    <p class="rw-live" data-rewards-live role="status" aria-live="polite"></p>
                 </div>
             </div>
             <input type="file" class="sr-only" data-profile-avatar-file accept="image/png,image/jpeg,image/gif,image/webp" tabindex="-1" aria-hidden="true">
@@ -421,76 +404,6 @@
 </div> <!-- Closed .selectionpage -->
 </div> <!-- Closed .background to ensure all modals are direct body children -->
 
-<!-- Quests Modal -->
-<div id="quests-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel quest-achieve-modal-card">
-        <button type="button" class="shinobi-modal-close" id="quests-modal-close" aria-label="Close">&times;</button>
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f59e0b" stroke-width="2" />
-                    <text x="20" y="28" fill="#ffd700" font-size="14" font-weight="900" text-anchor="middle">忍</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title">Ninja Quests</h2>
-                <p class="settings-modal-subtitle">Daily and Weekly Contracts</p>
-            </div>
-        </div>
-        <div class="quest-subtabs">
-            <button type="button" class="quest-tab-btn active" data-quest-type="daily">Daily</button>
-            <button type="button" class="quest-tab-btn" data-quest-type="weekly">Weekly</button>
-        </div>
-        <div class="quest-list-scroll" id="quests-list-container">
-            <div style="text-align:center; padding:32px 20px; color:#94a3b8; font-size:13px; font-weight:700;">Loading ninja contracts...</div>
-        </div>
-    </div>
-</div>
-
-<!-- Achievements Modal -->
-<div id="achievements-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel quest-achieve-modal-card">
-        <button type="button" class="shinobi-modal-close" id="achievements-modal-close" aria-label="Close">&times;</button>
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#c084fc" stroke-width="2" />
-                    <text x="20" y="28" fill="#e9d5ff" font-size="14" font-weight="900" text-anchor="middle">栄</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title">Shinobi Achievements</h2>
-                <p class="settings-modal-subtitle">Milestones, Masteries &amp; Honors</p>
-            </div>
-        </div>
-        <div class="achievement-list-scroll" id="achievements-list-container">
-            <div style="text-align:center; padding:32px 20px; color:#94a3b8; font-size:13px; font-weight:700;">Loading shinobi milestones...</div>
-        </div>
-    </div>
-</div>
-
-<!-- Daily Login Rewards Modal -->
-<div id="login-rewards-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel quest-achieve-modal-card" style="max-width: 620px;">
-        <button type="button" class="shinobi-modal-close" id="login-rewards-modal-close" aria-label="Close">&times;</button>
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#34d399" stroke-width="2" />
-                    <text x="20" y="28" fill="#a7f3d0" font-size="14" font-weight="900" text-anchor="middle">礼</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title">Daily Shinobi Check-In</h2>
-                <p class="settings-modal-subtitle">Log in daily to claim Ryo</p>
-            </div>
-        </div>
-        <div class="login-calendar-grid" id="login-calendar-grid"></div>
-        <div id="login-reward-msg" style="text-align:center; font-size:13px; color:#fbbf24; margin:10px 0; min-height:18px;"></div>
-        <button type="button" class="shinobi-btn-primary" id="claim-daily-login-btn" style="margin: 0 auto; display:block; min-width:200px;">Claim Today's Reward</button>
-    </div>
-</div>
-
 <!-- Daily Spin Modal -->
 <div id="daily-spin-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="daily-spin-title">
     <div class="shinobi-modal-panel quest-achieve-modal-card daily-spin-panel">
@@ -514,30 +427,6 @@
                 <button type="button" class="daily-spin-hub" data-daily-spin-go>Spin</button>
             </div>
             <div class="daily-spin-side" data-daily-spin-side aria-live="polite"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Promo Code Redemption Modal -->
-<div id="promo-code-modal" class="shinobi-modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="shinobi-modal-panel quest-achieve-modal-card" style="max-width: 480px;">
-        <button type="button" class="shinobi-modal-close" id="promo-code-modal-close" aria-label="Close">&times;</button>
-        <div class="settings-modal-header">
-            <div class="settings-modal-crest">
-                <svg class="rewards-seal-mark" viewBox="0 0 40 46" fill="none" aria-hidden="true">
-                    <polygon points="20,2 38,12 38,34 20,44 2,34 2,12" stroke="#f87171" stroke-width="2" />
-                    <text x="20" y="28" fill="#fecaca" font-size="14" font-weight="900" text-anchor="middle">文</text>
-                </svg>
-            </div>
-            <div>
-                <h2 class="settings-modal-title">Redeem Promo Code</h2>
-                <p class="settings-modal-subtitle">Enter promo codes for exclusive village gifts</p>
-            </div>
-        </div>
-        <div style="margin: 20px 0; display:flex; flex-direction:column; gap:12px;">
-            <input type="text" id="promo-code-input" placeholder="ENTER CODE HERE..." style="width:100%; box-sizing:border-box; background:#0f172a; border:1px solid #f59e0b; border-radius:8px; padding:12px 16px; color:#fff; font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:1px; outline:none;">
-            <div id="promo-code-msg" style="text-align:center; font-size:12px; min-height:16px;"></div>
-            <button type="button" class="shinobi-btn-primary" id="submit-promo-code-btn">Redeem Code</button>
         </div>
     </div>
 </div>
@@ -692,11 +581,11 @@
 <script src="roster-catalog.js?v=3"></script>
 <script src="status-display.js?v=2"></script>
 <script src="skill-description-format.js?v=3"></script>
-<script src="script.js?v=75"></script>
+<script src="script.js?v=76"></script>
 <script src="selectionWar.js?v=1"></script>
-<script src="selectionRewards.js?v=6"></script>
+<script src="selectionRewards.js?v=7"></script>
 <script src="selectionStore.js?v=8"></script>
-<script src="selectionSpin.js?v=4"></script>
+<script src="selectionSpin.js?v=5"></script>
 <script src="selectionHub.js?v=48"></script>
 <script>
     (function() {
