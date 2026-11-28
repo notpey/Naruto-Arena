@@ -15,7 +15,7 @@
         "characterdeescription": "Shunned by the Hidden Leaf Village for the Nine-Tailed Fox sealed within him, Naruto Uzumaki is a mischievous young genin determined to earn everyone's recognition and one day become Hokage. Armed with his newly learned Shadow Clone Technique and an unshakable spirit, Naruto begins his journey alongside Team 7, eager to prove that he's more than the village outcast.",
         "passive": {
             "name": "Kyuubi Awakening",
-            "icon": "https://www.animehistory.org/uploads/screencaps/naruto-episode-016-the-broken-seal/cap_19-38_b1b8.jpg",
+            "icon": "https://i.imgur.com/pTdTbje.png",
             "description": "Quest: Naruto uses 4 skills. Each other member of Team 7 on his team counts as 1 skill.\n\nReward: Naruto awakens the Kyuubi, healing 5 health each turn.",
             "awakening": {
                 "statusId": "uzumaki_naruto_kyuubi_awakening_awakened",

@@ -123,7 +123,7 @@
             {
                 "id": "uchiha-sasuke-ninja-wire-trap",
                 "name": "Ninja Wire Trap",
-                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-030-the-sharingan-revived-dragon-flame-jutsu_/cap_07-13_8a50.jpg",
+                "skillimage": "https://i.imgur.com/w5T2N16.png",
                 "skilldescription": "Sasuke targets an enemy for 1 turn, invisible to them. If the target does not use a skill during this turn, their physical skills will be stunned for 1 turn. The following turn, this skill is replaced by Dragon Flame Jutsu.",
                 "energy": [],
                 "target": "single-enemy",
@@ -186,7 +186,7 @@
             {
                 "id": "uchiha-sasuke-chidori",
                 "name": "Chidori",
-                "skillimage": "https://i.imgur.com/ApGd3KB.png",
+                "skillimage": "https://i.imgur.com/Bjvdj60.png",
                 "skilldescription": "Requires Two-Tomoe Sharingan. Sasuke deals 45 piercing chakra damage to an enemy.",
                 "energy": [
                     "Ninjutsu",
@@ -216,7 +216,7 @@
             {
                 "id": "uchiha-sasuke-sasuke-evasion",
                 "name": "Sasuke Evasion",
-                "skillimage": "https://i.imgur.com/dC3c6Vs.png",
+                "skillimage": "https://i.imgur.com/K8uTkCX.png",
                 "skilldescription": "Sasuke becomes invulnerable for 1 turn. While Two-Tomoe Sharingan is active, this skill's cooldown is reduced by 1.",
                 "energy": [
                     "Random"
@@ -245,7 +245,7 @@
             {
                 "id": "uchiha-sasuke-dragon-flame-jutsu",
                 "name": "Dragon Flame Jutsu",
-                "skillimage": "https://i.imgur.com/60VDgWY.png",
+                "skillimage": "https://i.imgur.com/h41biUZ.png",
                 "skilldescription": "Sasuke deals 20 chakra damage to an enemy and 10 chakra damage to all other enemies. Enemies affected by Ninja Wire Trap take an additional 15 chakra damage.",
                 "energy": [
                     "Bloodline"

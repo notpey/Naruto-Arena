@@ -2,7 +2,7 @@ module.exports = {
     "id": "neji-hyuuga",
     "characterId": "neji-hyuuga",
     "name": "Hyuuga Neji",
-    "facePicture": "https://i.imgur.com/j5onpzd.png",
+    "facePicture": "https://i.imgur.com/onlFSWv.png",
     "characterdeescription": "A gifted genin of the Hyuuga clan's branch family, Neji possesses exceptional mastery of the Byakugan and Gentle Fist fighting style. Cold and calculating, he believes that one's destiny is determined at birth and that no amount of effort can change it.",
     "passive": {
         "name": "Neji's Byakugan",
@@ -13,7 +13,7 @@ module.exports = {
         {
             "id": "neji-hyuuga-neji-gentle-fist",
             "name": "Neji Gentle Fist",
-            "skillimage": "https://i.imgur.com/svJIAbh.png",
+            "skillimage": "https://i.imgur.com/g2Ognpk.png",
             "skilldescription": "Neji deals 20 physical damage to one enemy for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
             "energy": [
                 "Taijutsu",
@@ -55,7 +55,10 @@ module.exports = {
                         "triggerOnApply": true,
                         "skillCostOverridesBySkillId": {
                             "neji-hyuuga-eight-trigrams-sixty-four-palms": {
-                                "energy": ["Taijutsu", "Random"]
+                                "energy": [
+                                    "Taijutsu",
+                                    "Random"
+                                ]
                             }
                         },
                         "tooltipText": "Eight Trigram Sixty-Four Palm costs 1 Taijutsu and 1 Random chakra."
@@ -66,7 +69,7 @@ module.exports = {
         {
             "id": "neji-hyuuga-eight-trigrams-revolving-heaven",
             "name": "Eight Trigram Heavenly Spin",
-            "skillimage": "https://i.imgur.com/hB5n56N.png",
+            "skillimage": "https://i.imgur.com/ia1mLNZ.png",
             "skilldescription": "Neji deals 15 physical damage to all enemies and becomes invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
             "energy": [
                 "Bloodline"
@@ -95,7 +98,10 @@ module.exports = {
                         "invulnerable": true,
                         "skillCostOverridesBySkillId": {
                             "neji-hyuuga-eight-trigrams-sixty-four-palms": {
-                                "energy": ["Bloodline", "Random"]
+                                "energy": [
+                                    "Bloodline",
+                                    "Random"
+                                ]
                             }
                         },
                         "tooltipText": "Neji is invulnerable. Eight Trigram Sixty-Four Palm costs 1 Bloodline and 1 Random chakra."
@@ -106,7 +112,7 @@ module.exports = {
         {
             "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
             "name": "Eight Trigram Sixty-Four Palm",
-            "skillimage": "https://i.imgur.com/KgBRINj.png",
+            "skillimage": "https://i.imgur.com/DvRAukA.png",
             "skilldescription": "Neji deals 35 physical damage to one enemy and removes 1 random chakra.",
             "energy": [
                 "Taijutsu",

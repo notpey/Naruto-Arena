@@ -1,76 +1,178 @@
 module.exports = {
-    id: 'ebisu', characterId: 'ebisu', name: 'Ebisu',
-    requiredMissionId: 'private-lesson',
-    facePicture: 'https://i.imgur.com/knE3OeU.png',
-    characterdeescription: "A special jōnin of the Hidden Leaf Village renowned for his expertise in teaching fundamental shinobi techniques, Ebisu serves as Konohamaru's private tutor before being assigned to train Naruto for the Chūnin Exams. Though strict and often self-important, he is a capable instructor whose disciplined approach emphasizes precise chakra control and mastery of the basics.",
-    passive: {
-        name: 'Mentor Fundamentals', icon: 'https://i.imgur.com/CjXRc1e.png',
-        description: "At the start of the match and every 3 turns thereafter, Ebisu's team gains 1 Random chakra. Whenever Ebisu or an ally uses a skill costing 2 or more chakra, that character gains 10 destructible defense for 1 turn. This defense cannot stack with itself.",
-        teamRandomChakraAtMatchStart: 1,
-        teamRandomChakraEveryOwnTurns: 3,
-        teamSkillCostDefense: { minimumCost: 2, points: 10, duration: 1,
-            statusId: 'ebisu_mentor_fundamentals_defense' },
+    "id": "ebisu",
+    "characterId": "ebisu",
+    "name": "Ebisu",
+    "requiredMissionId": "private-lesson",
+    "facePicture": "https://i.imgur.com/knE3OeU.png",
+    "characterdeescription": "A special jōnin of the Hidden Leaf Village renowned for his expertise in teaching fundamental shinobi techniques, Ebisu serves as Konohamaru's private tutor before being assigned to train Naruto for the Chūnin Exams. Though strict and often self-important, he is a capable instructor whose disciplined approach emphasizes precise chakra control and mastery of the basics.",
+    "passive": {
+        "name": "Mentor Fundamentals",
+        "icon": "https://i.imgur.com/CjXRc1e.png",
+        "description": "At the start of the match and every 3 turns thereafter, Ebisu's team gains 1 Random chakra. Whenever Ebisu or an ally uses a skill costing 2 or more chakra, that character gains 10 destructible defense for 1 turn.",
+        "teamRandomChakraAtMatchStart": 1,
+        "teamRandomChakraEveryOwnTurns": 3,
+        "teamSkillCostDefense": {
+            "minimumCost": 2,
+            "points": 10,
+            "duration": 1,
+            "statusId": "ebisu_mentor_fundamentals_defense"
+        }
     },
-    skills: [
+    "skills": [
         {
-            id: 'ebisu-water-walking', name: 'Water Walking',
-            skillimage: 'https://i.imgur.com/NdSN8te.png',
-            skilldescription: 'Ebisu grants himself or one ally 10 destructible defense for 2 turns. During this time, the next skill they use costs 1 less Random chakra.',
-            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 1,
-            classes: ['Strategic', 'Instant'], effects: [
-                { type: 'apply_status', statusId: 'ebisu_water_walking_defense', duration: 2,
-                    scope: 'target', metadata: { helpful: true, destructibleDefensePoints: 10,
-                        tooltipTextTemplate: 'This character has {destructibleDefensePoints} destructible defense from Water Walking.' } },
-                { type: 'apply_status', statusId: 'ebisu_water_walking_discount', duration: 2,
-                    scope: 'target', metadata: { helpful: true, randomCostReduction: 1,
-                        onOwnerUseSkillTrigger: true,
-                        tooltipText: 'The next skill this character uses costs 1 less Random chakra.' } },
+            "id": "ebisu-water-walking",
+            "name": "Water Walking",
+            "skillimage": "https://i.imgur.com/iggfco9.png",
+            "skilldescription": "Ebisu grants himself or one ally 10 destructible defense for 2 turns. During this time, the next skill they use costs 1 less Random chakra.",
+            "energy": [
+                "Random"
             ],
+            "target": "self-or-single-ally",
+            "damage": 0,
+            "cooldown": 1,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "ebisu_water_walking_defense",
+                    "duration": 2,
+                    "scope": "target",
+                    "metadata": {
+                        "helpful": true,
+                        "destructibleDefensePoints": 10,
+                        "tooltipTextTemplate": "This character has {destructibleDefensePoints} destructible defense from Water Walking."
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "ebisu_water_walking_discount",
+                    "duration": 2,
+                    "scope": "target",
+                    "metadata": {
+                        "helpful": true,
+                        "randomCostReduction": 1,
+                        "onOwnerUseSkillTrigger": true,
+                        "tooltipText": "The next skill this character uses costs 1 less Random chakra."
+                    }
+                }
+            ]
         },
         {
-            id: 'ebisu-textbook-taijutsu', name: 'Textbook Taijutsu',
-            skillimage: 'https://i.imgur.com/OHP9ulW.png',
-            skilldescription: 'Ebisu deals 20 physical damage to one enemy. For 1 turn, the next harmful Physical skill that enemy uses will be countered, dealing 10 physical damage to them.',
-            energy: ['Taijutsu'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 20, scope: 'target' },
-                { type: 'apply_status', statusId: 'ebisu_textbook_counter', duration: 1,
-                    scope: 'target', metadata: { harmful: true,
-                        triggerOnlyOnOwnerSkillUse: true,
-                        triggerOnEnemyHarmfulSkillClassesAny: ['physical'],
-                        counterCancelsSkill: true, counterDamage: 10,
-                        counterDamageSkillClasses: ['Physical'],
-                        counterDamageAttributedToStatusSource: true,
-                        turnDurationAnchor: 'source_turn',
-                        tooltipText: 'The next harmful Physical skill this character uses is countered and deals 10 physical damage to them.' } },
+            "id": "ebisu-textbook-taijutsu",
+            "name": "Textbook Taijutsu",
+            "skillimage": "https://i.imgur.com/IsVUFsc.png",
+            "skilldescription": "Ebisu deals 20 physical damage to one enemy. For 1 turn, the next harmful Physical skill that enemy uses will be countered, dealing 10 physical damage to them.",
+            "energy": [
+                "Taijutsu"
             ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 1,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 20,
+                    "scope": "target"
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "ebisu_textbook_counter",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "triggerOnlyOnOwnerSkillUse": true,
+                        "triggerOnEnemyHarmfulSkillClassesAny": [
+                            "physical"
+                        ],
+                        "counterCancelsSkill": true,
+                        "counterDamage": 10,
+                        "counterDamageSkillClasses": [
+                            "Physical"
+                        ],
+                        "counterDamageAttributedToStatusSource": true,
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "The next harmful Physical skill this character uses is countered and deals 10 physical damage to them."
+                    }
+                }
+            ]
         },
         {
-            id: 'ebisu-strict-discipline', name: 'Strict Discipline',
-            skillimage: 'https://i.imgur.com/AVnlbkW.png',
-            skilldescription: "Ebisu deals 15 affliction damage to one enemy. For 2 turns, that enemy's harmful skills cost 1 additional Random chakra. This effect cannot stack.",
-            energy: ['Ninjutsu'], target: 'single-enemy', damage: 0, cooldown: 2,
-            classes: ['Affliction', 'Action'], effects: [
-                { type: 'damage', amount: 15, scope: 'target',
-                    metadata: { afflictionDamage: true, ignoreDamageReduction: true,
-                        ignoreDestructibleDefense: true } },
-                { type: 'apply_status', statusId: 'ebisu_strict_discipline', duration: 2,
-                    scope: 'target', metadata: { harmful: true,
-                        randomCostIncreaseForHarmfulSkills: 1,
-                        turnDurationAnchor: 'source_turn', ongoingClass: 'action',
-                        tooltipText: 'Harmful skills cost 1 additional Random chakra.' } },
+            "id": "ebisu-strict-discipline",
+            "name": "Strict Discipline",
+            "skillimage": "https://i.imgur.com/pQt2hHI.png",
+            "skilldescription": "Ebisu deals 15 affliction damage to one enemy. For 2 turns, that enemy's harmful skills cost 1 additional Random chakra.",
+            "energy": [
+                "Ninjutsu"
             ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 2,
+            "classes": [
+                "Affliction",
+                "Action"
+            ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 15,
+                    "scope": "target",
+                    "metadata": {
+                        "afflictionDamage": true,
+                        "ignoreDamageReduction": true,
+                        "ignoreDestructibleDefense": true
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "ebisu_strict_discipline",
+                    "duration": 2,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "randomCostIncreaseForHarmfulSkills": 1,
+                        "turnDurationAnchor": "source_turn",
+                        "ongoingClass": "action",
+                        "tooltipText": "Harmful skills cost 1 additional Random chakra."
+                    }
+                }
+            ]
         },
         {
-            id: 'ebisu-to-the-skies', name: 'To The Skies',
-            skillimage: 'https://i.imgur.com/P0U83h1.png',
-            skilldescription: 'Ebisu becomes invulnerable for 1 turn.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Strategic', 'Instant'], effects: [
-                { type: 'apply_status', statusId: 'ebisu_to_the_skies', duration: 1,
-                    scope: 'self', metadata: { helpful: true, invulnerable: true,
-                        tooltipText: 'Ebisu is invulnerable.' } },
+            "id": "ebisu-to-the-skies",
+            "name": "To The Skies",
+            "skillimage": "https://i.imgur.com/ynzKYsm.png",
+            "skilldescription": "Ebisu becomes invulnerable for 1 turn.",
+            "energy": [
+                "Random"
             ],
-        },
-    ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "ebisu_to_the_skies",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "invulnerable": true,
+                        "tooltipText": "Ebisu is invulnerable."
+                    }
+                }
+            ]
+        }
+    ]
 };

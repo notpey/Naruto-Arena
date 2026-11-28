@@ -8,7 +8,7 @@ module.exports = {
     "passive": {
         "name": "Close Quarters",
         "icon": "https://i.imgur.com/MUx03Dx.png",
-        "description": "Yoroi's chakra-absorbing abilities grant him Lifesteal: he recovers health equal to the health damage his skills deal.",
+        "description": "Yoroi's chakra-absorbing abilities grant him Lifesteal, healing him based on damage dealt.",
         "lifestealPercent": 100
     },
     "skills": [

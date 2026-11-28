@@ -1284,7 +1284,7 @@
                 "id": "neji-hyuuga",
                 "characterId": "neji-hyuuga",
                 "name": "Hyuuga Neji",
-                "facePicture": "https://i.imgur.com/j5onpzd.png",
+                "facePicture": "https://i.imgur.com/onlFSWv.png",
                 "characterdeescription": "A gifted genin of the Hyuuga clan's branch family, Neji possesses exceptional mastery of the Byakugan and Gentle Fist fighting style. Cold and calculating, he believes that one's destiny is determined at birth and that no amount of effort can change it.",
                 "passive": {
                         "name": "Neji's Byakugan",
@@ -1295,7 +1295,7 @@
                         {
                                 "id": "neji-hyuuga-neji-gentle-fist",
                                 "name": "Neji Gentle Fist",
-                                "skillimage": "https://i.imgur.com/svJIAbh.png",
+                                "skillimage": "https://i.imgur.com/g2Ognpk.png",
                                 "skilldescription": "Neji deals 20 physical damage to one enemy for 2 turns. During this time, Eight Trigram Sixty-Four Palm will cost 1 Taijutsu, 1 Random chakra.",
                                 "energy": [
                                         "Taijutsu",
@@ -1351,7 +1351,7 @@
                         {
                                 "id": "neji-hyuuga-eight-trigrams-revolving-heaven",
                                 "name": "Eight Trigram Heavenly Spin",
-                                "skillimage": "https://i.imgur.com/hB5n56N.png",
+                                "skillimage": "https://i.imgur.com/ia1mLNZ.png",
                                 "skilldescription": "Neji deals 15 physical damage to all enemies and becomes invulnerable for 1 turn. During this time, Eight Trigram Sixty-Four Palm will cost 1 Bloodline, 1 Random chakra.",
                                 "energy": [
                                         "Bloodline"
@@ -1394,7 +1394,7 @@
                         {
                                 "id": "neji-hyuuga-eight-trigrams-sixty-four-palms",
                                 "name": "Eight Trigram Sixty-Four Palm",
-                                "skillimage": "https://i.imgur.com/KgBRINj.png",
+                                "skillimage": "https://i.imgur.com/DvRAukA.png",
                                 "skilldescription": "Neji deals 35 physical damage to one enemy and removes 1 random chakra.",
                                 "energy": [
                                         "Taijutsu",
@@ -1708,7 +1708,7 @@
                     "id": "kankuro-poison-bomb",
                     "name": "Poison Bomb",
                     "skillimage": "https://i.imgur.com/vJFqLIY.png",
-                    "skilldescription": "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn. While Puppet Preparation's destructible defense remains, the poison lasts 2 turns, dealing 10 affliction damage each turn and blocking healing for both. This skill starts on cooldown for 1 turn.",
+                    "skilldescription": "This skill has a starting cooldown of 1. Kankuro releases a cloud of poison on all enemies dealing 10 affliction damage and making them ignore healing effects for 1 turn. While Puppet Preparation's destructible defense is active, this skill lasts an additional turn.",
                     "energy": [
                         "Random"
                     ],
@@ -1857,8 +1857,8 @@
                 {
                     "id": "temari-cutting-whirlwind",
                     "name": "Cutting Whirlwind",
-                    "skillimage": "https://i.imgur.com/TceZL1M.png",
-                    "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing damage to an enemy and 5 piercing damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
+                    "skillimage": "https://i.imgur.com/RIdvC9Y.png",
+                    "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing physical damage to an enemy and 5 piercing physical damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
                     "energy": [
                         "Ninjutsu"
                     ],
@@ -1911,7 +1911,7 @@
                     "id": "temari-summoning-quick-beheading-dance",
                     "name": "Summoning: Quick Beheading Dance",
                     "skillimage": "https://i.imgur.com/cvblibj.png",
-                    "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+                    "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 physical damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
                     "energy": [
                         "Ninjutsu",
                         "Random",
@@ -1949,7 +1949,7 @@
                 {
                     "id": "temari-dust-wind",
                     "name": "Dust Wind",
-                    "skillimage": "https://i.imgur.com/O7YnMRH.png",
+                    "skillimage": "https://i.imgur.com/LBzws3r.png",
                     "skilldescription": "Temari kicks up a cloud of dust, making herself and all allies invulnerable for 1 turn. If enemies can be targeted, their non-affliction damage is also reduced by 20 for 1 turn. If used the turn after Cutting Whirlwind, this reduction lasts 2 turns instead.",
                     "energy": [
                         "Ninjutsu",

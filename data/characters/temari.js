@@ -17,8 +17,8 @@ module.exports = {
         {
             "id": "temari-cutting-whirlwind",
             "name": "Cutting Whirlwind",
-            "skillimage": "https://i.imgur.com/TceZL1M.png",
-            "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing damage to an enemy and 5 piercing damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
+            "skillimage": "https://i.imgur.com/RIdvC9Y.png",
+            "skilldescription": "Temari unleashes a razor-sharp gust of wind, dealing 15 piercing physical damage to an enemy and 5 piercing physical damage to all other enemies. Temari also becomes invulnerable to non-Strategic skills for 1 turn.",
             "energy": [
                 "Ninjutsu"
             ],
@@ -71,7 +71,7 @@ module.exports = {
             "id": "temari-summoning-quick-beheading-dance",
             "name": "Summoning: Quick Beheading Dance",
             "skillimage": "https://i.imgur.com/cvblibj.png",
-            "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
+            "skilldescription": "Temari summons Kamatari, the wind weasel, dealing 30 physical damage to all enemies. If used the turn after Cutting Whirlwind, this skill costs 1 less random chakra. Each use permanently increases the number of times Phantom Gale triggers by 1.",
             "energy": [
                 "Ninjutsu",
                 "Random",
@@ -109,7 +109,7 @@ module.exports = {
         {
             "id": "temari-dust-wind",
             "name": "Dust Wind",
-            "skillimage": "https://i.imgur.com/O7YnMRH.png",
+            "skillimage": "https://i.imgur.com/LBzws3r.png",
             "skilldescription": "Temari kicks up a cloud of dust, making herself and all allies invulnerable for 1 turn. If enemies can be targeted, their non-affliction damage is also reduced by 20 for 1 turn. If used the turn after Cutting Whirlwind, this reduction lasts 2 turns instead.",
             "energy": [
                 "Ninjutsu",

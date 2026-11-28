@@ -1,77 +1,189 @@
 module.exports = {
-    id: 'sarutobi-konohamaru', characterId: 'sarutobi-konohamaru',
-    name: 'Sarutobi Konohamaru',
-    requiredMissionId: 'a-new-generation',
-    facePicture: 'https://i.imgur.com/dlJ8ue3.png',
-    characterdeescription: "The spirited grandson of the Third Hokage, Konohamaru strives to escape his family's shadow through sheer grit, pranks, and an unbreakable rivalry with Naruto. In battle, he sows chaotic disruption using rudimentary traps, clumsy camouflage, and outrageous distractions to trip up opponents and protect his allies.",
-    passive: { name: 'Stubborn Rivalry', icon: 'https://i.imgur.com/j7YvGKz.png',
-        description: 'Whenever Konohamaru takes 30 or more damage in a single turn, he gains 10 destructible defense for 2 turns and his next attack deals 10 additional damage.',
-        damageTakenInTurn: { threshold: 30, defensePoints: 10, defenseDuration: 2,
-            defenseStatusId: 'konohamaru_rivalry_defense',
-            attackStatusId: 'konohamaru_rivalry_attack',
-            nextAttackDamage: 10 } },
-    skills: [
-        { id: 'sarutobi-konohamaru-cloak-of-invisibility-technique',
-            name: 'Cloak of Invisibility Technique',
-            skillimage: 'https://i.imgur.com/jYOQrWm.png',
-            skilldescription: 'Konohamaru covers himself or an ally with a camouflage sheet. The target ignores all damage dealt to them for 1 turn. If the target is targeted during this turn, Konohamaru jumps out, deals 15 damage to the attacker, and stuns their Physical skills for 1 turn.',
-            energy: ['Random'], target: 'self-or-single-ally', damage: 0, cooldown: 2,
-            classes: ['Strategic', 'Physical', 'Instant'], effects: [
-                { type: 'apply_status', statusId: 'konohamaru_invisibility_cloak', duration: 1, scope: 'target',
-                    metadata: { helpful: true, ignoreAllDamage: true,
-                        onEnemySkillTargetedUseStatusSource: true,
-                        onEnemySkillTargetedDamageToSourceAmount: 15,
-                        onEnemySkillTargetedApplyStatusToSource: {
-                            // Fresh: it lands during the attacker's turn and must last through their next one.
-                            statusId: 'konohamaru_cloak_physical_stun', duration: 1, fresh: true,
-                            metadata: { harmful: true, cannotUseSkillClasses: ['physical'],
-                                tooltipText: 'Physical skills are stunned by Konohamaru.' },
+    "id": "sarutobi-konohamaru",
+    "characterId": "sarutobi-konohamaru",
+    "name": "Sarutobi Konohamaru",
+    "requiredMissionId": "a-new-generation",
+    "facePicture": "https://i.imgur.com/2K5Ynub.png",
+    "characterdeescription": "The spirited grandson of the Third Hokage, Konohamaru strives to escape his family's shadow through sheer grit, pranks, and an unbreakable rivalry with Naruto. In battle, he sows chaotic disruption using rudimentary traps, clumsy camouflage, and outrageous distractions to trip up opponents and protect his allies.",
+    "passive": {
+        "name": "Stubborn Rivalry",
+        "icon": "https://i.imgur.com/j7YvGKz.png",
+        "description": "Whenever Konohamaru takes 30 or more damage in a single turn, he gains 10 destructible defense for 2 turns and his next attack deals 10 additional damage.",
+        "damageTakenInTurn": {
+            "threshold": 30,
+            "defensePoints": 10,
+            "defenseDuration": 2,
+            "defenseStatusId": "konohamaru_rivalry_defense",
+            "attackStatusId": "konohamaru_rivalry_attack",
+            "nextAttackDamage": 10
+        }
+    },
+    "skills": [
+        {
+            "id": "sarutobi-konohamaru-cloak-of-invisibility-technique",
+            "name": "Cloak of Invisibility Technique",
+            "skillimage": "https://i.imgur.com/toeLHBx.png",
+            "skilldescription": "Konohamaru covers himself or an ally with a camouflage sheet. The target ignores all damage dealt to them for 1 turn. If the target is targeted during this turn, Konohamaru jumps out, deals 15 damage to the attacker, and stuns their Physical skills for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self-or-single-ally",
+            "damage": 0,
+            "cooldown": 2,
+            "classes": [
+                "Strategic",
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "konohamaru_invisibility_cloak",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "helpful": true,
+                        "ignoreAllDamage": true,
+                        "onEnemySkillTargetedUseStatusSource": true,
+                        "onEnemySkillTargetedDamageToSourceAmount": 15,
+                        "onEnemySkillTargetedApplyStatusToSource": {
+                            "statusId": "konohamaru_cloak_physical_stun",
+                            "duration": 1,
+                            "fresh": true,
+                            "metadata": {
+                                "harmful": true,
+                                "cannotUseSkillClasses": [
+                                    "physical"
+                                ],
+                                "tooltipText": "Physical skills are stunned by Konohamaru."
+                            }
                         },
-                        tooltipText: 'This character ignores all damage. When targeted, Konohamaru deals 15 damage to the attacker and stuns their Physical skills.' } },
-            ],
+                        "tooltipText": "This character ignores all damage. When targeted, Konohamaru deals 15 damage to the attacker and stuns their Physical skills."
+                    }
+                }
+            ]
         },
-        { id: 'sarutobi-konohamaru-sexy-jutsu-konohamaru-style',
-            name: 'Sexy Jutsu: Konohamaru Style',
-            skillimage: 'https://i.imgur.com/VJeRkMO.png',
-            skilldescription: 'Konohamaru reduces all enemies\' damage by 20 for 1 turn. During this time, each new Strategic skill an enemy uses permanently reduces their non-affliction damage by 5; this stacks. These effects end if Konohamaru dies.',
-            energy: ['Random', 'Random'], target: 'all-enemy', damage: 0, cooldown: 2,
-            classes: ['Strategic', 'Instant'], effects: [
-                { type: 'apply_status', statusId: 'konohamaru_sexy_jutsu_debuff', duration: 1, scope: 'all-enemy',
-                    metadata: { harmful: true, damageDebuffFlat: 20, removeOnSourceDeath: true,
-                        onOwnerUseSkillTrigger: true, onOwnerUseSkillClassesAny: ['strategic'],
-                        persistOnOwnerUseSkillTrigger: true,
-                        onOwnerUseSkillApplyStatusToOwner: {
-                            statusId: 'konohamaru_sexy_jutsu_permanent_debuff', duration: 99,
-                            metadata: { harmful: true, permanent: true, removeOnSourceDeath: true,
-                                stackMetadataKey: 'nonAfflictionDamageDebuffFlat', stackDelta: 5,
-                                stackMax: 9999,
-                                tooltipTextTemplate: 'This character deals {nonAfflictionDamageDebuffFlat} less non-affliction damage.' },
+        {
+            "id": "sarutobi-konohamaru-sexy-jutsu-konohamaru-style",
+            "name": "Sexy Jutsu: Konohamaru Style",
+            "skillimage": "https://i.imgur.com/0wmC8dh.png",
+            "skilldescription": "Konohamaru reduces all enemies' damage by 20 for 1 turn. During this time, each new Strategic skill an enemy uses permanently reduces their non-affliction damage by 5; this stacks. These effects end if Konohamaru dies.",
+            "energy": [
+                "Random",
+                "Random"
+            ],
+            "target": "all-enemy",
+            "damage": 0,
+            "cooldown": 2,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "konohamaru_sexy_jutsu_debuff",
+                    "duration": 1,
+                    "scope": "all-enemy",
+                    "metadata": {
+                        "harmful": true,
+                        "damageDebuffFlat": 20,
+                        "removeOnSourceDeath": true,
+                        "onOwnerUseSkillTrigger": true,
+                        "onOwnerUseSkillClassesAny": [
+                            "strategic"
+                        ],
+                        "persistOnOwnerUseSkillTrigger": true,
+                        "onOwnerUseSkillApplyStatusToOwner": {
+                            "statusId": "konohamaru_sexy_jutsu_permanent_debuff",
+                            "duration": 99,
+                            "metadata": {
+                                "harmful": true,
+                                "permanent": true,
+                                "removeOnSourceDeath": true,
+                                "stackMetadataKey": "nonAfflictionDamageDebuffFlat",
+                                "stackDelta": 5,
+                                "stackMax": 9999,
+                                "tooltipTextTemplate": "This character deals {nonAfflictionDamageDebuffFlat} less non-affliction damage."
+                            }
                         },
-                        tooltipText: 'For 1 turn, this character deals 20 less damage. Each new Strategic skill permanently reduces their non-affliction damage by 5.' } },
-            ],
+                        "tooltipText": "For 1 turn, this character deals 20 less damage. Each new Strategic skill permanently reduces their non-affliction damage by 5."
+                    }
+                }
+            ]
         },
-        { id: 'sarutobi-konohamaru-shuriken-and-trap-ambush',
-            name: 'Shuriken & Trap Ambush',
-            skillimage: 'https://i.imgur.com/9eeMP2A.png',
-            skilldescription: 'Konohamaru deals 20 damage to one enemy and 10 piercing damage to all other enemies. If an enemy targets him next turn, the attacker takes 10 counter damage.',
-            energy: ['Taijutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'], effects: [
-                { type: 'damage', amount: 20, scope: 'target' },
-                { type: 'damage', amount: 10, scope: 'other-enemies',
-                    metadata: { ignoreDamageReduction: true, ignoreDestructibleDefense: true } },
-                { type: 'apply_status', statusId: 'konohamaru_ambush_trap', duration: 1, scope: 'self',
-                    metadata: { helpful: true, onEnemySkillTargetedDamageToSourceAmount: 10,
-                        tooltipText: 'If Konohamaru is targeted next turn, the attacker takes 10 counter damage.' } },
+        {
+            "id": "sarutobi-konohamaru-shuriken-and-trap-ambush",
+            "name": "Shuriken & Trap Ambush",
+            "skillimage": "https://i.imgur.com/GLl8fn7.png",
+            "skilldescription": "Konohamaru deals 20 damage to one enemy and 10 piercing damage to all other enemies. If an enemy targets him next turn, the attacker takes 10 counter damage.",
+            "energy": [
+                "Taijutsu",
+                "Random"
             ],
-        },
-        { id: 'sarutobi-konohamaru-replacement-technique', name: 'Replacement Technique',
-            skillimage: 'https://i.imgur.com/kYdI5MF.png',
-            skilldescription: 'Konohamaru becomes invulnerable for 1 turn.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Strategic', 'Instant'], effects: [
-                { type: 'apply_status', statusId: 'konohamaru_replacement', duration: 1, scope: 'self',
-                    metadata: { helpful: true, invulnerable: true, tooltipText: 'Konohamaru is invulnerable.' } },
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 1,
+            "classes": [
+                "Physical",
+                "Instant"
             ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 20,
+                    "scope": "target"
+                },
+                {
+                    "type": "damage",
+                    "amount": 10,
+                    "scope": "other-enemies",
+                    "metadata": {
+                        "ignoreDamageReduction": true,
+                        "ignoreDestructibleDefense": true
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "konohamaru_ambush_trap",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "onEnemySkillTargetedDamageToSourceAmount": 10,
+                        "tooltipText": "If Konohamaru is targeted next turn, the attacker takes 10 counter damage."
+                    }
+                }
+            ]
         },
-    ],
+        {
+            "id": "sarutobi-konohamaru-replacement-technique",
+            "name": "Replacement Technique",
+            "skillimage": "https://i.imgur.com/D8MmgBn.png",
+            "skilldescription": "Konohamaru becomes invulnerable for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "konohamaru_replacement",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "invulnerable": true,
+                        "tooltipText": "Konohamaru is invulnerable."
+                    }
+                }
+            ]
+        }
+    ]
 };

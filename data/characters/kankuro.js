@@ -1,90 +1,189 @@
 module.exports = {
-    id: 'kankuro',
-    characterId: 'kankuro',
-    name: 'Kankuro',
-    facePicture: 'https://i.imgur.com/5uxGoSN.png',
-    characterdeescription: "A cunning genin of the Hidden Sand Village and older brother of Gaara, Kankuro specializes in controlling deadly puppets equipped with concealed weapons and traps. His deceptive fighting style allows him to outmaneuver opponents while keeping himself safely out of reach.",
-    passive: {
-        name: 'Puppet Preparation',
-        icon: 'https://i.imgur.com/Kya84CC.png',
-        description: "Kankuro begins the battle with 15 destructible defense. Whenever an enemy's skill is countered, this defense is renewed.",
-        onEnemySkillCounteredDefense: { statusId: 'kankuro_puppet_preparation_defense', points: 15 },
+    "id": "kankuro",
+    "characterId": "kankuro",
+    "name": "Kankuro",
+    "facePicture": "https://i.imgur.com/5uxGoSN.png",
+    "characterdeescription": "A cunning genin of the Hidden Sand Village and older brother of Gaara, Kankuro specializes in controlling deadly puppets equipped with concealed weapons and traps. His deceptive fighting style allows him to outmaneuver opponents while keeping himself safely out of reach.",
+    "passive": {
+        "name": "Puppet Preparation",
+        "icon": "https://i.imgur.com/Kya84CC.png",
+        "description": "Kankuro begins the battle with 15 destructible defense. Whenever an enemy's skill is countered, this defense is renewed.",
+        "onEnemySkillCounteredDefense": {
+            "statusId": "kankuro_puppet_preparation_defense",
+            "points": 15
+        }
     },
-    startStatuses: [{
-        statusId: 'kankuro_puppet_preparation_defense',
-        duration: 99,
-        metadata: {
-            helpful: true, permanent: true, destructibleDefensePoints: 15,
-            // Poison Bomb lasts 1 turn longer while this defense remains (the status ends when it breaks).
-            skillDurationBonuses: { 'kankuro-poison-bomb': 1 },
-            tooltipTextTemplate: 'Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation.',
-        },
-    }],
-    skills: [
+    "startStatuses": [
         {
-            id: 'kankuro-black-secret-machine-one-shot',
-            name: 'Black Secret Machine One Shot',
-            skillimage: 'https://i.imgur.com/dHWzRYI.png',
-            skilldescription: "Kankuro unleashes his puppet's hidden weaponry, dealing 30 physical damage to an enemy. If the target is affected by Puppet Trap, this skill deals 15 additional damage.",
-            energy: ['Random', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
-            classes: ['Physical', 'Instant'],
-            effects: [{ type: 'damage', amount: 30, scope: 'target' }],
-        },
-        {
-            id: 'kankuro-poison-bomb',
-            name: 'Poison Bomb',
-            skillimage: 'https://i.imgur.com/vJFqLIY.png',
-            skilldescription: "Kankuro releases a cloud of poison, dealing 10 affliction damage to all enemies. Affected enemies ignore healing effects for 1 turn. While Puppet Preparation's destructible defense remains, the poison lasts 2 turns, dealing 10 affliction damage each turn and blocking healing for both. This skill starts on cooldown for 1 turn.",
-            energy: ['Random'], target: 'all-enemy', damage: 0, cooldown: 2, startingCooldown: 1,
-            classes: ['Affliction', 'Instant'],
-            effects: [
-                { type: 'apply_status', statusId: 'kankuro_poison_bomb_poison', duration: 1, scope: 'all-enemy',
-                    metadata: { harmful: true, afflictionDamage: true, turnEndDamage: 10,
-                        turnEndTrigger: 'source_turn', turnDurationAnchor: 'source_turn', triggerOnApply: true,
-                        tooltipText: 'This character takes 10 affliction damage each turn from Poison Bomb.' } },
-                { type: 'apply_status', statusId: 'kankuro_poison_bomb_no_heal', duration: 1,
-                    scope: 'all-enemy', metadata: { harmful: true, turnDurationAnchor: 'source_turn',
-                        healReceivedMultiplier: 0, tooltipText: 'This character ignores healing effects.' } },
-            ],
-        },
-        {
-            id: 'kankuro-puppet-trap',
-            name: 'Puppet Trap',
-            skillimage: '/assets/characters/kankuro-puppet-trap.jpg',
-            skilldescription: 'Kankuro sets an invisible trap on an enemy for 1 turn. If they use a physical or strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.',
-            energy: ['Random'], target: 'single-enemy', damage: 0, cooldown: 2,
-            classes: ['Strategic', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'kankuro_puppet_trap', duration: 1,
-                scope: 'target', metadata: {
-                    harmful: true, invisible: true, turnDurationAnchor: 'source_turn',
-                    bonusDamageFromSourceSkillsFlat: 15,
-                    bonusDamageFromSourceCharacterId: 'kankuro',
-                    bonusDamageAppliesToSkillIds: ['kankuro-black-secret-machine-one-shot'],
-                    triggerOnlyOnOwnerSkillUse: true,
-                    triggerOnOwnerHelpfulSkill: true,
-                    triggerOnEnemyHarmfulSkillClassesAny: ['strategic', 'physical'],
-                    counterCancelsSkill: true,
-                    counterStatusId: 'kankuro_puppet_trap_stun', counterStatusDuration: 1,
-                    counterStatusMetadata: { harmful: true,
-                        cannotUseSkillClasses: ['physical', 'strategic'],
-                        // A countered enemy stays open to the extra One Shot damage while stunned.
-                        bonusDamageFromSourceSkillsFlat: 15,
-                        bonusDamageFromSourceCharacterId: 'kankuro',
-                        bonusDamageAppliesToSkillIds: ['kankuro-black-secret-machine-one-shot'],
-                        tooltipText: 'Physical and Strategic skills are stunned for 1 turn.' },
-                    tooltipText: 'The next Physical or Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro\'s 15 defense.',
-                } }],
-        },
-        {
-            id: 'kankuro-puppet-replacement-technique',
-            name: 'Puppet Replacement Technique',
-            skillimage: 'https://i.imgur.com/mpGOYy6.png',
-            skilldescription: 'Kankuro uses a puppet to evade incoming attacks, becoming invulnerable for 1 turn.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Strategic', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'kankuro_puppet_replacement_invulnerable',
-                duration: 1, scope: 'self', metadata: { helpful: true, invulnerable: true,
-                    tooltipText: 'Kankuro is invulnerable.' } }],
-        },
+            "statusId": "kankuro_puppet_preparation_defense",
+            "duration": 99,
+            "metadata": {
+                "helpful": true,
+                "permanent": true,
+                "destructibleDefensePoints": 15,
+                "skillDurationBonuses": {
+                    "kankuro-poison-bomb": 1
+                },
+                "tooltipTextTemplate": "Kankuro has {destructibleDefensePoints} destructible defense from Puppet Preparation."
+            }
+        }
     ],
+    "skills": [
+        {
+            "id": "kankuro-black-secret-machine-one-shot",
+            "name": "Black Secret Machine One Shot",
+            "skillimage": "https://i.imgur.com/dHWzRYI.png",
+            "skilldescription": "Kankuro unleashes his puppet's hidden weaponry, dealing 30 physical damage to an enemy. If the target is affected by Puppet Trap, this skill deals 15 additional damage.",
+            "energy": [
+                "Random",
+                "Random"
+            ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 0,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 30,
+                    "scope": "target"
+                }
+            ]
+        },
+        {
+            "id": "kankuro-poison-bomb",
+            "name": "Poison Bomb",
+            "skillimage": "https://i.imgur.com/vJFqLIY.png",
+            "skilldescription": "This skill has a starting cooldown of 1. Kankuro releases a cloud of poison on all enemies dealing 10 affliction damage and making them ignore healing effects for 1 turn. While Puppet Preparation's destructible defense is active, this skill lasts an additional turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "all-enemy",
+            "damage": 0,
+            "cooldown": 2,
+            "startingCooldown": 1,
+            "classes": [
+                "Affliction",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "kankuro_poison_bomb_poison",
+                    "duration": 1,
+                    "scope": "all-enemy",
+                    "metadata": {
+                        "harmful": true,
+                        "afflictionDamage": true,
+                        "turnEndDamage": 10,
+                        "turnEndTrigger": "source_turn",
+                        "turnDurationAnchor": "source_turn",
+                        "triggerOnApply": true,
+                        "tooltipText": "This character takes 10 affliction damage each turn from Poison Bomb."
+                    }
+                },
+                {
+                    "type": "apply_status",
+                    "statusId": "kankuro_poison_bomb_no_heal",
+                    "duration": 1,
+                    "scope": "all-enemy",
+                    "metadata": {
+                        "harmful": true,
+                        "turnDurationAnchor": "source_turn",
+                        "healReceivedMultiplier": 0,
+                        "tooltipText": "This character ignores healing effects."
+                    }
+                }
+            ]
+        },
+        {
+            "id": "kankuro-puppet-trap",
+            "name": "Puppet Trap",
+            "skillimage": "/assets/characters/kankuro-puppet-trap.jpg",
+            "skilldescription": "Kankuro sets an invisible trap on an enemy for 1 turn. If they use a physical or strategic skill during this time, that skill is countered and their physical and strategic skills are stunned for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 2,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "kankuro_puppet_trap",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "invisible": true,
+                        "turnDurationAnchor": "source_turn",
+                        "bonusDamageFromSourceSkillsFlat": 15,
+                        "bonusDamageFromSourceCharacterId": "kankuro",
+                        "bonusDamageAppliesToSkillIds": [
+                            "kankuro-black-secret-machine-one-shot"
+                        ],
+                        "triggerOnlyOnOwnerSkillUse": true,
+                        "triggerOnOwnerHelpfulSkill": true,
+                        "triggerOnEnemyHarmfulSkillClassesAny": [
+                            "strategic",
+                            "physical"
+                        ],
+                        "counterCancelsSkill": true,
+                        "counterStatusId": "kankuro_puppet_trap_stun",
+                        "counterStatusDuration": 1,
+                        "counterStatusMetadata": {
+                            "harmful": true,
+                            "cannotUseSkillClasses": [
+                                "physical",
+                                "strategic"
+                            ],
+                            "bonusDamageFromSourceSkillsFlat": 15,
+                            "bonusDamageFromSourceCharacterId": "kankuro",
+                            "bonusDamageAppliesToSkillIds": [
+                                "kankuro-black-secret-machine-one-shot"
+                            ],
+                            "tooltipText": "Physical and Strategic skills are stunned for 1 turn."
+                        },
+                        "tooltipText": "The next Physical or Strategic skill this character uses is countered and stuns their Physical and Strategic skills. While trapped, Black Secret Machine One Shot deals 15 extra damage. A counter renews Kankuro's 15 defense."
+                    }
+                }
+            ]
+        },
+        {
+            "id": "kankuro-puppet-replacement-technique",
+            "name": "Puppet Replacement Technique",
+            "skillimage": "https://i.imgur.com/mpGOYy6.png",
+            "skilldescription": "Kankuro uses a puppet to evade incoming attacks, becoming invulnerable for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "kankuro_puppet_replacement_invulnerable",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "invulnerable": true,
+                        "tooltipText": "Kankuro is invulnerable."
+                    }
+                }
+            ]
+        }
+    ]
 };

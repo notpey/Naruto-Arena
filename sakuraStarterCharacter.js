@@ -48,7 +48,7 @@
             {
                 "id": "haruno-sakura-sakura-kick",
                 "name": "Sakura Kick",
-                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-011-the-land-where-a-hero-once-lived/cap_05-19_bc8e.jpg",
+                "skillimage": "https://i.imgur.com/8NbIpnf.png",
                 "skilldescription": "Sakura deals 20 physical damage to an enemy. They will ignore healing effects for 1 turn. Rudimentary Healing will permanently heal +5 (this effect does not stack).",
                 "energy": [
                     "Taijutsu"
@@ -98,7 +98,7 @@
             {
                 "id": "haruno-sakura-mental-overwhelm",
                 "name": "Mental Overwhelm",
-                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-042-the-ultimate-battle-cha_/cap_14-45_f141.jpg",
+                "skillimage": "https://i.imgur.com/XPY7fpe.png",
                 "skilldescription": "This skill can only be used on enemies who used a stun skill this turn. For 1 turn, Sakura will stun on that enemy the same classes that they stunned on Sakura's team. Rudimentary Healing will permanently heal +5 (this effect does not stack). During Inner Sakura this skill becomes a full stun every time, and deals 20 affliction damage to the enemy.",
                 "energy": [
                     "Genjutsu"
@@ -213,7 +213,7 @@
             {
                 "id": "haruno-sakura-inner-mental-overwhelm",
                 "name": "Mental Overwhelm",
-                "skillimage": "https://www.animehistory.org/uploads/screencaps/naruto-episode-042-the-ultimate-battle-cha_/cap_14-45_f141.jpg",
+                "skillimage": "https://i.imgur.com/XPY7fpe.png",
                 "skilldescription": "Inner Sakura: this skill can only be used on enemies who used a stun skill this turn. Sakura fully stuns that enemy for 1 turn and deals 20 affliction damage to them. Rudimentary Healing will permanently heal +5 (this effect does not stack).",
                 "energy": [
                     "Genjutsu"

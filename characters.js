@@ -6436,7 +6436,7 @@ const characters = [
                 "id": "demon-brothers-chain-wrap",
                 "name": "Chain Wrap",
                 "skillimage": "https://i.imgur.com/qm5cAjZ.png",
-                "skilldescription": "Demon Brothers deal 15 physical damage to one enemy and stun their Physical skills for 1 turn. For 2 turns, this skill is replaced by Chain Shred, which can only target that enemy. If Demon Brothers are stunned, Chain Wrap ends.",
+                "skilldescription": "Demon Brothers deal 15 physical damage to one enemy and stun their Physical skills for 1 turn. For 2 turns, this skill is replaced by Chain Shred, which can only target that enemy.",
                 "energy": [
                     "Taijutsu"
                 ],
@@ -6523,7 +6523,7 @@ const characters = [
                 "id": "demon-brothers-bladed-gauntlet",
                 "name": "Bladed Gauntlet",
                 "skillimage": "https://i.imgur.com/SjVUKDT.png",
-                "skilldescription": "Demon Brothers deal 20 physical damage to one enemy and 5 affliction damage* for 2 turns. Repeated use refreshes the poison's duration rather than stacking its damage.",
+                "skilldescription": "Demon Brothers deal 20 physical damage to one enemy and 5 affliction damage* for 2 turns.",
                 "energy": [
                     "Random"
                 ],

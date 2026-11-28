@@ -1,77 +1,199 @@
 module.exports = {
-    id: 'haku', characterId: 'haku', name: 'Haku',
-    facePicture: 'https://i.imgur.com/1iuyTS5.png',
-    requiredMissionId: 'hidden-hunter',
-    characterdeescription: 'A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.',
-    passive: {
-        name: 'Sacrifice', icon: 'https://i.imgur.com/aBCcujF.png',
-        description: 'Haku takes the damage of the first lethal attack against an ally in their place.',
-        sacrificeFirstLethalAllyAttack: true,
+    "id": "haku",
+    "characterId": "haku",
+    "name": "Haku",
+    "facePicture": "https://i.imgur.com/1iuyTS5.png",
+    "requiredMissionId": "hidden-hunter",
+    "characterdeescription": "A young shinobi gifted with the rare Ice Release kekkei genkai, Haku serves Zabuza Momochi with unwavering loyalty. Beneath a gentle demeanor lies a remarkably swift fighter whose precise senbon strikes and Demonic Mirroring Ice Crystals make escape nearly impossible.",
+    "passive": {
+        "name": "Sacrifice",
+        "icon": "https://i.imgur.com/aBCcujF.png",
+        "description": "Haku takes the damage of the first lethal attack against an ally in their place.",
+        "sacrificeFirstLethalAllyAttack": true
     },
-    skills: [
+    "skills": [
         {
-            id: 'haku-flying-needles-of-death', name: 'Flying Needles of Death',
-            skillimage: 'https://i.imgur.com/1wG05K5.png',
-            skilldescription: 'Haku deals 30 physical damage to one enemy. During Demonic Mirroring Ice Crystals, this skill targets all enemies.',
-            energy: ['Ninjutsu', 'Random'], target: 'single-enemy', damage: 0, cooldown: 0,
-            classes: ['Physical', 'Instant'],
-            effects: [{ type: 'damage', amount: 30, scope: 'target' }],
+            "id": "haku-flying-needles-of-death",
+            "name": "Flying Needles of Death",
+            "skillimage": "https://i.imgur.com/6DDRHaY.png",
+            "skilldescription": "Haku deals 30 physical damage to one enemy. During Demonic Mirroring Ice Crystals, this skill targets all enemies.",
+            "energy": [
+                "Ninjutsu",
+                "Random"
+            ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 0,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 30,
+                    "scope": "target"
+                }
+            ]
         },
         {
-            id: 'haku-acupuncture', name: 'Acupuncture', skillimage: 'https://i.imgur.com/dDxetJr.png',
-            skilldescription: 'Haku stuns one enemy\'s Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill targets all enemies.',
-            energy: ['Bloodline'], target: 'single-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'haku_acupuncture_stun', duration: 1, scope: 'target',
-                metadata: { harmful: true, cannotUseSkillClasses: ['physical', 'chakra'],
-                    turnDurationAnchor: 'source_turn',
-                    tooltipText: 'Physical and Chakra skills are stunned.' } }],
+            "id": "haku-acupuncture",
+            "name": "Acupuncture",
+            "skillimage": "https://i.imgur.com/dDxetJr.png",
+            "skilldescription": "Haku stuns one enemy's Physical and Chakra skills for 1 turn. During Demonic Mirroring Ice Crystals, this skill targets all enemies.",
+            "energy": [
+                "Bloodline"
+            ],
+            "target": "single-enemy",
+            "damage": 0,
+            "cooldown": 1,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "haku_acupuncture_stun",
+                    "duration": 1,
+                    "scope": "target",
+                    "metadata": {
+                        "harmful": true,
+                        "cannotUseSkillClasses": [
+                            "physical",
+                            "chakra"
+                        ],
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "Physical and Chakra skills are stunned."
+                    }
+                }
+            ]
         },
         {
-            id: 'haku-demonic-mirroring-ice-crystals', name: 'Demonic Mirroring Ice Crystals',
-            skillimage: 'https://i.imgur.com/2sgPkS0.png',
-            skilldescription: 'Haku becomes invulnerable for 3 turns. During this time, Flying Needles of Death and Acupuncture target all enemies.',
-            energy: ['Bloodline', 'Ninjutsu'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Strategic', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'haku_mirror_guard', duration: 3, scope: 'self',
-                metadata: { helpful: true, invulnerable: true,
-                    skillReplacements: {
-                        'haku-flying-needles-of-death': 'haku-flying-needles-of-death-mirrors',
-                        'haku-acupuncture': 'haku-acupuncture-mirrors',
-                    },
-                    tooltipText: 'Haku is invulnerable. Flying Needles of Death and Acupuncture target all enemies.' } }],
+            "id": "haku-demonic-mirroring-ice-crystals",
+            "name": "Demonic Mirroring Ice Crystals",
+            "skillimage": "https://i.imgur.com/2sgPkS0.png",
+            "skilldescription": "Haku becomes invulnerable for 3 turns. During this time, Flying Needles of Death and Acupuncture target all enemies.",
+            "energy": [
+                "Bloodline",
+                "Ninjutsu"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "haku_mirror_guard",
+                    "duration": 3,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "invulnerable": true,
+                        "skillReplacements": {
+                            "haku-flying-needles-of-death": "haku-flying-needles-of-death-mirrors",
+                            "haku-acupuncture": "haku-acupuncture-mirrors"
+                        },
+                        "tooltipText": "Haku is invulnerable. Flying Needles of Death and Acupuncture target all enemies."
+                    }
+                }
+            ]
         },
         {
-            id: 'haku-demon-of-the-ice', name: 'Demon of the Ice',
-            skillimage: 'https://i.imgur.com/Jo62MEC.png',
-            skilldescription: 'Haku becomes invulnerable for 1 turn.',
-            energy: ['Random'], target: 'self', damage: 0, cooldown: 4,
-            classes: ['Strategic', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'haku_demon_of_the_ice_guard', duration: 1,
-                scope: 'self', metadata: { helpful: true, invulnerable: true,
-                    tooltipText: 'Haku is invulnerable.' } }],
+            "id": "haku-demon-of-the-ice",
+            "name": "Demon of the Ice",
+            "skillimage": "https://i.imgur.com/H8Fztkp.png",
+            "skilldescription": "Haku becomes invulnerable for 1 turn.",
+            "energy": [
+                "Random"
+            ],
+            "target": "self",
+            "damage": 0,
+            "cooldown": 4,
+            "classes": [
+                "Strategic",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "haku_demon_of_the_ice_guard",
+                    "duration": 1,
+                    "scope": "self",
+                    "metadata": {
+                        "helpful": true,
+                        "invulnerable": true,
+                        "tooltipText": "Haku is invulnerable."
+                    }
+                }
+            ]
         },
         {
-            id: 'haku-flying-needles-of-death-mirrors',
-            baseSkillId: 'haku-flying-needles-of-death', useBaseSkillCooldown: true,
-            hiddenFromSelectionViewer: true, name: 'Flying Needles of Death',
-            skillimage: 'https://i.imgur.com/1wG05K5.png',
-            skilldescription: 'Haku deals 30 physical damage to all enemies.',
-            energy: ['Ninjutsu', 'Random'], target: 'all-enemy', damage: 0, cooldown: 0,
-            classes: ['Physical', 'Instant'],
-            effects: [{ type: 'damage', amount: 30, scope: 'all-enemy' }],
+            "id": "haku-flying-needles-of-death-mirrors",
+            "baseSkillId": "haku-flying-needles-of-death",
+            "useBaseSkillCooldown": true,
+            "hiddenFromSelectionViewer": true,
+            "name": "Flying Needles of Death",
+            "skillimage": "https://i.imgur.com/1wG05K5.png",
+            "skilldescription": "Haku deals 30 physical damage to all enemies.",
+            "energy": [
+                "Ninjutsu",
+                "Random"
+            ],
+            "target": "all-enemy",
+            "damage": 0,
+            "cooldown": 0,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "damage",
+                    "amount": 30,
+                    "scope": "all-enemy"
+                }
+            ]
         },
         {
-            id: 'haku-acupuncture-mirrors', baseSkillId: 'haku-acupuncture',
-            useBaseSkillCooldown: true, hiddenFromSelectionViewer: true, name: 'Acupuncture',
-            skillimage: 'https://i.imgur.com/dDxetJr.png',
-            skilldescription: 'Haku stuns all enemies\' Physical and Chakra skills for 1 turn.',
-            energy: ['Bloodline'], target: 'all-enemy', damage: 0, cooldown: 1,
-            classes: ['Physical', 'Instant'],
-            effects: [{ type: 'apply_status', statusId: 'haku_acupuncture_stun', duration: 1,
-                scope: 'all-enemy', metadata: { harmful: true,
-                    cannotUseSkillClasses: ['physical', 'chakra'], turnDurationAnchor: 'source_turn',
-                    tooltipText: 'Physical and Chakra skills are stunned.' } }],
-        },
-    ],
+            "id": "haku-acupuncture-mirrors",
+            "baseSkillId": "haku-acupuncture",
+            "useBaseSkillCooldown": true,
+            "hiddenFromSelectionViewer": true,
+            "name": "Acupuncture",
+            "skillimage": "https://i.imgur.com/dDxetJr.png",
+            "skilldescription": "Haku stuns all enemies' Physical and Chakra skills for 1 turn.",
+            "energy": [
+                "Bloodline"
+            ],
+            "target": "all-enemy",
+            "damage": 0,
+            "cooldown": 1,
+            "classes": [
+                "Physical",
+                "Instant"
+            ],
+            "effects": [
+                {
+                    "type": "apply_status",
+                    "statusId": "haku_acupuncture_stun",
+                    "duration": 1,
+                    "scope": "all-enemy",
+                    "metadata": {
+                        "harmful": true,
+                        "cannotUseSkillClasses": [
+                            "physical",
+                            "chakra"
+                        ],
+                        "turnDurationAnchor": "source_turn",
+                        "tooltipText": "Physical and Chakra skills are stunned."
+                    }
+                }
+            ]
+        }
+    ]
 };
